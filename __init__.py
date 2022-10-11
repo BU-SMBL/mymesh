@@ -19,3 +19,4 @@ from . import parseSTL
 from . import Quality
 from . import Rays
 from . import TetGen
+from . import Primitives

@@ -34,3 +34,7 @@ __pycache__/CSG.cpython-38.pyc
 __pycache__/converter.cpython-38.pyc
 __pycache__/_tetgen.cpython-38.pyc
 __pycache__/__init__.cpython-38.pyc
+docs/build/_sources/modules.rst.txt
+docs/build/_sources/Mesh.rst.txt
+docs/build/_sources/index.rst.txt
+__pycache__/Primitives.cpython-38.pyc
