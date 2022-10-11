@@ -1,0 +1,432 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mesh.Octree &#8212; Mesh 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for Mesh.Octree</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Mon Jan 31 22:52:03 2022</span>
+
+<span class="sd">@author: toj</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Rays</span><span class="p">,</span> <span class="n">MeshUtils</span>
+
+<div class="viewcode-block" id="OctreeNode"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.OctreeNode">[docs]</a><span class="k">class</span> <span class="nc">OctreeNode</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">centroid</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="p">[],</span><span class="n">data</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">centroid</span> <span class="o">=</span> <span class="n">centroid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="p">[]</span>
+        
+<div class="viewcode-block" id="OctreeNode.PointInNode"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.OctreeNode.PointInNode">[docs]</a>    <span class="k">def</span> <span class="nf">PointInNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">point</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">inclusive</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">all</span><span class="p">([(</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">point</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">point</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">all</span><span class="p">([(</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">point</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">point</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)])</span></div>
+        
+<div class="viewcode-block" id="OctreeNode.TriInNode"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.OctreeNode.TriInNode">[docs]</a>    <span class="k">def</span> <span class="nf">TriInNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tri</span><span class="p">,</span><span class="n">TriNormal</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">lims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLimits</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">Rays</span><span class="o">.</span><span class="n">TriangleBoxIntersection</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span> <span class="n">lims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">lims</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">BoxCenter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">,</span><span class="n">TriNormal</span><span class="o">=</span><span class="n">TriNormal</span><span class="p">)</span></div>
+        
+        <span class="c1"># return (any([self.PointInNode(pt,inclusive=inclusive) for pt in tri]) or Rays.TriangleBoxIntersection(tri, lims[0], lims[1], lims[2]))</span>
+    
+<div class="viewcode-block" id="OctreeNode.Contains"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.OctreeNode.Contains">[docs]</a>    <span class="k">def</span> <span class="nf">Contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">points</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">point</span><span class="p">)]</span></div>
+    
+<div class="viewcode-block" id="OctreeNode.ContainsTris"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.OctreeNode.ContainsTris">[docs]</a>    <span class="k">def</span> <span class="nf">ContainsTris</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tris</span><span class="p">,</span><span class="n">TriNormals</span><span class="p">):</span>
+        
+        <span class="c1"># return [idx for idx,tri in enumerate(tris) if self.TriInNode(tri,TriNormals[idx])]</span>
+        <span class="n">lims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLimits</span><span class="p">()</span>
+        <span class="n">Intersections</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Rays</span><span class="o">.</span><span class="n">BoxTrianglesIntersection</span><span class="p">(</span><span class="n">tris</span><span class="p">,</span> <span class="n">lims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">lims</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">TriNormals</span><span class="o">=</span><span class="n">TriNormals</span><span class="p">,</span> <span class="n">BoxCenter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Intersections</span></div>
+    
+<div class="viewcode-block" id="OctreeNode.isEmpty"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.OctreeNode.isEmpty">[docs]</a>    <span class="k">def</span> <span class="nf">isEmpty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">points</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span></div>
+    
+<div class="viewcode-block" id="OctreeNode.getLimits"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.OctreeNode.getLimits">[docs]</a>    <span class="k">def</span> <span class="nf">getLimits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits</span></div>
+    
+<div class="viewcode-block" id="OctreeNode.makeChildrenPts"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.OctreeNode.makeChildrenPts">[docs]</a>    <span class="k">def</span> <span class="nf">makeChildrenPts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">points</span><span class="p">,</span><span class="n">minSize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">maxSize</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="n">minSize</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">makeChildren</span><span class="p">()</span>
+            
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="n">ptIds</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">Contains</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+                <span class="n">ptsInChild</span> <span class="o">=</span> <span class="p">[</span><span class="n">points</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">ptIds</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">ptIds</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptsInChild</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> 
+                    <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">minSize</span><span class="p">:</span>
+                        <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">child</span><span class="o">.</span><span class="n">makeChildrenPts</span><span class="p">(</span><span class="n">ptsInChild</span><span class="p">,</span><span class="n">minSize</span><span class="o">=</span><span class="n">minSize</span><span class="p">,</span><span class="n">maxSize</span><span class="o">=</span><span class="n">maxSize</span><span class="p">)</span>
+                        <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;branch&#39;</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptsInChild</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="n">maxSize</span><span class="p">:</span>
+                        <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">child</span><span class="o">.</span><span class="n">makeChildrenPts</span><span class="p">(</span><span class="n">ptsInChild</span><span class="p">,</span><span class="n">minSize</span><span class="o">=</span><span class="n">minSize</span><span class="p">,</span><span class="n">maxSize</span><span class="o">=</span><span class="n">maxSize</span><span class="p">)</span>
+                        <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;branch&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;empty&#39;</span>
+                <span class="c1"># self.children.append(child)  </span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span></div>
+            
+<div class="viewcode-block" id="OctreeNode.makeChildrenTris"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.OctreeNode.makeChildrenTris">[docs]</a>    <span class="k">def</span> <span class="nf">makeChildrenTris</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tris</span><span class="p">,</span><span class="n">TriNormals</span><span class="p">,</span><span class="n">minSize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">maxSize</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+        <span class="c1"># tris is a list of Triangular vertices [tri1,tri2,...] where tri1 = [pt1,pt2,pt3]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeChildren</span><span class="p">()</span>
+                    
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">triIds</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">ContainsTris</span><span class="p">(</span><span class="n">tris</span><span class="p">,</span><span class="n">TriNormals</span><span class="p">)</span>
+            <span class="n">trisInChild</span> <span class="o">=</span> <span class="p">[</span><span class="n">tris</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">triIds</span><span class="p">]</span>
+            <span class="n">normalsInChild</span> <span class="o">=</span> <span class="p">[</span><span class="n">TriNormals</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">triIds</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">triIds</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trisInChild</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> 
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">minSize</span><span class="p">:</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">makeChildrenTris</span><span class="p">(</span><span class="n">trisInChild</span><span class="p">,</span><span class="n">normalsInChild</span><span class="p">,</span><span class="n">minSize</span><span class="o">=</span><span class="n">minSize</span><span class="p">,</span><span class="n">maxSize</span><span class="o">=</span><span class="n">maxSize</span><span class="p">)</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;branch&#39;</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">trisInChild</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="n">maxSize</span><span class="p">:</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">makeChildrenTris</span><span class="p">(</span><span class="n">trisInChild</span><span class="p">,</span><span class="n">normalsInChild</span><span class="p">,</span><span class="n">minSize</span><span class="o">=</span><span class="n">minSize</span><span class="p">,</span><span class="n">maxSize</span><span class="o">=</span><span class="n">maxSize</span><span class="p">)</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;branch&#39;</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">trisInChild</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;empty&#39;</span></div>
+            <span class="c1"># self.children.append(child)  </span>
+            
+<div class="viewcode-block" id="OctreeNode.makeChildren"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.OctreeNode.makeChildren">[docs]</a>    <span class="k">def</span> <span class="nf">makeChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">childSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">zSign</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">ySign</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">xSign</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">centroid</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">xSign</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">ySign</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">zSign</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">4</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OctreeNode</span><span class="p">(</span><span class="n">centroid</span><span class="p">,</span><span class="n">childSize</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="p">[]))</span></div>
+
+<div class="viewcode-block" id="OctreeNode.addTri"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.OctreeNode.addTri">[docs]</a>    <span class="k">def</span> <span class="nf">addTri</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tri</span><span class="p">,</span><span class="n">triId</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">minSize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># triId can be an identifier for the element corresponding to the given triangle</span>
+            <span class="c1"># If given, triId will be stored in the octree node data instead of the tri itself</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">minSize</span><span class="p">:</span>
+                <span class="c1"># By default creates octree with a minimum node size equal to the max edge length of a triangle</span>
+                <span class="n">minSize</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">max</span><span class="p">([</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">tri</span><span class="p">])</span><span class="o">-</span><span class="nb">min</span><span class="p">([</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">tri</span><span class="p">]),</span>
+                            <span class="nb">max</span><span class="p">([</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">tri</span><span class="p">])</span><span class="o">-</span><span class="nb">min</span><span class="p">([</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">tri</span><span class="p">]),</span>
+                            <span class="nb">max</span><span class="p">([</span><span class="n">pt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">tri</span><span class="p">])</span><span class="o">-</span><span class="nb">min</span><span class="p">([</span><span class="n">pt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">tri</span><span class="p">]),</span>
+                            <span class="p">])</span>
+            <span class="k">def</span> <span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">tri</span><span class="p">,</span><span class="n">triId</span><span class="p">,</span><span class="n">minSize</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">TriInNode</span><span class="p">(</span><span class="n">tri</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;unknown&#39;</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;empty&#39;</span><span class="p">:</span>
+                        <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;branch&#39;</span>
+                    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">minSize</span><span class="p">:</span>
+                        <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
+                        <span class="k">if</span> <span class="n">triId</span><span class="p">:</span>
+                            <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">triId</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tri</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span><span class="p">:</span>
+                            <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;branch&#39;</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">node</span><span class="o">.</span><span class="n">makeChildren</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                            <span class="n">recur</span><span class="p">(</span><span class="n">child</span><span class="p">,</span><span class="n">tri</span><span class="p">,</span><span class="n">triId</span><span class="p">,</span><span class="n">minSize</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;unknown&#39;</span><span class="p">:</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;empty&#39;</span>
+            <span class="n">recur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tri</span><span class="p">,</span><span class="n">triId</span><span class="p">,</span><span class="n">minSize</span><span class="p">)</span></div>
+            
+<div class="viewcode-block" id="OctreeNode.clearData"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.OctreeNode.clearData">[docs]</a>    <span class="k">def</span> <span class="nf">clearData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">clearChildren</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">clearChildren</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">clearData</span><span class="p">()</span>                 </div></div>
+
+<div class="viewcode-block" id="isInsideOctree"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.isInsideOctree">[docs]</a><span class="k">def</span> <span class="nf">isInsideOctree</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">node</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>   
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="n">inclusive</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">isInsideOctree</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">child</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+            
+<div class="viewcode-block" id="SearchOctree"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.SearchOctree">[docs]</a><span class="k">def</span> <span class="nf">SearchOctree</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">node</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="n">inclusive</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">node</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;empty&#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="n">SearchOctree</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">child</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">check</span>
+            <span class="k">return</span> <span class="kc">False</span>
+                    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+    
+<div class="viewcode-block" id="SearchOctreeTri"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.SearchOctreeTri">[docs]</a><span class="k">def</span> <span class="nf">SearchOctreeTri</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span><span class="n">node</span><span class="p">,</span><span class="n">nodes</span><span class="o">=</span><span class="p">[],</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="c1"># print(nodes)</span>
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">TriInNode</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="n">inclusive</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span><span class="p">:</span>
+            <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">child</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;empty&#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="n">SearchOctreeTri</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span><span class="n">child</span><span class="p">,</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="n">inclusive</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nodes</span></div>
+    
+<div class="viewcode-block" id="getAllLeaf"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.getAllLeaf">[docs]</a><span class="k">def</span> <span class="nf">getAllLeaf</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="c1"># Return a list of all terminal(leaf) nodes in the octree</span>
+    <span class="k">def</span> <span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">leaf</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span><span class="p">:</span>
+            <span class="n">leaf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">leaf</span>
+        <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;empty&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">leaf</span>
+        <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;root&#39;</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;branch&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="n">leaf</span> <span class="o">=</span> <span class="n">recur</span><span class="p">(</span><span class="n">child</span><span class="p">,</span><span class="n">leaf</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">leaf</span>
+    <span class="n">leaf</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="n">recur</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="n">leaf</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Voxel2Octree"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.Voxel2Octree">[docs]</a><span class="k">def</span> <span class="nf">Voxel2Octree</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">VoxelCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)</span>
+    <span class="c1"># Assumes (and requires) that all voxels are cubic and the same size</span>
+    <span class="n">VoxelSize</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">[</span><span class="n">VoxelConn</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="n">VoxelCoords</span><span class="p">[</span><span class="n">VoxelConn</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]]))</span>
+    <span class="n">centroids</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">VoxelConn</span><span class="p">]</span>
+    <span class="n">minx</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">maxx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">miny</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">maxy</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">minz</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">maxz</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">minsize</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">maxx</span><span class="o">-</span><span class="n">minx</span><span class="p">,</span><span class="n">maxy</span><span class="o">-</span><span class="n">miny</span><span class="p">,</span><span class="n">maxz</span><span class="o">-</span><span class="n">minz</span><span class="p">])</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">VoxelSize</span>
+    <span class="k">while</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="n">minsize</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">*=</span> <span class="mi">2</span>
+    
+    <span class="n">centroid</span> <span class="o">=</span> <span class="p">[</span><span class="n">minx</span> <span class="o">+</span> <span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">miny</span><span class="o">+</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">minz</span><span class="o">+</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+    
+    <span class="n">Root</span> <span class="o">=</span> <span class="n">OctreeNode</span><span class="p">(</span><span class="n">centroid</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">Root</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;root&#39;</span>
+    <span class="n">Root</span><span class="o">.</span><span class="n">makeChildrenPts</span><span class="p">(</span><span class="n">centroids</span><span class="p">,</span> <span class="n">maxSize</span><span class="o">=</span><span class="n">VoxelSize</span><span class="p">)</span>    
+    
+    <span class="k">return</span> <span class="n">Root</span></div>
+
+<div class="viewcode-block" id="Octree2Sparse"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.Octree2Sparse">[docs]</a><span class="k">def</span> <span class="nf">Octree2Sparse</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="c1"># Needs to be tested</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">):</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
+            <span class="n">recur</span><span class="o">.</span><span class="n">changes</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;branch&#39;</span><span class="p">:</span>
+                    <span class="n">recur</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+    <span class="n">thinking</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">while</span> <span class="n">thinking</span><span class="p">:</span>
+        <span class="n">recur</span><span class="o">.</span><span class="n">changes</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">recur</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">recur</span><span class="o">.</span><span class="n">changes</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">thinking</span> <span class="o">=</span> <span class="kc">False</span>
+            
+    <span class="k">return</span> <span class="n">root</span></div>
+    
+<div class="viewcode-block" id="Surf2Octree"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.Surf2Octree">[docs]</a><span class="k">def</span> <span class="nf">Surf2Octree</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>          
+    <span class="c1"># centroids = [np.mean(NodeCoords[elem],axis=0) for elem in SurfConn]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">minsize</span><span class="p">:</span>
+        <span class="c1"># By default creates octree with a minimum node size equal to the mean size of a triangle</span>
+        <span class="c1"># minsize = np.mean([max([max(NodeCoords[elem][:,0])-min(NodeCoords[elem][:,0]),</span>
+        <span class="c1">#             max(NodeCoords[elem][:,1])-min(NodeCoords[elem][:,1]),</span>
+        <span class="c1">#             max(NodeCoords[elem][:,2])-min(NodeCoords[elem][:,2]),</span>
+        <span class="c1">#             ]) for elem in SurfConn])</span>
+        <span class="n">RConn</span> <span class="o">=</span> <span class="n">MeshUtils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">SurfConn</span><span class="p">)</span>
+        <span class="n">RCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,[[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">minsize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">RCoords</span><span class="p">[</span><span class="n">RConn</span><span class="p">][:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">RCoords</span><span class="p">[</span><span class="n">RConn</span><span class="p">][:,</span><span class="mi">1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">RCoords</span><span class="p">[</span><span class="n">RConn</span><span class="p">][:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">RCoords</span><span class="p">[</span><span class="n">RConn</span><span class="p">][:,</span><span class="mi">2</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">RCoords</span><span class="p">[</span><span class="n">RConn</span><span class="p">][:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">RCoords</span><span class="p">[</span><span class="n">RConn</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">))</span>
+        <span class="c1"># print(minsize)</span>
+    <span class="n">minx</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">maxx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">miny</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">maxy</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">minz</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">maxz</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+    
+    <span class="n">maxx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span><span class="n">maxx</span><span class="o">+</span><span class="n">minsize</span><span class="p">,</span><span class="n">minsize</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">maxy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">miny</span><span class="p">,</span><span class="n">maxy</span><span class="o">+</span><span class="n">minsize</span><span class="p">,</span><span class="n">minsize</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">maxz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">minz</span><span class="p">,</span><span class="n">maxz</span><span class="o">+</span><span class="n">minsize</span><span class="p">,</span><span class="n">minsize</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">maxx</span><span class="o">-</span><span class="n">minx</span><span class="p">,</span><span class="n">maxy</span><span class="o">-</span><span class="n">miny</span><span class="p">,</span><span class="n">maxz</span><span class="o">-</span><span class="n">minz</span><span class="p">])</span>
+    <span class="n">centroid</span> <span class="o">=</span> <span class="p">[</span><span class="n">minx</span> <span class="o">+</span> <span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">miny</span><span class="o">+</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">minz</span><span class="o">+</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">ElemIds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">SurfConn</span><span class="p">)))</span>
+    <span class="n">Root</span> <span class="o">=</span> <span class="n">OctreeNode</span><span class="p">(</span><span class="n">centroid</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="n">ElemIds</span><span class="p">)</span>
+    <span class="n">Root</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;root&#39;</span>
+    <span class="c1"># Root.makeChildrenTris([(NodeCoords[elem]) for elem in SurfConn],maxSize=minsize,minSize=minsize)</span>
+    <span class="n">TriNormals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">MeshUtils</span><span class="o">.</span><span class="n">CalcFaceNormal</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">SurfConn</span><span class="p">))</span>
+    <span class="n">Root</span><span class="o">.</span><span class="n">makeChildrenTris</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">SurfConn</span><span class="p">)],</span><span class="n">TriNormals</span><span class="p">,</span><span class="n">maxSize</span><span class="o">=</span><span class="n">minsize</span><span class="p">,</span><span class="n">minSize</span><span class="o">=</span><span class="n">minsize</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Root</span></div>
+    
+<div class="viewcode-block" id="Octree2Voxel"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.Octree2Voxel">[docs]</a><span class="k">def</span> <span class="nf">Octree2Voxel</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;full&#39;</span><span class="p">):</span>
+    <span class="c1"># TODO: Implement option for sparse</span>
+    <span class="n">VoxConn</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">VoxCoords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">recurSearch</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span><span class="p">:</span>
+            <span class="n">VoxConn</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">VoxCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">3</span><span class="p">,</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="n">VoxCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">5</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">6</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">7</span><span class="p">])</span>
+            <span class="n">VoxCoords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="n">VoxCoords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="n">VoxCoords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="n">VoxCoords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="n">VoxCoords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="n">VoxCoords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="n">VoxCoords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="n">VoxCoords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;branch&#39;</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;root&#39;</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;unknown&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="n">recurSearch</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+    
+    <span class="n">recurSearch</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">VoxCoords</span><span class="p">,</span> <span class="n">VoxConn</span></div>
+
+<div class="viewcode-block" id="Octree2Image"><a class="viewcode-back" href="../../Mesh.html#Mesh.Octree.Octree2Image">[docs]</a><span class="k">def</span> <span class="nf">Octree2Image</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="n">OctreeDepth</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;corners&#39;</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">pass</span>
+            
+    
+    <span class="n">recur</span><span class="o">.</span><span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Mesh</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, toj.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
