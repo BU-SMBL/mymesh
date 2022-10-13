@@ -91,21 +91,31 @@ def Grid(bounds, h, meshobj=False, exact_h=False):
         Mesh object containing the grid mesh. Returned if meshobj = True.
     """    
 
-    nX = int(np.round((bounds[1]-bounds[0])/h))
-    nY = int(np.round((bounds[3]-bounds[2])/h))
-    nZ = int(np.round((bounds[5]-bounds[4])/h))
+    
     if exact_h:
         xs = np.arange(bounds[0],bounds[1]+h,h)
         ys = np.arange(bounds[2],bounds[3]+h,h)
         zs = np.arange(bounds[4],bounds[5]+h,h)
+        nX = len(xs)
+        nY = len(ys)
+        nZ = len(zs)
     else:
+        nX = int(np.round((bounds[1]-bounds[0])/h))+1
+        nY = int(np.round((bounds[3]-bounds[2])/h))+1
+        nZ = int(np.round((bounds[5]-bounds[4])/h))+1
         xs = np.linspace(bounds[0],bounds[1],nX)
         ys = np.linspace(bounds[2],bounds[3],nY)
         zs = np.linspace(bounds[4],bounds[5],nZ)
+        
 
+    # VoxelCoords = np.hstack([
+    #     np.repeat(xs,len(ys)*len(zs))[:,None],
+    #     np.tile(np.repeat(ys,len(xs)),len(zs)).flatten()[:,None],
+    #     np.tile(np.tile(zs,len(xs)).flatten(),len(ys)).flatten()[:,None]
+    # ])
     VoxelCoords = np.hstack([
         np.repeat(xs,len(ys)*len(zs))[:,None],
-        np.tile(np.repeat(ys,len(xs)),len(zs)).flatten()[:,None],
+        np.tile(np.repeat(ys,len(zs)),len(xs)).flatten()[:,None],
         np.tile(np.tile(zs,len(xs)).flatten(),len(ys)).flatten()[:,None]
     ])
 
@@ -121,8 +131,9 @@ def Grid(bounds, h, meshobj=False, exact_h=False):
     VoxelConn[:,5] = Ids[1:,:-1,1:].flatten()
     VoxelConn[:,6] = Ids[1:,1:,1:].flatten()
     VoxelConn[:,7] = Ids[:-1,1:,1:].flatten()
-
+    
     if meshobj:
+        from . import mesh
         return mesh(VoxelCoords,VoxelConn)
     return VoxelCoords, VoxelConn
 
