@@ -1005,7 +1005,6 @@ class mesh:
             return
         m = self.Mesh2Meshio()
         m.write(filename)
-
     def Meshio2Mesh(m):
 
         NodeCoords = m.points.tolist()
@@ -1019,11 +1018,55 @@ class mesh:
                 M.ElemData[key] = [data for celldata in m.cell_data[key] for data in celldata]
 
         return M
-
     def read(file):
+        """
+        read read a mesh file written in any file type supported by meshio
 
+        Parameters
+        ----------
+        file : str
+            File path to a mesh file readable by meshio (.vtu, .vtk, .inp, .stl, ...)
+
+        Returns
+        -------
+        M : mesh.mesh
+            Mesh object
+        """        
         m = meshio.read(file)
         M = mesh.Meshio2Mesh(m)
 
         return M  
             
+    def imread(img, voxelsize, scalefactor=1, scaleorder=1, threshold=None):
+        """
+        imread load a 3d image stack into a voxel mesh  using converter.im2voxel
+
+        Parameters
+        ----------
+        img : str or np.ndarray
+            If a str, should be the directory to an image stack of tiff or dicom files.
+            If an array, shoud be a 3D array of image data.
+        voxelsize : float
+            Size of voxel (based on image resolution).
+        scalefactor : float, optional
+            Scale factor for resampling the image. If greater than 1, there will be more than
+            1 elements per voxel. If less than 1, will coarsen the image, by default 1.
+        scaleorder : int, optional
+            Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
+            Must be 0-5.
+        threshold : float, optional
+            Voxel intensity threshold, by default None.
+            If given, elements with all nodes less than threshold will be discarded.
+
+        Returns
+        -------
+        M : mesh.mesh
+            Mesh object, containing image data for elements and nodes in M.ElemData['Image Data'] and M.NodeData['Image Data'].
+        """
+
+        VoxelCoords, VoxelConn, VoxelData, NodeData = converter.im2voxel(img,voxelsize,scalefactor=scalefactor,scaleorder=scaleorder,threshold=threshold)
+        M = mesh(VoxelCoords,VoxelConn)
+        M.ElemData['Image Data'] = VoxelData
+        M.NodeData['Image Data'] = NodeData
+        return M
+        

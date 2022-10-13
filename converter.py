@@ -8,8 +8,8 @@ Created on Sun Aug  1 17:48:50 2021
 import numpy as np
 import pandas as pd
 from scipy import ndimage
-import sys, os, warnings, glob, gc, cv2
-from . import MeshUtils, Rays
+import sys, os, warnings, glob, gc, cv2, tempfile, h5py, tqdm
+from . import MeshUtils, Rays, Primitives
 from joblib import Parallel, delayed
 
 def solid2surface(NodeCoords,NodeConn):
@@ -1215,6 +1215,85 @@ def surf2edges(NodeCoords,NodeConn):
 
     return Edges
 
+def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, threshold=None):
+    """
+    im2voxel Convert 3D image data to a cubic mesh. Each voxel will be represented by a node.
+
+    Parameters
+    ----------
+    img : str or np.ndarray
+        If a str, should be the directory to an image stack of tiff or dicom files.
+        If an array, shoud be a 3D array of image data.
+        TODO: Dicom support not yet implemented
+    voxelsize : float
+        Size of voxel (based on image resolution).
+    scalefactor : float, optional
+        Scale factor for resampling the image. If greater than 1, there will be more than
+        1 elements per voxel. If less than 1, will coarsen the image, by default 1.
+    scaleorder : int, optional
+        Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
+        Must be 0-5.
+    threshold : float, optional
+        Voxel intensity threshold, by default None.
+        If given, elements with all nodes less than threshold will be discarded.
+
+    Returns
+    -------
+    VoxelCoords : list
+        Node coordinats for the voxel mesh
+    VoxelConn : list
+        Node connectivity for the voxel mesh
+    VoxelData : numpy.ndarray
+        Image intensity data for each voxel.
+    NodeData : numpy.ndarray
+        Image intensity data for each node, averaged from connected voxels.
+
+    """    
+    if type(img) == list:
+        img = np.array(img)
+    if type(img) == np.ndarray:
+        assert len(img.shape) == 3, 'Image data must be a 3D array.'
+    elif type(img) == str:
+        path = img
+        files = glob.glob(os.path.join(path,'*.tiff'))
+        print('Loading {:s}...'.format(img))
+        with tempfile.TemporaryDirectory() as Dir:
+            with h5py.File(os.path.join(Dir,"images.hdf5"), "w") as f:
+                temp = cv2.imread(files[0])
+                data = f.create_dataset('img',(len(files),temp.shape[0],temp.shape[1]))
+
+                imgs = (cv2.imread(file) for file in files)
+                i = 0
+                for I in tqdm.tqdm(imgs, total=len(files)):
+                    data[i] = I[:,:,0]
+                    i += 1
+                if scalefactor != 1:
+                    img = ndimage.zoom(np.array(data),scalefactor,order=scaleorder)
+                    voxelsize /= scalefactor
+                else:
+                    img = np.array(data)
+    else:
+        raise Exception
+
+    (nz,ny,nx) = img.shape
+    xlims = [0,(nx)*voxelsize]
+    ylims = [0,(ny)*voxelsize]
+    zlims = [0,(nz)*voxelsize]
+    bounds = [xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]]
+    VoxelCoords, VoxelConn = Primitives.Grid(bounds, voxelsize, exact_h=True, meshobj=False)
+    VoxelData = img.flatten(order='F')
+    if threshold is not None:
+        VoxelConn = VoxelConn[VoxelData>=threshold]
+        VoxelData = VoxelData[VoxelData>=threshold]
+        VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
+
+    _,ElemConn = MeshUtils.getNodeNeighbors(VoxelCoords,VoxelConn)
+    RConn = MeshUtils.PadRagged(ElemConn)
+    TempData = np.append(VoxelData,np.nan)
+    NodeData = np.nanmean(TempData[RConn],axis=1)
+
+    return VoxelCoords, VoxelConn, VoxelData, NodeData
+
 #%% -----------------------------------------------------------
 # TODO: Below functions need to be revisitied, may be unstable.
 # -------------------------------------------------------------
@@ -1262,7 +1341,8 @@ def GridMesh(xlims,ylims,zlims,h):
     NodeConn : list
         List of nodal connectivities.
 
-    """        
+    """   
+    warnings.warn('GridMesh is now deprecated, Primitives.Grid should be used instead')     
     nX = int(np.round((xlims[1]-xlims[0])/h))
     nY = int(np.round((ylims[1]-ylims[0])/h))
     nZ = int(np.round((zlims[1]-zlims[0])/h))
@@ -1327,7 +1407,7 @@ def Surf2Voxel(SurfCoords,SurfConn,h):
     return VoxelCoords,VoxelConn
 
 def makeGrid(xlims, ylims, zlims, VoxelSize):
-    
+    warnings.warn('makeGrid is now deprecated, Primitives.Grid should be used instead.')
     h = VoxelSize
     nX = int(np.round((xlims[1]-xlims[0])/h))
     nY = int(np.round((ylims[1]-ylims[0])/h))
@@ -1359,111 +1439,6 @@ def makeGrid(xlims, ylims, zlims, VoxelSize):
                 l += 1
     VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
     return VoxelCoords, VoxelConn
-
-def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, threshold=None, n_jobs=4):
-    
-    if type(img) == list:
-        img = np.array(img)
-    elif type(img) == str:
-        pool = Parallel(n_jobs=n_jobs)
-        path = img
-        files = glob.glob(os.path.join(path,'*'))
-        files = [file for file in files if '.tiff' in file or '.TIFF' in file or '.DCM' in file]
-        img = np.array(pool(delayed(cv2.imread)(file,0) for file in files))
-
-    if scalefactor != 1:
-        img = ndimage.zoom(img,scalefactor,order=scaleorder)
-        voxelsize /= scalefactor
-
-    (nz,ny,nx) = img.shape
-    xlims = [0,(nx)*voxelsize]
-    ylims = [0,(ny)*voxelsize]
-    zlims = [0,(nz)*voxelsize]
-    VoxelCoords, VoxelConn = makeGrid(xlims, ylims, zlims, voxelsize)
-    NodeVals = img.flatten(order='F')
-    if threshold is not None:
-        VoxelConn = [elem for elem in VoxelConn if not all(NodeVals[elem] < threshold)]
-
-    return VoxelCoords, VoxelConn, NodeVals
-
-
-# def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, threshold=None, n_jobs=4):
-    
-#     if type(img) == list:
-#         img = np.array(img)
-#     elif type(img) == str:
-#         pool = Parallel(n_jobs=n_jobs)
-#         path = img
-#         files = glob.glob(os.path.join(path,'*'))
-#         files = [file for file in files if '.tiff' in file or '.TIFF' in file or '.DCM' in file]
-#         img = np.array(pool(delayed(cv2.imread)(file for file in files)))
-
-#     if scalefactor != 1:
-#         img = ndimage.zoom(img,scalefactor,order=scaleorder)
-#         voxelsize /= scalefactor
-
-#     # (nz,nx,ny) = img.shape
-#     (nz,ny,nx) = img.shape
-#     xlims = [0,(nx-1)*voxelsize]
-#     ylims = [0,(ny-1)*voxelsize]
-#     zlims = [0,(nz-1)*voxelsize]
-    
-#     h = np.float64(voxelsize)
-#     nX = int(np.round((xlims[1]-xlims[0])/h))
-#     nY = int(np.round((ylims[1]-ylims[0])/h))
-#     nZ = int(np.round((zlims[1]-zlims[0])/h))
-#     xs = np.arange(xlims[0],nX*h+h/10,h)
-#     ys = np.arange(ylims[0],nY*h+h/10,h)
-#     zs = np.arange(zlims[0],nZ*h+h/10,h)
-
-#     # X, Y, Z = np.mgrid[xlims[0]:xlims[1]:nX*1j, 
-#     #                     ylims[0]:ylims[1]:nY*1j, 
-#     #                     zlims[0]:zlims[1]:nZ*1j]
-#     X, Y, Z = np.meshgrid(xs,ys,zs,indexing='ij')
-#     Xshape = X.shape
-#     x = X.flatten()
-#     y = Y.flatten()
-#     z = Z.flatten()
-#     del X, Y, Z, xs, ys, zs
-#     gc.collect()
-#     ids = np.arange(len(x))
-#     Ids = np.reshape(ids,Xshape)
-#     del ids
-#     gc.collect()
-#     VoxelCoords = np.vstack([x,y,z]).transpose()
-#     del x, y, z
-#     gc.collect()
-    
-#     NodeVals = img.flatten(order='F')
-#     del img
-#     gc.collect()
-#     VoxelConn = [[] for i in range(nX-1) for j in range(nY-1) for k in range(nZ-1)] 
-#     l = 0
-    
-#     if threshold:
-#         for i in range(nX-1):
-#             # print(i)
-#             for j in range(nY-1):
-#                 for k in range(nZ-1):
-#                     idxs = [Ids[i,j,k],Ids[i+1,j,k],Ids[i+1,j+1,k],Ids[i,j+1,k],Ids[i,j,k+1],Ids[i+1,j,k+1],Ids[i+1,j+1,k+1],Ids[i,j+1,k+1]]
-#                     if any(NodeVals[idxs] > threshold):
-#                         VoxelConn[l] = idxs
-#                     l += 1
-#         VoxelConn = [elem for elem in VoxelConn if elem != []]
-        
-#     else:
-#         for i in range(nX-1):
-#             # print(i)
-#             for j in range(nY-1):
-#                 for k in range(nZ-1):
-#                     idxs = [Ids[i,j,k],Ids[i+1,j,k],Ids[i+1,j+1,k],Ids[i,j+1,k],Ids[i,j,k+1],Ids[i+1,j,k+1],Ids[i+1,j+1,k+1],Ids[i,j+1,k+1]]
-#                     VoxelConn[l] = idxs
-#                     l += 1
-    
-#     del Ids, idxs
-#     gc.collect()
-    
-#     return VoxelCoords, VoxelConn, NodeVals
 
 def voxel2im(VoxelCoords, VoxelConn, NodeVals):
     if type(VoxelCoords) == list: VoxelCoords = np.array(VoxelCoords)
