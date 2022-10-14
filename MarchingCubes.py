@@ -3366,12 +3366,39 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
     
     return TriNodeCoords, TriNodeConn
 
-def ParchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',pool=Parallel(n_jobs=1),method='33'):
+def ParchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',pool=Parallel(n_jobs=1),method='33',flip=False):
+    """
+    ParchingCubes _summary_
 
+    Parameters
+    ----------
+    VoxelNodeCoords : list
+        List of node coordinates in a cubic/voxel mesh
+    VoxelNodeConn : list
+        List of nodal connectivities in a cubic/voxel mesh
+    NodeValues : list
+        List of node values (one value per node)
+    threshold : float, optional
+        Value of desired isosurface, by default 0
+    interpolation : str, optional
+        Interpolation method for positioning nodes, by default 'linear'.
+        - 'linear' : will perform a linear interpolation between an two grid nodes to approximate place the new node at the threshold value
+        - 'midpoint' : the new node will be placed at the midpoint between two grid nodes.
+    pool : _type_, optional
+        _description_, by default Parallel(n_jobs=1)
+    method : str, optional
+        _description_, by default '33'
+    flip : bool, optional
+        If true, will flip the orientation of the triangles that are produced, by default False.
+        It's assumed that values below the threshold are 'inside' and values above the threshold
+        are 'outside' of the mesh, if the opposite is the case, set flip = True.
+    """    
     # method: 'original', '33'
     TriNodeCoords = []
     TriNodeConn = []
     NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
+    if flip:
+        NodeValues = -1*NodeValues
     
     if method == '33':
         MarchingCubes33Lookup.LookupTable = [[[[]]],
