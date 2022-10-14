@@ -1580,10 +1580,13 @@ def ExtractRagged(In,delval=-1,dtype=None):
         if type(In) is list: In = np.array(In)
         In = In.astype(dtype)
         delval = np.array([delval]).astype(dtype)[0]
-    if len(In.shape) == 2:
-        Out = [[x for x in y if x != delval] for y in In]
-    elif len(In.shape) == 3:
-        Out = [[[x for x in y if x != delval] for y in z if all([x!= delval for x in y])] for z in In]
+    if np.any(delval == In):
+        if len(In.shape) == 2:
+            Out = [[x for x in y if x != delval] for y in In]
+        elif len(In.shape) == 3:
+            Out = [[[x for x in y if x != delval] for y in z if all([x!= delval for x in y])] for z in In]
+        else:
+            raise Exception('Currently only supported for 2- or 3D matrices')
     else:
-        raise Exception('Currently only supported for 2- or 3D matrices')
+        Out = In
     return Out
