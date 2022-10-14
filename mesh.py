@@ -860,7 +860,7 @@ class mesh:
                 raise Exception('Invalid quality metric.')
         return quality
 
-    def getCurvature(self,metrics=['Max Principal','Min Principal', 'Curvedness', 'Shape Index'], nRings=1, SplitFeatures=True):
+    def getCurvature(self,metrics=['Max Principal','Min Principal', 'Curvedness', 'Shape Index'], nRings=1, SplitFeatures=False):
         
         if type(metrics) is str: metrics = [metrics]
         Curvature = {}
