@@ -153,7 +153,7 @@ def QuadFit(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
         MinPrincipal[i] = min(v)    # Min Principal Curvature
     return MaxPrincipal,MinPrincipal
 
-def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,Ignore=set(),IgnoreFeatures=False):
+def CubicFit_iterative(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,Ignore=set(),IgnoreFeatures=False):
     #
     # Based on Goldfeather & Interrante (2004)    
     if IgnoreFeatures:
@@ -280,7 +280,99 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,Ignore=set(),Igno
             v = [np.nan,np.nan]
         MaxPrincipal[i] = max(v)    # Max Principal Curvature
         MinPrincipal[i] = min(v)    # Min Principal Curvature
-    return MaxPrincipal,MinPrincipal    
+    return MaxPrincipal,MinPrincipal
+
+def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
+    
+    # Based on Goldfeather & Interrante (2004)    
+    SurfNodes = np.unique(SurfConn)
+    
+    MaxPrincipal = [np.nan for i in range(len(NodeCoords))]
+    MinPrincipal = [np.nan for i in range(len(NodeCoords))]
+    ### 
+    ArrayCoords = np.append(NodeCoords,[[np.nan,np.nan,np.nan]],axis=0)
+    N = np.append(NodeNormals,[[np.nan,np.nan,np.nan]],axis=0)
+
+    RHoods = MeshUtils.PadRagged(NodeNeighborhoods)[SurfNodes]
+
+    SurfCoords = np.append(ArrayCoords[SurfNodes],[[np.nan,np.nan,np.nan]],axis=0)
+    SurfNormals = np.append(N[SurfNodes],[[np.nan,np.nan,np.nan]],axis=0)
+
+    # Rotation Axes
+    RotAxes = np.repeat([[0,0,1]],len(SurfCoords),axis=0)
+    
+    Bool = ((SurfNormals[:,0]!=0) | (SurfNormals[:,1]!=0)) & ~np.any(np.isnan(SurfNormals),axis=1)
+    Cross = np.cross([0,0,1],-SurfNormals)
+    RotAxes = Cross/np.linalg.norm(Cross,axis=1)[:,None]
+    RotAxes[np.all(SurfNormals == [0,0,-1],axis=1)] = [1,0,0]
+    RotAxes[np.all(SurfNormals == [0,0,1],axis=1)] = [0,0,1]
+    # Rotation Angles
+    Angles = np.zeros(len(SurfCoords))
+    Angles[np.all(SurfNormals == [0,0,-1],axis=1)] = np.pi
+    Angles = np.arccos(-1*np.sum([0,0,1]*SurfNormals,axis=1))
+
+    # Quaternions
+    Q = np.hstack([np.transpose([np.cos(Angles/2)]), RotAxes*np.sin(Angles/2)[:,None]])
+    Zs = np.zeros(len(SurfCoords))
+    Os = np.ones(len(SurfCoords))
+    R = np.array([[2*(Q[:,0]**2+Q[:,1]**2)-1,   2*(Q[:,1]*Q[:,2]-Q[:,0]*Q[:,3]), 2*(Q[:,1]*Q[:,3]+Q[:,0]*Q[:,2]), Zs],
+             [2*(Q[:,1]*Q[:,2]+Q[:,0]*Q[:,3]), 2*(Q[:,0]**2+Q[:,2]**2)-1,   2*(Q[:,2]*Q[:,3]-Q[:,0]*Q[:,1]), Zs],
+             [2*(Q[:,1]*Q[:,3]-Q[:,0]*Q[:,2]), 2*(Q[:,2]*Q[:,3]+Q[:,0]*Q[:,1]), 2*(Q[:,0]**2+Q[:,3]**2)-1,   Zs],
+             [Zs,                       Zs,                       Zs,                       Os]
+             ])
+
+    T = np.array([[Os,Zs,Zs,-SurfCoords[:,0]],
+                [Zs,Os,Zs,-SurfCoords[:,1]],
+                [Zs,Zs,Os,-SurfCoords[:,2]],
+                [Zs,Zs,Zs,Os]])
+
+    SurfNeighborCoords = np.append(ArrayCoords,np.transpose([np.ones(len(ArrayCoords))]),axis=1)[RHoods]
+    SurfNeighborNormals = np.append(N,np.transpose([np.ones(len(ArrayCoords))]),axis=1)[RHoods]
+
+    TRCoords = np.matmul(np.matmul(T[:,:,:-1].swapaxes(0,2).swapaxes(1,2),SurfNeighborCoords.swapaxes(1,2)).swapaxes(1,2),R[:,:,:-1].swapaxes(0,2).swapaxes(1,2))
+    RNormals = np.matmul(SurfNeighborNormals,R[:,:,:-1].swapaxes(0,2).swapaxes(1,2))
+
+    xjs = TRCoords[:,:,0]
+    yjs = TRCoords[:,:,1]
+    zjs = TRCoords[:,:,2]
+
+    ajs = RNormals[:,:,0]
+    bjs = RNormals[:,:,1]
+    cjs = RNormals[:,:,2]
+
+    scales = 2/(xjs**2+yjs**2) 
+
+    nNeighbors = RHoods.shape[1]
+
+    Amat = np.zeros((len(SurfNodes),nNeighbors*3,7))
+    Amat[:,:nNeighbors] = np.array([scales/2*xjs**2, scales*xjs*yjs, scales/2*yjs**2, scales*xjs**3, scales*xjs**2*yjs, scales*xjs*yjs**2, scales*yjs**3]).T.swapaxes(0,1)
+    Amat[:,nNeighbors:2*nNeighbors] = np.array([scales*xjs, scales*yjs, np.zeros(scales.shape), scales*3*xjs**2, scales*2*xjs*yjs, scales*yjs**2, np.zeros(scales.shape)]).T.swapaxes(0,1)
+    Amat[:,2*nNeighbors:3*nNeighbors] = np.array([np.zeros(scales.shape), scales*xjs, scales*yjs, np.zeros(scales.shape), scales*xjs**2, scales*2*xjs*yjs, scales*3*yjs**2]).T.swapaxes(0,1)
+
+    Bmat = np.zeros((len(SurfNodes),nNeighbors*3,1))
+    Bmat[:,:nNeighbors,0] = scales*zjs
+    Bmat[:,nNeighbors:2*nNeighbors,0] = -scales*ajs/cjs
+    Bmat[:,2*nNeighbors:3*nNeighbors,0] = -scales*bjs/cjs
+
+    MaxPrincipal = np.repeat(np.nan,len(NodeCoords))
+    MinPrincipal = np.repeat(np.nan,len(NodeCoords))
+    for i,idx in enumerate(SurfNodes):
+        amat = Amat[i,~np.any(np.isnan(Amat[i]),axis=1) & ~np.any(np.isnan(Bmat[i]),axis=1)]
+        bmat = Bmat[i,~np.any(np.isnan(Amat[i]),axis=1) & ~np.any(np.isnan(Bmat[i]),axis=1)]
+        A = np.matmul(amat.T,amat)
+        if np.linalg.det(A) == 0:
+            MaxPrincipal[idx] = np.nan
+            MinPrincipal[idx] = np.nan
+        else:
+            B = np.matmul(amat.T,bmat)
+            X = np.linalg.solve(A,B).T[0]
+            W = np.array([[X[0],X[1]],
+                            [X[1],X[2]]])
+
+            [v,x] = np.linalg.eig(W)
+            MaxPrincipal[idx] = max(v)
+            MinPrincipal[idx] = min(v)
+    return MaxPrincipal,MinPrincipal
    
 def MeanCurvature(MaxPrincipal,MinPrincipal):
     
