@@ -368,8 +368,10 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
             X = np.linalg.solve(A,B).T[0]
             W = np.array([[X[0],X[1]],
                             [X[1],X[2]]])
-
-            [v,x] = np.linalg.eig(W)
+            if np.any(np.isnan(W)):
+                v = [np.nan, np.nan]
+            else:
+                [v,x] = np.linalg.eig(W)
             MaxPrincipal[idx] = max(v)
             MinPrincipal[idx] = min(v)
     return MaxPrincipal,MinPrincipal
