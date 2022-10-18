@@ -860,7 +860,7 @@ class mesh:
                 raise Exception('Invalid quality metric.')
         return quality
 
-    def getCurvature(self,metrics=['Max Principal','Min Principal', 'Curvedness', 'Shape Index'], nRings=1, SplitFeatures=False):
+    def getCurvature(self,metrics=['Max Principal','Min Principal', 'Curvedness', 'Shape Index', 'Mean', 'Gaussian'], nRings=1, SplitFeatures=False):
         
         if type(metrics) is str: metrics = [metrics]
         Curvature = {}
@@ -1037,7 +1037,7 @@ class mesh:
 
         return M  
             
-    def imread(img, voxelsize, scalefactor=1, scaleorder=1, threshold=None):
+    def imread(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, threshold=None, crop=None):
         """
         imread load a 3d image stack into a voxel mesh  using converter.im2voxel
 
@@ -1063,10 +1063,12 @@ class mesh:
         M : mesh.mesh
             Mesh object, containing image data for elements and nodes in M.ElemData['Image Data'] and M.NodeData['Image Data'].
         """
-
-        VoxelCoords, VoxelConn, VoxelData, NodeData = converter.im2voxel(img,voxelsize,scalefactor=scalefactor,scaleorder=scaleorder,threshold=threshold)
+        if return_nodedata:
+            VoxelCoords, VoxelConn, VoxelData, NodeData = converter.im2voxel(img,voxelsize,scalefactor=scalefactor,scaleorder=scaleorder,return_nodedata=return_nodedata,threshold=threshold,crop=crop)
+        else:
+            VoxelCoords, VoxelConn, VoxelData = converter.im2voxel(img,voxelsize,scalefactor=scalefactor,scaleorder=scaleorder,return_nodedata=return_nodedata,threshold=threshold,crop=crop)
         M = mesh(VoxelCoords,VoxelConn)
         M.ElemData['Image Data'] = VoxelData
-        M.NodeData['Image Data'] = NodeData
+        if return_nodedata: M.NodeData['Image Data'] = NodeData
         return M
         
