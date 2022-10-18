@@ -81,10 +81,10 @@ class OctreeNode():
                     
         for child in self.children:
             triIds = child.ContainsTris(tris,TriNormals)
-            trisInChild = [tris[idx] for idx in triIds]
-            normalsInChild = [TriNormals[idx] for idx in triIds]
+            trisInChild = tris[triIds]# [tris[idx] for idx in triIds]
+            normalsInChild = TriNormals[triIds]#[TriNormals[idx] for idx in triIds]
             if self.data:
-                child.data = [self.data[idx] for idx in triIds]
+                child.data = self.data[triIds] #[self.data[idx] for idx in triIds]
             if len(trisInChild) > 1: 
                 if child.size/2 <= minSize:
                     child.state = 'leaf'
@@ -258,11 +258,10 @@ def Surf2Octree(NodeCoords, SurfConn, minsize=None):
         #             max(NodeCoords[elem][:,1])-min(NodeCoords[elem][:,1]),
         #             max(NodeCoords[elem][:,2])-min(NodeCoords[elem][:,2]),
         #             ]) for elem in SurfConn])
-        RConn = MeshUtils.PadRagged(SurfConn)
-        RCoords = np.append(NodeCoords,[[np.nan,np.nan,np.nan]],axis=0)
-        minsize = np.nanmean(np.nanmax([np.linalg.norm(RCoords[RConn][:,0] - RCoords[RConn][:,1],axis=1),
-            np.linalg.norm(RCoords[RConn][:,1] - RCoords[RConn][:,2],axis=1),
-            np.linalg.norm(RCoords[RConn][:,2] - RCoords[RConn][:,0],axis=1)],axis=0
+        ArrayConn = np.asarray(SurfConn)
+        minsize = np.nanmean(np.nanmax([np.linalg.norm(NodeCoords[ArrayConn][:,0] - NodeCoords[ArrayConn][:,1],axis=1),
+            np.linalg.norm(NodeCoords[ArrayConn][:,1] - NodeCoords[ArrayConn][:,2],axis=1),
+            np.linalg.norm(NodeCoords[ArrayConn][:,2] - NodeCoords[ArrayConn][:,0],axis=1)],axis=0
             ))
         # print(minsize)
     minx = min(NodeCoords[:,0])
@@ -283,7 +282,7 @@ def Surf2Octree(NodeCoords, SurfConn, minsize=None):
     Root.state = 'root'
     # Root.makeChildrenTris([(NodeCoords[elem]) for elem in SurfConn],maxSize=minsize,minSize=minsize)
     TriNormals = np.array(MeshUtils.CalcFaceNormal(NodeCoords,SurfConn))
-    Root.makeChildrenTris(NodeCoords[np.asarray(SurfConn)],TriNormals,maxSize=minsize,minSize=minsize)
+    Root.makeChildrenTris(NodeCoords[ArrayConn],TriNormals,maxSize=minsize,minSize=minsize)
     return Root
     
 def Octree2Voxel(root, mode='full'):
