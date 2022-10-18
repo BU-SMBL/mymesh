@@ -13,6 +13,8 @@ from . import converter, Rays, Octree, Improvement, Quality
 def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     """
     getNodeNeighbors Gives the connected nodes for each node in the mesh
+    TODO: This should probably split into getNodeNeighbors and getElemConn -  the only shared
+    operation is solid2edges (edges could be an optional input argument to each)
 
     Parameters
     ----------
@@ -28,15 +30,7 @@ def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     ElemConn : list
         List of elements connected to each node for each node in NodeCoords.
     """
-    NodeNeighbors = [set() for i in range(len(NodeCoords))] 
-    ElemConn = [set() for i in range(len(NodeCoords))]         # Connected elements for each vertex 
-    Edges,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True)
-    for i in range(len(Edges)):
-        NodeNeighbors[Edges[i][0]].add(Edges[i][1])
-        NodeNeighbors[Edges[i][1]].add(Edges[i][0])
-        ElemConn[Edges[i][0]].add(EdgeElem[i])
-        ElemConn[Edges[i][1]].add(EdgeElem[i])
-    
+
     # NodeNeighbors = [set() for i in range(len(NodeCoords))]    # Neighboring nodes for each vertex
     # ElemConn = [set() for i in range(len(NodeCoords))]         # Connected elements for each vertex 
     # for i in range(len(NodeConn)):
@@ -45,9 +39,29 @@ def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     #         for j in edge:
     #             NodeNeighbors[j].add(edge[edge.index(j)-1])
     #             ElemConn[j].add(i)
-            
-    NodeNeighbors = [list(s) for s in NodeNeighbors]  
-    ElemConn = [list(s) for s in ElemConn]  
+    #### 
+    Edges,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True, ElemType=ElemType, ReturnType=np.ndarray)
+    # NodeNeighbors = [set() for i in range(len(NodeCoords))] 
+    # ElemConn = [set() for i in range(len(NodeCoords))]         # Connected elements for each vertex 
+    # for i in range(len(Edges)):
+    #     NodeNeighbors[Edges[i][0]].add(Edges[i][1])
+    #     NodeNeighbors[Edges[i][1]].add(Edges[i][0])
+    #     ElemConn[Edges[i][0]].add(EdgeElem[i])
+    #     ElemConn[Edges[i][1]].add(EdgeElem[i])
+    # NodeNeighbors = [list(s) for s in NodeNeighbors]  
+    # ElemConn = [list(s) for s in ElemConn] 
+    ####
+    UEdges,idx,inv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
+    Neighbors = UEdges.flatten(order='F')
+    Idx = np.fliplr(UEdges).flatten(order='F')
+    arg = Idx.argsort()
+
+    key_func = lambda x : x[0]
+    NodeNeighbors = [[z for y,z in x[1]] for x in itertools.groupby(zip(Idx[arg],Neighbors[arg]), key_func)]
+    
+    Neighbors2 = Edges[:,0]
+    arg2 = Neighbors2.argsort()
+    ElemConn = [list(set([z for y,z in x[1]])) for x in itertools.groupby(zip(Neighbors2[arg2],EdgeElem[arg2]), key_func)]
 
     return NodeNeighbors,ElemConn                
 
@@ -171,7 +185,7 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
 
     if mode=='edge':
         
-        Edges,EdgeConn,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True,return_EdgeConn=True)
+        Edges,EdgeConn,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True,return_EdgeConn=True,ReturnType=np.ndarray)
 
         UEdges,idx,inv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
         inv = np.append(inv,-1)
@@ -179,8 +193,8 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
         UEdgeElem = EdgeElem[idx]
 
         EdgeElemConn = np.nan*(np.ones((len(UEdges),2))) # Elements attached to each edge
-        EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(UEdgeConn))[:,None],UEdgeConn.shape[1],axis=1)).astype(int)
-        EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(UEdgeConn))[:,None],UEdgeConn.shape[1],axis=1).astype(int)
+        EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(UEdgeConn))[:,None],UEdgeConn.shape[1],axis=1,dtype=int))
+        EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(UEdgeConn))[:,None],UEdgeConn.shape[1],axis=1,dtype=int)
         EdgeElemConn = [[int(x) if not np.isnan(x) else x for x in y] for y in EdgeElemConn]
 
         for i in range(len(EdgeElemConn)):
@@ -219,7 +233,7 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
 
     return ElemNeighbors
 
-def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,mode='node',BarrierNodes=set()):
+def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,BarrierNodes=set()):
     """
     getConnectedNodes Identifies groups of connected nodes. For a fully 
     connected mesh, a single region will be identified
@@ -233,11 +247,6 @@ def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,mode='node',Barrier
     NodeNeighbors : list, optional
         List of neighboring nodes for each node in NodeCoords. The defau lt is 
         None. If no value is provided, it will be computed with getNodeNeighbors
-    mode : str, optional
-        Connectivity method to be used. The default is 'node'.
-        node - Gives all connected nodes regardless of configuration
-        edge - TODO:
-        face - TODO:
 
     Returns
     -------
@@ -273,29 +282,6 @@ def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,mode='node',Barrier
         todo.difference_update(region)
         NodeRegions.append(region)
         
-    
-    # if mode == 'node':
-    #     connectivity = 1
-    # elif mode == 'edge':
-    #     connectivity = 2
-    # elif mode == 'face':
-    #     connectivity = 3
-    
-    # diffset = AllNodes
-    # while len(diffset) > 0:
-    #     seed = diffset.pop()
-    #     nOld = 0
-    #     region = {seed}.union(NeighborSets[seed])
-    #     nCurrent = len(region)
-    #     while nOld != nCurrent:
-    #         nOld = nCurrent
-    #         for i,s in enumerate(NeighborSets):
-    #             S = s.union({i})
-    #             if len(region.intersection(S)) >= connectivity:
-    #                 region.add(i)
-    #         nCurrent = len(region)
-    #     NodeRegions.append(region)
-    #     diffset = AllNodes.difference(NodeRegions[0].union(*[s for s in NodeRegions]))
     return NodeRegions  
 
 def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge'):
@@ -1588,5 +1574,5 @@ def ExtractRagged(In,delval=-1,dtype=None):
         else:
             raise Exception('Currently only supported for 2- or 3D matrices')
     else:
-        Out = In
+        Out = In.tolist()
     return Out
