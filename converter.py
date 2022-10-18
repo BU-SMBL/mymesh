@@ -4,11 +4,12 @@ Created on Sun Aug  1 17:48:50 2021
 
 @author: toj
 """
-#%%
+
 import numpy as np
 import pandas as pd
 from scipy import ndimage
-import sys, os, warnings, glob, gc, cv2, tempfile, h5py, tqdm
+import sys, os, warnings, glob, gc, tempfile, h5py, tqdm
+import cv2, pydicom
 from . import MeshUtils, Rays, Primitives
 from joblib import Parallel, delayed
 
@@ -98,7 +99,7 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
     else:
         return Faces
 
-def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return_EdgeElem=False):
+def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeConn=False,return_EdgeElem=False,):
     """
     solid2edges Convert solid mesh to edges. The will be one edge for each edge of each element,
     i.e. there will be multiple entries for shared edges. Solid2Edges is also suitable for use 
@@ -148,13 +149,18 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
         pyrIdx = np.where(Ls == 5)[0]
         wdgIdx = np.where(Ls == 6)[0]
         hexIdx = np.where(Ls == 8)[0]
+        
         tris = [NodeConn[i] for i in triIdx]
         tets = [NodeConn[i] for i in tetIdx]
         pyrs = [NodeConn[i] for i in pyrIdx]
         wdgs = [NodeConn[i] for i in wdgIdx]
         hexs = [NodeConn[i] for i in hexIdx]
 
-        Edges = tri2edges([],tris) + tet2edges([],tets) + pyramid2edges([],pyrs) + wedge2edges([],wdgs) + hex2edges([],hexs)
+        Edges = np.concatenate((tri2edges([],tris,ReturnType=np.ndarray), 
+                                tet2edges([],tets,ReturnType=np.ndarray), 
+                                pyramid2edges([],pyrs,ReturnType=np.ndarray), 
+                                wedge2edges([],wdgs,ReturnType=np.ndarray), 
+                                hex2edges([],hexs,ReturnType=np.ndarray)))
         if return_EdgeElem or return_EdgeConn:
             EdgeElem = np.concatenate((np.repeat(triIdx,3),np.repeat(tetIdx,6),np.repeat(pyrIdx,8),np.repeat(wdgIdx,9),np.repeat(hexIdx,12)))
         if return_EdgeConn:
@@ -168,56 +174,77 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
             EdgeConn = -1*np.ones((len(NodeConn),12))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
             EdgeConn = MeshUtils.ExtractRagged(EdgeConn,dtype=int)
+        if ReturnType is list:
+            print('merp')
+            Edges = Edges.tolist()
+            if return_EdgeElem or return_EdgeConn:
+                EdgeElem = EdgeElem.tolist()
+
     elif ElemType=='tri':
-        Edges = tri2edges(NodeCoords,NodeConn)
+        Edges = tri2edges(NodeCoords,NodeConn,ReturnType=ReturnType)
         if return_EdgeElem or return_EdgeConn:
             triIdx = np.arange(len(NodeConn))
             EdgeElem = np.repeat(triIdx,3)
+            if ReturnType is list:
+                EdgeElem = EdgeElem.tolist()
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2]],len(tetIdx),axis=0).reshape(len(tetIdx)*3), 
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),3))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            EdgeConn = EdgeConn.astype(int).tolist()
+            if ReturnType is list:
+                EdgeElem = EdgeElem.tolist()
+                EdgeConn = EdgeConn.tolist()
     elif ElemType=='quad':
-        Edges = quad2edges(NodeCoords,NodeConn)
+        Edges = quad2edges(NodeCoords,NodeConn,ReturnType=ReturnType)
         if return_EdgeElem or return_EdgeConn:
             quadIdx = np.arange(len(NodeConn))
             EdgeElem = np.repeat(quadIdx,4)
+            if ReturnType is list:
+                EdgeElem = EdgeElem.tolist()
+                EdgeConn = EdgeConn.tolist()
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2]],len(tetIdx),axis=0).reshape(len(tetIdx)*3), 
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),4))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            EdgeConn = EdgeConn.astype(int).tolist()
+            if ReturnType is list:
+                EdgeElem = EdgeElem.tolist()
+                EdgeConn = EdgeConn.tolist()
     elif ElemType=='tet':
-        Edges = tet2edges(NodeCoords,NodeConn)
+        Edges = tet2edges(NodeCoords,NodeConn,ReturnType=ReturnType)
         if return_EdgeElem or return_EdgeConn:
             tetIdx = np.arange(len(NodeConn))
             EdgeElem = np.repeat(tetIdx,6)
+            if ReturnType is list:
+                EdgeElem = EdgeElem.tolist()
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2,3,4,5]],len(tetIdx),axis=0).reshape(len(tetIdx)*6),  
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),6))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            EdgeConn = EdgeConn.astype(int).tolist()
+            if ReturnType is list:
+                EdgeElem = EdgeElem.tolist()
     elif ElemType=='pyramid':
-        Edges = pyramid2edges(NodeCoords,NodeConn)
+        Edges = pyramid2edges(NodeCoords,NodeConn,ReturnType=ReturnType)
         if return_EdgeElem or return_EdgeConn:
             pyrIdx = np.arange(len(NodeConn))
             EdgeElem = np.repeat(pyrIdx,8)
+            if ReturnType is list:
+                EdgeElem = EdgeElem.tolist()
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2,3,4,5,6,7]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*8),                   
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),8))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            EdgeConn = EdgeConn.astype(int).tolist()
+            if ReturnType is list:
+                EdgeElem = EdgeElem.tolist()
     elif ElemType=='wedge':
-        Edges = wedge2edges(NodeCoords,NodeConn)
+        Edges = wedge2edges(NodeCoords,NodeConn,ReturnType=ReturnType)
         if return_EdgeElem or return_EdgeConn:
             wdgIdx = np.arange(len(NodeConn))
             EdgeElem = np.repeat(wdgIdx,9)
@@ -227,19 +254,23 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),9))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            EdgeConn = EdgeConn.astype(int).tolist()
+            if ReturnType is list:
+                EdgeElem = EdgeElem.tolist()
     elif ElemType=='hex':
-        Edges = hex2edges(NodeCoords,NodeConn)
+        Edges = hex2edges(NodeCoords,NodeConn,ReturnType=ReturnType)
         if return_EdgeElem or return_EdgeConn:
             hexIdx = np.arange(len(NodeConn))
             EdgeElem = np.repeat(hexIdx,12)
+            if ReturnType is list:
+                EdgeElem = EdgeElem.tolist()
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2,3,4,5,6,7,8,9,10,11]],len(hexIdx),axis=0).reshape(len(hexIdx)*12),                    
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),12))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            EdgeConn = EdgeConn.astype(int).tolist()
+            if ReturnType is list:
+                EdgeConn = EdgeConn.astype(int).tolist()
     elif ElemType=='polygon':
         Edges = polygon2edges(NodeCoords,NodeConn)
         if return_EdgeElem or return_EdgeConn:
@@ -351,19 +382,6 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
         ElemIds[ElemIds_i,ElemIds_j] = np.arange(len(TetConn))
         ElemIds = MeshUtils.ExtractRagged(ElemIds,dtype=int)
     
-    # TetConn = []
-    # for i,elem in enumerate(NodeConn):
-    #     if len(elem) == 4:
-    #         tets = [elem]
-    #     elif len(elem) == 5:
-    #         tets = pyramid2tet(elem)
-    #     elif len(elem) == 6:
-    #         tets = wedge2tet(elem)
-    #     elif len(elem) == 8:
-    #         tets = hex2tet(elem)
-    #     else:
-    #         raise Exception('Unable to identify element type')
-    #     TetConn += tets
     if return_ids:
         return TetConn, ElemIds
     return TetConn
@@ -396,30 +414,14 @@ def hex2tet(NodeCoords,NodeConn):
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
         Tets = -1*np.ones((len(NodeConn)*5,4))
-        t1 = ArrayConn[:,[0,1,3,4]]
-        t2 = ArrayConn[:,[1,2,3,6]]
-        t3 = ArrayConn[:,[4,6,5,1]]
-        t4 = ArrayConn[:,[4,7,6,3]]
-        t5 = ArrayConn[:,[4,6,1,3]]
-        Tets[0::5] = t1
-        Tets[1::5] = t2
-        Tets[2::5] = t3
-        Tets[3::5] = t4
-        Tets[4::5] = t5
+        Tets[0::5] = ArrayConn[:,[0,1,3,4]]
+        Tets[1::5] = ArrayConn[:,[1,2,3,6]]
+        Tets[2::5] = ArrayConn[:,[4,6,5,1]]
+        Tets[3::5] = ArrayConn[:,[4,7,6,3]]
+        Tets[4::5] = ArrayConn[:,[4,6,1,3]]
         Tets = Tets.astype(int).tolist()
     else:
         Tets = []
-
-
-    # idx = np.array([
-    #     [0,1,3,4],
-    #     [1,2,3,6],
-    #     [4,6,5,1],
-    #     [4,7,6,3],
-    #     [4,6,1,3]
-    #     ])
-
-    # Tets = np.array(elem)[idx].tolist()
     return Tets
 
 def wedge2tet(NodeCoords,NodeConn):
@@ -450,12 +452,9 @@ def wedge2tet(NodeCoords,NodeConn):
 
     ArrayConn = np.asarray(NodeConn)
     Tets = -1*np.ones((len(NodeConn)*3,4))
-    t1 = ArrayConn[:,[0,1,2,3]]
-    t2 = ArrayConn[:,[1,2,3,4]]
-    t3 = ArrayConn[:,[4,5,2,3]]
-    Tets[0::3] = t1
-    Tets[1::3] = t2
-    Tets[2::3] = t3
+    Tets[0::3] = ArrayConn[:,[0,1,2,3]]
+    Tets[1::3] = ArrayConn[:,[1,2,3,4]]
+    Tets[2::3] = ArrayConn[:,[4,5,2,3]]
     Tets = Tets.astype(int).tolist()
 
     return Tets
@@ -487,10 +486,8 @@ def pyramid2tet(NodeCoords,NodeConn):
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
         Tets = -1*np.ones((len(NodeConn)*2,4))
-        t1 = ArrayConn[:,[0,1,2,4]]
-        t2 = ArrayConn[:,[0,2,3,4]]
-        Tets[0::2] = t1
-        Tets[1::2] = t2
+        Tets[0::2] = ArrayConn[:,[0,1,2,4]]
+        Tets[1::2] = ArrayConn[:,[0,2,3,4]]
         Tets = Tets.astype(int).tolist()
     else:
         Tets = []
@@ -643,28 +640,28 @@ def edges2unique(Edges,return_idx=False,return_inv=False):
         Nodal connectivity of mesh edges (as obtained by solid2edges).
     return_idx : bool, optional
         If true, will return idx, the array of indices that relate the original list of
-        edges to the list of unique edges (UEaces = Eaces[idx]), by default False.
+        edges to the list of unique edges (UEdges = Edges[idx]), by default False.
         See numpy.unique for additional details.
     return_inv : bool, optional
         If true, will return inv, the array of indices that relate the unique list of
-        faces to the list of original faces (Faces = UFaces[inv]), by default False
+        edges to the list of original edges (Edges = UEdges[inv]), by default False
         See numpy.unique for additional details.
 
     Returns
     -------
     UEdges : list
-        Nodal connectivity of unique mesh faces.
+        Nodal connectivity of unique mesh edges.
     idx : np.ndarray, optional
         The array of indices that relate the unique list of
-        faces to the list of original faces.
+        faces to the list of original edges.
     inv : np.ndarray, optional
         The array of indices that relate the unique list of
-        faces to the list of original faces.
+        edges to the list of original edges.
     """
     # Returns only the unique edges (not duplicated for each element)
     # Get all unique element edges (accounting for flipped versions of edges)
     _,idx,inv = np.unique(np.sort(Edges,axis=1),axis=0,return_index=True,return_inverse=True)
-    UEdges = np.array(Edges)[idx]
+    UEdges = np.asarray(Edges)[idx]
     if return_idx and return_inv:
         return UEdges,idx,inv
     elif return_idx:
@@ -702,26 +699,18 @@ def tet2faces(NodeCoords,NodeConn):
         if len(NodeConn[0]) == 4:
             ArrayConn = np.asarray(NodeConn)
             Faces = -1*np.ones((len(NodeConn)*4,3))
-            f1 = ArrayConn[:,[0,2,1]]
-            f2 = ArrayConn[:,[0,1,3]]
-            f3 = ArrayConn[:,[1,2,3]]
-            f4 = ArrayConn[:,[0,3,2]]
-            Faces[0::4] = f1
-            Faces[1::4] = f2
-            Faces[2::4] = f3
-            Faces[3::4] = f4
+            Faces[0::4] = ArrayConn[:,[0,2,1]]
+            Faces[1::4] = ArrayConn[:,[0,1,3]]
+            Faces[2::4] = ArrayConn[:,[1,2,3]]
+            Faces[3::4] = ArrayConn[:,[0,3,2]]
             Faces = Faces.astype(int).tolist()
         elif len(NodeConn[0]) == 10:
             ArrayConn = np.asarray(NodeConn)
             Faces = -1*np.ones((len(NodeConn)*4,6))
-            f1 = ArrayConn[:,[0,2,1,6,5,4]]
-            f2 = ArrayConn[:,[0,1,3,4,8,7]]
-            f3 = ArrayConn[:,[1,2,3,5,9,8]]
-            f4 = ArrayConn[:,[0,3,2,7,9,6]]
-            Faces[0::4] = f1
-            Faces[1::4] = f2
-            Faces[2::4] = f3
-            Faces[3::4] = f4
+            Faces[0::4] = ArrayConn[:,[0,2,1,6,5,4]]
+            Faces[1::4] = ArrayConn[:,[0,1,3,4,8,7]]
+            Faces[2::4] = ArrayConn[:,[1,2,3,5,9,8]]
+            Faces[3::4] = ArrayConn[:,[0,3,2,7,9,6]]
             Faces = Faces.astype(int).tolist()
         else:
             raise Exception('Must be 4 or 10 node tetrahedral mesh.')
@@ -755,28 +744,15 @@ def hex2faces(NodeCoords,NodeConn):
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
         Faces = -1*np.ones((len(NodeConn)*6,4))
-        f1 = ArrayConn[:,[0,3,2,1]]
-        f2 = ArrayConn[:,[0,1,5,4]]
-        f3 = ArrayConn[:,[1,2,6,5]]
-        f4 = ArrayConn[:,[2,3,7,6]]
-        f5 = ArrayConn[:,[3,0,4,7]]
-        f6 = ArrayConn[:,[4,5,6,7]]
-        Faces[0::6] = f1
-        Faces[1::6] = f2
-        Faces[2::6] = f3
-        Faces[3::6] = f4
-        Faces[4::6] = f5
-        Faces[5::6] = f6
+        Faces[0::6] = ArrayConn[:,[0,3,2,1]]
+        Faces[1::6] = ArrayConn[:,[0,1,5,4]]
+        Faces[2::6] = ArrayConn[:,[1,2,6,5]]
+        Faces[3::6] = ArrayConn[:,[2,3,7,6]]
+        Faces[4::6] = ArrayConn[:,[3,0,4,7]]
+        Faces[5::6] = ArrayConn[:,[4,5,6,7]]
         Faces = Faces.astype(int).tolist()
     else:
         Faces = []
-    # for i in range(len(NodeConn)):
-    #     Faces[6*i+0] = [NodeConn[i][j] for j in [0,3,2,1]]
-    #     Faces[6*i+1] = [NodeConn[i][j] for j in [0,1,5,4]]
-    #     Faces[6*i+2] = [NodeConn[i][j] for j in [1,2,6,5]]
-    #     Faces[6*i+3] = [NodeConn[i][j] for j in [2,3,7,6]]
-    #     Faces[6*i+4] = [NodeConn[i][j] for j in [3,0,4,7]]
-    #     Faces[6*i+5] = [NodeConn[i][j] for j in [4,5,6,7]]
     return Faces
 
 def pyramid2faces(NodeCoords,NodeConn):
@@ -801,26 +777,14 @@ def pyramid2faces(NodeCoords,NodeConn):
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
         Faces = -1*np.ones((len(NodeConn)*5,4))
-        f1 = ArrayConn[:,[0,3,2,1]]
-        f2 = ArrayConn[:,[0,1,4]]
-        f3 = ArrayConn[:,[1,2,4]]
-        f4 = ArrayConn[:,[2,3,4]]
-        f5 = ArrayConn[:,[3,0,4]]
-        Faces[0::5] = f1
-        Faces[1::5,:3] = f2
-        Faces[2::5,:3] = f3
-        Faces[3::5,:3] = f4
-        Faces[4::5,:3] = f5
+        Faces[0::5] = ArrayConn[:,[0,3,2,1]]
+        Faces[1::5,:3] = ArrayConn[:,[0,1,4]]
+        Faces[2::5,:3] = ArrayConn[:,[1,2,4]]
+        Faces[3::5,:3] = ArrayConn[:,[2,3,4]]
+        Faces[4::5,:3] = ArrayConn[:,[3,0,4]]
         Faces = MeshUtils.ExtractRagged(Faces,delval=-1,dtype=int)
     else:
         Faces = []
-    # Faces = [[] for i in range(5*len(NodeConn))]    
-    # for i in range(len(NodeConn)):
-    #     Faces[5*i+0] = [NodeConn[i][j] for j in [0,1,2,3]]
-    #     Faces[5*i+1] = [NodeConn[i][j] for j in [0,1,4]]
-    #     Faces[5*i+2] = [NodeConn[i][j] for j in [1,2,4]]
-    #     Faces[5*i+3] = [NodeConn[i][j] for j in [2,3,4]]
-    #     Faces[5*i+4] = [NodeConn[i][j] for j in [3,0,4]]
     return Faces
         
 def wedge2faces(NodeCoords,NodeConn):
@@ -845,29 +809,17 @@ def wedge2faces(NodeCoords,NodeConn):
     if len(NodeConn):
         ArrayConn = np.asarray(NodeConn)
         Faces = -1*np.ones((len(NodeConn)*5,4))
-        f1 = ArrayConn[:,[2,1,0]]
-        f2 = ArrayConn[:,[0,1,4,3]]
-        f3 = ArrayConn[:,[1,2,5,4]]
-        f4 = ArrayConn[:,[2,0,3,5]]
-        f5 = ArrayConn[:,[3,4,5]]
-        Faces[0::5,:3] = f1
-        Faces[1::5] = f2
-        Faces[2::5] = f3
-        Faces[3::5] = f4
-        Faces[4::5,:3] = f5
+        Faces[0::5,:3] = ArrayConn[:,[2,1,0]]
+        Faces[1::5] = ArrayConn[:,[0,1,4,3]]
+        Faces[2::5] = ArrayConn[:,[1,2,5,4]]
+        Faces[3::5] = ArrayConn[:,[2,0,3,5]]
+        Faces[4::5,:3] = ArrayConn[:,[3,4,5]]
         Faces = MeshUtils.ExtractRagged(Faces,delval=-1,dtype=int)
     else:
         Faces = []
-    # Faces = [[] for i in range(5*len(NodeConn))]    
-    # for i in range(len(NodeConn)):
-    #     Faces[5*i+0] = [NodeConn[i][j] for j in [0,1,2]]
-    #     Faces[5*i+1] = [NodeConn[i][j] for j in [0,1,4,3]]
-    #     Faces[5*i+2] = [NodeConn[i][j] for j in [1,2,5,4]]
-    #     Faces[5*i+3] = [NodeConn[i][j] for j in [2,0,3,5]]
-    #     Faces[5*i+4] = [NodeConn[i][j] for j in [3,4,5]]
     return Faces
 
-def tri2edges(NodeCoords,NodeConn):
+def tri2edges(NodeCoords,NodeConn,ReturnType=list):
     """
     tri2edges extract edges from all elements of a purely 3-Node triangular mesh.
     Best practice is to use solid2edges, rather than using tri2edges directly.
@@ -878,6 +830,9 @@ def tri2edges(NodeCoords,NodeConn):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
+    ReturnType : type, optional.
+        Specifies the format of the returned list-like object.
+        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -891,19 +846,21 @@ def tri2edges(NodeCoords,NodeConn):
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
         Edges = -1*np.ones((len(NodeConn)*3,2))
-        e1 = ArrayConn[:,[0,1]]
-        e2 = ArrayConn[:,[1,2]]
-        e3 = ArrayConn[:,[2,0]]
-        Edges[0::3] = e1
-        Edges[1::3] = e2
-        Edges[2::3] = e3
-        Edges = Edges.astype(int).tolist()
+        Edges[0::3] = ArrayConn[:,[0,1]]
+        Edges[1::3] = ArrayConn[:,[1,2]]
+        Edges[2::3] = ArrayConn[:,[2,0]]
+        Edges = Edges.astype(int)
+        if ReturnType is list:
+            Edges = Edges.tolist()
     else:
-        Edges = []
+        if ReturnType is list:
+            Edges = []
+        else:
+            Edges = np.empty((0,2),dtype=int)
     
     return Edges
 
-def quad2edges(NodeCoords,NodeConn):
+def quad2edges(NodeCoords,NodeConn,ReturnType=list):
     """
     quad2edges extract edges from all elements of a purely 4-Node quadrilateral mesh.
     Best practice is to use solid2edges, rather than using quad2edges directly.
@@ -914,6 +871,9 @@ def quad2edges(NodeCoords,NodeConn):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
+    ReturnType : type, optional.
+        Specifies the format of the returned list-like object.
+        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -923,22 +883,23 @@ def quad2edges(NodeCoords,NodeConn):
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
         Edges = -1*np.ones((len(NodeConn)*4,2))
-        e1 = ArrayConn[:,[0,1]]
-        e2 = ArrayConn[:,[1,2]]
-        e3 = ArrayConn[:,[2,3]]
-        e4 = ArrayConn[:,[3,0]]
-        Edges[0::4] = e1
-        Edges[1::4] = e2
-        Edges[2::4] = e3
-        Edges[3::4] = e4
+        Edges[0::4] = ArrayConn[:,[0,1]]
+        Edges[1::4] = ArrayConn[:,[1,2]]
+        Edges[2::4] = ArrayConn[:,[2,3]]
+        Edges[3::4] = ArrayConn[:,[3,0]]
 
-        Edges = Edges.astype(int).tolist()
+        Edges = Edges.astype(int)
+        if ReturnType is list:
+            Edges = Edges.tolist()
     else:
-        Edges = []
+        if ReturnType is list:
+            Edges = []
+        else:
+            Edges = np.empty((0,2),dtype=int)
     
     return Edges
 
-def polygon2edges(NodeCoords,NodeConn):
+def polygon2edges(NodeCoords,NodeConn,ReturnType=list):
     """
     polygon2edges extract edges from all elements of a polygonal mesh.
     Best practice is to use solid2edges, rather than using polygon2edges directly.
@@ -949,6 +910,9 @@ def polygon2edges(NodeCoords,NodeConn):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
+    ReturnType : type, optional.
+        Specifies the format of the returned list-like object.
+        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -961,7 +925,7 @@ def polygon2edges(NodeCoords,NodeConn):
             edges.append([elem[j-1],n])
     return edges   
 
-def tet2edges(NodeCoords,NodeConn):
+def tet2edges(NodeCoords,NodeConn,ReturnType=list):
     """
     tet2edges extract edges from all elements of a purely 4-Node tetrahedral mesh.
     Best practice is to use solid2edges, rather than using tet2edges directly.
@@ -972,6 +936,9 @@ def tet2edges(NodeCoords,NodeConn):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
+    ReturnType : type, optional.
+        Specifies the format of the returned list-like object.
+        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -982,24 +949,23 @@ def tet2edges(NodeCoords,NodeConn):
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
         Edges = -1*np.ones((len(NodeConn)*6,2))
-        e1 = ArrayConn[:,[0,1]]
-        e2 = ArrayConn[:,[1,2]]
-        e3 = ArrayConn[:,[2,0]]
-        e4 = ArrayConn[:,[0,3]]
-        e5 = ArrayConn[:,[1,3]]
-        e6 = ArrayConn[:,[2,3]]
-        Edges[0::6] = e1
-        Edges[1::6] = e2
-        Edges[2::6] = e3
-        Edges[3::6] = e4
-        Edges[4::6] = e5
-        Edges[5::6] = e6
-        Edges = Edges.astype(int).tolist()
+        Edges[0::6] = ArrayConn[:,[0,1]]
+        Edges[1::6] = ArrayConn[:,[1,2]]
+        Edges[2::6] = ArrayConn[:,[2,0]]
+        Edges[3::6] = ArrayConn[:,[0,3]]
+        Edges[4::6] = ArrayConn[:,[1,3]]
+        Edges[5::6] = ArrayConn[:,[2,3]]
+        Edges = Edges.astype(int)
+        if ReturnType is list:
+            Edges = Edges.tolist()
     else:
-        Edges = []
+        if ReturnType is list:
+            Edges = []
+        else:
+            Edges = np.empty((0,2),dtype=int)
     return Edges
 
-def pyramid2edges(NodeCoords,NodeConn):
+def pyramid2edges(NodeCoords,NodeConn,ReturnType=list):
     """
     pyramid2edges extract edges from all elements of a purely 5-Node pyramidal mesh.
     Best practice is to use solid2edges, rather than using pyramid2edges directly.
@@ -1010,6 +976,9 @@ def pyramid2edges(NodeCoords,NodeConn):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
+    ReturnType : type, optional.
+        Specifies the format of the returned list-like object.
+        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -1019,28 +988,25 @@ def pyramid2edges(NodeCoords,NodeConn):
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
         Edges = -1*np.ones((len(NodeConn)*8,2))
-        e1 = ArrayConn[:,[0,1]]
-        e2 = ArrayConn[:,[1,2]]
-        e3 = ArrayConn[:,[2,3]]
-        e4 = ArrayConn[:,[3,0]]
-        e5 = ArrayConn[:,[0,4]]
-        e6 = ArrayConn[:,[1,4]]
-        e7 = ArrayConn[:,[2,4]]
-        e8 = ArrayConn[:,[3,4]]
-        Edges[0::8] = e1
-        Edges[1::8] = e2
-        Edges[2::8] = e3
-        Edges[3::8] = e4
-        Edges[4::8] = e5
-        Edges[5::8] = e6
-        Edges[6::8] = e7
-        Edges[7::8] = e8
-        Edges = Edges.astype(int).tolist()
+        Edges[0::8] = ArrayConn[:,[0,1]]
+        Edges[1::8] = ArrayConn[:,[1,2]]
+        Edges[2::8] = ArrayConn[:,[2,3]]
+        Edges[3::8] = ArrayConn[:,[3,0]]
+        Edges[4::8] = ArrayConn[:,[0,4]]
+        Edges[5::8] = ArrayConn[:,[1,4]]
+        Edges[6::8] = ArrayConn[:,[2,4]]
+        Edges[7::8] = ArrayConn[:,[3,4]]
+        Edges = Edges.astype(int)
+        if ReturnType is list:
+            Edges = Edges.tolist()
     else:
-        Edges = []
+        if ReturnType is list:
+            Edges = []
+        else:
+            Edges = np.empty((0,2),dtype=int)
     return Edges
 
-def wedge2edges(NodeCoords,NodeConn):
+def wedge2edges(NodeCoords,NodeConn,ReturnType=list):
     """
     wedge2edges extract edges from all elements of a purely 6-Node wedge element mesh.
     Best practice is to use solid2edges, rather than using wedge2edges directly.
@@ -1051,6 +1017,9 @@ def wedge2edges(NodeCoords,NodeConn):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
+    ReturnType : type, optional.
+        Specifies the format of the returned list-like object.
+        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -1060,30 +1029,26 @@ def wedge2edges(NodeCoords,NodeConn):
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
         Edges = -1*np.ones((len(NodeConn)*9,2))
-        e1 = ArrayConn[:,[0,1]]
-        e2 = ArrayConn[:,[1,2]]
-        e3 = ArrayConn[:,[2,0]]
-        e4 = ArrayConn[:,[0,3]]
-        e5 = ArrayConn[:,[1,4]]
-        e6 = ArrayConn[:,[2,5]]
-        e7 = ArrayConn[:,[3,4]]
-        e8 = ArrayConn[:,[4,5]]
-        e9 = ArrayConn[:,[5,3]]
-        Edges[0::9] = e1
-        Edges[1::9] = e2
-        Edges[2::9] = e3
-        Edges[3::9] = e4
-        Edges[4::9] = e5
-        Edges[5::9] = e6
-        Edges[6::9] = e7
-        Edges[7::9] = e8
-        Edges[8::9] = e9
-        Edges = Edges.astype(int).tolist()
+        Edges[0::9] = ArrayConn[:,[0,1]]
+        Edges[1::9] = ArrayConn[:,[1,2]]
+        Edges[2::9] = ArrayConn[:,[2,0]]
+        Edges[3::9] = ArrayConn[:,[0,3]]
+        Edges[4::9] = ArrayConn[:,[1,4]]
+        Edges[5::9] = ArrayConn[:,[2,5]]
+        Edges[6::9] = ArrayConn[:,[3,4]]
+        Edges[7::9] = ArrayConn[:,[4,5]]
+        Edges[8::9] = ArrayConn[:,[5,3]]
+        Edges = Edges.astype(int)
+        if ReturnType is list:
+            Edges = Edges.tolist()
     else:
-        Edges = []
+        if ReturnType is list:
+            Edges = []
+        else:
+            Edges = np.empty((0,2),dtype=int)
     return Edges
 
-def hex2edges(NodeCoords,NodeConn):
+def hex2edges(NodeCoords,NodeConn,ReturnType=list):
     """
     hex2edges extract edges from all elements of a purely 8-Node hexahedral mesh.
     Best practice is to use solid2edges, rather than using hex2edges directly.
@@ -1094,6 +1059,9 @@ def hex2edges(NodeCoords,NodeConn):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
+    ReturnType : type, optional.
+        Specifies the format of the returned list-like object.
+        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -1103,33 +1071,26 @@ def hex2edges(NodeCoords,NodeConn):
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
         Edges = -1*np.ones((len(NodeConn)*12,2))
-        e1 = ArrayConn[:,[0,1]]
-        e2 = ArrayConn[:,[1,2]]
-        e3 = ArrayConn[:,[2,3]]
-        e4 = ArrayConn[:,[3,0]]
-        e5 = ArrayConn[:,[0,4]]
-        e6 = ArrayConn[:,[1,5]]
-        e7 = ArrayConn[:,[2,6]]
-        e8 = ArrayConn[:,[3,7]]
-        e9 = ArrayConn[:,[4,5]]
-        e10 = ArrayConn[:,[5,6]]
-        e11 = ArrayConn[:,[6,7]]
-        e12 = ArrayConn[:,[7,4]]
-        Edges[0::12] = e1
-        Edges[1::12] = e2
-        Edges[2::12] = e3
-        Edges[3::12] = e4
-        Edges[4::12] = e5
-        Edges[5::12] = e6
-        Edges[6::12] = e7
-        Edges[7::12] = e8
-        Edges[8::12] = e9
-        Edges[9::12] = e10
-        Edges[10::12] = e11
-        Edges[11::12] = e12
-        Edges = Edges.astype(int).tolist()
+        Edges[0::12] = ArrayConn[:,[0,1]]
+        Edges[1::12] = ArrayConn[:,[1,2]]
+        Edges[2::12] = ArrayConn[:,[2,3]]
+        Edges[3::12] = ArrayConn[:,[3,0]]
+        Edges[4::12] = ArrayConn[:,[0,4]]
+        Edges[5::12] = ArrayConn[:,[1,5]]
+        Edges[6::12] = ArrayConn[:,[2,6]]
+        Edges[7::12] = ArrayConn[:,[3,7]]
+        Edges[8::12] = ArrayConn[:,[4,5]]
+        Edges[9::12] = ArrayConn[:,[5,6]]
+        Edges[10::12] = ArrayConn[:,[6,7]]
+        Edges[11::12] = ArrayConn[:,[7,4]]
+        Edges = Edges.astype(int)
+        if ReturnType is list:
+            Edges = Edges.tolist()
     else:
-        Edges = []
+        if ReturnType is list:
+            Edges = []
+        else:
+            Edges = np.empty((0,2),dtype=int)
     return Edges
 
 def quad2tri(QuadNodeConn):
@@ -1215,7 +1176,7 @@ def surf2edges(NodeCoords,NodeConn):
 
     return Edges
 
-def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, threshold=None):
+def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, threshold=None, crop=None):
     """
     im2voxel Convert 3D image data to a cubic mesh. Each voxel will be represented by a node.
 
@@ -1255,17 +1216,41 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, threshold=None):
         assert len(img.shape) == 3, 'Image data must be a 3D array.'
     elif type(img) == str:
         path = img
-        files = glob.glob(os.path.join(path,'*.tiff'))
-        print('Loading {:s}...'.format(img))
+        tiffs = glob.glob(os.path.join(path,'*.tiff'))
+        dicoms = glob.glob(os.path.join(path,'*.dcm'))
+        if len(tiffs) > 0 & len(dicoms) > 0:
+            warnings.warn('Image directory: "{:s}" contains both .tiff and .dcm files - only loading dcm files.')
+            files = dicoms
+            ftype = 'dcm'
+        elif len(tiffs) > 0:
+            files = tiffs
+            ftype = 'tiff'
+        elif len(dicoms) > 0:
+            files = dicoms
+            ftype = 'dcm'
+        else:
+            warnings.warn('Image directory is empty.')
+            if return_nodedata:
+                return [], [], [], []
+            else:
+                return [], [], [], []
+        print('Loading image data from {:s}...'.format(img))
         with tempfile.TemporaryDirectory() as Dir:
             with h5py.File(os.path.join(Dir,"images.hdf5"), "w") as f:
-                temp = cv2.imread(files[0])
+                if ftype == 'tiff':
+                    temp = cv2.imread(files[0])
+                    imgs = (cv2.imread(file) for file in files)
+                else:
+                    temp = pydicom.dcmread(files[0]).pixel_array
+                    imgs = (pydicom.dcmread(file).pixel_array for file in files)
+                
                 data = f.create_dataset('img',(len(files),temp.shape[0],temp.shape[1]))
-
-                imgs = (cv2.imread(file) for file in files)
                 i = 0
                 for I in tqdm.tqdm(imgs, total=len(files)):
-                    data[i] = I[:,:,0]
+                    if len(I.shape) == 3:
+                        data[i] = I[:,:,0]
+                    else:
+                        data[i] = I
                     i += 1
                 if scalefactor != 1:
                     img = ndimage.zoom(np.array(data),scalefactor,order=scaleorder)
@@ -1275,24 +1260,34 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, threshold=None):
     else:
         raise Exception
 
-    (nz,ny,nx) = img.shape
-    xlims = [0,(nx)*voxelsize]
-    ylims = [0,(ny)*voxelsize]
-    zlims = [0,(nz)*voxelsize]
-    bounds = [xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]]
-    VoxelCoords, VoxelConn = Primitives.Grid(bounds, voxelsize, exact_h=True, meshobj=False)
-    VoxelData = img.flatten(order='F')
+    if crop is None:
+        (nz,ny,nx) = img.shape
+        xlims = [0,(nx)*voxelsize]
+        ylims = [0,(ny)*voxelsize]
+        zlims = [0,(nz)*voxelsize]
+        bounds = [xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]]
+        VoxelCoords, VoxelConn = Primitives.Grid(bounds, voxelsize, exact_h=True, meshobj=False)
+        VoxelData = img.flatten(order='F')
+    else:
+        bounds = crop
+        VoxelCoords, VoxelConn = Primitives.Grid(bounds, voxelsize, exact_h=True, meshobj=False)
+        mins = (np.min(VoxelCoords,axis=0)/voxelsize).astype(int)
+        maxs = (np.max(VoxelCoords,axis=0)/voxelsize).astype(int)
+        cropimg = img[mins[2]:maxs[2],mins[1]:maxs[1],mins[0]:maxs[0]]
+        VoxelData = cropimg.flatten(order='F')
     if threshold is not None:
         VoxelConn = VoxelConn[VoxelData>=threshold]
         VoxelData = VoxelData[VoxelData>=threshold]
         VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
+    if return_nodedata:
+        _,ElemConn = MeshUtils.getNodeNeighbors(VoxelCoords,VoxelConn)
+        RConn = MeshUtils.PadRagged(ElemConn)
+        TempData = np.append(VoxelData,np.nan)
+        NodeData = np.nanmean(TempData[RConn],axis=1)
 
-    _,ElemConn = MeshUtils.getNodeNeighbors(VoxelCoords,VoxelConn)
-    RConn = MeshUtils.PadRagged(ElemConn)
-    TempData = np.append(VoxelData,np.nan)
-    NodeData = np.nanmean(TempData[RConn],axis=1)
-
-    return VoxelCoords, VoxelConn, VoxelData, NodeData
+        return VoxelCoords, VoxelConn, VoxelData, NodeData
+    else:
+        return VoxelCoords, VoxelConn, VoxelData
 
 #%% -----------------------------------------------------------
 # TODO: Below functions need to be revisitied, may be unstable.
@@ -1528,4 +1523,3 @@ def surf2dual(NodeCoords,SurfConn,Centroids=None,ElemConn=None,NodeNormals=None,
         raise Exception('Invalid input for sort')
     
     return DualCoords,DualConn
-# %%
