@@ -17,7 +17,7 @@ import sys, os, time, copy, warnings, bisect
 import meshio
 from joblib import Parallel, delayed
 from sklearn.neighbors import KDTree
-from . import MeshUtils, converter, MarchingCubes, Quality, Improvement, TetGen, Rays, Octree, mesh
+from . import MeshUtils, converter, MarchingCubes, Quality, Improvement, TetGen, Rays, Octree, mesh, Primitives
 
 
 # SDF Primitives
@@ -155,7 +155,7 @@ def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',reinitialize=False):
 
     """        
     
-    NodeCoords, NodeConn1 = converter.makeGrid(xlims,ylims,zlims,h)
+    NodeCoords, NodeConn1 = Primitives.Grid([xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]],h)
     NodeCoords = np.array(NodeCoords)
     NodeVals = sdf(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
     if reinitialize:

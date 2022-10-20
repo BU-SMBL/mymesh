@@ -51,17 +51,20 @@ def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     # NodeNeighbors = [list(s) for s in NodeNeighbors]  
     # ElemConn = [list(s) for s in ElemConn] 
     ####
+    
     UEdges,idx,inv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
-    Neighbors = UEdges.flatten(order='F')
-    Idx = np.fliplr(UEdges).flatten(order='F')
+    NotInMesh = set(range(len(NodeCoords))).difference(np.unique(UEdges))
+    Neighbors = np.append(UEdges.flatten(order='F'),np.repeat(-1,len(NotInMesh)))
+    Idx = np.append(np.fliplr(UEdges).flatten(order='F'),list(NotInMesh))
     arg = Idx.argsort()
 
     key_func = lambda x : x[0]
-    NodeNeighbors = [[z for y,z in x[1]] for x in itertools.groupby(zip(Idx[arg],Neighbors[arg]), key_func)]
+    NodeNeighbors = [[z for y,z in x[1] if z != -1] for x in itertools.groupby(zip(Idx[arg],Neighbors[arg]), key_func)]
     
-    Neighbors2 = Edges[:,0]
+    Neighbors2 = np.append(Edges[:,0],list(NotInMesh))
+    EdgeElem = np.append(EdgeElem,np.repeat(-1,len(NotInMesh)))
     arg2 = Neighbors2.argsort()
-    ElemConn = [list(set([z for y,z in x[1]])) for x in itertools.groupby(zip(Neighbors2[arg2],EdgeElem[arg2]), key_func)]
+    ElemConn = [list(set([z for y,z in x[1] if z != -1])) for x in itertools.groupby(zip(Neighbors2[arg2],EdgeElem[arg2]), key_func)]
 
     return NodeNeighbors,ElemConn                
 
@@ -193,9 +196,10 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
         UEdgeElem = EdgeElem[idx]
 
         EdgeElemConn = np.nan*(np.ones((len(UEdges),2))) # Elements attached to each edge
-        EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(UEdgeConn))[:,None],UEdgeConn.shape[1],axis=1,dtype=int))
-        EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(UEdgeConn))[:,None],UEdgeConn.shape[1],axis=1,dtype=int)
-        EdgeElemConn = [[int(x) if not np.isnan(x) else x for x in y] for y in EdgeElemConn]
+        r = np.repeat(np.arange(len(UEdgeConn))[:,None],UEdgeConn.shape[1],axis=1)
+        EECidx = (UEdgeElem[UEdgeConn] == r).astype(int)
+        EdgeElemConn[UEdgeConn,EECidx] = r
+        EdgeElemConn = EdgeElemConn.astype(int)
 
         for i in range(len(EdgeElemConn)):
             if not any(np.isnan(EdgeElemConn[i])):

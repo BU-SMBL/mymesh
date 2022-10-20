@@ -175,7 +175,6 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
             EdgeConn = MeshUtils.ExtractRagged(EdgeConn,dtype=int)
         if ReturnType is list:
-            print('merp')
             Edges = Edges.tolist()
             if return_EdgeElem or return_EdgeConn:
                 EdgeElem = EdgeElem.tolist()

@@ -9,7 +9,7 @@ from scipy import spatial
 import numpy as np
 from . import mesh, converter, MeshUtils, Octree, Rays, Improvement
 
-def MeshBooleans(Surf1, Surf2, tol=1e-8):
+def MeshBooleans(Surf1, Surf2, tol=1e-6):
     """
     MeshBooleans summary
     https://dl.acm.org/doi/pdf/10.1145/15922.15904
@@ -21,7 +21,7 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
     Surf2 : mesh.mesh
         Mesh object containing a surface mesh
     tol : type, optional
-        Tolerance value, by default 1e-8
+        Tolerance value, by default 1e-6
 
     Returns
     -------

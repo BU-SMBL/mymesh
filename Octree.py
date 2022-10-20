@@ -84,7 +84,7 @@ class OctreeNode():
             trisInChild = tris[triIds]# [tris[idx] for idx in triIds]
             normalsInChild = TriNormals[triIds]#[TriNormals[idx] for idx in triIds]
             if self.data:
-                child.data = self.data[triIds] #[self.data[idx] for idx in triIds]
+                child.data = [self.data[idx] for idx in triIds]
             if len(trisInChild) > 1: 
                 if child.size/2 <= minSize:
                     child.state = 'leaf'
