@@ -141,9 +141,9 @@ def writeMechanicalDatFile(Mesh, Material, bc, filename, jobname='job'):
             f.write('tref,22.\n')
             ## Material
             f.write('/wb,mat,start\n')
-            f.write('MP,DENS,1,{0:f}\n'.format(Material.Mechanical['Elastic']['rho']))
-            f.write('MP,EX,1,{0:f}\n'.format(Material.Mechanical['Elastic']['E']))
-            f.write('MP,NUXY,1,{0:f}\n'.format(Material.Mechanical['Elastic']['nu']))
+            f.write('MP,DENS,1,{0:f}\n'.format(Material['rho']))
+            f.write('MP,EX,1,{0:f}\n'.format(Material['E']))
+            f.write('MP,NUXY,1,{0:f}\n'.format(Material['nu']))
             f.write('/wb,mat,end\n')
             
             
@@ -151,12 +151,12 @@ def writeMechanicalDatFile(Mesh, Material, bc, filename, jobname='job'):
             f.write('/wb,load,start\n')
             # Degree-of-freedom constraints at nodes
             labels = ['ux','uy','uz']
-            for i,predisp in enumerate(bc.Mechanical['PreDisp']):
+            for i,predisp in enumerate(bc['PreDisp']):
                 if type(predisp[2]) == list:
                     # Transient load
-                    assert len(predisp[2]) == len(bc.TimeTable), 'TimeTable list must be the same length as the load list'
+                    assert len(predisp[2]) == len(bc['TimeTable']), 'TimeTable list must be the same length as the load list'
                     f.write('*DIM,_disptable{0:d},TABLE,{1:d},1,1,TIME\n'.format(i,len(predisp[2])))
-                    f.write('*TAXIS,_disptable{0:d}(1),1,'.format(i)+','.join([str(x) for x in bc.TimeTable])+'\n')
+                    f.write('*TAXIS,_disptable{0:d}(1),1,'.format(i)+','.join([str(x) for x in bc['TimeTable']])+'\n')
                     for j,d in enumerate(predisp[2]):
                         f.write('_disptable{0:d}({1:d},1,1) = {2:f}\n'.format(i,j+1,d))
                     f.write('d,{0:d},{1:s},%_disptable{2:d}%\n'.format(predisp[0]+1,labels[predisp[1]],i))
@@ -165,24 +165,25 @@ def writeMechanicalDatFile(Mesh, Material, bc, filename, jobname='job'):
                 
             # Force loads at nodes
             labels = ['fx','fy','fz']
-            for i,appforce in enumerate(bc.Mechanical['AppForce']):
-                if type(appforce[2]) == list:
-                    # Transient load
-                    assert len(appforce[2]) == len(bc.TimeTable), 'TimeTable list must be the same length as the load list'
-                    f.write('*DIM,_forctable{0:d},TABLE,{1:d},1,1,TIME\n'.format(i,len(appforce[2])))
-                    f.write('*TAXIS,_forctable{0:d}(1),1,'.format(i)+','.join([str(x) for x in bc.TimeTable])+'\n')
-                    for j,d in enumerate(appforce[2]):
-                        f.write('_forctable{0:d}({1:d},1,1) = {2:f}\n'.format(i,j+1,d))
-                    f.write('f,{0:d},{1:s},%_forctable{2:d}%\n'.format(appforce[0]+1,labels[appforce[1]],i))
-                else:
-                    f.write('f,{0:d},{1:s},{2:f}\n'.format(appforce[0]+1,labels[appforce[1]],appforce[2]))
+            if 'AppForce' in bc.keys():
+                for i,appforce in enumerate(bc['AppForce']):
+                    if type(appforce[2]) == list:
+                        # Transient load
+                        assert len(appforce[2]) == len(bc['TimeTable']), 'TimeTable list must be the same length as the load list'
+                        f.write('*DIM,_forctable{0:d},TABLE,{1:d},1,1,TIME\n'.format(i,len(appforce[2])))
+                        f.write('*TAXIS,_forctable{0:d}(1),1,'.format(i)+','.join([str(x) for x in bc['TimeTable']])+'\n')
+                        for j,d in enumerate(appforce[2]):
+                            f.write('_forctable{0:d}({1:d},1,1) = {2:f}\n'.format(i,j+1,d))
+                        f.write('f,{0:d},{1:s},%_forctable{2:d}%\n'.format(appforce[0]+1,labels[appforce[1]],i))
+                    else:
+                        f.write('f,{0:d},{1:s},{2:f}\n'.format(appforce[0]+1,labels[appforce[1]],appforce[2]))
                 
                 
             # FSI Nodes
-            if len(bc.Mechanical['FSI']) > 0:
-                f.write('CMBLOCK,   FSIN_1,NODE,{:d}\n'.format(len(bc.Mechanical['FSI'])))
+            if len(bc['FSI']) > 0:
+                f.write('CMBLOCK,   FSIN_1,NODE,{:d}\n'.format(len(bc['FSI'])))
                 f.write('(8i10)\n')
-                for i,node in enumerate(bc.Mechanical['FSI']):
+                for i,node in enumerate(bc['FSI']):
                     f.write('{:10d}'.format(node+1))
                     if (i+1)%8 == 0:
                         f.write('\n')
