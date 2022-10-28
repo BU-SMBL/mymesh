@@ -1,8 +1,24 @@
 # Mesh (better name TBD)
  
+## Package Overview
+- `mesh`: Defines the `mesh` class for holding, manipulating, and analyzing meshes
+  - The `mesh` class is defined primarily by the attributes `NodeCoords` and `NodeConn` which hold the coordinates and connectivity of the mesh nodes.
+  - A variety of properties enable on-demand computation of a variety of mesh related information, which are then cached to prevent recalculation
+    - Properties include: `ElemNormals`, `NodeNormals`, `NodeNeighbors`, `Faces`,  `Edges`, `SurfConn`
+  - The `NodeData` and  `ElemData` dictionaries can be used to store any (scalar or vector) data related to nodes or elements
+  - `read` and `write` methods utilize the [Meshio](https://github.com/nschloe/meshio) package as an easy importing/exporting interface to a variety of mesh file types. If supported by the target file, `write` will include `NodeData` and `ElemData`.
+  - `mesh` objects can be unpacked to obtain the underlying `NodeCoords` and `NodeConn` attributes for ease of use with function that take `NodeCoords` and `NodeConn` as inputs
+    - For example, the following lines are three equivalent ways of obtaining the face normals of a surface mesh stored in a `mesh` object (`M`):
+      ``` python
+      ElemNormals = M.ElemNormals
+      ElemNormals = MeshUtils.CalcFaceNormals(M.NodeCoords,M.NodeConn)
+      ElemNormals = MeshUtils.CalcFaceNormals(*M)
+      ```
+  
+
 ## Object Oriented Example Useage
 
-```
+``` python
 import sys
 sys.path.append('<path to parent directory of Mesh>')
 import Mesh
@@ -21,7 +37,7 @@ NodeNormals = M.NodeNormals
 M.NodeData['Node Normals'] = NodeNormals
 M.write('DemoCube.vtu')
 
-```
+``` python
 
 ## Non-Object Oriented Example Useage
 
