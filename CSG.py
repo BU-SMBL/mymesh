@@ -5,11 +5,12 @@ Created on Wed Feb 16 11:28:28 2022
 @author: toj
 """
 
+import warnings
 from scipy import spatial
 import numpy as np
 from . import mesh, converter, MeshUtils, Octree, Rays, Improvement
 
-def MeshBooleans(Surf1, Surf2, tol=1e-6):
+def MeshBooleans(Surf1, Surf2, tol=1e-8):
     """
     MeshBooleans summary
     https://dl.acm.org/doi/pdf/10.1145/15922.15904
@@ -21,7 +22,7 @@ def MeshBooleans(Surf1, Surf2, tol=1e-6):
     Surf2 : mesh.mesh
         Mesh object containing a surface mesh
     tol : type, optional
-        Tolerance value, by default 1e-6
+        Tolerance value, by default 1e-8
 
     Returns
     -------
@@ -34,10 +35,10 @@ def MeshBooleans(Surf1, Surf2, tol=1e-6):
     """    
     
     # Split Mesh
-    Split1, Split2 = SplitMesh(Surf1, Surf2, eps=1e-14)
+    Split1, Split2 = SplitMesh(Surf1, Surf2, eps=1e-10)
 
-    Split1.cleanup(tol=tol,strict=True)
-    Split2.cleanup(tol=tol,strict=True)
+    Split1.cleanup(tol=1e-10,strict=True)
+    Split2.cleanup(tol=1e-10,strict=True)
 
     # Get Shared Nodes
     Shared1,Shared2 = GetSharedNodes(Split1.NodeCoords, Split2.NodeCoords, eps=tol)
@@ -108,7 +109,7 @@ def VoxelDifference(VoxelCoordsA, VoxelConnA, VoxelCoordsB, VoxelConnB):
     DCoords,DConn,_ = converter.removeNodes(VoxelCoordsA, DConn)
     return DCoords, DConn
 
-def SplitMesh(Surf1, Surf2, eps=1e-14):
+def SplitMesh(Surf1, Surf2, eps=1e-12):
     
     Surf1Intersections,Surf2Intersections,IntersectionPts = Rays.SurfSurfIntersection(*Surf1,*Surf2,return_pts=True)
     
@@ -124,6 +125,8 @@ def SplitMesh(Surf1, Surf2, eps=1e-14):
 
         ElemNormals = MeshUtils.CalcFaceNormal(*surf)
         for j in range(surf.NElem):
+            if i == 1 and j == 9985:
+                print('merp')
             if len(SplitGroupNodes[j]) > 3:
                 n = ElemNormals[j]
 
@@ -150,15 +153,25 @@ def SplitMesh(Surf1, Surf2, eps=1e-14):
                             ]
 
                     # Delaunay Triangulation to retriangulate the split face
-                    flatnodes = np.matmul(R,np.transpose(SplitGroupNodes[j])).T[:,0:2].tolist()
-
-                conn = spatial.Delaunay(flatnodes,qhull_options="Qbb Qc Qz Q12").simplices
+                    flatnodes = np.matmul(R,np.transpose(SplitGroupNodes[j])).T[:,0:2]#.tolist()
+                    
+                conn = spatial.Delaunay(flatnodes,qhull_options="Qbb Qc Qz Q12").simplices               
                 flip = [np.dot(MeshUtils.CalcFaceNormal(SplitGroupNodes[j],[conn[i]]), n)[0] < 0 for i in range(len(conn))]
                 conn = (conn+surf.NNode).tolist()
                 surf.addElems([elem[::-1] if flip[i] else elem for i,elem in enumerate(conn)])
                 surf.addNodes(SplitGroupNodes[j].tolist())
+        # Collinear check
+        Edges = converter.solid2edges(*surf,ElemType='tri')
+        ArrayCoords = np.array(surf.NodeCoords)
+        EdgePoints = ArrayCoords[Edges]
+        ElemPoints = ArrayCoords[surf.NodeConn]
+        A2 = np.linalg.norm(np.cross(ElemPoints[:,1]-ElemPoints[:,0],ElemPoints[:,2]-ElemPoints[:,0]),axis=1)
+        EdgeLen = np.max(np.linalg.norm(EdgePoints[:,0]-EdgePoints[:,1],axis=1).reshape((int(len(Edges)/3),3)),axis=1)
+        deviation = A2/EdgeLen # the double area devided by the longest side gives the deviation of the middple point from the line of the other two
+        
         iset = set(SurfIntersections)
-        surf.NodeConn = [elem for i,elem in enumerate(surf.NodeConn) if i not in iset]
+        colset = set(np.where(deviation<eps)[0])
+        surf.NodeConn = [elem for i,elem in enumerate(surf.NodeConn) if i not in iset and i not in colset]
     Split1, Split2 = Surf12
 
     return Split1, Split2
@@ -258,25 +271,35 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB):
 
     AinNodes = set(elem for e in AinB for elem in SplitA.NodeConn[e])      # Node Set
     AoutNodes = set(elem for e in AoutB for elem in SplitA.NodeConn[e])    # Node Set    
-
+    AsameNodes = set(); AflipNodes = set()
     BinNodes = set(elem for e in BinA for elem in SplitB.NodeConn[e])      # Node Set
     BoutNodes = set(elem for e in BoutA for elem in SplitB.NodeConn[e])    # Node Set
-
+    BsameNodes = set(); BflipNodes = set()
     UnknownA = set(range(SplitA.NElem)).difference(AinB).difference(AoutB).difference(AsameB).difference(AflipB)
     UnknownB = set(range(SplitB.NElem)).difference(BinA).difference(BoutA).difference(BsameA).difference(BflipA)
 
     UnknownNodesA = set(elem for e in UnknownA for elem in SplitA.NodeConn[e]).difference(AinNodes).difference(AoutNodes).difference(SharedA)
     UnknownNodesB = set(elem for e in UnknownB for elem in SplitB.NodeConn[e]).difference(BinNodes).difference(BoutNodes).difference(SharedB)
     for node in UnknownNodesA:
-        if Rays.isInsideSurf(SplitA.NodeCoords[node],SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB):
+        check = Rays.isInsideSurf(SplitA.NodeCoords[node],SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,ray=SplitA.NodeNormals[node])
+        if check is True:
             AinNodes.add(node)
-        else:
+        elif check is False:
             AoutNodes.add(node)
-    for node in UnknownNodesB:
-        if Rays.isInsideSurf(SplitB.NodeCoords[node],SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA):
-            BinNodes.add(node)
+        elif check >= 0:
+            AsameNodes.add(node)
         else:
+            AflipNodes.add(node)
+    for node in UnknownNodesB:
+        check = Rays.isInsideSurf(SplitB.NodeCoords[node],SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,ray=SplitB.NodeNormals[node])
+        if check is True:
+            BinNodes.add(node)
+        elif check is False:
             BoutNodes.add(node)
+        elif check >= 0:
+            BsameNodes.add(node)
+        else:
+            BflipNodes.add(node)
 
     ProblemsA = set()
     ProblemsB = set()
@@ -285,6 +308,10 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB):
             AinB.add(e)
         elif np.all([n in AoutNodes or n in SharedA for n in SplitA.NodeConn[e]]):
             AoutB.add(e)
+        elif np.all([n in AsameNodes or n in SharedA for n in SplitA.NodeConn[e]]):
+            AsameB.add(e)
+        elif np.all([n in AflipNodes or n in SharedA for n in SplitA.NodeConn[e]]):
+            AflipB.add(e)
         else:
             ProblemsA.add(e)
 
@@ -293,8 +320,14 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB):
             BinA.add(e)
         elif np.all([n in BoutNodes or n in SharedB for n in SplitB.NodeConn[e]]):
             BoutA.add(e)
+        elif np.all([n in BsameNodes or n in SharedB for n in SplitB.NodeConn[e]]):
+            BsameA.add(e)
+        elif np.all([n in BflipNodes or n in SharedB for n in SplitB.NodeConn[e]]):
+            BflipA.add(e)
         else:
             ProblemsB.add(e)
+    if len(ProblemsB) > 0 or len(ProblemsA) > 0:
+        warnings.warn('Some triangles failed to be labeled.')
        
     return AinB, AoutB, AsameB, AflipB, BinA, BoutA, BsameA, BflipA
                         
