@@ -180,7 +180,7 @@ def writeMechanicalDatFile(Mesh, Material, bc, filename, jobname='job'):
                 
                 
             # FSI Nodes
-            if len(bc['FSI']) > 0:
+            if 'FSI' in bc.keys() and len(bc['FSI']) > 0:
                 f.write('CMBLOCK,   FSIN_1,NODE,{:d}\n'.format(len(bc['FSI'])))
                 f.write('(8i10)\n')
                 for i,node in enumerate(bc['FSI']):
@@ -230,6 +230,7 @@ def writeMechanicalDatFile(Mesh, Material, bc, filename, jobname='job'):
             f.write('outres,veng,all\n')
             f.write('outres,strs,all,\n')
             f.write('outres,epel,all,\n')
+            f.write('outres,nload,all,\n')
             f.write('outres,eppl,all,\n')
             f.write('outres,cont,all,\n')
             f.write('outres,v,all,\n')
@@ -283,7 +284,26 @@ def writeMechanicalDatFile(Mesh, Material, bc, filename, jobname='job'):
             f.write('*vwrite,nodal_data_full(1,1), nodal_data_full(1,2), nodal_data_full(1,3), nodal_data_full(1,4), nodal_data_full(1,5), nodal_data_full(1,6)\n')
             f.write('%E %E %E %E %E %E\n')   #formats for each column
             f.write('*cfclos\n')
-            
+            # Stress 
+            f.write('*vmask,mask(1)\n')
+            f.write('*vget,nodal_data_full(1,1),node,,S,X\n') 
+            f.write('*vmask,mask(1)\n')
+            f.write('*vget,nodal_data_full(1,2),node,,S,Y\n')
+            f.write('*vmask,mask(1)\n')
+            f.write('*vget,nodal_data_full(1,3),node,,S,Z\n')
+            f.write('*vmask,mask(1)\n')
+            f.write('*vget,nodal_data_full(1,4),node,,S,XY\n') 
+            f.write('*vmask,mask(1)\n')
+            f.write('*vget,nodal_data_full(1,5),node,,S,YZ\n')
+            f.write('*vmask,mask(1)\n')
+            f.write('*vget,nodal_data_full(1,6),node,,S,XZ\n')
+            f.write('*cfopen,'+jobname+'_stress-time_%current_time%,DAT\n')
+            f.write('*vwrite,nodal_data_full(1,1), nodal_data_full(1,2), nodal_data_full(1,3), nodal_data_full(1,4), nodal_data_full(1,5), nodal_data_full(1,6)\n')
+            f.write('%E %E %E %E %E %E\n')   #formats for each column
+            f.write('*cfclos\n')
+            # Force
+            f.write('/OUTPUT,'+jobname+'_force-time_%current_time%,DAT\n')
+            f.write('NFORCE\n')
             #
             f.write('set,next\n') #read next set
             f.write('*ENDDO\n') #end loop
