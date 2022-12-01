@@ -155,7 +155,7 @@ def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',reinitialize=False):
 
     """        
     
-    NodeCoords, NodeConn1 = Primitives.Grid([xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]],h)
+    NodeCoords, NodeConn1 = Primitives.Grid([xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]],h,exact_h=True)
     NodeCoords = np.array(NodeCoords)
     NodeVals = sdf(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
     if reinitialize:
@@ -953,7 +953,8 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,ZRIter=50,NZRIter=50,NZIter=50,
     NewCoords = np.array(NodeCoords)
     # mesh.mesh(NewCoords,NodeConn).Mesh2Meshio().write(str(k)+'.vtu');k+=1
 
-    NodeNeighbors,ElemConn = MeshUtils.getNodeNeighbors(NewCoords, NodeConn) 
+    NodeNeighbors = MeshUtils.getNodeNeighbors(NewCoords, NodeConn) 
+    ElemConn = MeshUtils.getElemConnectivity(NewCoords, NodeConn)
     ElemNeighbors = MeshUtils.getElemNeighbors(NodeCoords,NodeConn,mode='edge')
     # NodeConn, ElemNeighbors = Improvement.ValenceImprovementFlips(NodeCoords,NodeConn,NodeNeighbors,ElemNeighbors)
     # vE = [];    nE = []   
