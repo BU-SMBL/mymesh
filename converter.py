@@ -659,8 +659,14 @@ def edges2unique(Edges,return_idx=False,return_inv=False):
     """
     # Returns only the unique edges (not duplicated for each element)
     # Get all unique element edges (accounting for flipped versions of edges)
-    _,idx,inv = np.unique(np.sort(Edges,axis=1),axis=0,return_index=True,return_inverse=True)
-    UEdges = np.asarray(Edges)[idx]
+    if len(Edges) > 0:
+        _,idx,inv = np.unique(np.sort(Edges,axis=1),axis=0,return_index=True,return_inverse=True)
+        UEdges = np.asarray(Edges)[idx]
+    else:
+        UEdges = np.array([])
+        idx = np.array([])
+        inv = np.array([])
+
     if return_idx and return_inv:
         return UEdges,idx,inv
     elif return_idx:
