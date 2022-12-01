@@ -5,7 +5,7 @@ Created on Tue Feb  1 15:23:07 2022
 @author: toj
 """
 #%%
-from . import MeshUtils, Octree
+from . import MeshUtils, Octree, delaunay
 import numpy as np
 import itertools, random, sys
 
@@ -181,7 +181,7 @@ def TriangleTriangleIntersection(Tri1,Tri2,eps=1e-14,edgeedge=False):
         edges1 = Tri1[edges1idx]
         edges2 = Tri2[edges2idx]
 
-        intersections = SegmentsSegmentsIntersection(edges1,edges2,return_intersection=False)
+        intersections = SegmentsSegmentsIntersection(edges1,edges2,return_intersection=False,eps=eps)
         if any(intersections):
             return True
         else:
@@ -287,9 +287,18 @@ def TriangleTriangleIntersectionPt(Tri1,Tri2,eps=1e-14, edgeedge=False):
         edges1 = Tri1[edges1idx]
         edges2 = Tri2[edges2idx]
 
-        intersections,pts = SegmentsSegmentsIntersection(edges1,edges2,return_intersection=True)
+        intersections,pts = SegmentsSegmentsIntersection(edges1,edges2,return_intersection=True,eps=eps)
         if any(intersections):
-            return pts[intersections]
+            points = pts[intersections]
+            # Check if there are any verticies within the triangles
+            for i in range(3):
+                alpha,beta,gamma = MeshUtils.BaryTri(Tri1, Tri2[i])
+                if all([alpha>=0,beta>=0,gamma>=0]):
+                    points = np.vstack([points,Tri2[i]])
+                alpha,beta,gamma = MeshUtils.BaryTri(Tri2, Tri1[i])
+                if all([alpha>=0,beta>=0,gamma>=0]):
+                    points = np.vstack([points,Tri1[i]])
+            return points
         else:
             # Peform point-in-tri test
             alpha,beta,gamma = MeshUtils.BaryTri(Tri1, Tri2[0])
@@ -492,11 +501,11 @@ def TrianglesTrianglesIntersection(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
         edges1 = CoTri1s[:,edges1idx]
         edges2 = CoTri2s[:,edges2idx]
 
-        coplanar_where = np.where(coplanar)
+        coplanar_where = np.where(coplanar)[0] 
 
         edges1r = edges1.reshape(edges1.shape[0]*edges1.shape[1],edges1.shape[2],edges1.shape[3])
         edges2r = edges2.reshape(edges2.shape[0]*edges2.shape[1],edges2.shape[2],edges2.shape[3])
-        intersectionsr = SegmentsSegmentsIntersection(edges1r,edges2r,return_intersection=False)
+        intersectionsr = SegmentsSegmentsIntersection(edges1r,edges2r,return_intersection=False,eps=eps)
         
         intersections = intersectionsr.reshape(edges1.shape[0],edges1.shape[1])
 
@@ -643,7 +652,7 @@ def TrianglesTrianglesIntersectionPts(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
         else:
             Intersections[checks | coplanar] = False
 
-        IntersectionPts = np.nan*np.ones((len(Intersections),9,3))
+        IntersectionPts = np.nan*np.ones((len(Intersections),18,3))
         # IntersectionPts = [[] for i in range(len(Intersections))]
         t1,t2 = np.sort([t11s,t12s,t21s,t22s],axis=0)[1:3]
         IntersectionPts[Intersections,0,:] = O[Intersections] + t1[Intersections,None]*Ds[Intersections]
@@ -661,42 +670,128 @@ def TrianglesTrianglesIntersectionPts(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
         ###
         edges1r = edges1.reshape(edges1.shape[0]*edges1.shape[1],edges1.shape[2],edges1.shape[3])
         edges2r = edges2.reshape(edges2.shape[0]*edges2.shape[1],edges2.shape[2],edges2.shape[3])
-        intersectionsr,ptsr = SegmentsSegmentsIntersection(edges1r,edges2r,return_intersection=True)
+        intersectionsr,ptsr = SegmentsSegmentsIntersection(edges1r,edges2r,return_intersection=True,eps=eps)
         
         intersections = intersectionsr.reshape(edges1.shape[0],edges1.shape[1])
         pts = ptsr.reshape(edges1.shape[0],edges1.shape[1],ptsr.shape[1])
 
-        Intersections[coplanar_where] = np.any(intersections,axis=1)
-        IntersectionPts[coplanar_where] = pts
-
-        PtInTriChecks = coplanar_where[~Intersections[coplanar_where]]
-        for i in PtInTriChecks:
-            # Peform point-in-tri test
-            alpha,beta,gamma = MeshUtils.BaryTri(Tri1s[i], Tri2s[i][0])
-            if all([alpha>=0,beta>=0,gamma>=0]):
-                Intersections[i]  = True
-                IntersectionPts[i,:3,:] = Tri1s[i]
-            else:
-                alpha,beta,gamma = MeshUtils.BaryTri(Tri2s[i], Tri1s[i][0])
-                if all([alpha>=0,beta>=0,gamma>=0]):
-                    IntersectionPts[i,:3,:] = Tri2s[i]
         ###
+        edge1_ix = [[],[],[]]; edge1_ixpts = [[],[],[]]; edge1_ixcount = [[],[],[]]
+        edge1_ix[0] = intersections[:,0::3]
+        edge1_ix[1] = intersections[:,1::3]
+        edge1_ix[2] = intersections[:,2::3]
+        edge1_ixpts[0] = pts[:,0::3]#[edge1_ix[0]]
+        edge1_ixpts[1] = pts[:,1::3]#[edge1_ix[1]]
+        edge1_ixpts[2] = pts[:,2::3]#[edge1_ix[2]]
+        edge1_ixcount[0] = np.sum(edge1_ix[0],axis=1)
+        edge1_ixcount[1] = np.sum(edge1_ix[1],axis=1)
+        edge1_ixcount[2] = np.sum(edge1_ix[2],axis=1)
 
-        # for i in range(len(edges1)):
-        #     intersections,pts = SegmentsSegmentsIntersection(edges1[i],edges2[i],return_intersection=True)
-        #     if any(intersections):
-        #         Intersections[coplanar_where[i]] = True
-        #         IntersectionPts[coplanar_where[i]] = pts
-        #     else:
-        #         # Peform point-in-tri test
-        #         alpha,beta,gamma = MeshUtils.BaryTri(Tri1s[coplanar_where[i]], Tri2s[coplanar_where[i]][0])
-        #         if all([alpha>=0,beta>=0,gamma>=0]):
-        #             Intersections[coplanar_where[i]]  = True
-        #             IntersectionPts[coplanar_where[i],:3,:] = Tri1s[coplanar_where[i]]
-        #         else:
-        #             alpha,beta,gamma = MeshUtils.BaryTri(Tri2s[coplanar_where[i]], Tri1s[coplanar_where[i]][0])
-        #             if all([alpha>=0,beta>=0,gamma>=0]):
-        #                 IntersectionPts[coplanar_where[i],:3,:] = Tri2s[coplanar_where[i]]
+        edge2_ix = [[],[],[]]; edge2_ixpts = [[],[],[]]; edge2_ixcount = [[],[],[]]
+        edge2_ix[0] = intersections[:,[0,5,7]]
+        edge2_ix[1] = intersections[:,[1,3,8]]
+        edge2_ix[2] = intersections[:,[2,4,6]]
+        edge2_ixpts[0] = pts[:,[0,5,7]]#[edge2_ix[0]]
+        edge2_ixpts[1] = pts[:,[1,3,8]]#[edge2_ix[1]]
+        edge2_ixpts[2] = pts[:,[2,4,6]]#[edge2_ix[2]]
+        edge2_ixcount[0] = np.sum(edge2_ix[0],axis=1)
+        edge2_ixcount[1] = np.sum(edge2_ix[1],axis=1)
+        edge2_ixcount[2] = np.sum(edge2_ix[2],axis=1)
+
+        # For edges that only interesect at one point, they way have a point inside the other triangle that needs to be accounted for
+        # for i in range(len(edge1_ixcount)):
+        #     where = np.where(edge1_ixcount[i]==1)[0]
+        #     for j,edge in enumerate(edges1[edge1_ixcount[i]==1]):
+        #         idx = where[j]
+        #         for pt in edge[i]:
+        #             if PointInTri(Tri2s[coplanar_where[idx]],pt,method='BaryArea') and not np.any(np.all(np.abs(pt - edge1_ixpts[i][idx])<eps,axis=1)):
+        #                 # IntersectionPts[coplanar_where[idx],np.where(np.all(np.isnan(IntersectionPts[coplanar_where[idx]]),axis=1))[0][0],:] = pt
+        #                 edge1_ixpts[i][idx][np.where(np.all(np.isnan(edge1_ixpts[i][idx]),axis=1))[0][0]] = pt
+        #         # If there's still only one point, it probably means the endpoint of on edge is on the edge of the other triangle, duplicate the point
+        #         if np.sum(np.all(np.isnan(edge1_ixpts[i][idx]),axis=1)) == 2:
+        #             edge1_ixpts[i][idx][np.where(np.all(np.isnan(edge1_ixpts[i][idx]),axis=1))[0][0]] = edge1_ixpts[i][idx][~np.all(np.isnan(edge1_ixpts[i][idx]),axis=1)]
+        #     where = np.where(edge2_ixcount[i]==1)[0]
+        #     for j,edge in enumerate(edges2[edge2_ixcount[i]==1]):
+        #         idx = where[j]
+        #         for pt in edge[i]:
+        #             if PointInTri(Tri1s[coplanar_where[idx]],pt,method='BaryArea') and not np.any(np.all(np.abs(pt - edge2_ixpts[i][idx])<eps,axis=1)):
+        #                 # IntersectionPts[coplanar_where[idx],np.where(np.all(np.isnan(IntersectionPts[coplanar_where[idx]]),axis=1))[0][0],:] = pt
+        #                 edge2_ixpts[i][idx][np.where(np.all(np.isnan(edge2_ixpts[i][idx]),axis=1))[0][0]] = pt
+        #         if np.sum(np.all(np.isnan(edge2_ixpts[i][idx]),axis=1)) == 2:
+        #             edge2_ixpts[i][idx][np.where(np.all(np.isnan(edge2_ixpts[i][idx]),axis=1))[0][0]] = edge2_ixpts[i][idx][~np.all(np.isnan(edge2_ixpts[i][idx]),axis=1)]
+        
+        # For edges that only interesect at one point, they way have a point inside the other triangle that needs to be accounted for
+        for i in range(len(edge1_ixcount)):
+            where1 = np.where(edge1_ixcount[i]==1)[0]
+            es1 = edges1[where1][:,i]    # list of the first edges
+            p11s = es1[:,0]   # First point in the edges
+            p12s = es1[:,1]   # Second point in the edges
+            tris1 = Tri2s[coplanar_where[where1]]    # Corresponding triangle
+            In11 = PointsInTris(tris1,p11s,method='BaryArea') & (~np.any(np.all(np.abs(p11s[:,:,None] - edge1_ixpts[i][where1])<eps,axis=2),axis=1))
+            In12 = PointsInTris(tris1,p12s,method='BaryArea') & (~np.any(np.all(np.abs(p12s[:,:,None] - edge1_ixpts[i][where1])<eps,axis=2),axis=1))
+
+            nanidx1 = np.where(np.all(np.isnan(edge1_ixpts[i][where1]),axis=2).cumsum(axis=1).cumsum(axis=1) == 1)
+            edge1_ixpts[i][where1[nanidx1[0][In11]],nanidx1[1][In11]] = p11s[In11]
+            edge1_ixpts[i][where1[nanidx1[0][In12&~In11]],nanidx1[1][In12&~In11]] = p12s[In12&~In11]
+            edge1_ixpts[i][where1[nanidx1[0][~In12&~In11]],nanidx1[1][~In12&~In11]] = edge1_ixpts[i][where1[~In12&~In11]][np.where(np.all(~np.isnan(edge1_ixpts[i][where1[~In12&~In11]]),axis=2).cumsum(axis=1).cumsum(axis=1) == 1)]
+            #
+            where2 = np.where(edge2_ixcount[i]==1)[0]
+            es2 = edges2[where2][:,i]    # list of the first edges
+            p21s = es2[:,0]   # First point in the edges
+            p22s = es2[:,1]   # Second point in the edges
+            tris2 = Tri1s[coplanar_where[where2]]    # Corresponding triangle
+            In21 = PointsInTris(tris2,p21s,method='BaryArea') & (~np.any(np.all(np.abs(p21s[:,:,None] - edge2_ixpts[i][where2])<eps,axis=2),axis=1))
+            In22 = PointsInTris(tris2,p22s,method='BaryArea') & (~np.any(np.all(np.abs(p22s[:,:,None] - edge2_ixpts[i][where2])<eps,axis=2),axis=1))
+
+            nanidx2 = np.where(np.all(np.isnan(edge2_ixpts[i][where2]),axis=2).cumsum(axis=1).cumsum(axis=1) == 1)
+            edge2_ixpts[i][where2[nanidx2[0][In21]],nanidx2[1][In21]] = p21s[In21]
+            edge2_ixpts[i][where2[nanidx2[0][In22&~In21]],nanidx2[1][In22&~In21]] = p22s[In22&~In21]
+            edge2_ixpts[i][where2[nanidx2[0][~In22&~In21]],nanidx2[1][~In22&~In21]] = edge2_ixpts[i][where2[~In22&~In21]][np.where(np.all(~np.isnan(edge2_ixpts[i][where2[~In22&~In21]]),axis=2).cumsum(axis=1).cumsum(axis=1) == 1)]
+
+
+        # Collect the points so that the intersection edges 
+        Edge1Stack = np.concatenate([edge1_ixpts[0],edge1_ixpts[1],edge1_ixpts[2]],axis=1)
+        Edge2Stack = np.concatenate([edge2_ixpts[0],edge2_ixpts[1],edge2_ixpts[2]],axis=1)
+        DoubleStack = np.concatenate([Edge1Stack,Edge2Stack],axis=1)
+
+        NewDoubleStack = np.nan*np.ones(DoubleStack.shape)
+        NewDoubleStack[np.flip(np.sort(np.all(~np.isnan(DoubleStack),axis=2),axis=1),axis=1)] = DoubleStack[np.all(~np.isnan(DoubleStack),axis=2)]
+
+        Intersections[coplanar_where] = np.any(intersections,axis=1)
+        IntersectionPts[coplanar_where] = NewDoubleStack
+
+        # Check triangles with no edge intersections to see if one is completely within the other
+        PtInTriChecks = coplanar_where[~Intersections[coplanar_where]]
+        TwoInOne = PointsInTris(Tri1s[PtInTriChecks],Tri2s[PtInTriChecks,0],method='BaryArea',eps=eps,inclusive=False)
+        OneInTwo = PointsInTris(Tri2s[PtInTriChecks],Tri1s[PtInTriChecks,0],method='BaryArea',eps=eps,inclusive=False)
+
+        Intersections[PtInTriChecks] = OneInTwo | TwoInOne
+        IntersectionPts[PtInTriChecks[TwoInOne],:6,:] = Tri2s[PtInTriChecks[TwoInOne]][:,[0,1,1,2,2,0]]
+        IntersectionPts[PtInTriChecks[OneInTwo],:6,:] = Tri1s[PtInTriChecks[OneInTwo]][:,[0,1,1,2,2,0]]
+
+        # PtInTriChecks = coplanar_where[~Intersections[coplanar_where]]
+        # for i in PtInTriChecks:
+        #     # Peform point-in-tri test
+        #     if PointInTri(Tri1s[i],Tri2s[i][0],method='BaryArea',inclusive=False):
+        #         Intersections[i]  = True
+        #         IntersectionPts[i,:6,:] = Tri2s[i][[0,1,1,2,2,0]]
+        #     elif PointInTri(Tri2s[i],Tri1s[i][0],method='BaryArea',inclusive=False):
+        #         Intersections[i]  = True
+        #         IntersectionPts[i,:6,:] = Tri1s[i][[0,1,1,2,2,0]]
+
+
+        # import plotly.graph_objects as go
+        # fig = go.Figure()
+        # Idx = 0#coplanar_where[0]
+        # t1 = np.append(Tri1s[Idx],[Tri1s[Idx,0,:]],axis=0)
+        # t2 = np.append(Tri2s[Idx],[Tri2s[Idx,0,:]],axis=0)
+        # fig.add_trace(go.Scatter(x=t1[:,1],y=t1[:,2]))
+        # fig.add_trace(go.Scatter(x=t2[:,1],y=t2[:,2]))
+        # fig.add_trace(go.Scatter(x=IntersectionPts[:,:,1][Idx],y=IntersectionPts[:,:,2][Idx],mode='markers'))
+        # for i in range(0,len(IntersectionPts[Idx]),2):
+        #     fig.add_trace(go.Scatter(x=[IntersectionPts[Idx][i,1],IntersectionPts[Idx][i+1,1]],y=[IntersectionPts[Idx][i,2],IntersectionPts[Idx][i+1,2]]))
+        # fig.show()
+        # a = 2
 
     return Intersections, IntersectionPts
 
@@ -924,24 +1019,61 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
     Intersections[checks] = False
     return Intersections
     
-def SegmentSegmentIntersection(s1,s2,return_intersection=False):
-    # s1 = [p1,p2], s2 = [p3,p4]
+def SegmentSegmentIntersection(s1,s2,return_intersection=False,endpt_inclusive=True,eps=0):
+    # https://mathworld.wolfram.com/Line-LineIntersection.html
+    # Goldman (1990)
     [p1,p2] = np.array(s1)
     [p3,p4] = np.array(s2)
     
     a = p2-p1; b = p4-p3; c = p3-p1
-    s = np.dot(np.cross(c,b),np.cross(a,b))/(np.linalg.norm(np.cross(a,b)))**2
-    t = np.dot(np.cross(c,a),np.cross(a,b))/(np.linalg.norm(np.cross(a,b)))**2
+    axb = np.cross(a,b)
+    axbnorm2 = (np.linalg.norm(axb))**2
+    s = np.dot(np.cross(c,b),axb)/axbnorm2
+    t = np.dot(np.cross(c,a),axb)/axbnorm2
     
-    if (0 <= s <= 1) and (0 <= t <= 1):
-        if return_intersection:
-            return p1 + a*s
-        else:
-            return True
+    if endpt_inclusive:
+        Intersection = (0 <= s <= 1) and (0 <= t <= 1) & (axbnorm2 > eps)
     else:
-        return False
+        Intersection = (0+eps < s < 1-eps) and (0+eps < t < 1-eps) & (axbnorm2 > eps)
 
-def SegmentsSegmentsIntersection(s1,s2,return_intersection=False):
+    if return_intersection:
+        pt = p1 + a*s
+        return Intersection, pt
+
+    ###
+    # [x1,x2] = np.array(s1)
+    # [x3,x4] = np.array(s2)
+    # p1 = x1; V1 = x2-x1
+    # p2 = x3; V2 = x4-x3
+    # V1xV2 = np.cross(V1,V2)
+    # denom = np.linalg.norm(V1xV2)**2
+    # t = np.linalg.det([p2-p1,V2,V1xV2])/denom
+    # s = np.linalg.det([p2-p1,V1,V1xV2])/denom
+    # s = np.clip(s,0,1)
+    # t = np.clip(t,0,1)
+    # x1 = p1+V1*t
+    # x2 = p2+V2*s
+    # if endpt_inclusive:
+    #     if np.linalg.norm(x2-x1) <= eps:
+    #         Intersection = True
+    #     else:
+    #         Intersection = False
+    # else:
+    #     if np.linalg.norm(x2-x1,axis=1) <= eps and (0+eps < s) and (s < 1-eps) and (0+eps < t) and (t < 1-eps):
+    #         Intersection = True
+    #     else:
+    #         Intersection = False
+    # if return_intersection:
+    #     if Intersection:
+    #         return Intersection, x1
+    #     else:
+    #         return Intersection, np.repeat(np.nan,3)
+    ###
+    return Intersection
+
+def SegmentsSegmentsIntersection(s1,s2,return_intersection=False,endpt_inclusive=True,eps=0):
+    # https://mathworld.wolfram.com/Line-LineIntersection.html
+    # Goldman (1990)
     if type(s1) is list: s1 = np.array(s1)
     if type(s2) is list: s2 = np.array(s2)
     p1 = s1[:,0]; p2 = s1[:,1]
@@ -951,14 +1083,62 @@ def SegmentsSegmentsIntersection(s1,s2,return_intersection=False):
     axb = np.cross(a,b,axis=1)
     cxb = np.cross(c,b,axis=1)
     cxa = np.cross(c,a,axis=1)
-    axbnorm2 = np.sum(axb**2,axis=1)
-    s = np.sum(cxb*axb,axis=1)/axbnorm2
-    t = np.sum(cxa*axb,axis=1)/axbnorm2
-    
-    Intersections = (0 <= s) & (s <= 1) & (0 <= t) & (t <= 1)
+    axbnorm2 = np.sum(axb**2,axis=1) #+ 1e-32
+    with np.errstate(divide='ignore', invalid='ignore'):
+        s = np.sum(cxb*axb,axis=1)/axbnorm2
+        t = np.sum(cxa*axb,axis=1)/axbnorm2
+    # Collinear: Currently not getting intersection points for perfectly collinear lines
+    if endpt_inclusive:
+        Intersections = (0-eps <= s) & (s <= 1+eps) & (0-eps <= t) & (t <= 1+eps) & (axbnorm2 > eps**2) ## DON'T GET RID OF THE LAST CHECK
+        # Intersections = (0 <= s) & (s <= 1) & (0 <= t) & (t <= 1) & (axbnorm2 > eps**2)
+        ###
+
+        # Collinear = (axbnorm2 <= eps**2)
+        # np.linalg.norm(axb/(np.linalg.norm(a,axis=1)*np.linalg.norm(b,axis=1))[:,None],axis=1)
+        
+    else:
+        Intersections = (0+eps < s) & (s < 1-eps) & (0+eps < t) & (t < 1-eps) & (axbnorm2 > eps**2)
     if return_intersection:
+        ### Without collinear:
         pts = np.nan*np.ones((len(Intersections),3))
         pts[Intersections] = p1[Intersections] + a[Intersections]*s[Intersections,None]
+        ###
+
+        ### With collinear: (TBD)
+        # pts = np.nan*np.ones((len(Intersections),2,3))
+        ###
+        return Intersections, pts
+    return Intersections
+
+def SegmentsSegmentsIntersection2(s1,s2,return_intersection=False,endpt_inclusive=True,eps=1e-14):
+    # https://mathworld.wolfram.com/Line-LineIntersection.html
+    # Goldman (1990)
+    if type(s1) is list: s1 = np.array(s1)
+    if type(s2) is list: s2 = np.array(s2)
+    
+    x1,x2 = s1[:,0],s1[:,1]
+    x3,x4 = s2[:,0],s2[:,1]
+    p1 = x1; V1 = x2-x1
+    p2 = x3; V2 = x4-x3
+    V1xV2 = np.cross(V1,V2,axis=1)
+    denom = np.linalg.norm(V1xV2,axis=1)**2
+
+    t = np.linalg.det(np.array([p2-p1,V2,V1xV2]).swapaxes(0,1))/denom
+    s = np.linalg.det(np.array([p2-p1,V1,V1xV2]).swapaxes(0,1))/denom
+    s = np.clip(s,0,1)
+    t = np.clip(t,0,1)
+    
+    x1 = p1+V1*t[:,None]
+    x2 = p2+V2*s[:,None]
+    # print((np.linalg.norm(x1-s1[:,0],axis=1)))
+    # print((np.linalg.norm(x1-s1[:,1],axis=1)))
+    if endpt_inclusive:
+        Intersections = (np.linalg.norm(x2-x1,axis=1) == 0)
+    else:
+        Intersections = (np.linalg.norm(x2-x1,axis=1) == 0) & ~((np.linalg.norm(x1-s1[:,0],axis=1) <= eps) | (np.linalg.norm(x1-s1[:,1],axis=1) <= eps))
+    if return_intersection:
+        pts = np.nan*np.ones((len(Intersections),3))
+        pts[Intersections] = x1[Intersections]
         return Intersections, pts
     return Intersections
     
@@ -1163,3 +1343,65 @@ def InsideVoxel(pts, VoxelCoords, VoxelConn, inclusive=True):
     
     return inside
         
+def PointInTri(Tri,pt,method='BaryArea',eps=1e-12,inclusive=True):
+
+    if method == 'Normal':
+        pts = np.vstack([Tri,pt])
+        conn = [[0,1,3],[1,2,3],[2,0,3]]
+        normals = MeshUtils.CalcFaceNormal(pts,conn)
+        if np.dot(normals[0],normals[1]) < 0:
+            In = False
+        elif np.dot(normals[1],normals[2]) < 0:
+            In = False
+        else:
+            In = True
+    elif method == 'Bary':
+        alpha,beta,gamma = MeshUtils.BaryTri(Tri,pt)
+        In = all([alpha>=0,beta>=0,gamma>=0])
+    elif method == 'BaryArea':
+        A = Tri[0]
+        B = Tri[1]
+        C = Tri[2]
+        AB = np.subtract(A,B)
+        AC = np.subtract(A,C)
+        PA = np.subtract(pt,A)
+        PB = np.subtract(pt,B)
+        PC = np.subtract(pt,C)
+
+        Area2 = np.linalg.norm(np.cross(AB,AC))
+        
+        denom = 1/Area2
+        alpha = np.linalg.norm(np.cross(PB,PC))*denom
+        beta = np.linalg.norm(np.cross(PC,PA))*denom
+        gamma = np.linalg.norm(np.cross(PA,PB))*denom
+        if inclusive:
+            In = all([alpha>=0,beta>=0,gamma>=0]) and np.abs(alpha+beta+gamma-1) < eps
+        else:
+            In = all([alpha>=eps,beta>=eps,gamma>=eps]) and np.abs(alpha+beta+gamma-1) < eps
+    return In
+
+def PointsInTris(Tris,pts,method='BaryArea',eps=1e-12,inclusive=True):
+    # Pairwise comparisons between each triangle in tris and its corresponding point in pts
+    if method == 'BaryArea':
+        A = Tris[:,0]
+        B = Tris[:,1]
+        C = Tris[:,2]
+        AB = np.subtract(A,B)
+        AC = np.subtract(A,C)
+        PA = np.subtract(pts,A)
+        PB = np.subtract(pts,B)
+        PC = np.subtract(pts,C)
+
+        Area2 = np.linalg.norm(np.cross(AB,AC),axis=1)
+
+        
+        denom = 1/Area2
+        alpha = np.linalg.norm(np.cross(PB,PC),axis=1)*denom
+        beta = np.linalg.norm(np.cross(PC,PA),axis=1)*denom
+        gamma = np.linalg.norm(np.cross(PA,PB),axis=1)*denom
+        # print(alpha,beta,gamma)
+        if inclusive:
+            In = np.all([alpha>=0,beta>=0,gamma>=0],axis=0) & (np.abs(alpha+beta+gamma-1) <= eps)
+        else:
+            In = np.all([alpha>=eps,beta>=eps,gamma>=eps],axis=0) & (np.abs(alpha+beta+gamma-1) <= eps)
+    return In
