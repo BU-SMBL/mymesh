@@ -134,7 +134,7 @@ class mesh:
         if self.NElem > 0 and len(self.NodeConn[0]) == 3:
             # Currently only valid for tris
             self.NodeCoords,self.NodeConn = MeshUtils.DeleteDegenerateElements(*self,tol=tol,angletol=angletol,strict=strict)
-        else:
+        elif self.NElem > 0:
             self.NodeCoords,self.NodeConn = MeshUtils.DeleteDegenerateElements(*self,angletol=angletol,strict=True)
         self.NodeCoords,self.NodeConn,_ = converter.removeNodes(self.NodeCoords,self.NodeConn)
         
@@ -391,14 +391,14 @@ class mesh:
     def NodeNeighbors(self):
         if self._NodeNeighbors == []:
             if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying volume node neighbors...',end='')
-            self._NodeNeighbors,self._ElemConn = MeshUtils.getNodeNeighbors(*self)
+            self._NodeNeighbors = MeshUtils.getNodeNeighbors(*self)
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
         return self._NodeNeighbors
     @property
     def ElemConn(self):
         if self._ElemConn == []:
-            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying volume node neighbors...',end='')
-            self._NodeNeighbors,self._ElemConn = MeshUtils.getNodeNeighbors(*self)
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying volume node element connectivity...',end='')
+            self._ElemConn = MeshUtils.getElemConnectivity(*self)
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
         return self._ElemConn
     @property
@@ -407,7 +407,7 @@ class mesh:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying surface node neighbors...',end='')
                 self._printlevel+=1
-            self._SurfNodeNeighbors,self._SurfElemConn = MeshUtils.getNodeNeighbors(self.NodeCoords,self.SurfConn)
+            self._SurfNodeNeighbors = MeshUtils.getNodeNeighbors(self.NodeCoords,self.SurfConn)
             if self.verbose: 
                 self._printlevel-=1
                 print('Done', end='\n'+'\t'*self._printlevel)
@@ -416,9 +416,9 @@ class mesh:
     def SurfElemConn(self):
         if self._SurfElemConn == []:
             if self.verbose: 
-                print('\n'+'\t'*self._printlevel+'Identifying surface node neighbors...',end='')
+                print('\n'+'\t'*self._printlevel+'Identifying surface node element connectivity...',end='')
                 self._printlevel+=1
-            self._SurfNodeNeighbors,self._SurfElemConn = MeshUtils.getNodeNeighbors(self.NodeCoords,self.SurfConn)
+            self._SurfElemConn = MeshUtils.getElemConnectivity(self.NodeCoords,self.SurfConn)
             if self.verbose: 
                 self._printlevel-=1
                 print('Done', end='\n'+'\t'*self._printlevel)

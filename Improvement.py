@@ -4,7 +4,7 @@ Created on Wed Jan 26 09:27:53 2022
 
 @author: toj
 """
-#%%
+
 import numpy as np
 import sys, warnings, time, random, copy
 from . import converter, MeshUtils, Quality, Rays, Octree
@@ -596,7 +596,7 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,Fixed
 
 
     Nodes = set(range(len(NodeCoords))).difference(FixedNodes)
-    if not NodeNeighbors: NodeNeighbors,_ = MeshUtils.getNodeNeighbors(NodeCoords, NodeConn)
+    if not NodeNeighbors: NodeNeighbors = MeshUtils.getNodeNeighbors(NodeCoords, NodeConn)
     NewCoords = copy.copy(NodeCoords)#[node for node in NodeCoords]
     OldCoords = copy.copy(NodeCoords)
     for it in range(iterate):        
@@ -953,7 +953,7 @@ def ValenceImprovementFlips(NodeCoords,NodeConn,NodeNeighbors,ElemNeighbors):
 def AngleReductionFlips(NodeCoords,NodeConn,NodeNeighbors=None,FixedNodes=[]):
     NewCoords = np.array(NodeCoords)
     NewConn = copy.copy(NodeConn)
-    if not NodeNeighbors: NodeNeighbors,_ = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
+    if not NodeNeighbors: NodeNeighbors = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
     thinking = True
     iter = 0
     while thinking:
@@ -1070,7 +1070,7 @@ def AngleReductionFlips(NodeCoords,NodeConn,NodeNeighbors=None,FixedNodes=[]):
         # print(flips)
         if flips < len(NonDelaunay)-nskipped:
             thinking = True
-            NodeNeighbors,_ = MeshUtils.getNodeNeighbors(NewCoords, NewConn)    
+            NodeNeighbors = MeshUtils.getNodeNeighbors(NewCoords, NewConn)    
         else:
             thinking = False
 
@@ -1244,8 +1244,9 @@ def Contract(NodeCoords, NodeConn, h, iterate='converge', FixedNodes=set(), FixF
     
     while iter < iterate:
         iter += 1
-        NodeNeighbors,ElemConn = MeshUtils.getNodeNeighbors(NewCoords,NewConn)
-        Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True)
+        NodeNeighbors = MeshUtils.getNodeNeighbors(NewCoords,NewConn)
+        ElemConn = MeshUtils.getElemConnectivity(NewCoords,NewConn)
+        Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True,ReturnType=np.ndarray)
         UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
         UEdgeElem = np.asarray(EdgeElem)[UIdx]
         UEdgeConn = UInv[MeshUtils.PadRagged(EdgeConn)]
@@ -1347,7 +1348,8 @@ def TetOpt(NodeCoords, NodeConn, ElemConn=None, objective='eta', method='BFGS', 
     if type(FreeNodes) is list: FreeNodes = set(FreeNodes)
     FreeNodes = FreeNodes.difference(FixedNodes)
 
-    if ElemConn is None: _,ElemConn = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
+    # if ElemConn is None: _,ElemConn = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
+    if ElemConn is None: ElemConn = MeshUtils.getElemConnectivity(NodeCoords,NodeConn)
     ArrayCoords = np.array(NodeCoords); ArrayConn = np.asarray(NodeConn)
     assert ArrayConn.dtype != 'O', 'Input mesh must be purely tetrahedral.'
 
@@ -1491,6 +1493,22 @@ def TetOpt(NodeCoords, NodeConn, ElemConn=None, objective='eta', method='BFGS', 
     
     NewCoords = ArrayCoords.tolist()
     return NewCoords
+
+def PatchHoles(NodeCoords, SurfConn):
+    ## Work in Progress
+    edges = np.array(converter.surf2edges(NodeCoords, SurfConn))
+    ignore = set()
+    for i,edge in edges:
+        if i in ignore:
+            continue
+        ignore.add(i)
+        where0 = np.where(edge[0]==edges)[0]
+        where1 = np.where(edge[1]==edges)[0]
+        if len(where0) != 2 or len(where1) != 2:
+            # Can only patch edges if both nodes in the edge are only shared by one other edge
+            continue
+
+        
 
 
 # %%
