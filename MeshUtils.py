@@ -61,12 +61,18 @@ def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     key_func = lambda x : x[0]
     NodeNeighbors = [[z for y,z in x[1] if z != -1] for x in itertools.groupby(zip(Idx[arg],Neighbors[arg]), key_func)]
     
-    Neighbors2 = np.append(Edges[:,0],list(NotInMesh))
-    EdgeElem = np.append(EdgeElem,np.repeat(-1,len(NotInMesh)))
-    arg2 = Neighbors2.argsort()
-    ElemConn = [list(set([z for y,z in x[1] if z != -1])) for x in itertools.groupby(zip(Neighbors2[arg2],EdgeElem[arg2]), key_func)]
 
-    return NodeNeighbors,ElemConn                
+    return NodeNeighbors#,ElemConn               
+
+def getElemConnectivity(NodeCoords,NodeConn,ElemType='auto'):
+    Edges,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True, ElemType=ElemType, ReturnType=np.ndarray)
+    NodeNeighbors = [set() for i in range(len(NodeCoords))] 
+    ElemConn = [set() for i in range(len(NodeCoords))]         # Connected elements for each vertex 
+    for i in range(len(Edges)):
+        ElemConn[Edges[i][0]].add(EdgeElem[i])
+        ElemConn[Edges[i][1]].add(EdgeElem[i])
+    ElemConn = [list(s) for s in ElemConn] 
+    return ElemConn
 
 def getNodeNeighborhood(NodeCoords,NodeConn,nRings):
     """
@@ -89,7 +95,7 @@ def getNodeNeighborhood(NodeCoords,NodeConn,nRings):
         NodeCoords.
     """
     
-    NodeNeighbors,ElemConn = getNodeNeighbors(NodeCoords,NodeConn)
+    NodeNeighbors = getNodeNeighbors(NodeCoords,NodeConn)
     NodeNeighborhoods = [[j for j in NodeNeighbors[i]] for i in range(len(NodeNeighbors))]
     if nRings == 1:
         return NodeNeighborhoods
@@ -125,7 +131,7 @@ def getNodeNeighborhoodByRadius(NodeCoords,NodeConn,Radius):
         NodeCoords with the neighborhoods specified by a radius.
     """
     
-    NodeNeighbors,ElemConn = getNodeNeighbors(NodeCoords,NodeConn)
+    NodeNeighbors = getNodeNeighbors(NodeCoords,NodeConn)
     NodeNeighborhoods = [[] for i in range(len(NodeNeighbors))]
     for i in range(len(NodeNeighborhoods)):
         thisNode = NodeCoords[i]
@@ -199,12 +205,12 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
         r = np.repeat(np.arange(len(UEdgeConn))[:,None],UEdgeConn.shape[1],axis=1)
         EECidx = (UEdgeElem[UEdgeConn] == r).astype(int)
         EdgeElemConn[UEdgeConn,EECidx] = r
-        EdgeElemConn = EdgeElemConn.astype(int)
+        # EdgeElemConn = EdgeElemConn.astype(int)
 
         for i in range(len(EdgeElemConn)):
             if not any(np.isnan(EdgeElemConn[i])):
-                ElemNeighbors[EdgeElemConn[i][0]].add(EdgeElemConn[i][1])
-                ElemNeighbors[EdgeElemConn[i][1]].add(EdgeElemConn[i][0])
+                ElemNeighbors[int(EdgeElemConn[i][0])].add(int(EdgeElemConn[i][1]))
+                ElemNeighbors[int(EdgeElemConn[i][1])].add(int(EdgeElemConn[i][0]))
         ElemNeighbors = [list(s) for s in ElemNeighbors] 
 
     elif mode=='face':
@@ -259,7 +265,7 @@ def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,BarrierNodes=set())
     """
     
     NodeRegions = []
-    if not NodeNeighbors: NodeNeighbors,_ = getNodeNeighbors(NodeCoords,NodeConn)
+    if not NodeNeighbors: NodeNeighbors = getNodeNeighbors(NodeCoords,NodeConn)
     if len(BarrierNodes) > 0:
         NodeNeighbors = [[] if i in BarrierNodes else n for i,n in enumerate(NodeNeighbors)]
     NeighborSets = [set(n) for n in NodeNeighbors]
@@ -719,18 +725,61 @@ def BaryTri(Nodes, Pt):
     B = Nodes[1]
     C = Nodes[2]
     BA = np.subtract(B,A)
-    CB = np.subtract(C,B)
-    AC = np.subtract(A,C)
+    # CB = np.subtract(C,B)
+    # AC = np.subtract(A,C)
     CA = np.subtract(C,A)    
-    BABA = np.dot(BA, BA);
-    BACA = np.dot(BA, CA);
-    CACA = np.dot(CA, CA);
-    PABA = np.dot(np.subtract(Pt,A), BA);
-    PACA = np.dot(np.subtract(Pt,A), CA);
-    denom = 1/(BABA * CACA - BACA * BACA);
-    beta = (CACA * PABA - BACA * PACA) * denom;
-    gamma = (BABA * PACA - BACA * PABA) * denom;
-    alpha = 1 - gamma - beta;    
+    BABA = np.dot(BA, BA)
+    BACA = np.dot(BA, CA)
+    CACA = np.dot(CA, CA)
+    PABA = np.dot(np.subtract(Pt,A), BA)
+    PACA = np.dot(np.subtract(Pt,A), CA)
+    denom = 1/(BABA * CACA - BACA * BACA)
+    beta = (CACA * PABA - BACA * PACA) * denom
+    gamma = (BABA * PACA - BACA * PABA) * denom
+    alpha = 1 - gamma - beta
+    
+    return alpha, beta, gamma
+
+def BaryTris(Tris, Pt):
+    """
+    BaryTri returns the bary centric coordinates of a point (Pt) relative to 
+    a triangle (Nodes)
+
+    Parameters
+    ----------
+    Nodes : list
+        List of coordinates of the triangle vertices.
+    Pt : list
+        Coordinates of the point.
+
+    Returns
+    -------
+    alpha : float
+        First barycentric coordinate.
+    beta : float
+        Second barycentric coordinate.
+    gamma : float
+        Third barycentric coordinate.
+
+    """
+    
+    A = Tris[:,0]
+    B = Tris[:,1]
+    C = Tris[:,2]
+    BA = np.subtract(B,A)
+    # CB = np.subtract(C,B)
+    # AC = np.subtract(A,C)
+    CA = np.subtract(C,A)    
+    BABA = np.sum(BA*BA,axis=1)
+    BACA = np.sum(BA*CA,axis=1)
+    CACA = np.sum(CA*CA,axis=1)
+    PABA = np.sum(np.subtract(Pt,A)*BA,axis=1)
+    PACA = np.sum(np.subtract(Pt,A)*CA,axis=1)
+    with np.errstate(divide='ignore', invalid='ignore'):
+        denom = 1/(BABA * CACA - BACA *BACA)
+        beta = (CACA * PABA - BACA * PACA) * denom
+        gamma = (BABA * PACA - BACA * PABA) * denom
+        alpha = 1 - gamma - beta;    
     
     return alpha, beta, gamma
 
@@ -870,7 +919,7 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     if type(SurfConn1) is list: SurfConn1 = np.array(SurfConn1)
     if type(SurfConn2) is list: SurfConn2 = np.array(SurfConn2)
 
-    _,ElemConn1 = getNodeNeighbors(NodeCoords1,SurfConn1)
+    ElemConn1 = getElemConnectivity(NodeCoords1, SurfConn1)
     ElemNormals1 = CalcFaceNormal(NodeCoords1, SurfConn1)
     NodeNormals1 = Face2NodeNormal(NodeCoords1, SurfConn1, ElemConn1, ElemNormals1, method='angle')
 
@@ -973,7 +1022,7 @@ octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False
         return NodeVals2, octree
     return NodeVals2
 
-def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12):
+def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False):
     """
     DeleteDuplicateNodes Remove nodes that are duplicated in the mesh, either at exactly the same location as another 
     node or a distance < tol apart. Nodes are renumbered and elements reconnected such that the geometry and structure
@@ -1000,19 +1049,27 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12):
     """
 
     # assert len(NodeCoords) > 0, 'No nodes in mesh.'
-    if len(NodeCoords) == 0 or len(NodeConn) == 0:
+    if len(NodeCoords) == 0:
         return NodeCoords, NodeConn, []
+
     if tol > 0:
         arrayCoords = np.round(np.array(NodeCoords)/tol)*tol
     else:
         arrayCoords = np.array(NodeCoords)
-    unq,inv = np.unique(arrayCoords, return_inverse=True, axis=0)
+    unq,idx,inv = np.unique(arrayCoords, return_inverse=True, return_index=True, axis=0)
     newIds = np.arange(len(unq))[inv]
-    NodeCoords2 = unq.tolist()
-
-    tempIds = np.append(newIds,-1)
-    R = PadRagged(NodeConn,fillval=-1)
-    NodeConn2 = ExtractRagged(tempIds[R],delval=-1)
+    if type(NodeCoords) is list:
+        NodeCoords2 = np.asarray(NodeCoords)[idx].tolist()
+    else:
+        NodeCoords2 = np.asarray(NodeCoords)[idx]
+    if len(NodeConn) > 0:
+        tempIds = np.append(newIds,-1)
+        R = PadRagged(NodeConn,fillval=-1)
+        NodeConn2 = ExtractRagged(tempIds[R],delval=-1)
+    else:
+        NodeConn2 = NodeConn
+    if return_idx:
+        return NodeCoords2,NodeConn2,newIds,idx
     return NodeCoords2,NodeConn2,newIds
 
 def RelabelNodes(NodeCoords,NodeConn,newIds,faces=None):
@@ -1066,6 +1123,8 @@ def DeleteDegenerateElements(NodeCoords,NodeConn,tol=1e-12,angletol=1e-3,strict=
         NewConn = [elem for elem in NodeConn if len(elem) == len(set(elem))]
     else:
         NewCoords,NewConn = DeleteDegenerateElements(NodeCoords,NodeConn,strict=True)
+        if len(NewConn) == 0:
+            return NewCoords,NewConn
         if angletol == 0:
             warnings.warn("Change to strict=True")
         
