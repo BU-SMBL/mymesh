@@ -324,7 +324,7 @@ def tri_skewness(NodeCoords,NodeConn):
     skew : np.ndarray
         Array of skewness for each element.
     """
-    points = np.asarray(NodeCoords)[NodeConn]
+    points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
     A = points[:,0]
     B = points[:,1]
     C = points[:,2]
@@ -369,7 +369,7 @@ def quad_skewness(NodeCoords,NodeConn):
     skew : np.ndarray
         Array of skewness for each element.
     """
-    points = np.asarray(NodeCoords)[NodeConn]
+    points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
     A = points[:,0]
     B = points[:,1]
     C = points[:,2]
@@ -433,10 +433,11 @@ def tet_vol_skewness(NodeCoords,NodeConn):
     B = np.linalg.norm(points[:,2] - points[:,0],axis=1)
     C = np.linalg.norm(points[:,0] - points[:,1],axis=1)
     # Circumradius
-    R = np.sqrt((a*A+b*B+c*C)*(a*A+b*B-c*C)*(a*A-b*B+c*C)*(-a*A+b*B+c*C))/(24*V)
+    with np.errstate(divide='ignore', invalid='ignore'):
+        R = np.sqrt((a*A+b*B+c*C)*(a*A+b*B-c*C)*(a*A-b*B+c*C)*(-a*A+b*B+c*C))/(24*V)
 
-    Videal = 8*np.sqrt(3)/27 * R**3
-    skew = (Videal - V)/Videal
+        Videal = 8*np.sqrt(3)/27 * R**3
+        skew = (Videal - V)/Videal
     return skew
 
 def equiangular_skewness(NodeCoords,NodeConn):
