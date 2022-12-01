@@ -5,10 +5,10 @@ Created on Wed Feb 16 11:28:28 2022
 @author: toj
 """
 
-import warnings
+import warnings, itertools, copy
 from scipy import spatial
 import numpy as np
-from . import mesh, converter, MeshUtils, Octree, Rays, Improvement
+from . import mesh, converter, MeshUtils, Octree, Rays, Improvement, delaunay
 
 def MeshBooleans(Surf1, Surf2, tol=1e-8):
     """
@@ -33,18 +33,19 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
     Difference : mesh.mesh
         Mesh object containing the difference of the two input surfaces
     """    
-    
+    eps = tol/100
+    eps_final = tol*10
     # Split Mesh
-    Split1, Split2 = SplitMesh(Surf1, Surf2, eps=1e-10)
+    Split1, Split2 = SplitMesh(Surf1, Surf2, eps=eps)
 
-    Split1.cleanup(tol=1e-10,strict=True)
-    Split2.cleanup(tol=1e-10,strict=True)
+    Split1.cleanup(tol=eps,strict=True)
+    Split2.cleanup(tol=eps,strict=True)
 
     # Get Shared Nodes
     Shared1,Shared2 = GetSharedNodes(Split1.NodeCoords, Split2.NodeCoords, eps=tol)
     
     # Classify Tris
-    AinB, AoutB, AsameB, AflipB, BinA, BoutA, BsameA, BflipA = ClassifyTris(Split1, Shared1, Split2, Shared2)
+    AinB, AoutB, AsameB, AflipB, BinA, BoutA, BsameA, BflipA = ClassifyTris(Split1, Shared1, Split2, Shared2, eps=eps)
     # Perform Boolean Operations
     # Union
     AUtris = AoutB.union(AsameB)
@@ -84,9 +85,9 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
     # Intersection.NodeCoords,Intersection.NodeConn = Improvement.Split(*Intersection,1,criteria='AbsLargeAngle',iterate=1,thetal=179)
     # Difference.NodeCoords,Difference.NodeConn = Improvement.Split(*Difference,1,criteria='AbsLargeAngle',iterate=1,thetal=179)
 
-    Union.cleanup(tol=tol,angletol=5e-3)
-    Intersection.cleanup(tol=tol,angletol=5e-3)
-    Difference.cleanup(tol=tol,angletol=5e-3)
+    Union.cleanup(tol=eps_final,angletol=5e-3)
+    Intersection.cleanup(tol=eps_final,angletol=5e-3)
+    Difference.cleanup(tol=eps_final,angletol=5e-3)
 
 
     return Union, Intersection, Difference
@@ -117,18 +118,104 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
     
     Surf12 = [Surf1.copy(), Surf2.copy()]
     for i,surf in enumerate(Surf12):
+        # Group nodes for each triangle
         SurfIntersections = SurfIntersections12[i]
         ArrayCoords = np.array(surf.NodeCoords)
         SplitGroupNodes = [ArrayCoords[elem] for elem in surf.NodeConn]
         for j,elemid in enumerate(SurfIntersections):
-            SplitGroupNodes[elemid] = np.append(SplitGroupNodes[elemid], IntersectionPts[j], axis=0)
-
+            if len(IntersectionPts[j]) == 2:
+                SplitGroupNodes[elemid] = np.append(SplitGroupNodes[elemid], IntersectionPts[j], axis=0)
+            else:
+                for k in range(len(IntersectionPts[j])):
+                    SplitGroupNodes[elemid] = np.append(SplitGroupNodes[elemid], [IntersectionPts[j][k],IntersectionPts[j][(k+1)%len(IntersectionPts[j])]], axis=0)
+        
         ElemNormals = MeshUtils.CalcFaceNormal(*surf)
         for j in range(surf.NElem):
-            if i == 1 and j == 9985:
-                print('merp')
             if len(SplitGroupNodes[j]) > 3:
+                # print(j)
+                if j == 22:
+                    meep = 'morp'
                 n = ElemNormals[j]
+                # Set edge constraints
+                Constraints = np.transpose([np.arange(3,len(SplitGroupNodes[j]),2), np.arange(4,len(SplitGroupNodes[j]),2)])
+                Constraints = np.append([[0,1],[1,2],[2,0]],Constraints,axis=0)
+                boundary = SplitGroupNodes[j][:3]
+                # Reduce node list
+                SplitGroupNodes[j],_,newId,idx = MeshUtils.DeleteDuplicateNodes(SplitGroupNodes[j],[],return_idx=True,tol=eps)
+                # Tris = np.repeat([boundary],len(SplitGroupNodes[j]),axis=0)
+                # In = Rays.PointsInTris(Tris,SplitGroupNodes[j],eps=eps)
+
+                Constraints = newId[Constraints]
+                Constraints = np.unique(np.sort(Constraints,axis=1),axis=0)
+                # # Constraints = np.array([c for c in Constraints if c[0] != c[1]])
+                # bk = copy.copy(Constraints)
+                # pbk = copy.copy(SplitGroupNodes[j])
+                # # Check for intersections within the constraints
+                # combinations = np.array(list(itertools.combinations(range(len(Constraints)),2)))
+                # e1 = SplitGroupNodes[j][Constraints[combinations[:,0]]]
+                # e2 = SplitGroupNodes[j][Constraints[combinations[:,1]]]
+                # eIntersections,eIntersectionPts = Rays.SegmentsSegmentsIntersection(e1,e2,return_intersection=True,endpt_inclusive=True,eps=eps)
+                # NewConstraints = np.empty((0,2),dtype=int)
+                # for ic,c in enumerate(Constraints):
+                #     # ids of other constraints that intersect with this constraint
+                #     ids = np.unique(np.array([combo for combo in combinations[eIntersections] if ic in combo]))
+                #     # Check collinear lines - currently Rays.SegmentsSegmentsIntersection doesn't do this properly
+                #     coix = np.empty((0,3))
+                #     for combo in combinations[~eIntersections]:
+                #         if ic not in combo:
+                #             continue
+                #         segments = np.vstack(SplitGroupNodes[j][Constraints[combo]])
+                #         if np.linalg.norm(SplitGroupNodes[j][Constraints[combo[0]][0]] - 
+                #                                 SplitGroupNodes[j][Constraints[combo[0]][1]]) > eps:
+                #             check1 = np.linalg.norm(np.cross(segments[1]-segments[0], segments[2]-segments[0])) < eps
+                #             check2 = np.linalg.norm(np.cross(segments[1]-segments[0], segments[3]-segments[0])) < eps
+                #         elif np.linalg.norm(SplitGroupNodes[j][Constraints[combo[1]][0]] - 
+                #                                 SplitGroupNodes[j][Constraints[combo[1]][1]]) > eps:
+                #             check1 = np.linalg.norm(np.cross(segments[3]-segments[2], segments[0]-segments[2])) < eps
+                #             check2 = np.linalg.norm(np.cross(segments[3]-segments[2], segments[1]-segments[2])) < eps
+                #         else:
+                #             continue
+                #         if check1 and check2:
+                #             # For segments AB and CD if the (double) area of the triangles ABC and ABD are both (near) zero, the segments are collinear
+                #             # segsort = np.lexsort(segments.T) # Lexographic sort of the segments
+                #             segsort = np.lexsort((np.round(segments/eps)*eps).T) 
+                #             if (0 in segsort[:2] and 1 in segsort[:2]) or (2 in segsort[:2] and 3 in segsort[:2]):
+                #                 # if both points if a segment are on the same side of the other, they at most intersect at an endpt
+                #                 if np.linalg.norm(np.diff(segments[segsort[1:3]],axis=0)) < eps: # Norm of the difference between interior points
+                #                     # end point intersection
+                #                     coix = np.append(coix,[segments[segsort[1]]],axis=0)
+                #             else:
+                #                 # overlapping segments, get the two interior points
+                #                 coix = np.append(coix,segments[segsort[1:3]],axis=0)
+                #         elif check1:
+                #             segsort = np.lexsort(segments[[0,1,2]].T)
+                #             if segsort[1] == 2:
+                #                 coix = np.append(coix,[segments[2]],axis=0)
+                #         elif check2:
+                #             segsort = np.lexsort(segments[[0,1,3]].T)
+                #             if segsort[1] == 2:
+                #                 coix = np.append(coix,[segments[3]],axis=0)
+                                
+                #     ids = np.delete(ids,ids==ic)
+                #     if len(ids) == 0:
+                #         NewConstraints = np.append(NewConstraints,[c],axis=0)
+                #     else:
+                #         # corresponding intersection points
+                #         ixs = np.array([eIntersectionPts[eIntersections][x] for x,combo in enumerate(combinations[eIntersections]) if ic in combo])
+                #         ixs = np.append(ixs,coix,axis=0)
+                #         ixsort = ixs[np.lexsort((np.round(ixs/eps)*eps).T)]
+
+                #         NewConstraints = np.append(NewConstraints,np.vstack([np.arange(0,len(ixsort)-1),np.arange(1,len(ixsort))]).T+len(SplitGroupNodes[j]),axis=0)
+                #         SplitGroupNodes[j] = np.append(SplitGroupNodes[j],ixsort,axis=0)
+
+                # SplitGroupNodes[j], Constraints, _ = MeshUtils.DeleteDuplicateNodes(SplitGroupNodes[j],NewConstraints,tol=eps)
+                # Constraints = np.unique([c for c in Constraints if c[0] != c[1]],axis=0)
+                # SplitGroupNodes[j] = np.asarray(SplitGroupNodes[j])
+                    # import plotly.graph_objects as go
+                    # fig = go.Figure()
+                    # for i in range(len(Constraints)):
+                    #     fig.add_trace(go.Scatter(x=SplitGroupNodes[j][Constraints[i]][:,0], y=SplitGroupNodes[j][Constraints[i]][:,1],text=Constraints[i]))
+                    # fig.show()
 
                 # Transform to Local Coordinates
                 # Rotation matrix from global z (k=[0,0,1]) to local z(n)
@@ -136,7 +223,8 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
                 if n == k or n == [0,0,-1]:
                     # rotAxis = k
                     # angle = 0
-                    flatnodes = SplitGroupNodes[j][:,0:2]
+                    R = np.eye(3)
+                    flatnodes = SplitGroupNodes[j]#[:,0:2]
 
                 else:
                     kxn = np.cross(k,n)
@@ -153,9 +241,19 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
                             ]
 
                     # Delaunay Triangulation to retriangulate the split face
-                    flatnodes = np.matmul(R,np.transpose(SplitGroupNodes[j])).T[:,0:2]#.tolist()
+                    flatnodes = np.matmul(R,np.transpose(SplitGroupNodes[j])).T#[:,0:2]#.tolist()
                     
-                conn = spatial.Delaunay(flatnodes,qhull_options="Qbb Qc Qz Q12").simplices               
+                # conn = spatial.Delaunay(flatnodes,qhull_options="Qbb Qc Qz Q12").simplices   
+                ###
+                
+                
+                # coords, conn = delaunay.Triangulate(flatnodes[:,0:2],method='scipy',tol=eps)  
+                ## conn = delaunay.Triangulate(flatnodes,Constraints=idx[Constraints],method='Flips')     
+                coords, conn = delaunay.Triangulate(flatnodes[:,0:2],method='Triangle',Constraints=Constraints,tol=eps)  
+                ## coords, conn = delaunay.Triangulate(flatnodes[:,0:2],method='scipy',Constraints=None,tol=eps)        
+                ## coords,conn = delaunay.Triangle(flatnodes[:,0:2],Constraints=Constraints)
+                SplitGroupNodes[j] = np.matmul(np.linalg.inv(R),np.append(coords,flatnodes[0,2]*np.ones((len(coords),1)),axis=1).T).T
+                ###
                 flip = [np.dot(MeshUtils.CalcFaceNormal(SplitGroupNodes[j],[conn[i]]), n)[0] < 0 for i in range(len(conn))]
                 conn = (conn+surf.NNode).tolist()
                 surf.addElems([elem[::-1] if flip[i] else elem for i,elem in enumerate(conn)])
@@ -170,7 +268,7 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
         deviation = A2/EdgeLen # the double area devided by the longest side gives the deviation of the middple point from the line of the other two
         
         iset = set(SurfIntersections)
-        colset = set(np.where(deviation<eps)[0])
+        colset = set(np.where(deviation<eps/2)[0])
         surf.NodeConn = [elem for i,elem in enumerate(surf.NodeConn) if i not in iset and i not in colset]
     Split1, Split2 = Surf12
 
@@ -196,7 +294,7 @@ def GetSharedNodes(NodeCoordsA, NodeCoordsB, eps=1e-10):
     
     return SharedA, SharedB
                            
-def ClassifyTris(SplitA, SharedA, SplitB, SharedB):
+def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     # Classifies each Triangle in A as inside, outside, or on the surface facing the same or opposite direction as surface B
     
     
@@ -225,7 +323,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB):
     AllBoundaryACentroids = MeshUtils.Centroids(SplitA.NodeCoords,[elem for i,elem in enumerate(SplitA.NodeConn) if i in AllBoundaryA])
     AllBoundaryBCentroids = MeshUtils.Centroids(SplitB.NodeCoords,[elem for i,elem in enumerate(SplitB.NodeConn) if i in AllBoundaryB])
     for i,centroid in enumerate(AllBoundaryACentroids):
-        check = Rays.isInsideSurf(centroid,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,ray=ElemNormalsA[AllBoundaryA[i]]+np.random.rand(3)/1000)
+        check = Rays.isInsideSurf(centroid,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,ray=ElemNormalsA[AllBoundaryA[i]]+np.random.rand(3)/1000,eps=eps)
         if check is True:
             AinB.add(AllBoundaryA[i])
         elif check is False:
@@ -235,7 +333,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB):
         else:
             AflipB.add(AllBoundaryA[i])
     for i,centroid in enumerate(AllBoundaryBCentroids):
-        check = Rays.isInsideSurf(centroid,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,ray=ElemNormalsB[AllBoundaryB[i]]+np.random.rand(3)/1000)
+        check = Rays.isInsideSurf(centroid,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,ray=ElemNormalsB[AllBoundaryB[i]]+np.random.rand(3)/1000,eps=eps)
         if check is True:
             BinA.add(AllBoundaryB[i])
         elif check is False:
@@ -250,7 +348,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB):
         # centroid = np.mean([SplitA.NodeCoords[n] for n in SplitA.NodeConn[RegionElems[0]]], axis=0)
         # normal = ElemNormalsA[RegionElems[0]]
         pt = SplitA.NodeCoords[RegionsA[r].pop()]
-        if Rays.isInsideSurf(pt,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB):
+        if Rays.isInsideSurf(pt,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,eps=eps):
             # for e in RegionElems: AinB.add(e)
             AinB.update(RegionElems)
         else:
@@ -262,7 +360,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB):
         RegionElems = [e for e in range(len(SplitB.NodeConn)) if all([n in RegionsB[r] for n in SplitB.NodeConn[e]])] # Elem Set
         # centroid = np.mean([SplitB.NodeCoords[n] for n in SplitB.NodeConn[RegionElems[0]]], axis=0)
         pt = SplitB.NodeCoords[RegionsB[r].pop()]
-        if Rays.isInsideSurf(pt,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA):
+        if Rays.isInsideSurf(pt,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,eps=eps):
             # for e in RegionElems: BinA.add(e)
             BinA.update(RegionElems)
         else:
@@ -281,7 +379,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB):
     UnknownNodesA = set(elem for e in UnknownA for elem in SplitA.NodeConn[e]).difference(AinNodes).difference(AoutNodes).difference(SharedA)
     UnknownNodesB = set(elem for e in UnknownB for elem in SplitB.NodeConn[e]).difference(BinNodes).difference(BoutNodes).difference(SharedB)
     for node in UnknownNodesA:
-        check = Rays.isInsideSurf(SplitA.NodeCoords[node],SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,ray=SplitA.NodeNormals[node])
+        check = Rays.isInsideSurf(SplitA.NodeCoords[node],SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,ray=SplitA.NodeNormals[node],eps=eps)
         if check is True:
             AinNodes.add(node)
         elif check is False:
@@ -291,7 +389,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB):
         else:
             AflipNodes.add(node)
     for node in UnknownNodesB:
-        check = Rays.isInsideSurf(SplitB.NodeCoords[node],SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,ray=SplitB.NodeNormals[node])
+        check = Rays.isInsideSurf(SplitB.NodeCoords[node],SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,ray=SplitB.NodeNormals[node],eps=eps)
         if check is True:
             BinNodes.add(node)
         elif check is False:
@@ -324,6 +422,10 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB):
             BsameA.add(e)
         elif np.all([n in BflipNodes or n in SharedB for n in SplitB.NodeConn[e]]):
             BflipA.add(e)
+        elif np.all([n in BinNodes or n in SharedB or n in BsameNodes or n in BflipNodes for n in SplitB.NodeConn[e]]) and np.any([n in BinNodes for n in SplitB.NodeConn[e]]):
+            BinA.add(e)
+        elif np.all([n in BoutNodes or n in SharedB or n in BsameNodes or n in BflipNodes for n in SplitB.NodeConn[e]]) and np.any([n in BoutNodes for n in SplitB.NodeConn[e]]):
+            BoutA.add(e)
         else:
             ProblemsB.add(e)
     if len(ProblemsB) > 0 or len(ProblemsA) > 0:
