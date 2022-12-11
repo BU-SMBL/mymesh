@@ -69,7 +69,7 @@ def Triangulate(NodeCoords,Constraints=None,method='Flips',tol=1e-8):
         else:
             raise Exception('Invalid method.')
     else: 
-        Points,Constraints = SplitConstraints_2d(Points,Constraints,tol=tol)
+        Points,Constraints = SplitConstraints_2d(Points,Constraints)#,tol=tol)
         # Constrained Deluanay Traingulation - Sloan (1993)
         # Generate initial triangulation
         if method == 'Triangle':
@@ -206,7 +206,7 @@ def Triangulate(NodeCoords,Constraints=None,method='Flips',tol=1e-8):
     NodeCoords = Points
     return NodeCoords, NodeConn
 
-def SplitConstraints_2d(NodeCoords,Constraints,tol=1e-8):
+def SplitConstraints_2d(NodeCoords,Constraints,tol=1e-12):
     
     # import plotly.graph_objects as go
     # fig = go.Figure()
@@ -247,11 +247,12 @@ def SplitConstraints_2d(NodeCoords,Constraints,tol=1e-8):
                 continue
             v1 = segments[1]-segments[0]
             v2 = segments[3]-segments[2]
-            if np.abs(np.cross(v1/np.linalg.norm(v1),v2/np.linalg.norm(v2))) > 0.1:
-                # vectors aren't parallel (cross product of parallel vectors is [0,0,0])
-                # This is needed in addition to the previous area checks because a perpindicular segment
-                # in line with the end point of the other segment could also give area ~ 0
-                continue
+            with np.errstate(divide='ignore', invalid='ignore'):
+                if np.abs(np.cross(v1/np.linalg.norm(v1),v2/np.linalg.norm(v2))) > 0.1:
+                    # vectors aren't parallel (cross product of parallel vectors is [0,0,0])
+                    # This is needed in addition to the previous area checks because a perpindicular segment
+                    # in line with the end point of the other segment could also give area ~ 0
+                    continue
             if check1 and check2:
                 # For segments AB and CD if the (double) area of the triangles ABC and ABD are both (near) zero, the segments are collinear
                 # segsort = np.lexsort(segments.T) # Lexographic sort of the segments
