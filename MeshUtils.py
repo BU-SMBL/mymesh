@@ -316,7 +316,7 @@ def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge'):
     ElemRegions : list of sets
         Each set in the list contains a region of connected nodes.
     """
-    warnings.warn('getConnectedElements is still under development.')
+    # warnings.warn('getConnectedElements is still under development.')
     ElemRegions = []
     if not ElemNeighbors: ElemNeighbors = getElemNeighbors(NodeCoords,NodeConn,mode=mode)
     NeighborSets = [set(n) for n in ElemNeighbors]
