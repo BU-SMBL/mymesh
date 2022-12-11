@@ -930,7 +930,7 @@ class mesh:
                 
         else:
             raise Exception('Unknown method')
-    def load(self,filename,method='json'):
+    def load(self,filename,method='pickle'):
         
         if method=='pickle' or '.pickle' in filename:
             if '.pickle' not in filename: filename += '.pickle'
