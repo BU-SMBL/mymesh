@@ -133,8 +133,8 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
         for j in range(surf.NElem):
             if len(SplitGroupNodes[j]) > 3:
                 # print(j)
-                if j == 22:
-                    meep = 'morp'
+                # if j == 3595:
+                #     meep = 'morp'
                 n = ElemNormals[j]
                 # Set edge constraints
                 Constraints = np.transpose([np.arange(3,len(SplitGroupNodes[j]),2), np.arange(4,len(SplitGroupNodes[j]),2)])
