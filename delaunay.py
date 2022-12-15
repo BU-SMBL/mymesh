@@ -330,37 +330,21 @@ def Triangle(NodeCoords,Constraints=None):
     else:
         In = dict(vertices=NodeCoords,segments=Constraints)
     try:
-    	Out = triangle.triangulate(In,'pc')
-    	NodeConn = Out['triangles']
+        Out = triangle.triangulate(In,'pc')
+        NodeConn = Out['triangles']
+        # NodeCoords = Out['vertices']
+        if len(Out['vertices']) != len(NodeCoords):
+            # If constraints are improperly defined, extra points may be added, but these points most likely already exist
+            for v in range(len(NodeCoords),len(Out['vertices'])):
+                # print(v)
+                All = np.all(np.abs(Out['vertices'][v]-NodeCoords)<1e-12,axis=1)
+                if np.any(All):
+                    NodeConn[NodeConn==v] = np.where(All)[0][0]
+            if np.any(NodeConn >= len(NodeCoords)):
+                a = 2
+                NodeCoords = Out['vertices']
     except:
-	NodeConn = SciPy(NodeCoords)
-    # NodeCoords = Out['vertices']
-    if len(Out['vertices']) != len(NodeCoords):
-        # If constraints are improperly defined, extra points may be added, but these points most likely already exist
-        for v in range(len(NodeCoords),len(Out['vertices'])):
-            # print(v)
-            All = np.all(np.abs(Out['vertices'][v]-NodeCoords)<1e-12,axis=1)
-            if np.any(All):
-                NodeConn[NodeConn==v] = np.where(All)[0][0]
-        if np.any(NodeConn >= len(NodeCoords)):
-            a = 2
-            NodeCoords = Out['vertices']
-    # Edges = converter.solid2edges(NodeCoords,NodeConn)
-    # UEdges = converter.edges2unique(Edges)
-    # for constraint in Constraints:
-    #     if not (np.any(np.all(constraint == UEdges, axis=1)) or np.any(np.all(constraint[::-1] == UEdges, axis=1))):
-    #         pass
-    #         print('merp')
-            # import plotly.graph_objects as go
-            # Edges = converter.solid2edges(NodeCoords,NodeConn)
-            # UEdges = converter.edges2unique(Edges)
-            # fig = go.Figure()
-            # for i in range(len(UEdges)):
-            #     fig.add_trace(go.Scatter(x=NodeCoords[UEdges[i]][:,0], y=NodeCoords[UEdges[i]][:,1],text=UEdges[i],line=dict(dash='dash')))
-            # for i in range(len(Constraints)):
-            #     fig.add_trace(go.Scatter(x=NodeCoords[Constraints[i]][:,0], y=NodeCoords[Constraints[i]][:,1],text=Constraints[i]))
-            # fig.show()
-    #         a = 2
+        NodeConn = SciPy(NodeCoords)
 
     return NodeCoords, NodeConn
 
