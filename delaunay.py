@@ -329,8 +329,11 @@ def Triangle(NodeCoords,Constraints=None):
         In = dict(vertices=NodeCoords)
     else:
         In = dict(vertices=NodeCoords,segments=Constraints)
-    Out = triangle.triangulate(In,'pc')
-    NodeConn = Out['triangles']
+    try:
+    	Out = triangle.triangulate(In,'pc')
+    	NodeConn = Out['triangles']
+    except:
+	NodeConn = SciPy(NodeCoords)
     # NodeCoords = Out['vertices']
     if len(Out['vertices']) != len(NodeCoords):
         # If constraints are improperly defined, extra points may be added, but these points most likely already exist
