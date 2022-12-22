@@ -1,5 +1,4 @@
 # Mesh (better name TBD)
-[![Commit Count](https://img.shields.io/github/commit-activity/m/BU-SMBL/Mesh.svg)](https://github.com/BU-SMBL/Mesh)
 
 
 ## Package Overview
