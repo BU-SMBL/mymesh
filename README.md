@@ -1,5 +1,7 @@
 # Mesh (better name TBD)
- 
+[![Commit Count](https://img.shields.io/github/commit-activity/m/BU-SMBL/Mesh.svg)](https://github.com/BU-SMBL/Mesh)
+
+
 ## Package Overview
 - `mesh`: Defines the `mesh` class for holding, manipulating, and analyzing meshes
   - The `mesh` class is defined primarily by the attributes `NodeCoords` and `NodeConn` which hold the coordinates and connectivity of the mesh nodes.
