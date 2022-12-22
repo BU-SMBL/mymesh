@@ -38,11 +38,11 @@ NodeNormals = M.NodeNormals
 M.NodeData['Node Normals'] = NodeNormals
 M.write('DemoCube.vtu')
 
-``` python
+```
 
 ## Non-Object Oriented Example Useage
 
-```
+``` python
 import sys
 sys.path.append('<path to parent directory of Mesh>')
 import Mesh
