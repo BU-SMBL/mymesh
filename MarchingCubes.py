@@ -25,7 +25,7 @@ import copy, warnings
 #
 
 
-def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',pool=Parallel(n_jobs=1),method='33'):
+def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',method='33'):
 
     # method: 'original', '33'
     TriNodeCoords = []
@@ -3305,10 +3305,6 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         ]
     arrayCoords = np.array(VoxelNodeCoords)
     for e in range(len(VoxelNodeConn)):
-        if e == 8710 or e == 8711:
-            print(e)
-        else:
-            continue
         vals = np.array([NodeValues[node] for node in VoxelNodeConn[e]])
         inside = [1 if v <= 0 else 0 for v in vals]
         i = int("".join(str(j) for j in inside), 2)
@@ -3360,7 +3356,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
                     
         
         
-    TriNodeCoords,TriNodeConn,_ = MeshUtils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,pool=pool)
+    TriNodeCoords,TriNodeConn,_ = MeshUtils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn)
     if interpolation=='linear':
         TriNodeCoords,TriNodeConn = MeshUtils.DeleteDegenerateElements(TriNodeCoords,TriNodeConn)
     
@@ -3384,8 +3380,6 @@ def ParchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         Interpolation method for positioning nodes, by default 'linear'.
         - 'linear' : will perform a linear interpolation between an two grid nodes to approximate place the new node at the threshold value
         - 'midpoint' : the new node will be placed at the midpoint between two grid nodes.
-    pool : _type_, optional
-        _description_, by default Parallel(n_jobs=1)
     method : str, optional
         _description_, by default '33'
     flip : bool, optional
