@@ -1,5 +1,6 @@
 # Mesh (better name TBD)
- 
+
+
 ## Package Overview
 - `mesh`: Defines the `mesh` class for holding, manipulating, and analyzing meshes
   - The `mesh` class is defined primarily by the attributes `NodeCoords` and `NodeConn` which hold the coordinates and connectivity of the mesh nodes.
@@ -37,11 +38,11 @@ NodeNormals = M.NodeNormals
 M.NodeData['Node Normals'] = NodeNormals
 M.write('DemoCube.vtu')
 
-``` python
+```
 
 ## Non-Object Oriented Example Useage
 
-```
+``` python
 import sys
 sys.path.append('<path to parent directory of Mesh>')
 import Mesh
