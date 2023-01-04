@@ -2,7 +2,7 @@
 """
 Created on Wed Feb  2 10:45:14 2022
 
-@author: user
+@author: toj
 
 To Install tetgen with Anaconda: "conda install -c conda-forge tetgen"
 
