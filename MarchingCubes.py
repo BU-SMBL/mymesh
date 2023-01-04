@@ -6715,7 +6715,7 @@ def ParchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
                             ]
                         if np.sign(v2) == np.sign(v1):
                             print('Marching cubes fuckup')
-                            print(str(vals) + str(edgeLookup[n]) + str(v1) + '_' + str(v2))
+                            print(str(idx) + str(vals) + str(edgeLookup[n]))
                         elem.append(len(coords))
                         coords.append(newNode)
                     else:

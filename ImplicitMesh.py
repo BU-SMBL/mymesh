@@ -1455,14 +1455,15 @@ def TPMSGeometricAnalysis(func,c,L,h,verbose=True,writeVTUs=False,SurfOpt=False,
     except:
         pass
     
-    M = mesh.mesh(ScaffCoords,ScaffConn)
+    M = mesh(ScaffCoords,ScaffConn)
     M.verbose = False
     if writeVTUs: M.Mesh2Meshio().write('Scaffold.vtu')
     v = mesh2sdf(M,NodeCoords,NodeConn)
     if writeVTUs: meshio.Mesh(NodeCoords,[('hexahedron',NodeConn)],point_data={'v':NodeVals,'d':v}).write('sdf.vtu')
 
-    TPMSCoords,TPMSConn,TPMSVals = VoxelMesh(func,[bounds[0],bounds[1]+2*h],[bounds[2],bounds[3]+2*h],[bounds[4],bounds[5]+2*h],h,mode='notrim',reinitialize=False)
+    TPMSCoords,TPMSConn,TPMSVals = VoxelMesh(func,[bounds[0],bounds[1]],[bounds[2],bounds[3]],[bounds[4],bounds[5]],h,mode='notrim',reinitialize=False)
     TPMSSurfCoords,TPMSSurfConn = MarchingCubes.ParchingCubes(TPMSCoords,TPMSConn,TPMSVals,interpolation='linear',method='33',threshold=0)
+    # mesh(TPMSSurfCoords,TPMSSurfConn).write('TPMS.vtu')
     Points = np.array(TPMSSurfCoords)[np.array(TPMSSurfConn)]
     Area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2
     Atpms = sum(Area)
@@ -1475,12 +1476,12 @@ def TPMSGeometricAnalysis(func,c,L,h,verbose=True,writeVTUs=False,SurfOpt=False,
     center = np.array(NodeCoords[np.where(np.array(v) == min(v))[0][0]])
     radius = abs(min(v))
     # t = 2*radius
-    print(2*radius)
+    # print(2*radius)
     if writeVTUs: 
         sphereSDF = lambda x,y,z : sphere(x,y,z,radius,center)
         coords,conn,vals = VoxelMesh(sphereSDF,(center[0]-2*radius,center[0]+2*radius),(center[1]-2*radius,center[1]+2*radius),(center[2]-2*radius,center[2]+2*radius),radius/10,mode='notrim',reinitialize=False)
         sCoords,sConn = MarchingCubes.ParchingCubes(coords,conn,vals,interpolation='linear',method='33',threshold=0)
-        mesh.mesh(sCoords,sConn).write('Thickness_Sphere.vtu')
+        mesh(sCoords,sConn).write('Thickness_Sphere.vtu')
 
     # Pore Size:
     center = np.array(NodeCoords[np.where(np.array(v) == max(v))[0][0]])
@@ -1489,7 +1490,7 @@ def TPMSGeometricAnalysis(func,c,L,h,verbose=True,writeVTUs=False,SurfOpt=False,
         sphereSDF = lambda x,y,z : sphere(x,y,z,radius,center)
         coords,conn,vals = VoxelMesh(sphereSDF,(center[0]-2*radius,center[0]+2*radius),(center[1]-2*radius,center[1]+2*radius),(center[2]-2*radius,center[2]+2*radius),radius/10,mode='notrim',reinitialize=False)
         sCoords,sConn = MarchingCubes.ParchingCubes(coords,conn,vals,interpolation='linear',method='33',threshold=0)
-        mesh.mesh(sCoords,sConn).write('Pore_Sphere.vtu')
+        mesh(sCoords,sConn).write('Pore_Sphere.vtu')
 
     if verbose:
         print('------------------------------------------')
@@ -1498,5 +1499,7 @@ def TPMSGeometricAnalysis(func,c,L,h,verbose=True,writeVTUs=False,SurfOpt=False,
         print('Scaffold Pore Radius: {:.4f}'.format(radius))
         print('------------------------------------------')
     if return_mesh:
-        return t, rho, radius, mesh.mesh(ScaffCoords,ScaffConn)
+        return t, rho, radius, mesh(ScaffCoords,ScaffConn)
     return t, rho, radius
+
+# %%
