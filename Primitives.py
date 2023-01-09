@@ -34,9 +34,9 @@ def Box(bounds,h,meshobj=False):
     GridCoords, GridConn = Grid(bounds,h,exact_h=False)
     BoxConn = converter.quad2tri(converter.solid2surface(GridCoords,GridConn))
     BoxCoords,BoxConn,_ = converter.removeNodes(GridCoords,BoxConn)
-    Box = mesh.mesh(BoxCoords,BoxConn)
-    Box.cleanup()
     if meshobj:
+        Box = mesh(BoxCoords,BoxConn)
+        Box.cleanup()
         return Box
     return BoxCoords,BoxConn
 
@@ -68,19 +68,22 @@ def Grid(bounds, h, meshobj=False, exact_h=False):
     Grid : Mesh.mesh
         Mesh object containing the grid mesh. Returned if meshobj = True.
     """    
-
+    if type(h) is tuple or type(h) is list:
+        hx = h[0];hy = h[1]; hz = h[2]
+    else:
+        hx = h; hy = h; hz = h
     
     if exact_h:
-        xs = np.arange(bounds[0],bounds[1]+h,h)
-        ys = np.arange(bounds[2],bounds[3]+h,h)
-        zs = np.arange(bounds[4],bounds[5]+h,h)
+        xs = np.arange(bounds[0],bounds[1]+hx,hx)
+        ys = np.arange(bounds[2],bounds[3]+hy,hy)
+        zs = np.arange(bounds[4],bounds[5]+hz,hz)
         nX = len(xs)
         nY = len(ys)
         nZ = len(zs)
     else:
-        nX = int(np.round((bounds[1]-bounds[0])/h))+1
-        nY = int(np.round((bounds[3]-bounds[2])/h))+1
-        nZ = int(np.round((bounds[5]-bounds[4])/h))+1
+        nX = int(np.round((bounds[1]-bounds[0])/hx))+1
+        nY = int(np.round((bounds[3]-bounds[2])/hy))+1
+        nZ = int(np.round((bounds[5]-bounds[4])/hz))+1
         xs = np.linspace(bounds[0],bounds[1],nX)
         ys = np.linspace(bounds[2],bounds[3],nY)
         zs = np.linspace(bounds[4],bounds[5],nZ)
@@ -111,8 +114,8 @@ def Grid(bounds, h, meshobj=False, exact_h=False):
     VoxelConn[:,7] = Ids[:-1,1:,1:].flatten()
     
     if meshobj:
-        from . import mesh
-        return mesh.mesh(VoxelCoords,VoxelConn)
+        # from . import mesh
+        return mesh(VoxelCoords,VoxelConn)
     return VoxelCoords, VoxelConn
 
 def Sphere(center,radius,h):
