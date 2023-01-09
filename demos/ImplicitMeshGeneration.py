@@ -1,7 +1,7 @@
 #%% Imports:
 import sys, os
 import numpy as np
-sys.path.append('..\..')
+sys.path.append('../..')
 from Mesh import *  
 #%% Note on importing the Mesh package:
 # When working from a different directory, to import
@@ -14,7 +14,7 @@ from Mesh import *
 
 #%% Define some parameters for the structure
 L = 1 # Length scale for the TPMS periodicity
-tFactor = 1 # Thickness factor for the scaffold. Surface will be offset to +/- tFactor/2
+tFactor = 1  # Thickness factor for the scaffold. Surface will be offset to +/- tFactor/2
 bounds = [0,1,0,1,0,1] # Bounds for the structure 
 h = 0.04 # Element size
 #%% Define a function for your implicit surface, this example uses the primitive TPMS

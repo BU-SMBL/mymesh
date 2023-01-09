@@ -2,10 +2,9 @@
 """
 Created on Sat Jan 15 12:02:26 2022
 
-@author: user
+@author: toj
 """
 #%%
-from symbol import continue_stmt
 import numpy as np
 import plotly.graph_objects as go
 from plotly.offline import plot
