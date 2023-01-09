@@ -1191,8 +1191,9 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         If a str, should be the directory to an image stack of tiff or dicom files.
         If an array, shoud be a 3D array of image data.
         TODO: Dicom support not yet implemented
-    voxelsize : float
+    voxelsize : float, or tuple
         Size of voxel (based on image resolution).
+        If a tuple, should be specified as (hx,hy,hz)
     scalefactor : float, optional
         Scale factor for resampling the image. If greater than 1, there will be more than
         1 elements per voxel. If less than 1, will coarsen the image, by default 1.
@@ -1215,6 +1216,15 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         Image intensity data for each node, averaged from connected voxels.
 
     """    
+    if type(voxelsize) is list or type(voxelsize) is tuple:
+        assert len(voxelsize) == 3, 'If specified as a list or tuple, voxelsize must have a length of 3.'
+        xscale = voxelsize[0]
+        yscale = voxelsize[1]
+        zscale = voxelsize[2]
+        voxelsize = 1
+        rectangular_elements=True
+    else:
+        rectangular_elements=False
     if type(img) == list:
         img = np.array(img)
     if type(img) == np.ndarray:
@@ -1274,18 +1284,28 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         VoxelCoords, VoxelConn = Primitives.Grid(bounds, voxelsize, exact_h=True, meshobj=False)
         VoxelData = img.flatten(order='F')
     else:
-        bounds = crop
+        if rectangular_elements:
+            bounds = [crop[0]/xscale,crop[1]/xscale,
+                    crop[2]/yscale,crop[3]/yscale,
+                    crop[4]/zscale,crop[5]/zscale]
+        else:
+            bounds = crop
         VoxelCoords, VoxelConn = Primitives.Grid(bounds, voxelsize, exact_h=True, meshobj=False)
         mins = (np.min(VoxelCoords,axis=0)/voxelsize).astype(int)
         maxs = (np.max(VoxelCoords,axis=0)/voxelsize).astype(int)
         cropimg = img[mins[2]:maxs[2],mins[1]:maxs[1],mins[0]:maxs[0]]
         VoxelData = cropimg.flatten(order='F')
+    if rectangular_elements:
+        VoxelCoords[:,0] = VoxelCoords[:,0]*xscale
+        VoxelCoords[:,1] = VoxelCoords[:,1]*yscale
+        VoxelCoords[:,2] = VoxelCoords[:,2]*zscale
+        
     if threshold is not None:
         VoxelConn = VoxelConn[VoxelData>=threshold]
         VoxelData = VoxelData[VoxelData>=threshold]
         VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
     if return_nodedata:
-        _,ElemConn = MeshUtils.getNodeNeighbors(VoxelCoords,VoxelConn)
+        ElemConn = MeshUtils.getElemConnectivity(VoxelCoords,VoxelConn)
         RConn = MeshUtils.PadRagged(ElemConn)
         TempData = np.append(VoxelData,np.nan)
         NodeData = np.nanmean(TempData[RConn],axis=1)
