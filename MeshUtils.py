@@ -309,7 +309,7 @@ def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge'):
         List of neighboring elements for each element in NodeConn. The defau lt is 
         None. If no value is provided, it will be computed with getNodeNeighbors
     mode : str, optional
-        Connectivity method to be used for getElemNeighbors. The default is 'node'.
+        Connectivity method to be used for getElemNeighbors. The default is 'edge'.
 
     Returns
     -------
