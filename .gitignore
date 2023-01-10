@@ -2,6 +2,7 @@
 .vscode/
 .pylint.d/
 __pychace__/
+*.vtu
 Usurped/
 docs/source/modules.rst
 docs/make.bat
