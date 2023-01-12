@@ -664,7 +664,8 @@ class mesh:
         RelevantCoords,RelevantConn,NodeIds = converter.removeNodes(self.NodeCoords,RelevantElems) 
 
         # TetConn = converter.solid2tets(RelevantCoords,RelevantConn)
-        RelevantNodeNeighbors,RelevantElemConn = MeshUtils.getNodeNeighbors(RelevantCoords,RelevantConn)
+        RelevantNodeNeighbors = MeshUtils.getNodeNeighbors(RelevantCoords,RelevantConn)
+        RelevantElemConn = MeshUtils.getElemConnectivity(RelevantCoords,RelevantConn)
         RelevantForces = np.asarray(Forces)[NodeIds]
         RelevantFixed = Fixed[NodeIds]
         RelevantFixedNodes = set(np.where(RelevantFixed)[0])
@@ -758,7 +759,7 @@ class mesh:
         
 
         # Reduce or remove degenerate wedges -- TODO: This can probably be made more efficient
-        self.cleanup()
+        # self.cleanup()
         Unq = [np.unique(elem,return_index=True,return_inverse=True) for elem in self.NodeConn]
         key = MeshUtils.PadRagged([u[1][u[2]] for u in Unq],fillval=-1)
 

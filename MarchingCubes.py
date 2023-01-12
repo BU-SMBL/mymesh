@@ -3390,6 +3390,10 @@ def ParchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
     # method: 'original', '33'
     TriNodeCoords = []
     TriNodeConn = []
+    if len(VoxelNodeCoords) == 0 or len(VoxelNodeConn) == 0:
+        warnings.warn('Empty mesh given to ParchingCubes')
+        return TriNodeCoords, TriNodeConn
+        
     NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
     if flip:
         NodeValues = -1*NodeValues

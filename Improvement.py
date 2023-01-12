@@ -297,7 +297,7 @@ def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
     if len(ProblemNodes) == 0:
         warnings.warn('Fixed nodes prevent any repositioning.')
         return NodeCoords
-    _,ElemConn = MeshUtils.getNodeNeighbors(NodeCoords, NodeConn)
+    ElemConn = MeshUtils.getElemConnectivity(NodeCoords, NodeConn)
     NeighborhoodElems = np.unique([e for i in ProblemNodes for e in ElemConn[i]])
     NeighborhoodConn = [NodeConn[i] for i in NeighborhoodElems]
 
@@ -463,7 +463,7 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
         Faces = converter.faces2unique(faces)
         fcentroids = MeshUtils.Centroids(NodeCoords,Faces)
         fcentroids = np.append(fcentroids,[[np.nan,np.nan,np.nan]],axis=0)
-        _,FConn = MeshUtils.getNodeNeighbors(NodeCoords,Faces)
+        FConn = MeshUtils.getElemConnectivity(NodeCoords,Faces)
         RFConn = MeshUtils.PadRagged(FConn)
         FConnCentroids = fcentroids[RFConn]
         FConnCenterDist = np.sqrt((NodeCoords[:,0,None]-FConnCentroids[:,:,0])**2 + (NodeCoords[:,1,None]-FConnCentroids[:,:,1])**2 + (NodeCoords[:,2,None]-FConnCentroids[:,:,2])**2)
