@@ -82,7 +82,8 @@ def RayBoxIntersection(pt, ray, xlim, ylim, zlim):
         tmin = (xlim[1] - pt[0]) * divx
         tmax = (xlim[0] - pt[0]) * divx
     else:
-        tmin = tmax = np.inf
+        tmin = np.sign(xlim[0] - pt[0])*np.inf
+        tmax = np.sign(xlim[1] - pt[0])*np.inf
     
     
     if ray[1] > 0:
@@ -94,7 +95,8 @@ def RayBoxIntersection(pt, ray, xlim, ylim, zlim):
         tymin = (ylim[1] - pt[1]) * divy
         tymax = (ylim[0] - pt[1]) * divy
     else:
-        tymin = tymax = np.inf
+        tymin = np.sign(ylim[0] - pt[1])*np.inf
+        tymax = np.sign(ylim[1] - pt[1])*np.inf
     
     if (tmin > tymax) or (tymin > tmax):
         return False
@@ -113,7 +115,9 @@ def RayBoxIntersection(pt, ray, xlim, ylim, zlim):
         tzmin = (zlim[1] - pt[2]) * divz
         tzmax = (zlim[0] - pt[2]) * divz
     else:
-        tzmin = tzmax = np.inf
+        tzmin = np.sign(zlim[0] - pt[2])*np.inf
+        tzmax = np.sign(zlim[1] - pt[2])*np.inf
+        
         
     if (tmin > tzmax) or (tzmin > tmax):
         return False

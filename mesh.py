@@ -1007,9 +1007,13 @@ class mesh:
         m = self.Mesh2Meshio()
         m.write(filename)
     def Meshio2Mesh(m):
-
+        
+        if int(meshio.__version__.split('.')[0]) >= 5 and int(meshio.__version__.split('.')[1]) >= 2:
+            NodeConn = [elem for cells in m.cells for elem in cells.data.tolist()]
+        else:
+            # Support for older meshio version
+            NodeConn = [elem for cells in m.cells for elem in cells[1].tolist()]
         NodeCoords = m.points.tolist()
-        NodeConn = [elem for cells in m.cells for elem in cells[1].tolist()]
         M = mesh(NodeCoords,NodeConn)
         if len(m.point_data) > 0 :
             for key in m.point_data.keys():
@@ -1019,6 +1023,7 @@ class mesh:
                 M.ElemData[key] = [data for celldata in m.cell_data[key] for data in celldata]
 
         return M
+    
     def read(file):
         """
         read read a mesh file written in any file type supported by meshio

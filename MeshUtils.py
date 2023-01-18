@@ -983,35 +983,35 @@ octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False
 
     """
     
-    if type(NodeVals1[0]) == list:
-        singleVal = False
-        NodeVals2 = [[0 for j in range(len(NodeCoords2))] for i in range(len(NodeVals1))]
-    else:
-        singleVal = True
-        NodeVals2 = [0 for i in range(len(NodeCoords2))]
+    # if type(NodeVals1[0]) is list or type(NodeVals1[0]) is np.ndarray:
+    #     singleVal = False
+    #     # NodeVals2 = [[0 for j in range(len(NodeCoords2))] for i in range(len(NodeVals1))]
+    # else:
+    #     singleVal = True
+        # NodeVals2 = [0 for i in range(len(NodeCoords2))]
     # Map the coordinates from surface 2 to surface 1
     if MappingMatrix is None:
         MappingMatrix,octree = SurfMapping(NodeCoords2, SurfConn2,  NodeCoords1, SurfConn1, octree=octree, tol=tol, verbose=verbose, return_octree=True)
 
-    if singleVal:
-        if len(np.shape(NodeVals1)) == 1:
-            # 1D data
-            _NodeVals1 = np.append(NodeVals1, np.nan)
-            alpha = MappingMatrix[:,1]
-            beta = MappingMatrix[:,2]
-            gamma = MappingMatrix[:,3]
-        else:
-            # ND data
-            _NodeVals1 = np.append(NodeVals1,[np.repeat(np.nan,np.shape(NodeVals1)[1])],axis=0)
-            alpha = MappingMatrix[:,1][:,None]
-            beta = MappingMatrix[:,2][:,None]
-            gamma = MappingMatrix[:,3][:,None]
-        NodeVals2 = np.nan*np.ones(np.shape(NodeVals1))
-        elemID = MappingMatrix[:,0].astype(int)
-        ArrayConn = np.append(SurfConn1,[[-1,-1,-1]],axis=0)
-        NodeVals2 = alpha*_NodeVals1[ArrayConn[elemID][:,0]] + \
-                beta*_NodeVals1[ArrayConn[elemID][:,1]] + \
-                gamma*_NodeVals1[ArrayConn[elemID][:,2]]
+    # if singleVal:
+    if len(np.shape(NodeVals1)) == 1:
+        # 1D data
+        _NodeVals1 = np.append(NodeVals1, np.nan)
+        alpha = MappingMatrix[:,1]
+        beta = MappingMatrix[:,2]
+        gamma = MappingMatrix[:,3]
+    else:
+        # ND data
+        _NodeVals1 = np.append(NodeVals1,[np.repeat(np.nan,np.shape(NodeVals1)[1])],axis=0)
+        alpha = MappingMatrix[:,1][:,None]
+        beta = MappingMatrix[:,2][:,None]
+        gamma = MappingMatrix[:,3][:,None]
+    NodeVals2 = np.nan*np.ones(np.shape(NodeVals1))
+    elemID = MappingMatrix[:,0].astype(int)
+    ArrayConn = np.append(SurfConn1,[[-1,-1,-1]],axis=0)
+    NodeVals2 = alpha*_NodeVals1[ArrayConn[elemID][:,0]] + \
+            beta*_NodeVals1[ArrayConn[elemID][:,1]] + \
+            gamma*_NodeVals1[ArrayConn[elemID][:,2]]
         
             
     if return_MappingMatrix and return_octree:
