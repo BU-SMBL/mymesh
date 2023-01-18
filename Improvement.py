@@ -480,11 +480,9 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
     Kcols_off = RNeighbors[UnfixedNodes].flatten()[flattemplate]
     Kvals_off = -k[UnfixedNodes].flatten()[flattemplate]
     
-
     Krows = np.concatenate((Krows_diag,Krows_off))
     Kcols = np.concatenate((Kcols_diag,Kcols_off))
     Kvals = np.concatenate((Kvals_diag,Kvals_off))
-
 
     if CellCentered:
         RNodeConn = MeshUtils.PadRagged(NodeConn+[[-1,-1,-1]],fillval=-1)
@@ -500,8 +498,6 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
         Kcols = np.concatenate((Kcols,Kcols_Ccentered))
         Kvals = np.concatenate((Kvals,Kvals_Ccentered))
 
-
-    
     if FaceCentered:
         RFaces = MeshUtils.PadRagged(Faces+[[-1,-1,-1]],fillval=-1)
         pretemplate = RFaces[RFConn]
@@ -516,15 +512,12 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
         Kcols = np.concatenate((Kcols,Kcols_Fcentered))
         Kvals = np.concatenate((Kvals,Kvals_Fcentered))
 
-        
-    
-
     K = sparse.coo_matrix((Kvals,(Krows,Kcols)))
     F = sparse.csc_matrix(Forces)
     dXnew = spsolve(K.tocsc(), F).toarray()
-
     
     Xnew = np.array(NodeCoords) + dXnew
+    Xnew[list(FixedNodes)] = np.array(NodeCoords)[list(FixedNodes)] # Enforce fixed nodes
     if return_KF:
         return Xnew.tolist(), dXnew.tolist(), (K,F)
     return Xnew.tolist(), dXnew.tolist()
