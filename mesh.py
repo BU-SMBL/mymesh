@@ -713,10 +713,8 @@ class mesh:
             NewRelevantCoords = np.add(RelevantCoords, U2)
 
         NewCoords[NodeIds] = NewRelevantCoords
-
+        NewCoords[list(FixedNodes)] = np.array(self.NodeCoords)[list(FixedNodes)]
         # Collapse transition elements
-
-
 
         if OptimizeTets:
             Tets = [elem for elem in self.NodeConn if len(elem)==4]
@@ -760,6 +758,7 @@ class mesh:
 
         # Reduce or remove degenerate wedges -- TODO: This can probably be made more efficient
         # self.cleanup()
+        self.NodeCoords,self.NodeConn,_ = MeshUtils.DeleteDuplicateNodes(self.NodeCoords,self.NodeConn)
         Unq = [np.unique(elem,return_index=True,return_inverse=True) for elem in self.NodeConn]
         key = MeshUtils.PadRagged([u[1][u[2]] for u in Unq],fillval=-1)
 
@@ -812,7 +811,7 @@ class mesh:
         # NewRelevantCoords = NewCoords[NodeIds]
         V = Quality.Volume(*self)
         if min(V) < 0:
-            print(sum(V<0))
+            # print(sum(V<0))
             # BLConn = [elem for elem in self.NodeConn if len(elem) == 6]
             # self.NodeCoords = Improvement.FixInversions(self.NodeCoords,BLConn,FixedNodes=np.unique(converter.solid2surface(self.NodeCoords,self.NodeConn)))
             BadElems = set(np.where(V<0)[0])
