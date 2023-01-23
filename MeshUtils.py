@@ -1006,7 +1006,7 @@ octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False
         alpha = MappingMatrix[:,1][:,None]
         beta = MappingMatrix[:,2][:,None]
         gamma = MappingMatrix[:,3][:,None]
-    NodeVals2 = np.nan*np.ones(np.shape(NodeVals1))
+    # NodeVals2 = np.nan*np.ones(np.shape(NodeVals1))
     elemID = MappingMatrix[:,0].astype(int)
     ArrayConn = np.append(SurfConn1,[[-1,-1,-1]],axis=0)
     NodeVals2 = alpha*_NodeVals1[ArrayConn[elemID][:,0]] + \
@@ -1605,7 +1605,7 @@ def PadRagged(In,fillval=-1):
     Out = np.array(list(itertools.zip_longest(*In,fillvalue=fillval))).T
     return Out
 
-def ExtractRagged(In,delval=-1,dtype=None):
+def ExtractRagged_old(In,delval=-1,dtype=None):
     """
     ExtractRagged Extracts a list of list from a 2d numpy array, removing the 
     specified value, generally creating a ragged array unless there is no padding
@@ -1632,6 +1632,24 @@ def ExtractRagged(In,delval=-1,dtype=None):
     if np.any(delval == In):
         if len(In.shape) == 2:
             Out = [[x for x in y if x != delval] for y in In]
+        elif len(In.shape) == 3:
+            Out = [[[x for x in y if x != delval] for y in z if all([x!= delval for x in y])] for z in In]
+        else:
+            raise Exception('Currently only supported for 2- or 3D matrices')
+    else:
+        Out = In.tolist()
+    return Out
+
+def ExtractRagged(In,delval=-1,dtype=None):
+    if dtype:
+        if type(In) is list: In = np.array(In)
+        In = In.astype(dtype)
+        delval = np.array([delval]).astype(dtype)[0]
+    where = In != delval
+    if not np.all(where):
+        if len(In.shape) == 2:
+            Out = np.split(In[where],np.cumsum(np.sum(where,axis=1)))[:-1]
+            # Out = [x.tolist() for x in Out]
         elif len(In.shape) == 3:
             Out = [[[x for x in y if x != delval] for y in z if all([x!= delval for x in y])] for z in In]
         else:
