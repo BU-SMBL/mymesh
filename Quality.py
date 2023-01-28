@@ -481,6 +481,12 @@ def equiangular_skewness(NodeCoords,NodeConn):
 
     return skew
 
+def Area(NodeCoords,NodeConn):
+    # Currently only for triangular meshes
+    Points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
+    Area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2 
+    return Area
+
 def Volume(NodeCoords,NodeConn,verbose=False):
     """
     Volme Calculates element volumes for each element in the mesh.
