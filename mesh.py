@@ -161,6 +161,8 @@ class mesh:
     def addNodes(self,NewNodeCoords,NodeSet=None):
         if type(NewNodeCoords) is np.ndarray:
             NewNodeCoords = NewNodeCoords.tolist()
+        if type(self.NodeCoords) is np.ndarray:
+            self.NodeCoords = self.NodeCoords.tolist()
         assert type(NewNodeCoords) is list, 'Supplied NodeCoords must be list or np.ndarray'
         
         nnode = self.NNode
@@ -192,6 +194,8 @@ class mesh:
     def addElems(self,NewNodeConn,ElemSet=None):
         if type(NewNodeConn) is np.ndarray:
             NewNodeConn = NewNodeConn.tolist()
+        if type(self.NodeConn) is np.ndarray:
+            self.NodeConn = self.NodeConn.tolist()
         assert type(NewNodeConn) is list, 'Supplied NodeConn must be list or np.ndarray'
         nelem = self.NElem
         self.NodeConn += NewNodeConn
@@ -243,8 +247,8 @@ class mesh:
             # Original Stats
             NNode = self.NNode
             NElem = self.NElem
-            NFace = self.NFace
-            NEdge = self.NEdge
+            NFace = self._NFace
+            NEdge = self._NEdge
             
             # Add Nodes
             if len(M.NodeSets) > 1:
