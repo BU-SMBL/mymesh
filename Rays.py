@@ -10,9 +10,9 @@ import numpy as np
 import itertools, random, sys
 
 ## Intersection Tests:
-def RayTriangleIntersection(pt, ray, TriCoords, bidirectional=False):
+def RayTriangleIntersection(pt, ray, TriCoords, bidirectional=False, eps=1e-6):
     # Möller-Trumbore Intersection Algorithm
-    eps = 0.000001
+    # eps = 0.000001
     edge1 = np.subtract(TriCoords[1],TriCoords[0])
     edge2 = np.subtract(TriCoords[2], TriCoords[0])
     
@@ -32,7 +32,7 @@ def RayTriangleIntersection(pt, ray, TriCoords, bidirectional=False):
         return []
     
     t = np.dot(edge2, q) * invdet
-    if (abs(t) > eps) or bidirectional:
+    if (t > eps) or bidirectional:
         intersectionPt = np.array(pt) + np.array(ray)*t
     else:
         return []
