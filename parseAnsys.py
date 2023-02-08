@@ -6,8 +6,12 @@ Created on Wed Oct 20 12:54:44 2021
 """
 import pandas as pd
 import numpy as np
-import os, time, sys, h5py, csv
+import os, time, sys, csv
 from . import mesh, MeshUtils
+try:
+    import h5py
+except:
+    warnings.warn('Optional dependencies not found - some functions may not work properly')
 
 def parseMechanicalResultTxt(resultTxt):
     # To export data from Ansys mechanical, from mechanical, do 

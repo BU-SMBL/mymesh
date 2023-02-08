@@ -6,13 +6,17 @@ Created on Sat Jan 15 12:02:26 2022
 """
 #%%
 import numpy as np
-import plotly.graph_objects as go
-from plotly.offline import plot
 import sys, copy, itertools
 from . import *
 from . import MeshUtils, Rays, converter
 from scipy import spatial
-import triangle # pip install triangle
+
+try:
+    import triangle # pip install triangle
+    from plotly.offline import plot
+    import plotly.graph_objects as go
+except:
+    warnings.warn('Optional dependencies not found - some functions may not work properly')
 
 def Triangulate(NodeCoords,Constraints=None,method='Flips',tol=1e-8):
     """

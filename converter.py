@@ -8,10 +8,14 @@ Created on Sun Aug  1 17:48:50 2021
 import numpy as np
 import pandas as pd
 from scipy import ndimage
-import sys, os, warnings, glob, gc, tempfile, h5py, tqdm
-import cv2, pydicom
+import sys, os, warnings, glob, gc, tempfile
 from . import MeshUtils, Rays, Primitives
-from joblib import Parallel, delayed
+try:
+    import h5py, tqdm
+    import cv2, pydicom
+    from joblib import Parallel, delayed
+except:
+    warnings.warn('Optional dependencies not found - some functions may not work properly')
 
 def solid2surface(NodeCoords,NodeConn):
     """

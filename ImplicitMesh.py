@@ -7,17 +7,21 @@ Created on Fri Jan 14 17:43:57 2022
 
 # %%
 
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.offline import plot
 import numpy as np
 from scipy.spatial import distance
 from scipy import optimize, interpolate
 import sys, os, time, copy, warnings, bisect
 import meshio
 from joblib import Parallel, delayed
-from sklearn.neighbors import KDTree
 from . import MeshUtils, converter, MarchingCubes, Quality, Improvement, TetGen, Rays, Octree, mesh, Primitives
+
+try:
+    from sklearn.neighbors import KDTree
+    import plotly.express as px
+    import plotly.graph_objects as go
+    from plotly.offline import plot
+except:
+    warnings.warn('Optional dependencies not found - some functions may not work properly')
 
 
 # SDF Primitives

@@ -5,9 +5,13 @@ Created on Sun Jan 23 23:58:18 2022
 @author: toj
 """
 import numpy as np
-from joblib import Parallel, delayed
+
 import sys, copy
 from . import MeshUtils, converter
+try:
+    from joblib import Parallel, delayed
+except:
+    warnings.warn('Optional dependencies not found - some functions may not work properly')
 
 # Finite element modeling mesh quality, energy balance and validation methods: A review with recommendations associated with the modeling of bone tissue - Burkhart et al.
 

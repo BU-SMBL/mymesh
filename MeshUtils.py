@@ -6,9 +6,12 @@ Created on Wed Sep 29 18:31:03 2021
 """
 
 import numpy as np
-from joblib import Parallel, delayed
 import sys, warnings, copy, time, itertools
 from . import converter, Rays, Octree, Improvement, Quality
+try:
+    from joblib import Parallel, delayed
+except:
+    warnings.warn('Optional dependencies not found - some functions may not work properly')
 
 def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     """

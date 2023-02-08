@@ -8,10 +8,14 @@ Created on Wed Jan 26 09:27:53 2022
 import numpy as np
 import sys, warnings, time, random, copy
 from . import converter, MeshUtils, Quality, Rays, Octree
-from joblib import Parallel, delayed
 from scipy import sparse, spatial
 from scipy.sparse.linalg import spsolve
 from scipy.optimize import minimize
+try:
+    from joblib import Parallel, delayed
+except:
+    warnings.warn('Optional dependencies not found - some functions may not work properly')
+
 
 def CollapseSlivers_old(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=[], verbose=False, pool=Parallel(n_jobs=1)):
     
