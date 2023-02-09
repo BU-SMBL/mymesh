@@ -1024,6 +1024,8 @@ class mesh:
         if len(m.cell_data) > 0:
             for key in m.cell_data.keys():
                 M.ElemData[key] = [data for celldata in m.cell_data[key] for data in celldata]
+        M.NodeSets = m.point_sets
+        M.ElemSets = m.elem_sets    # TODO: This might not be right
 
         return M
     
