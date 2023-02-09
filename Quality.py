@@ -6,7 +6,7 @@ Created on Sun Jan 23 23:58:18 2022
 """
 import numpy as np
 
-import sys, copy
+import sys, copy, warnings
 from . import MeshUtils, converter
 try:
     from joblib import Parallel, delayed

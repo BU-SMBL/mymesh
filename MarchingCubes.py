@@ -8,9 +8,13 @@ Created on Sat Jan 22 09:18:20 2022
 import time
 import sys
 from . import MeshUtils
-from joblib import Parallel, delayed
 import numpy as np
 import copy, warnings
+try:
+    from joblib import Parallel, delayed
+except:
+    warnings.warn('Optional dependencies not found - some functions may not work properly')
+
 
 #      7_______6              *__10___*
 #     /|      /|             /|      /|

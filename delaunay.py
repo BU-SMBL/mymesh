@@ -6,7 +6,7 @@ Created on Sat Jan 15 12:02:26 2022
 """
 #%%
 import numpy as np
-import sys, copy, itertools
+import sys, copy, itertools, warnings
 from . import *
 from . import MeshUtils, Rays, converter
 from scipy import spatial

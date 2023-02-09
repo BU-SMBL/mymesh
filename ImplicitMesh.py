@@ -12,8 +12,13 @@ from scipy.spatial import distance
 from scipy import optimize, interpolate
 import sys, os, time, copy, warnings, bisect
 import meshio
-from joblib import Parallel, delayed
+
 from . import MeshUtils, converter, MarchingCubes, Quality, Improvement, TetGen, Rays, Octree, mesh, Primitives
+
+try:
+    from joblib import Parallel, delayed
+except:
+    warnings.warn('Optional dependencies not found - some functions may not work properly')
 
 try:
     from sklearn.neighbors import KDTree
@@ -1463,7 +1468,7 @@ def TPMSGeometricAnalysis(func,c,L,h,verbose=True,writeVTUs=False,SurfOpt=False,
     M.verbose = False
     if writeVTUs: M.Mesh2Meshio().write('Scaffold.vtu')
     v = mesh2sdf(M,NodeCoords,NodeConn)
-    if writeVTUs: meshio.Mesh(NodeCoords,[('hexahedron',NodeConn)],point_data={'v':NodeVals,'d':v}).write('sdf.vtu')
+    # if writeVTUs: meshio.Mesh(NodeCoords,[('hexahedron',NodeConn)],point_data={'v':NodeVals,'d':v}).write('sdf.vtu')
 
     TPMSCoords,TPMSConn,TPMSVals = VoxelMesh(func,[bounds[0],bounds[1]],[bounds[2],bounds[3]],[bounds[4],bounds[5]],h,mode='notrim',reinitialize=False)
     TPMSSurfCoords,TPMSSurfConn = MarchingCubes.ParchingCubes(TPMSCoords,TPMSConn,TPMSVals,interpolation='linear',method='33',threshold=0)
