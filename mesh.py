@@ -965,7 +965,7 @@ class mesh:
         if len(self.ElemData) > 0:
             keys = self.ElemData.keys()
             for key in keys:
-                celldata = [[],[],[],[],[]]
+                celldata = [[],[],[],[],[],[]]
                 if self.nD == 3:
                     for i,elem in enumerate(self.NodeConn):
                         n = len(elem)
@@ -979,6 +979,8 @@ class mesh:
                             if len(self.ElemData) > 0: celldata[3].append(self.ElemData[key][i])
                         elif n == 8:
                             if len(self.ElemData) > 0: celldata[4].append(self.ElemData[key][i])
+                        elif n == 10:
+                            if len(self.ElemData) > 0: celldata[5].append(self.ElemData[key][i])
                 celldata = [c for c in celldata if len(c) > 0]
                 celldict[key] = celldata
         tris = []   # n = 3            
@@ -986,6 +988,7 @@ class mesh:
         pyrs = []   # n = 5
         wdgs = []   # n = 6
         hexs = []   # n = 8
+        tet10 = []   # n = 10
         for i,elem in enumerate(self.NodeConn):
             n = len(elem)
             if n == 3:
@@ -998,8 +1001,10 @@ class mesh:
                 wdgs.append(elem)
             elif n == 8:
                 hexs.append(elem)
+            elif n == 10:
+                tet10.append(elem)
         
-        elems = [e for e in [('triangle',tris),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs)] if len(e[1]) > 0]
+        elems = [e for e in [('triangle',tris),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10)] if len(e[1]) > 0]
         m = meshio.Mesh(points, elems, point_data=self.NodeData, cell_data=celldict)
         return m
 
