@@ -1008,12 +1008,15 @@ class mesh:
         m = meshio.Mesh(points, elems, point_data=self.NodeData, cell_data=celldict)
         return m
 
-    def write(self,filename):
+    def write(self,filename,binary=None):
         if self.NNode == 0:
             warnings.warn('Mesh empty - file not written.')
             return
         m = self.Mesh2Meshio()
-        m.write(filename)
+        if binary is not None:
+            m.write(filename,binary=binary)
+        else:
+            m.write(filename)
     def Meshio2Mesh(m):
         
         if int(meshio.__version__.split('.')[0]) >= 5 and int(meshio.__version__.split('.')[1]) >= 2:
