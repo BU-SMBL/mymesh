@@ -484,7 +484,12 @@ class mesh:
         
         self.reset(keep=['Faces','FaceElemConn','FaceConn'])
     def RenumberFacesBySet(self):
-        setkeys = self.FaceSets.keys()
+        setkeys = list(self.FaceSets.keys())
+        
+        if any([len(set(self.FaceSets[key1]).intersection(self.FaceSets[key2]))>0 for i,key1 in enumerate(setkeys) for key2 in setkeys[i+1:]]):
+            raise Exception('There must be no overlap between FaceSets')
+        
+        
         # newIds is a list of face ids where the new index is located at the old index
         newIds = np.repeat(np.nan,len(self.Faces))
         end = 0
