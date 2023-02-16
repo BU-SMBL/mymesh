@@ -1236,7 +1236,9 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
     elif type(img) == str:
         path = img
         tiffs = glob.glob(os.path.join(path,'*.tiff'))
+        tiffs.sort()
         dicoms = glob.glob(os.path.join(path,'*.dcm'))
+        dicoms.sort()
         if len(tiffs) > 0 & len(dicoms) > 0:
             warnings.warn('Image directory: "{:s}" contains both .tiff and .dcm files - only loading dcm files.')
             files = dicoms
