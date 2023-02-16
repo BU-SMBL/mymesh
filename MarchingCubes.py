@@ -29,14 +29,15 @@ except:
 #
 
 
-def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',method='33'):
+def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',method='33',flip=False):
 # TODO: add option to invert (-NodeValues, -threshold)
     # method: 'original', '33'
     TriNodeCoords = []
     TriNodeConn = []
     
     NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
-    
+    if flip:
+        NodeValues = -1*NodeValues
     if method == '33':
         MarchingCubes33Lookup.LookupTable = [[[[]]],
             [[[7, 10, 11]]],
