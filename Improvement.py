@@ -656,7 +656,7 @@ def GlobalLaplacianSmoothing(NodeCoords,NodeConn,FeatureNodes=[],FixedNodes=set(
     # smoothing approach with feature preservation. In Ninth International 
     # Conference on Computer Aided Design and Computer Graphics
     
-    NodeNeighbors,ElemConn = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
+    NodeNeighbors = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
     
     NNode = len(NodeCoords)
     NFeature = len(FeatureNodes)
@@ -1363,12 +1363,15 @@ def TetOpt(NodeCoords, NodeConn, ElemConn=None, objective='eta', method='BFGS', 
         # Escobar, et al. 2003. “Simultaneous untangling and smoothing of tetrahedral meshes.”
         Points = ArrayCoords[LocalConn]
         x = Points[:,:,0]; y = Points[:,:,1]; z = Points[:,:,2]
-
-        A = np.swapaxes(np.swapaxes(np.array([
-            [x[:,1]-x[:,0], x[:,2]-x[:,0], x[:,3]-x[:,0]],
-            [y[:,1]-y[:,0], y[:,2]-y[:,0], y[:,3]-y[:,0]],
-            [z[:,1]-z[:,0], z[:,2]-z[:,0], z[:,3]-z[:,0]],
-            ]),0,2),1,2)
+        # A = np.swapaxes(np.swapaxes(np.array([
+        #     [x[:,1]-x[:,0], x[:,2]-x[:,0], x[:,3]-x[:,0]],
+        #     [y[:,1]-y[:,0], y[:,2]-y[:,0], y[:,3]-y[:,0]],
+        #     [z[:,1]-z[:,0], z[:,2]-z[:,0], z[:,3]-z[:,0]],
+        #     ]),0,2),1,2)
+        A = np.zeros((len(LocalConn),3,3))
+        A[:,0,:] = x[:,1:4]-x[:,0,None]
+        A[:,1,:] = y[:,1:4]-y[:,0,None]
+        A[:,2,:] = z[:,1:4]-z[:,0,None]
 
         # Affine map that takes an equilateral tetrahedron Ti(v0,v1,v2,v3) to a given 
         # tetrahedron T(x0,x1,x2,x3) is: x=Aw^-v1+x0. It's jacobian is S=AW^-1
@@ -1389,15 +1392,43 @@ def TetOpt(NodeCoords, NodeConn, ElemConn=None, objective='eta', method='BFGS', 
         else:
             raise Exception('Invalid var.')
 
-        dA = np.swapaxes(np.swapaxes(np.array([
-            [x[:,1]-x[:,0], x[:,2]-x[:,0], x[:,3]-x[:,0]],
-            [y[:,1]-y[:,0], y[:,2]-y[:,0], y[:,3]-y[:,0]],
-            [z[:,1]-z[:,0], z[:,2]-z[:,0], z[:,3]-z[:,0]],
-            ]),0,2),1,2)
+        # dA = np.swapaxes(np.swapaxes(np.array([
+        #     [x[:,1]-x[:,0], x[:,2]-x[:,0], x[:,3]-x[:,0]],
+        #     [y[:,1]-y[:,0], y[:,2]-y[:,0], y[:,3]-y[:,0]],
+        #     [z[:,1]-z[:,0], z[:,2]-z[:,0], z[:,3]-z[:,0]],
+        #     ]),0,2),1,2)
+        dA = np.swapaxes(np.array([
+            [x[:,1]-x[:,0], y[:,1]-y[:,0], z[:,1]-z[:,0]],
+            [x[:,2]-x[:,0], y[:,2]-y[:,0], z[:,2]-z[:,0]],
+            [x[:,3]-x[:,0], y[:,3]-y[:,0], z[:,3]-z[:,0]],
+            ]),0,2)
         
         dS = np.matmul(dA,Winv)
         return dS
-
+    def dS_x(i,LocalConn):
+        x = (LocalConn == i).astype(int)
+        dA = np.zeros((LocalConn.shape[0],3,3))
+        dA[:,0,0] = x[:,1]-x[:,0]
+        dA[:,0,1] = x[:,2]-x[:,0]
+        dA[:,0,2] = x[:,3]-x[:,0]
+        dS = np.matmul(dA,Winv)
+        return dS
+    def dS_y(i,LocalConn):
+        y = (LocalConn == i).astype(int)
+        dA = np.zeros((LocalConn.shape[0],3,3))
+        dA[:,1,0] = y[:,1]-y[:,0]
+        dA[:,1,1] = y[:,2]-y[:,0]
+        dA[:,1,2] = y[:,3]-y[:,0]
+        dS = np.matmul(dA,Winv)
+        return dS
+    def dS_z(i,LocalConn):
+        z = (LocalConn == i).astype(int)
+        dA = np.zeros((LocalConn.shape[0],3,3))
+        dA[:,2,0] = z[:,1]-z[:,0]
+        dA[:,2,1] = z[:,2]-z[:,0]
+        dA[:,2,2] = z[:,3]-z[:,0]
+        dS = np.matmul(dA,Winv)
+        return dS
     
     if objective == 'eta':
         def eta(x,i,LocalConn):
@@ -1405,24 +1436,26 @@ def TetOpt(NodeCoords, NodeConn, ElemConn=None, objective='eta', method='BFGS', 
             ArrayCoords[i] = x
             S = tet_jacobians(ArrayCoords,LocalConn)
             sigma = np.linalg.det(S)
-            if min(sigma) >= eps:
+            min_sigma = np.min(sigma)
+            if min_sigma >= eps:
                 delta = 0
                 h = sigma
             else:
-                delta = np.sqrt(eps*(eps-min(sigma)))
+                delta = np.sqrt(eps*(eps-min_sigma))
                 h = 1/2 * (sigma + np.sqrt(sigma**2 + 4*delta**2))
             e = np.linalg.norm(S,'fro',axis=(1,2))**2 / (3*h**(2/3))
-            return e, delta
+            return e, delta, S, sigma
         def K_eta(x,i,LocalConn): 
             K = np.linalg.norm(eta(x,i,LocalConn)[0],ord=p)
             return K
         def grad_K_eta(x,i,LocalConn):
             
-            e,delta = eta(x,i,LocalConn)
-            S = tet_jacobians(ArrayCoords,LocalConn)
-            sigma = np.linalg.det(S)
-            da_S = np.array([dS(i,a,ArrayCoords,LocalConn) for a in ['x','y','z']])
-            da_sigma = np.array([np.linalg.det(S) * np.trace(np.matmul(np.linalg.inv(S), da_S[j]),axis1=1,axis2=2) for j in range(3)])
+            e,delta,S,sigma = eta(x,i,LocalConn)
+            # S = tet_jacobians(ArrayCoords,LocalConn)
+            # sigma = np.linalg.det(S)
+            # da_S = np.array([dS(i,a,ArrayCoords,LocalConn) for a in ['x','y','z']])
+            da_S = [dS_x(i,LocalConn), dS_y(i,LocalConn), dS_z(i,LocalConn)]
+            da_sigma = np.array([sigma * np.trace(np.matmul(np.linalg.inv(S), da_S[j]),axis1=1,axis2=2) for j in range(3)])
 
             da_eta = (2*e)*np.array([
                 np.trace(np.matmul(np.swapaxes(da_S[j],1,2),S),axis1=1,axis2=2)/np.linalg.norm(S,'fro',axis=(1,2))**2 - 
@@ -1430,7 +1463,7 @@ def TetOpt(NodeCoords, NodeConn, ElemConn=None, objective='eta', method='BFGS', 
                 for j in range(3)])
 
             # grad_K = np.linalg.norm(da_eta,axis=1,ord=p)
-            grad_K = np.array([1/p * sum(e**p)**(1/p-1) * p*sum(e**(p-1)*da_eta[j]) for j in range(3)])
+            grad_K = np.array([1/p * np.sum(e**p)**(1/p-1) * p*np.sum(e**(p-1)*da_eta[j]) for j in range(3)])
 
             return grad_K
         
@@ -1483,10 +1516,10 @@ def TetOpt(NodeCoords, NodeConn, ElemConn=None, objective='eta', method='BFGS', 
                 continue
             fun = lambda x : ifun(x,i,LocalConn)
             grad = lambda x : igrad(x,i,LocalConn)
-            x0 = copy.copy(ArrayCoords[i])
+            x0 = ArrayCoords[i]
             # out = minimize(fun,x0,jac=grad,method='BFGS')
             out = minimize(fun,x0,jac=grad,method=method)
-            ArrayCoords[i] = out.x
+            # ArrayCoords[i] = out.x
     
     NewCoords = ArrayCoords.tolist()
     return NewCoords
