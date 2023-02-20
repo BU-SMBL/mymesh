@@ -753,20 +753,21 @@ def DualPrimalOptimization(sdf,NodeCoords,NodeConn,eps=1e-3,nIter=2):
     writeVTK('{:d}_PrimalOpt.vtk'.format(k),OptCoords,OptConn)
     return OptCoords,OptConn
 
-def SurfFlowOptimization(sdf,NodeCoords,NodeConn,ZRIter=50,NZRIter=50,NZIter=50,Subdivision=True,FixedNodes=set()):
+def SurfFlowOptimization(sdf,NodeCoords,NodeConn,ZRIter=50,NZRIter=50,NZIter=50,Subdivision=True,FixedNodes=set(), gradF=None):
     
     C = 0.1     # Positive Constant
     FreeNodes = list(set(range(len(NodeCoords))).difference(FixedNodes))
-    def gradF(q):
-        h = 1e-6    # Finite Diff Step Size
-        if type(q) is list: q = np.array(q)
-        if len(q.shape)==1: q = np.array([q])
-        gradx = (sdf(q[:,0]+h/2,q[:,1],q[:,2]) - sdf(q[:,0]-h/2,q[:,1],q[:,2]))/h
-        grady = (sdf(q[:,0],q[:,1]+h/2,q[:,2]) - sdf(q[:,0],q[:,1]-h/2,q[:,2]))/h
-        gradz = (sdf(q[:,0],q[:,1],q[:,2]+h/2) - sdf(q[:,0],q[:,1],q[:,2]-h/2))/h
-        gradf = np.vstack((gradx,grady,gradz)).T
-        if len(gradf) == 1: gradf = gradf[0]
-        return gradf
+    if gradF is None:
+        def gradF(q):
+            h = 1e-6    # Finite Diff Step Size
+            if type(q) is list: q = np.array(q)
+            if len(q.shape)==1: q = np.array([q])
+            gradx = (sdf(q[:,0]+h/2,q[:,1],q[:,2]) - sdf(q[:,0]-h/2,q[:,1],q[:,2]))/h
+            grady = (sdf(q[:,0],q[:,1]+h/2,q[:,2]) - sdf(q[:,0],q[:,1]-h/2,q[:,2]))/h
+            gradz = (sdf(q[:,0],q[:,1],q[:,2]+h/2) - sdf(q[:,0],q[:,1],q[:,2]-h/2))/h
+            gradf = np.vstack((gradx,grady,gradz)).T
+            if len(gradf) == 1: gradf = gradf[0]
+            return gradf
     def NFlow(NodeCoords, NodeConn, NodeNormals, NodeNeighbors, ElemConn, Area, Centroids,tf=1):
         gradC = -gradF(Centroids)
         gradCnorm = np.linalg.norm(gradC,axis=1)
