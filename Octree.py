@@ -252,13 +252,13 @@ def Surf2Octree(NodeCoords, SurfConn, minsize=None):
     if type(NodeCoords) is list:
         NodeCoords = np.array(NodeCoords)          
     # centroids = [np.mean(NodeCoords[elem],axis=0) for elem in SurfConn]
+    ArrayConn = np.asarray(SurfConn)
     if not minsize:
         # By default creates octree with a minimum node size equal to the mean size of a triangle
         # minsize = np.mean([max([max(NodeCoords[elem][:,0])-min(NodeCoords[elem][:,0]),
         #             max(NodeCoords[elem][:,1])-min(NodeCoords[elem][:,1]),
         #             max(NodeCoords[elem][:,2])-min(NodeCoords[elem][:,2]),
         #             ]) for elem in SurfConn])
-        ArrayConn = np.asarray(SurfConn)
         minsize = np.nanmean(np.nanmax([np.linalg.norm(NodeCoords[ArrayConn][:,0] - NodeCoords[ArrayConn][:,1],axis=1),
             np.linalg.norm(NodeCoords[ArrayConn][:,1] - NodeCoords[ArrayConn][:,2],axis=1),
             np.linalg.norm(NodeCoords[ArrayConn][:,2] - NodeCoords[ArrayConn][:,0],axis=1)],axis=0
