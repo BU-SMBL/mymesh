@@ -443,7 +443,7 @@ def writeMechanicalScpFile(datFile,workdir=None):
                      
 def readFluentH5File(mshFile):
     
-    Mesh = mesh.mesh()
+    Mesh = mesh()
     h5 = h5py.File(mshFile, 'r')
     
     #TODO: Need a loop to account for multiple meshes, for now assuming only 1
@@ -462,25 +462,26 @@ def readFluentH5File(mshFile):
         Mesh.NodeSets[name] = range(startIdx,endIdx)        
         
     # Parse Edges
-    edges = h5.get('meshes/1/edges/nodes')    
-    edgesets = list(h5.get('meshes/1/edges/nodes').keys())
-    for i in range(len(edgesets)):
-        startIdx = len(Mesh.Edges)
-        nnodes = np.array(edges.get(edgesets[i]+'/nnodes'))
-        nodes = np.array(edges.get(edgesets[i]+'/nodes'))
-        Edges = []
-        count = 0
-        for j in range(len(nnodes)):
-            edge = [nodes[k] for k in range(count,count+nnodes[j])]
-            count += nnodes[j]
-            Edges += [edge]
-        Mesh.addEdges(Edges)
-        endIdx = len(Mesh.Edges)
-        if h5['meshes/1/edges/zoneTopology/edgeType'][i] == 5:
-            name = 'edge' + edgesets[i] + '-' + 'boundary'
-        else:
-            name = 'edge' +edgesets[i]
-        Mesh.EdgeSets[name] = range(startIdx,endIdx)        
+    edges = h5.get('meshes/1/edges/nodes')   
+    if h5.get('meshes/1/edges/nodes') is not None:
+        edgesets = list(h5.get('meshes/1/edges/nodes').keys())
+        for i in range(len(edgesets)):
+            startIdx = len(Mesh.Edges)
+            nnodes = np.array(edges.get(edgesets[i]+'/nnodes'))
+            nodes = np.array(edges.get(edgesets[i]+'/nodes'))
+            Edges = []
+            count = 0
+            for j in range(len(nnodes)):
+                edge = [nodes[k] for k in range(count,count+nnodes[j])]
+                count += nnodes[j]
+                Edges += [edge]
+            Mesh.addEdges(Edges)
+            endIdx = len(Mesh.Edges)
+            if h5['meshes/1/edges/zoneTopology/edgeType'][i] == 5:
+                name = 'edge' + edgesets[i] + '-' + 'boundary'
+            else:
+                name = 'edge' +edgesets[i]
+            Mesh.EdgeSets[name] = range(startIdx,endIdx)        
     
     # Parse Faces
     faces = h5.get('meshes/1/faces/nodes')
@@ -506,7 +507,7 @@ def readFluentH5File(mshFile):
         endIdx = len(Mesh.Faces)
         name = 'face' + facesets[i] + '-' + 'bcID' + str(h5['meshes/1/faces/zoneTopology/zoneType'][i]) 
         Mesh.FaceSets[name] = range(startIdx,endIdx)
-    Mesh.FaceElemConn = CellConn
+    Mesh._FaceElemConn = CellConn
     
     # Parse Cells
     cells = h5.get('meshes/1/cells/ctype')
@@ -515,10 +516,11 @@ def readFluentH5File(mshFile):
     for i in range(len(cellsets)):
         startIdx = len(celltypes)
         celltype = np.array(cells.get(cellsets[i] + '/cell-types')).tolist()
-        celltypes += celltype
-        endIdx = len(celltypes)
-        name = 'node' + cellsets[i]
-        Mesh.ElemSets[name] = range(startIdx,endIdx)       
+        if celltype is not None:
+            celltypes += celltype
+            endIdx = len(celltypes)
+            name = 'node' + cellsets[i]
+            Mesh.ElemSets[name] = range(startIdx,endIdx)       
     NElem = len(celltypes)
     
     FaceConn = [[] for i in range(NElem)]   # Includes the faces adjacent to a given cell
