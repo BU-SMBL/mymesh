@@ -1185,7 +1185,7 @@ def surf2edges(NodeCoords,NodeConn):
 
     return Edges
 
-def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, threshold=None, crop=None):
+def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None):
     """
     im2voxel Convert 3D image data to a cubic mesh. Each voxel will be represented by a node.
 
@@ -1194,7 +1194,6 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
     img : str or np.ndarray
         If a str, should be the directory to an image stack of tiff or dicom files.
         If an array, shoud be a 3D array of image data.
-        TODO: Dicom support not yet implemented
     voxelsize : float, or tuple
         Size of voxel (based on image resolution).
         If a tuple, should be specified as (hx,hy,hz)
@@ -1233,6 +1232,9 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         img = np.array(img)
     if type(img) == np.ndarray:
         assert len(img.shape) == 3, 'Image data must be a 3D array.'
+        if scalefactor != 1:
+            img = ndimage.zoom(img,scalefactor,order=scaleorder)
+            voxelsize /= scalefactor
     elif type(img) == str:
         path = img
         tiffs = glob.glob(os.path.join(path,'*.tiff'))
@@ -1280,7 +1282,8 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
                     img = np.array(data)
     else:
         raise Exception
-
+    
+    
     if crop is None:
         (nz,ny,nx) = img.shape
         xlims = [0,(nx)*voxelsize]
@@ -1289,6 +1292,11 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         bounds = [xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]]
         VoxelCoords, VoxelConn = Primitives.Grid(bounds, voxelsize, exact_h=True, meshobj=False)
         VoxelData = img.flatten(order='F')
+        if return_gradient:
+            gradx = ndimage.gaussian_filter(img,gaussian_sigma,order=(1,0,0))
+            grady = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,1,0))
+            gradz = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,0,1))
+            GradData = np.vstack([gradx.flatten(order='F'),grady.flatten(order='F'),gradz.flatten(order='F')]).T
     else:
         if rectangular_elements:
             bounds = [crop[0]/xscale,crop[1]/xscale,
@@ -1301,6 +1309,11 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         maxs = (np.max(VoxelCoords,axis=0)/voxelsize).astype(int)
         cropimg = img[mins[2]:maxs[2],mins[1]:maxs[1],mins[0]:maxs[0]]
         VoxelData = cropimg.flatten(order='F')
+        if return_gradient:
+            gradx = ndimage.gaussian_filter(cropimg,gaussian_sigma,order=(1,0,0))
+            grady = ndimage.gaussian_filter(cropimg,gaussian_sigma,order=(0,1,0))
+            gradz = ndimage.gaussian_filter(cropimg,gaussian_sigma,order=(0,0,1))
+            GradData = np.vstack([gradx.flatten(order='F'),grady.flatten(order='F'),gradz.flatten(order='F')]).T
     if rectangular_elements:
         VoxelCoords[:,0] = VoxelCoords[:,0]*xscale
         VoxelCoords[:,1] = VoxelCoords[:,1]*yscale
@@ -1309,16 +1322,22 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
     if threshold is not None:
         VoxelConn = VoxelConn[VoxelData>=threshold]
         VoxelData = VoxelData[VoxelData>=threshold]
+        if return_gradient: GradData = GradData[VoxelData>=threshold]
         VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
     if return_nodedata:
         ElemConn = MeshUtils.getElemConnectivity(VoxelCoords,VoxelConn)
         RConn = MeshUtils.PadRagged(ElemConn)
         TempData = np.append(VoxelData,np.nan)
         NodeData = np.nanmean(TempData[RConn],axis=1)
-
+        if return_gradient:
+            TempGrad = np.append(GradData,[[np.nan,np.nan,np.nan]],axis=0)
+            NodeGrad = np.nanmean(TempGrad[RConn],axis=1)
+            VoxelData = (VoxelData,GradData)
+            NodeData = (NodeData,NodeGrad)
         return VoxelCoords, VoxelConn, VoxelData, NodeData
-    else:
-        return VoxelCoords, VoxelConn, VoxelData
+    if return_gradient:
+        VoxelData = (VoxelData,GradData)
+    return VoxelCoords, VoxelConn, VoxelData
 
 #%% -----------------------------------------------------------
 # TODO: Below functions need to be revisitied, may be unstable.

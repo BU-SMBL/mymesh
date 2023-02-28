@@ -187,7 +187,7 @@ def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',reinitialize=False):
     NodeVals = [NodeVals[i] for i in OriginalIds]
     return NodeCoords, NodeConn, NodeVals
 
-def grid2fun(VoxelCoords,VoxelConn,NodeVals,method='linear'):
+def grid2fun(VoxelCoords,VoxelConn,NodeVals,method='linear',fill_value=None):
     """
     grid2fun converts a voxel grid mesh (as made by VoxelMesh(mode='notrim') 
     or converter.makeGrid) into a function that can be evaluated at any point
@@ -218,7 +218,7 @@ def grid2fun(VoxelCoords,VoxelConn,NodeVals,method='linear'):
     points = (X,Y,Z)
     V = np.reshape(NodeVals,[len(X),len(Y),len(Z)])
     
-    fun = lambda x,y,z : interpolate.interpn(points,V,np.vstack([x,y,z]).T,method=method,bounds_error=False)
+    fun = lambda x,y,z : interpolate.interpn(points,V,np.vstack([x,y,z]).T,method=method,bounds_error=False,fill_value=None)
     
     return fun
 
@@ -753,18 +753,18 @@ def DualPrimalOptimization(sdf,NodeCoords,NodeConn,eps=1e-3,nIter=2):
     writeVTK('{:d}_PrimalOpt.vtk'.format(k),OptCoords,OptConn)
     return OptCoords,OptConn
 
-def SurfFlowOptimization(sdf,NodeCoords,NodeConn,ZRIter=50,NZRIter=50,NZIter=50,Subdivision=True,FixedNodes=set(), gradF=None):
+def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=50,Subdivision=True,FixedNodes=set(), gradF=None):
     
     C = 0.1     # Positive Constant
     FreeNodes = list(set(range(len(NodeCoords))).difference(FixedNodes))
     if gradF is None:
         def gradF(q):
-            h = 1e-6    # Finite Diff Step Size
+            hdiff = 1e-6    # Finite Diff Step Size
             if type(q) is list: q = np.array(q)
             if len(q.shape)==1: q = np.array([q])
-            gradx = (sdf(q[:,0]+h/2,q[:,1],q[:,2]) - sdf(q[:,0]-h/2,q[:,1],q[:,2]))/h
-            grady = (sdf(q[:,0],q[:,1]+h/2,q[:,2]) - sdf(q[:,0],q[:,1]-h/2,q[:,2]))/h
-            gradz = (sdf(q[:,0],q[:,1],q[:,2]+h/2) - sdf(q[:,0],q[:,1],q[:,2]-h/2))/h
+            gradx = (sdf(q[:,0]+hdiff/2,q[:,1],q[:,2]) - sdf(q[:,0]-hdiff/2,q[:,1],q[:,2]))/hdiff
+            grady = (sdf(q[:,0],q[:,1]+hdiff/2,q[:,2]) - sdf(q[:,0],q[:,1]-hdiff/2,q[:,2]))/hdiff
+            gradz = (sdf(q[:,0],q[:,1],q[:,2]+hdiff/2) - sdf(q[:,0],q[:,1],q[:,2]-h/2))/hdiff
             gradf = np.vstack((gradx,grady,gradz)).T
             if len(gradf) == 1: gradf = gradf[0]
             return gradf
@@ -839,7 +839,8 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,ZRIter=50,NZRIter=50,NZIter=50,
 
         # tau = 1/(500*max(A))
         # Z = np.divide(-2*(tau*A)[:,None]*(fP[:,None]*gradP),np.linalg.norm(fP[:,None]*gradP,axis=1)[:,None],where=(fP!=0)[:,None])
-        tau = tf*1/(100*max(A*np.linalg.norm(fP[:,None]*gradP,axis=1)))
+        # tau = tf*1/(100*max(A*np.linalg.norm(fP[:,None]*gradP,axis=1)))
+        tau = tf*h/(100*max(np.linalg.norm(fP[:,None]*gradP,axis=1)))
         Z = -2*tau*A[:,None]*fP[:,None]*gradP
         return Z
     def Z2Flow(NodeCoords, NodeConn, NodeNormals, NodeNeighbors, ElemConn, Area, Centroids):
