@@ -32,6 +32,8 @@ class mesh:
         self._FaceConn = [] # For each element, gives the indices of connected faces
         self._FaceElemConn = [] # For each face, gives the indices of connected elements (nan -> surface)
         self._Edges = []    
+        self._EdgeConn = []
+        self._EdgeElemConn = []
         self._NodeNormalsMethod = 'Angle'
         self._NFace = 0
         self._NEdge = 0
@@ -69,6 +71,8 @@ class mesh:
         size += getsizeof(self._FaceConn)
         size += getsizeof(self._FaceElemConn)
         size += getsizeof(self._Edges)
+        size += getsizeof(self._EdgeConn)
+        size += getsizeof(self._EdgeElemConn)
         size += getsizeof(self._NElem)
         size += getsizeof(self.nNode)
         size += getsizeof(self._NNode)
@@ -112,6 +116,8 @@ class mesh:
             if 'NodeNormals' not in keep: self._NodeNormals = []
             if 'Centroids' not in keep: self._Centroids = []
             if 'Edges' not in keep: self._Edges = []
+            if 'Edges' not in keep or 'EdgeConn' not in keep: self._FaceConn = []
+            if 'Edges' not in keep or 'EdgeElemConn' not in keep: self._FaceElemConn = [] 
             if 'Faces' not in keep: self._Faces = []
             if 'Faces' not in keep or 'FaceConn' not in keep: self._FaceConn = []
             if 'Faces' not in keep or 'FaceElemConn' not in keep: self._FaceElemConn = [] 
@@ -286,7 +292,7 @@ class mesh:
             
             self._FaceElemConn = self._FaceElemConn + [[elem + NElem for elem in elemconn] for elemconn in M._FaceElemConn]
             self._FaceConn = self._FaceConn + [[face + NFace for face in faceconn] for faceconn in M._FaceConn]
-        
+            # TODO: EdgeELemConn, EdgeConn
         # Cleanup
         if cleanup:
             self.cleanup(tol=tol)
@@ -338,6 +344,26 @@ class mesh:
             return Faces, FaceConn, FaceElemConn
         else:
             return [], [], []
+    def __get_edges(self):
+        # TODO: This might not work properly with mixed element types - but I think it shoud
+        if self.NElem > 0:
+            # Get all element edges
+            edges, edgeconn, edgeelem = converter.solid2edges(self.NodeCoords,self.NodeConn,return_EdgeConn=True,return_EdgeElem=True)
+            # Convert to unique edges
+            Edges, UIdx, UInv = converter.edges2unique(edges,return_idx=True,return_inv=True)
+            EdgeElem = np.asarray(edgeelem)[UIdx]
+            EdgeConn = UInv[MeshUtils.PadRagged(edgeconn)]
+            
+            rows = EdgeConn.flatten()
+            cols = np.repeat(np.arange(self.NElem),[len(x) for x in EdgeConn])
+            data = np.ones(len(rows))
+            
+            mat = scipy.sparse.coo_matrix((data,(rows,cols)),shape=(len(Edges),self.NElem)).tocsr()
+            EdgeElemConn = [list(mat.indices[mat.indptr[i]:mat.indptr[i+1]]) for i in range(mat.shape[0])]
+            
+            return Edges, EdgeConn, EdgeElemConn
+        else:
+            return [], [], []
     @property
     def Faces(self):
         if self._Faces == []:
@@ -380,10 +406,42 @@ class mesh:
     @property
     def Edges(self):
         if self._Edges == []:
-            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying element edges...',end='')
-            self._Edges = converter.solid2edges(*self)
-            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying element edges...',end='')
+                self._printlevel+=1
+
+            self._Edges, self._EdgeConn, self._EdgeElemConn = self.__get_edges()
+
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
         return self._Edges
+    @property
+    def EdgeConn(self):
+        if self._FaceConn == []:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying element-edge connectivity...',end='')
+                self._printlevel+=1
+
+            self._Edges, self._EdgeConn, self._EdgeElemConn = self.__get_edges()
+            
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
+        return self._EdgeConn
+    @property
+    def EdgeElemConn(self):
+        if self._EdgeElemConn == []:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying element edge-element connectivity...',end='')
+                self._printlevel+=1
+
+            self._Edges, self._EdgeConn, self._EdgeElemConn = self.__get_edges()
+            
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
+        return self._EdgeElemConn
     @property
     def SurfConn(self):
         if self._SurfConn == []:
