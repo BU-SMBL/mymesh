@@ -6,7 +6,7 @@ Created Sept 2022
 """
 import numpy as np
 import gc
-from . import converter, mesh
+from . import *
 
 def Box(bounds,h,meshobj=False):
     """
