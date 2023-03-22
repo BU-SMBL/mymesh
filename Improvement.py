@@ -634,7 +634,8 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),Fi
             edges,corners = MeshUtils.DetectFeatures(NodeCoords,NodeConn)
             FixedNodes.update(edges)
             FixedNodes.update(corners)
-        NodeNeighbors,ElemConn = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
+        NodeNeighbors = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
+        ElemConn = MeshUtils.getElemConnectivity(NodeCoords,NodeConn)
         lens = np.array([len(n) for n in NodeNeighbors])
         r = MeshUtils.PadRagged(NodeNeighbors,fillval=-1)
         FreeNodes = list(set(range(len(NodeCoords))).difference(FixedNodes))
@@ -756,7 +757,7 @@ def ResolveSurfSelfIntersections(NodeCoords,SurfConn,FixedNodes=set(),octree='ge
     count = 0
     while len(Intersected) > 0 and count < maxIter:
         print(count)
-        _,ElemConn = MeshUtils.getNodeNeighbors(NewCoords, SurfConn)
+        ElemConn = MeshUtils.getElemConnectivity(NewCoords, SurfConn)
         NeighborhoodElems = np.unique([e for i in (SurfConn[Intersected]).flatten() for e in ElemConn[i]])
         PatchConn = SurfConn[NeighborhoodElems]
         BoundaryEdges = converter.surf2edges(NewCoords,PatchConn) 
@@ -1524,21 +1525,150 @@ def TetOpt(NodeCoords, NodeConn, ElemConn=None, objective='eta', method='BFGS', 
     NewCoords = ArrayCoords.tolist()
     return NewCoords
 
-def PatchHoles(NodeCoords, SurfConn):
-    ## Work in Progress
-    edges = np.array(converter.surf2edges(NodeCoords, SurfConn))
-    ignore = set()
-    for i,edge in edges:
-        if i in ignore:
-            continue
-        ignore.add(i)
-        where0 = np.where(edge[0]==edges)[0]
-        where1 = np.where(edge[1]==edges)[0]
-        if len(where0) != 2 or len(where1) != 2:
-            # Can only patch edges if both nodes in the edge are only shared by one other edge
-            continue
-
+def Tet23Flip(NodeCoords,NodeConn,Faces,FaceElemConn,FaceConn,FaceID,quality,QualityMetric='Skewness',Validate=True):
+    
+    # NodeConn should be an array for the input to avoid a lot of overhead
+    
+    if np.any(np.isnan(FaceElemConn[FaceID])):
+        return NodeConn,Faces,FaceElemConn,FaceConn,quality
+    
+    NewConn = np.asarray(NodeConn)
+    FaceNodes = Faces[FaceID]
+    NonFaceNodes = [np.setdiff1d(NodeConn[FaceElemConn[FaceID][0]],FaceNodes)[0],np.setdiff1d(NodeConn[FaceElemConn[FaceID][1]],FaceNodes)[0]]
+    # Elem1 = np.append(FaceNodes,NonFaceNodes[0])
+    # Elem2 = np.append(np.flip(FaceNodes),NonFaceNodes[1])
+    a = NonFaceNodes[1]
+    e = NonFaceNodes[0]
+    b,c,d = FaceNodes
+    
+    # Make New Elements
+    NewElem1 = [a,e,d,b]
+    NewElem2 = [a,b,c,e]
+    NewElem3 = [a,e,c,d]
+    
+    # Check New Elements
+    if QualityMetric == 'Skewness':
+        OldWorstQuality = np.max([quality[FaceElemConn[FaceID][0]], quality[FaceElemConn[FaceID][1]]])
+        NewQuality = Quality.Skewness(NodeCoords,[NewElem1,NewElem2,NewElem3])
+        NewWorstQuality = np.max(NewQuality)
         
+        Improved = NewWorstQuality < OldWorstQuality
+
+    else:
+        raise Exception('Quality metric {:s} unknown or not yet implemented.'.format(QualityMetric))
+    if Validate:
+        if not Improved:
+            # Flip didn't improve quality or created invalid elements, keep old mesh
+            return NodeConn,Faces,FaceElemConn,FaceConn,quality
+        
+        NewVolume = Quality.Volume(NodeCoords,[NewElem1,NewElem2,NewElem3])
+        Valid = np.min(NewVolume) >= 0 and min(NewQuality) >= 0 and max(NewQuality) <= 1
+        if not Valid:
+            # Flip didn't improve quality or created invalid elements, keep old mesh
+            return NodeConn,Faces,FaceElemConn,FaceConn,quality
+    
+    # Flip validly improves quality, modify mesh
+    print('flip')
+    # Delete old elements
+    maxelem = max(FaceElemConn[FaceID])
+    minelem = min(FaceElemConn[FaceID])
+    
+    AdjacentFaces = np.unique([FaceConn[maxelem],FaceConn[minelem]])
+    AdjacentFaces = AdjacentFaces[AdjacentFaces!=FaceID]    
+    OldFaceSets = [set(Faces[fid]) for fid in AdjacentFaces]
+    
+    NewConn = np.delete(NewConn,[maxelem,minelem],axis=0)
+    quality = np.delete(quality, [maxelem,minelem])
+    del FaceConn[maxelem], FaceConn[minelem]
+    
+    # Add new elems
+    NewElemIds = [len(NewConn),len(NewConn)+1,len(NewConn)+2]
+    NewConn = np.append(NewConn, [NewElem1, NewElem2, NewElem3],axis=0)
+    quality = np.append(quality, [NewQuality[0], NewQuality[1], NewQuality[2]])
+    
+    
+    # Delete old face
+    del Faces[FaceID]
+    del FaceElemConn[FaceID]
+    
+    # Add new faces
+    NewFaceIds = [len(Faces),len(Faces)+1,len(Faces)+2]
+    Faces += [[a,e,d],[a,b,e],[a,c,e]]
+    FaceElemConn += [[1,3],[2,1],[3,2]]
+    
+    # Adjust FaceElemConn
+    NewFaceSets = [{a,d,c},{c,d,e},{a,b,d},{b,e,d},{a,c,b},{b,c,e}] 
+    NewFaceElemConnID = [0,0,1,1,2,2]
+    MatchedFaces = [AdjacentFaces[i] for FaceSet in NewFaceSets for i,OldSet in enumerate(OldFaceSets) if FaceSet==OldSet]
+    for i,fid in enumerate(MatchedFaces):
+        FaceElemConn[fid] = [NewElemIds[NewFaceElemConnID[i]] if (x == maxelem or x == minelem) else x for x in FaceElemConn[fid]]
+    
+    FaceConn += [[MatchedFaces[0],MatchedFaces[1],NewFaceIds[0],NewFaceIds[1]],
+                [MatchedFaces[2],MatchedFaces[3],NewFaceIds[1],NewFaceIds[2]],
+                [MatchedFaces[3],MatchedFaces[4],NewFaceIds[2],NewFaceIds[0]]]
+    
+    return NewConn,Faces,FaceElemConn,FaceConn,quality
+    
+def Tet32Flip(NodeCoords, NodeConn, Edges, EdgeElemConn, EdgeConn, EdgeID, quality, QualityMetric='Skewness',Validate=True):
+    
+    # NodeConn should be an array for the input to avoid a lot of overhead
+    
+    if len(EdgeElemConn[EdgeID]) != 3:
+        # Not valid for a 3-2 flip
+        return NodeConn, Edges, EdgeElemConn, EdgeConn, quality
+    
+    NewConn = np.asarray(NodeConn)
+    EdgeNodes = Edges[EdgeID]
+    Elements = EdgeElemConn[EdgeID]
+    Face = np.setdiff1d(np.unique(NewConn[Elements]),EdgeNodes)
+    
+    if len(Face) != 3:
+        # Not valid for a 3-2 flip
+        return NodeConn, Edges, EdgeElemConn, EdgeConn, quality
+    
+    # Elem1 = np.append(FaceNodes,NonFaceNodes[0])
+    # Elem2 = np.append(np.flip(FaceNodes),NonFaceNodes[1])
+    a = EdgeNodes[1]
+    e = EdgeNodes[0]
+    b,c,d = Face
+
+    Normal = np.cross(np.subtract(NodeCoords[b],NodeCoords[c]),np.subtract(NodeCoords[d],NodeCoords[c]))
+    if np.dot(Normal,NodeCoords[a])-np.dot(Normal,NodeCoords[c]) < 0:
+        # Reorder a, e for consistent tet formation
+        a,e = e,a
+    
+    # Make New Elements
+    NewElem1 = [b,c,d,e]
+    NewElem2 = [b,d,c,a]
+    
+    # Check New Elements
+    if QualityMetric == 'Skewness':
+        OldWorstQuality = np.max([quality[Elements[0]], quality[Elements[1]], quality[Elements[2]]])
+        NewQuality = Quality.Skewness(NodeCoords,[NewElem1,NewElem2])
+        NewWorstQuality = np.max(NewQuality)
+        
+        Improved = NewWorstQuality < OldWorstQuality
+
+    else:
+        raise Exception('Quality metric {:s} unknown or not yet implemented.'.format(QualityMetric))
+    if Validate:
+        if not Improved:
+            # Flip didn't improve quality or created invalid elements, keep old mesh
+            return NodeConn, Edges, EdgeElemConn, EdgeConn, quality
+        
+        NewVolume = Quality.Volume(NodeCoords,[NewElem1,NewElem2])
+        Valid = np.min(NewVolume) >= 0 and min(NewQuality) >= 0 and max(NewQuality) <= 1
+        if not Valid:
+            # Flip didn't improve quality or created invalid elements, keep old mesh
+            return NodeConn, Edges, EdgeElemConn, EdgeConn, quality
+    
+    # Delete old elements
+    NewConn = np.delete(NewConn, Elements,axis=0)
+    quality = np.delete(quality, Elements)
+    
+    
+    # Remove edge and adjust EdgeConn, EdgeElemConn
+    
 
 
 # %%
