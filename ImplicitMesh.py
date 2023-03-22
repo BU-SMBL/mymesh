@@ -89,17 +89,15 @@ def intersection(fval1,fval2):
 #    return np.maximum(fval1,fval2)
     return rMax(fval1,fval2)
 
-def rMax(a,b):
+def rMax(a,b,alpha=0,m=0,p=2):
     # R-Function version of max(a,b) to yield a smoothly differentiable max - R0
     # Implicit Functions With Guaranteed Differential Properties - Shapiro & Tsukanov
-    alpha = 0 
-    return 1/(1+alpha)*(a+b+np.sqrt(np.maximum(a**2+b**2-2*alpha*a*b,0)))
+    return 1/(1+alpha)*(a+b+(np.maximum(a**p+b**p - 2*alpha*a*b,0))**(1/p)) * (a**2 + b**2)**(m/2)
 
-def rMin(a,b):
+def rMin(a,b,alpha=0,m=0,p=2):
     # R-Function version of min(a,b) to yield a smoothly differentiable min - R0
     # Implicit Functions With Guaranteed Differential Properties - Shapiro & Tsukanov
-    alpha = 0 
-    return 1/(1+alpha)*(a+b-np.sqrt(np.maximum(a**2+b**2-2*alpha*a*b,0)))
+    return 1/(1+alpha)*(a+b-(np.maximum(a**p+b**p - 2*alpha*a*b,0))**(1/p)) * (a**2 + b**2)**(m/2)
 
 def sMax(a,b,p):
     # p-norm smooth maximum
@@ -218,7 +216,8 @@ def grid2fun(VoxelCoords,VoxelConn,NodeVals,method='linear',fill_value=None):
     points = (X,Y,Z)
     V = np.reshape(NodeVals,[len(X),len(Y),len(Z)])
     
-    fun = lambda x,y,z : interpolate.interpn(points,V,np.vstack([x,y,z]).T,method=method,bounds_error=False,fill_value=None)
+    V[np.isnan(V)] = np.array([np.nan]).astype(int)[0]
+    fun = lambda x,y,z : interpolate.RegularGridInterpolator(points,V,method=method,bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
     
     return fun
 
