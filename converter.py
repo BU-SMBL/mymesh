@@ -6,7 +6,7 @@ Created on Sun Aug  1 17:48:50 2021
 """
 
 import numpy as np
-import pandas as pd
+
 from scipy import ndimage
 import sys, os, warnings, glob, gc, tempfile
 from . import MeshUtils, Rays, Primitives
@@ -1290,7 +1290,7 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         ylims = [0,(ny)*voxelsize]
         zlims = [0,(nz)*voxelsize]
         bounds = [xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]]
-        VoxelCoords, VoxelConn = Primitives.Grid(bounds, voxelsize, exact_h=True, meshobj=False)
+        VoxelCoords, VoxelConn = Primitives.Grid(bounds, voxelsize, exact_h=False, meshobj=False)
         VoxelData = img.flatten(order='F')
         if return_gradient:
             gradx = ndimage.gaussian_filter(img,gaussian_sigma,order=(1,0,0))
@@ -1411,7 +1411,7 @@ def GridMesh(xlims,ylims,zlims,h):
     del ids
     gc.collect()
     NodeCoords = np.vstack([x,y,z]).transpose()
-    pd.DataFrame(NodeCoords).to_csv('NodeCoords.csv')
+    # pd.DataFrame(NodeCoords).to_csv('NodeCoords.csv')
     # print(3)
     del x, y, z
     gc.collect()
@@ -1485,10 +1485,10 @@ def makeGrid(xlims, ylims, zlims, VoxelSize):
     VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
     return VoxelCoords, VoxelConn
 
-def voxel2im(VoxelCoords, VoxelConn, NodeVals):
+def voxel2im(VoxelCoords, VoxelConn, VoxelVals):
     if type(VoxelCoords) == list: VoxelCoords = np.array(VoxelCoords)
-    shape = (len(np.unique(VoxelCoords[:,2])),len(np.unique(VoxelCoords[:,1])),len(np.unique(VoxelCoords[:,0])))
-    I = np.reshape(NodeVals,shape,order='F')
+    shape = (len(np.unique(VoxelCoords[:,2]))-1,len(np.unique(VoxelCoords[:,1]))-1,len(np.unique(VoxelCoords[:,0]))-1)
+    I = np.reshape(VoxelVals,shape,order='F')
     
     return I
 
