@@ -6,7 +6,7 @@ Created Sept 2022
 """
 import numpy as np
 import gc
-from . import *
+from . import converter, ImplicitMesh, mesh
 
 def Box(bounds,h,meshobj=False):
     """
@@ -35,7 +35,7 @@ def Box(bounds,h,meshobj=False):
     BoxConn = converter.quad2tri(converter.solid2surface(GridCoords,GridConn))
     BoxCoords,BoxConn,_ = converter.removeNodes(GridCoords,BoxConn)
     if meshobj:
-        Box = mesh(BoxCoords,BoxConn)
+        Box = mesh.mesh(BoxCoords,BoxConn)
         Box.cleanup()
         return Box
     return BoxCoords,BoxConn
@@ -114,8 +114,7 @@ def Grid(bounds, h, meshobj=False, exact_h=False):
     VoxelConn[:,7] = Ids[:-1,1:,1:].flatten()
     
     if meshobj:
-        # from . import mesh
-        return mesh(VoxelCoords,VoxelConn)
+        return mesh.mesh(VoxelCoords,VoxelConn)
     return VoxelCoords, VoxelConn
 
 def Sphere(center,radius,h):
