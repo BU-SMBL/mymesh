@@ -881,6 +881,8 @@ def writeFluentMshFile(Mesh, filename):
             Mesh.FaceSets['interior_bcID2'] = np.where(~boundarycheck)[0]
 
         Mesh.RenumberFacesBySet()
+        
+        
         if len(Mesh.ElemSets) == 0:
             Mesh.ElemSets = {'All-fluid':range(Mesh.NElem)}
         
