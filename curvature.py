@@ -8,6 +8,7 @@ import numpy as np
 import sympy as sp
 from . import MeshUtils, converter
 import warnings
+from scipy import ndimage
   
 def NormCurve(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
     #
@@ -506,50 +507,96 @@ def AnalyticalCurvature(F,NodeCoords):
     cof = sp.lambdify((x,y,z),Cof,['numpy',{'DiracDelta':DiracDelta}])
 
     g = grad(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).swapaxes(0,2)
-    h = hess(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2])
-    if np.all(h[0][0] == 0):
-        h[0][0] = np.zeros(len(NodeCoords))
-    if np.all(h[0][1] == 0):
-        h[0][1] = np.zeros(len(NodeCoords))
-    if np.all(h[0][2] == 0):
-        h[0][2] = np.zeros(len(NodeCoords))
-    if np.all(h[1][0] == 0):
-        h[1][0] = np.zeros(len(NodeCoords))
-    if np.all(h[1][1] == 0):
-        h[1][1] = np.zeros(len(NodeCoords))
-    if np.all(h[1][2] == 0):
-        h[1][2] = np.zeros(len(NodeCoords))
-    if np.all(h[2][0] == 0):
-        h[2][0] = np.zeros(len(NodeCoords))
-    if np.all(h[2][1] == 0):
-        h[2][1] = np.zeros(len(NodeCoords))
-    if np.all(h[2][2] == 0):
-        h[2][2] = np.zeros(len(NodeCoords))
-    h = np.array(h.tolist()).swapaxes(0,2)
-    c = cof(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2])
-    if np.all(c[0][0] == 0):
-        c[0][0] = np.zeros(len(NodeCoords))
-    if np.all(c[0][1] == 0):
-        c[0][1] = np.zeros(len(NodeCoords))
-    if np.all(c[0][2] == 0):
-        c[0][2] = np.zeros(len(NodeCoords))
-    if np.all(c[1][0] == 0):
-        c[1][0] = np.zeros(len(NodeCoords))
-    if np.all(c[1][1] == 0):
-        c[1][1] = np.zeros(len(NodeCoords))
-    if np.all(c[1][2] == 0):
-        c[1][2] = np.zeros(len(NodeCoords))
-    if np.all(c[2][0] == 0):
-        c[2][0] = np.zeros(len(NodeCoords))
-    if np.all(c[2][1] == 0):
-        c[2][1] = np.zeros(len(NodeCoords))
-    if np.all(c[2][2] == 0):
-        c[2][2] = np.zeros(len(NodeCoords))
-    c = np.array(c.tolist()).swapaxes(0,2)
+    h = hess(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).tolist()
+    if not hasattr(h[0][0], "__len__"):
+        h[0][0] = np.repeat(h[0][0],len(NodeCoords)).tolist()
+    if not hasattr(h[0][1], "__len__"):
+        h[0][1] = np.repeat(h[0][1],len(NodeCoords)).tolist()
+    if not hasattr(h[0][2], "__len__"):
+        h[0][2] = np.repeat(h[0][2],len(NodeCoords)).tolist()
+    if not hasattr(h[1][0], "__len__"):
+        h[1][0] = np.repeat(h[1][0],len(NodeCoords)).tolist()
+    if not hasattr(h[1][1], "__len__"):
+        h[1][1] = np.repeat(h[1][1],len(NodeCoords)).tolist()
+    if not hasattr(h[1][2], "__len__"):
+        h[1][2] = np.repeat(h[1][2],len(NodeCoords)).tolist()
+    if not hasattr(h[2][0], "__len__"):
+        h[2][0] = np.repeat(h[2][0],len(NodeCoords)).tolist()
+    if not hasattr(h[2][1], "__len__"):
+        h[2][1] = np.repeat(h[2][1],len(NodeCoords)).tolist()
+    if not hasattr(h[2][2], "__len__"):
+        h[2][2] = np.repeat(h[2][2],len(NodeCoords)).tolist()
+    h = np.array(h).swapaxes(0,2)
+    c = cof(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).tolist()
+    if not hasattr(c[0][0], "__len__"):
+        c[0][0] = np.repeat(c[0][0],len(NodeCoords)).tolist()
+    if not hasattr(c[0][1], "__len__"):
+        c[0][1] = np.repeat(c[0][1],len(NodeCoords)).tolist()
+    if not hasattr(c[0][2], "__len__"):
+        c[0][2] = np.repeat(c[0][2],len(NodeCoords)).tolist()
+    if not hasattr(c[1][0], "__len__"):
+        c[1][0] = np.repeat(c[1][0],len(NodeCoords)).tolist()
+    if not hasattr(c[1][1], "__len__"):
+        c[1][1] = np.repeat(c[1][1],len(NodeCoords)).tolist()
+    if not hasattr(c[1][2], "__len__"):
+        c[1][2] = np.repeat(c[1][2],len(NodeCoords)).tolist()
+    if not hasattr(c[2][0], "__len__"):
+        c[2][0] = np.repeat(c[2][0],len(NodeCoords)).tolist()
+    if not hasattr(c[2][1], "__len__"):
+        c[2][1] = np.repeat(c[2][1],len(NodeCoords)).tolist()
+    if not hasattr(c[2][2], "__len__"):
+        c[2][2] = np.repeat(c[2][2],len(NodeCoords)).tolist()
+    c = np.array(c).swapaxes(0,2)
 
     gaussian = np.matmul(np.matmul(g.swapaxes(1,2),c),g)[:,0,0]/(np.linalg.norm(g,axis=1)[:,0]**4)
     mean = -(np.matmul(np.matmul(g.swapaxes(1,2),h),g)[:,0,0] - (np.linalg.norm(g,axis=1)[:,0]**2) * np.trace(h,axis1=1,axis2=2))/(2*np.linalg.norm(g,axis=1)[:,0]**3)
 
+    MaxPrincipal = mean + np.sqrt(np.maximum(mean**2-gaussian,0))
+    MinPrincipal = mean - np.sqrt(np.maximum(mean**2-gaussian,0))
+
+    return MaxPrincipal, MinPrincipal, mean, gaussian
+
+def ImageCurvature(I,gaussian_sigma=1,voxelsize=1,brightobject=True):
+    # Note: Can lead to errors if surface is too close to the boundary of the image, consider building in padding based on gaussian_sigma
+    # If the 'inside' of the imaged object is darker than background, the signs of the curvatures will be flipped, in this case use brightobject=False
+    
+    if not brightobject:
+        I = -np.array(I)
+    
+    Fx = ndimage.gaussian_filter(I,gaussian_sigma,order=(1,0,0))
+    Fy = ndimage.gaussian_filter(I,gaussian_sigma,order=(0,1,0))
+    Fz = ndimage.gaussian_filter(I,gaussian_sigma,order=(0,0,1))
+
+    Fxx = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(1,0,0))
+    Fxy = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(0,1,0))
+    Fxz = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(0,0,1))
+    
+    Fyx = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(1,0,0))
+    Fyy = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(0,1,0))
+    Fyz = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(0,0,1))
+    
+    Fzx = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(1,0,0))
+    Fzy = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(0,1,0))
+    Fzz = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(0,0,1))
+
+
+    Grad = np.transpose(np.array([Fx, Fy, Fz])[None,:,:,:,:],(2,3,4,0,1))
+    Hess = np.transpose(np.array([[Fxx, Fxy, Fxz],
+                    [Fyx, Fyy, Fyz],
+                    [Fzx, Fzy, Fzz]
+                ]),(2,3,4,0,1))
+
+    Cof = np.transpose(np.array([[Fyy*Fzz-Fyz*Fzy, Fyz*Fzx-Fyx*Fzz, Fyx*Fzy-Fyy*Fzx],
+                    [Fxz*Fzy-Fxy*Fzz, Fxx*Fzz-Fxz*Fzx, Fxy*Fzx-Fxx*Fzy],
+                    [Fxy*Fyz-Fxz*Fyy, Fyx*Fxz-Fxx*Fyz, Fxx*Fyy-Fxy*Fyx]
+                ]),(2,3,4,0,1))
+    with np.errstate(divide='ignore', invalid='ignore'):
+        gaussian = np.matmul(np.matmul(Grad,Cof),np.transpose(Grad,(0,1,2,4,3))).reshape(I.shape)/np.linalg.norm(Grad,axis=4).reshape(I.shape)**4
+        mean = (np.matmul(np.matmul(Grad,Hess),np.transpose(Grad,(0,1,2,4,3))).reshape(I.shape)-np.linalg.norm(Grad,axis=4).reshape(I.shape)**2 * np.trace(Hess,axis1=3,axis2=4))/(2*np.linalg.norm(Grad,axis=4).reshape(I.shape)**3)
+
+    gaussian = gaussian/voxelsize**2    
+    mean = mean/voxelsize
+    
     MaxPrincipal = mean + np.sqrt(np.maximum(mean**2-gaussian,0))
     MinPrincipal = mean - np.sqrt(np.maximum(mean**2-gaussian,0))
 
