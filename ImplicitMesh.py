@@ -286,7 +286,7 @@ def FastMarchingMethod(VoxelCoords, VoxelConn, NodeVals):
     F = 1
     NodeVals = np.array(NodeVals)
     # Get Neighbors
-    NodeNeighbors,_ = MeshUtils.getNodeNeighbors(VoxelCoords, VoxelConn)
+    NodeNeighbors = MeshUtils.getNodeNeighbors(VoxelCoords, VoxelConn)
     xNeighbors = [[n for n in NodeNeighbors[i] if (VoxelCoords[n][1] == VoxelCoords[i][1]) and (VoxelCoords[n][2] == VoxelCoords[i][2])] for i in range(len(NodeNeighbors))]
     yNeighbors = [[n for n in NodeNeighbors[i] if (VoxelCoords[n][0] == VoxelCoords[i][0]) and (VoxelCoords[n][2] == VoxelCoords[i][2])] for i in range(len(NodeNeighbors))]
     zNeighbors = [[n for n in NodeNeighbors[i] if (VoxelCoords[n][0] == VoxelCoords[i][0]) and (VoxelCoords[n][1] == VoxelCoords[i][1])] for i in range(len(NodeNeighbors))]
