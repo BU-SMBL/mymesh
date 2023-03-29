@@ -18,6 +18,7 @@ class mesh:
         # Primary attributes
         self.NodeCoords = []
         self.NodeConn = []
+        self.Type = 'vol' # Valid options are 'surf' and 'vol'
 
         # Properties:
         self._SurfConn = []
@@ -59,6 +60,8 @@ class mesh:
                 self.NodeConn = arg
                 if len(self.NodeConn) > 0:
                     self.nNode = len(self.NodeConn[0])
+            elif i == 2:
+                self.Type = arg
         
         self.verbose = True
         self._printlevel = 0
@@ -87,7 +90,13 @@ class mesh:
         size += getsizeof(self._Centroids)
         return size
     def __repr__(self):
-        return 'Mesh Object\n{0:d} Nodes\n{1:d} Elements'.format(self.NNode,self.NElem)
+        if self.Type == 'surf':
+            Type = 'Surface'
+        elif self.Type == 'vol':
+            Type = 'Volume'
+        else:
+            Type = 'Unknown'
+        return 'Mesh Object\nType: {0:s}\n{1:d} Nodes\n{2:d} Elements'.format(Type,self.NNode,self.NElem)
     def __iter__(self):
         return iter((self.NodeCoords,self.NodeConn))
     def initialize(self,cleanup=True):
@@ -1029,24 +1038,24 @@ class mesh:
             keys = self.ElemData.keys()
             for key in keys:
                 celldata = [[],[],[],[],[],[]]
-                if self.nD == 3:
-                    for i,elem in enumerate(self.NodeConn):
-                        n = len(elem)
-                        if n == 3:
-                            if len(self.ElemData) > 0: celldata[0].append(self.ElemData[key][i])
-                        elif n == 4:
-                            if len(self.ElemData) > 0: celldata[1].append(self.ElemData[key][i])
-                        elif n == 5:
-                            if len(self.ElemData) > 0: celldata[2].append(self.ElemData[key][i])
-                        elif n == 6:
-                            if len(self.ElemData) > 0: celldata[3].append(self.ElemData[key][i])
-                        elif n == 8:
-                            if len(self.ElemData) > 0: celldata[4].append(self.ElemData[key][i])
-                        elif n == 10:
-                            if len(self.ElemData) > 0: celldata[5].append(self.ElemData[key][i])
+                for i,elem in enumerate(self.NodeConn):
+                    n = len(elem)
+                    if n == 3:
+                        if len(self.ElemData) > 0: celldata[0].append(self.ElemData[key][i])
+                    elif n == 4:
+                        if len(self.ElemData) > 0: celldata[1].append(self.ElemData[key][i])
+                    elif n == 5:
+                        if len(self.ElemData) > 0: celldata[2].append(self.ElemData[key][i])
+                    elif n == 6:
+                        if len(self.ElemData) > 0: celldata[3].append(self.ElemData[key][i])
+                    elif n == 8:
+                        if len(self.ElemData) > 0: celldata[4].append(self.ElemData[key][i])
+                    elif n == 10:
+                        if len(self.ElemData) > 0: celldata[5].append(self.ElemData[key][i])
                 celldata = [c for c in celldata if len(c) > 0]
                 celldict[key] = celldata
-        tris = []   # n = 3            
+        tris = []   # n = 3         
+        quads = []  # n = 4, self.type='surf'
         tets = []   # n = 4
         pyrs = []   # n = 5
         wdgs = []   # n = 6
@@ -1056,6 +1065,8 @@ class mesh:
             n = len(elem)
             if n == 3:
                 tris.append(elem)
+            elif n == 4 and self.Type == 'surf':
+                quads.append(elem)
             elif n == 4:
                 tets.append(elem)
             elif n == 5:
@@ -1067,7 +1078,7 @@ class mesh:
             elif n == 10:
                 tet10.append(elem)
         
-        elems = [e for e in [('triangle',tris),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10)] if len(e[1]) > 0]
+        elems = [e for e in [('triangle',tris),('quad',quads),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10)] if len(e[1]) > 0]
         m = meshio.Mesh(points, elems, point_data=self.NodeData, cell_data=celldict)
         return m
 
