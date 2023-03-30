@@ -372,7 +372,9 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
     wdgs = [NodeConn[i] for i in wdgIdx]
     hexs = [NodeConn[i] for i in hexIdx]
 
-    TetConn = tets + pyramid2tet([],pyrs) + wedge2tet([],wdgs) + hex2tet([],hexs)
+
+    _,fromhex = hex2tet([],hexs,method='1to5')
+    TetConn = tets + pyramid2tet([],pyrs) + wedge2tet([],wdgs) + fromhex
     if return_ids:
         # Element ids of the tets connected to the original elements
         ElemIds_i = np.concatenate((tetIdx,np.repeat(pyrIdx,2),np.repeat(wdgIdx,3),np.repeat(hexIdx,5)))
@@ -389,7 +391,7 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
         return TetConn, ElemIds
     return TetConn
 
-def hex2tet(NodeCoords,NodeConn):
+def hex2tet(NodeCoords,NodeConn,method='1to5'):
     """
     hex2tet Decompose all elements of a 3D hexahedral mesh to tetrahedra.
     Generally solid2tets should be used rather than hex2tet directly
@@ -410,22 +412,79 @@ def hex2tet(NodeCoords,NodeConn):
 
     Returns
     -------
+    NewCoords : list
+        New list of nodal coordinates.
     TetConn, list
         Nodal connectivity list of generated tetrahedra
     """
-
-    if len(NodeConn) > 0:
+    if method == '1to5':
+        if len(NodeConn) > 0:
+            ArrayConn = np.asarray(NodeConn)
+            TetConn = -1*np.ones((len(NodeConn)*5,4))
+            TetConn[0::5] = ArrayConn[:,[0,1,3,4]]
+            TetConn[1::5] = ArrayConn[:,[1,2,3,6]]
+            TetConn[2::5] = ArrayConn[:,[4,6,5,1]]
+            TetConn[3::5] = ArrayConn[:,[4,7,6,3]]
+            TetConn[4::5] = ArrayConn[:,[4,6,1,3]]
+            TetConn = TetConn.astype(int).tolist()
+        else:
+            TetConn = []
+        NewCoords = NodeCoords
+    elif method=='1to24':
+        ArrayCoords = np.asarray(NodeCoords)
         ArrayConn = np.asarray(NodeConn)
-        Tets = -1*np.ones((len(NodeConn)*5,4))
-        Tets[0::5] = ArrayConn[:,[0,1,3,4]]
-        Tets[1::5] = ArrayConn[:,[1,2,3,6]]
-        Tets[2::5] = ArrayConn[:,[4,6,5,1]]
-        Tets[3::5] = ArrayConn[:,[4,7,6,3]]
-        Tets[4::5] = ArrayConn[:,[4,6,1,3]]
-        Tets = Tets.astype(int).tolist()
-    else:
-        Tets = []
-    return Tets
+
+        Centroids = MeshUtils.Centroids(ArrayCoords,NodeConn)
+        Face0Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1,2,3]]],axis=1)
+        Face1Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1,5,4]]],axis=1)
+        Face2Centroids = np.mean(ArrayCoords[ArrayConn[:,[1,2,6,5]]],axis=1)
+        Face3Centroids = np.mean(ArrayCoords[ArrayConn[:,[2,3,7,6]]],axis=1)
+        Face4Centroids = np.mean(ArrayCoords[ArrayConn[:,[3,0,4,7]]],axis=1)
+        Face5Centroids = np.mean(ArrayCoords[ArrayConn[:,[4,5,6,7]]],axis=1)
+
+        CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*0,len(NodeCoords)+len(NodeConn)*1))
+        Face0CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*1,len(NodeCoords)+len(NodeConn)*2))
+        Face1CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*2,len(NodeCoords)+len(NodeConn)*3))
+        Face2CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*3,len(NodeCoords)+len(NodeConn)*4))
+        Face3CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*4,len(NodeCoords)+len(NodeConn)*5))
+        Face4CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*5,len(NodeCoords)+len(NodeConn)*6))
+        Face5CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*6,len(NodeCoords)+len(NodeConn)*7))
+        
+        NewCoords = np.vstack([ArrayCoords,Centroids,Face0Centroids,Face1Centroids,Face2Centroids,Face3Centroids,Face4Centroids,Face5Centroids])        
+        
+        TetConn = -1*np.ones((len(NodeConn)*24,4))
+        TetConn[0::24] = np.hstack([ArrayConn[:,[0,1]],Face0CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[1::24] = np.hstack([ArrayConn[:,[1,2]],Face0CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[2::24] = np.hstack([ArrayConn[:,[2,3]],Face0CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[3::24] = np.hstack([ArrayConn[:,[3,0]],Face0CentroidIds[:,None],CentroidIds[:,None]])
+
+        TetConn[4::24] = np.hstack([ArrayConn[:,[1,0]],Face1CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[5::24] = np.hstack([ArrayConn[:,[5,1]],Face1CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[6::24] = np.hstack([ArrayConn[:,[4,5]],Face1CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[7::24] = np.hstack([ArrayConn[:,[0,4]],Face1CentroidIds[:,None],CentroidIds[:,None]])
+
+        TetConn[8::24] = np.hstack([ArrayConn[:,[2,1]],Face2CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[9::24] = np.hstack([ArrayConn[:,[6,2]],Face2CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[10::24] = np.hstack([ArrayConn[:,[5,6]],Face2CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[11::24] = np.hstack([ArrayConn[:,[1,5]],Face2CentroidIds[:,None],CentroidIds[:,None]])
+
+        TetConn[12::24] = np.hstack([ArrayConn[:,[3,2]],Face3CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[13::24] = np.hstack([ArrayConn[:,[7,3]],Face3CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[14::24] = np.hstack([ArrayConn[:,[6,7]],Face3CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[15::24] = np.hstack([ArrayConn[:,[2,6]],Face3CentroidIds[:,None],CentroidIds[:,None]])
+
+        TetConn[16::24] = np.hstack([ArrayConn[:,[0,3]],Face4CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[17::24] = np.hstack([ArrayConn[:,[4,0]],Face4CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[18::24] = np.hstack([ArrayConn[:,[7,4]],Face4CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[19::24] = np.hstack([ArrayConn[:,[3,7]],Face4CentroidIds[:,None],CentroidIds[:,None]])
+
+        TetConn[20::24] = np.hstack([ArrayConn[:,[5,4]],Face5CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[21::24] = np.hstack([ArrayConn[:,[6,5]],Face5CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[22::24] = np.hstack([ArrayConn[:,[7,6]],Face5CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[23::24] = np.hstack([ArrayConn[:,[4,7]],Face5CentroidIds[:,None],CentroidIds[:,None]])
+
+
+    return NewCoords, TetConn
 
 def wedge2tet(NodeCoords,NodeConn):
     """
