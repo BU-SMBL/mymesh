@@ -1357,6 +1357,9 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
             gradz = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,0,1))
             GradData = np.vstack([gradx.flatten(order='F'),grady.flatten(order='F'),gradz.flatten(order='F')]).T
     else:
+        # Adjust crop values to only get whole voxels
+        crop[:-1:2] = np.floor(np.asarray(crop)[:-1:2]/voxelsize)*voxelsize
+        crop[1::2] = np.ceil(np.asarray(crop)[1::2]/voxelsize)*voxelsize
         if rectangular_elements:
             bounds = [crop[0]/xscale,crop[1]/xscale,
                     crop[2]/yscale,crop[3]/yscale,
@@ -1364,8 +1367,8 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         else:
             bounds = crop
         VoxelCoords, VoxelConn = Primitives.Grid(bounds, voxelsize, exact_h=True, meshobj=False)
-        mins = (np.min(VoxelCoords,axis=0)/voxelsize).astype(int)
-        maxs = (np.max(VoxelCoords,axis=0)/voxelsize).astype(int)
+        mins = np.round(np.min(VoxelCoords,axis=0)/voxelsize).astype(int)
+        maxs = np.round(np.max(VoxelCoords,axis=0)/voxelsize).astype(int)
         cropimg = img[mins[2]:maxs[2],mins[1]:maxs[1],mins[0]:maxs[0]]
         VoxelData = cropimg.flatten(order='F')
         if return_gradient:
