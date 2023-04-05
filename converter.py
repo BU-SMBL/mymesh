@@ -19,7 +19,7 @@ except:
 
 def solid2surface(NodeCoords,NodeConn):
     """
-    solid2surface Extract the 2D surface elemenets from a 3D volume mesh
+    solid2surface Extract the 2D surface elements from a 3D volume mesh
 
     Parameters
     ----------
@@ -1340,7 +1340,7 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
                 else:
                     img = np.array(data)
     else:
-        raise Exception
+        raise Exception('Type {:s} not supported'.format(str(type(img))))
     
     
     if crop is None:
