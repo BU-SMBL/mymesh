@@ -185,7 +185,7 @@ def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',reinitialize=False):
     NodeVals = [NodeVals[i] for i in OriginalIds]
     return NodeCoords, NodeConn, NodeVals
 
-def grid2fun(VoxelCoords,VoxelConn,NodeVals,method='linear',fill_value=None):
+def grid2fun(VoxelCoords,VoxelConn,Vals,method='linear',fill_value=None):
     """
     grid2fun converts a voxel grid mesh (as made by VoxelMesh(mode='notrim') 
     or converter.makeGrid) into a function that can be evaluated at any point
@@ -197,8 +197,8 @@ def grid2fun(VoxelCoords,VoxelConn,NodeVals,method='linear',fill_value=None):
         List of nodal coordinates for the voxel mesh
     VoxelConn : List of Lists
        Nodal connectivity list for the voxel mesh.
-    NodeVals : list
-        List of values at each node.
+    Vals : list
+        List of values at each node or at each element.
 
     Returns
     -------
@@ -208,13 +208,19 @@ def grid2fun(VoxelCoords,VoxelConn,NodeVals,method='linear',fill_value=None):
 
     """
     
-    VoxelCoords = np.array(VoxelCoords)
-    X = np.unique(VoxelCoords[:,0])
-    Y = np.unique(VoxelCoords[:,1])
-    Z = np.unique(VoxelCoords[:,2])
+    if len(Vals) == len(VoxelCoords):
+        Coords = np.asarray(VoxelCoords)
+    elif len(Vals) == len(VoxelConn):
+        Coords = MeshUtils.Centroids(VoxelCoords,VoxelConn)
+    else:
+        raise Exception('Vals must be the same length as either VoxelCoords or VoxelConn')
+    # VoxelCoords = np.array(VoxelCoords)
+    X = np.unique(Coords[:,0])
+    Y = np.unique(Coords[:,1])
+    Z = np.unique(Coords[:,2])
     
     points = (X,Y,Z)
-    V = np.reshape(NodeVals,[len(X),len(Y),len(Z)])
+    V = np.reshape(Vals,[len(X),len(Y),len(Z)])
     
     V[np.isnan(V)] = np.array([np.nan]).astype(int)[0]
     fun = lambda x,y,z : interpolate.RegularGridInterpolator(points,V,method=method,bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
