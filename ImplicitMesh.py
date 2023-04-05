@@ -286,7 +286,11 @@ def FastMarchingMethod(VoxelCoords, VoxelConn, NodeVals):
     F = 1
     NodeVals = np.array(NodeVals)
     # Get Neighbors
-    NodeNeighbors = MeshUtils.getNodeNeighbors(VoxelCoords, VoxelConn)
+    if len(VoxelConn[0]) == 4:
+        ElemType = 'quad'
+    else:
+        ElemType = 'hex'
+    NodeNeighbors = MeshUtils.getNodeNeighbors(VoxelCoords, VoxelConn, ElemType=ElemType)
     xNeighbors = [[n for n in NodeNeighbors[i] if (VoxelCoords[n][1] == VoxelCoords[i][1]) and (VoxelCoords[n][2] == VoxelCoords[i][2])] for i in range(len(NodeNeighbors))]
     yNeighbors = [[n for n in NodeNeighbors[i] if (VoxelCoords[n][0] == VoxelCoords[i][0]) and (VoxelCoords[n][2] == VoxelCoords[i][2])] for i in range(len(NodeNeighbors))]
     zNeighbors = [[n for n in NodeNeighbors[i] if (VoxelCoords[n][0] == VoxelCoords[i][0]) and (VoxelCoords[n][1] == VoxelCoords[i][1])] for i in range(len(NodeNeighbors))]
@@ -333,9 +337,9 @@ def FastMarchingMethod(VoxelCoords, VoxelConn, NodeVals):
                 Nar.insert(bisect.bisect_left(Nar, (T[n],n)), (T[n],n))
             if n not in Accepted:
                 # Eikonal Update:
-                Tx = min([T[x] for x in xNeighbors[n]])
-                Ty = min([T[y] for y in yNeighbors[n]])
-                Tz = min([T[z] for z in zNeighbors[n]])
+                Tx = min([T[x] for x in xNeighbors[n]]+[0])
+                Ty = min([T[y] for y in yNeighbors[n]]+[0])
+                Tz = min([T[z] for z in zNeighbors[n]]+[0])
                 
                 discriminant = sum([Tx,Ty,Tz])**2 - N*(sum([Tx**2,Ty**2,Tz**2]) - h**2/F**2)
                 if discriminant > 0:
