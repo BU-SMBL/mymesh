@@ -963,8 +963,8 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
 
         return VertexError, NormalError
 
-    edges = converter.surf2edges(NodeCoords,NodeConn)
-    if len(edges) > 0: warnings.warn('Input mesh should be closed and contain no exposed edges.')
+    # edges = converter.surf2edges(NodeCoords,NodeConn)
+    # if len(edges) > 0: warnings.warn('Input mesh should be closed and contain no exposed edges.')
     k = 0
     # mesh.mesh(NodeCoords,NodeConn).Mesh2Meshio().write(str(k)+'.vtu');k+=1
 

@@ -8,7 +8,7 @@ Created on Wed Feb 16 11:28:28 2022
 import warnings, itertools, copy
 from scipy import spatial
 import numpy as np
-from . import mesh, converter, MeshUtils, Octree, Rays, Improvement, delaunay
+from . import mesh, converter, MeshUtils, Octree, Rays, Improvement, delaunay, Primitives
 
 def MeshBooleans(Surf1, Surf2, tol=1e-8):
     """
@@ -91,7 +91,91 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
 
 
     return Union, Intersection, Difference
-               
+
+def PlaneClip(pt, normal, Surf, fill=False, fill_h=None, tol=1e-8, flip=True, return_splitplane=False):
+    
+    
+    Tris = np.asarray(Surf.NodeCoords)[Surf.NodeConn]
+    pt = np.asarray(pt)
+    normal = np.asarray(normal)/np.linalg.norm(normal)
+    sd = np.sum(normal*Tris,axis=2) - np.dot(normal,pt)
+    Intersections = ~(np.all((sd < -tol),axis=1) | np.all((sd > tol),axis=1))
+    
+    if flip:
+        Clipped = mesh(Surf.NodeCoords,(np.asarray(Surf.NodeConn)[~Intersections & np.all(sd < 0,axis=1)]))
+    else:
+        Clipped = mesh(Surf.NodeCoords,(np.asarray(Surf.NodeConn)[~Intersections & np.all(sd > 0,axis=1)]))
+
+    Intersected = mesh(Surf.NodeCoords, [elem for i,elem in enumerate(Surf.NodeConn) if Intersections[i]])
+    
+    mins = np.min(Surf.NodeCoords,axis=0)
+    maxs = np.max(Surf.NodeCoords,axis=0)
+    bounds = [mins[0]-tol,maxs[0]+tol,mins[1]-tol,maxs[1]+tol,mins[2]-tol,maxs[2]+tol]
+    if fill_h is None:
+        fill_h = np.linalg.norm(maxs-mins)/10
+    Plane = Primitives.Plane(pt, normal, bounds, fill_h, meshobj=True, exact_h=False, ElemType='tri')
+
+    SplitSurf, SplitPlane = SplitMesh(Intersected,Plane) # TODO: This could be done more efficiently for planar case
+    SplitSurf.cleanup()
+    SplitPlane.cleanup()
+
+    # if fill:
+    #     # TODO: Efficiency and Robustness
+    #     Shared1,Shared2 = GetSharedNodes(SplitSurf.NodeCoords, SplitPlane.NodeCoords, eps=tol)
+    #     root = Octree.Surf2Octree(*Surf)
+    #     if np.any(np.abs(normal) != [0,0,1]):
+    #         ray = np.cross(normal, [0,0,1])
+    #     else:
+    #         ray = np.cross(normal, [1,0,0])
+
+    #     AllBoundary = [i for i,elem in enumerate(SplitPlane.NodeConn) if all([n in Shared2 for n in elem])]  
+        
+    #     NotSharedConn = [elem for i,elem in enumerate(SplitPlane.NodeConn) if not any([n in Shared2 for n in elem]) and i not in AllBoundary] 
+    #     SharedConn = [elem for i,elem in enumerate(SplitPlane.NodeConn) if any([n in Shared2 for n in elem]) and i not in AllBoundary]  
+        
+    #     Regions = MeshUtils.getConnectedElements(SplitPlane.NodeCoords,NotSharedConn)  # Node Sets
+    #     FillConn = []
+    #     for region in Regions:
+    #         RegionConn = [SplitPlane.NodeConn[i] for i in region]
+    #         point = MeshUtils.Centroids(SplitPlane.NodeCoords,[RegionConn[0]])
+    #         inside = Rays.isInsideSurf(point, Surf.NodeCoords, Surf.NodeConn, Surf.ElemNormals, octree=None, eps=1e-8, ray=ray)
+    #         if inside:
+    #             FillConn += RegionConn
+    #     InsideNodes = set(np.unique(FillConn))
+    #     OutsideNodes = set(range(SplitPlane.NNode)).difference(InsideNodes)
+
+    #     centroids = MeshUtils.Centroids(SplitPlane.NodeCoords,SharedConn)
+    #     for i,elem in enumerate(SharedConn):
+    #         if all([n in Shared2 or n in InsideNodes for n in elem]):
+    #             FillConn.append(elem)
+    #         elif all([n in Shared2 or n in InsideNodes for n in elem]):
+    #             continue
+    #         else:
+    #             centroid = centroids[i]
+    #             if Rays.isInsideSurf(centroid, Surf.NodeCoords, Surf.NodeConn, Surf.ElemNormals, octree=None, eps=1e-8, ray=ray):
+    #                 FillConn.append(elem)
+    #             #     InsideNodes.update([n for n in elem if n not in Shared2])
+    #             # else:
+    #             #     OutsideNodes.update([n for n in elem if n not in Shared2])
+
+
+    SplitTris = np.asarray(SplitSurf.NodeCoords)[SplitSurf.NodeConn]
+    sd2 = np.sum(normal*SplitTris,axis=2) - np.dot(normal,pt)
+
+    if flip:
+        Clipped2 = mesh(SplitSurf.NodeCoords,(np.asarray(SplitSurf.NodeConn)[np.all(sd2 <= tol,axis=1)]))
+        # if fill:
+        #     Clipped2.addElems(FillConn)
+    else:
+        Clipped2 = mesh(SplitSurf.NodeCoords,(np.asarray(SplitSurf.NodeConn)[np.all(sd2 >= -tol,axis=1)]))
+        # if fill:
+        #     Clipped2.addElems(FillConn)
+    Clipped.merge(Clipped2)
+    Clipped.cleanup()
+    if return_splitplane:
+        return Clipped,SplitPlane
+    return Clipped
+       
 def VoxelIntersect(VoxelCoordsA, VoxelConnA, VoxelCoordsB, VoxelConnB):
     # Requires Voxel meshes that exsits within the same grid
     centroidsA = [np.mean([VoxelCoordsA[n] for n in elem],axis=0).tolist() for elem in VoxelConnA]
@@ -294,7 +378,7 @@ def GetSharedNodes(NodeCoordsA, NodeCoordsB, eps=1e-10):
     
     return SharedA, SharedB
                            
-def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
+def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10, ray_override=None):
     # Classifies each Triangle in A as inside, outside, or on the surface facing the same or opposite direction as surface B
     
     

@@ -157,6 +157,16 @@ def PlaneTriangleIntersection(pt, Normal, TriCoords):
         # Intersection, points on different sides of the plane
         return True
     
+def PlaneTrianglesIntersection(pt, Normal, Tris, eps=1e-14):
+
+    Tris = np.asarray(Tris)
+    pt = np.asarray(pt)
+    Normal = np.asarray(Normal)/np.linalg.norm(Normal)
+    sd = np.sum(Normal*Tris,axis=2) - np.dot(Normal,pt)
+    Intersection = ~(np.all((sd < -eps),axis=1) | np.all((sd > eps),axis=1))
+
+    return Intersection
+    
 def TriangleTriangleIntersection(Tri1,Tri2,eps=1e-14,edgeedge=False):
     
     # If <edgeedge> is true, two triangles that meet exactly at the edges will be counted as an intersection
@@ -498,7 +508,8 @@ def TrianglesTrianglesIntersection(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
 
         Intersections[checks | coplanar] = False
         
-        CoTri1s = Tri1s[coplanar]; CoTri2s = Tri2s[coplanar]
+        CoTri1s = Tri1s[coplanar]
+        CoTri2s = Tri2s[coplanar]
         edges = np.array([[0,1],[1,2],[2,0]])
         edges1idx = np.array([edges[0],edges[1],edges[2],edges[0],edges[1],edges[2],edges[0],edges[1],edges[2]])
         edges2idx = np.array([edges[0],edges[1],edges[2],edges[1],edges[2],edges[0],edges[2],edges[0],edges[1]])
@@ -521,6 +532,10 @@ def TrianglesTrianglesIntersection(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
             alpha,beta,gamma = MeshUtils.BaryTri(Tri1s[i], Tri2s[i][0])
             if all([alpha>=0,beta>=0,gamma>=0]):
                 Intersections[i]  = True
+            else:
+                alpha,beta,gamma = MeshUtils.BaryTri(Tri2s[i], Tri1s[i][0])
+                if all([alpha>=0,beta>=0,gamma>=0]):
+                    Intersections[i]  = True
         ###
         # coplanar_intersections = np.repeat(False,len(coplanar))
         # for i in range(len(edges1)):
@@ -1186,8 +1201,6 @@ def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, octree='genera
     else:
         raise Exception('Invalid octree argument given')
         
-    
-    
     return intersections, distances, intersectionPts
         
 def SurfSelfIntersection(NodeCoords, SurfConn, octree='generate', eps=1e-14, return_pts=False):
@@ -1297,6 +1310,16 @@ def SurfSurfIntersection(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, eps=1e-
             
     return Surf1Intersections, Surf2Intersections
 
+def PlaneSurfIntersection(pt, Normal, NodeCoords, SurfConn, eps=1e-14):
+
+    NodeCoords = np.asarray(NodeCoords)
+    SurfConn = np.asarray(SurfConn)
+    pt = np.asarray(pt)
+    Normal = np.asarray(Normal)
+
+    Intersections = PlaneTrianglesIntersection(pt, Normal, NodeCoords[SurfConn], eps=eps)
+    return Intersections
+
 ## Inside Tests
 def isInsideSurf(pt, NodeCoords, SurfConn, ElemNormals, octree=None, eps=1e-8, ray=np.random.rand(3)):
     
@@ -1313,7 +1336,7 @@ def isInsideSurf(pt, NodeCoords, SurfConn, ElemNormals, octree=None, eps=1e-8, r
     else:
         raise Exception('Invalid octree argument given: '+str(octree))
         
-    intersections, distances,_ = RaySurfIntersection(pt,ray,NodeCoords,SurfConn,octree=root)
+    intersections, distances, _ = RaySurfIntersection(pt,ray,NodeCoords,SurfConn,octree=root)
     posDistances = np.array([d for d in distances if d > eps])
     zero = np.any(np.abs(distances)<eps)
     # intersections2 = [intersections[i] for i,d in enumerate(distances) if d >= 0]
