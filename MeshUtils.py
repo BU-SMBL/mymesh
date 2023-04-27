@@ -194,8 +194,13 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
 
         # for i,e in enumerate(NodeConn):
         #     ElemNeighbors[i] = 
-
-    if mode=='edge':
+    if mode=='node':
+        ElemConn = getElemConnectivity(NodeCoords,NodeConn)
+        for i,elem in enumerate(NodeConn):
+            for n in elem:
+                ElemNeighbors[i].update(ElemConn[n])
+        ElemNeighbors = [list(s) for s in ElemNeighbors] 
+    elif mode=='edge':
         
         Edges,EdgeConn,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True,return_EdgeConn=True,ReturnType=np.ndarray)
 
@@ -297,7 +302,7 @@ def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,BarrierNodes=set())
         
     return NodeRegions  
 
-def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge'):
+def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge',BarrierElems=set()):
     """
     getConnectedElements Identifies groups of connected nodes. For a fully 
     connected mesh, a single region will be identified
@@ -313,6 +318,10 @@ def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge'):
         None. If no value is provided, it will be computed with getNodeNeighbors
     mode : str, optional
         Connectivity method to be used for getElemNeighbors. The default is 'edge'.
+    BarrierElems : set, optional
+        Set of barrier elements that the connected region cannot move past. 
+        They can be included in a region, but will not connect to their neighbors
+        
 
     Returns
     -------
@@ -322,9 +331,11 @@ def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge'):
     # warnings.warn('getConnectedElements is still under development.')
     ElemRegions = []
     if not ElemNeighbors: ElemNeighbors = getElemNeighbors(NodeCoords,NodeConn,mode=mode)
+    if len(BarrierElems) > 0:
+        ElemNeighbors = [[] if i in BarrierElems else e for i,e in enumerate(ElemNeighbors)]
     NeighborSets = [set(n) for n in ElemNeighbors]
 
-    todo = set(range(len(NodeConn)))
+    todo = set(range(len(NodeConn))).difference(BarrierElems)
     while len(todo) > 0:
         seed = todo.pop()
         region = {seed}
