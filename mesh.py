@@ -306,6 +306,8 @@ class mesh:
         if cleanup:
             self.cleanup(tol=tol)
 
+      
+
     @property
     def NNode(self):
         self._NNode = len(self.NodeCoords)
@@ -531,6 +533,14 @@ class mesh:
             self._Centroids = MeshUtils.Centroids(*self)
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
         return self._Centroids
+    
+    # Topological Properties
+    @property
+    def EulerCharacteristic(self):
+        return self.NNode - self.NEdge + self.NFace
+    @property
+    def Genus(self):
+        return -(self.EulerCharacteristic - 2)/2
     
     def RenumberNodesBySet(self):
         # Re-organize the order of nodes based on their node sets and make required adjustments to other stored values
@@ -1021,7 +1031,7 @@ class mesh:
             raise Exception('Unrecognized file')   
     def Mesh2Meshio(self,PointData={},CellData={}):
         
-        points = self.NodeCoords
+        # points = self.NodeCoords
 
         if type(PointData) is list or type(PointData) is np.ndarray:
             self.NodeData['_NodeVals_'] = PointData
@@ -1034,52 +1044,79 @@ class mesh:
             self.ElemData = {**self.ElemData,**CellData}
 
         celldict = dict()
+        elemlengths = np.array([len(elem) for elem in self.NodeConn])
+        # if len(self.ElemData) > 0:
+        #     keys = self.ElemData.keys()
+        #     for key in keys:
+        #         celldata = [[],[],[],[],[],[]]
+        #         for i,elem in enumerate(self.NodeConn):
+        #             n = len(elem)
+        #             if n == 3:
+        #                 if len(self.ElemData) > 0: celldata[0].append(self.ElemData[key][i])
+        #             elif n == 4:
+        #                 if len(self.ElemData) > 0: celldata[1].append(self.ElemData[key][i])
+        #             elif n == 5:
+        #                 if len(self.ElemData) > 0: celldata[2].append(self.ElemData[key][i])
+        #             elif n == 6:
+        #                 if len(self.ElemData) > 0: celldata[3].append(self.ElemData[key][i])
+        #             elif n == 8:
+        #                 if len(self.ElemData) > 0: celldata[4].append(self.ElemData[key][i])
+        #             elif n == 10:
+        #                 if len(self.ElemData) > 0: celldata[5].append(self.ElemData[key][i])
+        #         celldata = [c for c in celldata if len(c) > 0]
         if len(self.ElemData) > 0:
             keys = self.ElemData.keys()
             for key in keys:
                 celldata = [[],[],[],[],[],[]]
-                for i,elem in enumerate(self.NodeConn):
-                    n = len(elem)
-                    if n == 3:
-                        if len(self.ElemData) > 0: celldata[0].append(self.ElemData[key][i])
-                    elif n == 4:
-                        if len(self.ElemData) > 0: celldata[1].append(self.ElemData[key][i])
-                    elif n == 5:
-                        if len(self.ElemData) > 0: celldata[2].append(self.ElemData[key][i])
-                    elif n == 6:
-                        if len(self.ElemData) > 0: celldata[3].append(self.ElemData[key][i])
-                    elif n == 8:
-                        if len(self.ElemData) > 0: celldata[4].append(self.ElemData[key][i])
-                    elif n == 10:
-                        if len(self.ElemData) > 0: celldata[5].append(self.ElemData[key][i])
+                data = np.array(self.ElemData[key])
+                celldata[0] = data[elemlengths==3]
+                celldata[1] = data[elemlengths==4]
+                celldata[2] = data[elemlengths==5]
+                celldata[3] = data[elemlengths==6]
+                celldata[4] = data[elemlengths==8]
+                celldata[5] = data[elemlengths==10]
                 celldata = [c for c in celldata if len(c) > 0]
                 celldict[key] = celldata
-        tris = []   # n = 3         
-        quads = []  # n = 4, self.type='surf'
-        tets = []   # n = 4
-        pyrs = []   # n = 5
-        wdgs = []   # n = 6
-        hexs = []   # n = 8
-        tet10 = []   # n = 10
-        for i,elem in enumerate(self.NodeConn):
-            n = len(elem)
-            if n == 3:
-                tris.append(elem)
-            elif n == 4 and self.Type == 'surf':
-                quads.append(elem)
-            elif n == 4:
-                tets.append(elem)
-            elif n == 5:
-                pyrs.append(elem)
-            elif n == 6:
-                wdgs.append(elem)
-            elif n == 8:
-                hexs.append(elem)
-            elif n == 10:
-                tet10.append(elem)
+                
+                
+        # tris = []   # n = 3         
+        # quads = []  # n = 4, self.type='surf'
+        # tets = []   # n = 4
+        # pyrs = []   # n = 5
+        # wdgs = []   # n = 6
+        # hexs = []   # n = 8
+        # tet10 = []   # n = 10
+        ArrayConn = np.array(self.NodeConn,dtype=object)
+        tris = ArrayConn[elemlengths==3].tolist()
+        if self.Type == 'surf':
+            quads = ArrayConn[elemlengths==4].tolist()
+            tets = []
+        else:
+            quads = []
+            tets = ArrayConn[elemlengths==4].tolist()
+        pyrs = ArrayConn[elemlengths==5].tolist()
+        wdgs = ArrayConn[elemlengths==6].tolist()
+        hexs = ArrayConn[elemlengths==8].tolist()
+        tet10 = ArrayConn[elemlengths==10].tolist()
+        # for i,elem in enumerate(self.NodeConn):
+        #     if elemlengths[i] == 3:
+        #         tris.append(elem)
+        #     elif elemlengths[i] == 4 and self.Type == 'surf':
+        #         quads.append(elem)
+        #     elif elemlengths[i] == 4:
+        #         tets.append(elem)
+        #     elif elemlengths[i] == 5:
+        #         pyrs.append(elem)
+        #     elif elemlengths[i] == 6:
+        #         wdgs.append(elem)
+        #     elif elemlengths[i] == 8:
+        #         hexs.append(elem)
+        #     elif elemlengths[i] == 10:
+        #         tet10.append(elem)
+        
         
         elems = [e for e in [('triangle',tris),('quad',quads),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10)] if len(e[1]) > 0]
-        m = meshio.Mesh(points, elems, point_data=self.NodeData, cell_data=celldict)
+        m = meshio.Mesh(self.NodeCoords, elems, point_data=self.NodeData, cell_data=celldict)
         return m
 
     def write(self,filename,binary=None):
