@@ -28,6 +28,125 @@ except:
 #  0_______1              *___0___*    
 #
 
+# 3___6___2
+# |       |
+# 7       5
+# |       |
+# 0___4___1
+
+def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation='linear', method='triangle', flip=False):
+    NewCoords = []
+    NewConn = []
+    NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
+    if flip:
+        NodeValues = -1*NodeValues
+    MarchingSquaresLookup_Edge.LookupTable = [
+        [[]],           # 0-0000
+        [[6,7]],        # 1-0001
+        [[5,6]],        # 2-0010
+        [[5,7]],        # 3-0011
+        [[4,5]],        # 4-0100
+        [[4,7],[5,6]],  # 5-0101
+        [[4,6]],        # 6-0110
+        [[4,7]],        # 7-0111
+        [[7,4]],        # 8-1000
+        [[6,4]],        # 9-1001
+        [[4,5],[6,7]],  # 10-1010
+        [[5,4]],        # 11-1011
+        [[7,5]],        # 12-1100
+        [[5,6]],        # 13-1101
+        [[7,6]], # 14-1110
+        [[]]   # 15-1111
+    ]
+    MarchingSquaresLookup_Tri.LookupTable = [
+        [[]],               # 0-0000
+        [[7,6,3]],          # 1-0001
+        [[5,2,6]],          # 2-0010
+        [[7,5,2],[2,3,7]],  # 3-0011
+        [[4,1,5]],          # 4-0100
+        [[4,1,5],[5,6,4],[4,6,7],[7,6,3]], # 5-0101
+        [[4,6,2],[2,6,4]],  # 6-0110
+        [[1,2,3],[3,4,1],[4,3,7]], # 7-0111
+        [[0,4,7]],          # 8-1000
+        [[0,4,6],[6,3,0]],  # 9-1001
+        [[0,4,7],[4,5,7],[7,5,6],[6,5,2]], # 10-1010
+        [[0,2,3],[0,4,5],[5,2,0]], # 11-1011
+        [[0,1,5],[5,7,0]], # 12-1100
+        [[0,1,3],[1,5,6],[6,3,1]], # 13-1101
+        [[0,1,2],[0,2,6],[6,7,0]], # 14-1110
+        [[0,1,2],[2,3,0]]   # 15-1111
+    ]
+    edgeLookup = [
+        [0, 0],  # Corner 0
+        [1, 1],  # Corner 1
+        [2, 2],  # Corner 2
+        [3, 3],  # Corner 3
+        [0, 1],  # Edge 0
+        [1, 2],  # Edge 1
+        [2, 3],  # Edge 2
+        [3, 0],  # Edge 3
+        ]
+    
+    arrayCoords = np.array(NodeCoords)
+    for e in range(len(NodeConn)):
+        vals = np.array([NodeValues[node] for node in NodeConn[e]])
+        inside = [1 if v <= 0 else 0 for v in vals]
+        i = int("".join(str(j) for j in inside), 2)
+        if method == 'triangle':
+            NewElems = MarchingSquaresLookup_Tri(i)
+        elif method == 'edge':
+            NewElems = MarchingSquaresLookup_Edge(i)
+        else:
+            raise Exception('Invalid method')
+    
+        if len(NewElems) > 0:
+            for t in NewElems:
+                elem = []
+                for n in t:
+                    node1 = NodeConn[e][edgeLookup[n][0]]
+                    node2 = NodeConn[e][edgeLookup[n][1]]
+                    coords1 = NodeCoords[node1]
+                    coords2 = NodeCoords[node2]
+                    v1 = NodeValues[node1]
+                    v2 = NodeValues[node2]
+                    if interpolation == 'midpoint' or v1 == v2:
+                        newNode = [
+                            (coords1[0] + coords2[0])/2,
+                            (coords1[1] + coords2[1])/2,
+                            (coords1[2] + coords2[2])/2
+                            ]
+                        elem.append(len(NewCoords))
+                        NewCoords.append(newNode)
+                    elif interpolation == 'linear':
+                        newNode = [
+                            coords1[0] + (0-v1)*(coords2[0]-coords1[0])/(v2-v1),
+                            coords1[1] + (0-v1)*(coords2[1]-coords1[1])/(v2-v1),
+                            coords1[2] + (0-v1)*(coords2[2]-coords1[2])/(v2-v1)
+                            ]
+                        if np.sign(v2) == np.sign(v1):
+                            print('Marching squares fuckup')
+                            print(str(e) + str(np.sign(vals)) + str(edgeLookup[n]))
+                        elem.append(len(NewCoords))
+                        NewCoords.append(newNode)                            
+                    else:
+                        raise Exception('Invalid interpolation method')
+                if len(elem) > 0:
+                    NewConn.append(elem)  
+                      
+    NewCoords,NewConn,_ = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn)
+    if interpolation=='linear' and method=='triangle':
+        NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
+
+    return NewCoords, NewConn
+
+def MarchingSquaresLookup_Tri(i):
+    assert i < 16, 'There are only 16 possible states of the square, i must be less than 16'
+    TriElems = MarchingSquaresLookup_Tri.LookupTable[i]
+    return TriElems
+def MarchingSquaresLookup_Edge(i):
+    assert i < 16, 'There are only 16 possible states of the square, i must be less than 16'
+    TriElems = MarchingSquaresLookup_Edge.LookupTable[i]
+    return TriElems
 
 def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',method='33',flip=False):
 # TODO: add option to invert (-NodeValues, -threshold)
