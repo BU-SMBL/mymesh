@@ -1045,48 +1045,23 @@ class mesh:
 
         celldict = dict()
         elemlengths = np.array([len(elem) for elem in self.NodeConn])
-        # if len(self.ElemData) > 0:
-        #     keys = self.ElemData.keys()
-        #     for key in keys:
-        #         celldata = [[],[],[],[],[],[]]
-        #         for i,elem in enumerate(self.NodeConn):
-        #             n = len(elem)
-        #             if n == 3:
-        #                 if len(self.ElemData) > 0: celldata[0].append(self.ElemData[key][i])
-        #             elif n == 4:
-        #                 if len(self.ElemData) > 0: celldata[1].append(self.ElemData[key][i])
-        #             elif n == 5:
-        #                 if len(self.ElemData) > 0: celldata[2].append(self.ElemData[key][i])
-        #             elif n == 6:
-        #                 if len(self.ElemData) > 0: celldata[3].append(self.ElemData[key][i])
-        #             elif n == 8:
-        #                 if len(self.ElemData) > 0: celldata[4].append(self.ElemData[key][i])
-        #             elif n == 10:
-        #                 if len(self.ElemData) > 0: celldata[5].append(self.ElemData[key][i])
-        #         celldata = [c for c in celldata if len(c) > 0]
         if len(self.ElemData) > 0:
             keys = self.ElemData.keys()
             for key in keys:
-                celldata = [[],[],[],[],[],[]]
+                celldata = [[],[],[],[],[],[],[]]
                 data = np.array(self.ElemData[key])
                 celldata[0] = data[elemlengths==3]
-                celldata[1] = data[elemlengths==4]
-                celldata[2] = data[elemlengths==5]
-                celldata[3] = data[elemlengths==6]
-                celldata[4] = data[elemlengths==8]
-                celldata[5] = data[elemlengths==10]
+                celldata[1] = data[elemlengths==3]
+                celldata[2] = data[elemlengths==4]
+                celldata[3] = data[elemlengths==5]
+                celldata[4] = data[elemlengths==6]
+                celldata[5] = data[elemlengths==8]
+                celldata[6] = data[elemlengths==10]
                 celldata = [c for c in celldata if len(c) > 0]
                 celldict[key] = celldata
                 
-                
-        # tris = []   # n = 3         
-        # quads = []  # n = 4, self.type='surf'
-        # tets = []   # n = 4
-        # pyrs = []   # n = 5
-        # wdgs = []   # n = 6
-        # hexs = []   # n = 8
-        # tet10 = []   # n = 10
         ArrayConn = np.array(self.NodeConn,dtype=object)
+        edges = ArrayConn[elemlengths==2].tolist()
         tris = ArrayConn[elemlengths==3].tolist()
         if self.Type == 'surf':
             quads = ArrayConn[elemlengths==4].tolist()
@@ -1098,24 +1073,9 @@ class mesh:
         wdgs = ArrayConn[elemlengths==6].tolist()
         hexs = ArrayConn[elemlengths==8].tolist()
         tet10 = ArrayConn[elemlengths==10].tolist()
-        # for i,elem in enumerate(self.NodeConn):
-        #     if elemlengths[i] == 3:
-        #         tris.append(elem)
-        #     elif elemlengths[i] == 4 and self.Type == 'surf':
-        #         quads.append(elem)
-        #     elif elemlengths[i] == 4:
-        #         tets.append(elem)
-        #     elif elemlengths[i] == 5:
-        #         pyrs.append(elem)
-        #     elif elemlengths[i] == 6:
-        #         wdgs.append(elem)
-        #     elif elemlengths[i] == 8:
-        #         hexs.append(elem)
-        #     elif elemlengths[i] == 10:
-        #         tet10.append(elem)
         
         
-        elems = [e for e in [('triangle',tris),('quad',quads),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10)] if len(e[1]) > 0]
+        elems = [e for e in [('line',edges),('triangle',tris),('quad',quads),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10)] if len(e[1]) > 0]
         m = meshio.Mesh(self.NodeCoords, elems, point_data=self.NodeData, cell_data=celldict)
         return m
 
