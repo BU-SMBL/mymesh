@@ -1050,7 +1050,7 @@ class mesh:
             for key in keys:
                 celldata = [[],[],[],[],[],[],[]]
                 data = np.array(self.ElemData[key])
-                celldata[0] = data[elemlengths==3]
+                celldata[0] = data[elemlengths==2]
                 celldata[1] = data[elemlengths==3]
                 celldata[2] = data[elemlengths==4]
                 celldata[3] = data[elemlengths==5]
