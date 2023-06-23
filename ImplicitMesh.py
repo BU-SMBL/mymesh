@@ -185,6 +185,11 @@ def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',reinitialize=False):
     NodeVals = [NodeVals[i] for i in OriginalIds]
     return NodeCoords, NodeConn, NodeVals
 
+def SurfaceMesh(sdf,xlims,ylims,zlims,h,threshold=0, flip=False, mcmethod='33'):
+    NodeCoords, NodeConn, NodeVals = VoxelMesh(sdf,xlims,ylims,zlims,h,mode='notrim',reinitialize=False)
+    SurfCoords, SurfConn = MarchingCubes.MarchingCubes(NodeCoords, NodeConn, NodeVals, threshold=threshold, flip=flip, method=mcmethod)
+    return SurfCoords, SurfConn
+
 def grid2fun(VoxelCoords,VoxelConn,Vals,method='linear',fill_value=None):
     """
     grid2fun converts a voxel grid mesh (as made by VoxelMesh(mode='notrim') 
