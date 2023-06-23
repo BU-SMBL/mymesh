@@ -17,7 +17,7 @@ except:
     warnings.warn('Optional dependencies not found - some functions may not work properly')
 
 
-def CollapseSlivers_old(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=[], verbose=False, pool=Parallel(n_jobs=1)):
+def CollapseSlivers_old(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=[], verbose=False, pool=None):
     
     if type(NodeCoords) is np.array: NodeCoords = NodeCoords.tolist()
     if type(NodeConn) is np.array: NodeConn = NodeConn.tolist()
