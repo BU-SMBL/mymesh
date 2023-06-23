@@ -466,6 +466,7 @@ def ShapeCategory(shapeindex):
     return shape
                        
 def AnalyticalCurvature(F,NodeCoords):
+    # Curvature formulas for implicit curves and surfaces, Ron Goldman (2005)
     x, y, z = sp.symbols('x y z', real=True)
     if type(NodeCoords) is list: NodeCoords = np.asarray(NodeCoords)
 
@@ -501,13 +502,20 @@ def AnalyticalCurvature(F,NodeCoords):
                     [Fxz*Fzy-Fxy*Fzz, Fxx*Fzz-Fxz*Fzx, Fxy*Fzx-Fxx*Fzy],
                     [Fxy*Fyz-Fxz*Fyy, Fyx*Fxz-Fxx*Fyz, Fxx*Fyy-Fxy*Fyx]
                 ])
-
+    
     grad = sp.lambdify((x,y,z),Grad,['numpy',{'DiracDelta':DiracDelta}])
     hess = sp.lambdify((x,y,z),Hess,['numpy',{'DiracDelta':DiracDelta}])
     cof = sp.lambdify((x,y,z),Cof,['numpy',{'DiracDelta':DiracDelta}])
 
-    g = grad(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).swapaxes(0,2)
-    h = hess(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).tolist()
+    if all([any([g.has(var) for g in Grad]) for var in [x,y,z]]):
+        g = grad(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).swapaxes(0,2)
+    else:
+        g = np.array([grad(NodeCoords[i,0],NodeCoords[i,1],NodeCoords[i,2]) for i in range(len(NodeCoords))]).swapaxes(1,2)
+
+    if all([any([h.has(var) for h in Hess]) for var in [x,y,z]]):
+        h = hess(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).tolist()
+    else:
+        h = np.array([hess(NodeCoords[i,0],NodeCoords[i,1],NodeCoords[i,2]) for i in range(len(NodeCoords))]).T
     if not hasattr(h[0][0], "__len__"):
         h[0][0] = np.repeat(h[0][0],len(NodeCoords)).tolist()
     if not hasattr(h[0][1], "__len__"):
@@ -527,7 +535,12 @@ def AnalyticalCurvature(F,NodeCoords):
     if not hasattr(h[2][2], "__len__"):
         h[2][2] = np.repeat(h[2][2],len(NodeCoords)).tolist()
     h = np.array(h).swapaxes(0,2)
-    c = cof(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).tolist()
+
+    if all([any([c.has(var) for c in Cof]) for var in [x,y,z]]):
+        c = cof(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).tolist()
+    else:
+        c = np.array([cof(NodeCoords[i,0],NodeCoords[i,1],NodeCoords[i,2]) for i in range(len(NodeCoords))]).T
+    
     if not hasattr(c[0][0], "__len__"):
         c[0][0] = np.repeat(c[0][0],len(NodeCoords)).tolist()
     if not hasattr(c[0][1], "__len__"):
