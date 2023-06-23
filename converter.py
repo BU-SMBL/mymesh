@@ -581,6 +581,8 @@ def faces2surface(Faces):
     unique,indices,counts = np.unique(arr,return_counts=True,return_index=True)
     SurfIdx = indices[np.where(counts==1)]
     SurfConn = np.array(Faces,dtype=object)[SurfIdx].tolist()
+    if len(Faces) == len(SurfConn):
+        SurfConn=Faces
     return SurfConn
 
 def faces2unique(Faces,return_idx=False,return_inv=False):
