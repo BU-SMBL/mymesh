@@ -1549,10 +1549,17 @@ def makeGrid(xlims, ylims, zlims, VoxelSize):
     VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
     return VoxelCoords, VoxelConn
 
-def voxel2im(VoxelCoords, VoxelConn, VoxelVals):
+def voxel2im(VoxelCoords, VoxelConn, Vals):
     if type(VoxelCoords) == list: VoxelCoords = np.array(VoxelCoords)
-    shape = (len(np.unique(VoxelCoords[:,2]))-1,len(np.unique(VoxelCoords[:,1]))-1,len(np.unique(VoxelCoords[:,0]))-1)
-    I = np.reshape(VoxelVals,shape,order='F')
+    if len(Vals) == len(VoxelCoords):
+        # Node values
+        shape = (len(np.unique(VoxelCoords[:,2])),len(np.unique(VoxelCoords[:,1])),len(np.unique(VoxelCoords[:,0])))
+    elif len(Vals) == len(VoxelConn):
+        # Voxel values
+        shape = (len(np.unique(VoxelCoords[:,2]))-1,len(np.unique(VoxelCoords[:,1]))-1,len(np.unique(VoxelCoords[:,0]))-1)
+    else:
+        raise Exception('Vals must be equal in length to either VoxelCoords or VoxelConn')
+    I = np.reshape(Vals,shape,order='F')
     
     return I
 
