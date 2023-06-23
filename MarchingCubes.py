@@ -65,7 +65,7 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
         [[7,5,2],[2,3,7]],  # 3-0011
         [[4,1,5]],          # 4-0100
         [[4,1,5],[5,6,4],[4,6,7],[7,6,3]], # 5-0101
-        [[4,6,2],[2,6,4]],  # 6-0110
+        [[4,1,2],[2,6,4]],  # 6-0110
         [[1,2,3],[3,4,1],[4,3,7]], # 7-0111
         [[0,4,7]],          # 8-1000
         [[0,4,6],[6,3,0]],  # 9-1001
@@ -97,7 +97,7 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
         elif method == 'edge':
             NewElems = MarchingSquaresLookup_Edge(i)
         else:
-            raise Exception('Invalid method')
+            raise Exception('Invalid method. Must be "triangle" or "edge".')
     
         if len(NewElems) > 0:
             for t in NewElems:
