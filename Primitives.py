@@ -43,7 +43,7 @@ def Box(bounds,h,meshobj=False):
         return Box
     return BoxCoords,BoxConn
 
-def Grid(bounds, h, meshobj=False, exact_h=False):
+def Grid(bounds, h, meshobj=True, exact_h=False):
     """
     Grid Generate a rectangular grid mesh.
 
@@ -124,7 +124,7 @@ def Grid(bounds, h, meshobj=False, exact_h=False):
         return Grid
     return VoxelCoords, VoxelConn
 
-def Grid2D(bounds, h, z=0, meshobj=False, exact_h=False, ElemType='quad'):
+def Grid2D(bounds, h, z=0, meshobj=True, exact_h=False, ElemType='quad'):
     """
     Grid Generate a rectangular grid mesh.
 
@@ -199,7 +199,7 @@ def Grid2D(bounds, h, z=0, meshobj=False, exact_h=False, ElemType='quad'):
         return Grid
     return GridCoords, GridConn
 
-def Plane(pt, normal, bounds, h, meshobj=False, exact_h=False, ElemType='quad'):
+def Plane(pt, normal, bounds, h, meshobj=True, exact_h=False, ElemType='quad'):
 
     # Get rotation between the plane and the xy (z=0) plane
     normal = np.asarray(normal)/np.linalg.norm(normal)
