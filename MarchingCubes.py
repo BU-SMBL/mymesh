@@ -34,9 +34,10 @@ except:
 # |       |
 # 0___4___1
 
-def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation='linear', method='triangle', flip=False):
+def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation='linear', method='triangle', flip=False, return_anchors=False):
     NewCoords = []
     NewConn = []
+    Anchors = []
     NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
     if flip:
         NodeValues = -1*NodeValues
@@ -46,7 +47,7 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
         [[5,6]],        # 2-0010
         [[5,7]],        # 3-0011
         [[4,5]],        # 4-0100
-        [[4,7],[5,6]],  # 5-0101
+        [[7,4],[5,6]],  # 5-0101
         [[4,6]],        # 6-0110
         [[4,7]],        # 7-0111
         [[7,4]],        # 8-1000
@@ -54,7 +55,7 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
         [[4,5],[6,7]],  # 10-1010
         [[5,4]],        # 11-1011
         [[7,5]],        # 12-1100
-        [[5,6]],        # 13-1101
+        [[6,5]],        # 13-1101
         [[7,6]], # 14-1110
         [[]]   # 15-1111
     ]
@@ -87,7 +88,7 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
         [3, 0],  # Edge 3
         ]
     
-    arrayCoords = np.array(NodeCoords)
+    # arrayCoords = np.array(NodeCoords)
     for e in range(len(NodeConn)):
         vals = np.array([NodeValues[node] for node in NodeConn[e]])
         inside = [1 if v <= 0 else 0 for v in vals]
@@ -130,13 +131,22 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
                         NewCoords.append(newNode)                            
                     else:
                         raise Exception('Invalid interpolation method')
+                    if return_anchors:
+                        if flip:
+                            anchor = [node1,node2][np.argmax([v1,v2])] # Pick the point in positive domain
+                        else:
+                            anchor = [node1,node2][np.argmin([v1,v2])] # Pick the point in negative domain
+                        Anchors.append(anchor)
+                    
                 if len(elem) > 0:
                     NewConn.append(elem)  
                       
-    NewCoords,NewConn,_ = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn)
+    NewCoords,NewConn,_,Idx = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
     if interpolation=='linear' and method=='triangle':
         NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
-
+    if return_anchors:
+        Anchors = np.array(Anchors)
+        return NewCoords, NewConn, Anchors[Idx]
     return NewCoords, NewConn
 
 def MarchingSquaresLookup_Tri(i):
@@ -148,12 +158,12 @@ def MarchingSquaresLookup_Edge(i):
     TriElems = MarchingSquaresLookup_Edge.LookupTable[i]
     return TriElems
 
-def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',method='33',flip=False):
+def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',method='33',flip=False, return_anchors=False):
 # TODO: add option to invert (-NodeValues, -threshold)
     # method: 'original', '33'
     TriNodeCoords = []
     TriNodeConn = []
-    
+    Anchors = []
     NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
     if flip:
         NodeValues = -1*NodeValues
@@ -3605,13 +3615,21 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
                             TriNodeCoords.append(newNode)                            
                         else:
                             raise Exception('Invalid interpolation method')
+                        if return_anchors:
+                            if flip:
+                                anchor = [node1,node2][np.argmax([v1,v2])] # Pick the point in positive domain
+                            else:
+                                anchor = [node1,node2][np.argmin([v1,v2])] # Pick the point in negative domain
+                            Anchors.append(anchor)
                 if len(elem) > 0:
                     TriNodeConn.append(elem)  
                       
-    TriNodeCoords,TriNodeConn,_ = MeshUtils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn)
+    TriNodeCoords,TriNodeConn,_,Idx = MeshUtils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,return_idx=True)
     if interpolation=='linear':
         TriNodeCoords,TriNodeConn = MeshUtils.DeleteDegenerateElements(TriNodeCoords,TriNodeConn,strict=True)
-    
+    if return_anchors:
+        Anchors = np.array(Anchors)
+        return TriNodeCoords, TriNodeConn, Anchors[Idx]
     return TriNodeCoords, TriNodeConn
 
 def ParchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',pool=Parallel(n_jobs=1),method='33',flip=False):
@@ -7930,5 +7948,4 @@ def generateLookup():
     # i = 26
     # bits = np.array([int(b) for b in list('{:08b}'.format(i))])
     # lookuptable[i],Case[i] = lookup(bits)
-    return LookupTable, Cases
-
+    return 
