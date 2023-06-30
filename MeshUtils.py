@@ -1064,6 +1064,8 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False):
 
     # assert len(NodeCoords) > 0, 'No nodes in mesh.'
     if len(NodeCoords) == 0:
+        if return_idx:
+            return NodeCoords,NodeConn,[],[]
         return NodeCoords, NodeConn, []
 
     if tol > 0:
