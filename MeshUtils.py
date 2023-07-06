@@ -881,11 +881,16 @@ def Project2Surface(Point,Normal,NodeCoords,SurfConn,tol=np.inf,octree='generate
     elif min(np.abs(distances)) > tol:
         elemID = alpha = beta = gamma = -1
     else:
-        idx = np.where(np.abs(distances) == min(np.abs(distances)))[0][0]
-        p = intersectionPts[idx]
-        elemID = intersections[idx]
-        pts = NodeCoords[SurfConn[elemID]]
-        alpha,beta,gamma = BaryTri(pts,p)
+        try:
+            idx = np.where(np.abs(distances) == min(np.abs(distances)))[0][0]
+            p = intersectionPts[idx]
+            elemID = intersections[idx]
+            pts = NodeCoords[SurfConn[elemID]]
+            alpha,beta,gamma = BaryTri(pts,p)
+        except:
+            print(distances)
+            elemID = alpha = beta = gamma = -1
+
     return elemID,alpha,beta,gamma
 
 def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verbose=False, octree='generate', return_octree=False):
