@@ -34,10 +34,12 @@ except:
 # |       |
 # 0___4___1
 
-def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation='linear', method='triangle', flip=False, return_anchors=False):
+def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation='linear', method='triangle', flip=False, return_anchors=False, cleanup=True):
     NewCoords = []
     NewConn = []
     Anchors = []
+    AnchorAxis = []
+    AnchorDir = []
     NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
     if flip:
         NodeValues = -1*NodeValues
@@ -137,16 +139,38 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
                         else:
                             anchor = [node1,node2][np.argmin([v1,v2])] # Pick the point in negative domain
                         Anchors.append(anchor)
+
+                        if (edgeLookup[n][0] == 0 and edgeLookup[n][1] == 1) or (edgeLookup[n][0] == 2 and edgeLookup[n][1] == 3):
+                            AnchorAxis.append(0)
+                        elif (edgeLookup[n][0] == 1 and edgeLookup[n][1] == 2) or (edgeLookup[n][0] == 3 and edgeLookup[n][1] == 0):
+                            AnchorAxis.append(1)
+                        else:
+                            AnchorAxis.append(-1)
+
+                        mid = np.array([
+                            (coords1[0] + coords2[0])/2,
+                            (coords1[1] + coords2[1])/2,
+                            (coords1[2] + coords2[2])/2
+                            ])
+                        if np.all(mid-NodeCoords[anchor] >= 0):
+                            AnchorDir.append(1)
+                        else:
+                            AnchorDir.append(-1)
+
                     
                 if len(elem) > 0:
                     NewConn.append(elem)  
-                      
-    NewCoords,NewConn,_,Idx = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
-    if interpolation=='linear' and method=='triangle':
-        NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
+    if cleanup:                  
+        NewCoords,NewConn,_,Idx = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
+        if interpolation=='linear' and method=='triangle':
+            NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
+    else:
+        Idx = np.arange(len(NewCoords),dtype=int)
     if return_anchors:
         Anchors = np.array(Anchors)
-        return NewCoords, NewConn, Anchors[Idx]
+        AnchorAxis = np.array(AnchorAxis)
+        AnchorDir = np.array(AnchorDir)
+        return NewCoords, NewConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
     return NewCoords, NewConn
 
 def MarchingSquaresLookup_Tri(i):
@@ -7947,5 +7971,4 @@ def generateLookup():
         LookupTable[i], Cases[i] = lookup(bits)
     # i = 26
     # bits = np.array([int(b) for b in list('{:08b}'.format(i))])
-    # lookuptable[i],Case[i] = lookup(bits)
-    return 
+    # lookuptab
