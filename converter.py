@@ -154,14 +154,16 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
         pyrIdx = np.where(Ls == 5)[0]
         wdgIdx = np.where(Ls == 6)[0]
         hexIdx = np.where(Ls == 8)[0]
-        
-        edgs = [NodeConn[i] for i in edgIdx]
+        if len(edgIdx) > 0:
+            edgs = np.array([NodeConn[i] for i in edgIdx]).astype(int)
+        else:
+            edgs = np.empty((0,2),dtype=int)
         tris = [NodeConn[i] for i in triIdx]
         tets = [NodeConn[i] for i in tetIdx]
         pyrs = [NodeConn[i] for i in pyrIdx]
         wdgs = [NodeConn[i] for i in wdgIdx]
         hexs = [NodeConn[i] for i in hexIdx]
-
+        
         Edges = np.concatenate((edgs,tri2edges([],tris,ReturnType=np.ndarray), 
                                 tet2edges([],tets,ReturnType=np.ndarray), 
                                 pyramid2edges([],pyrs,ReturnType=np.ndarray), 
