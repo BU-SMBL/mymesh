@@ -7,7 +7,8 @@ Created on Tue Feb  1 15:23:07 2022
 #%%
 from . import MeshUtils, Octree, delaunay
 import numpy as np
-import itertools, random, sys
+import itertools, random, sys, warnings
+import scipy
 
 ## Intersection Tests:
 def RayTriangleIntersection(pt, ray, TriCoords, bidirectional=False, eps=1e-6):
@@ -69,7 +70,36 @@ def RayTrianglesIntersection(pt, ray, Tris, bidirectional=False, eps=1e-14):
         intersectionPts = pt + ray*t[intersections,None]
         
     return intersections, intersectionPts
-    
+
+def RaysTrianglesIntersection(pts, rays, Tris, bidirectional=False, eps=1e-14):
+    # Pairwise checks between rays and Tris
+    with np.errstate(divide='ignore', invalid='ignore'):
+        edge1 = Tris[:,1] - Tris[:,0]
+        edge2 = Tris[:,2] - Tris[:,0]
+        
+        p = np.cross(rays, edge2)
+        det = np.sum(edge1*p,axis=1)
+        
+        invdet = 1/det
+        tvec = pts - Tris[:,0]
+        u = np.sum(tvec*p,axis=1) * invdet
+        
+        q = np.cross(tvec,edge1)
+        v = np.sum(rays*q,axis=1) * invdet
+        
+        t = np.sum(edge2*q,axis=1) * invdet
+        
+        checks = (
+            ((det > -eps) & (det < eps)) |
+            ((u < 0) | (u > 1)) |
+            ((v < 0) | (u+v > 1)) |
+            ((abs(t) <= eps) & (not bidirectional))
+            )
+        intersections = np.where(~checks)[0]
+        intersectionPts = pts[intersections] + rays[intersections]*t[intersections,None]
+        
+    return intersections, intersectionPts
+
 def RayBoxIntersection(pt, ray, xlim, ylim, zlim):
     # Williams, Barrus, Morley and Shirley (2002)
     
@@ -1202,7 +1232,96 @@ def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, octree='genera
         raise Exception('Invalid octree argument given')
         
     return intersections, distances, intersectionPts
+
+ 
+def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, eps=1e-14, octree='generate'):
+    
+    ArrayCoords = np.array(NodeCoords)
+    if type(pts) is list: pts = np.array(pts)
+    if type(rays) is list: rays = np.array(rays)
+    if octree == None or octree == 'None' or octree == 'none':
+        # Won't use any octree structure to accelerate intersection tests
+        inpts = np.repeat(pts,len(SurfConn),axis=0)
+        inrays = np.repeat(rays,len(SurfConn),axis=0)
+        RayIds = np.repeat(np.arange(len(rays),dtype=int),len(SurfConn),axis=0)
+
+        Tris = np.tile(ArrayCoords[SurfConn], (len(pts),1,1))
+        TriIds = np.tile(np.arange(len(SurfConn),dtype=int), len(pts))
         
+        outintersections,outintersectionPts = RaysTrianglesIntersection(inpts, inrays, Tris, bidirectional=True, eps=eps)
+        outdistances = np.sum(inrays[outintersections]*(outintersectionPts-inpts[outintersections]),axis=1)
+
+        intersections = -1*np.ones((len(pts),len(SurfConn)))
+        distances = np.nan*np.ones((len(pts),len(SurfConn)))
+        intersectionPts = np.nan*np.ones((len(pts),len(SurfConn),3))
+
+        intersections[RayIds[outintersections],TriIds[outintersections]] = TriIds[outintersections]
+        distances[RayIds[outintersections],TriIds[outintersections]] = outdistances
+        intersectionPts[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts
+
+        intersections = MeshUtils.ExtractRagged(intersections,delval=-1)
+        distances = MeshUtils.ExtractRagged(distances,delval=np.nan)
+        intersectionPts = MeshUtils.ExtractRagged(intersectionPts,delval=np.nan)
+
+    elif octree == 'generate' or type(octree) == Octree.OctreeNode:
+        if octree == 'generate':
+            # Create an octree structure based on the provided structure
+            root = Octree.Surf2Octree(NodeCoords,SurfConn)
+        else:
+            # Using an already generated octree structure
+            # If this is the case, it should conform to the same structure and labeling as one generated with Octree.Surf2Octree
+            root = octree
+        # Proceeding with octree-accelerated intersection test
+        def octreeTest(pt, ray, node, TriIds):
+            [xlim,ylim,zlim] = node.getLimits()
+            if RayBoxIntersection(pt, ray, xlim, ylim, zlim):
+                if node.state == 'leaf':
+                    TriIds += node.data
+                elif node.state == 'root' or node.state == 'branch':
+                    for child in node.children:
+                        TriIds = octreeTest(pt, ray, child, TriIds)
+            return TriIds
+        
+        # Assemble pairwise list of rays and tris
+        TriIds = [[] for i in range(len(pts))]
+        RayIds = [[] for i in range(len(pts))]
+        for i in range(len(rays)):
+            iTris = octreeTest(pts[i], rays[i], root, [])
+            TriIds[i] = iTris
+            RayIds[i] = np.repeat(i,len(iTris))
+        TriIds = np.array([x for y in TriIds for x in y]) # flattening
+        RayIds = np.array([x for y in RayIds for x in y]) # flattening
+        
+        Tris = ArrayCoords[np.asarray(SurfConn)[TriIds]]
+        inpts = pts[RayIds]
+        inrays = rays[RayIds]
+        outintersections,outintersectionPts = RaysTrianglesIntersection(inpts, inrays, Tris, bidirectional=True, eps=eps)
+
+        outdistances = np.sum(inrays[outintersections]*(outintersectionPts-inpts[outintersections]),axis=1)
+
+        spintersections = scipy.sparse.lil_matrix((len(pts),len(SurfConn)),dtype=int)
+        spdistances = scipy.sparse.lil_matrix((len(pts),len(SurfConn)))
+        spintersectionPtsX = scipy.sparse.lil_matrix((len(pts),len(SurfConn)))
+        spintersectionPtsY = scipy.sparse.lil_matrix((len(pts),len(SurfConn)))
+        spintersectionPtsZ = scipy.sparse.lil_matrix((len(pts),len(SurfConn)))
+
+
+        spintersections[RayIds[outintersections],TriIds[outintersections]] = TriIds[outintersections]
+        spdistances[RayIds[outintersections],TriIds[outintersections]] = outdistances+1e-32
+        spintersectionPtsX[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts[:,0]+1e-32
+        spintersectionPtsY[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts[:,1]+1e-32
+        spintersectionPtsZ[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts[:,2]+1e-32
+
+        intersections = [x.toarray()[x.nonzero()] for x in spintersections.tocsr()]
+        distances = [(x.toarray()[x.nonzero()]-1e-32) for x in spdistances.tocsr()]        
+        intersectionPts = [np.vstack([x.toarray()[x.nonzero()],y.toarray()[y.nonzero()],z.toarray()[z.nonzero()]]).T-1e32 for x,y,z in zip(spintersectionPtsX.tocsr(),spintersectionPtsY.tocsr(),spintersectionPtsZ.tocsr())]
+
+
+    else:
+        raise Exception('Invalid octree argument given')
+        
+    return intersections, distances, intersectionPts
+
 def SurfSelfIntersection(NodeCoords, SurfConn, octree='generate', eps=1e-14, return_pts=False):
     if octree == None or octree == 'None' or octree == 'none':
         # Won't use any octree structure to accelerate intersection tests

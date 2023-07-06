@@ -148,27 +148,32 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
     
     if ElemType=='auto' or ElemType=='mixed':
         Ls = np.array([len(elem) for elem in NodeConn])
+        edgIdx = np.where(Ls == 2)[0]
         triIdx = np.where(Ls == 3)[0]
         tetIdx = np.where(Ls == 4)[0]
         pyrIdx = np.where(Ls == 5)[0]
         wdgIdx = np.where(Ls == 6)[0]
         hexIdx = np.where(Ls == 8)[0]
-        
+        if len(edgIdx) > 0:
+            edgs = np.array([NodeConn[i] for i in edgIdx]).astype(int)
+        else:
+            edgs = np.empty((0,2),dtype=int)
         tris = [NodeConn[i] for i in triIdx]
         tets = [NodeConn[i] for i in tetIdx]
         pyrs = [NodeConn[i] for i in pyrIdx]
         wdgs = [NodeConn[i] for i in wdgIdx]
         hexs = [NodeConn[i] for i in hexIdx]
-
-        Edges = np.concatenate((tri2edges([],tris,ReturnType=np.ndarray), 
+        
+        Edges = np.concatenate((edgs,tri2edges([],tris,ReturnType=np.ndarray), 
                                 tet2edges([],tets,ReturnType=np.ndarray), 
                                 pyramid2edges([],pyrs,ReturnType=np.ndarray), 
                                 wedge2edges([],wdgs,ReturnType=np.ndarray), 
                                 hex2edges([],hexs,ReturnType=np.ndarray)))
         if return_EdgeElem or return_EdgeConn:
-            EdgeElem = np.concatenate((np.repeat(triIdx,3),np.repeat(tetIdx,6),np.repeat(pyrIdx,8),np.repeat(wdgIdx,9),np.repeat(hexIdx,12)))
+            EdgeElem = np.concatenate((np.repeat(edgIdx,1),np.repeat(triIdx,3),np.repeat(tetIdx,6),np.repeat(pyrIdx,8),np.repeat(wdgIdx,9),np.repeat(hexIdx,12)))
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
+                np.repeat([[0]],len(edgIdx),axis=0).reshape(len(edgIdx)*1),
                 np.repeat([[0,1,2]],len(triIdx),axis=0).reshape(len(triIdx)*3), 
                 np.repeat([[0,1,2,3,4,5]],len(tetIdx),axis=0).reshape(len(tetIdx)*6),  
                 np.repeat([[0,1,2,3,4,5,6,7]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*8),                   
