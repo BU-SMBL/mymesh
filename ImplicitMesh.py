@@ -418,7 +418,7 @@ def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
     
     return NodeVals
 
-def mesh2udf(M,VoxelCoords,VoxelConn,pool=Parallel(n_jobs=4,backend='threading')):
+def mesh2udf(M,VoxelCoords,VoxelConn,pool=None):
     """
     mesh2udf Generates an unsigned distance field for a mesh
 
@@ -1071,7 +1071,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
     return NewCoords.tolist(), NodeConn
 
 def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25','-Y','-o/150'],
-           MCInterp='midpoint',SurfOpt=True,TetOpt=True,GLS=False,SkewThreshold=None, pool=Parallel(n_jobs=1),
+           MCInterp='midpoint',SurfOpt=True,TetOpt=True,GLS=False,SkewThreshold=None, pool=None,
            BLStiffnessFactor=1,BLMaxThickness=None,TetSliverThreshold=None):
     """
     HexCore - Generate a mesh with a core of regular hexahedral elements, 
@@ -1264,7 +1264,7 @@ def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25',
     return hexcore  
 
 def TetMesh(sdf,bounds,h,verbose=True,TetgenSwitches=['-pq1.1/25','-Y','-o/150'],
-            MCInterp='midpoint',SurfOpt=True,GLS=False,SkewThreshold=None,pool=Parallel(n_jobs=1)):
+            MCInterp='midpoint',SurfOpt=True,GLS=False,SkewThreshold=None,pool=None):
     """
     TetMesh - Generate a Tetrahedral Mesh for a given signed distance function
     (or similar isosurface implicit function)
