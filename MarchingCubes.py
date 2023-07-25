@@ -140,9 +140,16 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
                             anchor = [node1,node2][np.argmin([v1,v2])] # Pick the point in negative domain
                         Anchors.append(anchor)
 
-                        if (edgeLookup[n][0] == 0 and edgeLookup[n][1] == 1) or (edgeLookup[n][0] == 2 and edgeLookup[n][1] == 3):
+                        # if (edgeLookup[n][0] == 0 and edgeLookup[n][1] == 1) or (edgeLookup[n][0] == 2 and edgeLookup[n][1] == 3):
+                        #     AnchorAxis.append(0)
+                        # elif (edgeLookup[n][0] == 1 and edgeLookup[n][1] == 2) or (edgeLookup[n][0] == 3 and edgeLookup[n][1] == 0):
+                        #     AnchorAxis.append(1)
+                        # else:
+                        #     AnchorAxis.append(-1)
+
+                        if n == 4 or n == 6:
                             AnchorAxis.append(0)
-                        elif (edgeLookup[n][0] == 1 and edgeLookup[n][1] == 2) or (edgeLookup[n][0] == 3 and edgeLookup[n][1] == 0):
+                        elif n == 5 or n == 7: 
                             AnchorAxis.append(1)
                         else:
                             AnchorAxis.append(-1)
@@ -188,6 +195,8 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
     TriNodeCoords = []
     TriNodeConn = []
     Anchors = []
+    AnchorAxis = []
+    AnchorDir = []
     NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
     if flip:
         NodeValues = -1*NodeValues
@@ -3645,18 +3654,41 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
                             else:
                                 anchor = [node1,node2][np.argmin([v1,v2])] # Pick the point in negative domain
                             Anchors.append(anchor)
+
+                            if n == 0 or n == 2 or n == 8 or n == 10:
+                                AnchorAxis.append(0)
+                            elif n == 1 or n == 3 or n == 9 or n == 11:
+                                AnchorAxis.append(1)    
+                            elif n == 4 or n == 5 or n == 6 or n == 7:
+                                AnchorAxis.append(2)
+                            else:
+                                AnchorAxis.append(-1)
+
+                            mid = np.array([
+                                (coords1[0] + coords2[0])/2,
+                                (coords1[1] + coords2[1])/2,
+                                (coords1[2] + coords2[2])/2
+                                ])
+                            if np.all(mid-NodeCoords[anchor] >= 0):
+                                AnchorDir.append(1)
+                            else:
+                                AnchorDir.append(-1)
+
+
                 if len(elem) > 0:
                     TriNodeConn.append(elem)  
                       
     TriNodeCoords,TriNodeConn,_,Idx = MeshUtils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,return_idx=True)
     if interpolation=='linear':
         TriNodeCoords,TriNodeConn = MeshUtils.DeleteDegenerateElements(TriNodeCoords,TriNodeConn,strict=True)
-    if return_anchors:
+    if return_anchors: 
         Anchors = np.array(Anchors)
-        return TriNodeCoords, TriNodeConn, Anchors[Idx]
+        AnchorAxis = np.array(AnchorAxis)
+        AnchorDir = np.array(AnchorDir)
+        return TriNodeCoords, TriNodeConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
     return TriNodeCoords, TriNodeConn
 
-def ParchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',pool=Parallel(n_jobs=1),method='33',flip=False):
+def ParchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',pool=None,method='33',flip=False):
     """
     ParchingCubes _summary_
 
