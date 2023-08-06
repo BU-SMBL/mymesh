@@ -1314,7 +1314,7 @@ def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, eps=1e-14, octree='gen
 
         intersections = [x.toarray()[x.nonzero()] for x in spintersections.tocsr()]
         distances = [(x.toarray()[x.nonzero()]-1e-32) for x in spdistances.tocsr()]        
-        intersectionPts = [np.vstack([x.toarray()[x.nonzero()],y.toarray()[y.nonzero()],z.toarray()[z.nonzero()]]).T-1e32 for x,y,z in zip(spintersectionPtsX.tocsr(),spintersectionPtsY.tocsr(),spintersectionPtsZ.tocsr())]
+        intersectionPts = [np.vstack([x.toarray()[x.nonzero()],y.toarray()[y.nonzero()],z.toarray()[z.nonzero()]]).T-1e-32 for x,y,z in zip(spintersectionPtsX.tocsr(),spintersectionPtsY.tocsr(),spintersectionPtsZ.tocsr())]
 
 
     else:
