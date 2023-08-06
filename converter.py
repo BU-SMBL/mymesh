@@ -698,7 +698,7 @@ def faces2faceelemconn(Faces,FaceConn,FaceElem,return_UniqueFaceInfo=False):
 
     return FaceElemConn
 
-def edges2unique(Edges,return_idx=False,return_inv=False):
+def edges2unique(Edges,return_idx=False,return_inv=False,return_counts=False):
     """
     edges2unique reduce set of mesh edges to contain only unique edges, i.e. there will only
     be one entry to indicate a edge shared between multiple elements.
@@ -730,21 +730,17 @@ def edges2unique(Edges,return_idx=False,return_inv=False):
     # Returns only the unique edges (not duplicated for each element)
     # Get all unique element edges (accounting for flipped versions of edges)
     if len(Edges) > 0:
-        _,idx,inv = np.unique(np.sort(Edges,axis=1),axis=0,return_index=True,return_inverse=True)
+        _,idx,inv,counts = np.unique(np.sort(Edges,axis=1),axis=0,return_index=True,return_inverse=True,return_counts=True)
         UEdges = np.asarray(Edges)[idx]
     else:
         UEdges = np.array([])
         idx = np.array([])
         inv = np.array([])
+        counts = np.array([])
 
-    if return_idx and return_inv:
-        return UEdges,idx,inv
-    elif return_idx:
-        return UEdges,idx
-    elif return_inv:
-        return UEdges,inv
-    else:
-        return UEdges
+    out = np.array([UEdges,idx,inv,counts],dtype=object)[np.array([True,return_idx,return_inv,return_counts])]
+
+    return out
 
 def tet2faces(NodeCoords,NodeConn):
     """
@@ -1210,7 +1206,7 @@ def tet102tet4(Tet10NodeConn):
     
     return Tet4NodeConn
      
-def surf2edges(NodeCoords,NodeConn):
+def surf2edges(NodeCoords,NodeConn,ElemType='auto'):
     """
     surf2edges Extract the edges of an unclosed surface mesh.
     This differs from solid2edges in that it doesn't return any
@@ -1231,23 +1227,29 @@ def surf2edges(NodeCoords,NodeConn):
     """
     # TODO: this should be revamped to utilize solid2edges, edges2unique
 
-    edges = [[0,0] for i in range(3*len(NodeConn))]
-    if len(NodeConn) == 0:
-        return edges
+    # edges = [[0,0] for i in range(3*len(NodeConn))]
+    # if len(NodeConn) == 0:
+    #     return edges
     
-    # Explode surface elements into edges
-    for i in range(len(NodeConn)):
-        edges[3*i+0] = [NodeConn[i][j] for j in [0,1]]
-        edges[3*i+1] = [NodeConn[i][j] for j in [1,2]]
-        edges[3*i+2] = [NodeConn[i][j] for j in [0,2]]
-    # Identify surface elements, i.e. triangles that aren't shared between two elements
-    sortedConn = np.sort(edges,axis=1)
-    unique,counts = np.unique(sortedConn,axis=0,return_counts=True)
-    uedges = unique[np.where(counts==1)].tolist()
-    sC = sortedConn.tolist()
-    # SurfIdx = [np.where(np.all(surfs[i] == sC,axis=1))[0].tolist()[0] for i in range(len(surfs))]
-    EdgeIdx = [sC.index(uedges[i]) for i in range(len(uedges))]
-    Edges = np.array(edges)[EdgeIdx].tolist()
+    # # Explode surface elements into edges
+    # for i in range(len(NodeConn)):
+    #     edges[3*i+0] = [NodeConn[i][j] for j in [0,1]]
+    #     edges[3*i+1] = [NodeConn[i][j] for j in [1,2]]
+    #     edges[3*i+2] = [NodeConn[i][j] for j in [0,2]]
+    # # Identify surface elements, i.e. triangles that aren't shared between two elements
+    # sortedConn = np.sort(edges,axis=1)
+    # unique,counts = np.unique(sortedConn,axis=0,return_counts=True)
+    # uedges = unique[np.where(counts==1)].tolist()
+    # sC = sortedConn.tolist()
+    # # SurfIdx = [np.where(np.all(surfs[i] == sC,axis=1))[0].tolist()[0] for i in range(len(surfs))]
+    # EdgeIdx = [sC.index(uedges[i]) for i in range(len(uedges))]
+    # Edges = np.array(edges)[EdgeIdx].tolist()
+
+    edges = solid2edges(NodeCoords, NodeConn, ElemType=ElemType)
+    UEdges, indices, counts = edges2unique(edges, return_idx=True, return_counts=True)
+
+    EdgeIdx = indices[np.where(counts==1)]
+    Edges = np.asarray(edges)[EdgeIdx]
 
     return Edges
 
@@ -1276,7 +1278,7 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
     Returns
     -------
     VoxelCoords : list
-        Node coordinats for the voxel mesh
+        Node coordinates for the voxel mesh
     VoxelConn : list
         Node connectivity for the voxel mesh
     VoxelData : numpy.ndarray
