@@ -152,7 +152,7 @@ def Grid2D(bounds, h, z=0, meshobj=True, exact_h=False, ElemType='quad'):
     Grid : Mesh.mesh
         Mesh object containing the grid mesh. Returned if meshobj = True.
     """    
-    if type(h) is tuple or type(h) is list:
+    if type(h) is tuple or type(h) is list or type(h) is np.ndarray:
         hx = h[0];hy = h[1]
     else:
         hx = h; hy = h
