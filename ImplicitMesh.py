@@ -442,8 +442,10 @@ def mesh2udf(M,VoxelCoords,VoxelConn,pool=None):
     NodeCoords = M.NodeCoords
     def func(n):
         return np.min(distance.cdist([n],NodeCoords))
-    
-    NodeVals = pool(delayed(func)(n) for n in VoxelCoords)
+    if pool is None:
+        NodeVals = [func(n) for n in VoxelCoords]
+    else:
+        NodeVals = pool(delayed(func)(n) for n in VoxelCoords)
     
     return NodeVals
 
