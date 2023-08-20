@@ -7,7 +7,7 @@ Created on Sun Aug  1 17:48:50 2021
 
 import numpy as np
 
-from scipy import ndimage
+from scipy import ndimage, sparse
 import sys, os, warnings, glob, gc, tempfile
 from . import MeshUtils, Rays, Primitives
 try:
@@ -1307,6 +1307,9 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         tiffs.sort()
         dicoms = glob.glob(os.path.join(path,'*.dcm'))
         dicoms.sort()
+        if len(dicoms) == 0:
+            dicoms = glob.glob(os.path.join(path,'*.DCM'))
+            dicoms.sort()
         if len(tiffs) > 0 & len(dicoms) > 0:
             warnings.warn('Image directory: "{:s}" contains both .tiff and .dcm files - only loading dcm files.')
             files = dicoms
@@ -1322,7 +1325,7 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
             if return_nodedata:
                 return [], [], [], []
             else:
-                return [], [], [], []
+                return [], [], []
         print('Loading image data from {:s}...'.format(img))
         with tempfile.TemporaryDirectory() as Dir:
             with h5py.File(os.path.join(Dir,"images.hdf5"), "w") as f:
@@ -1394,15 +1397,23 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         if return_gradient: GradData = GradData[VoxelData>=threshold]
         VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
     if return_nodedata:
-        ElemConn = MeshUtils.getElemConnectivity(VoxelCoords,VoxelConn)
-        RConn = MeshUtils.PadRagged(ElemConn)
-        TempData = np.append(VoxelData,np.nan)
-        NodeData = np.nanmean(TempData[RConn],axis=1)
+        # ElemConn = MeshUtils.getElemConnectivity(VoxelCoords,VoxelConn,ElemType='hex')
+        # RConn = MeshUtils.PadRagged(ElemConn)
+        # TempData = np.append(VoxelData,np.nan)
+        # NodeData = np.nanmean(TempData[RConn],axis=1)
+        rows = VoxelConn.flatten()
+        cols = np.repeat(np.arange(len(VoxelConn)),8)
+        data = np.repeat(1/8,len(rows))
+        M = sparse.coo_matrix((data,(rows,cols))).tocsr()
+        NodeData = M*VoxelData
+        
         if return_gradient:
-            TempGrad = np.append(GradData,[[np.nan,np.nan,np.nan]],axis=0)
-            NodeGrad = np.nanmean(TempGrad[RConn],axis=1)
+            # TempGrad = np.append(GradData,[[np.nan,np.nan,np.nan]],axis=0)
+            # NodeGrad = np.nanmean(TempGrad[RConn],axis=1)
+            NodeGrad = M*GradData            
             VoxelData = (VoxelData,GradData)
             NodeData = (NodeData,NodeGrad)
+            
         return VoxelCoords, VoxelConn, VoxelData, NodeData
     if return_gradient:
         VoxelData = (VoxelData,GradData)
