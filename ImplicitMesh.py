@@ -413,11 +413,11 @@ def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
     cs = Out[1].flatten()
     rs = VoxelCoords - Coords[cs]
     signs = np.sign(np.sum(rs*Normals[cs,:],axis=1))# [np.sign(np.dot(rs[i],Normals[cs[i]])) for i in range(len(ds))]
-    NodeVals = [signs[i]*ds[i] for i in range(len(ds))]
+    NodeVals = signs*ds
     
     return NodeVals
 
-def mesh2udf(M,VoxelCoords,VoxelConn,pool=None):
+def mesh2udf(M,VoxelCoords,VoxelConn):
     """
     mesh2udf Generates an unsigned distance field for a mesh
 
@@ -438,13 +438,11 @@ def mesh2udf(M,VoxelCoords,VoxelConn,pool=None):
         List of signed distance values evaluated at each node in the voxel grid.
 
     """
-    NodeCoords = M.NodeCoords
-    def func(n):
-        return np.min(distance.cdist([n],NodeCoords))
-    if pool is None:
-        NodeVals = [func(n) for n in VoxelCoords]
-    else:
-        NodeVals = pool(delayed(func)(n) for n in VoxelCoords)
+    Coords = np.asarray(M.NodeCoords)
+
+    tree = KDTree(Coords, leaf_size=2)  
+    Out = tree.query(VoxelCoords,1)
+    NodeVals = Out[0].flatten()
     
     return NodeVals
 
