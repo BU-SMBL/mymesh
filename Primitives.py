@@ -283,6 +283,25 @@ def Plane(pt, normal, bounds, h, meshobj=True, exact_h=False, ElemType='quad'):
         return plane
     return PlaneCoords, GridConn
 
+def Extrude(line, distance, step, axis=2, ElemType='quad', meshobj=True):
+    NodeCoords = np.array(line.NodeCoords)
+    OriginalConn = np.array(line.NodeConn)
+    NodeConn = np.empty((0,4))
+    for i,s in enumerate(np.arange(step,distance+step,step)):
+        temp = np.array(line.NodeCoords)
+        temp[:,axis] += s
+        NodeCoords = np.append(NodeCoords, temp, axis=0)
+
+        NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
+    
+    if ElemType == 'tri':
+        NodeConn = converter.quad2tri(NodeConn)
+    if meshobj:
+        extruded = mesh(NodeCoords,NodeConn)
+        extruded.Type = 'surf'
+        return extruded
+    return NodeCoords, NodeConn
+
 # def Sphere(center,radius,h):
     
 
