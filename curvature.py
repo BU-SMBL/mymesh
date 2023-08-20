@@ -403,14 +403,11 @@ def GaussianCurvature(MaxPrincipal,MinPrincipal):
 
 def Curvedness(MaxPrincipal,MinPrincipal):
     # Ref: Koenderink, J.J. and Van Doorn, A.J., 1992. Surface shape and curvature scales. Image and vision computing, 10(8), pp.557-564.
-    if type(MaxPrincipal) == np.ndarray:
-        MaxPrincipal = MaxPrincipal.tolist()
-    if type(MinPrincipal) == np.ndarray:
-        MinPrincipal = MinPrincipal.tolist()
-    if type(MaxPrincipal) == list and type(MinPrincipal) == list and len(MaxPrincipal) == len(MinPrincipal):
-        curvedness = [np.sqrt((MaxPrincipal[i]**2 + MinPrincipal[i]**2)/2) for i in range(len(MaxPrincipal))]
-    elif (type(MaxPrincipal) == int or type(MaxPrincipal) == float) and (type(MinPrincipal) == int or type(MinPrincipal) == float):
-        curvedness = np.sqrt((MaxPrincipal**2 + MinPrincipal**2)/2)
+
+    curvedness = np.sqrt((np.asarray(MaxPrincipal)**2 + np.asarray(MinPrincipal)**2)/2)
+    if len(curvedness) == 1 and type(MaxPrincipal) is int or type(MaxPrincipal) is float:
+        curvedness = curvedness[0]
+        
     
     return curvedness
  
@@ -418,17 +415,28 @@ def ShapeIndex(MaxPrincipal,MinPrincipal):
     # Ref: Koenderink, J.J. and Van Doorn, A.J., 1992. Surface shape and curvature scales. Image and vision computing, 10(8), pp.557-564.
     # Note: the equation from Koenderink & van Doorn has the equation: pi/2*arctan((min+max)/(min-max)), but this doesn't
     # seem to give values consistent with what are described as cups/caps - instead using pi/2*arctan((max+min)/(max-min))
-    if type(MaxPrincipal) == np.ndarray:
-        MaxPrincipal = MaxPrincipal.tolist()
-    if type(MinPrincipal) == np.ndarray:
-        MinPrincipal = MinPrincipal.tolist()
-    if type(MaxPrincipal) == list and type(MinPrincipal) == list and len(MaxPrincipal) == len(MinPrincipal):
-        shape = [(2/np.pi) * np.arctan((MaxPrincipal[i] + MinPrincipal[i])/(MaxPrincipal[i] - MinPrincipal[i])) if (MaxPrincipal[i] != MinPrincipal[i]) else 1 if MaxPrincipal[i]>0 else -1 for i in range(len(MaxPrincipal))]
-    elif (type(MaxPrincipal) == int or type(MaxPrincipal) == float) and (type(MinPrincipal) == int or type(MinPrincipal) == float):
-        if MaxPrincipal != MinPrincipal:
-            shape = (2/np.pi) * np.arctan((MinPrincipal + MaxPrincipal)/(MinPrincipal - MaxPrincipal))
-        else:
-            shape = 0
+    
+    # if type(MaxPrincipal) == np.ndarray:
+    #     MaxPrincipal = MaxPrincipal.tolist()
+    # if type(MinPrincipal) == np.ndarray:
+    #     MinPrincipal = MinPrincipal.tolist()
+    # if type(MaxPrincipal) == list and type(MinPrincipal) == list and len(MaxPrincipal) == len(MinPrincipal):
+    #     shape = [(2/np.pi) * np.arctan((MaxPrincipal[i] + MinPrincipal[i])/(MaxPrincipal[i] - MinPrincipal[i])) if (MaxPrincipal[i] != MinPrincipal[i]) else 1 if MaxPrincipal[i]>0 else -1 for i in range(len(MaxPrincipal))]
+    # elif (type(MaxPrincipal) == int or type(MaxPrincipal) == float) and (type(MinPrincipal) == int or type(MinPrincipal) == float):
+    #     if MaxPrincipal != MinPrincipal:
+    #         shape = (2/np.pi) * np.arctan((MinPrincipal + MaxPrincipal)/(MinPrincipal - MaxPrincipal))
+    #     else:
+    #         shape = 0
+    
+    MaxPrincipal = np.asarray(MaxPrincipal) 
+    MinPrincipal = np.asarray(MinPrincipal) 
+    with np.errstate(divide='ignore', invalid='ignore'):
+        shape = (2/np.pi) * np.arctan((MaxPrincipal + MinPrincipal)/(MaxPrincipal - MinPrincipal))
+    shape[MaxPrincipal == MinPrincipal] = 1*np.sign(MaxPrincipal[MaxPrincipal == MinPrincipal])
+    
+    if len(shape) == 1 and type(MaxPrincipal) is int or type(MaxPrincipal) is float:
+        shape = shape[0]
+    
     return shape
 
 def ShapeCategory(shapeindex):
