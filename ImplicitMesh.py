@@ -392,18 +392,18 @@ def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
     """
     
     if method == 'nodes':
-        Normals = M.NodeNormals
+        Normals = np.asarray(M.NodeNormals)
         SurfNodes = set(np.unique(M.SurfConn))
         Coords = np.array([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)])
     elif method == 'centroids':
-        Normals = M.ElemNormals()
+        Normals = np.asarray(M.ElemNormals)
         NodeCoords = np.array(M.NodeCoords)
-        Coords = np.array([np.mean(NodeCoords[elem],axis=0) for elem in M.SurfConn])
+        Coords = MeshUtils.Centroids(M.NodeCoords,M.NodeConn) #np.array([np.mean(NodeCoords[elem],axis=0) for elem in M.SurfConn])
     elif method == 'nodes+centroids':
-        Normals = list(M.NodeNormals) + list(M.ElemNormals)
+        Normals = np.array(list(M.NodeNormals) + list(M.ElemNormals))
         NodeCoords = np.array(M.NodeCoords)
         SurfNodes = set(np.unique(M.SurfConn))
-        Coords = np.array([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)] + [np.mean(NodeCoords[elem],axis=0) for elem in M.SurfConn])
+        Coords = np.append([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)], MeshUtils.Centroids(M.NodeCoords,M.NodeConn),axis=0)
     else:
         raise Exception('Invalid method - use "nodes", "centroids", or "nodes+centroids"')
     
@@ -412,8 +412,7 @@ def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
     ds = Out[0].flatten()
     cs = Out[1].flatten()
     rs = VoxelCoords - Coords[cs]
-    normals = [Normals[cs[i]] for i in range(len(ds))]
-    signs = [np.sign(np.dot(rs[i],Normals[cs[i]])) for i in range(len(ds))]
+    signs = np.sign(np.sum(rs*Normals[cs,:],axis=1))# [np.sign(np.dot(rs[i],Normals[cs[i]])) for i in range(len(ds))]
     NodeVals = [signs[i]*ds[i] for i in range(len(ds))]
     
     return NodeVals
