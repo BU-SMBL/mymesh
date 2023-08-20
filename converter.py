@@ -70,21 +70,23 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
     """     
        
     Ls = np.array([len(elem) for elem in NodeConn])
+    edgIdx = np.where(Ls == 2)[0]
     triIdx = np.where(Ls == 3)[0]
     tetIdx = np.where((Ls == 4) | (Ls == 10))[0]
     pyrIdx = np.where(Ls == 5)[0]
     wdgIdx = np.where(Ls == 6)[0]
     hexIdx = np.where(Ls == 8)[0]
+    edgs = [NodeConn[i] for i in edgIdx]
     tris = [NodeConn[i] for i in triIdx]
     tets = [NodeConn[i] for i in tetIdx]
     pyrs = [NodeConn[i] for i in pyrIdx]
     wdgs = [NodeConn[i] for i in wdgIdx]
     hexs = [NodeConn[i] for i in hexIdx]
 
-    Faces = tris + tet2faces([],tets) + pyramid2faces([],pyrs) + wedge2faces([],wdgs) + hex2faces([],hexs)
-    ElemIds_i = np.concatenate((triIdx,np.repeat(tetIdx,4),np.repeat(pyrIdx,5),np.repeat(wdgIdx,5),np.repeat(hexIdx,6)))
+    Faces = edgs + tris + tet2faces([],tets) + pyramid2faces([],pyrs) + wedge2faces([],wdgs) + hex2faces([],hexs)
+    ElemIds_i = np.concatenate((edgIdx,triIdx,np.repeat(tetIdx,4),np.repeat(pyrIdx,5),np.repeat(wdgIdx,5),np.repeat(hexIdx,6)))
     FaceElem = ElemIds_i
-    ElemIds_j = np.concatenate((np.repeat(0,len(triIdx)), 
+    ElemIds_j = np.concatenate((np.repeat(0,len(edgIdx)),np.repeat(0,len(triIdx)), 
             np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
             np.repeat([[0,1,2,3,4]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*5),                   
             np.repeat([[0,1,2,3,4]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*5),   
