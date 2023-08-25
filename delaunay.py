@@ -326,7 +326,7 @@ def SciPy(NodeCoords):
     NodeConn = out.simplices
     return NodeConn
 
-def Triangle(NodeCoords,Constraints=None):
+def Triangle(NodeCoords,Constraints=None,opts=''):
     # Uses Triangle by Jonathan Shewchuk
     if Constraints is None or len(Constraints)==0:
         In = dict(vertices=NodeCoords)
