@@ -8,9 +8,9 @@ import numpy as np
 import gc
 from . import converter, ImplicitMesh, mesh
 
-def Box(bounds,h,meshobj=False):
+def Box(bounds,h,meshobj=True,ElemType='quad'):
     """
-    Box Generate a triangular surface mesh of a rectangular box. 
+    Box Generate a surface mesh of a rectangular box. 
 
     Parameters
     ----------
@@ -32,8 +32,10 @@ def Box(bounds,h,meshobj=False):
         Mesh object containing the box mesh. Returned if meshobj = True.
     """    
     GridCoords, GridConn = Grid(bounds,h,exact_h=False)
-    BoxConn = converter.quad2tri(converter.solid2surface(GridCoords,GridConn))
+    BoxConn = converter.solid2surface(GridCoords,GridConn)
     BoxCoords,BoxConn,_ = converter.removeNodes(GridCoords,BoxConn)
+    if ElemType == 'tri':
+        BoxConn = converter.quad2tri(BoxConn)
     if meshobj:
         if 'mesh' in dir(mesh):
             Box = mesh.mesh(BoxCoords,BoxConn,'surf')
@@ -293,12 +295,14 @@ def Extrude(line, distance, step, axis=2, ElemType='quad', meshobj=True):
         NodeCoords = np.append(NodeCoords, temp, axis=0)
 
         NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
-    
+        NodeConn = NodeConn.astype(int)
     if ElemType == 'tri':
         NodeConn = converter.quad2tri(NodeConn)
     if meshobj:
-        extruded = mesh(NodeCoords,NodeConn)
-        extruded.Type = 'surf'
+        if 'mesh' in dir(mesh):
+            extruded = mesh.mesh(NodeCoords,NodeConn,'surf')
+        else:
+            extruded = mesh(NodeCoords,NodeConn,'surf')
         return extruded
     return NodeCoords, NodeConn
 
