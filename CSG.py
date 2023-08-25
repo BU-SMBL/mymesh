@@ -75,10 +75,14 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
     MergedDCoords, MergedDConn = MeshUtils.MergeMesh(Split1.NodeCoords, ADConn, Split2.NodeCoords, BDConn)
     # MergedDCoords, MergedDConn, _ = converter.removeNodes(MergedDCoords, MergedDConn)
     # MergedDCoords, MergedDConn, _ = MeshUtils.DeleteDuplicateNodes(MergedDCoords, MergedDConn)
-    
-    Union = mesh.mesh(MergedUCoords,MergedUConn)
-    Intersection = mesh.mesh(MergedICoords,MergedIConn)
-    Difference = mesh.mesh(MergedDCoords,MergedDConn)
+    if 'mesh' in dir(mesh):
+        Union = mesh.mesh(MergedUCoords,MergedUConn)
+        Intersection = mesh.mesh(MergedICoords,MergedIConn)
+        Difference = mesh.mesh(MergedDCoords,MergedDConn)
+    else:
+        Union = mesh(MergedUCoords,MergedUConn)
+        Intersection = mesh(MergedICoords,MergedIConn)
+        Difference = mesh(MergedDCoords,MergedDConn)
 
     # Split elements by the Absolute large angle criteria, this will split degenerate collinear elements so that they can be easily cleaned up
     # Union.NodeCoords,Union.NodeConn = Improvement.Split(*Union,1,criteria='AbsLargeAngle',iterate=1,thetal=179)
@@ -378,7 +382,7 @@ def GetSharedNodes(NodeCoordsA, NodeCoordsB, eps=1e-10):
     
     return SharedA, SharedB
                            
-def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10, ray_override=None):
+def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     # Classifies each Triangle in A as inside, outside, or on the surface facing the same or opposite direction as surface B
     
     
@@ -389,9 +393,15 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10, ray_override=None)
     NotSharedConnA = [elem for i,elem in enumerate(SplitA.NodeConn) if not any([n in SharedA for n in elem]) and i not in AllBoundaryA]  
     NotSharedConnB = [elem for i,elem in enumerate(SplitB.NodeConn) if not any([n in SharedB for n in elem]) and i not in AllBoundaryB]  
     
-    RegionsA = MeshUtils.getConnectedNodes(SplitA.NodeCoords,NotSharedConnA)  # Node Sets
-    RegionsB = MeshUtils.getConnectedNodes(SplitB.NodeCoords,NotSharedConnB)  # Node Sets
-
+    if len(NotSharedConnA) > 0:
+        RegionsA = MeshUtils.getConnectedNodes(SplitA.NodeCoords,NotSharedConnA)  # Node Sets
+    else:
+        RegionsA = []
+    if len(NotSharedConnB) > 0:
+        RegionsB = MeshUtils.getConnectedNodes(SplitB.NodeCoords,NotSharedConnB)  # Node Sets
+    else:
+        RegionsB = []
+        
     ElemNormalsA = MeshUtils.CalcFaceNormal(*SplitA)
     ElemNormalsB = MeshUtils.CalcFaceNormal(*SplitB)
 
