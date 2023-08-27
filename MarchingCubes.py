@@ -188,6 +188,12 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', metho
             roots = np.vstack([-1/(3*a) * ( b + zeta**k*C + delta0/(zeta**k*C) ) for k in [0, 1, 2]]).T
             realcheck = np.isclose(np.imag(roots), 0)
             roots[realcheck]  = np.real(roots[realcheck])
+            
+            # overwrite with quadratic for a ~ 0
+            near0 = np.isclose(a,0)
+            roots[near0] = np.vstack([(-c[near0] + np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]), 
+                                       (-c[near0] - np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]),
+                                        np.repeat(np.nan,len(b[near0]))]).T
             Roots.append(roots)
         xRoots = Roots[0]
         yRoots = Roots[1]
