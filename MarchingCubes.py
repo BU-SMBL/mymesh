@@ -35,14 +35,8 @@ except:
 # |       |
 # 0___4___1
 
-def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', method='triangle', flip=False, edgemode='constant', cleanup=True):
-    # edgemode is for handling edges when interpolation is greater than linear (see np.pad for options)
-    # Image data is assumed to be voxel data and will be interpolated to vertices to get the corners of each 'square'
-    
-    assert len(I.shape) == 2, 'I must be a 2D numpy array of image data. For 3D, use MarchingCubesImage.'
-    I = I - threshold  
-    if method == 'triangle':
-        LookupTable = np.array([
+
+MSTriangle_Lookup = np.array([
             [[]],               # 0-0000
             [[7,6,3]],          # 1-0001
             [[5,2,6]],          # 2-0010
@@ -60,8 +54,7 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', metho
             [[0,1,2],[0,2,6],[6,7,0]], # 14-1110
             [[0,1,2],[2,3,0]]   # 15-1111
         ],dtype=object)
-    elif method == 'edge':
-        LookupTable = np.array([
+MSEdge_Lookup = np.array([
             [[]],           # 0-0000
             [[6,7]],        # 1-0001
             [[5,6]],        # 2-0010
@@ -79,342 +72,136 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', metho
             [[7,6]], # 14-1110
             [[]]   # 15-1111
         ],dtype=object)
-    else:
-        raise Exception('Invalid method. Must be "triangle" or "edge".')
-    if flip: 
-        I = -I
-    if isinstance(h, (int, float, np.number)):
-        h = (h,h)
-    
-    Padding = 0
-    if interpolation == "cubic":
-        # I = np.pad(I,1,mode=edgemode)
-        Padding = 1
-    
-    x1 = np.arange(0,I.shape[1]*h[0],h[0]) + h[0]/2
-    y1 = np.arange(0,I.shape[0]*h[1],h[1]) + h[1]/2
-    
-    X = np.repeat(np.atleast_2d(x1),I.shape[0],axis=0) - Padding*h[0]
-    Y = np.repeat(np.atleast_2d(y1).T,I.shape[1],axis=1) - Padding*h[1]
-    Z = np.zeros(X.shape)
-    
-    
-    Xv = np.repeat(np.atleast_2d(np.arange(-Padding,I.shape[1]+(1+Padding),1)),  I.shape[0]+1+2*Padding,axis=0) * h[0]
-    Yv = np.repeat(np.atleast_2d(np.arange(-Padding,I.shape[0]+(1+Padding),1)).T,I.shape[1]+1+2*Padding,axis=1) * h[1]
-    
-    # TODO: This is major bottleneck for cubic
-    interp = scipy.interpolate.RegularGridInterpolator((y1,x1),I,fill_value=None,method='linear',bounds_error=False)
-    Iv = interp((Xv.flatten(),Yv.flatten())).reshape(Xv.shape)
-    
-    X = Xv; Y = Yv; I = Iv; Z = np.zeros(Xv.shape)
-    
-    edgeLookup = np.array([
-        [0, 0],  # Corner 0
-        [1, 1],  # Corner 1
-        [2, 2],  # Corner 2
-        [3, 3],  # Corner 3
-        [0, 1],  # Edge 0
-        [1, 2],  # Edge 1
-        [2, 3],  # Edge 2
-        [3, 0],  # Edge 3
-        ])
-    iidx = np.repeat(np.arange(X.shape[0]-1-2*Padding),X.shape[1]-1-2*Padding)+Padding
-    jidx = np.tile(np.arange(X.shape[1]-1-2*Padding),X.shape[0]-1-2*Padding)+Padding
-    
-    isquares = np.vstack([iidx,iidx+1,iidx+1,iidx]).T
-    jsquares = np.vstack([jidx,jidx,jidx+1,jidx+1]).T
-    
-    vals = I[isquares,jsquares]
-    inside = (vals <= 0).astype(int)
-    tableIdx = np.dot(inside, 2**np.arange(inside.shape[1] - 1, -1, -1))
-    
-    edgeList =  LookupTable[tableIdx]
-    edgeConnections = np.array([x for y in edgeList for x in y if len(x) != 0])
-    numbering = np.array([j for j,y in enumerate(edgeList) for i,x in enumerate(y) if len(x) != 0])
-    
-    
-    i_indices = isquares[numbering][np.arange(len(numbering))[:, np.newaxis,np.newaxis], edgeLookup[edgeConnections]]
-    j_indices = jsquares[numbering][np.arange(len(numbering))[:, np.newaxis,np.newaxis], edgeLookup[edgeConnections]]
-    
-    
-    if interpolation == "cubic":
-        NewCoords = []
-        ishiftdir = i_indices[:,:,1] - i_indices[:,:,0]
-        jshiftdir = j_indices[:,:,1] - j_indices[:,:,0]
-        
-        i_interp = np.stack([i_indices[:,:,0]-1*ishiftdir, i_indices[:,:,0], i_indices[:,:,1], i_indices[:,:,1]+1*ishiftdir],axis=2)
-        j_interp = np.stack([j_indices[:,:,0]-1*jshiftdir, j_indices[:,:,0], j_indices[:,:,1], j_indices[:,:,1]+1*jshiftdir],axis=2)
-        
-        X_interp = X[i_interp,j_interp]
-        Y_interp = Y[i_interp,j_interp]
-        I_interp = I[i_interp,j_interp]
-        
-        
-        x = X_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
-        y = Y_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
-        v = I_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
-        
-        # Build coefficients for cubic polynomials
-        xbool = x[:,1]!=x[:,2] # Only interpolate in x if on an x edge
-        ybool = y[:,1]!=y[:,2] # Only interpolate in y if on an y edge
-        
-        xsort = np.argsort(x[xbool],axis=1)
-        ysort = np.argsort(y[ybool],axis=1)
-        x[xbool,:] = np.take_along_axis(x[xbool], xsort, axis=1)
-        y[ybool,:] = np.take_along_axis(y[ybool], ysort, axis=1)
-        v[xbool,:] = np.take_along_axis(v[xbool], xsort, axis=1)
-        v[ybool,:] = np.take_along_axis(v [ybool], ysort, axis=1)
-        
-        xAs = np.stack([x[xbool]**3, x[xbool]**2, x[xbool]**1, x[xbool]**0],axis=2)
-        yAs = np.stack([y[ybool]**3, y[ybool]**2, y[ybool]**1, y[ybool]**0],axis=2)
-        xCoeff = np.linalg.solve(xAs,v[xbool,:])
-        yCoeff = np.linalg.solve(yAs,v[ybool,:])
-        
-        # cf. https://en.wikipedia.org/wiki/Cubic_equation#General_cubic_formula
-        Roots = []
-        for coeff in [xCoeff, yCoeff]:
-            a = coeff[:,0]
-            b = coeff[:,1]
-            c = coeff[:,2]
-            d = coeff[:,3]
-            
-            delta0 = b**2 - 3*a*c
-            delta1 = 2*b**3 - 9*a*b*c + 27*a**2*d
-            
-            C = ((delta1 + np.sqrt(delta1**2+0J - 4*delta0**3))/2)**(1/3)
-            C[C==0] = ((delta1[C==0] - np.sqrt(delta1[C==0]**2 - 4*delta0[C==0]**3))/2)**(1/3)
-            
-            zeta = (-1 + np.sqrt(-3+0J))/2
-            roots = np.vstack([-1/(3*a) * ( b + zeta**k*C + delta0/(zeta**k*C) ) for k in [0, 1, 2]]).T
-            realcheck = np.isclose(np.imag(roots), 0)
-            roots[realcheck]  = np.real(roots[realcheck])
-            
-            # overwrite with quadratic for a ~ 0
-            near0 = np.isclose(a,0)
-            roots[near0] = np.vstack([(-c[near0] + np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]), 
-                                       (-c[near0] - np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]),
-                                        np.repeat(np.nan,len(b[near0]))]).T
-            Roots.append(roots)
-        xRoots = Roots[0]
-        yRoots = Roots[1]
-        
-        NewCoords = np.nan*np.ones((v.shape[0],3))
-        
-        NewCoords[xbool,0] = xRoots[(x[xbool,1,None] <= xRoots) & (x[xbool,2,None] >= xRoots) & np.isreal(xRoots)]
-        NewCoords[xbool,1] = y[xbool,1]
-        
-        NewCoords[ybool,0] = x[ybool,1]
-        NewCoords[ybool,1] = yRoots[(y[ybool,1,None] <= yRoots) & (y[ybool,2,None] >= yRoots) & np.isreal(yRoots)]
-        
-        NewCoords[:,2] = z
-        
-    elif interpolation == "linear" or interpolation == "midpoint":
-        ishiftdir = i_indices[:,:,1] - i_indices[:,:,0]
-        jshiftdir = j_indices[:,:,1] - j_indices[:,:,0]
-        
-        i_interp = i_indices
-        j_interp = j_indices
-        
-        X_interp = X[i_interp,j_interp]
-        Y_interp = Y[i_interp,j_interp]
-        I_interp = I[i_interp,j_interp]
-        
-        x = X_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
-        y = Y_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
-        v = I_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
-        
-        if interpolation == "linear":
-            with np.errstate(divide='ignore', invalid='ignore'):
-                NewCoords = np.vstack([
-                     x[:,0] + np.nan_to_num((0-v[:,0])*(x[:,1]-x[:,0])/(v[:,1]-v[:,0])),
-                     y[:,0]  + np.nan_to_num((0-v[:,0])*(y[:,1]-y[:,0])/(v[:,1]-v[:,0])),
-                     np.repeat(z,len(x))
-                    ]).T
-        else:
-            NewCoords = np.vstack([
-                 (x[:,0] + x[:,1])/2,
-                 (y[:,0] + y[:,1])/2,
-                 np.repeat(z,len(x))
-                ]).T
-    else:
-        raise Exception('Invalid input "{:s}" for interpolation. Must be one of "midpoint", "linear", or "cubic".'.format(interpolation))
-            
-    NewConn = np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F')
-    if cleanup:
-        NewCoords,NewConn,_,Idx = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
-        if (interpolation=='linear' or interpolation=='cubic') and method=='triangle':
-            NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
-            
-    return NewCoords, NewConn
-
-def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation='linear', method='triangle', flip=False, return_anchors=False, cleanup=True):
-    NewCoords = []
-    NewConn = []
-    Anchors = []
-    AnchorAxis = []
-    AnchorDir = []
-    NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
-    if flip:
-        NodeValues = -1*NodeValues
-    MarchingSquaresLookup_Edge.LookupTable = [
-        [[]],           # 0-0000
-        [[6,7]],        # 1-0001
-        [[5,6]],        # 2-0010
-        [[5,7]],        # 3-0011
-        [[4,5]],        # 4-0100
-        [[7,4],[5,6]],  # 5-0101
-        [[4,6]],        # 6-0110
-        [[4,7]],        # 7-0111
-        [[7,4]],        # 8-1000
-        [[6,4]],        # 9-1001
-        [[4,5],[6,7]],  # 10-1010
-        [[5,4]],        # 11-1011
-        [[7,5]],        # 12-1100
-        [[6,5]],        # 13-1101
-        [[7,6]], # 14-1110
-        [[]]   # 15-1111
-    ]
-    MarchingSquaresLookup_Tri.LookupTable = [
-        [[]],               # 0-0000
-        [[7,6,3]],          # 1-0001
-        [[5,2,6]],          # 2-0010
-        [[7,5,2],[2,3,7]],  # 3-0011
-        [[4,1,5]],          # 4-0100
-        [[4,1,5],[5,6,4],[4,6,7],[7,6,3]], # 5-0101
-        [[4,1,2],[2,6,4]],  # 6-0110
-        [[1,2,3],[3,4,1],[4,3,7]], # 7-0111
-        [[0,4,7]],          # 8-1000
-        [[0,4,6],[6,3,0]],  # 9-1001
-        [[0,4,7],[4,5,7],[7,5,6],[6,5,2]], # 10-1010
-        [[0,2,3],[0,4,5],[5,2,0]], # 11-1011
-        [[0,1,5],[5,7,0]], # 12-1100
-        [[0,1,3],[1,5,6],[6,3,1]], # 13-1101
-        [[0,1,2],[0,2,6],[6,7,0]], # 14-1110
-        [[0,1,2],[2,3,0]]   # 15-1111
-    ]
-    edgeLookup = [
-        [0, 0],  # Corner 0
-        [1, 1],  # Corner 1
-        [2, 2],  # Corner 2
-        [3, 3],  # Corner 3
-        [0, 1],  # Edge 0
-        [1, 2],  # Edge 1
-        [2, 3],  # Edge 2
-        [3, 0],  # Edge 3
-        ]
-    
-    # arrayCoords = np.array(NodeCoords)
-    for e in range(len(NodeConn)):
-        vals = np.array([NodeValues[node] for node in NodeConn[e]])
-        inside = [1 if v <= 0 else 0 for v in vals]
-        i = int("".join(str(j) for j in inside), 2)
-        if method == 'triangle':
-            NewElems = MarchingSquaresLookup_Tri(i)
-        elif method == 'edge':
-            NewElems = MarchingSquaresLookup_Edge(i)
-        else:
-            raise Exception('Invalid method. Must be "triangle" or "edge".')
-    
-        if len(NewElems) > 0:
-            for t in NewElems:
-                elem = []
-                for n in t:
-                    node1 = NodeConn[e][edgeLookup[n][0]]
-                    node2 = NodeConn[e][edgeLookup[n][1]]
-                    coords1 = NodeCoords[node1]
-                    coords2 = NodeCoords[node2]
-                    v1 = NodeValues[node1]
-                    v2 = NodeValues[node2]
-                    if interpolation == 'midpoint' or v1 == v2:
-                        newNode = [
-                            (coords1[0] + coords2[0])/2,
-                            (coords1[1] + coords2[1])/2,
-                            (coords1[2] + coords2[2])/2
-                            ]
-                        elem.append(len(NewCoords))
-                        NewCoords.append(newNode)
-                    elif interpolation == 'linear':
-                        newNode = [
-                            coords1[0] + (0-v1)*(coords2[0]-coords1[0])/(v2-v1),
-                            coords1[1] + (0-v1)*(coords2[1]-coords1[1])/(v2-v1),
-                            coords1[2] + (0-v1)*(coords2[2]-coords1[2])/(v2-v1)
-                            ]
-                        if np.sign(v2) == np.sign(v1):
-                            print('Marching squares fuckup')
-                            print(str(e) + str(np.sign(vals)) + str(edgeLookup[n]))
-                        elem.append(len(NewCoords))
-                        NewCoords.append(newNode)                            
-                    else:
-                        raise Exception('Invalid interpolation method')
-                    if return_anchors:
-                        if flip:
-                            anchor = [node1,node2][np.argmax([v1,v2])] # Pick the point in positive domain
-                        else:
-                            anchor = [node1,node2][np.argmin([v1,v2])] # Pick the point in negative domain
-                        Anchors.append(anchor)
-
-                        # if (edgeLookup[n][0] == 0 and edgeLookup[n][1] == 1) or (edgeLookup[n][0] == 2 and edgeLookup[n][1] == 3):
-                        #     AnchorAxis.append(0)
-                        # elif (edgeLookup[n][0] == 1 and edgeLookup[n][1] == 2) or (edgeLookup[n][0] == 3 and edgeLookup[n][1] == 0):
-                        #     AnchorAxis.append(1)
-                        # else:
-                        #     AnchorAxis.append(-1)
-
-                        if n == 4 or n == 6:
-                            AnchorAxis.append(0)
-                        elif n == 5 or n == 7: 
-                            AnchorAxis.append(1)
-                        else:
-                            AnchorAxis.append(-1)
-
-                        mid = np.array([
-                            (coords1[0] + coords2[0])/2,
-                            (coords1[1] + coords2[1])/2,
-                            (coords1[2] + coords2[2])/2
-                            ])
-                        if np.all(mid-NodeCoords[anchor] >= 0):
-                            AnchorDir.append(1)
-                        else:
-                            AnchorDir.append(-1)
-
-                    
-                if len(elem) > 0:
-                    NewConn.append(elem)  
-    if cleanup:                  
-        NewCoords,NewConn,_,Idx = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
-        if interpolation=='linear' and method=='triangle':
-            NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
-    else:
-        Idx = np.arange(len(NewCoords),dtype=int)
-    if return_anchors:
-        Anchors = np.array(Anchors)
-        AnchorAxis = np.array(AnchorAxis)
-        AnchorDir = np.array(AnchorDir)
-        return NewCoords, NewConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
-    return NewCoords, NewConn
-
-def MarchingSquaresLookup_Tri(i):
-    assert i < 16, 'There are only 16 possible states of the square, i must be less than 16'
-    TriElems = MarchingSquaresLookup_Tri.LookupTable[i]
-    return TriElems
-def MarchingSquaresLookup_Edge(i):
-    assert i < 16, 'There are only 16 possible states of the square, i must be less than 16'
-    TriElems = MarchingSquaresLookup_Edge.LookupTable[i]
-    return TriElems
-
-def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',method='33',flip=False, return_anchors=False):
-# TODO: add option to invert (-NodeValues, -threshold)
-    # method: 'original', '33'
-    TriNodeCoords = []
-    TriNodeConn = []
-    Anchors = []
-    AnchorAxis = []
-    AnchorDir = []
-    NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
-    if flip:
-        NodeValues = -1*NodeValues
-    if method == '33':
-        MarchingCubes33Lookup.LookupTable = [[[[]]],
+MC_Lookup = np.array([
+            [[]],
+            [[7, 10, 11]],
+            [[6, 9, 10]],
+            [[6, 9, 7], [7, 9, 11]],
+            [[5, 8, 9]],
+            [[5, 8, 9], [7, 10, 11]],
+            [[5, 8, 6], [6, 8, 10]],
+            [[5, 7, 6], [5, 8, 11], [5, 11, 7]],
+            [[11, 8, 4]],
+            [[8, 7, 10], [4, 7, 8]],
+            [[4, 11, 8], [6, 9, 10]],
+            [[7, 6, 4], [9, 8, 4], [6, 9, 4]],
+            [[4, 9, 5], [11, 9, 4]],
+            [[7, 5, 4], [7, 10, 9], [7, 9, 5]],
+            [[4, 6, 5], [4, 11, 10], [4, 10, 6]],
+            [[4, 6, 5], [4, 7, 6]],
+            [[7, 3, 2]],
+            [[3, 2, 11], [11, 2, 10]],
+            [[3, 2, 7], [9, 10, 6]],
+            [[11, 3, 9], [2, 6, 9], [3, 2, 9]],
+            [[2, 7, 3], [5, 8, 9]],
+            [[5, 8, 9], [10, 3, 2], [11, 3, 10]],
+            [[2, 7, 3], [5, 8, 6], [6, 8, 10]],
+            [[3, 2, 6], [8, 3, 6], [8, 6, 5], [11, 3, 8]],
+            [[2, 7, 3], [8, 4, 11]],
+            [[10, 8, 2], [4, 3, 2], [8, 4, 2]],
+            [[2, 7, 3], [4, 11, 8], [6, 9, 10]],
+            [[2, 4, 3], [6, 4, 2], [6, 8, 4], [9, 8, 6]],
+            [[7, 3, 2], [9, 5, 11], [11, 5, 4]],
+            [[4, 3, 2], [4, 2, 9], [5, 4, 9], [9, 2, 10]],
+            [[10, 4, 11], [6, 4, 10], [6, 5, 4], [3, 2, 7]],
+            [[5, 4, 6], [3, 2, 6], [4, 3, 6]],
+            [[6, 2, 1]],
+            [[6, 2, 1], [7, 10, 11]],
+            [[2, 9, 10], [1, 9, 2]],
+            [[9, 11, 1], [7, 2, 1], [11, 7, 1]],
+            [[2, 1, 6], [8, 9, 5]],
+            [[8, 9, 5], [1, 6, 2], [11, 7, 10]],
+            [[2, 8, 10], [2, 1, 5], [2, 5, 8]],
+            [[5, 8, 1], [1, 8, 2], [8, 11, 2], [2, 11, 7]],
+            [[1, 6, 2], [11, 8, 4]],
+            [[6, 2, 1], [8, 4, 10], [10, 4, 7]],
+            [[4, 11, 8], [9, 2, 1], [10, 2, 9]],
+            [[9, 8, 4], [9, 4, 2], [1, 9, 2], [4, 7, 2]],
+            [[1, 6, 2], [4, 11, 5], [5, 11, 9]],
+            [[1, 7, 2], [5, 7, 1], [5, 4, 7], [10, 9, 6]],
+            [[2, 1, 5], [11, 2, 5], [11, 5, 4], [10, 2, 11]],
+            [[4, 7, 5], [2, 1, 5], [7, 2, 5]],
+            [[7, 1, 6], [3, 1, 7]],
+            [[1, 11, 3], [1, 6, 10], [1, 10, 11]],
+            [[1, 9, 3], [10, 7, 3], [9, 10, 3]],
+            [[11, 1, 9], [11, 3, 1]],
+            [[9, 5, 8], [7, 3, 6], [6, 3, 1]],
+            [[8, 1, 5], [11, 1, 8], [11, 3, 1], [6, 10, 9]],
+            [[1, 5, 8], [1, 8, 7], [3, 1, 7], [7, 8, 10]],
+            [[3, 1, 11], [5, 8, 11], [1, 5, 11]],
+            [[8, 4, 11], [7, 1, 6], [3, 1, 7]],
+            [[1, 6, 10], [1, 10, 4], [3, 1, 4], [4, 10, 8]],
+            [[7, 9, 10], [3, 9, 7], [3, 1, 9], [8, 4, 11]],
+            [[9, 3, 1], [9, 8, 4], [9, 4, 3]],
+            [[5, 11, 9], [5, 4, 11], [6, 7, 3], [6, 3, 1]],
+            [[9, 6, 10], [4, 3, 5], [5, 3, 1]],
+            [[10, 7, 11], [4, 1, 5], [3, 1, 4]],
+            [[1, 5, 3], [3, 5, 4]],
+            [[0, 5, 1]],
+            [[11, 7, 10], [5, 1, 0]],
+            [[5, 1, 0], [6, 9, 10]],
+            [[0, 5, 1], [6, 11, 7], [9, 11, 6]],
+            [[1, 8, 9], [0, 8, 1]],
+            [[10, 11, 7], [1, 0, 9], [9, 0, 8]],
+            [[8, 10, 0], [6, 1, 0], [10, 6, 0]],
+            [[6, 1, 0], [11, 6, 0], [11, 0, 8], [7, 6, 11]],
+            [[1, 0, 5], [11, 8, 4]],
+            [[0, 5, 1], [7, 10, 4], [4, 10, 8]],
+            [[0, 5, 1], [6, 9, 10], [4, 11, 8]],
+            [[0, 4, 1], [1, 4, 6], [4, 7, 6], [5, 9, 8]],
+            [[1, 11, 9], [1, 0, 4], [1, 4, 11]],
+            [[1, 0, 4], [10, 1, 4], [10, 4, 7], [9, 1, 10]],
+            [[6, 1, 10], [10, 1, 11], [1, 0, 11], [11, 0, 4]],
+            [[6, 4, 7], [6, 1, 0], [6, 0, 4]],
+            [[5, 1, 0], [7, 3, 2]],
+            [[5, 1, 0], [3, 10, 11], [2, 10, 3]],
+            [[3, 2, 7], [10, 6, 9], [0, 5, 1]],
+            [[6, 9, 2], [2, 9, 3], [9, 11, 3], [1, 0, 5]],
+            [[3, 2, 7], [8, 9, 0], [0, 9, 1]],
+            [[0, 9, 1], [0, 8, 9], [2, 10, 11], [2, 11, 3]],
+            [[1, 0, 6], [6, 0, 10], [0, 8, 10], [2, 7, 3]],
+            [[1, 2, 6], [8, 11, 0], [0, 11, 3]],
+            [[1, 0, 5], [8, 4, 11], [2, 7, 3]],
+            [[1, 8, 5], [2, 8, 1], [2, 10, 8], [4, 3, 0]],
+            [[0, 5, 1], [5, 10, 6], [4, 11, 8], [2, 7, 3]],
+            [[3, 0, 4], [6, 1, 2], [5, 9, 8]],
+            [[4, 1, 0], [11, 1, 4], [11, 9, 1], [2, 7, 3]],
+            [[4, 3, 0], [1, 10, 9], [2, 10, 1]],
+            [[1, 2, 6], [10, 7, 11], [0, 4, 3]],
+            [[4, 3, 0], [6, 1, 2]],
+            [[0, 5, 2], [2, 5, 6]],
+            [[11, 7, 10], [6, 0, 5], [2, 0, 6]],
+            [[0, 10, 2], [0, 5, 9], [0, 9, 10]],
+            [[11, 7, 2], [5, 11, 2], [5, 2, 0], [5, 9, 11]],
+            [[0, 8, 2], [9, 6, 2], [8, 9, 2]],
+            [[7, 8, 11], [2, 8, 7], [2, 0, 8], [9, 6, 10]],
+            [[0, 10, 2], [0, 8, 10]],
+            [[0, 8, 2], [11, 7, 2], [8, 11, 2]],
+            [[8, 4, 11], [6, 2, 5], [5, 2, 0]],
+            [[5, 6, 0], [6, 2, 0], [7, 10, 8], [4, 7, 8]],
+            [[11, 0, 4], [10, 0, 11], [10, 2, 0], [5, 9, 8]],
+            [[8, 5, 9], [7, 2, 4], [4, 2, 0]],
+            [[9, 6, 2], [4, 9, 2], [4, 2, 0], [4, 11, 9]],
+            [[9, 6, 10], [7, 0, 4], [2, 0, 7]],
+            [[0, 10, 2], [0, 4, 11], [0, 11, 10]],
+            [[0, 4, 2], [2, 4, 7]],
+            [[6, 7, 5], [3, 0, 5], [7, 3, 5]],
+            [[6, 10, 11], [0, 6, 11], [0, 11, 3], [0, 5, 6]],
+            [[0, 5, 3], [3, 5, 7], [5, 9, 7], [7, 9, 10]],
+            [[3, 9, 11], [3, 0, 5], [3, 5, 9]],
+            [[8, 9, 6], [3, 8, 6], [3, 6, 7], [0, 8, 3]],
+            [[10, 9, 6], [3, 0, 11], [11, 0, 8]],
+            [[10, 0, 8], [10, 7, 3], [10, 3, 0]],
+            [[8, 11, 0], [0, 11, 3]],
+            [[0, 5, 3], [3, 5, 7], [5, 6, 7], [4, 11, 8]],
+            [[0, 4, 3], [6, 10, 5], [5, 10, 8]],
+            [[7, 11, 10], [0, 4, 3], [8, 5, 9]],
+            [[3, 0, 4], [9, 8, 5]],
+            [[4, 3, 0], [9, 6, 11], [11, 6, 7]],
+            [[10, 9, 6], [3, 0, 4]],
+            [[4, 3, 0], [7, 11, 10]],
+            [[4, 3, 0]]],dtype=object)
+MC33_Lookup = np.array([[[[]]],
          [[[7, 10, 11]]],
          [[[9, 10, 6]]],
          [[[6, 9, 7], [7, 9, 11]]],
@@ -2887,8 +2674,8 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
          [[[7, 9, 6], [11, 9, 7]]],
          [[[10, 9, 6]]],
          [[[10, 7, 11]]],
-         [[[]]]]
-        MarchingCubes33Lookup.FaceTests = [[[]],
+         [[[]]]], dtype=object)
+MC33_FaceTest = np.array([[[]],
          [[]],
          [[]],
          [[]],
@@ -3153,8 +2940,9 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
          [[]],
          [[]],
          [[]],
-         [[]]]
-        MarchingCubes33Lookup.Cases = [0,
+         [[]]],
+         dtype=object)
+MC33_Cases = np.array([0,
          1,
          1,
          2,
@@ -3409,8 +3197,8 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
          2,
          1,
          1,
-         0]
-        MarchingCubes33Lookup.Signs = [-1,
+         0])
+MC33_Signs = np.array([-1,
          -1,
          -1,
          -1,
@@ -3665,137 +3453,535 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
          1,
          1,
          1,
-         -1]
+         -1])
+
+
+def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', method='triangle', flip=False, edgemode='constant', cleanup=True):
+    # edgemode is for handling edges when interpolation is greater than linear (see np.pad for options)
+    # Image data is assumed to be voxel data and will be interpolated to vertices to get the corners of each 'square'
+    
+    assert len(I.shape) == 2, 'I must be a 2D numpy array of image data. For 3D, use MarchingCubesImage.'
+    I = I - threshold  
+    if method == 'triangle':
+        LookupTable = MSTriangle_Lookup
+    elif method == 'edge':
+        LookupTable = MSEdge_Lookup
+    else:
+        raise Exception('Invalid method. Must be "triangle" or "edge".')
+    if flip: 
+        I = -I
+    if isinstance(h, (int, float, np.number)):
+        h = (h,h)
+    
+    Padding = 0
+    if interpolation == "cubic":
+        # I = np.pad(I,1,mode=edgemode)
+        Padding = 1
+    
+    x1 = np.arange(0,I.shape[1]*h[0],h[0]) + h[0]/2
+    y1 = np.arange(0,I.shape[0]*h[1],h[1]) + h[1]/2
+    
+    X = np.repeat(np.atleast_2d(x1),I.shape[0],axis=0) - Padding*h[0]
+    Y = np.repeat(np.atleast_2d(y1).T,I.shape[1],axis=1) - Padding*h[1]
+    Z = np.zeros(X.shape)
+    
+    
+    Xv = np.repeat(np.atleast_2d(np.arange(-Padding,I.shape[1]+(1+Padding),1)),  I.shape[0]+1+2*Padding,axis=0) * h[0]
+    Yv = np.repeat(np.atleast_2d(np.arange(-Padding,I.shape[0]+(1+Padding),1)).T,I.shape[1]+1+2*Padding,axis=1) * h[1]
+    
+    # TODO: This is major bottleneck for cubic
+    interp = scipy.interpolate.RegularGridInterpolator((y1,x1),I,fill_value=None,method='linear',bounds_error=False)
+    Iv = interp((Yv.flatten(),Xv.flatten())).reshape(Xv.shape)
+    
+    X = Xv; Y = Yv; I = Iv; Z = np.zeros(Xv.shape)
+    
+    edgeLookup = np.array([
+        [0, 0],  # Corner 0
+        [1, 1],  # Corner 1
+        [2, 2],  # Corner 2
+        [3, 3],  # Corner 3
+        [0, 1],  # Edge 0
+        [1, 2],  # Edge 1
+        [2, 3],  # Edge 2
+        [3, 0],  # Edge 3
+        ])
+    iidx = np.repeat(np.arange(X.shape[0]-1-2*Padding),X.shape[1]-1-2*Padding)+Padding
+    jidx = np.tile(np.arange(X.shape[1]-1-2*Padding),X.shape[0]-1-2*Padding)+Padding
+    
+    isquares = np.vstack([iidx,iidx+1,iidx+1,iidx]).T
+    jsquares = np.vstack([jidx,jidx,jidx+1,jidx+1]).T
+    
+    vals = I[isquares,jsquares]
+    inside = (vals <= 0).astype(int)
+    tableIdx = np.dot(inside, 2**np.arange(inside.shape[1] - 1, -1, -1))
+    
+    edgeList =  LookupTable[tableIdx]
+    edgeConnections = np.array([x for y in edgeList for x in y if len(x) != 0])
+    numbering = np.array([j for j,y in enumerate(edgeList) for i,x in enumerate(y) if len(x) != 0])
+    
+    
+    i_indices = isquares[numbering][np.arange(len(numbering))[:, np.newaxis,np.newaxis], edgeLookup[edgeConnections]]
+    j_indices = jsquares[numbering][np.arange(len(numbering))[:, np.newaxis,np.newaxis], edgeLookup[edgeConnections]]
+    
+    
+    if interpolation == "cubic":
+        NewCoords = []
+        ishiftdir = i_indices[:,:,1] - i_indices[:,:,0]
+        jshiftdir = j_indices[:,:,1] - j_indices[:,:,0]
+        
+        i_interp = np.stack([i_indices[:,:,0]-1*ishiftdir, i_indices[:,:,0], i_indices[:,:,1], i_indices[:,:,1]+1*ishiftdir],axis=2)
+        j_interp = np.stack([j_indices[:,:,0]-1*jshiftdir, j_indices[:,:,0], j_indices[:,:,1], j_indices[:,:,1]+1*jshiftdir],axis=2)
+        
+        X_interp = X[i_interp,j_interp]
+        Y_interp = Y[i_interp,j_interp]
+        I_interp = I[i_interp,j_interp]
+        
+        
+        x = X_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        y = Y_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        v = I_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        
+        # Build coefficients for cubic polynomials
+        xbool = x[:,1]!=x[:,2] # Only interpolate in x if on an x edge
+        ybool = y[:,1]!=y[:,2] # Only interpolate in y if on an y edge
+        
+        xsort = np.argsort(x[xbool],axis=1)
+        ysort = np.argsort(y[ybool],axis=1)
+        x[xbool,:] = np.take_along_axis(x[xbool], xsort, axis=1)
+        y[ybool,:] = np.take_along_axis(y[ybool], ysort, axis=1)
+        v[xbool,:] = np.take_along_axis(v[xbool], xsort, axis=1)
+        v[ybool,:] = np.take_along_axis(v [ybool], ysort, axis=1)
+        
+        xAs = np.stack([x[xbool]**3, x[xbool]**2, x[xbool]**1, x[xbool]**0],axis=2)
+        yAs = np.stack([y[ybool]**3, y[ybool]**2, y[ybool]**1, y[ybool]**0],axis=2)
+        xCoeff = np.linalg.solve(xAs,v[xbool,:])
+        yCoeff = np.linalg.solve(yAs,v[ybool,:])
+        
+        # cf. https://en.wikipedia.org/wiki/Cubic_equation#General_cubic_formula
+        Roots = []
+        for coeff in [xCoeff, yCoeff]:
+            a = coeff[:,0]
+            b = coeff[:,1]
+            c = coeff[:,2]
+            d = coeff[:,3]
+            
+            delta0 = b**2 - 3*a*c
+            delta1 = 2*b**3 - 9*a*b*c + 27*a**2*d
+            
+            C = ((delta1 + np.sqrt(delta1**2+0J - 4*delta0**3))/2)**(1/3)
+            C[C==0] = ((delta1[C==0] - np.sqrt(delta1[C==0]**2 - 4*delta0[C==0]**3))/2)**(1/3)
+            
+            zeta = (-1 + np.sqrt(-3+0J))/2
+            roots = np.vstack([-1/(3*a) * ( b + zeta**k*C + delta0/(zeta**k*C) ) for k in [0, 1, 2]]).T
+            realcheck = np.isclose(np.imag(roots), 0)
+            roots[realcheck]  = np.real(roots[realcheck])
+            
+            # overwrite with quadratic for a ~ 0
+            near0 = np.isclose(a,0)
+            roots[near0] = np.vstack([(-c[near0] + np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]), 
+                                       (-c[near0] - np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]),
+                                        np.repeat(np.nan,len(b[near0]))]).T
+            Roots.append(roots)
+        xRoots = Roots[0]
+        yRoots = Roots[1]
+        
+        NewCoords = np.nan*np.ones((v.shape[0],3))
+        
+        NewCoords[xbool,0] = xRoots[(x[xbool,1,None] <= xRoots) & (x[xbool,2,None] >= xRoots) & np.isreal(xRoots)]
+        NewCoords[xbool,1] = y[xbool,1]
+        
+        NewCoords[ybool,0] = x[ybool,1]
+        NewCoords[ybool,1] = yRoots[(y[ybool,1,None] <= yRoots) & (y[ybool,2,None] >= yRoots) & np.isreal(yRoots)]
+        
+        NewCoords[:,2] = z
+        
+    elif interpolation == "linear" or interpolation == "midpoint":
+        ishiftdir = i_indices[:,:,1] - i_indices[:,:,0]
+        jshiftdir = j_indices[:,:,1] - j_indices[:,:,0]
+        
+        i_interp = i_indices
+        j_interp = j_indices
+        
+        X_interp = X[i_interp,j_interp]
+        Y_interp = Y[i_interp,j_interp]
+        I_interp = I[i_interp,j_interp]
+        
+        x = X_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        y = Y_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        v = I_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        
+        if interpolation == "linear":
+            with np.errstate(divide='ignore', invalid='ignore'):
+                NewCoords = np.vstack([
+                     x[:,0] + np.nan_to_num((0-v[:,0])*(x[:,1]-x[:,0])/(v[:,1]-v[:,0])),
+                     y[:,0]  + np.nan_to_num((0-v[:,0])*(y[:,1]-y[:,0])/(v[:,1]-v[:,0])),
+                     np.repeat(z,len(x))
+                    ]).T
+        else:
+            NewCoords = np.vstack([
+                 (x[:,0] + x[:,1])/2,
+                 (y[:,0] + y[:,1])/2,
+                 np.repeat(z,len(x))
+                ]).T
+    else:
+        raise Exception('Invalid input "{:s}" for interpolation. Must be one of "midpoint", "linear", or "cubic".'.format(interpolation))
+            
+    NewConn = np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F')
+    if cleanup:
+        NewCoords,NewConn,_,Idx = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
+        if (interpolation=='linear' or interpolation=='cubic') and method=='triangle':
+            NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
+            
+    return NewCoords, NewConn
+
+def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation='linear', method='triangle', flip=False, return_anchors=False, cleanup=True):
+    NewCoords = []
+    NewConn = []
+    Anchors = []
+    AnchorAxis = []
+    AnchorDir = []
+    NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
+    if flip:
+        NodeValues = -1*NodeValues
+    MarchingSquaresLookup_Edge.LookupTable = MSEdge_Lookup
+    MarchingSquaresLookup_Tri.LookupTable = MSTriangle_Lookup
+    edgeLookup = [
+        [0, 0],  # Corner 0
+        [1, 1],  # Corner 1
+        [2, 2],  # Corner 2
+        [3, 3],  # Corner 3
+        [0, 1],  # Edge 0
+        [1, 2],  # Edge 1
+        [2, 3],  # Edge 2
+        [3, 0],  # Edge 3
+        ]
+    
+    # arrayCoords = np.array(NodeCoords)
+    for e in range(len(NodeConn)):
+        vals = np.array([NodeValues[node] for node in NodeConn[e]])
+        inside = [1 if v <= 0 else 0 for v in vals]
+        i = int("".join(str(j) for j in inside), 2)
+        if method == 'triangle':
+            NewElems = MarchingSquaresLookup_Tri(i)
+        elif method == 'edge':
+            NewElems = MarchingSquaresLookup_Edge(i)
+        else:
+            raise Exception('Invalid method. Must be "triangle" or "edge".')
+    
+        if len(NewElems) > 0:
+            for t in NewElems:
+                elem = []
+                for n in t:
+                    node1 = NodeConn[e][edgeLookup[n][0]]
+                    node2 = NodeConn[e][edgeLookup[n][1]]
+                    coords1 = NodeCoords[node1]
+                    coords2 = NodeCoords[node2]
+                    v1 = NodeValues[node1]
+                    v2 = NodeValues[node2]
+                    if interpolation == 'midpoint' or v1 == v2:
+                        newNode = [
+                            (coords1[0] + coords2[0])/2,
+                            (coords1[1] + coords2[1])/2,
+                            (coords1[2] + coords2[2])/2
+                            ]
+                        elem.append(len(NewCoords))
+                        NewCoords.append(newNode)
+                    elif interpolation == 'linear':
+                        newNode = [
+                            coords1[0] + (0-v1)*(coords2[0]-coords1[0])/(v2-v1),
+                            coords1[1] + (0-v1)*(coords2[1]-coords1[1])/(v2-v1),
+                            coords1[2] + (0-v1)*(coords2[2]-coords1[2])/(v2-v1)
+                            ]
+                        if np.sign(v2) == np.sign(v1):
+                            print('Marching squares fuckup')
+                            print(str(e) + str(np.sign(vals)) + str(edgeLookup[n]))
+                        elem.append(len(NewCoords))
+                        NewCoords.append(newNode)                            
+                    else:
+                        raise Exception('Invalid interpolation method')
+                    if return_anchors:
+                        if flip:
+                            anchor = [node1,node2][np.argmax([v1,v2])] # Pick the point in positive domain
+                        else:
+                            anchor = [node1,node2][np.argmin([v1,v2])] # Pick the point in negative domain
+                        Anchors.append(anchor)
+
+                        # if (edgeLookup[n][0] == 0 and edgeLookup[n][1] == 1) or (edgeLookup[n][0] == 2 and edgeLookup[n][1] == 3):
+                        #     AnchorAxis.append(0)
+                        # elif (edgeLookup[n][0] == 1 and edgeLookup[n][1] == 2) or (edgeLookup[n][0] == 3 and edgeLookup[n][1] == 0):
+                        #     AnchorAxis.append(1)
+                        # else:
+                        #     AnchorAxis.append(-1)
+
+                        if n == 4 or n == 6:
+                            AnchorAxis.append(0)
+                        elif n == 5 or n == 7: 
+                            AnchorAxis.append(1)
+                        else:
+                            AnchorAxis.append(-1)
+
+                        mid = np.array([
+                            (coords1[0] + coords2[0])/2,
+                            (coords1[1] + coords2[1])/2,
+                            (coords1[2] + coords2[2])/2
+                            ])
+                        if np.all(mid-NodeCoords[anchor] >= 0):
+                            AnchorDir.append(1)
+                        else:
+                            AnchorDir.append(-1)
+
+                    
+                if len(elem) > 0:
+                    NewConn.append(elem)  
+    if cleanup:                  
+        NewCoords,NewConn,_,Idx = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
+        if interpolation=='linear' and method=='triangle':
+            NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
+    else:
+        Idx = np.arange(len(NewCoords),dtype=int)
+    if return_anchors:
+        Anchors = np.array(Anchors)
+        AnchorAxis = np.array(AnchorAxis)
+        AnchorDir = np.array(AnchorDir)
+        return NewCoords, NewConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
+    return NewCoords, NewConn
+
+def MarchingSquaresLookup_Tri(i):
+    assert i < 16, 'There are only 16 possible states of the square, i must be less than 16'
+    TriElems = MarchingSquaresLookup_Tri.LookupTable[i]
+    return TriElems
+def MarchingSquaresLookup_Edge(i):
+    assert i < 16, 'There are only 16 possible states of the square, i must be less than 16'
+    TriElems = MarchingSquaresLookup_Edge.LookupTable[i]
+    return TriElems
+
+def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='33', flip=False, cleanup=True):
+    # edgemode is for handling edges when interpolation is greater than linear (see np.pad for options)
+    # Image data is assumed to be voxel data and will be interpolated to vertices to get the corners of each 'square'
+    
+    assert len(I.shape) == 3, 'I must be a 3D numpy array of image data. For 2D, use MarchingSquaresImage.'
+    I = I - threshold  
+    if method == 'original':
+        LookupTable = MC_Lookup
+    elif method == '33':
+        LookupTable = MC33_Lookup
+    else:
+        raise Exception('Invalid method. Must be "original" or "33".')
+    if flip: 
+        I = -I
+    if isinstance(h, (int, float, np.number)):
+        h = (h,h,h)
+    
+    Padding = 0
+    if interpolation == "cubic":
+        Padding = 1
+    
+    x1 = np.arange(0,I.shape[2]*h[0],h[0]) + h[0]/2
+    y1 = np.arange(0,I.shape[1]*h[1],h[1]) + h[1]/2
+    z1 = np.arange(0,I.shape[0]*h[2],h[2]) + h[2]/2
+
+    X,Y,Z = np.meshgrid(x1,y1,z1)
+    X -= Padding*h[0]
+    Y -= Padding*h[1]
+    Z -= Padding*h[2]
+    
+    # Xv = np.repeat(np.atleast_2d(np.arange(-Padding,I.shape[2]+(1+Padding),1)),  I.shape[0]+1+2*Padding,axis=0) * h[0]
+    # Yv = np.repeat(np.atleast_2d(np.arange(-Padding,I.shape[1]+(1+Padding),1)).T,I.shape[1]+1+2*Padding,axis=1) * h[1]
+    
+    Xv, Yv, Zv = np.meshgrid(np.arange(-Padding,I.shape[2]+(1+Padding)),
+                             np.arange(-Padding,I.shape[1]+(1+Padding)),
+                             np.arange(-Padding,I.shape[0]+(1+Padding)))*np.asarray(h)[:,None,None,None]
+    
+    # TODO: This is major bottleneck for cubic
+    interp = scipy.interpolate.RegularGridInterpolator((z1,y1,x1),I,fill_value=None,method='linear',bounds_error=False)
+    Iv = interp((Zv.flatten(),Yv.flatten(),Xv.flatten())).reshape(Xv.shape)
+    
+    X = Xv; Y = Yv; Z = Zv; I = Iv; 
+    
+    edgeLookup = np.array([
+        [0, 1],  # Edge 0 - Between nodes 0 and 1
+        [1, 2],  # Edge 1
+        [2, 3],  # Edge 2
+        [3, 0],  # Edge 3
+        [0, 4],  # Edge 4
+        [1, 5],  # Edge 5
+        [2, 6],  # Edge 6
+        [3, 7],  # Edge 7
+        [4, 5],  # Edge 8
+        [5, 6],  # Edge 9
+        [6, 7],  # Edge 10
+        [7, 4],  # Edge 11
+        # []       # Center
+        ])
+    iidx = np.repeat(np.arange(Xv.shape[0]-1-2*Padding),(Xv.shape[1]-1-2*Padding)*(Xv.shape[2]-1-2*Padding))+Padding
+    jidx = np.repeat(np.tile(np.arange(Xv.shape[1]-1-2*Padding),(Xv.shape[0]-1-2*Padding)),(Xv.shape[2]-1-2*Padding))+Padding
+    kidx = np.tile(np.arange(Xv.shape[2]-1-2*Padding),(Xv.shape[1]-1-2*Padding)*(Xv.shape[2]-1-2*Padding))+Padding
+    
+    icubes = np.vstack([iidx,iidx+1,iidx+1,iidx,iidx,iidx+1,iidx+1,iidx]).T
+    jcubes = np.vstack([jidx,jidx,jidx+1,jidx+1,jidx,jidx,jidx+1,jidx+1]).T
+    kcubes = np.vstack([kidx,kidx,kidx,kidx,kidx+1,kidx+1,kidx+1,kidx+1]).T
+    
+    vals = Iv[icubes,jcubes,kcubes]
+    inside = (vals <= 0).astype(int)
+    tableIdx = np.dot(inside, 2**np.arange(inside.shape[1] - 1, -1, -1))
+    
+    if method == 'original':
+        tableIdx[tableIdx > 127] = 128 - (tableIdx[tableIdx > 127]-127)
+        edgeList =  LookupTable[tableIdx]
+        edgeConnections = np.array([x for y in edgeList for x in y if len(x) != 0])
+        numbering = np.array([j for j,y in enumerate(edgeList) for i,x in enumerate(y) if len(x) != 0])
+    
+    elif method == '33':
+        ##### TODO ####
+        pass
+    
+    i_indices = icubes[numbering][np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]]
+    j_indices = jcubes[numbering][np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]]
+    k_indices = kcubes[numbering][np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]]
+    
+    ishiftdir = i_indices[:,:,1] - i_indices[:,:,0]
+    jshiftdir = j_indices[:,:,1] - j_indices[:,:,0]
+    kshiftdir = k_indices[:,:,1] - k_indices[:,:,0]
+    if interpolation == "cubic":
+        
+        i_interp = np.stack([i_indices[:,:,0]-1*ishiftdir, i_indices[:,:,0], i_indices[:,:,1], i_indices[:,:,1]+1*ishiftdir],axis=2)
+        j_interp = np.stack([j_indices[:,:,0]-1*jshiftdir, j_indices[:,:,0], j_indices[:,:,1], j_indices[:,:,1]+1*jshiftdir],axis=2)
+        k_interp = np.stack([k_indices[:,:,0]-1*kshiftdir, k_indices[:,:,0], k_indices[:,:,1], k_indices[:,:,1]+1*kshiftdir],axis=2)
+        
+        X_interp = X[i_interp,j_interp,k_interp]
+        Y_interp = Y[i_interp,j_interp,k_interp]
+        Z_interp = Z[i_interp,j_interp,k_interp]
+        I_interp = I[i_interp,j_interp,k_interp]
+        
+        
+        x = X_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        y = Y_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        z = Z_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        v = I_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        
+        # Build coefficients for cubic polynomials
+        xbool = x[:,1]!=x[:,2] # Only interpolate in x if on an x edge
+        ybool = y[:,1]!=y[:,2] # Only interpolate in y if on an y edge
+        zbool = z[:,1]!=z[:,2] # Only interpolate in y if on an y edge
+
+        
+        xsort = np.argsort(x[xbool],axis=1)
+        ysort = np.argsort(y[ybool],axis=1)
+        zsort = np.argsort(z[zbool],axis=1)
+        x[xbool,:] = np.take_along_axis(x[xbool], xsort, axis=1)
+        y[ybool,:] = np.take_along_axis(y[ybool], ysort, axis=1)
+        z[zbool,:] = np.take_along_axis(z[zbool], zsort, axis=1)
+        v[xbool,:] = np.take_along_axis(v[xbool], xsort, axis=1)
+        v[ybool,:] = np.take_along_axis(v[ybool], ysort, axis=1)
+        v[zbool,:] = np.take_along_axis(v[zbool], zsort, axis=1)
+        
+        xAs = np.stack([x[xbool]**3, x[xbool]**2, x[xbool]**1, x[xbool]**0],axis=2)
+        yAs = np.stack([y[ybool]**3, y[ybool]**2, y[ybool]**1, y[ybool]**0],axis=2)
+        zAs = np.stack([z[zbool]**3, z[zbool]**2, z[zbool]**1, z[zbool]**0],axis=2)
+        xCoeff = np.linalg.solve(xAs,v[xbool,:])
+        yCoeff = np.linalg.solve(yAs,v[ybool,:])
+        zCoeff = np.linalg.solve(zAs,v[zbool,:])
+        
+        # cf. https://en.wikipedia.org/wiki/Cubic_equation#General_cubic_formula
+        Roots = []
+        for coeff in [xCoeff, yCoeff, zCoeff]:
+            a = coeff[:,0]
+            b = coeff[:,1]
+            c = coeff[:,2]
+            d = coeff[:,3]
+            
+            delta0 = b**2 - 3*a*c
+            delta1 = 2*b**3 - 9*a*b*c + 27*a**2*d
+            
+            C = ((delta1 + np.sqrt(delta1**2+0J - 4*delta0**3))/2)**(1/3)
+            C[C==0] = ((delta1[C==0] - np.sqrt(delta1[C==0]**2 - 4*delta0[C==0]**3))/2)**(1/3)
+            
+            zeta = (-1 + np.sqrt(-3+0J))/2
+            roots = np.vstack([-1/(3*a) * ( b + zeta**k*C + delta0/(zeta**k*C) ) for k in [0, 1, 2]]).T
+            realcheck = np.isclose(np.imag(roots), 0)
+            roots[realcheck]  = np.real(roots[realcheck])
+            
+            # overwrite with quadratic for a ~ 0
+            near0 = np.isclose(a,0)
+            roots[near0] = np.vstack([(-c[near0] + np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]), 
+                                       (-c[near0] - np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]),
+                                        np.repeat(np.nan,len(b[near0]))]).T
+            Roots.append(roots)
+        xRoots = Roots[0]
+        yRoots = Roots[1]
+        zRoots = Roots[2]
+        
+        NewCoords = np.nan*np.ones((v.shape[0],3))
+        
+        NewCoords[xbool,0] = xRoots[(x[xbool,1,None] <= xRoots) & (x[xbool,2,None] >= xRoots) & np.isreal(xRoots)]
+        NewCoords[xbool,1] = y[xbool,1]
+        NewCoords[xbool,2] = z[xbool,1]
+        
+        NewCoords[ybool,0] = x[ybool,1]
+        NewCoords[ybool,1] = yRoots[(y[ybool,1,None] <= yRoots) & (y[ybool,2,None] >= yRoots) & np.isreal(yRoots)]
+        NewCoords[ybool,2] = z[ybool,1]
+        
+        NewCoords[zbool,0] = x[zbool,1]
+        NewCoords[zbool,1] = y[zbool,1]
+        NewCoords[zbool,2] = zRoots[(z[zbool,1,None] <= zRoots) & (z[zbool,2,None] >= zRoots) & np.isreal(zRoots)]
+        
+    elif interpolation == "linear" or interpolation == "midpoint":
+        
+        i_interp = i_indices
+        j_interp = j_indices
+        k_interp = k_indices
+        
+        X_interp = X[i_interp,j_interp,k_interp]
+        Y_interp = Y[i_interp,j_interp,k_interp]
+        Z_interp = Z[i_interp,j_interp,k_interp]
+        I_interp = I[i_interp,j_interp,k_interp]
+        
+        x = X_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        y = Y_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        z = Z_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        v = I_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        
+        if interpolation == "linear":
+            with np.errstate(divide='ignore', invalid='ignore'):
+                NewCoords = np.vstack([
+                     x[:,0] + np.nan_to_num((0-v[:,0])*(x[:,1]-x[:,0])/(v[:,1]-v[:,0])),
+                     y[:,0]  + np.nan_to_num((0-v[:,0])*(y[:,1]-y[:,0])/(v[:,1]-v[:,0])),
+                     z[:,0]  + np.nan_to_num((0-v[:,0])*(z[:,1]-z[:,0])/(v[:,1]-v[:,0]))
+                    ]).T
+        else:
+            NewCoords = np.vstack([
+                 (x[:,0] + x[:,1])/2,
+                 (y[:,0] + y[:,1])/2,
+                 (z[:,0] + z[:,1])/2,
+                ]).T
+    else:
+        raise Exception('Invalid input "{:s}" for interpolation. Must be one of "midpoint", "linear", or "cubic".'.format(interpolation))
+            
+    NewConn = np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F')
+    if cleanup:
+        NewCoords,NewConn,_,Idx = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
+        if (interpolation=='linear' or interpolation=='cubic') and method=='triangle':
+            NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
+            
+    return NewCoords, NewConn
+
+def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',method='33',flip=False, return_anchors=False):
+    # method: 'original', '33'
+    TriNodeCoords = []
+    TriNodeConn = []
+    Anchors = []
+    AnchorAxis = []
+    AnchorDir = []
+    NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
+    if flip:
+        NodeValues = -1*NodeValues
+    if method == '33':
+        MarchingCubes33Lookup.LookupTable = MC33_Lookup
+        MarchingCubes33Lookup.FaceTests = MC33_FaceTest
+        MarchingCubes33Lookup.Cases = MC33_Cases
+        MarchingCubes33Lookup.Signs = MC33_Signs
     elif method == 'original':
-        MarchingCubesLookup.LookupTable = [
-            [[]],
-            [[7, 10, 11]],
-            [[6, 9, 10]],
-            [[6, 9, 7], [7, 9, 11]],
-            [[5, 8, 9]],
-            [[5, 8, 9], [7, 10, 11]],
-            [[5, 8, 6], [6, 8, 10]],
-            [[5, 7, 6], [5, 8, 11], [5, 11, 7]],
-            [[11, 8, 4]],
-            [[8, 7, 10], [4, 7, 8]],
-            [[4, 11, 8], [6, 9, 10]],
-            [[7, 6, 4], [9, 8, 4], [6, 9, 4]],
-            [[4, 9, 5], [11, 9, 4]],
-            [[7, 5, 4], [7, 10, 9], [7, 9, 5]],
-            [[4, 6, 5], [4, 11, 10], [4, 10, 6]],
-            [[4, 6, 5], [4, 7, 6]],
-            [[7, 3, 2]],
-            [[3, 2, 11], [11, 2, 10]],
-            [[3, 2, 7], [9, 10, 6]],
-            [[11, 3, 9], [2, 6, 9], [3, 2, 9]],
-            [[2, 7, 3], [5, 8, 9]],
-            [[5, 8, 9], [10, 3, 2], [11, 3, 10]],
-            [[2, 7, 3], [5, 8, 6], [6, 8, 10]],
-            [[3, 2, 6], [8, 3, 6], [8, 6, 5], [11, 3, 8]],
-            [[2, 7, 3], [8, 4, 11]],
-            [[10, 8, 2], [4, 3, 2], [8, 4, 2]],
-            [[2, 7, 3], [4, 11, 8], [6, 9, 10]],
-            [[2, 4, 3], [6, 4, 2], [6, 8, 4], [9, 8, 6]],
-            [[7, 3, 2], [9, 5, 11], [11, 5, 4]],
-            [[4, 3, 2], [4, 2, 9], [5, 4, 9], [9, 2, 10]],
-            [[10, 4, 11], [6, 4, 10], [6, 5, 4], [3, 2, 7]],
-            [[5, 4, 6], [3, 2, 6], [4, 3, 6]],
-            [[6, 2, 1]],
-            [[6, 2, 1], [7, 10, 11]],
-            [[2, 9, 10], [1, 9, 2]],
-            [[9, 11, 1], [7, 2, 1], [11, 7, 1]],
-            [[2, 1, 6], [8, 9, 5]],
-            [[8, 9, 5], [1, 6, 2], [11, 7, 10]],
-            [[2, 8, 10], [2, 1, 5], [2, 5, 8]],
-            [[5, 8, 1], [1, 8, 2], [8, 11, 2], [2, 11, 7]],
-            [[1, 6, 2], [11, 8, 4]],
-            [[6, 2, 1], [8, 4, 10], [10, 4, 7]],
-            [[4, 11, 8], [9, 2, 1], [10, 2, 9]],
-            [[9, 8, 4], [9, 4, 2], [1, 9, 2], [4, 7, 2]],
-            [[1, 6, 2], [4, 11, 5], [5, 11, 9]],
-            [[1, 7, 2], [5, 7, 1], [5, 4, 7], [10, 9, 6]],
-            [[2, 1, 5], [11, 2, 5], [11, 5, 4], [10, 2, 11]],
-            [[4, 7, 5], [2, 1, 5], [7, 2, 5]],
-            [[7, 1, 6], [3, 1, 7]],
-            [[1, 11, 3], [1, 6, 10], [1, 10, 11]],
-            [[1, 9, 3], [10, 7, 3], [9, 10, 3]],
-            [[11, 1, 9], [11, 3, 1]],
-            [[9, 5, 8], [7, 3, 6], [6, 3, 1]],
-            [[8, 1, 5], [11, 1, 8], [11, 3, 1], [6, 10, 9]],
-            [[1, 5, 8], [1, 8, 7], [3, 1, 7], [7, 8, 10]],
-            [[3, 1, 11], [5, 8, 11], [1, 5, 11]],
-            [[8, 4, 11], [7, 1, 6], [3, 1, 7]],
-            [[1, 6, 10], [1, 10, 4], [3, 1, 4], [4, 10, 8]],
-            [[7, 9, 10], [3, 9, 7], [3, 1, 9], [8, 4, 11]],
-            [[9, 3, 1], [9, 8, 4], [9, 4, 3]],
-            [[5, 11, 9], [5, 4, 11], [6, 7, 3], [6, 3, 1]],
-            [[9, 6, 10], [4, 3, 5], [5, 3, 1]],
-            [[10, 7, 11], [4, 1, 5], [3, 1, 4]],
-            [[1, 5, 3], [3, 5, 4]],
-            [[0, 5, 1]],
-            [[11, 7, 10], [5, 1, 0]],
-            [[5, 1, 0], [6, 9, 10]],
-            [[0, 5, 1], [6, 11, 7], [9, 11, 6]],
-            [[1, 8, 9], [0, 8, 1]],
-            [[10, 11, 7], [1, 0, 9], [9, 0, 8]],
-            [[8, 10, 0], [6, 1, 0], [10, 6, 0]],
-            [[6, 1, 0], [11, 6, 0], [11, 0, 8], [7, 6, 11]],
-            [[1, 0, 5], [11, 8, 4]],
-            [[0, 5, 1], [7, 10, 4], [4, 10, 8]],
-            [[0, 5, 1], [6, 9, 10], [4, 11, 8]],
-            [[0, 4, 1], [1, 4, 6], [4, 7, 6], [5, 9, 8]],
-            [[1, 11, 9], [1, 0, 4], [1, 4, 11]],
-            [[1, 0, 4], [10, 1, 4], [10, 4, 7], [9, 1, 10]],
-            [[6, 1, 10], [10, 1, 11], [1, 0, 11], [11, 0, 4]],
-            [[6, 4, 7], [6, 1, 0], [6, 0, 4]],
-            [[5, 1, 0], [7, 3, 2]],
-            [[5, 1, 0], [3, 10, 11], [2, 10, 3]],
-            [[3, 2, 7], [10, 6, 9], [0, 5, 1]],
-            [[6, 9, 2], [2, 9, 3], [9, 11, 3], [1, 0, 5]],
-            [[3, 2, 7], [8, 9, 0], [0, 9, 1]],
-            [[0, 9, 1], [0, 8, 9], [2, 10, 11], [2, 11, 3]],
-            [[1, 0, 6], [6, 0, 10], [0, 8, 10], [2, 7, 3]],
-            [[1, 2, 6], [8, 11, 0], [0, 11, 3]],
-            [[1, 0, 5], [8, 4, 11], [2, 7, 3]],
-            [[1, 8, 5], [2, 8, 1], [2, 10, 8], [4, 3, 0]],
-            [[0, 5, 1], [5, 10, 6], [4, 11, 8], [2, 7, 3]],
-            [[3, 0, 4], [6, 1, 2], [5, 9, 8]],
-            [[4, 1, 0], [11, 1, 4], [11, 9, 1], [2, 7, 3]],
-            [[4, 3, 0], [1, 10, 9], [2, 10, 1]],
-            [[1, 2, 6], [10, 7, 11], [0, 4, 3]],
-            [[4, 3, 0], [6, 1, 2]],
-            [[0, 5, 2], [2, 5, 6]],
-            [[11, 7, 10], [6, 0, 5], [2, 0, 6]],
-            [[0, 10, 2], [0, 5, 9], [0, 9, 10]],
-            [[11, 7, 2], [5, 11, 2], [5, 2, 0], [5, 9, 11]],
-            [[0, 8, 2], [9, 6, 2], [8, 9, 2]],
-            [[7, 8, 11], [2, 8, 7], [2, 0, 8], [9, 6, 10]],
-            [[0, 10, 2], [0, 8, 10]],
-            [[0, 8, 2], [11, 7, 2], [8, 11, 2]],
-            [[8, 4, 11], [6, 2, 5], [5, 2, 0]],
-            [[5, 6, 0], [6, 2, 0], [7, 10, 8], [4, 7, 8]],
-            [[11, 0, 4], [10, 0, 11], [10, 2, 0], [5, 9, 8]],
-            [[8, 5, 9], [7, 2, 4], [4, 2, 0]],
-            [[9, 6, 2], [4, 9, 2], [4, 2, 0], [4, 11, 9]],
-            [[9, 6, 10], [7, 0, 4], [2, 0, 7]],
-            [[0, 10, 2], [0, 4, 11], [0, 11, 10]],
-            [[0, 4, 2], [2, 4, 7]],
-            [[6, 7, 5], [3, 0, 5], [7, 3, 5]],
-            [[6, 10, 11], [0, 6, 11], [0, 11, 3], [0, 5, 6]],
-            [[0, 5, 3], [3, 5, 7], [5, 9, 7], [7, 9, 10]],
-            [[3, 9, 11], [3, 0, 5], [3, 5, 9]],
-            [[8, 9, 6], [3, 8, 6], [3, 6, 7], [0, 8, 3]],
-            [[10, 9, 6], [3, 0, 11], [11, 0, 8]],
-            [[10, 0, 8], [10, 7, 3], [10, 3, 0]],
-            [[8, 11, 0], [0, 11, 3]],
-            [[0, 5, 3], [3, 5, 7], [5, 6, 7], [4, 11, 8]],
-            [[0, 4, 3], [6, 10, 5], [5, 10, 8]],
-            [[7, 11, 10], [0, 4, 3], [8, 5, 9]],
-            [[3, 0, 4], [9, 8, 5]],
-            [[4, 3, 0], [9, 6, 11], [11, 6, 7]],
-            [[10, 9, 6], [3, 0, 4]],
-            [[4, 3, 0], [7, 11, 10]],
-            [[4, 3, 0]]]
+        MarchingCubesLookup.LookupTable = MC_Lookup
     else:
         raise Exception('Unknown method "{:s}"'.format(method))
     edgeLookup = [
