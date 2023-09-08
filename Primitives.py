@@ -38,9 +38,10 @@ def Box(bounds,h,meshobj=True,ElemType='quad'):
         BoxConn = converter.quad2tri(BoxConn)
     if meshobj:
         if 'mesh' in dir(mesh):
-            Box = mesh.mesh(BoxCoords,BoxConn,'surf')
+            Box = mesh.mesh(BoxCoords,BoxConn)
         else:
-            Box = mesh(BoxCoords,BoxConn,'surf')
+            Box = mesh(BoxCoords,BoxConn)
+        Box.Type = 'surf'
         Box.cleanup()
         return Box
     return BoxCoords,BoxConn
