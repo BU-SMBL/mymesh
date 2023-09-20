@@ -141,7 +141,7 @@ class mesh:
             setattr(self,properties,[])
         else:
             raise Exception('Invalid input.')
-    def cleanup(self,tol=1e-12,angletol=1e-3,strict=False):
+    def cleanup(self,tol=1e-10,angletol=1e-3,strict=False):
         # TODO: This needs to be improved so other variables that point to nodes or elements are updated accordingly
         
         self.reset()
