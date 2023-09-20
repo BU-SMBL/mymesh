@@ -11,7 +11,7 @@ To Install tetgen with Anaconda: "conda install -c conda-forge tetgen"
 import os, sys, subprocess, tempfile
 import numpy as np
 
-def tetgen(NodeCoords, NodeConn, holes=[], switches=[''], verbose=False, BoundingBox=False):
+def tetgen(NodeCoords, NodeConn, holes=[], switches=[''], verbose=False, BoundingBox=False, sizing=None):
     
     # Use BoundingBox if the the mesh is potentially discontinuous and there are holes
     if type(NodeCoords) == np.ndarray: NodeCoords = NodeCoords.tolist()
@@ -41,6 +41,10 @@ def tetgen(NodeCoords, NodeConn, holes=[], switches=[''], verbose=False, Boundin
         boxconn = [[0,1,5],[0,5,4],[1,2,6],[1,6,5],[2,3,7],[2,7,6],[3,4,7],[3,0,4],[0,2,1],[0,3,2],[4,5,7],[5,6,7]]        
         NodeConn = NodeConn + (np.array(boxconn)+len(NodeCoords)).tolist()
         NodeCoords = NodeCoords + boxcoords
+        
+        if sizing is not None:
+            sizing = np.append(sizing,np.ones(len(boxcoords)))
+        
         # NodeConn = boxconn
         # NodeCoords = boxcoords
         hole = [xmin-dx/20,ymin-dy/20,zmin-dz/20]
@@ -49,7 +53,12 @@ def tetgen(NodeCoords, NodeConn, holes=[], switches=[''], verbose=False, Boundin
     with tempfile.TemporaryDirectory() as tempdir:       
         filename = os.path.join(tempdir,'mesh.smesh')
         writeSmesh(filename, NodeCoords, NodeConn, holes=holes)
-        process = subprocess.run(['tetgen'] + switches + [filename], capture_output=True, text=True)
+        if sizing is not None:
+            sizename = os.path.join(tempdir,'mesh.mtr')
+            writeMtr(sizename, sizing)
+            process = subprocess.run(['tetgen'] + switches + ['-m '] + [sizename] + [filename], capture_output=True, text=True)
+        else:
+            process = subprocess.run(['tetgen'] + switches + [filename], capture_output=True, text=True)
         if verbose: print(process.stdout)
         node = os.path.join(tempdir,'mesh.1.node')
         ele = os.path.join(tempdir,'mesh.1.ele')
@@ -137,7 +146,32 @@ def writeSmesh(filename, NodeCoords, NodeConn, holes=[]):
         f.write('# Part 4 - the region list.\n')        
         f.write(str(0))
         
+def writeNode(filename, NodeCoords):
     
+    if os.path.splitext(filename)[1] != '.node':
+        filename += '.node'
+        
+    with open(filename,'w') as f:
+        # Write Nodes
+        f.write(' '.join([str(len(NodeCoords)), str(len(NodeCoords[0])), str(0), str(0)]))  # TODO: No attributes or boundary markers
+        f.write('\n')
+        for i,coord in enumerate(NodeCoords):
+            f.write(' '.join([str(i+1), str(coord[0]), str(coord[1]), str(coord[2])]))
+            f.write('\n')
+            
+def writeMtr(filename, sizing):
+    
+    if os.path.splitext(filename)[1] != '.mtr':
+        filename += '.mtr'
+        
+    with open(filename,'w') as f:
+        # Write Nodes
+        f.write(' '.join([str(sizing), '0'])) 
+        f.write('\n')
+        for i,s in enumerate(sizing):
+            f.write(str(s))
+            f.write('\n')
+            
 def readNode(filename):
     NodeCoords = []
     with open(filename,'r') as f:
