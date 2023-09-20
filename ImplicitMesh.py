@@ -1009,7 +1009,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
         if Subdivision: NewCoords, NodeConn = AdaptiveSubdivision(sdf, NewCoords.tolist(), NodeConn, threshold=1e-4)
         NewCoords = np.array(NewCoords)
         NodeNeighbors = MeshUtils.getNodeNeighbors(NewCoords, NodeConn)    
-        ElemConn = MeshUtils.getNodeElemConnectivity(NewCoords, NodeConn)    
+        ElemConn = MeshUtils.getElemConnectivity(NewCoords, NodeConn)    
         ElemNeighbors = MeshUtils.getElemNeighbors(NewCoords,NodeConn,mode='edge')
         ElemNormals = MeshUtils.CalcFaceNormal(NewCoords, NodeConn)
         tfs = np.linspace(1,0,NZIter+1)
