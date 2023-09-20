@@ -584,24 +584,46 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,Fixed
     NewCoords : list
         List of updated nodal coordinates.
     """    
-    if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
+    # if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
     
+    # if FixFeatures:
+    #     edges,corners = MeshUtils.DetectFeatures(NodeCoords,NodeConn)
+    #     FixedNodes.update(edges)
+    #     FixedNodes.update(corners)
+
+
+    # Nodes = set(range(len(NodeCoords))).difference(FixedNodes)
+    # if not NodeNeighbors: NodeNeighbors = MeshUtils.getNodeNeighbors(NodeCoords, NodeConn)
+    # NewCoords = copy.copy(NodeCoords)#[node for node in NodeCoords]
+    # OldCoords = copy.copy(NodeCoords)
+    # for it in range(iterate):        
+    #     for i in Nodes:
+    #         Ni = len(NodeNeighbors[i])
+    #         if Ni > 0:
+    #             NewCoords[i] = (1/Ni * np.sum([OldCoords[NodeNeighbors[i][j]] for j in range(len(NodeNeighbors[i]))],axis=0)).tolist() 
+    #     OldCoords = copy.copy(NewCoords)
+    if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
     if FixFeatures:
         edges,corners = MeshUtils.DetectFeatures(NodeCoords,NodeConn)
         FixedNodes.update(edges)
         FixedNodes.update(corners)
+    NodeNeighbors = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
+    ElemConn = MeshUtils.getElemConnectivity(NodeCoords,NodeConn)
+    lens = np.array([len(n) for n in NodeNeighbors])
+    r = MeshUtils.PadRagged(NodeNeighbors,fillval=-1)
+    FreeNodes = list(set(range(len(NodeCoords))).difference(FixedNodes))
+    ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
+    
+    ElemNormals = MeshUtils.CalcFaceNormal(ArrayCoords[:-1],NodeConn)
+    NodeNormals = MeshUtils.Face2NodeNormal(ArrayCoords[:-1],NodeConn,ElemConn,ElemNormals)
+    
+    for i in range(iterate):
+        Q = ArrayCoords[r]
+        U = (1/lens)[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
+        ArrayCoords[FreeNodes] += U[FreeNodes]
 
-
-    Nodes = set(range(len(NodeCoords))).difference(FixedNodes)
-    if not NodeNeighbors: NodeNeighbors = MeshUtils.getNodeNeighbors(NodeCoords, NodeConn)
-    NewCoords = copy.copy(NodeCoords)#[node for node in NodeCoords]
-    OldCoords = copy.copy(NodeCoords)
-    for it in range(iterate):        
-        for i in Nodes:
-            Ni = len(NodeNeighbors[i])
-            if Ni > 0:
-                NewCoords[i] = (1/Ni * np.sum([OldCoords[NodeNeighbors[i][j]] for j in range(len(NodeNeighbors[i]))],axis=0)).tolist() 
-        OldCoords = copy.copy(NewCoords)
+    NewCoords = ArrayCoords[:-1]
+    
     return NewCoords
 
 def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),FixFeatures=False):
@@ -641,15 +663,16 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),Fi
         FreeNodes = list(set(range(len(NodeCoords))).difference(FixedNodes))
         ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
         
+        ElemNormals = MeshUtils.CalcFaceNormal(ArrayCoords[:-1],NodeConn)
+        NodeNormals = MeshUtils.Face2NodeNormal(ArrayCoords[:-1],NodeConn,ElemConn,ElemNormals)
+        
         for i in range(iterate):
-            ElemNormals = MeshUtils.CalcFaceNormal(ArrayCoords[:-1],NodeConn)
-            NodeNormals = MeshUtils.Face2NodeNormal(ArrayCoords[:-1],NodeConn,ElemConn,ElemNormals)
             Q = ArrayCoords[r]
             U = (1/lens)[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
             R = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
             ArrayCoords[FreeNodes] += R[FreeNodes]
 
-        NewCoords = ArrayCoords[:-1].tolist()
+        NewCoords = ArrayCoords[:-1]
         return NewCoords
 
 def GlobalLaplacianSmoothing(NodeCoords,NodeConn,FeatureNodes=[],FixedNodes=set(),FeatureWeight=1,BaryWeight=1/3):
