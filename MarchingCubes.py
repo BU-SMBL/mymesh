@@ -3755,9 +3755,10 @@ def MarchingSquaresLookup_Edge(i):
     TriElems = MarchingSquaresLookup_Edge.LookupTable[i]
     return TriElems
 
-def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='33', flip=False, cleanup=True):
+def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='original', VertexValues=False, edgemode='constant', flip=False, cleanup=True):
     # edgemode is for handling edges when interpolation is greater than linear (see np.pad for options)
     # Image data is assumed to be voxel data and will be interpolated to vertices to get the corners of each 'square'
+    # if VertexValues, Image data is assumed to be vertices
     
     assert len(I.shape) == 3, 'I must be a 3D numpy array of image data. For 2D, use MarchingSquaresImage.'
     I = I - threshold  
@@ -3776,28 +3777,33 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='33',
     if interpolation == "cubic":
         Padding = 1
     
-    x1 = np.arange(0,I.shape[2]*h[0],h[0]) + h[0]/2
-    y1 = np.arange(0,I.shape[1]*h[1],h[1]) + h[1]/2
-    z1 = np.arange(0,I.shape[0]*h[2],h[2]) + h[2]/2
+    
+    
+    
+    if not VertexValues:
+        x1 = np.arange(0,I.shape[2]*h[0],h[0]) + h[0]/2
+        y1 = np.arange(0,I.shape[1]*h[1],h[1]) + h[1]/2
+        z1 = np.arange(0,I.shape[0]*h[2],h[2]) + h[2]/2
 
-    X,Y,Z = np.meshgrid(x1,y1,z1)
-    X -= Padding*h[0]
-    Y -= Padding*h[1]
-    Z -= Padding*h[2]
-    
-    # Xv = np.repeat(np.atleast_2d(np.arange(-Padding,I.shape[2]+(1+Padding),1)),  I.shape[0]+1+2*Padding,axis=0) * h[0]
-    # Yv = np.repeat(np.atleast_2d(np.arange(-Padding,I.shape[1]+(1+Padding),1)).T,I.shape[1]+1+2*Padding,axis=1) * h[1]
-    
-    Xv, Yv, Zv = np.meshgrid(np.arange(-Padding,I.shape[2]+(1+Padding)),
-                             np.arange(-Padding,I.shape[1]+(1+Padding)),
-                             np.arange(-Padding,I.shape[0]+(1+Padding)))*np.asarray(h)[:,None,None,None]
-    
-    # TODO: This is major bottleneck for cubic
-    interp = scipy.interpolate.RegularGridInterpolator((z1,y1,x1),I,fill_value=None,method='linear',bounds_error=False)
-    Iv = interp((Zv.flatten(),Yv.flatten(),Xv.flatten())).reshape(Xv.shape)
-    
-    X = Xv; Y = Yv; Z = Zv; I = Iv; 
-    
+        X,Y,Z = np.meshgrid(x1,y1,z1)
+        Xv, Yv, Zv = np.meshgrid(np.arange(-Padding,I.shape[2]+(1+Padding)),
+                                 np.arange(-Padding,I.shape[1]+(1+Padding)),
+                                 np.arange(-Padding,I.shape[0]+(1+Padding)))*np.asarray(h)[:,None,None,None]
+
+        X -= Padding*h[0]
+        Y -= Padding*h[1]
+        Z -= Padding*h[2]
+        
+        
+        # TODO: This is major bottleneck for cubic
+        interp = scipy.interpolate.RegularGridInterpolator((z1,y1,x1),I,fill_value=None,method='linear',bounds_error=False)
+        Iv = interp((Zv.flatten(),Yv.flatten(),Xv.flatten())).reshape(Xv.shape)
+        X = Xv; Y = Yv; Z = Zv; I = Iv; 
+    else:
+        X, Y, Z = np.meshgrid(np.arange(-Padding,I.shape[0]+(Padding)),
+                                 np.arange(-Padding,I.shape[1]+(Padding)),
+                                 np.arange(-Padding,I.shape[2]+(Padding)))*np.asarray(h)[:,None,None,None]
+        I = np.pad(I,Padding,mode=edgemode)
     edgeLookup = np.array([
         [0, 1],  # Edge 0 - Between nodes 0 and 1
         [1, 2],  # Edge 1
@@ -3813,15 +3819,15 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='33',
         [7, 4],  # Edge 11
         # []       # Center
         ])
-    iidx = np.repeat(np.arange(Xv.shape[0]-1-2*Padding),(Xv.shape[1]-1-2*Padding)*(Xv.shape[2]-1-2*Padding))+Padding
-    jidx = np.repeat(np.tile(np.arange(Xv.shape[1]-1-2*Padding),(Xv.shape[0]-1-2*Padding)),(Xv.shape[2]-1-2*Padding))+Padding
-    kidx = np.tile(np.arange(Xv.shape[2]-1-2*Padding),(Xv.shape[1]-1-2*Padding)*(Xv.shape[2]-1-2*Padding))+Padding
+    iidx = np.repeat(np.arange(X.shape[0]-1-2*Padding),(X.shape[1]-1-2*Padding)*(X.shape[2]-1-2*Padding))+Padding
+    jidx = np.repeat(np.tile(np.arange(X.shape[1]-1-2*Padding),(X.shape[0]-1-2*Padding)),(X.shape[2]-1-2*Padding))+Padding
+    kidx = np.tile(np.arange(X.shape[2]-1-2*Padding),(X.shape[1]-1-2*Padding)*(X.shape[0]-1-2*Padding))+Padding
     
     icubes = np.vstack([iidx,iidx+1,iidx+1,iidx,iidx,iidx+1,iidx+1,iidx]).T
     jcubes = np.vstack([jidx,jidx,jidx+1,jidx+1,jidx,jidx,jidx+1,jidx+1]).T
     kcubes = np.vstack([kidx,kidx,kidx,kidx,kidx+1,kidx+1,kidx+1,kidx+1]).T
     
-    vals = Iv[icubes,jcubes,kcubes]
+    vals = I[icubes,jcubes,kcubes]
     inside = (vals <= 0).astype(int)
     tableIdx = np.dot(inside, 2**np.arange(inside.shape[1] - 1, -1, -1))
     
@@ -3912,18 +3918,39 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='33',
         zRoots = Roots[2]
         
         NewCoords = np.nan*np.ones((v.shape[0],3))
-        
-        NewCoords[xbool,0] = xRoots[(x[xbool,1,None] <= xRoots) & (x[xbool,2,None] >= xRoots) & np.isreal(xRoots)]
+        eps = 1e-10
+        xCheck = (x[xbool,1,None] <= xRoots) & (x[xbool,2,None] >= xRoots) & np.isreal(xRoots)
+        xcubic = np.repeat(False,len(xbool)); xlinear = np.repeat(False,len(xbool))
+        xcubic[xbool] = np.sum(xCheck,axis=1)==1
+        xlinear[xbool] = np.sum(xCheck,axis=1)!=1
+        xlin = x[xbool][np.sum(xCheck,axis=1)!=1]; vxlin = v[xbool][np.sum(xCheck,axis=1)!=1]; 
+        NewCoords[xcubic,0] = xRoots[np.sum(xCheck,axis=1)==1][xCheck[np.sum(xCheck,axis=1)==1]]
+        # Fall back to linear for any failed interpolations
+        NewCoords[xlinear,0] = xlin[:,1] + np.nan_to_num((0-vxlin[:,1])*(xlin[:,2]-xlin[:,1])/(vxlin[:,2]-vxlin[:,1]))
         NewCoords[xbool,1] = y[xbool,1]
         NewCoords[xbool,2] = z[xbool,1]
         
+        yCheck = (y[ybool,1,None] <= yRoots) & (y[ybool,2,None] >= yRoots) & np.isreal(yRoots)
+        ycubic = np.repeat(False,len(ybool)); ylinear = np.repeat(False,len(ybool))
+        ycubic[ybool] = np.sum(yCheck,axis=1)==1
+        ylinear[ybool] = np.sum(yCheck,axis=1)!=1
+        ylin = y[ybool][np.sum(yCheck,axis=1)!=1]; vylin = v[ybool][np.sum(yCheck,axis=1)!=1]; 
         NewCoords[ybool,0] = x[ybool,1]
-        NewCoords[ybool,1] = yRoots[(y[ybool,1,None] <= yRoots) & (y[ybool,2,None] >= yRoots) & np.isreal(yRoots)]
+        NewCoords[ycubic,1] = yRoots[np.sum(yCheck,axis=1)==1][yCheck[np.sum(yCheck,axis=1)==1]]
+        # Fall back to linear for any failed interpolations
+        NewCoords[ylinear,1] = ylin[:,1] + np.nan_to_num((0-vylin[:,1])*(ylin[:,2]-ylin[:,1])/(vylin[:,2]-vylin[:,1]))
         NewCoords[ybool,2] = z[ybool,1]
         
+        zCheck = (z[zbool,1,None] <= zRoots) & (z[zbool,2,None] >= zRoots) & np.isreal(zRoots)
+        zcubic = np.repeat(False,len(zbool)); zlinear = np.repeat(False,len(zbool))
+        zcubic[zbool] = np.sum(zCheck,axis=1)==1
+        zlinear[zbool] = np.sum(zCheck,axis=1)!=1
+        zlin = z[zbool][np.sum(zCheck,axis=1)!=1]; vzlin = v[zbool][np.sum(zCheck,axis=1)!=1]; 
         NewCoords[zbool,0] = x[zbool,1]
         NewCoords[zbool,1] = y[zbool,1]
-        NewCoords[zbool,2] = zRoots[(z[zbool,1,None] <= zRoots) & (z[zbool,2,None] >= zRoots) & np.isreal(zRoots)]
+        NewCoords[zcubic,2] = zRoots[np.sum(zCheck,axis=1)==1][zCheck[np.sum(zCheck,axis=1)==1]]
+        # Fall back to linear for any failed interpolations
+        NewCoords[zlinear,2] = zlin[:,1] + np.nan_to_num((0-vzlin[:,1])*(zlin[:,2]-zlin[:,1])/(vzlin[:,2]-vzlin[:,1]))
         
     elif interpolation == "linear" or interpolation == "midpoint":
         
@@ -3945,8 +3972,8 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='33',
             with np.errstate(divide='ignore', invalid='ignore'):
                 NewCoords = np.vstack([
                      x[:,0] + np.nan_to_num((0-v[:,0])*(x[:,1]-x[:,0])/(v[:,1]-v[:,0])),
-                     y[:,0]  + np.nan_to_num((0-v[:,0])*(y[:,1]-y[:,0])/(v[:,1]-v[:,0])),
-                     z[:,0]  + np.nan_to_num((0-v[:,0])*(z[:,1]-z[:,0])/(v[:,1]-v[:,0]))
+                     y[:,0] + np.nan_to_num((0-v[:,0])*(y[:,1]-y[:,0])/(v[:,1]-v[:,0])),
+                     z[:,0] + np.nan_to_num((0-v[:,0])*(z[:,1]-z[:,0])/(v[:,1]-v[:,0]))
                     ]).T
         else:
             NewCoords = np.vstack([
@@ -4068,7 +4095,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
                                 (coords1[1] + coords2[1])/2,
                                 (coords1[2] + coords2[2])/2
                                 ])
-                            if np.all(mid-NodeCoords[anchor] >= 0):
+                            if np.all(mid-VoxelNodeCoords[anchor] >= 0):
                                 AnchorDir.append(1)
                             else:
                                 AnchorDir.append(-1)
