@@ -7,7 +7,7 @@ Created on Sat Jan 22 09:18:20 2022
 #%%
 import time
 import sys
-from . import MeshUtils
+from . import MeshUtils, Octree
 import numpy as np
 import scipy
 import copy, warnings
@@ -4113,6 +4113,20 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         AnchorDir = np.array(AnchorDir)
         return TriNodeCoords, TriNodeConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
     return TriNodeCoords, TriNodeConn
+
+def DualMarchingCubes(func, grad, bounds, maxsize, minsize, threshold=0, method='33', dualgrid_method='centroid'):
+    
+    # *NOTE: In below comments the terms bottom/top, left/right, front/back refer to z, x, and y directions respectively
+    # z(bottom) < z(top), x(left) < x(right), y(front) < y(back) 
+
+    # dualgrid_method could be centroid or qef_min
+
+    root = Octree.Function2Octree(func, grad, bounds, maxsize=maxsize, minsize=minsize)
+    DualCoords, DualConn = Octree.Octree2Dual(root,method=dualgrid_method)
+            
+    return DualCoords, DualConn
+
+
 
 def ParchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',pool=None,method='33',flip=False):
     """
