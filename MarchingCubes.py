@@ -4114,17 +4114,19 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         return TriNodeCoords, TriNodeConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
     return TriNodeCoords, TriNodeConn
 
-def DualMarchingCubes(func, grad, bounds, maxsize, minsize, threshold=0, method='33', dualgrid_method='centroid'):
+def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method='33', octree_strategy='gradient', octree_eps=0.1, dualgrid_method='centroid'):
     
     # *NOTE: In below comments the terms bottom/top, left/right, front/back refer to z, x, and y directions respectively
     # z(bottom) < z(top), x(left) < x(right), y(front) < y(back) 
 
     # dualgrid_method could be centroid or qef_min
 
-    root = Octree.Function2Octree(func, grad, bounds, maxsize=maxsize, minsize=minsize)
+    root = Octree.Function2Octree(func, grad, bounds, maxsize=maxsize, minsize=minsize, strategy=octree_strategy, eps=octree_eps)
     DualCoords, DualConn = Octree.Octree2Dual(root,method=dualgrid_method)
+    NodeValues = func(DualCoords[:,0],DualCoords[:,1],DualCoords[:,2])
+    TriCoords, TriConn = MarchingCubes(DualCoords, DualConn, NodeValues)
             
-    return DualCoords, DualConn
+    return TriCoords, TriConn
 
 
 

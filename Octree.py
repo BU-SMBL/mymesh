@@ -115,34 +115,139 @@ class OctreeNode():
                 child.state = 'empty'
             # self.children.append(child) 
 
-    def makeChildrenFunc(self, func, grad, minsize=0, maxsize=np.inf, strategy='QEF', nQEFpt=5, eps=0.01):
+    def makeChildrenFunc(self, func, grad, minsize=0, maxsize=np.inf, strategy='QEF', npts=5, eps=0.01):
         # Currently only strategy is QEF, but making an option for future expansion
-        # QEF strategy based on Dual Marching Cubes: Primal Contouring of Dual Grids, Schaeffer & Warren (2005)
-        
-        if strategy == 'QEF':
+        # QEF (Quadratic Error Function) strategy based on Dual Marching Cubes: Primal Contouring of Dual Grids, Schaeffer & Warren (2005)
+        # EDError (Euclidean Distance Error) based on Zhang, Bajaj, & Sohn (2003, 2005)
+        subdivide = False
+        MinSize = minsize
+        if self.size > maxsize:
+            subdivide = True
+        elif strategy == 'QEF':
             # https://www.mattkeeter.com/projects/qef/
             #
             # create grid of sample points
             
-            e = runQEF(self, func, grad, nQEFpt=nQEFpt, eps=eps)
-            if np.min(e) > eps:
-                self.makeChildren()        
-                
-                for child in self.children:
-                    vertices = child.getVertices()
-                    child.data = dict(f=func(vertices[:,0],vertices[:,1],vertices[:,2]),
-                                      g =grad(vertices[:,0],vertices[:,1],vertices[:,2]))
-                    if child.size/2 <= minsize:
-                        child.state = 'leaf'
-                        ec = runQEF(child, func, grad, nQEFpt=nQEFpt, eps=eps)
-                    else:
-                        child.makeChildrenFunc(func,grad,minsize=minsize,maxsize=maxsize, strategy=strategy)
-                        if len(child.children) == 0:
-                            child.state = 'leaf'
-                        else:
-                            child.state = 'branch'
+            e, crosses_zero = runQEF(self, func, grad, npts=npts, eps=eps)
+            if e > eps and crosses_zero:
+                subdivide = True
+            
+        elif strategy == 'EDError':
+            npts = 3
+            [x0,x1],[y0,y1],[z0,z1] = self.getLimits()
+            
+            nodef = self.data['f']
+            f_interp = lambda x,y,z : nodef[0]*(1-x)*(1-y)*(1-z) +  \
+                                        nodef[1]*x*(1-y)*(1-z) + \
+                                        nodef[2]*x*y*(1-z) + \
+                                        nodef[3]*(1-x)*y*(1-z) + \
+                                        nodef[4]*(1-x)*(1-y)*z +  \
+                                        nodef[5]*x*(1-y)*z + \
+                                        nodef[6]*x*y*z + \
+                                        nodef[7]*(1-x)*y*z
+            # NOTE: edge numbering consistent with that of MarchingCubes.py
+            half = self.size/2
+            sample_pts = np.array([[x0+half, y0, z0], # 0-edge 0
+                                   [x1, y0+half, z0], # 1-edge 1
+                                   [x0+half, y1, z0], # 2-edge 2
+                                   [x0, y0+half, z0], # 3-edge 3
+                                   [x0, y0, z0+half], # 4-edge 4
+                                   [x1, y0, z0+half], # 5-edge 5
+                                   [x1, y1, z0+half], # 6-edge 6
+                                   [x0, y1, z0+half], # 7-edge 7
+                                   [x0+half, y0, z1], # 8-edge 8
+                                   [x1, y0+half, z1], # 9-edge 9
+                                   [x0+half, y1, z1], # 10-edge 10
+                                   [x0, y0+half, z1], # 11-edge 11
+                                   [x0+half, y0+half, z0], # 12-face 0
+                                   [x0+half, y0, z0+half], # 13-face 1
+                                   [x1, y0+half, z0+half], # 14-face 2
+                                   [x0+half, y1, z0+half], # 15-face 3
+                                   [x0, y0+half, z0+half], # 16-face 4
+                                   [x0+half, y0+half, z1], # 17-face 5
+                                   [x0+half, y0+half, z0+half] # 18-center
+                                   ])
+            
+            sample_f = func(sample_pts[:,0], sample_pts[:,1], sample_pts[:,2])
+            sample_g = grad(sample_pts[:,0], sample_pts[:,1], sample_pts[:,2])
+            interp_f = f_interp(sample_pts[:,0], sample_pts[:,1], sample_pts[:,2])
+            
+            e = np.nansum(np.abs(sample_f - interp_f)/np.linalg.norm(sample_g,axis=1))
+            if e > eps:
+                subdivide = True
             else:
-                self.state = 'leaf'
+                a = 2
+        
+        elif strategy == 'spatial':
+            assert callable(minsize), 'minsize must be a function of (x,y,z) if strategy=="spatial".'
+            v = np.append(self.getVertices(), [self.centroid], axis=0)
+            if not np.all(minsize(v[:,0],v[:,1],v[:,2])) <= self.size:
+                subdivide = True
+            
+            
+        if subdivide:
+            self.makeChildren()        
+            for child in self.children: child.data = dict()
+            if strategy == 'EDError':
+                if self.size > maxsize:
+                    for child in self.children:
+                        v = child.getVertices()
+                        child.data['f'] = func(v[:,0],v[:,1],v[:,2])
+                        child.data['g'] = grad(v[:,0],v[:,1],v[:,2])
+                else:
+                    # Pass the vertex values that have already been calculated to children
+                    self.children[0].data['f'] = np.array([self.data['f'][0], sample_f[0], sample_f[12], sample_f[3],
+                                                            sample_f[4], sample_f[13], sample_f[18], sample_f[16]])
+                    self.children[1].data['f'] = np.array([sample_f[0], self.data['f'][1], sample_f[1], sample_f[12],
+                                                            sample_f[13], sample_f[5], sample_f[14], sample_f[18]])
+                    self.children[2].data['f'] = np.array([sample_f[12], sample_f[1], self.data['f'][2], sample_f[2],
+                                                            sample_f[18], sample_f[14], sample_f[6], sample_f[15]])
+                    self.children[3].data['f'] = np.array([sample_f[3], sample_f[12], sample_f[2], self.data['f'][3],
+                                                            sample_f[16], sample_f[18], sample_f[15], sample_f[7]])
+                    self.children[4].data['f'] = np.array([sample_f[4], sample_f[13], sample_f[18], sample_f[16],
+                                                            self.data['f'][4], sample_f[8], sample_f[17], sample_f[11]])
+                    self.children[5].data['f'] = np.array([sample_f[13], sample_f[5], sample_f[14], sample_f[18],
+                                                            sample_f[8], self.data['f'][5], sample_f[9], sample_f[17]])
+                    self.children[6].data['f'] = np.array([sample_f[18], sample_f[14], sample_f[6], sample_f[15],
+                                                            sample_f[17], sample_f[9], self.data['f'][6], sample_f[10]])
+                    self.children[7].data['f'] = np.array([sample_f[16], sample_f[18], sample_f[15], sample_f[7],
+                                                            sample_f[11], sample_f[17], sample_f[10], self.data['f'][7]])
+                    
+                    self.children[0].data['g'] = np.array([self.data['g'][0], sample_g[0], sample_g[12], sample_g[3],
+                                                            sample_g[4], sample_g[13], sample_g[18], sample_g[16]])
+                    self.children[1].data['g'] = np.array([sample_g[0], self.data['g'][1], sample_g[1], sample_g[12],
+                                                            sample_g[13], sample_g[5], sample_g[14], sample_g[18]])
+                    self.children[2].data['g'] = np.array([sample_g[12], sample_g[1], self.data['g'][2], sample_g[2],
+                                                            sample_g[18], sample_g[14], sample_g[6], sample_g[15]])
+                    self.children[3].data['g'] = np.array([sample_g[3], sample_g[12], sample_g[2], self.data['g'][3],
+                                                            sample_g[16], sample_g[18], sample_g[15], sample_g[7]])
+                    self.children[4].data['g'] = np.array([sample_g[4], sample_g[13], sample_g[18], sample_g[16],
+                                                            self.data['g'][4], sample_g[8], sample_g[17], sample_g[11]])
+                    self.children[5].data['g'] = np.array([sample_g[13], sample_g[5], sample_g[14], sample_g[18],
+                                                            sample_g[8], self.data['g'][5], sample_g[9], sample_g[17]])
+                    self.children[6].data['g'] = np.array([sample_g[18], sample_g[14], sample_g[6], sample_g[15],
+                                                            sample_g[17], sample_g[9], self.data['g'][6], sample_g[10]])
+                    self.children[7].data['g'] = np.array([sample_g[16], sample_g[18], sample_g[15], sample_g[7],
+                                                            sample_g[11], sample_g[17], sample_g[10], self.data['g'][7]])
+                
+                                
+                
+            for child in self.children:
+                if strategy == 'spatial':
+                    MinSize = minsize(child.centroid[0], child.centroid[1], child.centroid[2])
+                if child.size/2 <= MinSize:
+                    child.state = 'leaf'
+                    if strategy == 'QEF':
+                        ec = runQEF(child, func, grad, npts=npts, eps=eps)
+                        
+                else:
+                    child.makeChildrenFunc(func,grad,minsize=minsize,maxsize=maxsize, strategy=strategy, npts=npts, eps=eps)
+                    if len(child.children) == 0:
+                        child.state = 'leaf'
+                    else:
+                        child.state = 'branch'
+        else:
+            self.state = 'leaf'
 
     def makeChildren(self):
         childSize = self.size/2
@@ -326,7 +431,7 @@ def Surf2Octree(NodeCoords, SurfConn, minsize=None):
     Root.makeChildrenTris(NodeCoords[ArrayConn],TriNormals,maxsize=minsize,minsize=minsize)
     return Root
 
-def Function2Octree(func, grad, bounds, minsize=None, maxsize=None, nQEFpt=5, eps=0.01):
+def Function2Octree(func, grad, bounds, minsize=None, maxsize=None, strategy='QEF', npts=5, eps=0.01):
     # Function value and gradient evaluated at the vertices is stored as `data` in each node
     # func and grad should both accept 3 arguments (x,y,z), and handle both vectorized and scalar inputs
 
@@ -338,7 +443,7 @@ def Function2Octree(func, grad, bounds, minsize=None, maxsize=None, nQEFpt=5, ep
     Root.data = dict(f = func(vertices[:,0],vertices[:,1],vertices[:,2]), 
                      g = grad(vertices[:,0],vertices[:,1],vertices[:,2]))
     Root.state = 'root'
-    Root.makeChildrenFunc(func, grad, minsize=minsize, maxsize=maxsize, nQEFpt=nQEFpt, eps=eps)
+    Root.makeChildrenFunc(func, grad, minsize=minsize, maxsize=maxsize, npts=npts, eps=eps, strategy=strategy)
 
 
     return Root
@@ -589,31 +694,30 @@ def Print(root):
     
     recur(root)
     
-def runQEF(node, func, grad, nQEFpt=5, eps=0.01):
+def runQEF(node, func, grad, npts=5, eps=0.01):
     # ref: https://www.mattkeeter.com/projects/qef/
     # n = 5 # arbitrary
     # eps = .01 # arbitrary
 
     [x0,x1],[y0,y1],[z0,z1] = node.getLimits()
-    X,Y,Z = np.meshgrid(np.linspace(x0,x1,nQEFpt),np.linspace(y0,y1,nQEFpt),np.linspace(z0,z1,nQEFpt))
+    X,Y,Z = np.meshgrid(np.linspace(x0,x1,npts),np.linspace(y0,y1,npts),np.linspace(z0,z1,npts))
     xi = X.flatten()
     yi = Y.flatten()
     zi = Z.flatten()
-    
     
     f = func(xi,yi,zi)
     g = grad(xi,yi,zi)
     
     p = np.vstack([xi,yi,zi]).T
     
-    A = np.nan_to_num(g/np.linalg.norm(g,axis=1)[:,None])
-    B = np.sum(A*p,axis=1)
+    # A = np.nan_to_num(g/np.linalg.norm(g,axis=1)[:,None])
+    # B = np.sum(A*p,axis=1)
     
-    xopt = np.linalg.solve(A.T@A,A.T@B)
-    node.data['xopt'] = xopt
+    # xopt = np.linalg.solve(A.T@A,A.T@B)
+    # node.data['xopt'] = xopt
     
     
-    e = (A@xopt - B).T @ (A@xopt - B)
+    # e = (A@xopt - B).T @ (A@xopt - B)
     
     # More readable, less efficient:
     # Ti = lambda i, x, y, z : np.dot(g[i], np.array([x,y,z]) - np.array([xi[i],yi[i],zi[i]]))
@@ -621,12 +725,16 @@ def runQEF(node, func, grad, nQEFpt=5, eps=0.01):
     # e = [E(f[i],xi[i],yi[i],zi[i]) for i in range(len(xi))]
 
     # Evaluate QEF at each subgrid point
-    # def E(f,x,y,z):
-    #     t = np.sum(g[:,None,:] * (np.vstack([x,y,z]).T - np.vstack([xi, yi, zi]).T[:,None,:]),axis=2)
-    #     e = np.sum((f[None,:] - t)**2 / (1 + np.linalg.norm(g,axis=1)**2)[:,None], axis=0)
-    #     return e
+    def E(f,x,y,z):
+        t = np.sum(g[:,None,:] * (np.vstack([x,y,z]).T - np.vstack([xi, yi, zi]).T[:,None,:]),axis=2)
+        e = np.sum((f[None,:] - t)**2 / (1 + np.linalg.norm(g,axis=1)**2)[:,None], axis=0)
+        return e
     
-    # e = E(f,xi,yi,zi)
-    # print(np.min(E(f,xi,yi,zi)))
-    
-    return e
+    e = np.nan_to_num(E(f,xi,yi,zi))
+    idx = np.argmin(e)
+    node.data['xopt'] = p[idx]
+    # print(e[idx])
+    crosses_zero = True if len(np.unique(np.sign(f))) > 1 else False
+    if crosses_zero:
+        a = 2
+    return e[idx], crosses_zero
