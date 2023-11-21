@@ -24,26 +24,26 @@ def func(x,y,z):
     # and positive values indicate the 'outside' of the surface
     p = np.cos(2*np.pi*x/L) + np.cos(2*np.pi*y/L) + np.cos(2*np.pi*z/L)
     # Offsetting the surface in the positive and negative directions
-    offp = ImplicitMesh.offset(p,tFactor/2)
-    offn = ImplicitMesh.offset(p,-tFactor/2)
+    offp = implicit.offset(p,tFactor/2)
+    offn = implicit.offset(p,-tFactor/2)
     # Join the offset surfaces
-    f = ImplicitMesh.intersection(-ImplicitMesh.diff(offn,offp),ImplicitMesh.cube(x,y,z,*bounds))
+    f = implicit.intersection(-implicit.diff(offn,offp),implicit.cube(x,y,z,*bounds))
     return f
 #%% Evaluate the function on a uniform mesh grid
 xlims = (bounds[0]-h,bounds[1]+h) # Add 1 voxel of padding to the bounds 
 ylims = (bounds[2]-h,bounds[3]+h)
 zlims = (bounds[4]-h,bounds[5]+h)
-NodeCoords, NodeConn, NodeVals = ImplicitMesh.VoxelMesh(func,xlims,ylims,zlims,h,mode='notrim')
+NodeCoords, NodeConn, NodeVals = implicit.VoxelMesh(func,xlims,ylims,zlims,h,mode='notrim')
 # Create a mesh object:
 grid = mesh(NodeCoords,NodeConn)
 grid.NodeData['v'] = NodeVals
 # To write a file for visualization in paraview: grid.write(<path>/grid.vtu)
 #%% Triangulate the surface
-TriCoords,TriConn = MarchingCubes.MarchingCubes(grid.NodeCoords,grid.NodeConn,grid.NodeData['v'])
+TriCoords,TriConn = contour.MarchingCubes(grid.NodeCoords,grid.NodeConn,grid.NodeData['v'])
 tri = mesh(TriCoords,TriConn)
 # To write a file for visualization in paraview: tri.write(<path>/'surf.vtu')
 #%% Improve the surface mesh:
-tri.NodeCoords,tri.NodeConn = ImplicitMesh.SurfFlowOptimization(func,*tri,ZRIter=20,NZRIter=0,NZIter=0,Subdivision=False)
+tri.NodeCoords,tri.NodeConn = implicit.SurfFlowOptimization(func,*tri,ZRIter=20,NZRIter=0,NZIter=0,Subdivision=False)
 # To write a file for visualization in paraview: tri.write(<path>/'surf2.vtu')
 
 

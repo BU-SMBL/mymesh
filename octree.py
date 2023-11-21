@@ -6,7 +6,7 @@ Created on Mon Jan 31 22:52:03 2022
 """
 import numpy as np
 import sys, copy
-from . import Rays, MeshUtils
+from . import rays, utils
 
 class OctreeNode():
     def __init__(self,centroid,size,parent=[],data=[],level=0):
@@ -28,9 +28,9 @@ class OctreeNode():
         
     def TriInNode(self,tri,TriNormal,inclusive=True):
         lims = self.getLimits()
-        return Rays.TriangleBoxIntersection(tri, lims[0], lims[1], lims[2], BoxCenter=self.centroid,TriNormal=TriNormal)
+        return rays.TriangleBoxIntersection(tri, lims[0], lims[1], lims[2], BoxCenter=self.centroid,TriNormal=TriNormal)
         
-        # return (any([self.PointInNode(pt,inclusive=inclusive) for pt in tri]) or Rays.TriangleBoxIntersection(tri, lims[0], lims[1], lims[2]))
+        # return (any([self.PointInNode(pt,inclusive=inclusive) for pt in tri]) or rays.TriangleBoxIntersection(tri, lims[0], lims[1], lims[2]))
     
     def Contains(self,points):
         return [idx for idx,point in enumerate(points) if self.PointInNode(point)]
@@ -39,7 +39,7 @@ class OctreeNode():
         
         # return [idx for idx,tri in enumerate(tris) if self.TriInNode(tri,TriNormals[idx])]
         lims = self.getLimits()
-        Intersections = np.where(Rays.BoxTrianglesIntersection(tris, lims[0], lims[1], lims[2], TriNormals=TriNormals, BoxCenter=self.centroid))[0]
+        Intersections = np.where(rays.BoxTrianglesIntersection(tris, lims[0], lims[1], lims[2], TriNormals=TriNormals, BoxCenter=self.centroid))[0]
         return Intersections
     
     def isEmpty(self,points):
@@ -145,7 +145,7 @@ class OctreeNode():
                                         nodef[5]*x*(1-y)*z + \
                                         nodef[6]*x*y*z + \
                                         nodef[7]*(1-x)*y*z
-            # NOTE: edge numbering consistent with that of MarchingCubes.py
+            # NOTE: edge numbering consistent with that of contour.py
             half = self.size/2
             sample_pts = np.array([[x0+half, y0, z0], # 0-edge 0
                                    [x1, y0+half, z0], # 1-edge 1
@@ -427,7 +427,7 @@ def Surf2Octree(NodeCoords, SurfConn, minsize=None):
     Root = OctreeNode(centroid,size,data=ElemIds)
     Root.state = 'root'
     # Root.makeChildrenTris([(NodeCoords[elem]) for elem in SurfConn],maxsize=minsize,minsize=minsize)
-    TriNormals = np.array(MeshUtils.CalcFaceNormal(NodeCoords,SurfConn))
+    TriNormals = np.array(utils.CalcFaceNormal(NodeCoords,SurfConn))
     Root.makeChildrenTris(NodeCoords[ArrayConn],TriNormals,maxsize=minsize,minsize=minsize)
     return Root
 

@@ -6,7 +6,7 @@ Created on Wed Sep 29 14:10:08 2021
 """
 import numpy as np
 import sympy as sp
-from . import MeshUtils, converter
+from . import utils, converter
 import warnings
 from scipy import ndimage
   
@@ -158,7 +158,7 @@ def CubicFit_iterative(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,Ignore=
     #
     # Based on Goldfeather & Interrante (2004)    
     if IgnoreFeatures:
-        edges,corners = MeshUtils.DetectFeatures(NodeCoords,SurfConn)
+        edges,corners = utils.DetectFeatures(NodeCoords,SurfConn)
         FeatureNodes = set(edges).union(corners)
         Ignore.update(FeatureNodes)
     SurfNodes = np.unique(SurfConn)
@@ -294,7 +294,7 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
     ArrayCoords = np.append(NodeCoords,[[np.nan,np.nan,np.nan]],axis=0)
     N = np.append(NodeNormals,[[np.nan,np.nan,np.nan]],axis=0)
 
-    RHoods = MeshUtils.PadRagged(NodeNeighborhoods)[SurfNodes]
+    RHoods = utils.PadRagged(NodeNeighborhoods)[SurfNodes]
 
     SurfCoords = np.append(ArrayCoords[SurfNodes],[[np.nan,np.nan,np.nan]],axis=0)
     SurfNormals = np.append(N[SurfNodes],[[np.nan,np.nan,np.nan]],axis=0)

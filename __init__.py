@@ -5,18 +5,18 @@ Created on Thu Mar 24 13:51:50 2022
 @author: toj
 """
 from . import converter
-from . import CSG
+from . import booleans
 from . import curvature
 from . import delaunay
-from . import ImplicitMesh
+from . import implicit
 from . import MarchingCubes
 from .mesh import mesh
-from . import MeshUtils
-from . import Octree
+from . import utils
+from . import octree
 from . import parseAnsys
 from . import parseINP
 from . import parseSTL
-from . import Quality
-from . import Rays
+from . import quality
+from . import rays
 from . import TetGen
-from . import Primitives
+from . import primitives

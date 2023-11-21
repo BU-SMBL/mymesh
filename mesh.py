@@ -5,7 +5,7 @@ Created on Wed Sep  1 16:20:47 2021
 @author: toj
 """
 
-from . import MeshUtils, Improvement, converter, Quality, Rays, curvature
+from . import utils, improvement, converter, quality, rays, curvature
 from sys import getsizeof
 import scipy
 import numpy as np
@@ -145,12 +145,12 @@ class mesh:
         # TODO: This needs to be improved so other variables that point to nodes or elements are updated accordingly
         
         self.reset()
-        self.NodeCoords,self.NodeConn,_ = MeshUtils.DeleteDuplicateNodes(self.NodeCoords,self.NodeConn,tol=tol)
+        self.NodeCoords,self.NodeConn,_ = utils.DeleteDuplicateNodes(self.NodeCoords,self.NodeConn,tol=tol)
         if self.NElem > 0 and len(self.NodeConn[0]) == 3:
             # Currently only valid for tris
-            self.NodeCoords,self.NodeConn = MeshUtils.DeleteDegenerateElements(*self,tol=tol,angletol=angletol,strict=strict)
+            self.NodeCoords,self.NodeConn = utils.DeleteDegenerateElements(*self,tol=tol,angletol=angletol,strict=strict)
         elif self.NElem > 0:
-            self.NodeCoords,self.NodeConn = MeshUtils.DeleteDegenerateElements(*self,angletol=angletol,strict=True)
+            self.NodeCoords,self.NodeConn = utils.DeleteDegenerateElements(*self,angletol=angletol,strict=True)
         self.NodeCoords,self.NodeConn,_ = converter.removeNodes(self.NodeCoords,self.NodeConn)
         
     def validate(self):
@@ -159,7 +159,7 @@ class mesh:
         assert type(self.NodeConn) == list, 'Invalid type for model.mesh.NodeConn'
         assert len(self.NodeConn), 'Undefined Nodal Connectivity'
         assert max([max(elem) for elem in self.NodeConn]) <= len(self.NodeCoords), 'NodeConn references undefined nodes'
-        v = Quality.Volume(*self)
+        v = quality.Volume(*self)
         if np.nanmin(v) < 0:
             warnings.warn('VALIDATION WARNING: Mesh has inverted elements')
     def setnD(self):
@@ -333,8 +333,8 @@ class mesh:
             # Get all element faces
             faces,faceconn,faceelem = converter.solid2faces(self.NodeCoords,self.NodeConn,return_FaceConn=True,return_FaceElem=True)
             # Pad Ragged arrays in case of mixed-element meshes
-            Rfaces = MeshUtils.PadRagged(faces)
-            Rfaceconn = MeshUtils.PadRagged(faceconn)
+            Rfaces = utils.PadRagged(faces)
+            Rfaceconn = utils.PadRagged(faceconn)
             # Get all unique element faces (accounting for flipped versions of faces)
             _,idx,inv = np.unique(np.sort(Rfaces,axis=1),axis=0,return_index=True,return_inverse=True)
             RFaces = Rfaces[idx]
@@ -350,8 +350,8 @@ class mesh:
             FaceElemConn = [[int(x) if not np.isnan(x) else x for x in y] for y in FaceElemConn[:-1]]
 
 
-            Faces = MeshUtils.ExtractRagged(RFaces[:-1],dtype=int)
-            FaceConn = MeshUtils.ExtractRagged(RFaceConn,dtype=int)
+            Faces = utils.ExtractRagged(RFaces[:-1],dtype=int)
+            FaceConn = utils.ExtractRagged(RFaceConn,dtype=int)
             return Faces, FaceConn, FaceElemConn
         else:
             return [], [], []
@@ -363,7 +363,7 @@ class mesh:
             # Convert to unique edges
             Edges, UIdx, UInv = converter.edges2unique(edges,return_idx=True,return_inv=True)
             EdgeElem = np.asarray(edgeelem)[UIdx]
-            EdgeConn = UInv[MeshUtils.PadRagged(edgeconn)]
+            EdgeConn = UInv[utils.PadRagged(edgeconn)]
             
             rows = EdgeConn.flatten()
             cols = np.repeat(np.arange(self.NElem),[len(x) for x in EdgeConn])
@@ -464,14 +464,14 @@ class mesh:
     def NodeNeighbors(self):
         if self._NodeNeighbors == []:
             if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying volume node neighbors...',end='')
-            self._NodeNeighbors = MeshUtils.getNodeNeighbors(*self)
+            self._NodeNeighbors = utils.getNodeNeighbors(*self)
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
         return self._NodeNeighbors
     @property
     def ElemConn(self):
         if self._ElemConn == []:
             if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying volume node element connectivity...',end='')
-            self._ElemConn = MeshUtils.getElemConnectivity(*self)
+            self._ElemConn = utils.getElemConnectivity(*self)
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
         return self._ElemConn
     @property
@@ -480,7 +480,7 @@ class mesh:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying surface node neighbors...',end='')
                 self._printlevel+=1
-            self._SurfNodeNeighbors = MeshUtils.getNodeNeighbors(self.NodeCoords,self.SurfConn)
+            self._SurfNodeNeighbors = utils.getNodeNeighbors(self.NodeCoords,self.SurfConn)
             if self.verbose: 
                 self._printlevel-=1
                 print('Done', end='\n'+'\t'*self._printlevel)
@@ -491,7 +491,7 @@ class mesh:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying surface node element connectivity...',end='')
                 self._printlevel+=1
-            self._SurfElemConn = MeshUtils.getElemConnectivity(self.NodeCoords,self.SurfConn)
+            self._SurfElemConn = utils.getElemConnectivity(self.NodeCoords,self.SurfConn)
             if self.verbose: 
                 self._printlevel-=1
                 print('Done', end='\n'+'\t'*self._printlevel)
@@ -503,7 +503,7 @@ class mesh:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Calculating surface element normals...',end='')
                 self._printlevel+=1
-            self._ElemNormals = MeshUtils.CalcFaceNormal(self.NodeCoords,self.SurfConn)
+            self._ElemNormals = utils.CalcFaceNormal(self.NodeCoords,self.SurfConn)
             if self.verbose: 
                 self._printlevel-=1
                 print('Done', end='\n'+'\t'*self._printlevel)
@@ -521,7 +521,7 @@ class mesh:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Calculating surface node normals...',end='')
                 self._printlevel+=1
-            self._NodeNormals = MeshUtils.Face2NodeNormal(self.NodeCoords,self.SurfConn,self.SurfElemConn,self.ElemNormals,method=self.NodeNormalsMethod)
+            self._NodeNormals = utils.Face2NodeNormal(self.NodeCoords,self.SurfConn,self.SurfElemConn,self.ElemNormals,method=self.NodeNormalsMethod)
             if self.verbose: 
                 self._printlevel-=1
                 print('Done', end='\n'+'\t'*self._printlevel)
@@ -530,7 +530,7 @@ class mesh:
     def Centroids(self):
         if self._Centroids == []:
             if self.verbose: print('\n'+'\t'*self._printlevel+'Calculating element centroids...',end='')
-            self._Centroids = MeshUtils.Centroids(*self)
+            self._Centroids = utils.Centroids(*self)
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
         return self._Centroids
     
@@ -557,7 +557,7 @@ class mesh:
             
         # Renumber any nodes that aren't in node sets
         newIds[np.isnan(newIds)] = np.arange(end,len(self.NodeCoords))
-        self.NodeCoords, self.NodeConn, self._Faces = MeshUtils.RelabelNodes(self.NodeCoords, self.NodeConn, newIds, faces=self._Faces)
+        self.NodeCoords, self.NodeConn, self._Faces = utils.RelabelNodes(self.NodeCoords, self.NodeConn, newIds, faces=self._Faces)
         
         self.reset(keep=['Faces','FaceElemConn','FaceConn'])
     def RenumberFacesBySet(self):
@@ -581,18 +581,18 @@ class mesh:
         newIds = newIds.astype(int)
 
         # Reorder faces
-        NewFaces = np.zeros(MeshUtils.PadRagged(self.Faces).shape,dtype=int)
+        NewFaces = np.zeros(utils.PadRagged(self.Faces).shape,dtype=int)
         NewFaceElemConn = np.zeros(np.shape(self.FaceElemConn))
 
-        NewFaces[newIds,:] = MeshUtils.PadRagged(self.Faces)
+        NewFaces[newIds,:] = utils.PadRagged(self.Faces)
         NewFaceElemConn[newIds] = self.FaceElemConn
 
 
-        NewFaceConn = newIds[MeshUtils.PadRagged(self.FaceConn)]
+        NewFaceConn = newIds[utils.PadRagged(self.FaceConn)]
         
-        self._Faces = MeshUtils.ExtractRagged(NewFaces,dtype=int)
+        self._Faces = utils.ExtractRagged(NewFaces,dtype=int)
         self._FaceElemConn = NewFaceElemConn.tolist()
-        self._FaceConn = MeshUtils.ExtractRagged(NewFaceConn,dtype=int)
+        self._FaceConn = utils.ExtractRagged(NewFaceConn,dtype=int)
     
     def CreateBoundaryLayer(self,nLayers,FixedNodes=set(),StiffnessFactor=1,Thickness=None,OptimizeTets=True,FaceSets='surf'):
         """
@@ -615,7 +615,7 @@ class mesh:
             If nLayers > 1, this thickness is subdivided by nLayers, by default None
         OptimizeTets : bool, optional
             If True, will perform tetrahedral mesh optimization
-            (see Improvement.TetOpt), by default True.
+            (see improvement.TetOpt), by default True.
         FaceSets : str or list, optional
             FaceSet or list of FaceSets to generate boundary later elements on, by default ['surf'].
             While mesh.FaceSets can generally contain any element face, boundary layer face sets
@@ -750,8 +750,8 @@ class mesh:
         RelevantCoords,RelevantConn,NodeIds = converter.removeNodes(self.NodeCoords,RelevantElems) 
 
         # TetConn = converter.solid2tets(RelevantCoords,RelevantConn)
-        RelevantNodeNeighbors = MeshUtils.getNodeNeighbors(RelevantCoords,RelevantConn)
-        RelevantElemConn = MeshUtils.getElemConnectivity(RelevantCoords,RelevantConn)
+        RelevantNodeNeighbors = utils.getNodeNeighbors(RelevantCoords,RelevantConn)
+        RelevantElemConn = utils.getElemConnectivity(RelevantCoords,RelevantConn)
         RelevantForces = np.asarray(Forces)[NodeIds]
         RelevantFixed = Fixed[NodeIds]
         RelevantFixedNodes = set(np.where(RelevantFixed)[0])
@@ -763,7 +763,7 @@ class mesh:
             L0Override = 'min'
         
         # Expand boundary layer
-        NewRelevantCoords,U,(K,F) = Improvement.SegmentSpringSmoothing(RelevantCoords,RelevantConn,
+        NewRelevantCoords,U,(K,F) = improvement.SegmentSpringSmoothing(RelevantCoords,RelevantConn,
             RelevantNodeNeighbors,RelevantElemConn,StiffnessFactor=StiffnessFactor,
             FixedNodes=RelevantFixedNodes,Forces=RelevantForces,L0Override=L0Override,return_KF=True)
 
@@ -772,7 +772,7 @@ class mesh:
 
             # Full solve:
             # def fun(k):
-            #     NewRelevantCoords,_ = Improvement.SegmentSpringSmoothing(RelevantCoords,TetConn,
+            #     NewRelevantCoords,_ = improvement.SegmentSpringSmoothing(RelevantCoords,TetConn,
             #                                 RelevantNodeNeighbors,RelevantElemConn,StiffnessFactor=k,
             #                                 FixedNodes=RelevantFixedNodes,Forces=RelevantForces,L0Override=L0Override)
             #     t = max(np.linalg.norm(U,axis=1))
@@ -804,9 +804,9 @@ class mesh:
 
         if OptimizeTets:
             Tets = [elem for elem in self.NodeConn if len(elem)==4]
-            skew = Quality.Skewness(NewCoords,Tets)
+            skew = quality.Skewness(NewCoords,Tets)
             BadElems = set(np.where(skew>0.9)[0])
-            ElemNeighbors = MeshUtils.getElemNeighbors(NewCoords,Tets)
+            ElemNeighbors = utils.getElemNeighbors(NewCoords,Tets)
             BadElems.update([e for i in BadElems for e in ElemNeighbors[i]])
             BadNodes = set([n for i in BadElems for n in Tets[i]])
 
@@ -815,7 +815,7 @@ class mesh:
 
             FreeNodes = BadNodes.difference(SurfNodes)
 
-            NewCoords = Improvement.TetOpt(NewCoords,Tets,FreeNodes=FreeNodes,objective='eta',method='BFGS',iterate=4)
+            NewCoords = improvement.TetOpt(NewCoords,Tets,FreeNodes=FreeNodes,objective='eta',method='BFGS',iterate=4)
         
         # Divide the boundary layer to create the specified number of layers
         if nLayers > 1: 
@@ -844,9 +844,9 @@ class mesh:
 
         # Reduce or remove degenerate wedges -- TODO: This can probably be made more efficient
         # self.cleanup()
-        self.NodeCoords,self.NodeConn,_ = MeshUtils.DeleteDuplicateNodes(self.NodeCoords,self.NodeConn)
+        self.NodeCoords,self.NodeConn,_ = utils.DeleteDuplicateNodes(self.NodeCoords,self.NodeConn)
         Unq = [np.unique(elem,return_index=True,return_inverse=True) for elem in self.NodeConn]
-        key = MeshUtils.PadRagged([u[1][u[2]] for u in Unq],fillval=-1)
+        key = utils.PadRagged([u[1][u[2]] for u in Unq],fillval=-1)
 
         Cases = -1*np.ones(self.NElem,dtype=int)
         # Fully degenerate wedges (triangles):
@@ -885,7 +885,7 @@ class mesh:
             [1,4,5,2,3],    # 11
             [0,2,5,3,4]     # 12
         ]
-        RNodeConn = MeshUtils.PadRagged(self.NodeConn)
+        RNodeConn = utils.PadRagged(self.NodeConn)
         for i,case in enumerate(Cases):
             if case == -1:
                 continue
@@ -895,13 +895,13 @@ class mesh:
         # Attempt to fix any element inversions
         # NewCoords = np.asarray(NewCoords)
         # NewRelevantCoords = NewCoords[NodeIds]
-        V = Quality.Volume(*self)
+        V = quality.Volume(*self)
         if min(V) < 0:
             # print(sum(V<0))
             # BLConn = [elem for elem in self.NodeConn if len(elem) == 6]
-            # self.NodeCoords = Improvement.FixInversions(self.NodeCoords,BLConn,FixedNodes=np.unique(converter.solid2surface(self.NodeCoords,self.NodeConn)))
+            # self.NodeCoords = improvement.FixInversions(self.NodeCoords,BLConn,FixedNodes=np.unique(converter.solid2surface(self.NodeCoords,self.NodeConn)))
             BadElems = set(np.where(V<0)[0])
-            ElemNeighbors = MeshUtils.getElemNeighbors(*self)
+            ElemNeighbors = utils.getElemNeighbors(*self)
             BadElems.update([e for i in BadElems for e in ElemNeighbors[i]])
             BadNodes = set([n for i in BadElems for n in self.NodeConn[i]])
             # self.reset('SurfConn')
@@ -909,39 +909,39 @@ class mesh:
 
             FreeNodes = BadNodes.difference(SurfNodes)
             FixedNodes = set(range(self.NNode)).difference(FreeNodes)
-            # NewRelevantCoords = Improvement.TetOpt(NewRelevantCoords,RelevantConn,FreeNodes=FreeNodes,objective='eta',method='BFGS',iterate=4)
-            self.NodeCoords = Improvement.FixInversions(*self,FixedNodes=FixedNodes)
+            # NewRelevantCoords = improvement.TetOpt(NewRelevantCoords,RelevantConn,FreeNodes=FreeNodes,objective='eta',method='BFGS',iterate=4)
+            self.NodeCoords = improvement.FixInversions(*self,FixedNodes=FixedNodes)
             # NewCoords[NodeIds] = NewRelevantCoords
         self.reset()
     
-    def getQuality(self,metrics=['Skewness','Aspect Ratio','Inverse Orthogonal Quality','Inverse Orthogonality','Min Dihedral(deg)','Max Dihedral(deg)','Volume']):
+    def getQuality(self,metrics=['Skewness','Aspect Ratio','Inverse Orthogonal quality','Inverse Orthogonality','Min Dihedral(deg)','Max Dihedral(deg)','Volume']):
         
         quality = {}
         if type(metrics) is str: metrics = [metrics]
         for metric in metrics:
             if metric == 'Skewness':
-                quality[metric] = Quality.Skewness(*self,verbose=self.verbose)
+                quality[metric] = quality.Skewness(*self,verbose=self.verbose)
             elif metric == 'Aspect Ratio':
-                quality[metric] = Quality.AspectRatio(*self,verbose=self.verbose)    
-            elif metric == 'Inverse Orthogonal Quality':
-                quality[metric] = Quality.InverseOrthogonalQuality(*self,verbose=self.verbose)
-            elif metric == 'Orthogonal Quality':
-                quality[metric] = Quality.OrthogonalQuality(*self,verbose=self.verbose)
+                quality[metric] = quality.AspectRatio(*self,verbose=self.verbose)    
+            elif metric == 'Inverse Orthogonal quality':
+                quality[metric] = quality.InverseOrthogonalQuality(*self,verbose=self.verbose)
+            elif metric == 'Orthogonal quality':
+                quality[metric] = quality.OrthogonalQuality(*self,verbose=self.verbose)
             elif metric == 'Inverse Orthogonality':
-                quality[metric] = Quality.InverseOrthogonality(*self,verbose=self.verbose)
+                quality[metric] = quality.InverseOrthogonality(*self,verbose=self.verbose)
             elif metric == 'Orthogonality':
-                quality[metric] = Quality.Orthogonality(*self,verbose=self.verbose)
+                quality[metric] = quality.Orthogonality(*self,verbose=self.verbose)
             elif metric == 'Min Dihedral':
-                quality[metric] = Quality.MinDihedral(*self,verbose=self.verbose)
+                quality[metric] = quality.MinDihedral(*self,verbose=self.verbose)
             elif metric == 'Min Dihedral(deg)':
-                quality[metric] = Quality.MinDihedral(*self,verbose=self.verbose)*180/np.pi
+                quality[metric] = quality.MinDihedral(*self,verbose=self.verbose)*180/np.pi
             elif metric == 'Max Dihedral':
-                quality[metric] = Quality.MaxDihedral(*self,verbose=self.verbose)
+                quality[metric] = quality.MaxDihedral(*self,verbose=self.verbose)
             elif metric == 'Max Dihedral(deg)':
-                quality[metric] = Quality.MaxDihedral(*self,verbose=self.verbose)*180/np.pi
+                quality[metric] = quality.MaxDihedral(*self,verbose=self.verbose)*180/np.pi
             
             elif metric == 'Volume':
-                quality[metric] = Quality.Volume(*self,verbose=self.verbose)
+                quality[metric] = quality.Volume(*self,verbose=self.verbose)
             else:
                 raise Exception('Invalid quality metric.')
         return quality
@@ -951,19 +951,19 @@ class mesh:
         if type(metrics) is str: metrics = [metrics]
         Curvature = {}
         if SplitFeatures:
-            edges,corners = MeshUtils.DetectFeatures(self.NodeCoords,self.SurfConn)
+            edges,corners = utils.DetectFeatures(self.NodeCoords,self.SurfConn)
             FeatureNodes = set(edges).union(corners)
-            NodeRegions = MeshUtils.getConnectedNodes(self.NodeCoords,self.SurfConn,BarrierNodes=FeatureNodes)
+            NodeRegions = utils.getConnectedNodes(self.NodeCoords,self.SurfConn,BarrierNodes=FeatureNodes)
             MaxPs = np.nan*np.ones((self.NNode,len(NodeRegions))) 
             MinPs = np.nan*np.ones((self.NNode,len(NodeRegions))) 
             for i,region in enumerate(NodeRegions):
                 Elems = [elem for elem in self.SurfConn if all([n in region for n in elem])]
                 # ElemNormals = [self.ElemNormals[i] for i,elem in enumerate(self.SurfConn) if all([n in region for n in elem])]
-                ElemNormals = MeshUtils.CalcFaceNormal(self.NodeCoords,Elems)
-                Neighbors,ElemConn = MeshUtils.getNodeNeighbors(self.NodeCoords,Elems)
+                ElemNormals = utils.CalcFaceNormal(self.NodeCoords,Elems)
+                Neighbors,ElemConn = utils.getNodeNeighbors(self.NodeCoords,Elems)
                 if nRings > 1:
-                    Neighbors = MeshUtils.getNodeNeighborhood(self.NodeCoords,Elems,nRings)
-                NodeNormals = MeshUtils.Face2NodeNormal(self.NodeCoords,Elems,ElemConn,ElemNormals)
+                    Neighbors = utils.getNodeNeighborhood(self.NodeCoords,Elems,nRings)
+                NodeNormals = utils.Face2NodeNormal(self.NodeCoords,Elems,ElemConn,ElemNormals)
                 MaxPs[:,i], MinPs[:,i] = curvature.CubicFit(self.NodeCoords,Elems,Neighbors,NodeNormals)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=RuntimeWarning)
@@ -974,7 +974,7 @@ class mesh:
             if nRings == 1:
                 Neighbors = self.SurfNodeNeighbors
             else:
-                Neighbors = MeshUtils.getNodeNeighborhood(self.NodeCoords,self.SurfConn,nRings=nRings)
+                Neighbors = utils.getNodeNeighborhood(self.NodeCoords,self.SurfConn,nRings=nRings)
             MaxPrincipal,MinPrincipal = curvature.CubicFit(self.NodeCoords,self.SurfConn,Neighbors,self.NodeNormals)
         if 'Max Principal' in metrics:
             Curvature['Max Principal Curvature'] = MaxPrincipal

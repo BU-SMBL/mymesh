@@ -13,23 +13,15 @@ from scipy import optimize, interpolate
 import sys, os, time, copy, warnings, bisect
 import meshio
 
-from . import MeshUtils, converter, MarchingCubes, Quality, Improvement, TetGen, Rays, Octree, mesh, Primitives
-
-try:
-    from joblib import Parallel, delayed
-except:
-    warnings.warn('Optional dependencies not found - some functions may not work properly')
+from . import utils, converter, MarchingCubes, quality, improvement, TetGen, rays, octree, mesh, primitives
 
 try:
     from sklearn.neighbors import KDTree
-    import plotly.express as px
-    import plotly.graph_objects as go
-    from plotly.offline import plot
 except:
     warnings.warn('Optional dependencies not found - some functions may not work properly')
 
 
-# SDF Primitives
+# SDF primitives
 def gyroid(x,y,z):
     return np.sin(2*np.pi*x)*np.cos(2*np.pi*y) + np.sin(2*np.pi*y)*np.cos(2*np.pi*z) + np.sin(2*np.pi*z)*np.cos(2*np.pi*x)
 
@@ -113,25 +105,6 @@ def sMin(a,b,k):
 def sUnion(fval1,fval2,k):
     return sMin(fval1,fval2,k)
 
-def plotSDF(x,y,z,sdf,isomax=0.0):
-    # h = .01
-    # x, y, z = np.mgrid[0:1:(1/h)*1j,0:1:(1/h)*1j,0:1:(1/h)*1j]
-    # x = x.flatten()
-    # y = y.flatten()
-    # z = z.flatten()
-    # sVal = sdf(x,y,z)
-    # plotSDF(x,y,z,sVal)
-    fig = go.Figure(data=go.Volume(
-        x=x,
-        y=y,
-        z=z,
-        value=sdf,
-        opacity=0.5,
-        isomin=np.min(sdf),
-        isomax=isomax
-        ))
-    plot(fig)
-    
 def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',values='nodes'):
     """
     VoxelMesh Generate voxel mesh of a signed distance function
@@ -164,7 +137,7 @@ def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',values='nodes'):
 
     """        
     
-    NodeCoords, NodeConn1 = Primitives.Grid([xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]],h,exact_h=True, meshobj=False)
+    NodeCoords, NodeConn1 = primitives.Grid([xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]],h,exact_h=True, meshobj=False)
     NodeVals = sdf(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
     if mode != 'notrim':
         NodeConn = []
@@ -187,7 +160,7 @@ def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',values='nodes'):
 
 def SurfaceMesh(sdf,xlims,ylims,zlims,h,threshold=0, flip=False, mcmethod='33'):
     # NodeCoords, NodeConn, NodeVals = VoxelMesh(sdf,xlims,ylims,zlims,h,mode='notrim',reinitialize=False)
-    # SurfCoords, SurfConn = MarchingCubes.MarchingCubes(NodeCoords, NodeConn, NodeVals, threshold=threshold, flip=flip, method=mcmethod)
+    # SurfCoords, SurfConn = contour.MarchingCubes(NodeCoords, NodeConn, NodeVals, threshold=threshold, flip=flip, method=mcmethod)
 
     if isinstance(h, (list, tuple, np.ndarray)):
         hx = h[0];hy = h[1]; hz = h[2]
@@ -199,7 +172,7 @@ def SurfaceMesh(sdf,xlims,ylims,zlims,h,threshold=0, flip=False, mcmethod='33'):
 
     X,Y,Z = np.meshgrid(xs,ys,zs)
     F = sdf(X,Y,Z)
-    SurfCoords, SurfConn = MarchingCubes.MarchingCubesImage(F, h=(hx, hy, hz), threshold=threshold, flip=False, method='original', interpolation='cubic',VertexValues=True)
+    SurfCoords, SurfConn = contour.MarchingCubesImage(F, h=(hx, hy, hz), threshold=threshold, flip=False, method='original', interpolation='cubic',VertexValues=True)
     SurfCoords[:,0] += xlims[0]
     SurfCoords[:,1] += ylims[0]
     SurfCoords[:,2] += zlims[0]
@@ -231,7 +204,7 @@ def grid2fun(VoxelCoords,VoxelConn,Vals,method='linear',fill_value=None):
     if len(Vals) == len(VoxelCoords):
         Coords = np.asarray(VoxelCoords)
     elif len(Vals) == len(VoxelConn):
-        Coords = MeshUtils.Centroids(VoxelCoords,VoxelConn)
+        Coords = utils.Centroids(VoxelCoords,VoxelConn)
     else:
         raise Exception('Vals must be the same length as either VoxelCoords or VoxelConn')
     # VoxelCoords = np.array(VoxelCoords)
@@ -316,7 +289,7 @@ def FastMarchingMethod(VoxelCoords, VoxelConn, NodeVals):
         ElemType = 'quad'
     else:
         ElemType = 'hex'
-    NodeNeighbors = MeshUtils.getNodeNeighbors(VoxelCoords, VoxelConn, ElemType=ElemType)
+    NodeNeighbors = utils.getNodeNeighbors(VoxelCoords, VoxelConn, ElemType=ElemType)
     xNeighbors = [[n for n in NodeNeighbors[i] if (VoxelCoords[n][1] == VoxelCoords[i][1]) and (VoxelCoords[n][2] == VoxelCoords[i][2])] for i in range(len(NodeNeighbors))]
     yNeighbors = [[n for n in NodeNeighbors[i] if (VoxelCoords[n][0] == VoxelCoords[i][0]) and (VoxelCoords[n][2] == VoxelCoords[i][2])] for i in range(len(NodeNeighbors))]
     zNeighbors = [[n for n in NodeNeighbors[i] if (VoxelCoords[n][0] == VoxelCoords[i][0]) and (VoxelCoords[n][1] == VoxelCoords[i][1])] for i in range(len(NodeNeighbors))]
@@ -413,12 +386,12 @@ def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
     elif method == 'centroids':
         Normals = np.asarray(M.ElemNormals)
         NodeCoords = np.array(M.NodeCoords)
-        Coords = MeshUtils.Centroids(M.NodeCoords,M.NodeConn) #np.array([np.mean(NodeCoords[elem],axis=0) for elem in M.SurfConn])
+        Coords = utils.Centroids(M.NodeCoords,M.NodeConn) #np.array([np.mean(NodeCoords[elem],axis=0) for elem in M.SurfConn])
     elif method == 'nodes+centroids':
         Normals = np.array(list(M.NodeNormals) + list(M.ElemNormals))
         NodeCoords = np.array(M.NodeCoords)
         SurfNodes = set(np.unique(M.SurfConn))
-        Coords = np.append([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)], MeshUtils.Centroids(M.NodeCoords,M.NodeConn),axis=0)
+        Coords = np.append([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)], utils.Centroids(M.NodeCoords,M.NodeConn),axis=0)
     else:
         raise Exception('Invalid method - use "nodes", "centroids", or "nodes+centroids"')
     
@@ -464,13 +437,13 @@ def mesh2udf(M,VoxelCoords,VoxelConn):
 def DoubleDualResampling(sdf,NodeCoords,NodeConn,DualCoords,DualConn,eps=1e-3,c=2):
     # Ohtake, Y., and Belyaev, A. G. (March 26, 2003). "Dual-Primal Mesh Optimization for Polygonized Implicit Surfaces With Sharp Features ." ASME. J. Comput. Inf. Sci. Eng. December 2002; 2(4): 277–284. https://doi.org/10.1115/1.1559153
     DualCoords,DualConn,gradP = DualMeshOptimization(sdf,NodeCoords,NodeConn,DualCoords,DualConn,eps=eps,return_grad=True)
-    DualNeighbors,ElemConn = MeshUtils.getNodeNeighbors(DualCoords,DualConn,ElemType='polygon')
+    DualNeighbors,ElemConn = utils.getNodeNeighbors(DualCoords,DualConn,ElemType='polygon')
     NewNodeCoords = [[] for i in range(len(NodeCoords))]
     gradPnorms = [np.linalg.norm(gradP[i]) for i in range(len(gradP))]
-    Normals = [gradP[j]/gradPnorms[j] if gradPnorms[j] > 0 else MeshUtils.CalcFaceNormal(DualCoords,[DualConn[ElemConn[j][0]]])[0] for j in range(len(DualCoords))]
+    Normals = [gradP[j]/gradPnorms[j] if gradPnorms[j] > 0 else utils.CalcFaceNormal(DualCoords,[DualConn[ElemConn[j][0]]])[0] for j in range(len(DualCoords))]
     for i in range(len(NodeCoords)):
         Ps = DualConn[i]
-        # Ns = [gradP[j]/gradPnorms[j] if gradPnorms[j] > 0 else MeshUtils.CalcFaceNormal(DualCoords,[Ps])[0] for j in Ps]
+        # Ns = [gradP[j]/gradPnorms[j] if gradPnorms[j] > 0 else utils.CalcFaceNormal(DualCoords,[Ps])[0] for j in Ps]
         ks = []
         for j,Pj in enumerate(Ps):
             NeighborPs = DualNeighbors[Pj][:3]
@@ -540,7 +513,7 @@ def DualMeshOptimization(sdf,NodeCoords,NodeConn,DualCoords,DualConn,eps=1e-3,re
         return c
     ArrayCoords = np.array(NodeCoords)
     
-    # _,ElemConn = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
+    # _,ElemConn = utils.getNodeNeighbors(NodeCoords,NodeConn)
     # DualCoords,DualConn = converter.surf2dual(ArrayCoords,NodeConn,ElemConn=ElemConn)
     
     # Optimize dual mesh coordinates     
@@ -618,7 +591,7 @@ def AdaptiveSubdivision(sdf,NodeCoords,NodeConn,threshold=1e-3):
     
     NewNodeCoords = copy.copy(NodeCoords)
     NewNodeConn = copy.copy(NodeConn)
-    ElemNeighbors = MeshUtils.getElemNeighbors(NodeCoords, NodeConn, mode='edge')
+    ElemNeighbors = utils.getElemNeighbors(NodeCoords, NodeConn, mode='edge')
 
     ###
     Points = np.array(NodeCoords)[np.array(NodeConn)]
@@ -711,7 +684,7 @@ def AdaptiveSubdivision(sdf,NodeCoords,NodeConn,threshold=1e-3):
             thinking = False
             
     NewNodeConn = [elem for elem in NewNodeConn if (type(elem[0]) != list)] + [e for elem in NewNodeConn if (type(elem[0]) == list) for e in elem]
-    NewNodeCoords,NewNodeConn,_ = MeshUtils.DeleteDuplicateNodes(NewNodeCoords,NewNodeConn)
+    NewNodeCoords,NewNodeConn,_ = utils.DeleteDuplicateNodes(NewNodeCoords,NewNodeConn)
             
     return NewNodeCoords,NewNodeConn
      
@@ -721,8 +694,8 @@ def DualPrimalOptimization(sdf,NodeCoords,NodeConn,eps=1e-3,nIter=2):
     def PrimalMeshOptimization(DualCoords,DualConn,gradP,tau=10**3):
         ArrayCoords = np.zeros([len(DualConn),3])
         DualCoords = np.array(DualCoords)
-        DualNeighbors,ElemConn = MeshUtils.getNodeNeighbors(DualCoords,DualConn,ElemType='polygon')
-        centroids = MeshUtils.Centroids(DualCoords,DualConn)
+        DualNeighbors,ElemConn = utils.getNodeNeighbors(DualCoords,DualConn,ElemType='polygon')
+        centroids = utils.Centroids(DualCoords,DualConn)
         gradPnorms = [np.linalg.norm(gradP[i]) for i in range(len(gradP))]
         TransCoords = copy.copy(DualCoords)
         for j,Pis in enumerate(DualConn):
@@ -734,7 +707,7 @@ def DualPrimalOptimization(sdf,NodeCoords,NodeConn,eps=1e-3,nIter=2):
             
             # Normal vector TODO: gradP[i] could = 0 at sharp features, in this case, need to use something else (maybe the element normal of the primal element corresponding to the dual node)
             # Ns = [np.divide(gradP[i],gradPnorms[i]) for i in Pis]
-            Ns = [np.divide(gradP[i],gradPnorms[i]) if gradPnorms[i] > 0 else MeshUtils.CalcFaceNormal(DualCoords,[DualConn[ElemConn[i][0]]])[0] for i in Pis]
+            Ns = [np.divide(gradP[i],gradPnorms[i]) if gradPnorms[i] > 0 else utils.CalcFaceNormal(DualCoords,[DualConn[ElemConn[i][0]]])[0] for i in Pis]
             
             r = np.linalg.norm(centroids[j]-DualCoords[Pis[0]])*2
             A = np.diag([sum([N[0]**2 for i,N in enumerate(Ns)]), 
@@ -761,7 +734,7 @@ def DualPrimalOptimization(sdf,NodeCoords,NodeConn,eps=1e-3,nIter=2):
         writeVTK('{:d}_Dual.vtk'.format(k),DualCoords,DualConn)
         OptCoords,_ = DoubleDualResampling(sdf,OptCoords,OptConn,DualCoords,DualConn)
         writeVTK('{:d}_PrimalResampled.vtk'.format(k),OptCoords,OptConn)
-        DualCoords = MeshUtils.Centroids(OptCoords,OptConn)
+        DualCoords = utils.Centroids(OptCoords,OptConn)
         writeVTK('{:d}_Dual2.vtk'.format(k),DualCoords,DualConn)
         DualCoords, DualConn, gradP = DualMeshOptimization(sdf,OptCoords,OptConn,DualCoords,DualConn,eps=eps,return_grad=True) 
         writeVTK('{:d}_DualOpt.vtk'.format(k),DualCoords,DualConn)
@@ -810,7 +783,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
         Area2 = np.append(Area,0)
         m2 = np.vstack([m,[0,0,0]])
         Centroids2 = np.vstack([Centroids,[0,0,0]])
-        R = MeshUtils.PadRagged(ElemConn,fillval=-1)
+        R = utils.PadRagged(ElemConn,fillval=-1)
         a = Area2[R]
         A = np.sum(a,axis=1)
         tau = tf*.75 # 1/(100*max(A))
@@ -835,7 +808,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
         # 
         lens = [len(e) for e in ElemConn]
         maxlens = max(lens)
-        R = MeshUtils.PadRagged(ElemConn,fillval=-1)
+        R = utils.PadRagged(ElemConn,fillval=-1)
         Mask0 = (R>=0).astype(int)
         Masknan = Mask0.astype(float)
         Masknan[Mask0 == 0] = np.nan
@@ -862,7 +835,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
         gradP = gradF(NodeCoords)
         # A = np.array([sum([Area[T] for T in ElemConn[i]]) for i in range(len(NodeCoords))])
         Area2 = np.append(Area,0)
-        R = MeshUtils.PadRagged(ElemConn,fillval=-1)
+        R = utils.PadRagged(ElemConn,fillval=-1)
         A = np.sum(Area2[R],axis=1)
 
         # tau = 1/(500*max(A))
@@ -877,7 +850,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
         Area2 = np.append(Area,0)
         fC = np.append(fC,0)
         gradC = np.vstack([gradC,[0,0,0]])
-        R = MeshUtils.PadRagged(ElemConn,fillval=-1)
+        R = utils.PadRagged(ElemConn,fillval=-1)
         A = np.sum(Area2[R],axis=1)
         tau = 1/(100*max(A))
         Z = 2*tau*np.sum(Area2[R][:,:,None]*gradC[R]*fC[R][:,:,None],axis=1)/3
@@ -888,7 +861,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
         #     R = C*np.array([U[i] - np.dot(U[i],NodeNormals[i])*NodeNormals[i] for i in range(len(NodeCoords))])
         ###
         lens = np.array([len(n) for n in NodeNeighbors])
-        r = MeshUtils.PadRagged(NodeNeighbors,fillval=-1)
+        r = utils.PadRagged(NodeNeighbors,fillval=-1)
         ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
         Q = ArrayCoords[r]
         U = (1/lens)[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
@@ -927,13 +900,13 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
                         # This condition checks if the flip will be legal
                         continue
 
-                    Newi,Newj = Improvement.FlipEdge(NodeCoords,NewConn,i,j)
-                    [Ci,Cj] = MeshUtils.Centroids(NodeCoords,np.array([Newi,Newj]))
+                    Newi,Newj = improvement.FlipEdge(NodeCoords,NewConn,i,j)
+                    [Ci,Cj] = utils.Centroids(NodeCoords,np.array([Newi,Newj]))
                     gradC = gradF(np.vstack([Ci,Cj]))
                     gradCnorm = np.linalg.norm(gradC,axis=1)
                     mi = gradC[0]/gradCnorm[0]
                     mj = gradC[1]/gradCnorm[1]
-                    [Ni,Nj] = MeshUtils.CalcFaceNormal(NodeCoords,np.array([Newi,Newj]))
+                    [Ni,Nj] = utils.CalcFaceNormal(NodeCoords,np.array([Newi,Newj]))
                     
                     Ai = np.linalg.norm(np.cross(NodeCoords[Newi[1]]-NodeCoords[Newi[0]],NodeCoords[Newi[2]]-NodeCoords[Newi[0]]))/2
                     Aj = np.linalg.norm(np.cross(NodeCoords[Newj[1]]-NodeCoords[Newj[0]],NodeCoords[Newj[2]]-NodeCoords[Newj[0]]))/2
@@ -974,7 +947,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
         m = np.divide(gradC,np.reshape(gradCnorm,(len(gradC),1)))
 
         area = np.append(Area,0)
-        R = MeshUtils.PadRagged(ElemConn,fillval=-1)
+        R = utils.PadRagged(ElemConn,fillval=-1)
         A = np.sum(area[R],axis=1)
 
         VertexError = 1/(3*sum(Area)) * sum((fP**2/gradPnorm**2)*A)
@@ -988,58 +961,58 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
     # mesh.mesh(NodeCoords,NodeConn).Mesh2Meshio().write(str(k)+'.vtu');k+=1
 
     if Subdivision: NodeCoords, NodeConn = AdaptiveSubdivision(sdf, NodeCoords, NodeConn,threshold=1e-3)
-    NodeCoords,NodeConn,_ = MeshUtils.DeleteDuplicateNodes(NodeCoords,NodeConn)
+    NodeCoords,NodeConn,_ = utils.DeleteDuplicateNodes(NodeCoords,NodeConn)
     NewCoords = np.array(NodeCoords)
     # mesh.mesh(NewCoords,NodeConn).Mesh2Meshio().write(str(k)+'.vtu');k+=1
 
-    NodeNeighbors = MeshUtils.getNodeNeighbors(NewCoords, NodeConn) 
-    ElemConn = MeshUtils.getElemConnectivity(NewCoords, NodeConn)
-    ElemNeighbors = MeshUtils.getElemNeighbors(NodeCoords,NodeConn,mode='edge')
-    # NodeConn, ElemNeighbors = Improvement.ValenceImprovementFlips(NodeCoords,NodeConn,NodeNeighbors,ElemNeighbors)
+    NodeNeighbors = utils.getNodeNeighbors(NewCoords, NodeConn) 
+    ElemConn = utils.getElemConnectivity(NewCoords, NodeConn)
+    ElemNeighbors = utils.getElemNeighbors(NodeCoords,NodeConn,mode='edge')
+    # NodeConn, ElemNeighbors = improvement.ValenceImprovementFlips(NodeCoords,NodeConn,NodeNeighbors,ElemNeighbors)
     # vE = [];    nE = []   
-    ElemNormals = MeshUtils.CalcFaceNormal(NewCoords, NodeConn)
-    NodeNormals = np.array(MeshUtils.Face2NodeNormal(NewCoords, NodeConn, ElemConn, ElemNormals))
+    ElemNormals = utils.CalcFaceNormal(NewCoords, NodeConn)
+    NodeNormals = np.array(utils.Face2NodeNormal(NewCoords, NodeConn, ElemConn, ElemNormals))
     
     tfs = np.linspace(1,0,ZRIter+1)
     for i in range(ZRIter):
         tf = tfs[i]
         Points = NewCoords[np.array(NodeConn)]
         Area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2   
-        Centroids = MeshUtils.Centroids(NewCoords, NodeConn)
+        Centroids = utils.Centroids(NewCoords, NodeConn)
         # v,n = Error(NewCoords, ElemConn, ElemNormals, Area, Centroids); vE.append(v); nE.append(n)
         NewCoords[FreeNodes] += ZRFlow(NewCoords, NodeConn, NodeNormals, NodeNeighbors, ElemConn, Area, Centroids, tf=tf)[FreeNodes]
-        ElemNormals = MeshUtils.CalcFaceNormal(NewCoords, NodeConn)
-        NodeNormals = np.array(MeshUtils.Face2NodeNormal(NewCoords, NodeConn, ElemConn, ElemNormals))
+        ElemNormals = utils.CalcFaceNormal(NewCoords, NodeConn)
+        NodeNormals = np.array(utils.Face2NodeNormal(NewCoords, NodeConn, ElemConn, ElemNormals))
         # mesh.mesh(NewCoords,NodeConn).Mesh2Meshio().write(str(k)+'.vtu');k+=1
     for i in range(NZRIter):
         Points = NewCoords[np.array(NodeConn)]
         Area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2   
-        Centroids = MeshUtils.Centroids(NewCoords, NodeConn)
+        Centroids = utils.Centroids(NewCoords, NodeConn)
         # v,n = Error(NewCoords, ElemConn, ElemNormals, Area, Centroids); vE.append(v); nE.append(n)
         NewCoords[FreeNodes] += NZRFlow(NewCoords, NodeConn, NodeNormals, NodeNeighbors, ElemConn, Area, Centroids)[FreeNodes]
-        ElemNormals = MeshUtils.CalcFaceNormal(NewCoords, NodeConn)
-        NodeNormals = np.array(MeshUtils.Face2NodeNormal(NewCoords, NodeConn, ElemConn, ElemNormals))
+        ElemNormals = utils.CalcFaceNormal(NewCoords, NodeConn)
+        NodeNormals = np.array(utils.Face2NodeNormal(NewCoords, NodeConn, ElemConn, ElemNormals))
         # mesh.mesh(NewCoords,NodeConn).Mesh2Meshio().write(str(k)+'.vtu');k+=1
     if NZIter > 0:
         if Subdivision: NewCoords, NodeConn = AdaptiveSubdivision(sdf, NewCoords.tolist(), NodeConn, threshold=1e-4)
         NewCoords = np.array(NewCoords)
-        NodeNeighbors = MeshUtils.getNodeNeighbors(NewCoords, NodeConn)    
-        ElemConn = MeshUtils.getElemConnectivity(NewCoords, NodeConn)    
-        ElemNeighbors = MeshUtils.getElemNeighbors(NewCoords,NodeConn,mode='edge')
-        ElemNormals = MeshUtils.CalcFaceNormal(NewCoords, NodeConn)
+        NodeNeighbors = utils.getNodeNeighbors(NewCoords, NodeConn)    
+        ElemConn = utils.getElemConnectivity(NewCoords, NodeConn)    
+        ElemNeighbors = utils.getElemNeighbors(NewCoords,NodeConn,mode='edge')
+        ElemNormals = utils.CalcFaceNormal(NewCoords, NodeConn)
         tfs = np.linspace(1,0,NZIter+1)
     for i in range(NZIter):
         tf = tfs[i]
         Points = NewCoords[np.array(NodeConn)]
         Area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2   
-        Centroids = MeshUtils.Centroids(NewCoords, NodeConn)
+        Centroids = utils.Centroids(NewCoords, NodeConn)
 
         # v,n = Error(NewCoords, ElemConn, ElemNormals, Area, Centroids)
         # vE.append(v); nE.append(n)
 
         NewCoords[FreeNodes] += NZFlow(NewCoords, NodeConn, [], NodeNeighbors, ElemConn, Area, Centroids,tf=tf)[FreeNodes]
         
-        NewElemNormals = np.array(MeshUtils.CalcFaceNormal(NewCoords, NodeConn))
+        NewElemNormals = np.array(utils.CalcFaceNormal(NewCoords, NodeConn))
 
         ### Check for near-intersections ###
         # Angles:
@@ -1052,7 +1025,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
         gamma = np.arccos(np.sum(v20*-v12,axis=1)/(l20*l12))
         angles = np.vstack([alpha,beta,gamma]).T
         # Dihedrals:
-        dihedrals = Quality.DihedralAngles(NewElemNormals,ElemNeighbors)
+        dihedrals = quality.DihedralAngles(NewElemNormals,ElemNeighbors)
         # Normal Flipping:
         NormDot = np.sum(NewElemNormals * ElemNormals,axis=1)
 
@@ -1060,7 +1033,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
         Intersected = []
         if i >= NZIter-5:
             # NodeConn, ElemNeighbors = Flip(NewCoords,NodeConn,ElemNormals,ElemNeighbors,Area,Centroids)
-            IntersectionPairs = Rays.SurfSelfIntersection(NewCoords,NodeConn)
+            IntersectionPairs = rays.SurfSelfIntersection(NewCoords,NodeConn)
             Intersected = np.unique(IntersectionPairs).tolist()
             
         if np.any(Risk) or len(Intersected):
@@ -1071,12 +1044,12 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
             PatchConn = ArrayConn[NeighborhoodElems] 
             BoundaryEdges = converter.surf2edges(NewCoords,PatchConn)
             FixedNodes = set([n for edge in BoundaryEdges for n in edge])
-            NewCoords = np.array(Improvement.LocalLaplacianSmoothing(NewCoords,PatchConn,2,FixedNodes=FixedNodes))
+            NewCoords = np.array(improvement.LocalLaplacianSmoothing(NewCoords,PatchConn,2,FixedNodes=FixedNodes))
 
-            # NodeConn = Improvement.AngleReductionFlips(NewCoords,NodeConn,NodeNeighbors)
-            NodeNeighbors,ElemConn = MeshUtils.getNodeNeighbors(NewCoords, NodeConn)    
-            ElemNeighbors = MeshUtils.getElemNeighbors(NewCoords,NodeConn,mode='edge')
-            ElemNormals = np.array(MeshUtils.CalcFaceNormal(NewCoords, NodeConn))
+            # NodeConn = improvement.AngleReductionFlips(NewCoords,NodeConn,NodeNeighbors)
+            NodeNeighbors,ElemConn = utils.getNodeNeighbors(NewCoords, NodeConn)    
+            ElemNeighbors = utils.getElemNeighbors(NewCoords,NodeConn,mode='edge')
+            ElemNormals = np.array(utils.CalcFaceNormal(NewCoords, NodeConn))
         else:
             ElemNormals = NewElemNormals
         # mesh.mesh(NewCoords,NodeConn).Mesh2Meshio().write(str(k)+'.vtu');k+=1
@@ -1085,7 +1058,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
     return NewCoords.tolist(), NodeConn
 
 def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25','-Y','-o/150'],
-           MCInterp='midpoint',SurfOpt=True,TetOpt=True,GLS=False,SkewThreshold=None, pool=None,
+           MCInterp='midpoint',SurfOpt=True,TetOpt=True,GLS=False,SkewThreshold=None,
            BLStiffnessFactor=1,BLMaxThickness=None,TetSliverThreshold=None):
     """
     HexCore - Generate a mesh with a core of regular hexahedral elements, 
@@ -1118,8 +1091,6 @@ def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25',
     SkewThreshold : float, optional
         Skewness threshold above which triangles will be considered slivers
         and collapsed. The default is 0.9.
-    pool : joblib.parallel.Parallel, optional
-        Parallel pool for joblib execution. The default is Parallel(n_jobs=1).
 
     Returns
     -------
@@ -1140,7 +1111,7 @@ def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25',
     
     if verbose: print('Performing Marching Cubes Surface Construction...')
     tic = time.time()
-    TriNodeCoords,TriNodeConn = MarchingCubes.ParchingCubes(NodeCoords,NodeConn,NodeVals,interpolation=MCInterp,pool=pool,method='33',threshold=0)
+    TriNodeCoords,TriNodeConn = contour.MarchingCubes(NodeCoords,NodeConn,NodeVals,interpolation=MCInterp,method='33',threshold=0)
     MarchingTime += time.time()-tic
     # if verbose: print('Surface Optimization...')
     # tic = time.time()
@@ -1154,29 +1125,29 @@ def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25',
 
     if GLS:
         tic = time.time()
-        TriNodeCoords = Improvement.GlobalLaplacianSmoothing(TriNodeCoords,TriNodeConn,[],FeatureWeight=1,BaryWeight=1/3)
+        TriNodeCoords = improvement.GlobalLaplacianSmoothing(TriNodeCoords,TriNodeConn,[],FeatureWeight=1,BaryWeight=1/3)
     if not (SurfOpt or GLS):
         TriNodeCoords = TriNodeCoords
         TriNodeConn = TriNodeConn
     
     if SkewThreshold:
-        TriNodeCoords,TriNodeConn = Improvement.CollapseSlivers(TriNodeCoords,TriNodeConn,skewThreshold=SkewThreshold,verbose=verbose)
+        TriNodeCoords,TriNodeConn = improvement.CollapseSlivers(TriNodeCoords,TriNodeConn,skewThreshold=SkewThreshold,verbose=verbose)
     SurfOptTime += time.time()-tic
     # mesh.mesh(TriNodeCoords,TriNodeConn).Mesh2Meshio().write('opt.vtu')
 
     if verbose: print('Peeling Voxels...')
     tic = time.time()
     cutvoxels = set([i for i,elem in enumerate(NodeConn) if 0 < sum([NodeVals[n] > 0 for n in elem]) < 8])  # Voxels cut by marching cubes
-    PeeledCoords, PeeledConn, PeelCoords, PeelConn = MeshUtils.PeelHex(NodeCoords,[elem for i,elem in enumerate(NodeConn) if i not in cutvoxels],nLayers=nPeel)
+    PeeledCoords, PeeledConn, PeelCoords, PeelConn = utils.PeelHex(NodeCoords,[elem for i,elem in enumerate(NodeConn) if i not in cutvoxels],nLayers=nPeel)
     PeelTime = time.time() - tic
 
     if verbose: print('Generating Pyramids...')
     tic = time.time()
     if len(PeeledConn) > 0:
-        PyramidCoords, PyramidConn = MeshUtils.makePyramidLayer(PeeledCoords,PeeledConn)
+        PyramidCoords, PyramidConn = utils.makePyramidLayer(PeeledCoords,PeeledConn)
         PyrSurf = converter.solid2surface(PyramidCoords,PyramidConn)
         TriSurf = [elem for elem in PyrSurf if len(elem) == 3]
-        TriCoords,TriSurf,_ = MeshUtils.DeleteDuplicateNodes(PyramidCoords,TriSurf)
+        TriCoords,TriSurf,_ = utils.DeleteDuplicateNodes(PyramidCoords,TriSurf)
     else:
         TriCoords = []
         TriSurf = []
@@ -1188,10 +1159,10 @@ def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25',
     BoundaryConn = TriSurf + (np.array(TriNodeConn)+len(TriCoords)).tolist()
 
     FixedNodes = set(range(len(TriCoords)))
-    BoundaryCoords = Improvement.ResolveSurfSelfIntersections(BoundaryCoords,BoundaryConn,FixedNodes=FixedNodes)
+    BoundaryCoords = improvement.ResolveSurfSelfIntersections(BoundaryCoords,BoundaryConn,FixedNodes=FixedNodes)
 
     if len(PeeledConn) > 0:
-        holes = MeshUtils.Centroids(PeeledCoords,PeeledConn)
+        holes = utils.Centroids(PeeledCoords,PeeledConn)
     else:
         holes = []
     
@@ -1205,9 +1176,9 @@ def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25',
         if verbose: print('Optimizing Tetrahedral Mesh...')
         tic = time.time()
         # Tets = [elem for elem in hexcore.NodeConn if len(elem)==4]
-        # skew = Quality.Skewness(hexcore.NodeCoords,Tets)
+        # skew = quality.Skewness(hexcore.NodeCoords,Tets)
         # BadElems = set(np.where(skew>0.9)[0])
-        # ElemNeighbors = MeshUtils.getElemNeighbors(hexcore.NodeCoords,Tets)
+        # ElemNeighbors = utils.getElemNeighbors(hexcore.NodeCoords,Tets)
         # BadElems.update([e for i in BadElems for e in ElemNeighbors[i]])
         # BadNodes = set([n for i in BadElems for n in Tets[i]])
 
@@ -1218,7 +1189,7 @@ def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25',
         SurfConn = converter.solid2surface(TetCoords,TetConn)
         SurfNodes = set([n for elem in SurfConn for n in elem])
         FreeNodes = set(range(len(TetCoords))).difference(SurfNodes)
-        TetCoords = Improvement.TetOpt(TetCoords,TetConn,FreeNodes=FreeNodes,objective='eta',method='BFGS',iterate=3)
+        TetCoords = improvement.TetOpt(TetCoords,TetConn,FreeNodes=FreeNodes,objective='eta',method='BFGS',iterate=3)
         TetTime += time.time()-tic
 
     if verbose: print('Assembling Mesh...')
@@ -1253,7 +1224,7 @@ def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25',
     if TetSliverThreshold:
         if verbose: print('Peeling Surface Tet Slivers...')
         tic = time.time()
-        hexcore.NodeConn = Improvement.SliverPeel(*hexcore,skewThreshold=TetSliverThreshold)
+        hexcore.NodeConn = improvement.SliverPeel(*hexcore,skewThreshold=TetSliverThreshold)
         TetTime += time.time()-tic
     
     ### 
@@ -1278,7 +1249,7 @@ def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25',
     return hexcore  
 
 def TetMesh(sdf,bounds,h,verbose=True,TetgenSwitches=['-pq1.1/25','-Y','-o/150'],
-            MCInterp='midpoint',SurfOpt=True,GLS=False,SkewThreshold=None,pool=None):
+            MCInterp='midpoint',SurfOpt=True,GLS=False,SkewThreshold=None):
     """
     TetMesh - Generate a Tetrahedral Mesh for a given signed distance function
     (or similar isosurface implicit function)
@@ -1307,8 +1278,6 @@ def TetMesh(sdf,bounds,h,verbose=True,TetgenSwitches=['-pq1.1/25','-Y','-o/150']
     skewThreshold : float, optional
         Skewness threshold above which triangles will be considered slivers
         and collapsed. The default is None.
-    pool : joblib.parallel.Parallel, optional
-        Parallel pool for joblib execution. The default is Parallel(n_jobs=1).
 
     Returns
     -------
@@ -1325,7 +1294,7 @@ def TetMesh(sdf,bounds,h,verbose=True,TetgenSwitches=['-pq1.1/25','-Y','-o/150']
     
     if verbose: print('Performing Marching Cubes Surface Construction...')
     tic = time.time()
-    TriNodeCoords,TriNodeConn = MarchingCubes.ParchingCubes(NodeCoords,NodeConn,NodeVals,interpolation=MCInterp,pool=pool,method='33',threshold=0)
+    TriNodeCoords,TriNodeConn = contour.MarchingCubes(NodeCoords,NodeConn,NodeVals,interpolation=MCInterp,method='33',threshold=0)
     MarchingTime += time.time()-tic
     if SurfOpt:
         if verbose: print('Surface Optimization...')
@@ -1336,20 +1305,20 @@ def TetMesh(sdf,bounds,h,verbose=True,TetgenSwitches=['-pq1.1/25','-Y','-o/150']
     if GLS:
         if verbose: print('Smoothing Mesh...')
         tic = time.time()
-        TriNodeCoords = Improvement.GlobalLaplacianSmoothing(TriNodeCoords,TriNodeConn,[],FeatureWeight=1,BaryWeight=1/3)
+        TriNodeCoords = improvement.GlobalLaplacianSmoothing(TriNodeCoords,TriNodeConn,[],FeatureWeight=1,BaryWeight=1/3)
         SurfOptTime += time.time()-tic
 
     if SkewThreshold:
         if verbose: print('Collapsing Surface Mesh Slivers...')
         tic = time.time()
-        TriNodeCoords,TriNodeConn = Improvement.CollapseSlivers(TriNodeCoords,TriNodeConn,skewThreshold=SkewThreshold,verbose=verbose,pool=pool)
+        TriNodeCoords,TriNodeConn = improvement.CollapseSlivers(TriNodeCoords,TriNodeConn,skewThreshold=SkewThreshold,verbose=verbose)
         SurfOptTime += time.time()-tic
     # mesh.mesh(TriNodeCoords,TriNodeConn).Mesh2Meshio().write('opt.vtu')
     if verbose: print('Tet Meshing with TetGen...')    
     tic = time.time()
     v = np.array(NodeVals)
     hconn = [elem for elem in NodeConn if all(v[elem] > 0)]
-    holes = MeshUtils.Centroids(NodeCoords,hconn)
+    holes = utils.Centroids(NodeCoords,hconn)
     
     if '-Y' not in TetgenSwitches:
         TetgenSwitches.append('-Y') 
@@ -1488,7 +1457,7 @@ def TPMSGeometricAnalysis(func,c,L,h,verbose=True,writeVTUs=False,SurfOpt=False,
     NodeCoords, NodeConn, NodeVals = VoxelMesh(scaffold,[bounds[0]-h,bounds[1]+3*h],[bounds[2]-h,bounds[3]+3*h],[bounds[4]-h,bounds[5]+3*h],h,mode='notrim',reinitialize=False)
     # sdf = FastMarchingMethod(NodeCoords,NodeConn,NodeVals)
     # print(max(sdf),min(sdf))
-    ScaffCoords,ScaffConn = MarchingCubes.ParchingCubes(NodeCoords,NodeConn,NodeVals,interpolation=MCInterp,method='33',threshold=0)
+    ScaffCoords,ScaffConn = contour.ParchingCubes(NodeCoords,NodeConn,NodeVals,interpolation=MCInterp,method='33',threshold=0)
     
     try:
         if SurfOpt: ScaffCoords,ScaffConn = SurfFlowOptimization(scaffold,ScaffCoords,ScaffConn)
@@ -1502,12 +1471,12 @@ def TPMSGeometricAnalysis(func,c,L,h,verbose=True,writeVTUs=False,SurfOpt=False,
     # if writeVTUs: meshio.Mesh(NodeCoords,[('hexahedron',NodeConn)],point_data={'v':NodeVals,'d':v}).write('sdf.vtu')
 
     TPMSCoords,TPMSConn,TPMSVals = VoxelMesh(func,[bounds[0],bounds[1]],[bounds[2],bounds[3]],[bounds[4],bounds[5]],h,mode='notrim',reinitialize=False)
-    TPMSSurfCoords,TPMSSurfConn = MarchingCubes.ParchingCubes(TPMSCoords,TPMSConn,TPMSVals,interpolation='linear',method='33',threshold=0)
+    TPMSSurfCoords,TPMSSurfConn = contour.ParchingCubes(TPMSCoords,TPMSConn,TPMSVals,interpolation='linear',method='33',threshold=0)
     # mesh(TPMSSurfCoords,TPMSSurfConn).write('TPMS.vtu')
     Points = np.array(TPMSSurfCoords)[np.array(TPMSSurfConn)]
     Area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2
     Atpms = sum(Area)
-    Vtpms = MeshUtils.TriSurfVol(ScaffCoords, ScaffConn)
+    Vtpms = utils.TriSurfVol(ScaffCoords, ScaffConn)
     Vcell = 1
     rho = Vtpms/Vcell   
     t = Vtpms/Atpms
@@ -1520,7 +1489,7 @@ def TPMSGeometricAnalysis(func,c,L,h,verbose=True,writeVTUs=False,SurfOpt=False,
     if writeVTUs: 
         sphereSDF = lambda x,y,z : sphere(x,y,z,radius,center)
         coords,conn,vals = VoxelMesh(sphereSDF,(center[0]-2*radius,center[0]+2*radius),(center[1]-2*radius,center[1]+2*radius),(center[2]-2*radius,center[2]+2*radius),radius/10,mode='notrim',reinitialize=False)
-        sCoords,sConn = MarchingCubes.ParchingCubes(coords,conn,vals,interpolation='linear',method='33',threshold=0)
+        sCoords,sConn = contour.ParchingCubes(coords,conn,vals,interpolation='linear',method='33',threshold=0)
         mesh(sCoords,sConn).write('Thickness_Sphere.vtu')
 
     # Pore Size:
@@ -1529,7 +1498,7 @@ def TPMSGeometricAnalysis(func,c,L,h,verbose=True,writeVTUs=False,SurfOpt=False,
     if writeVTUs: 
         sphereSDF = lambda x,y,z : sphere(x,y,z,radius,center)
         coords,conn,vals = VoxelMesh(sphereSDF,(center[0]-2*radius,center[0]+2*radius),(center[1]-2*radius,center[1]+2*radius),(center[2]-2*radius,center[2]+2*radius),radius/10,mode='notrim',reinitialize=False)
-        sCoords,sConn = MarchingCubes.ParchingCubes(coords,conn,vals,interpolation='linear',method='33',threshold=0)
+        sCoords,sConn = contour.ParchingCubes(coords,conn,vals,interpolation='linear',method='33',threshold=0)
         mesh(sCoords,sConn).write('Pore_Sphere.vtu')
 
     if verbose:

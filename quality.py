@@ -7,11 +7,7 @@ Created on Sun Jan 23 23:58:18 2022
 import numpy as np
 
 import sys, copy, warnings
-from . import MeshUtils, converter
-try:
-    from joblib import Parallel, delayed
-except:
-    warnings.warn('Optional dependencies not found - some functions may not work properly')
+from . import utils, converter
 
 # Finite element modeling mesh quality, energy balance and validation methods: A review with recommendations associated with the modeling of bone tissue - Burkhart et al.
 
@@ -42,7 +38,7 @@ def AspectRatio(NodeCoords,NodeConn,verbose=False):
     EdgePoints = ArrayCoords[Edges]
     EdgeVec = EdgePoints[:,1] - EdgePoints[:,0]
     lengths = np.append(np.linalg.norm(EdgeVec,axis=1),[np.nan])
-    REdgeConn = MeshUtils.PadRagged(EdgeConn,fillval=-1)
+    REdgeConn = utils.PadRagged(EdgeConn,fillval=-1)
     ElemEdgeLengths = lengths[REdgeConn]
     aspect = np.nanmax(ElemEdgeLengths,axis=1)/np.nanmin(ElemEdgeLengths,axis=1)
 
@@ -83,15 +79,15 @@ def Orthogonality(NodeCoords,NodeConn,verbose=False):
         Array of orthogonalities for each element.
     """
     Faces,FaceConn,FaceElem = converter.solid2faces(NodeCoords,NodeConn, return_FaceConn=True, return_FaceElem=True)
-    RFaceConn = MeshUtils.PadRagged(FaceConn,fillval=-1)
+    RFaceConn = utils.PadRagged(FaceConn,fillval=-1)
     FaceElemConn, UFaces, UFaceConn, UFaceElem, idx, inv = converter.faces2faceelemconn(Faces,FaceConn,FaceElem,return_UniqueFaceInfo=True)
 
 
-    ElemCentroids = MeshUtils.Centroids(NodeCoords,NodeConn)
-    FaceCentroids = MeshUtils.Centroids(NodeCoords,Faces)
+    ElemCentroids = utils.Centroids(NodeCoords,NodeConn)
+    FaceCentroids = utils.Centroids(NodeCoords,Faces)
 
     # Face Normal Vectors
-    A = np.append(MeshUtils.CalcFaceNormal(NodeCoords,Faces),[[np.nan,np.nan,np.nan]],axis=0)
+    A = np.append(utils.CalcFaceNormal(NodeCoords,Faces),[[np.nan,np.nan,np.nan]],axis=0)
     Ai = A[RFaceConn]
 
     # Vectors from element centroid to face centroid
@@ -191,9 +187,9 @@ def OrthogonalQuality(NodeCoords,NodeConn,verbose=False):
         maxOrthoq = max(orthoq)
         meanOrthoq = np.mean(orthoq)
         print('------------------------------------------')
-        print(f'Minimum Orthogonal Quality: {minOrthoq:.3f} on Element {np.where(orthoq==minOrthoq)[0][0]:.0f}')
-        print(f'Maximum Orthogonal Quality: {maxOrthoq:.3f} on Element {np.where(orthoq==maxOrthoq)[0][0]:.0f}')
-        print(f'Mean Orthogonal Quality: {meanOrthoq:.3f}')
+        print(f'Minimum Orthogonal quality: {minOrthoq:.3f} on Element {np.where(orthoq==minOrthoq)[0][0]:.0f}')
+        print(f'Maximum Orthogonal quality: {maxOrthoq:.3f} on Element {np.where(orthoq==maxOrthoq)[0][0]:.0f}')
+        print(f'Mean Orthogonal quality: {meanOrthoq:.3f}')
         print('------------------------------------------')
 
     return orthoq
@@ -234,9 +230,9 @@ def InverseOrthogonalQuality(NodeCoords,NodeConn,verbose=False):
         maxIorthoq = max(iorthoq)
         meanIorthoq = np.mean(iorthoq)
         print('------------------------------------------')
-        print(f'Minimum Inverse Orthogonal Quality: {minIorthoq:.3f} on Element {np.where(iorthoq==minIorthoq)[0][0]:.0f}')
-        print(f'Maximum Inverse Orthogonal Quality: {maxIorthoq:.3f} on Element {np.where(iorthoq==maxIorthoq)[0][0]:.0f}')
-        print(f'Mean Inverse Orthogonal Quality: {meanIorthoq:.3f}')
+        print(f'Minimum Inverse Orthogonal quality: {minIorthoq:.3f} on Element {np.where(iorthoq==minIorthoq)[0][0]:.0f}')
+        print(f'Maximum Inverse Orthogonal quality: {maxIorthoq:.3f} on Element {np.where(iorthoq==maxIorthoq)[0][0]:.0f}')
+        print(f'Mean Inverse Orthogonal quality: {meanIorthoq:.3f}')
         print('------------------------------------------')
 
     return iorthoq
@@ -479,7 +475,7 @@ def equiangular_skewness(NodeCoords,NodeConn):
         QuadSkew = quad_skewness(NodeCoords,Quads)
         FaceSkew[quadIdx] = QuadSkew
 
-    RFaceConn = MeshUtils.PadRagged(FaceConn)
+    RFaceConn = utils.PadRagged(FaceConn)
     FaceSkew = np.append(FaceSkew,np.nan)
     skew = np.nanmax(FaceSkew[RFaceConn],axis=1)
 
@@ -520,7 +516,7 @@ def Volume(NodeCoords,NodeConn,verbose=False):
     pt3 = ArrayCoords[ArrayConn][:,3]
     vol = -np.sum((pt0-pt1)*np.cross((pt1-pt3),(pt2-pt3)),axis=1)/6
     vol = np.append(vol,0)
-    V = np.sum(vol[MeshUtils.PadRagged(ElemIds)],axis=1)
+    V = np.sum(vol[utils.PadRagged(ElemIds)],axis=1)
 
     if verbose:
         minVol = min(V)
@@ -539,7 +535,7 @@ def Volume(NodeCoords,NodeConn,verbose=False):
 def MinDihedral(NodeCoords,NodeConn,verbose=False):
 
     Faces, FaceConn, FaceElem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
-    Normals = np.asarray(MeshUtils.CalcFaceNormal(NodeCoords,Faces))
+    Normals = np.asarray(utils.CalcFaceNormal(NodeCoords,Faces))
 
     tetkey = np.array([[0,1],[0,2],[0,3],[1,2],[2,3],[3,1]])
     pyrkey = np.array([[0,1],[0,2],[0,3],[0,4],[1,2],[2,3],[3,4],[4,1]])
@@ -563,7 +559,7 @@ def MinDihedral(NodeCoords,NodeConn,verbose=False):
 def MaxDihedral(NodeCoords,NodeConn,verbose=False):
 
     Faces, FaceConn, FaceElem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
-    Normals = np.asarray(MeshUtils.CalcFaceNormal(NodeCoords,Faces))
+    Normals = np.asarray(utils.CalcFaceNormal(NodeCoords,Faces))
 
     tetkey = np.array([[0,1],[0,2],[0,3],[1,2],[2,3],[3,1]])
     pyrkey = np.array([[0,1],[0,2],[0,3],[0,4],[1,2],[2,3],[3,4],[4,1]])

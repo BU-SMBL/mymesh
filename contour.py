@@ -7,14 +7,10 @@ Created on Sat Jan 22 09:18:20 2022
 #%%
 import time
 import sys
-from . import MeshUtils, Octree
+from . import utils, octree
 import numpy as np
 import scipy
 import copy, warnings
-try:
-    from joblib import Parallel, delayed
-except:
-    warnings.warn('Optional dependencies not found - some functions may not work properly')
 
 
 #      7_______6              *__10___*
@@ -3628,9 +3624,9 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', metho
             
     NewConn = np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F')
     if cleanup:
-        NewCoords,NewConn,_,Idx = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
+        NewCoords,NewConn,_,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
         if (interpolation=='linear' or interpolation=='cubic') and method=='triangle':
-            NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
+            NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
             
     return NewCoords, NewConn
 
@@ -3734,9 +3730,9 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
                 if len(elem) > 0:
                     NewConn.append(elem)  
     if cleanup:                  
-        NewCoords,NewConn,_,Idx = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
+        NewCoords,NewConn,_,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
         if interpolation=='linear' and method=='triangle':
-            NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
+            NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
     else:
         Idx = np.arange(len(NewCoords),dtype=int)
     if return_anchors:
@@ -3986,9 +3982,9 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
             
     NewConn = np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F')
     if cleanup:
-        NewCoords,NewConn,_,Idx = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
+        NewCoords,NewConn,_,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
         if (interpolation=='linear' or interpolation=='cubic') and method=='triangle':
-            NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
+            NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
             
     return NewCoords, NewConn
 
@@ -4104,9 +4100,9 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
                 if len(elem) > 0:
                     TriNodeConn.append(elem)  
                       
-    TriNodeCoords,TriNodeConn,_,Idx = MeshUtils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,return_idx=True)
+    TriNodeCoords,TriNodeConn,_,Idx = utils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,return_idx=True)
     if interpolation=='linear':
-        TriNodeCoords,TriNodeConn = MeshUtils.DeleteDegenerateElements(TriNodeCoords,TriNodeConn,strict=True)
+        TriNodeCoords,TriNodeConn = utils.DeleteDegenerateElements(TriNodeCoords,TriNodeConn,strict=True)
     if return_anchors: 
         Anchors = np.array(Anchors)
         AnchorAxis = np.array(AnchorAxis)
@@ -4121,8 +4117,8 @@ def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method=
 
     # dualgrid_method could be centroid or qef_min
 
-    root = Octree.Function2Octree(func, grad, bounds, maxsize=maxsize, minsize=minsize, strategy=octree_strategy, eps=octree_eps)
-    DualCoords, DualConn = Octree.Octree2Dual(root,method=dualgrid_method)
+    root = octree.Function2Octree(func, grad, bounds, maxsize=maxsize, minsize=minsize, strategy=octree_strategy, eps=octree_eps)
+    DualCoords, DualConn = octree.Octree2Dual(root,method=dualgrid_method)
     NodeValues = func(DualCoords[:,0],DualCoords[:,1],DualCoords[:,2])
     TriCoords, TriConn = MarchingCubes(DualCoords, DualConn, NodeValues)
             
@@ -7635,9 +7631,9 @@ def ParchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
             TriNodeCoords += coords
             TriNodeConn += [[node+lcoords for node in elem] for elem in conn]
     
-    TriNodeCoords,TriNodeConn,_ = MeshUtils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn)
+    TriNodeCoords,TriNodeConn,_ = utils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn)
     if interpolation=='linear':
-        TriNodeCoords,TriNodeConn = MeshUtils.DeleteDegenerateElements(TriNodeCoords,TriNodeConn)
+        TriNodeCoords,TriNodeConn = utils.DeleteDegenerateElements(TriNodeCoords,TriNodeConn)
     if type(TriNodeCoords) is np.ndarray: TriNodeCoords = TriNodeCoords.tolist()
     return TriNodeCoords, TriNodeConn
 

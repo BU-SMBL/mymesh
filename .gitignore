@@ -14,4 +14,4 @@ __pycache__/*
 docs/build/_sources/modules.rst.txt
 docs/build/_sources/Mesh.rst.txt
 docs/build/_sources/index.rst.txt
-__pycache__/Primitives.cpython-38.pyc
+__pycache__/primitives.cpython-38.pyc

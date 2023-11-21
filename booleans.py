@@ -8,7 +8,7 @@ Created on Wed Feb 16 11:28:28 2022
 import warnings, itertools, copy
 from scipy import spatial
 import numpy as np
-from . import mesh, converter, MeshUtils, Octree, Rays, Improvement, delaunay, Primitives
+from . import mesh, converter, utils, octree, rays, improvement, delaunay, primitives
 
 def MeshBooleans(Surf1, Surf2, tol=1e-8):
     """
@@ -64,17 +64,17 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
     BDConn = [elem for e,elem in enumerate(Split2.NodeConn) if e in BDtris]
     
     # Merge and Cleanup Mesh
-    MergedUCoords, MergedUConn = MeshUtils.MergeMesh(Split1.NodeCoords, AUConn, Split2.NodeCoords, BUConn)
+    MergedUCoords, MergedUConn = utils.MergeMesh(Split1.NodeCoords, AUConn, Split2.NodeCoords, BUConn)
     # MergedUCoords, MergedUConn, _ = converter.removeNodes(MergedUCoords, MergedUConn)
-    # MergedUCoords, MergedUConn, _ = MeshUtils.DeleteDuplicateNodes(MergedUCoords, MergedUConn)
+    # MergedUCoords, MergedUConn, _ = utils.DeleteDuplicateNodes(MergedUCoords, MergedUConn)
         
-    MergedICoords, MergedIConn = MeshUtils.MergeMesh(Split1.NodeCoords, AIConn, Split2.NodeCoords, BIConn)
+    MergedICoords, MergedIConn = utils.MergeMesh(Split1.NodeCoords, AIConn, Split2.NodeCoords, BIConn)
     # MergedICoords, MergedIConn, _ = converter.removeNodes(MergedICoords, MergedIConn)
-    # MergedICoords, MergedIConn, _ = MeshUtils.DeleteDuplicateNodes(MergedICoords, MergedIConn)
+    # MergedICoords, MergedIConn, _ = utils.DeleteDuplicateNodes(MergedICoords, MergedIConn)
     
-    MergedDCoords, MergedDConn = MeshUtils.MergeMesh(Split1.NodeCoords, ADConn, Split2.NodeCoords, BDConn)
+    MergedDCoords, MergedDConn = utils.MergeMesh(Split1.NodeCoords, ADConn, Split2.NodeCoords, BDConn)
     # MergedDCoords, MergedDConn, _ = converter.removeNodes(MergedDCoords, MergedDConn)
-    # MergedDCoords, MergedDConn, _ = MeshUtils.DeleteDuplicateNodes(MergedDCoords, MergedDConn)
+    # MergedDCoords, MergedDConn, _ = utils.DeleteDuplicateNodes(MergedDCoords, MergedDConn)
     if 'mesh' in dir(mesh):
         Union = mesh.mesh(MergedUCoords,MergedUConn)
         Intersection = mesh.mesh(MergedICoords,MergedIConn)
@@ -85,9 +85,9 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
         Difference = mesh(MergedDCoords,MergedDConn)
 
     # Split elements by the Absolute large angle criteria, this will split degenerate collinear elements so that they can be easily cleaned up
-    # Union.NodeCoords,Union.NodeConn = Improvement.Split(*Union,1,criteria='AbsLargeAngle',iterate=1,thetal=179)
-    # Intersection.NodeCoords,Intersection.NodeConn = Improvement.Split(*Intersection,1,criteria='AbsLargeAngle',iterate=1,thetal=179)
-    # Difference.NodeCoords,Difference.NodeConn = Improvement.Split(*Difference,1,criteria='AbsLargeAngle',iterate=1,thetal=179)
+    # Union.NodeCoords,Union.NodeConn = improvement.Split(*Union,1,criteria='AbsLargeAngle',iterate=1,thetal=179)
+    # Intersection.NodeCoords,Intersection.NodeConn = improvement.Split(*Intersection,1,criteria='AbsLargeAngle',iterate=1,thetal=179)
+    # Difference.NodeCoords,Difference.NodeConn = improvement.Split(*Difference,1,criteria='AbsLargeAngle',iterate=1,thetal=179)
 
     Union.cleanup(tol=eps_final,angletol=5e-3)
     Intersection.cleanup(tol=eps_final,angletol=5e-3)
@@ -117,7 +117,7 @@ def PlaneClip(pt, normal, Surf, fill=False, fill_h=None, tol=1e-8, flip=True, re
     bounds = [mins[0]-tol,maxs[0]+tol,mins[1]-tol,maxs[1]+tol,mins[2]-tol,maxs[2]+tol]
     if fill_h is None:
         fill_h = np.linalg.norm(maxs-mins)/10
-    Plane = Primitives.Plane(pt, normal, bounds, fill_h, meshobj=True, exact_h=False, ElemType='tri')
+    Plane = primitives.Plane(pt, normal, bounds, fill_h, meshobj=True, exact_h=False, ElemType='tri')
 
     SplitSurf, SplitPlane = SplitMesh(Intersected,Plane) # TODO: This could be done more efficiently for planar case
     SplitSurf.cleanup()
@@ -126,7 +126,7 @@ def PlaneClip(pt, normal, Surf, fill=False, fill_h=None, tol=1e-8, flip=True, re
     # if fill:
     #     # TODO: Efficiency and Robustness
     #     Shared1,Shared2 = GetSharedNodes(SplitSurf.NodeCoords, SplitPlane.NodeCoords, eps=tol)
-    #     root = Octree.Surf2Octree(*Surf)
+    #     root = octree.Surf2Octree(*Surf)
     #     if np.any(np.abs(normal) != [0,0,1]):
     #         ray = np.cross(normal, [0,0,1])
     #     else:
@@ -137,18 +137,18 @@ def PlaneClip(pt, normal, Surf, fill=False, fill_h=None, tol=1e-8, flip=True, re
     #     NotSharedConn = [elem for i,elem in enumerate(SplitPlane.NodeConn) if not any([n in Shared2 for n in elem]) and i not in AllBoundary] 
     #     SharedConn = [elem for i,elem in enumerate(SplitPlane.NodeConn) if any([n in Shared2 for n in elem]) and i not in AllBoundary]  
         
-    #     Regions = MeshUtils.getConnectedElements(SplitPlane.NodeCoords,NotSharedConn)  # Node Sets
+    #     Regions = utils.getConnectedElements(SplitPlane.NodeCoords,NotSharedConn)  # Node Sets
     #     FillConn = []
     #     for region in Regions:
     #         RegionConn = [SplitPlane.NodeConn[i] for i in region]
-    #         point = MeshUtils.Centroids(SplitPlane.NodeCoords,[RegionConn[0]])
-    #         inside = Rays.isInsideSurf(point, Surf.NodeCoords, Surf.NodeConn, Surf.ElemNormals, octree=None, eps=1e-8, ray=ray)
+    #         point = utils.Centroids(SplitPlane.NodeCoords,[RegionConn[0]])
+    #         inside = rays.isInsideSurf(point, Surf.NodeCoords, Surf.NodeConn, Surf.ElemNormals, octree=None, eps=1e-8, ray=ray)
     #         if inside:
     #             FillConn += RegionConn
     #     InsideNodes = set(np.unique(FillConn))
     #     OutsideNodes = set(range(SplitPlane.NNode)).difference(InsideNodes)
 
-    #     centroids = MeshUtils.Centroids(SplitPlane.NodeCoords,SharedConn)
+    #     centroids = utils.Centroids(SplitPlane.NodeCoords,SharedConn)
     #     for i,elem in enumerate(SharedConn):
     #         if all([n in Shared2 or n in InsideNodes for n in elem]):
     #             FillConn.append(elem)
@@ -156,7 +156,7 @@ def PlaneClip(pt, normal, Surf, fill=False, fill_h=None, tol=1e-8, flip=True, re
     #             continue
     #         else:
     #             centroid = centroids[i]
-    #             if Rays.isInsideSurf(centroid, Surf.NodeCoords, Surf.NodeConn, Surf.ElemNormals, octree=None, eps=1e-8, ray=ray):
+    #             if rays.isInsideSurf(centroid, Surf.NodeCoords, Surf.NodeConn, Surf.ElemNormals, octree=None, eps=1e-8, ray=ray):
     #                 FillConn.append(elem)
     #             #     InsideNodes.update([n for n in elem if n not in Shared2])
     #             # else:
@@ -200,7 +200,7 @@ def VoxelDifference(VoxelCoordsA, VoxelConnA, VoxelCoordsB, VoxelConnB):
 
 def SplitMesh(Surf1, Surf2, eps=1e-12):
     
-    Surf1Intersections,Surf2Intersections,IntersectionPts = Rays.SurfSurfIntersection(*Surf1,*Surf2,return_pts=True)
+    Surf1Intersections,Surf2Intersections,IntersectionPts = rays.SurfSurfIntersection(*Surf1,*Surf2,return_pts=True)
     
     SurfIntersections12 = [Surf1Intersections,Surf2Intersections]
     
@@ -217,7 +217,7 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
                 for k in range(len(IntersectionPts[j])):
                     SplitGroupNodes[elemid] = np.append(SplitGroupNodes[elemid], [IntersectionPts[j][k],IntersectionPts[j][(k+1)%len(IntersectionPts[j])]], axis=0)
         
-        ElemNormals = MeshUtils.CalcFaceNormal(*surf)
+        ElemNormals = utils.CalcFaceNormal(*surf)
         for j in range(surf.NElem):
             if len(SplitGroupNodes[j]) > 3:
                 # print(j)
@@ -229,9 +229,9 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
                 Constraints = np.append([[0,1],[1,2],[2,0]],Constraints,axis=0)
                 boundary = SplitGroupNodes[j][:3]
                 # Reduce node list
-                SplitGroupNodes[j],_,newId,idx = MeshUtils.DeleteDuplicateNodes(SplitGroupNodes[j],[],return_idx=True,tol=eps)
+                SplitGroupNodes[j],_,newId,idx = utils.DeleteDuplicateNodes(SplitGroupNodes[j],[],return_idx=True,tol=eps)
                 # Tris = np.repeat([boundary],len(SplitGroupNodes[j]),axis=0)
-                # In = Rays.PointsInTris(Tris,SplitGroupNodes[j],eps=eps)
+                # In = rays.PointsInTris(Tris,SplitGroupNodes[j],eps=eps)
 
                 Constraints = newId[Constraints]
                 Constraints = np.unique(np.sort(Constraints,axis=1),axis=0)
@@ -242,12 +242,12 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
                 # combinations = np.array(list(itertools.combinations(range(len(Constraints)),2)))
                 # e1 = SplitGroupNodes[j][Constraints[combinations[:,0]]]
                 # e2 = SplitGroupNodes[j][Constraints[combinations[:,1]]]
-                # eIntersections,eIntersectionPts = Rays.SegmentsSegmentsIntersection(e1,e2,return_intersection=True,endpt_inclusive=True,eps=eps)
+                # eIntersections,eIntersectionPts = rays.SegmentsSegmentsIntersection(e1,e2,return_intersection=True,endpt_inclusive=True,eps=eps)
                 # NewConstraints = np.empty((0,2),dtype=int)
                 # for ic,c in enumerate(Constraints):
                 #     # ids of other constraints that intersect with this constraint
                 #     ids = np.unique(np.array([combo for combo in combinations[eIntersections] if ic in combo]))
-                #     # Check collinear lines - currently Rays.SegmentsSegmentsIntersection doesn't do this properly
+                #     # Check collinear lines - currently rays.SegmentsSegmentsIntersection doesn't do this properly
                 #     coix = np.empty((0,3))
                 #     for combo in combinations[~eIntersections]:
                 #         if ic not in combo:
@@ -296,7 +296,7 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
                 #         NewConstraints = np.append(NewConstraints,np.vstack([np.arange(0,len(ixsort)-1),np.arange(1,len(ixsort))]).T+len(SplitGroupNodes[j]),axis=0)
                 #         SplitGroupNodes[j] = np.append(SplitGroupNodes[j],ixsort,axis=0)
 
-                # SplitGroupNodes[j], Constraints, _ = MeshUtils.DeleteDuplicateNodes(SplitGroupNodes[j],NewConstraints,tol=eps)
+                # SplitGroupNodes[j], Constraints, _ = utils.DeleteDuplicateNodes(SplitGroupNodes[j],NewConstraints,tol=eps)
                 # Constraints = np.unique([c for c in Constraints if c[0] != c[1]],axis=0)
                 # SplitGroupNodes[j] = np.asarray(SplitGroupNodes[j])
                     # import plotly.graph_objects as go
@@ -342,7 +342,7 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
                 ## coords,conn = delaunay.Triangle(flatnodes[:,0:2],Constraints=Constraints)
                 SplitGroupNodes[j] = np.matmul(np.linalg.inv(R),np.append(coords,flatnodes[0,2]*np.ones((len(coords),1)),axis=1).T).T
                 ###
-                flip = [np.dot(MeshUtils.CalcFaceNormal(SplitGroupNodes[j],[conn[i]]), n)[0] < 0 for i in range(len(conn))]
+                flip = [np.dot(utils.CalcFaceNormal(SplitGroupNodes[j],[conn[i]]), n)[0] < 0 for i in range(len(conn))]
                 conn = (conn+surf.NNode).tolist()
                 surf.addElems([elem[::-1] if flip[i] else elem for i,elem in enumerate(conn)])
                 surf.addNodes(SplitGroupNodes[j].tolist())
@@ -386,24 +386,24 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     # Classifies each Triangle in A as inside, outside, or on the surface facing the same or opposite direction as surface B
     
     
-    octA = None# Octree.Surf2Octree(*SplitA)
-    octB = None#Octree.Surf2Octree(*SplitB)
+    octA = None# octree.Surf2Octree(*SplitA)
+    octB = None#octree.Surf2Octree(*SplitB)
     AllBoundaryA = [i for i,elem in enumerate(SplitA.NodeConn) if all([n in SharedA for n in elem])]  
     AllBoundaryB = [i for i,elem in enumerate(SplitB.NodeConn) if all([n in SharedB for n in elem])]  
     NotSharedConnA = [elem for i,elem in enumerate(SplitA.NodeConn) if not any([n in SharedA for n in elem]) and i not in AllBoundaryA]  
     NotSharedConnB = [elem for i,elem in enumerate(SplitB.NodeConn) if not any([n in SharedB for n in elem]) and i not in AllBoundaryB]  
     
     if len(NotSharedConnA) > 0:
-        RegionsA = MeshUtils.getConnectedNodes(SplitA.NodeCoords,NotSharedConnA)  # Node Sets
+        RegionsA = utils.getConnectedNodes(SplitA.NodeCoords,NotSharedConnA)  # Node Sets
     else:
         RegionsA = []
     if len(NotSharedConnB) > 0:
-        RegionsB = MeshUtils.getConnectedNodes(SplitB.NodeCoords,NotSharedConnB)  # Node Sets
+        RegionsB = utils.getConnectedNodes(SplitB.NodeCoords,NotSharedConnB)  # Node Sets
     else:
         RegionsB = []
         
-    ElemNormalsA = MeshUtils.CalcFaceNormal(*SplitA)
-    ElemNormalsB = MeshUtils.CalcFaceNormal(*SplitB)
+    ElemNormalsA = utils.CalcFaceNormal(*SplitA)
+    ElemNormalsB = utils.CalcFaceNormal(*SplitB)
 
     AinB = set()    # Elem Set
     AoutB = set()   # Elem Set
@@ -414,10 +414,10 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     BsameA = set()  # Elem Set
     BflipA = set()  # Elem Set
     
-    AllBoundaryACentroids = MeshUtils.Centroids(SplitA.NodeCoords,[elem for i,elem in enumerate(SplitA.NodeConn) if i in AllBoundaryA])
-    AllBoundaryBCentroids = MeshUtils.Centroids(SplitB.NodeCoords,[elem for i,elem in enumerate(SplitB.NodeConn) if i in AllBoundaryB])
+    AllBoundaryACentroids = utils.Centroids(SplitA.NodeCoords,[elem for i,elem in enumerate(SplitA.NodeConn) if i in AllBoundaryA])
+    AllBoundaryBCentroids = utils.Centroids(SplitB.NodeCoords,[elem for i,elem in enumerate(SplitB.NodeConn) if i in AllBoundaryB])
     for i,centroid in enumerate(AllBoundaryACentroids):
-        check = Rays.isInsideSurf(centroid,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,ray=ElemNormalsA[AllBoundaryA[i]]+np.random.rand(3)/1000,eps=eps)
+        check = rays.isInsideSurf(centroid,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,ray=ElemNormalsA[AllBoundaryA[i]]+np.random.rand(3)/1000,eps=eps)
         if check is True:
             AinB.add(AllBoundaryA[i])
         elif check is False:
@@ -427,7 +427,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
         else:
             AflipB.add(AllBoundaryA[i])
     for i,centroid in enumerate(AllBoundaryBCentroids):
-        check = Rays.isInsideSurf(centroid,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,ray=ElemNormalsB[AllBoundaryB[i]]+np.random.rand(3)/1000,eps=eps)
+        check = rays.isInsideSurf(centroid,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,ray=ElemNormalsB[AllBoundaryB[i]]+np.random.rand(3)/1000,eps=eps)
         if check is True:
             BinA.add(AllBoundaryB[i])
         elif check is False:
@@ -442,7 +442,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
         # centroid = np.mean([SplitA.NodeCoords[n] for n in SplitA.NodeConn[RegionElems[0]]], axis=0)
         # normal = ElemNormalsA[RegionElems[0]]
         pt = SplitA.NodeCoords[RegionsA[r].pop()]
-        if Rays.isInsideSurf(pt,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,eps=eps):
+        if rays.isInsideSurf(pt,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,eps=eps):
             # for e in RegionElems: AinB.add(e)
             AinB.update(RegionElems)
         else:
@@ -454,7 +454,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
         RegionElems = [e for e in range(len(SplitB.NodeConn)) if all([n in RegionsB[r] for n in SplitB.NodeConn[e]])] # Elem Set
         # centroid = np.mean([SplitB.NodeCoords[n] for n in SplitB.NodeConn[RegionElems[0]]], axis=0)
         pt = SplitB.NodeCoords[RegionsB[r].pop()]
-        if Rays.isInsideSurf(pt,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,eps=eps):
+        if rays.isInsideSurf(pt,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,eps=eps):
             # for e in RegionElems: BinA.add(e)
             BinA.update(RegionElems)
         else:
@@ -473,7 +473,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     UnknownNodesA = set(elem for e in UnknownA for elem in SplitA.NodeConn[e]).difference(AinNodes).difference(AoutNodes).difference(SharedA)
     UnknownNodesB = set(elem for e in UnknownB for elem in SplitB.NodeConn[e]).difference(BinNodes).difference(BoutNodes).difference(SharedB)
     for node in UnknownNodesA:
-        check = Rays.isInsideSurf(SplitA.NodeCoords[node],SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,ray=SplitA.NodeNormals[node],eps=eps)
+        check = rays.isInsideSurf(SplitA.NodeCoords[node],SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,ray=SplitA.NodeNormals[node],eps=eps)
         if check is True:
             AinNodes.add(node)
         elif check is False:
@@ -483,7 +483,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
         else:
             AflipNodes.add(node)
     for node in UnknownNodesB:
-        check = Rays.isInsideSurf(SplitB.NodeCoords[node],SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,ray=SplitB.NodeNormals[node],eps=eps)
+        check = rays.isInsideSurf(SplitB.NodeCoords[node],SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,ray=SplitB.NodeNormals[node],eps=eps)
         if check is True:
             BinNodes.add(node)
         elif check is False:

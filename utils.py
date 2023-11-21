@@ -7,11 +7,7 @@ Created on Wed Sep 29 18:31:03 2021
 
 import numpy as np
 import sys, warnings, copy, time, itertools
-from . import converter, Rays, Octree, Improvement, Quality
-try:
-    from joblib import Parallel, delayed
-except:
-    warnings.warn('Optional dependencies not found - some functions may not work properly')
+from . import converter, rays, octree, improvement, quality
 
 def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     """
@@ -855,12 +851,12 @@ def Project2Surface(Point,Normal,NodeCoords,SurfConn,tol=np.inf,octree='generate
         Nodal connectivity of the surface mesh that the point is being projected to.
     tol : float, optional
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
-        octree : str (or Octree.OctreeNode), optional
-        Octree options. An octree representation of the surface can significantly
+        octree : str (or octree.OctreeNode), optional
+        octree options. An octree representation of the surface can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        Octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by Octree.Surf2Octree(NodeCoords,SurfConn)
+        octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by octree.Surf2Octree(NodeCoords,SurfConn)
     Returns
     -------
     elemID : int
@@ -875,7 +871,7 @@ def Project2Surface(Point,Normal,NodeCoords,SurfConn,tol=np.inf,octree='generate
     if type(NodeCoords) is list: NodeCoords = np.array(NodeCoords)
     if type(SurfConn) is list: SurfConn = np.array(SurfConn)
 
-    intersections, distances, intersectionPts = Rays.RaySurfIntersection(Point, Normal, NodeCoords, SurfConn, octree=octree)
+    intersections, distances, intersectionPts = rays.RaySurfIntersection(Point, Normal, NodeCoords, SurfConn, octree=octree)
     if len(intersections) == 0:
         elemID = alpha = beta = gamma = -1
     elif min(np.abs(distances)) > tol:
@@ -912,12 +908,12 @@ def Project2Surface2(Points,Normals,NodeCoords,SurfConn,tol=np.inf,octree='gener
         Nodal connectivity of the surface mesh that the point is being projected to.
     tol : float, optional
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
-        octree : str (or Octree.OctreeNode), optional
-        Octree options. An octree representation of the surface can significantly
+        octree : str (or octree.OctreeNode), optional
+        octree options. An octree representation of the surface can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        Octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by Octree.Surf2Octree(NodeCoords,SurfConn)
+        octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by octree.Surf2Octree(NodeCoords,SurfConn)
     Returns
     -------
     elemID : int
@@ -932,7 +928,7 @@ def Project2Surface2(Points,Normals,NodeCoords,SurfConn,tol=np.inf,octree='gener
     if type(NodeCoords) is list: NodeCoords = np.array(NodeCoords)
     if type(SurfConn) is list: SurfConn = np.array(SurfConn)
 
-    intersections, distances, intersectionPts = Rays.RaysSurfIntersection(Points, Normals, NodeCoords, SurfConn, octree=octree)
+    intersections, distances, intersectionPts = rays.RaysSurfIntersection(Points, Normals, NodeCoords, SurfConn, octree=octree)
 
     argmindist = [np.argmin(np.abs(x)) if len(x) > 0 else -1 for x in distances]
     mindist = np.array([x[argmindist[i]] if len(x) > 0 else np.inf for i,x in enumerate(distances)])
@@ -993,12 +989,12 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
     verbose : bool, optional
         If true, will print mapping statistics, by default False.
-    octree : str (or Octree.OctreeNode), optional
-        Octree options. An octree representation of surface 2 can significantly
+    octree : str (or octree.OctreeNode), optional
+        octree options. An octree representation of surface 2 can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        Octree.OctreeNode - Provide a precompute octree structure corresponding to surface 2. Should be created by Octree.Surf2Octree(NodeCoords2,SurfConn2)
+        octree.OctreeNode - Provide a precompute octree structure corresponding to surface 2. Should be created by octree.Surf2Octree(NodeCoords2,SurfConn2)
     return_octree : bool, optional
         If true, will return the generated or provided octree, by default False.
 
@@ -1007,7 +1003,7 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     MappingMatrix : list
         len(NodeCoords1)x4 matrix of of barycentric coordinates, defining NodeCoords1 in terms
         of the triangular surface elements of Surface 2.
-    octree : Octree.OctreeNode, optional
+    octree : octree.OctreeNode, optional
         The generated or provided octree structure corresponding to Surface 2.
 
     """
@@ -1023,7 +1019,7 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     Surf1Nodes = np.unique(SurfConn1.flatten())
 
     
-    if octree == 'generate': octree = Octree.Surf2Octree(NodeCoords2,SurfConn2)
+    if octree == 'generate': octree = octree.Surf2Octree(NodeCoords2,SurfConn2)
     # tic = time.time()
     MappingMatrix = -1*np.ones((len(NodeCoords1),4))
     MappingMatrix[Surf1Nodes,:] = Project2Surface2(NodeCoords1[Surf1Nodes,:], NodeNormals1[Surf1Nodes,:], NodeCoords2, SurfConn2, tol=tol, octree=octree)
@@ -1061,12 +1057,12 @@ octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False
         Contains the nodal connectivity defining the surface elements.
     tol : float, optional
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf 
-    octree : str (or Octree.OctreeNode), optional
-        Octree options. An octree representation of surface 1 can significantly
+    octree : str (or octree.OctreeNode), optional
+        octree options. An octree representation of surface 1 can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        Octree.OctreeNode - Provide a precompute octree structure corresponding to surface 1. Should be created by Octree.Surf2Octree(NodeCoords1,SurfConn1)
+        octree.OctreeNode - Provide a precompute octree structure corresponding to surface 1. Should be created by octree.Surf2Octree(NodeCoords1,SurfConn1)
     MappingMatrix : list
         len(NodeCoords2)x4 matrix of of barycentric coordinates, defining NodeCoords2 in terms
         of the triangular surface elements of Surface 1.
@@ -1466,7 +1462,7 @@ def DetectFeatures(NodeCoords,SurfConn,angle=25):
     EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)
     
     ConnectedNormals = ElemNormals[EdgeElemConn]
-    angles = Quality.dihedralAngles(ConnectedNormals[:,0],ConnectedNormals[:,1],Abs=False)
+    angles = quality.dihedralAngles(ConnectedNormals[:,0],ConnectedNormals[:,1],Abs=False)
     
     FeatureEdges = np.where(angles > angle*np.pi/180)[0]
     FeatureNodes = [n for edge in FeatureEdges for n in UEdges[edge]]

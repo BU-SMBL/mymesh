@@ -9,11 +9,10 @@ import numpy as np
 
 from scipy import ndimage, sparse
 import sys, os, warnings, glob, gc, tempfile
-from . import MeshUtils, Rays, Primitives
+from . import utils, rays, primitives
 try:
     import h5py, tqdm
     import cv2, pydicom
-    from joblib import Parallel, delayed
 except:
     warnings.warn('Optional dependencies not found - some functions may not work properly')
 
@@ -94,7 +93,7 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
             ))
     FaceConn = -1*np.ones((len(NodeConn),6))
     FaceConn[ElemIds_i,ElemIds_j] = np.arange(len(Faces))
-    FaceConn = MeshUtils.ExtractRagged(FaceConn,dtype=int)
+    FaceConn = utils.ExtractRagged(FaceConn,dtype=int)
     
     if return_FaceConn and return_FaceElem:
         return Faces,FaceConn,FaceElem
@@ -184,7 +183,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),12))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            EdgeConn = MeshUtils.ExtractRagged(EdgeConn,dtype=int)
+            EdgeConn = utils.ExtractRagged(EdgeConn,dtype=int)
         if ReturnType is list:
             Edges = Edges.tolist()
             if return_EdgeElem or return_EdgeConn:
@@ -350,7 +349,7 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
     NOTE the generated tetrahedra will not generally be continuously oriented, i.e.
     edges of child tetrahedra may not be aligned between one parent element 
     and its neighbor, and thus the resulting mesh will typically be invalid.
-    The primary use-case for this method is for methods like Quality.Volume
+    The primary use-case for this method is for methods like quality.Volume
     which utilize the geometric properties of tetrahedra to determine properties of 
     the parent elements.
     
@@ -392,7 +391,7 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
                 ))
         ElemIds = -1*np.ones((len(NodeConn),6))
         ElemIds[ElemIds_i,ElemIds_j] = np.arange(len(TetConn))
-        ElemIds = MeshUtils.ExtractRagged(ElemIds,dtype=int)
+        ElemIds = utils.ExtractRagged(ElemIds,dtype=int)
     
     if return_ids:
         return TetConn, ElemIds
@@ -405,7 +404,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to5'):
     NOTE the generated tetrahedra will not generally be continuously oriented, i.e.
     edges of child tetrahedra may not be aligned between one parent element 
     and its neighbor, and thus the resulting mesh will typically be invalid.
-    The primary use-case for this method is for methods like Quality.Volume
+    The primary use-case for this method is for methods like quality.Volume
     which utilize the geometric properties of tetrahedra to determine properties of 
     the parent elements.
     
@@ -441,7 +440,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to5'):
         ArrayCoords = np.asarray(NodeCoords)
         ArrayConn = np.asarray(NodeConn)
 
-        Centroids = MeshUtils.Centroids(ArrayCoords,NodeConn)
+        Centroids = utils.Centroids(ArrayCoords,NodeConn)
         Face0Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1,2,3]]],axis=1)
         Face1Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1,5,4]]],axis=1)
         Face2Centroids = np.mean(ArrayCoords[ArrayConn[:,[1,2,6,5]]],axis=1)
@@ -500,7 +499,7 @@ def wedge2tet(NodeCoords,NodeConn):
     NOTE the generated tetrahedra will not generally be continuously oriented, i.e.
     edges of child tetrahedra may not be aligned between one parent element 
     and its neighbor, and thus the resulting mesh will typically be invalid.
-    The primary use-case for this method is for methods like Quality.Volume
+    The primary use-case for this method is for methods like quality.Volume
     which utilize the geometric properties of tetrahedra to determine properties of 
     the parent elements.
 
@@ -535,7 +534,7 @@ def pyramid2tet(NodeCoords,NodeConn):
     NOTE the generated tetrahedra will not generally be continuously oriented, i.e.
     edges of child tetrahedra may not be aligned between one parent element 
     and its neighbor, and thus the resulting mesh will typically be invalid.
-    The primary use-case for this method is for methods like Quality.Volume
+    The primary use-case for this method is for methods like quality.Volume
     which utilize the geometric properties of tetrahedra to determine properties of 
     the parent elements.
     
@@ -623,11 +622,11 @@ def faces2unique(Faces,return_idx=False,return_inv=False):
 
     """
     # Returns only the unique faces (not duplicated for each element)
-    Rfaces = MeshUtils.PadRagged(Faces)
+    Rfaces = utils.PadRagged(Faces)
     # Get all unique element faces (accounting for flipped versions of faces)
     _,idx,inv = np.unique(np.sort(Rfaces,axis=1),axis=0,return_index=True,return_inverse=True)
     RFaces = Rfaces[idx]
-    UFaces = MeshUtils.ExtractRagged(RFaces,dtype=int)
+    UFaces = utils.ExtractRagged(RFaces,dtype=int)
     if return_idx and return_inv:
         return UFaces,idx,inv
     elif return_idx:
@@ -680,11 +679,11 @@ def faces2faceelemconn(Faces,FaceConn,FaceElem,return_UniqueFaceInfo=False):
     # 
     UFaces,idx,inv = faces2unique(Faces,return_idx=True,return_inv=True)
 
-    UFaces = MeshUtils.PadRagged(Faces)[idx]
+    UFaces = utils.PadRagged(Faces)[idx]
     UFaceElem = np.asarray(FaceElem)[idx]
     UFaces = np.append(UFaces, np.repeat(-1,UFaces.shape[1])[None,:],axis=0)
     inv = np.append(inv,-1)
-    UFaceConn = inv[MeshUtils.PadRagged(FaceConn)] # Faces attached to each element
+    UFaceConn = inv[utils.PadRagged(FaceConn)] # Faces attached to each element
     # Face-Element Connectivity
     FaceElemConn = np.nan*(np.ones((len(UFaces),2))) # Elements attached to each face
 
@@ -694,8 +693,8 @@ def faces2faceelemconn(Faces,FaceConn,FaceElem,return_UniqueFaceInfo=False):
     FaceElemConn = [[int(x) if not np.isnan(x) else x for x in y] for y in FaceElemConn[:-1]]
 
     if return_UniqueFaceInfo:
-        UFaces = MeshUtils.ExtractRagged(UFaces)[:-1]
-        UFaceConn = MeshUtils.ExtractRagged(UFaceConn)
+        UFaces = utils.ExtractRagged(UFaces)[:-1]
+        UFaceConn = utils.ExtractRagged(UFaceConn)
         return FaceElemConn, UFaces, UFaceConn, UFaceElem, idx, inv[:-1]
 
     return FaceElemConn
@@ -855,7 +854,7 @@ def pyramid2faces(NodeCoords,NodeConn):
         Faces[2::5,:3] = ArrayConn[:,[1,2,4]]
         Faces[3::5,:3] = ArrayConn[:,[2,3,4]]
         Faces[4::5,:3] = ArrayConn[:,[3,0,4]]
-        Faces = MeshUtils.ExtractRagged(Faces,delval=-1,dtype=int)
+        Faces = utils.ExtractRagged(Faces,delval=-1,dtype=int)
     else:
         Faces = []
     return Faces
@@ -887,7 +886,7 @@ def wedge2faces(NodeCoords,NodeConn):
         Faces[2::5] = ArrayConn[:,[1,2,5,4]]
         Faces[3::5] = ArrayConn[:,[2,0,3,5]]
         Faces[4::5,:3] = ArrayConn[:,[3,4,5]]
-        Faces = MeshUtils.ExtractRagged(Faces,delval=-1,dtype=int)
+        Faces = utils.ExtractRagged(Faces,delval=-1,dtype=int)
     else:
         Faces = []
     return Faces
@@ -1363,7 +1362,7 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         ylims = [0,(ny)*voxelsize]
         zlims = [0,(nz)*voxelsize]
         bounds = [xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]]
-        VoxelCoords, VoxelConn = Primitives.Grid(bounds, voxelsize, exact_h=False, meshobj=False)
+        VoxelCoords, VoxelConn = primitives.Grid(bounds, voxelsize, exact_h=False, meshobj=False)
         VoxelData = img.flatten(order='F')
         if return_gradient:
             gradx = ndimage.gaussian_filter(img,gaussian_sigma,order=(1,0,0))
@@ -1380,7 +1379,7 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
                     crop[4]/zscale,crop[5]/zscale]
         else:
             bounds = crop
-        VoxelCoords, VoxelConn = Primitives.Grid(bounds, voxelsize, exact_h=False, meshobj=False)
+        VoxelCoords, VoxelConn = primitives.Grid(bounds, voxelsize, exact_h=False, meshobj=False)
         mins = np.round(np.min(VoxelCoords,axis=0)/voxelsize).astype(int)
         maxs = np.round(np.max(VoxelCoords,axis=0)/voxelsize).astype(int)
         cropimg = img[mins[2]:maxs[2],mins[1]:maxs[1],mins[0]:maxs[0]]
@@ -1401,8 +1400,8 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         if return_gradient: GradData = GradData[VoxelData>=threshold]
         VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
     if return_nodedata:
-        # ElemConn = MeshUtils.getElemConnectivity(VoxelCoords,VoxelConn,ElemType='hex')
-        # RConn = MeshUtils.PadRagged(ElemConn)
+        # ElemConn = utils.getElemConnectivity(VoxelCoords,VoxelConn,ElemType='hex')
+        # RConn = utils.PadRagged(ElemConn)
         # TempData = np.append(VoxelData,np.nan)
         # NodeData = np.nanmean(TempData[RConn],axis=1)
         rows = VoxelConn.flatten()
@@ -1429,7 +1428,7 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
 
 def edge2corners(NodeCoords,EdgeConn,angle=150):
     corners = []
-    EdgeNodeNeighbors,EdgeElemConn = MeshUtils.getNodeNeighbors(NodeCoords,EdgeConn)
+    EdgeNodeNeighbors,EdgeElemConn = utils.getNodeNeighbors(NodeCoords,EdgeConn)
     for i in range(len(NodeCoords)):
         if len(EdgeNodeNeighbors[i]) == 2:
             A = NodeCoords[i]
@@ -1471,7 +1470,7 @@ def GridMesh(xlims,ylims,zlims,h):
         List of nodal connectivities.
 
     """   
-    warnings.warn('GridMesh is now deprecated, Primitives.Grid should be used instead')     
+    warnings.warn('GridMesh is now deprecated, primitives.Grid should be used instead')     
     nX = int(np.round((xlims[1]-xlims[0])/h))
     nY = int(np.round((ylims[1]-ylims[0])/h))
     nZ = int(np.round((zlims[1]-zlims[0])/h))
@@ -1529,14 +1528,14 @@ def Surf2Voxel(SurfCoords,SurfConn,h):
             xlim = [GridCoords[elem[0]][0],GridCoords[elem[6]][0]]
             ylim = [GridCoords[elem[0]][1],GridCoords[elem[6]][1]]
             zlim = [GridCoords[elem[0]][2],GridCoords[elem[6]][2]]
-            if Rays.TriangleBoxIntersection(arrayCoords[trielem], xlim, ylim, zlim):
+            if rays.TriangleBoxIntersection(arrayCoords[trielem], xlim, ylim, zlim):
                 VoxelConn.append(elem)
                 break
     VoxelCoords,VoxelConn,_ = removeNodes(GridCoords,VoxelConn)
     return VoxelCoords,VoxelConn
 
 def makeGrid(xlims, ylims, zlims, VoxelSize):
-    warnings.warn('makeGrid is now deprecated, Primitives.Grid should be used instead.')
+    warnings.warn('makeGrid is now deprecated, primitives.Grid should be used instead.')
     h = VoxelSize
     nX = int(np.round((xlims[1]-xlims[0])/h))
     nY = int(np.round((ylims[1]-ylims[0])/h))
@@ -1603,12 +1602,12 @@ def removeNodes(NodeCoords,NodeConn):
 
 def surf2dual(NodeCoords,SurfConn,Centroids=None,ElemConn=None,NodeNormals=None,sort='ccw'):
     if not Centroids:
-        Centroids = MeshUtils.Centroids(NodeCoords,SurfConn)
+        Centroids = utils.Centroids(NodeCoords,SurfConn)
     if not ElemConn:
-        _,ElemConn = MeshUtils.getNodeNeighbors(NodeCoords,SurfConn,ElemType='polygon')
+        _,ElemConn = utils.getNodeNeighbors(NodeCoords,SurfConn,ElemType='polygon')
     if not NodeNormals and (sort == 'ccw' or sort == 'CCW' or sort == 'cw' or sort == 'CW'):
-        ElemNormals = MeshUtils.CalcFaceNormal(NodeCoords,SurfConn)
-        NodeNormals = MeshUtils.Face2NodeNormal(NodeCoords,SurfConn,ElemConn,ElemNormals)
+        ElemNormals = utils.CalcFaceNormal(NodeCoords,SurfConn)
+        NodeNormals = utils.Face2NodeNormal(NodeCoords,SurfConn,ElemConn,ElemNormals)
     
     DualCoords = Centroids
     if sort == 'ccw' or sort == 'CCW' or sort == 'cw' or sort == 'CW':

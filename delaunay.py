@@ -8,7 +8,7 @@ Created on Sat Jan 15 12:02:26 2022
 import numpy as np
 import sys, copy, itertools, warnings
 from . import *
-from . import MeshUtils, Rays, converter
+from . import utils, rays, converter
 from scipy import spatial
 
 try:
@@ -40,7 +40,7 @@ def Triangulate(NodeCoords,Constraints=None,method='Flips',tol=1e-8):
     Points = np.asarray(NodeCoords)
 
     if Constraints is None or len(Constraints) == 0:
-        Points,_,newId,idx = MeshUtils.DeleteDuplicateNodes(Points,[],return_idx=True,tol=tol)
+        Points,_,newId,idx = utils.DeleteDuplicateNodes(Points,[],return_idx=True,tol=tol)
         if method == 'NonDelauanay':
             Hull = ConvexHull_GiftWrapping(Points,IncludeCollinear=True)
             NodeConn = idx[TriangleSplittingTriangulation(Points,Hull=Hull)]
@@ -55,7 +55,7 @@ def Triangulate(NodeCoords,Constraints=None,method='Flips',tol=1e-8):
             NodeConn = ConvexHullFanTriangulation(Hull)
             interior = np.setdiff1d(np.arange(len(Points)),Hull,assume_unique=True)
             for i in interior:
-                alpha,beta,gamma = MeshUtils.BaryTris(Points[NodeConn],Points[i])
+                alpha,beta,gamma = utils.BaryTris(Points[NodeConn],Points[i])
             
                 # currently not using special treatment for nodes on boundaries
                 inside = (alpha >= 0-tol) & (beta >= 0-tol) & (gamma >= 0-tol)
@@ -87,7 +87,7 @@ def Triangulate(NodeCoords,Constraints=None,method='Flips',tol=1e-8):
             #     combinations = np.array(list(itertools.combinations(range(len(Constraints)),2)))
             #     e1 = NodeCoords[Constraints[combinations[:,0]]]
             #     e2 = NodeCoords[Constraints[combinations[:,1]]]
-            #     eIntersections,eIntersectionPts = Rays.SegmentsSegmentsIntersection(np.append(e1,np.zeros((e1.shape[0],e1.shape[1],1)),axis=2),np.append(e2,np.zeros((e2.shape[0],e2.shape[1],1)),axis=2),return_intersection=True, endpt_inclusive=False,eps=1e-14)
+            #     eIntersections,eIntersectionPts = rays.SegmentsSegmentsIntersection(np.append(e1,np.zeros((e1.shape[0],e1.shape[1],1)),axis=2),np.append(e2,np.zeros((e2.shape[0],e2.shape[1],1)),axis=2),return_intersection=True, endpt_inclusive=False,eps=1e-14)
             #     if np.any(eIntersections):
             #         print('aaaa')
                     # raise Exception('Invalid constraints - the following constraint pairs intersect each other: {}'.format(combinations[eIntersections]))
@@ -116,7 +116,7 @@ def Triangulate(NodeCoords,Constraints=None,method='Flips',tol=1e-8):
 
             Edges = converter.solid2edges(Points,NodeConn)
             UEdges = converter.edges2unique(Edges)
-            ElemConn = MeshUtils.getElemConnectivity(Points, NodeConn)
+            ElemConn = utils.getElemConnectivity(Points, NodeConn)
             
             if np.all([np.any(np.all(Constraint==UEdges,axis=1)) or np.any(np.all(Constraint[::-1]==UEdges,axis=1))for Constraint in NewConstraints]):
                 # All constraints are present
@@ -130,7 +130,7 @@ def Triangulate(NodeCoords,Constraints=None,method='Flips',tol=1e-8):
                 s1 = np.tile(NodeCoords3d[constraint],(len(UEdges),1,1))
                 s2 = NodeCoords3d[UEdges]
 
-                intersections = Rays.SegmentsSegmentsIntersection(s1,s2,endpt_inclusive=True) # Having endpt_inclusive=True is important here
+                intersections = rays.SegmentsSegmentsIntersection(s1,s2,endpt_inclusive=True) # Having endpt_inclusive=True is important here
 
                 Iedges = set(np.where(intersections)[0])
                 ww = 0 # Not working sometimes for some reason;fuck
@@ -169,8 +169,8 @@ def Triangulate(NodeCoords,Constraints=None,method='Flips',tol=1e-8):
                             # If the new edge is already an edge, it needs to be flipped again
                             Iedges.add(k)
                         UEdges[k] = NewEdge
-                        ElemConn = MeshUtils.getElemConnectivity(Points, NodeConn)
-                        if Rays.SegmentSegmentIntersection(NodeCoords3d[constraint],NodeCoords3d[NewEdge],endpt_inclusive=True):
+                        ElemConn = utils.getElemConnectivity(Points, NodeConn)
+                        if rays.SegmentSegmentIntersection(NodeCoords3d[constraint],NodeCoords3d[NewEdge],endpt_inclusive=True):
                             Iedges.add(k)
                             if len(Iedges) == 1:
                                 a = 2
@@ -224,13 +224,13 @@ def SplitConstraints_2d(NodeCoords,Constraints,tol=1e-12):
     NodeCoords3 = np.append(NodeCoords,np.zeros((len(NodeCoords),1)),axis=1)
     e1 = NodeCoords3[Constraints[combinations[:,0]]]
     e2 = NodeCoords3[Constraints[combinations[:,1]]]
-    eIntersections,eIntersectionPts = Rays.SegmentsSegmentsIntersection(e1,e2,return_intersection=True,endpt_inclusive=True,eps=tol)
+    eIntersections,eIntersectionPts = rays.SegmentsSegmentsIntersection(e1,e2,return_intersection=True,endpt_inclusive=True,eps=tol)
     eIntersectionPts = eIntersectionPts[:,:2]
     NewConstraints = np.empty((0,2),dtype=int)
     for ic,c in enumerate(Constraints):
         # ids of other constraints that intersect with this constraint
         ids = np.unique(np.array([combo for combo in combinations[eIntersections] if ic in combo]))
-        # Check collinear lines - currently Rays.SegmentsSegmentsIntersection doesn't do this properly
+        # Check collinear lines - currently rays.SegmentsSegmentsIntersection doesn't do this properly
         coix = np.empty((0,2))
         for combo in combinations[~eIntersections]:
             if ic not in combo:
@@ -289,7 +289,7 @@ def SplitConstraints_2d(NodeCoords,Constraints,tol=1e-12):
             NewConstraints = np.append(NewConstraints,np.vstack([np.arange(0,len(ixsort)-1),np.arange(1,len(ixsort))]).T+len(NodeCoords),axis=0)
             NodeCoords = np.append(NodeCoords,ixsort,axis=0)
 
-    NodeCoords, Constraints, _ = MeshUtils.DeleteDuplicateNodes(NodeCoords,NewConstraints,tol=10*tol)
+    NodeCoords, Constraints, _ = utils.DeleteDuplicateNodes(NodeCoords,NewConstraints,tol=10*tol)
     Constraints = np.unique([c for c in Constraints if c[0] != c[1]],axis=0)
     NodeCoords = np.asarray(NodeCoords)
 
@@ -534,7 +534,7 @@ def TriangleSplittingTriangulation(NodeCoords, Hull=None, return_Hull=False):
 
     interior = np.setdiff1d(np.arange(len(NodeCoords)),Hull,assume_unique=True)
     for i in interior:
-        alpha,beta,gamma = MeshUtils.BaryTris(Points[NodeConn],Points[i])
+        alpha,beta,gamma = utils.BaryTris(Points[NodeConn],Points[i])
         
         # currently not using special treatment for nodes on boundaries
         inside = (alpha >= 0) & (beta >= 0) & (gamma >= 0)

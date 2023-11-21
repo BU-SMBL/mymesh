@@ -6,7 +6,7 @@ Created Sept 2022
 """
 import numpy as np
 import gc
-from . import converter, ImplicitMesh, mesh
+from . import converter, implicit, mesh
 
 def Box(bounds,h,meshobj=True,ElemType='quad'):
     """
@@ -310,6 +310,6 @@ def Extrude(line, distance, step, axis=2, ElemType='quad', meshobj=True):
 # def Sphere(center,radius,h):
     
 
-#     func = lambda x,y,z : ImplicitMesh.sphere(x,y,z,radius,center)
+#     func = lambda x,y,z : implicit.sphere(x,y,z,radius,center)
     
 

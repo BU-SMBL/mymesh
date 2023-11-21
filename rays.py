@@ -5,7 +5,7 @@ Created on Tue Feb  1 15:23:07 2022
 @author: toj
 """
 #%%
-from . import MeshUtils, Octree, delaunay
+from . import utils, octree, delaunay
 import numpy as np
 import itertools, random, sys, warnings
 import scipy
@@ -230,11 +230,11 @@ def TriangleTriangleIntersection(Tri1,Tri2,eps=1e-14,edgeedge=False):
             return True
         else:
             # Peform point-in-tri test
-            alpha,beta,gamma = MeshUtils.BaryTri(Tri1, Tri2[0])
+            alpha,beta,gamma = utils.BaryTri(Tri1, Tri2[0])
             if all([alpha>=0,beta>=0,gamma>=0]):
                 return True
             else:
-                alpha,beta,gamma = MeshUtils.BaryTri(Tri2, Tri1[0])
+                alpha,beta,gamma = utils.BaryTri(Tri2, Tri1[0])
                 if all([alpha>=0,beta>=0,gamma>=0]):
                     return True
                 else:
@@ -336,20 +336,20 @@ def TriangleTriangleIntersectionPt(Tri1,Tri2,eps=1e-14, edgeedge=False):
             points = pts[intersections]
             # Check if there are any verticies within the triangles
             for i in range(3):
-                alpha,beta,gamma = MeshUtils.BaryTri(Tri1, Tri2[i])
+                alpha,beta,gamma = utils.BaryTri(Tri1, Tri2[i])
                 if all([alpha>=0,beta>=0,gamma>=0]):
                     points = np.vstack([points,Tri2[i]])
-                alpha,beta,gamma = MeshUtils.BaryTri(Tri2, Tri1[i])
+                alpha,beta,gamma = utils.BaryTri(Tri2, Tri1[i])
                 if all([alpha>=0,beta>=0,gamma>=0]):
                     points = np.vstack([points,Tri1[i]])
             return points
         else:
             # Peform point-in-tri test
-            alpha,beta,gamma = MeshUtils.BaryTri(Tri1, Tri2[0])
+            alpha,beta,gamma = utils.BaryTri(Tri1, Tri2[0])
             if all([alpha>=0,beta>=0,gamma>=0]):
                 return Tri2
             else:
-                alpha,beta,gamma = MeshUtils.BaryTri(Tri2, Tri1[0])
+                alpha,beta,gamma = utils.BaryTri(Tri2, Tri1[0])
                 if all([alpha>=0,beta>=0,gamma>=0]):
                     return Tri1
                 else:
@@ -559,11 +559,11 @@ def TrianglesTrianglesIntersection(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
         PtInTriChecks = coplanar_where[~Intersections[coplanar_where]]
         for i in PtInTriChecks:
             # Peform point-in-tri test
-            alpha,beta,gamma = MeshUtils.BaryTri(Tri1s[i], Tri2s[i][0])
+            alpha,beta,gamma = utils.BaryTri(Tri1s[i], Tri2s[i][0])
             if all([alpha>=0,beta>=0,gamma>=0]):
                 Intersections[i]  = True
             else:
-                alpha,beta,gamma = MeshUtils.BaryTri(Tri2s[i], Tri1s[i][0])
+                alpha,beta,gamma = utils.BaryTri(Tri2s[i], Tri1s[i][0])
                 if all([alpha>=0,beta>=0,gamma>=0]):
                     Intersections[i]  = True
         ###
@@ -574,11 +574,11 @@ def TrianglesTrianglesIntersection(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
         #         coplanar_intersections[coplanar_where[i]] = True                
         #     else:
         #         # Peform point-in-tri test
-        #         alpha,beta,gamma = MeshUtils.BaryTri(Tri1s[coplanar_where[i]], Tri2s[coplanar_where[i]][0])
+        #         alpha,beta,gamma = utils.BaryTri(Tri1s[coplanar_where[i]], Tri2s[coplanar_where[i]][0])
         #         if all([alpha>=0,beta>=0,gamma>=0]):
         #             coplanar_intersections[coplanar_where[i]]  = True
         #         else:
-        #             alpha,beta,gamma = MeshUtils.BaryTri(Tri2s[coplanar_where[i]], Tri1s[coplanar_where[i]][0])
+        #             alpha,beta,gamma = utils.BaryTri(Tri2s[coplanar_where[i]], Tri1s[coplanar_where[i]][0])
         #             if all([alpha>=0,beta>=0,gamma>=0]):
         #                 coplanar_intersections[coplanar_where[i]]  = True
         
@@ -1225,13 +1225,13 @@ def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, octree='genera
         # Won't use any octree structure to accelerate intersection tests
         intersections,intersectionPts = RayTrianglesIntersection(pt, ray, ArrayCoords[SurfConn], bidirectional=True, eps=eps)
         distances = np.sum(ray*(intersectionPts-pt),axis=1)
-    elif octree == 'generate' or type(octree) == Octree.OctreeNode:
+    elif octree == 'generate' or type(octree) == octree.OctreeNode:
         if octree == 'generate':
             # Create an octree structure based on the provided structure
-            root = Octree.Surf2Octree(NodeCoords,SurfConn)
+            root = octree.Surf2Octree(NodeCoords,SurfConn)
         else:
             # Using an already generated octree structure
-            # If this is the case, it should conform to the same structure and labeling as one generated with Octree.Surf2Octree
+            # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surf2Octree
             root = octree
         # Proceeding with octree-accelerated intersection test
         def octreeTest(pt, ray, node, TriIds):
@@ -1281,17 +1281,17 @@ def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, ep
         distances[RayIds[outintersections],TriIds[outintersections]] = outdistances
         intersectionPts[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts
 
-        intersections = MeshUtils.ExtractRagged(intersections,delval=-1)
-        distances = MeshUtils.ExtractRagged(distances,delval=np.nan)
-        intersectionPts = MeshUtils.ExtractRagged(intersectionPts,delval=np.nan)
+        intersections = utils.ExtractRagged(intersections,delval=-1)
+        distances = utils.ExtractRagged(distances,delval=np.nan)
+        intersectionPts = utils.ExtractRagged(intersectionPts,delval=np.nan)
 
-    elif octree == 'generate' or type(octree) == Octree.OctreeNode:
+    elif octree == 'generate' or type(octree) == octree.OctreeNode:
         if octree == 'generate':
             # Create an octree structure based on the provided structure
-            root = Octree.Surf2Octree(NodeCoords,SurfConn)
+            root = octree.Surf2Octree(NodeCoords,SurfConn)
         else:
             # Using an already generated octree structure
-            # If this is the case, it should conform to the same structure and labeling as one generated with Octree.Surf2Octree
+            # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surf2Octree
             root = octree
         # Proceeding with octree-accelerated intersection test
         def octreeTest(pt, ray, node, TriIds):
@@ -1350,10 +1350,10 @@ def SurfSelfIntersection(NodeCoords, SurfConn, octree='generate', eps=1e-14, ret
         root = None
     elif octree == 'generate':
         # Create an octree structure based on the provided structure
-        root = Octree.Surf2Octree(NodeCoords,SurfConn)
-    elif type(octree) == Octree.OctreeNode:
+        root = octree.Surf2Octree(NodeCoords,SurfConn)
+    elif type(octree) == octree.OctreeNode:
         # Using an already generated octree structure
-        # If this is the case, it should conform to the same structure and labeling as one generated with Octree.Surf2Octree
+        # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surf2Octree
         root = octree
     else:
         raise Exception('Invalid octree argument given: '+str(octree))
@@ -1364,7 +1364,7 @@ def SurfSelfIntersection(NodeCoords, SurfConn, octree='generate', eps=1e-14, ret
         idx1,idx2 = zip(*combinations)
         Tri1s = Points[np.array(idx1)]; Tri2s = Points[np.array(idx2)]
     else:
-        leaves = Octree.getAllLeaf(root)
+        leaves = octree.getAllLeaf(root)
         combinations = []
         for leaf in leaves:
             combinations += list(itertools.combinations(leaf.data,2))
@@ -1390,16 +1390,16 @@ def SurfSurfIntersection(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, eps=1e-
     #     root = None
     # elif octree == 'generate':
     #     # Create an octree structure based on the provided structure
-    #     root = Octree.Surf2Octree(NodeCoords,SurfConn)
-    # elif type(octree) == Octree.OctreeNode:
+    #     root = octree.Surf2Octree(NodeCoords,SurfConn)
+    # elif type(octree) == octree.OctreeNode:
     #     # Using an already generated octree structure
-    #     # If this is the case, it should conform to the same structure and labeling as one generated with Octree.Surf2Octree
+    #     # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surf2Octree
     #     root = octree
     # else:
     #     raise Exception('Invalid octree argument given: '+str(octree))
 
-    MergeCoords,MergeConn = MeshUtils.MergeMesh(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, cleanup=False)
-    root = Octree.Surf2Octree(MergeCoords,MergeConn)
+    MergeCoords,MergeConn = utils.MergeMesh(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, cleanup=False)
+    root = octree.Surf2Octree(MergeCoords,MergeConn)
     
     Points = np.array(MergeCoords)[np.array(MergeConn)]   
     if root == None:
@@ -1407,7 +1407,7 @@ def SurfSurfIntersection(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, eps=1e-
         idx1,idx2 = zip(*combinations)
         Tri1s = Points[np.array(idx1)]; Tri2s = Points[np.array(idx2)]
     else:
-        leaves = Octree.getAllLeaf(root)
+        leaves = octree.getAllLeaf(root)
         combinations = []
         for leaf in leaves:
             combinations += list(itertools.combinations(leaf.data,2))
@@ -1420,7 +1420,7 @@ def SurfSurfIntersection(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, eps=1e-
         IntersectionPairs = np.array(combinations)[intersections].tolist()
         IPoints = intersectionPts[intersections]
         IPoints[np.isnan(IPoints)]=-1
-        IPoints = MeshUtils.ExtractRagged(IPoints)
+        IPoints = utils.ExtractRagged(IPoints)
 
         # TODO: I'm being lazy here
         Surf1Intersections = []; Surf2Intersections = []; IntersectionPoints = []
@@ -1522,10 +1522,10 @@ def isInsideBox(pt, xlim, ylim, zlim):
     return all([lims[d][0] < pt[d] and lims[d][1] > pt[d] for d in range(3)])
 
 def InsideVoxel(pts, VoxelCoords, VoxelConn, inclusive=True):    
-    Root = Octree.Voxel2Octree(VoxelCoords, VoxelConn)
+    Root = octree.Voxel2Octree(VoxelCoords, VoxelConn)
     inside = [False for i in range(len(pts))]
     for i,pt in enumerate(pts):
-        inside[i] = Octree.isInsideOctree(pt, Root, inclusive=inclusive)    
+        inside[i] = octree.isInsideOctree(pt, Root, inclusive=inclusive)    
     
     return inside
         
@@ -1534,7 +1534,7 @@ def PointInTri(Tri,pt,method='BaryArea',eps=1e-12,inclusive=True):
     if method == 'Normal':
         pts = np.vstack([Tri,pt])
         conn = [[0,1,3],[1,2,3],[2,0,3]]
-        normals = MeshUtils.CalcFaceNormal(pts,conn)
+        normals = utils.CalcFaceNormal(pts,conn)
         if np.dot(normals[0],normals[1]) < 0:
             In = False
         elif np.dot(normals[1],normals[2]) < 0:
@@ -1542,7 +1542,7 @@ def PointInTri(Tri,pt,method='BaryArea',eps=1e-12,inclusive=True):
         else:
             In = True
     elif method == 'Bary':
-        alpha,beta,gamma = MeshUtils.BaryTri(Tri,pt)
+        alpha,beta,gamma = utils.BaryTri(Tri,pt)
         In = all([alpha>=0,beta>=0,gamma>=0])
     elif method == 'BaryArea':
         A = Tri[0]
@@ -1599,10 +1599,10 @@ def OctreeInputProcessor(NodeCoords, SurfConn, octree):
         root = None
     elif octree == 'generate':
         # Create an octree structure based on the provided structure
-        root = Octree.Surf2Octree(NodeCoords,SurfConn)
-    elif type(octree) == Octree.OctreeNode:
+        root = octree.Surf2Octree(NodeCoords,SurfConn)
+    elif type(octree) == octree.OctreeNode:
         # Using an already generated octree structure
-        # If this is the case, it should conform to the same structure and labeling as one generated with Octree.Surf2Octree
+        # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surf2Octree
         root = octree
     else:
         raise Exception('Invalid octree argument given: '+str(octree))

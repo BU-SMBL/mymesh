@@ -7,17 +7,12 @@ Created on Wed Jan 26 09:27:53 2022
 
 import numpy as np
 import sys, warnings, time, random, copy
-from . import converter, MeshUtils, Quality, Rays, Octree
+from . import converter, utils, quality, rays, octree
 from scipy import sparse, spatial
 from scipy.sparse.linalg import spsolve
 from scipy.optimize import minimize
-try:
-    from joblib import Parallel, delayed
-except:
-    warnings.warn('Optional dependencies not found - some functions may not work properly')
 
-
-def CollapseSlivers_old(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=[], verbose=False, pool=None):
+def CollapseSlivers_old(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=[], verbose=False):
     
     if type(NodeCoords) is np.array: NodeCoords = NodeCoords.tolist()
     if type(NodeConn) is np.array: NodeConn = NodeConn.tolist()
@@ -26,7 +21,7 @@ def CollapseSlivers_old(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=[], 
     fixed = set(FixedNodes)
     if verbose:
         print('Initial Skewness:')
-    skew = Quality.Skewness(NewCoords,NewConn,verbose=verbose,pool=pool)
+    skew = quality.Skewness(NewCoords,NewConn,verbose=verbose)
     if verbose:
         print(str(sum([1 for i in skew if i > skewThreshold])) + ' slivers')
     ignore = []
@@ -170,13 +165,13 @@ def CollapseSlivers_old(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=[], 
                             sides.remove(CD)
                 
                 
-        NewCoords,NewConn,_ = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn)
-        NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
+        NewCoords,NewConn,_ = utils.DeleteDuplicateNodes(NewCoords,NewConn)
+        NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
         NewCoords,NewConn,_ = converter.removeNodes(NewCoords,NewConn)
             
         if verbose:
             print('Improved Skewness:')
-        skew = Quality.Skewness(NewCoords,NewConn,verbose=verbose,pool=pool)
+        skew = quality.Skewness(NewCoords,NewConn,verbose=verbose)
         if verbose:
             print(str(sum([1 for i in skew if i > skewThreshold])) + ' slivers remaining')
     
@@ -186,16 +181,16 @@ def CollapseSlivers(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=set(), v
     
     if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
     ArrayCoords = np.asarray(NodeCoords)
-    skew = Quality.Skewness(ArrayCoords,NodeConn,verbose=verbose)
+    skew = quality.Skewness(ArrayCoords,NodeConn,verbose=verbose)
     Slivers = np.where(skew>skewThreshold)[0]
     if len(Slivers) > 0:
 
         NewConn = copy.copy(NodeConn)
-        RNodeConn = MeshUtils.PadRagged(NodeConn)
+        RNodeConn = utils.PadRagged(NodeConn)
         
         Edges, EdgeConn, EdgeElem = converter.solid2edges(ArrayCoords,NodeConn,return_EdgeConn=True,return_EdgeElem=True)
         Edges = np.asarray(Edges)
-        REdgeConn = MeshUtils.PadRagged(EdgeConn)
+        REdgeConn = utils.PadRagged(EdgeConn)
         
         Pt1 = ArrayCoords[Edges[:,0]]; Pt2 = ArrayCoords[Edges[:,1]]
         EdgeLen = np.append(np.linalg.norm(Pt1-Pt2,axis=1),np.infty)
@@ -215,7 +210,7 @@ def CollapseSlivers(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=set(), v
                     ArrayCoords[Edges[edge][0]] = (ArrayCoords[Edges[edge][0]]+ArrayCoords[Edges[edge][1]])/2
                     RNodeConn[RNodeConn == Edges[edge][0]] = Edges[edge][1]
                 break
-        NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(ArrayCoords,NewConn,strict=True)
+        NewCoords,NewConn = utils.DeleteDegenerateElements(ArrayCoords,NewConn,strict=True)
         NewCoords = NewCoords.tolist()
     else:
         NewCoords = NodeCoords
@@ -241,11 +236,11 @@ def SliverPeel(NodeCoords, NodeConn, skewThreshold=0.95, FixedNodes=set()):
     NewConn : list
         New nodal connectivity list.
     """
-    skew = Quality.Skewness(NodeCoords,NodeConn)
+    skew = quality.Skewness(NodeCoords,NodeConn)
     Faces,FaceConn,FaceElem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
     FaceElemConn,UFaces, UFaceConn, UFaceElem, idx, inv = converter.faces2faceelemconn(Faces,FaceConn,FaceElem,return_UniqueFaceInfo=True)
-    UFaceConn = MeshUtils.PadRagged(UFaceConn)
-    ElemNormals = np.array(MeshUtils.CalcFaceNormal(NodeCoords,Faces))
+    UFaceConn = utils.PadRagged(UFaceConn)
+    ElemNormals = np.array(utils.CalcFaceNormal(NodeCoords,Faces))
 
     where = np.where(np.isnan(FaceElemConn))
     SurfElems = np.asarray(FaceElemConn)[where[0],1-where[1]].astype(int)
@@ -259,7 +254,7 @@ def SliverPeel(NodeCoords, NodeConn, skewThreshold=0.95, FixedNodes=set()):
     X = np.isnan(np.append(FaceElemConn,[[np.inf,np.inf]],axis=0)[UFaceConn])
     Face01 = np.sum(X,axis=(1,2))==2 # Check if elem has 2 faces on surface
     # For elems with two surface faces, check if their normals are pointing the same direction
-    SurfFacePairs = MeshUtils.PadRagged(FaceConn)[Face01][np.any(X,axis=2)[Face01]].reshape((sum(Face01),2))
+    SurfFacePairs = utils.PadRagged(FaceConn)[Face01][np.any(X,axis=2)[Face01]].reshape((sum(Face01),2))
     dots = np.sum(ElemNormals[SurfFacePairs[:,0]]*ElemNormals[SurfFacePairs[:,1]],axis=1)
     Face01[Face01] = dots > np.sqrt(3)/2
     Feature01 = np.array([sum([n in FixedNodes for n in elem]) < 2 for i,elem in enumerate(NodeConn)])
@@ -290,7 +285,7 @@ def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
     NewCoords : list
         Updated list of nodal coordinates.
     """
-    V = Quality.Volume(NodeCoords, NodeConn)
+    V = quality.Volume(NodeCoords, NodeConn)
     if min(V) > 0:
         return NodeCoords
     
@@ -301,7 +296,7 @@ def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
     if len(ProblemNodes) == 0:
         warnings.warn('Fixed nodes prevent any repositioning.')
         return NodeCoords
-    ElemConn = MeshUtils.getElemConnectivity(NodeCoords, NodeConn)
+    ElemConn = utils.getElemConnectivity(NodeCoords, NodeConn)
     NeighborhoodElems = np.unique([e for i in ProblemNodes for e in ElemConn[i]])
     NeighborhoodConn = [NodeConn[i] for i in NeighborhoodElems]
 
@@ -309,7 +304,7 @@ def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
 
     def fun(x):
         ArrayCoords[ProblemNodes] = x.reshape((int(len(x)/3),3))
-        v = Quality.Volume(ArrayCoords,NeighborhoodConn)
+        v = quality.Volume(ArrayCoords,NeighborhoodConn)
         # print(sum(v<0))
         return -min(v)
 
@@ -423,7 +418,7 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
     """
 
     if NodeNeighbors is None or ElemConn is None:
-        NodeNeighbors,ElemConn = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
+        NodeNeighbors,ElemConn = utils.getNodeNeighbors(NodeCoords,NodeConn)
     if Forces is None or len(Forces) == 0:
         Forces = np.zeros((len(NodeCoords),3))
     else:
@@ -431,7 +426,7 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
     
     TempCoords = np.array(NodeCoords+[[np.nan,np.nan,np.nan]])
     NodeCoords = np.array(NodeCoords)
-    RNeighbors = MeshUtils.PadRagged(NodeNeighbors+[[-1,-1,-1]])
+    RNeighbors = utils.PadRagged(NodeNeighbors+[[-1,-1,-1]])
     Points = TempCoords[RNeighbors]
     lengths = np.sqrt((TempCoords[:,0,None]-Points[:,:,0])**2 + (TempCoords[:,1,None]-Points[:,:,1])**2 + (TempCoords[:,2,None]-Points[:,:,2])**2)
     if L0Override == 'min':
@@ -455,9 +450,9 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
     Kcols_diag = np.arange(len(NodeCoords))
     Kvals_diag = np.nansum(k[:-1],axis=1) 
     if CellCentered:
-        centroids = MeshUtils.Centroids(NodeCoords,NodeConn)
+        centroids = utils.Centroids(NodeCoords,NodeConn)
         centroids = np.append(centroids,[[np.nan,np.nan,np.nan]],axis=0)
-        RElemConn = MeshUtils.PadRagged(ElemConn)
+        RElemConn = utils.PadRagged(ElemConn)
         ElemConnCentroids = centroids[RElemConn]
         ElemConnCenterDist = np.sqrt((NodeCoords[:,0,None]-ElemConnCentroids[:,:,0])**2 + (NodeCoords[:,1,None]-ElemConnCentroids[:,:,1])**2 + (NodeCoords[:,2,None]-ElemConnCentroids[:,:,2])**2)
         kcenters = StiffnessFactor/ElemConnCenterDist
@@ -465,10 +460,10 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
     if FaceCentered:
         faces = converter.solid2faces(NodeCoords,NodeConn)
         Faces = converter.faces2unique(faces)
-        fcentroids = MeshUtils.Centroids(NodeCoords,Faces)
+        fcentroids = utils.Centroids(NodeCoords,Faces)
         fcentroids = np.append(fcentroids,[[np.nan,np.nan,np.nan]],axis=0)
-        FConn = MeshUtils.getElemConnectivity(NodeCoords,Faces)
-        RFConn = MeshUtils.PadRagged(FConn)
+        FConn = utils.getElemConnectivity(NodeCoords,Faces)
+        RFConn = utils.PadRagged(FConn)
         FConnCentroids = fcentroids[RFConn]
         FConnCenterDist = np.sqrt((NodeCoords[:,0,None]-FConnCentroids[:,:,0])**2 + (NodeCoords[:,1,None]-FConnCentroids[:,:,1])**2 + (NodeCoords[:,2,None]-FConnCentroids[:,:,2])**2)
         fkcenters = StiffnessFactor/FConnCenterDist
@@ -489,7 +484,7 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
     Kvals = np.concatenate((Kvals_diag,Kvals_off))
 
     if CellCentered:
-        RNodeConn = MeshUtils.PadRagged(NodeConn+[[-1,-1,-1]],fillval=-1)
+        RNodeConn = utils.PadRagged(NodeConn+[[-1,-1,-1]],fillval=-1)
         pretemplate = RNodeConn[RElemConn]
         # template = ((pretemplate >= 0) & (pretemplate != np.arange(len(NodeCoords))[:,None,None]))[UnfixedNodes]
         template = (pretemplate >= 0)[UnfixedNodes]
@@ -503,7 +498,7 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
         Kvals = np.concatenate((Kvals,Kvals_Ccentered))
 
     if FaceCentered:
-        RFaces = MeshUtils.PadRagged(Faces+[[-1,-1,-1]],fillval=-1)
+        RFaces = utils.PadRagged(Faces+[[-1,-1,-1]],fillval=-1)
         pretemplate = RFaces[RFConn]
         # template = ((pretemplate >= 0) & (pretemplate != np.arange(len(NodeCoords))[:,None,None]))[UnfixedNodes]
         template = (pretemplate >= 0)[UnfixedNodes]
@@ -587,13 +582,13 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,Fixed
     # if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
     
     # if FixFeatures:
-    #     edges,corners = MeshUtils.DetectFeatures(NodeCoords,NodeConn)
+    #     edges,corners = utils.DetectFeatures(NodeCoords,NodeConn)
     #     FixedNodes.update(edges)
     #     FixedNodes.update(corners)
 
 
     # Nodes = set(range(len(NodeCoords))).difference(FixedNodes)
-    # if not NodeNeighbors: NodeNeighbors = MeshUtils.getNodeNeighbors(NodeCoords, NodeConn)
+    # if not NodeNeighbors: NodeNeighbors = utils.getNodeNeighbors(NodeCoords, NodeConn)
     # NewCoords = copy.copy(NodeCoords)#[node for node in NodeCoords]
     # OldCoords = copy.copy(NodeCoords)
     # for it in range(iterate):        
@@ -604,18 +599,18 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,Fixed
     #     OldCoords = copy.copy(NewCoords)
     if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
     if FixFeatures:
-        edges,corners = MeshUtils.DetectFeatures(NodeCoords,NodeConn)
+        edges,corners = utils.DetectFeatures(NodeCoords,NodeConn)
         FixedNodes.update(edges)
         FixedNodes.update(corners)
-    NodeNeighbors = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
-    ElemConn = MeshUtils.getElemConnectivity(NodeCoords,NodeConn)
+    NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
+    ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
     lens = np.array([len(n) for n in NodeNeighbors])
-    r = MeshUtils.PadRagged(NodeNeighbors,fillval=-1)
+    r = utils.PadRagged(NodeNeighbors,fillval=-1)
     FreeNodes = list(set(range(len(NodeCoords))).difference(FixedNodes))
     ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
     
-    ElemNormals = MeshUtils.CalcFaceNormal(ArrayCoords[:-1],NodeConn)
-    NodeNormals = MeshUtils.Face2NodeNormal(ArrayCoords[:-1],NodeConn,ElemConn,ElemNormals)
+    ElemNormals = utils.CalcFaceNormal(ArrayCoords[:-1],NodeConn)
+    NodeNormals = utils.Face2NodeNormal(ArrayCoords[:-1],NodeConn,ElemConn,ElemNormals)
     
     for i in range(iterate):
         Q = ArrayCoords[r]
@@ -653,18 +648,18 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),Fi
 
         if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
         if FixFeatures:
-            edges,corners = MeshUtils.DetectFeatures(NodeCoords,NodeConn)
+            edges,corners = utils.DetectFeatures(NodeCoords,NodeConn)
             FixedNodes.update(edges)
             FixedNodes.update(corners)
-        NodeNeighbors = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
-        ElemConn = MeshUtils.getElemConnectivity(NodeCoords,NodeConn)
+        NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
+        ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
         lens = np.array([len(n) for n in NodeNeighbors])
-        r = MeshUtils.PadRagged(NodeNeighbors,fillval=-1)
+        r = utils.PadRagged(NodeNeighbors,fillval=-1)
         FreeNodes = list(set(range(len(NodeCoords))).difference(FixedNodes))
         ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
         
-        ElemNormals = MeshUtils.CalcFaceNormal(ArrayCoords[:-1],NodeConn)
-        NodeNormals = MeshUtils.Face2NodeNormal(ArrayCoords[:-1],NodeConn,ElemConn,ElemNormals)
+        ElemNormals = utils.CalcFaceNormal(ArrayCoords[:-1],NodeConn)
+        NodeNormals = utils.Face2NodeNormal(ArrayCoords[:-1],NodeConn,ElemConn,ElemNormals)
         
         for i in range(iterate):
             Q = ArrayCoords[r]
@@ -680,7 +675,7 @@ def GlobalLaplacianSmoothing(NodeCoords,NodeConn,FeatureNodes=[],FixedNodes=set(
     # smoothing approach with feature preservation. In Ninth International 
     # Conference on Computer Aided Design and Computer Graphics
     
-    NodeNeighbors = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
+    NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
     
     NNode = len(NodeCoords)
     NFeature = len(FeatureNodes)
@@ -773,21 +768,21 @@ def ResolveSurfSelfIntersections(NodeCoords,SurfConn,FixedNodes=set(),octree='ge
     NewCoords = np.array(NodeCoords)
     SurfConn = np.asarray(SurfConn)
     if octree == 'generate':
-        octree = Octree.Surf2Octree(NewCoords,SurfConn)
-    IntersectionPairs = Rays.SurfSelfIntersection(NewCoords,SurfConn,octree=octree)
+        octree = octree.Surf2Octree(NewCoords,SurfConn)
+    IntersectionPairs = rays.SurfSelfIntersection(NewCoords,SurfConn,octree=octree)
     Intersected = np.unique(IntersectionPairs).tolist()
     
     count = 0
     while len(Intersected) > 0 and count < maxIter:
         print(count)
-        ElemConn = MeshUtils.getElemConnectivity(NewCoords, SurfConn)
+        ElemConn = utils.getElemConnectivity(NewCoords, SurfConn)
         NeighborhoodElems = np.unique([e for i in (SurfConn[Intersected]).flatten() for e in ElemConn[i]])
         PatchConn = SurfConn[NeighborhoodElems]
         BoundaryEdges = converter.surf2edges(NewCoords,PatchConn) 
 
         NewCoords = np.asarray(LocalLaplacianSmoothing(NewCoords,PatchConn,2,FixedNodes=FixedNodes.union(set([n for edge in BoundaryEdges for n in edge]))))
 
-        IntersectionPairs = Rays.SurfSelfIntersection(NewCoords,SurfConn,octree=octree)
+        IntersectionPairs = rays.SurfSelfIntersection(NewCoords,SurfConn,octree=octree)
         Intersected = np.unique(IntersectionPairs).tolist()
         count += 1
         if len(Intersected) > 0 and count > maxIter:
@@ -811,7 +806,7 @@ def FlipEdge(NodeCoords,NodeConn,i,j):
 def DelaunayFlips(NodeCoords,NodeConn,ElemNeighbors=None):
     NewConn = copy.copy(NodeConn)
     NodeCoords = np.array(NodeCoords)
-    if ElemNeighbors==None: ElemNeighbors = MeshUtils.getElemNeighbors(NodeCoords,NodeConn)
+    if ElemNeighbors==None: ElemNeighbors = utils.getElemNeighbors(NodeCoords,NodeConn)
 
     eps = 1e-12
     # Circumcenters
@@ -919,7 +914,7 @@ def ValenceImprovementFlips(NodeCoords,NodeConn,NodeNeighbors,ElemNeighbors):
                     TempConn[j] = Newj
                     Newshared = list(set(Newi).intersection(Newj))
 
-                    if not Rays.SegmentSegmentIntersection(Array[shared],Array[Newshared]):
+                    if not rays.SegmentSegmentIntersection(Array[shared],Array[Newshared]):
                         # This condition checks if the flipped segment intersects with the old segment.
                         # Flips that don't pass this check could cause element inversion
                         continue
@@ -974,7 +969,7 @@ def ValenceImprovementFlips(NodeCoords,NodeConn,NodeNeighbors,ElemNeighbors):
 def AngleReductionFlips(NodeCoords,NodeConn,NodeNeighbors=None,FixedNodes=[]):
     NewCoords = np.array(NodeCoords)
     NewConn = copy.copy(NodeConn)
-    if not NodeNeighbors: NodeNeighbors = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
+    if not NodeNeighbors: NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
     thinking = True
     iter = 0
     while thinking:
@@ -1011,7 +1006,7 @@ def AngleReductionFlips(NodeCoords,NodeConn,NodeNeighbors=None,FixedNodes=[]):
         Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True)
         UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
         UEdgeElem = np.asarray(EdgeElem)[UIdx]
-        UEdgeConn = UInv[MeshUtils.PadRagged(EdgeConn)]
+        UEdgeConn = UInv[utils.PadRagged(EdgeConn)]
         EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)).astype(int)
         EdgeElemConn = -1*(np.ones((len(UEdges),2),dtype=int))
         EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)
@@ -1060,7 +1055,7 @@ def AngleReductionFlips(NodeCoords,NodeConn,NodeNeighbors=None,FixedNodes=[]):
                 nskipped += 1
                 continue            
 
-            if not Rays.SegmentSegmentIntersection(NewCoords[Edge],NewCoords[NewEdge]):
+            if not rays.SegmentSegmentIntersection(NewCoords[Edge],NewCoords[NewEdge]):
                 # This condition checks if the flipped segment intersects with the old segment.
                 # Flips that don't pass this check could cause element inversion
                 a = 2
@@ -1091,7 +1086,7 @@ def AngleReductionFlips(NodeCoords,NodeConn,NodeNeighbors=None,FixedNodes=[]):
         # print(flips)
         if flips < len(NonDelaunay)-nskipped:
             thinking = True
-            NodeNeighbors = MeshUtils.getNodeNeighbors(NewCoords, NewConn)    
+            NodeNeighbors = utils.getNodeNeighbors(NewCoords, NewConn)    
         else:
             thinking = False
 
@@ -1159,7 +1154,7 @@ def Split(NodeCoords, NodeConn, h, iterate='converge', criteria=['AbsLongness','
         Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True)
         UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
         UEdgeElem = np.asarray(EdgeElem)[UIdx]
-        UEdgeConn = UInv[MeshUtils.PadRagged(EdgeConn)]
+        UEdgeConn = UInv[utils.PadRagged(EdgeConn)]
         EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)).astype(int)
         EdgeElemConn = -1*(np.ones((len(UEdges),2),dtype=int))
         EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)
@@ -1257,7 +1252,7 @@ def Contract(NodeCoords, NodeConn, h, iterate='converge', FixedNodes=set(), FixF
     Old_NElem = len(NewConn)
     iter = 0
     degenerate = set()
-    edges,corners = MeshUtils.DetectFeatures(NewCoords,NewConn)
+    edges,corners = utils.DetectFeatures(NewCoords,NewConn)
     if FixFeatures:
         FixedNodes.update(edges)
         FixedNodes.update(corners)
@@ -1268,12 +1263,12 @@ def Contract(NodeCoords, NodeConn, h, iterate='converge', FixedNodes=set(), FixF
     
     while iter < iterate:
         iter += 1
-        NodeNeighbors = MeshUtils.getNodeNeighbors(NewCoords,NewConn)
-        ElemConn = MeshUtils.getElemConnectivity(NewCoords,NewConn)
+        NodeNeighbors = utils.getNodeNeighbors(NewCoords,NewConn)
+        ElemConn = utils.getElemConnectivity(NewCoords,NewConn)
         Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True,ReturnType=np.ndarray)
         UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
         UEdgeElem = np.asarray(EdgeElem)[UIdx]
-        UEdgeConn = UInv[MeshUtils.PadRagged(EdgeConn)]
+        UEdgeConn = UInv[utils.PadRagged(EdgeConn)]
         EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)).astype(int)
         EdgeElemConn = -1*(np.ones((len(UEdges),2),dtype=int))
         EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)
@@ -1335,11 +1330,11 @@ def Contract(NodeCoords, NodeConn, h, iterate='converge', FixedNodes=set(), FixF
             else:
                 newpoint = NewCoords[edge[1]]
             OldCoords = [copy.copy(NewCoords[edge[0]]),copy.copy(NewCoords[edge[1]])]
-            OldNormals = MeshUtils.CalcFaceNormal(NewCoords,[NewConn[e] for e in (ElemConn[edge[0]]+ElemConn[edge[1]])])
+            OldNormals = utils.CalcFaceNormal(NewCoords,[NewConn[e] for e in (ElemConn[edge[0]]+ElemConn[edge[1]])])
             
             NewCoords[edge[0]] = newpoint
             NewCoords[edge[1]] = newpoint
-            NewNormals = MeshUtils.CalcFaceNormal(NewCoords,[NewConn[e] for e in (ElemConn[edge[0]]+ElemConn[edge[1]])])
+            NewNormals = utils.CalcFaceNormal(NewCoords,[NewConn[e] for e in (ElemConn[edge[0]]+ElemConn[edge[1]])])
             if any([np.dot(OldNormals[i],NewNormals[i]) < np.sqrt(3)/2 for i in range(len(OldNormals)) if not(np.any(np.isnan(NewNormals[i])) or np.any(np.isnan(OldNormals[i])))]):
                 NewCoords[edge[0]] = OldCoords[0]
                 NewCoords[edge[1]] = OldCoords[1]
@@ -1356,11 +1351,11 @@ def Contract(NodeCoords, NodeConn, h, iterate='converge', FixedNodes=set(), FixF
                 impacted.update(NodeNeighbors[keep])
                 impacted.update(NodeNeighbors[remove])
                 k+=1
-        NewCoords,NewConn = MeshUtils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
+        NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
         if k == 0:
             break
 
-    NewCoords,NewConn,_ = MeshUtils.DeleteDuplicateNodes(NewCoords,NewConn)
+    NewCoords,NewConn,_ = utils.DeleteDuplicateNodes(NewCoords,NewConn)
 
     if type(NewCoords) is np.ndarray: NewCoords = NewCoords.tolist()
     return NewCoords, NewConn
@@ -1372,8 +1367,8 @@ def TetOpt(NodeCoords, NodeConn, ElemConn=None, objective='eta', method='BFGS', 
     if type(FreeNodes) is list: FreeNodes = set(FreeNodes)
     FreeNodes = FreeNodes.difference(FixedNodes)
 
-    # if ElemConn is None: _,ElemConn = MeshUtils.getNodeNeighbors(NodeCoords,NodeConn)
-    if ElemConn is None: ElemConn = MeshUtils.getElemConnectivity(NodeCoords,NodeConn)
+    # if ElemConn is None: _,ElemConn = utils.getNodeNeighbors(NodeCoords,NodeConn)
+    if ElemConn is None: ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
     ArrayCoords = np.array(NodeCoords); ArrayConn = np.asarray(NodeConn)
     assert ArrayConn.dtype != 'O', 'Input mesh must be purely tetrahedral.'
 
@@ -1575,19 +1570,19 @@ def Tet23Flip(NodeCoords,NodeConn,Faces,FaceElemConn,FaceConn,FaceID,quality,Qua
     # Check New Elements
     if QualityMetric == 'Skewness':
         OldWorstQuality = np.max([quality[FaceElemConn[FaceID][0]], quality[FaceElemConn[FaceID][1]]])
-        NewQuality = Quality.Skewness(NodeCoords,[NewElem1,NewElem2,NewElem3])
+        NewQuality = quality.Skewness(NodeCoords,[NewElem1,NewElem2,NewElem3])
         NewWorstQuality = np.max(NewQuality)
         
         Improved = NewWorstQuality < OldWorstQuality
 
     else:
-        raise Exception('Quality metric {:s} unknown or not yet implemented.'.format(QualityMetric))
+        raise Exception('quality metric {:s} unknown or not yet implemented.'.format(QualityMetric))
     if Validate:
         if not Improved:
             # Flip didn't improve quality or created invalid elements, keep old mesh
             return NodeConn,Faces,FaceElemConn,FaceConn,quality
         
-        NewVolume = Quality.Volume(NodeCoords,[NewElem1,NewElem2,NewElem3])
+        NewVolume = quality.Volume(NodeCoords,[NewElem1,NewElem2,NewElem3])
         Valid = np.min(NewVolume) >= 0 and min(NewQuality) >= 0 and max(NewQuality) <= 1
         if not Valid:
             # Flip didn't improve quality or created invalid elements, keep old mesh
@@ -1670,19 +1665,19 @@ def Tet32Flip(NodeCoords, NodeConn, Edges, EdgeElemConn, EdgeConn, EdgeID, quali
     # Check New Elements
     if QualityMetric == 'Skewness':
         OldWorstQuality = np.max([quality[Elements[0]], quality[Elements[1]], quality[Elements[2]]])
-        NewQuality = Quality.Skewness(NodeCoords,[NewElem1,NewElem2])
+        NewQuality = quality.Skewness(NodeCoords,[NewElem1,NewElem2])
         NewWorstQuality = np.max(NewQuality)
         
         Improved = NewWorstQuality < OldWorstQuality
 
     else:
-        raise Exception('Quality metric {:s} unknown or not yet implemented.'.format(QualityMetric))
+        raise Exception('quality metric {:s} unknown or not yet implemented.'.format(QualityMetric))
     if Validate:
         if not Improved:
             # Flip didn't improve quality or created invalid elements, keep old mesh
             return NodeConn, Edges, EdgeElemConn, EdgeConn, quality
         
-        NewVolume = Quality.Volume(NodeCoords,[NewElem1,NewElem2])
+        NewVolume = quality.Volume(NodeCoords,[NewElem1,NewElem2])
         Valid = np.min(NewVolume) >= 0 and min(NewQuality) >= 0 and max(NewQuality) <= 1
         if not Valid:
             # Flip didn't improve quality or created invalid elements, keep old mesh
@@ -1695,6 +1690,3 @@ def Tet32Flip(NodeCoords, NodeConn, Edges, EdgeElemConn, EdgeConn, EdgeID, quali
     
     # Remove edge and adjust EdgeConn, EdgeElemConn
     
-
-
-# %%
