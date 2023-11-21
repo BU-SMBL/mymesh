@@ -1261,7 +1261,10 @@ def Contract(NodeCoords, NodeConn, h, iterate='converge', FixedNodes=set(), FixF
     if FixFeatures:
         FixedNodes.update(edges)
         FixedNodes.update(corners)
-    FeatureRank = [2 if i in corners else 1 if i in edges else 0 for i in range(len(NewCoords))]
+    # FeatureRank = [2 if i in corners else 1 if i in edges else 0 for i in range(len(NewCoords))]
+    FeatureRank = np.zeros(len(NewCoords))
+    FeatureRank[list(corners)] = 2
+    FeatureRank[list(edges)] = 1
     
     while iter < iterate:
         iter += 1
