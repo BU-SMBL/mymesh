@@ -314,7 +314,7 @@ def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge',Barr
     NodeConn : list of lists
         Nodal connectivity list.
     ElemNeighbors : list, optional
-        List of neighboring elements for each element in NodeConn. The defau lt is 
+        List of neighboring elements for each element in NodeConn. The default is 
         None. If no value is provided, it will be computed with getNodeNeighbors
     mode : str, optional
         Connectivity method to be used for getElemNeighbors. The default is 'edge'.
@@ -893,6 +893,84 @@ def Project2Surface(Point,Normal,NodeCoords,SurfConn,tol=np.inf,octree='generate
 
     return elemID,alpha,beta,gamma
 
+def Project2Surface2(Points,Normals,NodeCoords,SurfConn,tol=np.inf,octree='generate'):
+    """
+    Project2Surface Projects a node (NodeCoord) along its normal vector (NodeNormal) onto the 
+    surface defined by NodeCoord and SurfConn, returns the index of the 
+    element (elemID) that contains the projected node and the barycentric 
+    coordinates (alpha, beta, gamma) of that projection within that element
+
+    Parameters
+    ----------
+    Point : list or np.ndarray
+        Coordinates of the point to be projected on to the surface.
+    Normal : list or np.ndarray
+        Vector along which the point will be projected.
+    NodeCoords : list or np.ndarray
+        Node coordinates list of the mesh that the point is being projected to.
+    SurfConn : list or np.ndarray
+        Nodal connectivity of the surface mesh that the point is being projected to.
+    tol : float, optional
+        Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
+        octree : str (or Octree.OctreeNode), optional
+        Octree options. An octree representation of the surface can significantly
+        improve mapping speeds, by default 'generate'.
+        'generate' - Will generate an octree for use in surface mapping.
+        'none' or None - Won't generate an octree and will use a brute force approach.
+        Octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by Octree.Surf2Octree(NodeCoords,SurfConn)
+    Returns
+    -------
+    elemID : int
+        Index of the element in SurfConn that the point gets projected onto.
+    alpha : float
+        First barycentric coordinate of the projected point relative to the triangle identified by elemId
+    beta : float
+        Second barycentric coordinate of the projected point relative to the triangle identified by elemId
+    gamma : float
+        Third barycentric coordinate of the projected point relative to the triangle identified by elemId
+    """
+    if type(NodeCoords) is list: NodeCoords = np.array(NodeCoords)
+    if type(SurfConn) is list: SurfConn = np.array(SurfConn)
+
+    intersections, distances, intersectionPts = Rays.RaysSurfIntersection(Points, Normals, NodeCoords, SurfConn, octree=octree)
+
+    argmindist = [np.argmin(np.abs(x)) if len(x) > 0 else -1 for x in distances]
+    mindist = np.array([x[argmindist[i]] if len(x) > 0 else np.inf for i,x in enumerate(distances)])
+    
+    elemID = np.array([intersections[i][argmindist[i]] if len(x) > 0 else -1 for i,x in enumerate(distances)])
+    ps = np.array([intersectionPts[i][argmindist[i]] if len(x) > 0 else [np.nan,np.nan,np.nan] for i,x in enumerate(distances)])
+
+    mappedbool = (elemID >= 0) & (mindist <= tol)
+    alphas, betas, gammas = BaryTris(NodeCoords[SurfConn[elemID[mappedbool]]], ps[mappedbool,:])
+
+    alpha = -1*np.ones(len(Points))
+    beta = -1*np.ones(len(Points))
+    gamma = -1*np.ones(len(Points))
+
+    alpha[mappedbool] = alphas
+    beta[mappedbool] = betas
+    gamma[mappedbool] = gammas
+
+    MappingMatrix = np.vstack([elemID, alpha, beta, gamma]).T
+
+
+    # if len(intersections) == 0:
+    #     elemID = alpha = beta = gamma = -1
+    # elif min(np.abs(distances)) > tol:
+    #     elemID = alpha = beta = gamma = -1
+    # else:
+    #     try:
+    #         idx = np.where(np.abs(distances) == min(np.abs(distances)))[0][0]
+    #         p = intersectionPts[idx]
+    #         elemID = intersections[idx]
+    #         pts = NodeCoords[SurfConn[elemID]]
+    #         alpha,beta,gamma = BaryTri(pts,p)
+    #     except:
+    #         print(distances)
+    #         elemID = alpha = beta = gamma = -1
+
+    return MappingMatrix
+
 def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verbose=False, octree='generate', return_octree=False):
     """
     SurfMapping Generate a mapping matrix from surface 1 (NodeCoords1, SurfConn1) to surface 2 (NodeCoords2, SurfConn2)
@@ -907,7 +985,7 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
         List of nodal coordinates.
     SurfConn1 : list
         List of nodal connectivities.
-    NodeCoords2 : _type_
+    NodeCoords2 : list
         List of nodal coordinates.
     SurfConn2 : list
         List of nodal connectivities.
@@ -942,12 +1020,19 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     ElemNormals1 = CalcFaceNormal(NodeCoords1, SurfConn1)
     NodeNormals1 = Face2NodeNormal(NodeCoords1, SurfConn1, ElemConn1, ElemNormals1, method='angle')
 
-    Surf1Nodes = set(SurfConn1.flatten())
+    Surf1Nodes = np.unique(SurfConn1.flatten())
 
-    MappingMatrix = -1*np.ones((len(NodeCoords1),4))
+    
     if octree == 'generate': octree = Octree.Surf2Octree(NodeCoords2,SurfConn2)
-    for i in Surf1Nodes:
-        MappingMatrix[i] = Project2Surface(NodeCoords1[i], NodeNormals1[i], NodeCoords2, SurfConn2, tol=tol, octree=octree)
+    # tic = time.time()
+    MappingMatrix = -1*np.ones((len(NodeCoords1),4))
+    MappingMatrix[Surf1Nodes,:] = Project2Surface2(NodeCoords1[Surf1Nodes,:], NodeNormals1[Surf1Nodes,:], NodeCoords2, SurfConn2, tol=tol, octree=octree)
+    # print(time.time()-tic)
+    # tic = time.time()
+    # MappingMatrix = -1*np.ones((len(NodeCoords1),4))
+    # for i in Surf1Nodes:
+    #     MappingMatrix[i] = Project2Surface(NodeCoords1[i], NodeNormals1[i], NodeCoords2, SurfConn2, tol=tol, octree=octree)
+    # print(time.time()-tic)
     if verbose: 
         failcount = np.sum(MappingMatrix[list(Surf1Nodes),0] == -1)
         print('{:.3f}% of nodes mapped'.format((len(Surf1Nodes)-failcount)/len(Surf1Nodes)*100))
