@@ -83,7 +83,9 @@ def union(fval1,fval2):
 
 def diff(fval1,fval2):
 #    return np.minimum(fval1,-fval2)
-    return rMin(fval1,-fval2)
+    # This has maybe been wrong for a long time changing min to max
+    # return rMin(fval1,-fval2)
+    return rMax(fval1,-fval2)
 
 def intersection(fval1,fval2):
 #    return np.maximum(fval1,fval2)
@@ -130,7 +132,7 @@ def plotSDF(x,y,z,sdf,isomax=0.0):
         ))
     plot(fig)
     
-def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',reinitialize=False):
+def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',values='nodes'):
     """
     VoxelMesh Generate voxel mesh of a signed distance function
 
@@ -162,11 +164,8 @@ def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',reinitialize=False):
 
     """        
     
-    NodeCoords, NodeConn1 = Primitives.Grid([xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]],h,exact_h=True)
-    NodeCoords = np.array(NodeCoords)
+    NodeCoords, NodeConn1 = Primitives.Grid([xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]],h,exact_h=True, meshobj=False)
     NodeVals = sdf(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
-    if reinitialize:
-        NodeVals = FastMarchingMethod(NodeCoords,NodeConn1,NodeVals)
     if mode != 'notrim':
         NodeConn = []
         for elem in NodeConn1:
@@ -179,15 +178,31 @@ def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',reinitialize=False):
             elif mode =='liberal':
                 if any([NodeVals[node] <= 0 for node in elem]):
                     NodeConn.append(elem)
+        NodeCoords,NodeConn,OriginalIds = converter.removeNodes(NodeCoords.tolist(),NodeConn)
+        NodeVals = NodeVals[OriginalIds]
     else:   
         NodeConn = NodeConn1
-    NodeCoords,NodeConn,OriginalIds = converter.removeNodes(NodeCoords.tolist(),NodeConn)
-    NodeVals = [NodeVals[i] for i in OriginalIds]
+    
     return NodeCoords, NodeConn, NodeVals
 
 def SurfaceMesh(sdf,xlims,ylims,zlims,h,threshold=0, flip=False, mcmethod='33'):
-    NodeCoords, NodeConn, NodeVals = VoxelMesh(sdf,xlims,ylims,zlims,h,mode='notrim',reinitialize=False)
-    SurfCoords, SurfConn = MarchingCubes.MarchingCubes(NodeCoords, NodeConn, NodeVals, threshold=threshold, flip=flip, method=mcmethod)
+    # NodeCoords, NodeConn, NodeVals = VoxelMesh(sdf,xlims,ylims,zlims,h,mode='notrim',reinitialize=False)
+    # SurfCoords, SurfConn = MarchingCubes.MarchingCubes(NodeCoords, NodeConn, NodeVals, threshold=threshold, flip=flip, method=mcmethod)
+
+    if isinstance(h, (list, tuple, np.ndarray)):
+        hx = h[0];hy = h[1]; hz = h[2]
+    else:
+        hx = h; hy = h; hz = h
+    xs = np.arange(xlims[0],xlims[1]+hx,hx)
+    ys = np.arange(ylims[0],ylims[1]+hy,hy)
+    zs = np.arange(zlims[0],zlims[1]+hz,hz)
+
+    X,Y,Z = np.meshgrid(xs,ys,zs)
+    F = sdf(X,Y,Z)
+    SurfCoords, SurfConn = MarchingCubes.MarchingCubesImage(F, h=(hx, hy, hz), threshold=threshold, flip=False, method='original', interpolation='cubic',VertexValues=True)
+    SurfCoords[:,0] += xlims[0]
+    SurfCoords[:,1] += ylims[0]
+    SurfCoords[:,2] += zlims[0]
     return SurfCoords, SurfConn
 
 def grid2fun(VoxelCoords,VoxelConn,Vals,method='linear',fill_value=None):
