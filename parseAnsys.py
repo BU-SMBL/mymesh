@@ -104,7 +104,7 @@ def writeMechanicalDatFile(Mesh, Material, bc, filename, jobname='job'):
         filename += '.dat'
     
     assert Mesh.nD == 3, 'Currently only working for 3D'
-    assert len(Mesh.NodeConn[0]) == 8, 'Currently only working for 8 node hexahedrons or degenerate variations'
+    # assert len(Mesh.NodeConn[0]) == 8, 'Currently only working for 8 node hexahedrons or degenerate variations'
     
     with open(filename, 'w') as f:
             ## Header
@@ -117,6 +117,7 @@ def writeMechanicalDatFile(Mesh, Material, bc, filename, jobname='job'):
             f.write('/prep7\n')
             f.write('/nolist\n')
             f.write('etcon,set\n')
+            f.write('SHPP, WARN\n')
             
             ## Nodes
             f.write('nblock,3,,{0:d}\n'.format(Mesh.NNode))
@@ -129,13 +130,24 @@ def writeMechanicalDatFile(Mesh, Material, bc, filename, jobname='job'):
             ## Elements
             f.write('/wb,elem,start\n') # Not sure if needed
             # Element Type
-            f.write('et,1,185\n')           # 185 -> 8 Node Element
-            ncol = min(11 + len(Mesh.NodeConn[0]),19)   # This might need to change for other element types?
-            f.write('eblock,{0:d},solid,,{1:d}\n'.format(ncol,Mesh.NElem))
-            f.write('({0:d}i9)\n'.format(ncol))
-            for i,elem in enumerate(Mesh.NodeConn):
-                f.write('{0:9d}{1:9d}{2:9d}{3:9d}{4:9d}{5:9d}{6:9d}{7:9d}{8:9d}{9:9d}{10:9d}'.format(1,1,1,1,0,0,0,0,len(elem),0,i+1) +
-                        ''.join(['{' + str(j) + ':9d}' for j in range(len(elem))]).format(*(np.array(elem)+1)) + '\n')
+            if len(Mesh.NodeConn[0]) == 8:
+                f.write('et,1,185\n')           # 185 -> 8 Node Element
+                ncol = min(11 + len(Mesh.NodeConn[0]),19)   # This might need to change for other element types?
+                f.write('eblock,{0:d},solid,,{1:d}\n'.format(ncol,Mesh.NElem))
+                f.write('({0:d}i9)\n'.format(ncol))
+                for i,elem in enumerate(Mesh.NodeConn):
+                    f.write('{0:9d}{1:9d}{2:9d}{3:9d}{4:9d}{5:9d}{6:9d}{7:9d}{8:9d}{9:9d}{10:9d}'.format(1,1,1,1,0,0,0,0,len(elem),0,i+1) +
+                            ''.join(['{' + str(j) + ':9d}' for j in range(len(elem))]).format(*(np.array(elem)+1)) + '\n')
+            # elif len(Mesh.NodeConn[0]) == 4:
+            #     f.write('et,1,285,1\n')           # 285 -> 4 Node Element
+            #     ncol = 19   # This might need to change for other element types?
+            #     f.write('eblock,{0:d},solid,,{1:d}\n'.format(4,Mesh.NElem))
+            #     f.write('({0:d}i9)\n'.format(ncol))
+            #     for i,elem in enumerate(Mesh.NodeConn):
+            #         f.write('{0:9d}{1:9d}{2:9d}{3:9d}{4:9d}{5:9d}{6:9d}{7:9d}{8:9d}{9:9d}{10:9d}'.format(1,1,1,1,0,0,0,0,len(elem),0,i+1) +
+            #                 ''.join(['{' + str(j) + ':9d}' for j in range(8)]).format(*(np.array(elem)+1),0,0,0,0) + '\n')
+            else:
+                raise Exception('Invalid element')
                 # Need to add a second line if 10+len(elem) > 19 for other element types
             f.write('-1\n')
             f.write('/wb,elem,end\n')
