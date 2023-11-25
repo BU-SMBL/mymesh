@@ -298,7 +298,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
 def EdgesByElement(NodeCoords,NodeConn,ElemType='auto'):
     """
     EdgesByElement Returns edges grouped by the element from which they came.
-    TODO: This can should be rewritten based on solid2edges using EdgeConn
+    TODO: This can/should be rewritten based on solid2edges using EdgeConn
 
     Parameters
     ----------
@@ -668,7 +668,7 @@ def faces2faceelemconn(Faces,FaceConn,FaceElem,return_UniqueFaceInfo=False):
     UFaceConn : list, optional
         FaceConn transformed to properly index UFaces rather than Faces.
     UFaceElem : list, optional
-        FaceElem transformed to coorespond with UFaces rather than Faces.
+        FaceElem transformed to correspond with UFaces rather than Faces.
     idx : np.ndarray, optional
         The array of indices that relate the unique list of
         faces to the list of original faces (see faces2unique).
@@ -1254,9 +1254,9 @@ def surf2edges(NodeCoords,NodeConn,ElemType='auto'):
 
     return Edges
 
-def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None):
+def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
     """
-    im2voxel Convert 3D image data to a cubic mesh. Each voxel will be represented by a node.
+    im2voxel Convert 3D image data to a cubic mesh. Each voxel will be represented by an element.
 
     Parameters
     ----------
@@ -1288,6 +1288,8 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         Image intensity data for each node, averaged from connected voxels.
 
     """    
+    multichannel = False
+
     if type(voxelsize) is list or type(voxelsize) is tuple:
         assert len(voxelsize) == 3, 'If specified as a list or tuple, voxelsize must have a length of 3.'
         xscale = voxelsize[0]
@@ -1306,7 +1308,7 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
             voxelsize /= scalefactor
     elif type(img) == str:
         path = img
-        tiffs = glob.glob(os.path.join(path,'*.tiff'))
+        tiffs = glob.glob(os.path.join(path,'*.tiff')) + glob.glob(os.path.join(path,'*.tif')) + glob.glob(os.path.join(path,'*.jpg')) + glob.glob(os.path.join(path,'*.jpeg')) + glob.glob(os.path.join(path,'*.png'))
         tiffs.sort()
         dicoms = glob.glob(os.path.join(path,'*.dcm'))
         dicoms.sort()
@@ -1330,28 +1332,52 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
             else:
                 return [], [], []
         print('Loading image data from {:s}...'.format(img))
-        with tempfile.TemporaryDirectory() as Dir:
-            with h5py.File(os.path.join(Dir,"images.hdf5"), "w") as f:
-                if ftype == 'tiff':
-                    temp = cv2.imread(files[0])
-                    imgs = (cv2.imread(file) for file in files)
-                else:
-                    temp = pydicom.dcmread(files[0]).pixel_array
-                    imgs = (pydicom.dcmread(file).pixel_array for file in files)
+        # with tempfile.TemporaryDirectory() as Dir:
+        #     with h5py.File(os.path.join(Dir,"images.hdf5"), "w") as f:
+        #         if ftype == 'tiff':
+        #             temp = cv2.imread(files[0])
+        #             imgs = (cv2.imread(file) for file in files)
+        #         else:
+        #             temp = pydicom.dcmread(files[0]).pixel_array
+        #             imgs = (pydicom.dcmread(file).pixel_array for file in files)
                 
-                data = f.create_dataset('img',(len(files),temp.shape[0],temp.shape[1]))
-                i = 0
-                for I in tqdm.tqdm(imgs, total=len(files)):
-                    if len(I.shape) == 3:
-                        data[i] = I[:,:,0]
-                    else:
-                        data[i] = I
-                    i += 1
-                if scalefactor != 1:
-                    img = ndimage.zoom(np.array(data),scalefactor,order=scaleorder)
-                    voxelsize /= scalefactor
-                else:
-                    img = np.array(data)
+        #         data = f.create_dataset('img',(len(files),temp.shape[0],temp.shape[1]))
+        #         i = 0
+        #         for I in tqdm.tqdm(imgs, total=len(files)):
+        #             if len(I.shape) == 3:
+        #                 data[i] = I[:,:,0]
+        #             else:
+        #                 data[i] = I
+        #             i += 1
+        #         if scalefactor != 1:
+        #             img = ndimage.zoom(np.array(data),scalefactor,order=scaleorder)
+        #             voxelsize /= scalefactor
+        #         else:
+        #             img = np.array(data)
+        if ftype == 'tiff':
+            temp = cv2.imread(files[0])
+            if len(temp.shape) > 2:
+                multichannel = True
+                multiimgs = [np.array([cv2.imread(file)[:,:,i] for file in files]) for i in range(temp.shape[2])]
+                imgs = multiimgs[0]
+            else:
+                multichannel = False
+                imgs = np.array([cv2.imread(file) for file in files])
+        else:
+            # temp = pydicom.dcmread(files[0]).pixel_array
+            imgs = np.array([pydicom.dcmread(file).pixel_array for file in files])
+        
+        if scalefactor != 1:
+            if multichannel:
+                multiimg = [ndimage.zoom(I,scalefactor,order=scaleorder) for I in multiimgs]
+                img = multiimg[0]
+            else:
+                img = ndimage.zoom(imgs,scalefactor,order=scaleorder)
+            voxelsize /= scalefactor
+        else:
+            if multichannel:
+                multiimg = multiimgs
+            img = imgs
     else:
         raise Exception('Type {:s} not supported'.format(str(type(img))))
     
@@ -1363,7 +1389,10 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         zlims = [0,(nz)*voxelsize]
         bounds = [xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]]
         VoxelCoords, VoxelConn = primitives.Grid(bounds, voxelsize, exact_h=False, meshobj=False)
-        VoxelData = img.flatten(order='F')
+        if multichannel:
+            VoxelData = np.column_stack([I.flatten(order='F') for I in multiimg])
+        else:
+            VoxelData = img.flatten(order='F')
         if return_gradient:
             gradx = ndimage.gaussian_filter(img,gaussian_sigma,order=(1,0,0))
             grady = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,1,0))
@@ -1382,8 +1411,12 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         VoxelCoords, VoxelConn = primitives.Grid(bounds, voxelsize, exact_h=False, meshobj=False)
         mins = np.round(np.min(VoxelCoords,axis=0)/voxelsize).astype(int)
         maxs = np.round(np.max(VoxelCoords,axis=0)/voxelsize).astype(int)
-        cropimg = img[mins[2]:maxs[2],mins[1]:maxs[1],mins[0]:maxs[0]]
-        VoxelData = cropimg.flatten(order='F')
+        if multichannel:
+            cropimg = [I[mins[2]:maxs[2],mins[1]:maxs[1],mins[0]:maxs[0]] for I in multiimg]
+            VoxelData = np.column_stack([I.flatten(order='F') for I in cropimg])
+        else:
+            cropimg = img[mins[2]:maxs[2],mins[1]:maxs[1],mins[0]:maxs[0]]
+            VoxelData = cropimg.flatten(order='F')
         if return_gradient:
             gradx = ndimage.gaussian_filter(cropimg,gaussian_sigma,order=(1,0,0))
             grady = ndimage.gaussian_filter(cropimg,gaussian_sigma,order=(0,1,0))
@@ -1395,24 +1428,34 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         VoxelCoords[:,2] = VoxelCoords[:,2]*zscale
         
     if threshold is not None:
-        VoxelConn = VoxelConn[VoxelData>=threshold]
-        VoxelData = VoxelData[VoxelData>=threshold]
-        if return_gradient: GradData = GradData[VoxelData>=threshold]
-        VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
+        if threshold_direction == 1:
+            VoxelConn = VoxelConn[VoxelData>=threshold]
+            VoxelData = VoxelData[VoxelData>=threshold]
+            if return_gradient: GradData = GradData[VoxelData>=threshold]
+            VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
+            VoxelConn = np.asarray(VoxelConn)
+
+        elif threshold_direction == -1:
+            VoxelConn = VoxelConn[VoxelData<=threshold]
+            VoxelData = VoxelData[VoxelData<=threshold]
+            if return_gradient: GradData = GradData[VoxelData<=threshold]
+            VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
+            VoxelConn = np.asarray(VoxelConn)
+        else:
+            raise Exception('threshold_direction must be 1 or -1, where 1 indicates that values >= threshold will be kept and -1 indicates that values <= threshold will be kept.')
     if return_nodedata:
-        # ElemConn = utils.getElemConnectivity(VoxelCoords,VoxelConn,ElemType='hex')
-        # RConn = utils.PadRagged(ElemConn)
-        # TempData = np.append(VoxelData,np.nan)
-        # NodeData = np.nanmean(TempData[RConn],axis=1)
         rows = VoxelConn.flatten()
         cols = np.repeat(np.arange(len(VoxelConn)),8)
-        data = np.repeat(1/8,len(rows))
-        M = sparse.coo_matrix((data,(rows,cols))).tocsr()
-        NodeData = M*VoxelData
+        data = np.ones(len(rows))
+        M = sparse.coo_matrix((data,(rows,cols))).tolil()
+        M = M.multiply(1/(M*np.ones((M.shape[1],1))))
+
+        if multichannel:
+            NodeData = np.column_stack([M*VoxelData[:,i] for i in range(VoxelData.shape[1])])
+        else:
+            NodeData = M*VoxelData
         
         if return_gradient:
-            # TempGrad = np.append(GradData,[[np.nan,np.nan,np.nan]],axis=0)
-            # NodeGrad = np.nanmean(TempGrad[RConn],axis=1)
             NodeGrad = M*GradData            
             VoxelData = (VoxelData,GradData)
             NodeData = (NodeData,NodeGrad)
