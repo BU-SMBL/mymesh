@@ -489,7 +489,7 @@ def Area(NodeCoords,NodeConn):
 
 def Volume(NodeCoords,NodeConn,verbose=False):
     """
-    Volme Calculates element volumes for each element in the mesh.
+    Volume Calculates element volumes for each element in the mesh.
 
     Parameters
     ----------

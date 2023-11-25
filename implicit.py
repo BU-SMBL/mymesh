@@ -13,13 +13,12 @@ from scipy import optimize, interpolate
 import sys, os, time, copy, warnings, bisect
 import meshio
 
-from . import utils, converter, MarchingCubes, quality, improvement, TetGen, rays, octree, mesh, primitives
+from . import utils, converter, contour, quality, improvement, TetGen, rays, octree, mesh, primitives
 
 try:
     from sklearn.neighbors import KDTree
 except:
     warnings.warn('Optional dependencies not found - some functions may not work properly')
-
 
 # SDF primitives
 def gyroid(x,y,z):
@@ -45,7 +44,6 @@ def neovius(x,y,z):
 
 def diamond(x,y,z):
     return np.sin(2*np.pi*x)*np.sin(2*np.pi*y)*np.sin(2*np.pi*z) + np.sin(2*np.pi*x)*np.cos(2*np.pi*y)*np.cos(2*np.pi*z) + np.cos(2*np.pi*x)*np.sin(2*np.pi*y)*np.cos(2*np.pi*z) + np.cos(2*np.pi*x)*np.cos(2*np.pi*y)*np.sin(2*np.pi*z)
-
 
 def cylinder(x,y,r):
     return (x**2 + y**2) - r**2

@@ -134,7 +134,7 @@ def Grid2D(bounds, h, z=0, meshobj=True, exact_h=False, ElemType='quad'):
     Parameters
     ----------
     bounds : list
-        Six element list, [xmin,xmax,ymin,ymax].
+        Four element list, [xmin,xmax,ymin,ymax].
     h : float
         Element size.
     meshobj : bool, optional
@@ -203,7 +203,31 @@ def Grid2D(bounds, h, z=0, meshobj=True, exact_h=False, ElemType='quad'):
     return GridCoords, GridConn
 
 def Plane(pt, normal, bounds, h, meshobj=True, exact_h=False, ElemType='quad'):
+    """
+    Plane Generate a 2D grid oriented on a plane
 
+    Parameters
+    ----------
+    pt : list, np.ndarray
+        Coordinates (x,y,z) of a point on the plane
+    normal : list, np.ndarray
+        Normal vector of the plane
+    bounds : list
+        Six element list, [xmin,xmax,ymin,ymax,zmin,zmax].
+    h : _type_
+        _description_
+    meshobj : bool, optional
+        _description_, by default True
+    exact_h : bool, optional
+        _description_, by default False
+    ElemType : str, optional
+        _description_, by default 'quad'
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
     # Get rotation between the plane and the xy (z=0) plane
     normal = np.asarray(normal)/np.linalg.norm(normal)
     
@@ -307,9 +331,4 @@ def Extrude(line, distance, step, axis=2, ElemType='quad', meshobj=True):
         return extruded
     return NodeCoords, NodeConn
 
-# def Sphere(center,radius,h):
-    
-
-#     func = lambda x,y,z : implicit.sphere(x,y,z,radius,center)
-    
 

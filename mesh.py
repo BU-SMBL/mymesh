@@ -306,8 +306,6 @@ class mesh:
         if cleanup:
             self.cleanup(tol=tol)
 
-      
-
     @property
     def NNode(self):
         self._NNode = len(self.NodeCoords)
@@ -1127,7 +1125,7 @@ class mesh:
 
         return M  
             
-    def imread(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None):
+    def imread(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
         """
         imread load a 3d image stack into a voxel mesh  using converter.im2voxel
 
@@ -1154,9 +1152,9 @@ class mesh:
             Mesh object, containing image data for elements and nodes in M.ElemData['Image Data'] and M.NodeData['Image Data'].
         """
         if return_nodedata:
-            VoxelCoords, VoxelConn, VoxelData, NodeData = converter.im2voxel(img,voxelsize,scalefactor=scalefactor,scaleorder=scaleorder,return_nodedata=return_nodedata,return_gradient=return_gradient, gaussian_sigma=gaussian_sigma,threshold=threshold,crop=crop)
+            VoxelCoords, VoxelConn, VoxelData, NodeData = converter.im2voxel(img,voxelsize,scalefactor=scalefactor,scaleorder=scaleorder,return_nodedata=return_nodedata,return_gradient=return_gradient, gaussian_sigma=gaussian_sigma,threshold=threshold,crop=crop,threshold_direction=threshold_direction)
         else:
-            VoxelCoords, VoxelConn, VoxelData = converter.im2voxel(img,voxelsize,scalefactor=scalefactor,scaleorder=scaleorder,return_nodedata=return_nodedata,return_gradient=return_gradient,gaussian_sigma=gaussian_sigma,threshold=threshold,crop=crop)
+            VoxelCoords, VoxelConn, VoxelData = converter.im2voxel(img,voxelsize,scalefactor=scalefactor,scaleorder=scaleorder,return_nodedata=return_nodedata,return_gradient=return_gradient,gaussian_sigma=gaussian_sigma,threshold=threshold,crop=crop,threshold_direction=threshold_direction)
         M = mesh(VoxelCoords,VoxelConn)
         if return_gradient:
             M.ElemData['Image Data'],M.ElemData['Image Gradient'] = VoxelData

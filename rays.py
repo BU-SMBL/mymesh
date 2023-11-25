@@ -1255,7 +1255,6 @@ def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, octree='genera
         
     return intersections, distances, intersectionPts
 
- 
 def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, eps=1e-14, octree='generate'):
     
     ArrayCoords = np.array(NodeCoords)

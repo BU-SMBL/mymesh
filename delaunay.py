@@ -351,7 +351,6 @@ def Triangle(NodeCoords,Constraints=None,opts=''):
 
     return NodeCoords, NodeConn
 
-
 def BowyerWatson3d(NodeCoords):
     # Someting isn't working right
     NodeConn = []

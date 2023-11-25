@@ -8013,7 +8013,6 @@ def InternalConnection(vals,case13=False):
                 
     return connected
 
-#%%
 def generateLookup33():
     # LookupTable, Cases, FaceTests = generateLookup33()
     import random
