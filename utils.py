@@ -832,7 +832,7 @@ def BaryTet(Nodes, Pt):
     
     return alpha, beta, gamma, delta
 
-def Project2Surface(Point,Normal,NodeCoords,SurfConn,tol=np.inf,octree='generate'):
+def Project2Surface(Point,Normal,NodeCoords,SurfConn,tol=np.inf,Octree='generate'):
     """
     Project2Surface Projects a node (NodeCoord) along its normal vector (NodeNormal) onto the 
     surface defined by NodeCoord and SurfConn, returns the index of the 
@@ -851,7 +851,7 @@ def Project2Surface(Point,Normal,NodeCoords,SurfConn,tol=np.inf,octree='generate
         Nodal connectivity of the surface mesh that the point is being projected to.
     tol : float, optional
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
-        octree : str (or octree.OctreeNode), optional
+        Octree : str (or octree.OctreeNode), optional
         octree options. An octree representation of the surface can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
@@ -871,7 +871,7 @@ def Project2Surface(Point,Normal,NodeCoords,SurfConn,tol=np.inf,octree='generate
     if type(NodeCoords) is list: NodeCoords = np.array(NodeCoords)
     if type(SurfConn) is list: SurfConn = np.array(SurfConn)
 
-    intersections, distances, intersectionPts = rays.RaySurfIntersection(Point, Normal, NodeCoords, SurfConn, octree=octree)
+    intersections, distances, intersectionPts = rays.RaySurfIntersection(Point, Normal, NodeCoords, SurfConn, Octree=Octree)
     if len(intersections) == 0:
         elemID = alpha = beta = gamma = -1
     elif min(np.abs(distances)) > tol:
@@ -889,7 +889,7 @@ def Project2Surface(Point,Normal,NodeCoords,SurfConn,tol=np.inf,octree='generate
 
     return elemID,alpha,beta,gamma
 
-def Project2Surface2(Points,Normals,NodeCoords,SurfConn,tol=np.inf,octree='generate'):
+def Project2Surface2(Points,Normals,NodeCoords,SurfConn,tol=np.inf,Octree='generate'):
     """
     Project2Surface Projects a node (NodeCoord) along its normal vector (NodeNormal) onto the 
     surface defined by NodeCoord and SurfConn, returns the index of the 
@@ -908,7 +908,7 @@ def Project2Surface2(Points,Normals,NodeCoords,SurfConn,tol=np.inf,octree='gener
         Nodal connectivity of the surface mesh that the point is being projected to.
     tol : float, optional
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
-        octree : str (or octree.OctreeNode), optional
+        Octree : str (or octree.OctreeNode), optional
         octree options. An octree representation of the surface can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
@@ -928,7 +928,7 @@ def Project2Surface2(Points,Normals,NodeCoords,SurfConn,tol=np.inf,octree='gener
     if type(NodeCoords) is list: NodeCoords = np.array(NodeCoords)
     if type(SurfConn) is list: SurfConn = np.array(SurfConn)
 
-    intersections, distances, intersectionPts = rays.RaysSurfIntersection(Points, Normals, NodeCoords, SurfConn, octree=octree)
+    intersections, distances, intersectionPts = rays.RaysSurfIntersection(Points, Normals, NodeCoords, SurfConn, Octree=Octree)
 
     argmindist = [np.argmin(np.abs(x)) if len(x) > 0 else -1 for x in distances]
     mindist = np.array([x[argmindist[i]] if len(x) > 0 else np.inf for i,x in enumerate(distances)])
@@ -967,7 +967,7 @@ def Project2Surface2(Points,Normals,NodeCoords,SurfConn,tol=np.inf,octree='gener
 
     return MappingMatrix
 
-def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verbose=False, octree='generate', return_octree=False):
+def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verbose=False, Octree='generate', return_octree=False):
     """
     SurfMapping Generate a mapping matrix from surface 1 (NodeCoords1, SurfConn1) to surface 2 (NodeCoords2, SurfConn2)
     Each row of the mapping matrix contains an element ID followed by barycentric coordinates alpha, beta, gamma
@@ -989,7 +989,7 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
     verbose : bool, optional
         If true, will print mapping statistics, by default False.
-    octree : str (or octree.OctreeNode), optional
+    Octree : str (or octree.OctreeNode), optional
         octree options. An octree representation of surface 2 can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
@@ -1003,7 +1003,7 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     MappingMatrix : list
         len(NodeCoords1)x4 matrix of of barycentric coordinates, defining NodeCoords1 in terms
         of the triangular surface elements of Surface 2.
-    octree : octree.OctreeNode, optional
+    Octree : octree.OctreeNode, optional
         The generated or provided octree structure corresponding to Surface 2.
 
     """
@@ -1019,25 +1019,25 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     Surf1Nodes = np.unique(SurfConn1.flatten())
 
     
-    if octree == 'generate': octree = octree.Surf2Octree(NodeCoords2,SurfConn2)
+    if Octree == 'generate': Octree = octree.Surf2Octree(NodeCoords2,SurfConn2)
     # tic = time.time()
     MappingMatrix = -1*np.ones((len(NodeCoords1),4))
-    MappingMatrix[Surf1Nodes,:] = Project2Surface2(NodeCoords1[Surf1Nodes,:], NodeNormals1[Surf1Nodes,:], NodeCoords2, SurfConn2, tol=tol, octree=octree)
+    MappingMatrix[Surf1Nodes,:] = Project2Surface2(NodeCoords1[Surf1Nodes,:], NodeNormals1[Surf1Nodes,:], NodeCoords2, SurfConn2, tol=tol, Octree=Octree)
     # print(time.time()-tic)
     # tic = time.time()
     # MappingMatrix = -1*np.ones((len(NodeCoords1),4))
     # for i in Surf1Nodes:
-    #     MappingMatrix[i] = Project2Surface(NodeCoords1[i], NodeNormals1[i], NodeCoords2, SurfConn2, tol=tol, octree=octree)
+    #     MappingMatrix[i] = Project2Surface(NodeCoords1[i], NodeNormals1[i], NodeCoords2, SurfConn2, tol=tol, Octree=Octree)
     # print(time.time()-tic)
     if verbose: 
         failcount = np.sum(MappingMatrix[list(Surf1Nodes),0] == -1)
         print('{:.3f}% of nodes mapped'.format((len(Surf1Nodes)-failcount)/len(Surf1Nodes)*100))
     if return_octree:
-        return MappingMatrix, octree
+        return MappingMatrix, Octree
     return MappingMatrix
 
 def ValueMapping(NodeCoords1, SurfConn1, NodeVals1, NodeCoords2, SurfConn2, tol=np.inf, 
-octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False, return_octree=False):
+Octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False, return_octree=False):
     """
     ValueMapping Maps nodal values <NodeVals1> from surface 1 to surface 2
     - Currently only supports triangluar surface meshes
@@ -1057,7 +1057,7 @@ octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False
         Contains the nodal connectivity defining the surface elements.
     tol : float, optional
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf 
-    octree : str (or octree.OctreeNode), optional
+    Octree : str (or octree.OctreeNode), optional
         octree options. An octree representation of surface 1 can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
@@ -1073,7 +1073,7 @@ octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False
     return_octree : bool, optional
         If true, will return generated or provided octree, by defualt False.
         NOTE if MappingMatrix is provided, the octree structure won't be generated.
-        In this cases, if octree='generate' and return_octree=True, the returned value
+        In this cases, if Octree='generate' and return_octree=True, the returned value
         for octree will simply be the string 'generate'.
 
     Returns
@@ -1091,7 +1091,7 @@ octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False
         # NodeVals2 = [0 for i in range(len(NodeCoords2))]
     # Map the coordinates from surface 2 to surface 1
     if MappingMatrix is None:
-        MappingMatrix,octree = SurfMapping(NodeCoords2, SurfConn2,  NodeCoords1, SurfConn1, octree=octree, tol=tol, verbose=verbose, return_octree=True)
+        MappingMatrix,Octree = SurfMapping(NodeCoords2, SurfConn2,  NodeCoords1, SurfConn1, Octree=Octree, tol=tol, verbose=verbose, return_octree=True)
 
     # if singleVal:
     if len(np.shape(NodeVals1)) == 1:
@@ -1115,11 +1115,11 @@ octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False
         
             
     if return_MappingMatrix and return_octree:
-        return NodeVals2, MappingMatrix, octree
+        return NodeVals2, MappingMatrix, Octree
     elif return_MappingMatrix:
         return NodeVals2, MappingMatrix
     elif return_octree:
-        return NodeVals2, octree
+        return NodeVals2, Octree
     return NodeVals2
 
 def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False):

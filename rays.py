@@ -1213,7 +1213,7 @@ def RaySegmentsIntersection(pt, ray, segments, return_intersection=False, eps=1e
         return Intersections, pts
     return Intersections
     
-def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, octree='generate'):
+def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, Octree='generate'):
     
     def test(pt, ray, nodes):
         iPt = RayTriangleIntersection(pt, ray, nodes, bidirectional=True)
@@ -1221,18 +1221,18 @@ def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, octree='genera
     ArrayCoords = np.array(NodeCoords)
     if type(pt) is list: pt = np.array(pt)
     if type(ray) is list: ray = np.array(ray)
-    if octree == None or octree == 'None' or octree == 'none':
+    if Octree == None or Octree == 'None' or Octree == 'none':
         # Won't use any octree structure to accelerate intersection tests
         intersections,intersectionPts = RayTrianglesIntersection(pt, ray, ArrayCoords[SurfConn], bidirectional=True, eps=eps)
         distances = np.sum(ray*(intersectionPts-pt),axis=1)
-    elif octree == 'generate' or type(octree) == octree.OctreeNode:
-        if octree == 'generate':
+    elif Octree == 'generate' or type(Octree) == octree.OctreeNode:
+        if Octree == 'generate':
             # Create an octree structure based on the provided structure
             root = octree.Surf2Octree(NodeCoords,SurfConn)
         else:
             # Using an already generated octree structure
             # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surf2Octree
-            root = octree
+            root = Octree
         # Proceeding with octree-accelerated intersection test
         def octreeTest(pt, ray, node, TriIds):
             [xlim,ylim,zlim] = node.getLimits()
@@ -1255,12 +1255,12 @@ def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, octree='genera
         
     return intersections, distances, intersectionPts
 
-def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, eps=1e-14, octree='generate'):
+def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, eps=1e-14, Octree='generate'):
     
     ArrayCoords = np.array(NodeCoords)
     if type(pts) is list: pts = np.array(pts)
     if type(rays) is list: rays = np.array(rays)
-    if octree == None or octree == 'None' or octree == 'none':
+    if Octree == None or Octree == 'None' or Octree == 'none':
         # Won't use any octree structure to accelerate intersection tests
         inpts = np.repeat(pts,len(SurfConn),axis=0)
         inrays = np.repeat(rays,len(SurfConn),axis=0)
@@ -1284,14 +1284,14 @@ def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, ep
         distances = utils.ExtractRagged(distances,delval=np.nan)
         intersectionPts = utils.ExtractRagged(intersectionPts,delval=np.nan)
 
-    elif octree == 'generate' or type(octree) == octree.OctreeNode:
-        if octree == 'generate':
+    elif Octree == 'generate' or type(Octree) == octree.OctreeNode:
+        if Octree == 'generate':
             # Create an octree structure based on the provided structure
             root = octree.Surf2Octree(NodeCoords,SurfConn)
         else:
             # Using an already generated octree structure
             # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surf2Octree
-            root = octree
+            root = Octree
         # Proceeding with octree-accelerated intersection test
         def octreeTest(pt, ray, node, TriIds):
             [xlim,ylim,zlim] = node.getLimits()
@@ -1343,19 +1343,19 @@ def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, ep
         
     return intersections, distances, intersectionPts
 
-def SurfSelfIntersection(NodeCoords, SurfConn, octree='generate', eps=1e-14, return_pts=False):
-    if octree == None or octree == 'None' or octree == 'none':
+def SurfSelfIntersection(NodeCoords, SurfConn, Octree='generate', eps=1e-14, return_pts=False):
+    if Octree == None or Octree == 'None' or Octree == 'none':
         # Won't use any octree structure to accelerate intersection tests
         root = None
-    elif octree == 'generate':
+    elif Octree == 'generate':
         # Create an octree structure based on the provided structure
         root = octree.Surf2Octree(NodeCoords,SurfConn)
-    elif type(octree) == octree.OctreeNode:
+    elif type(Octree) == octree.OctreeNode:
         # Using an already generated octree structure
         # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surf2Octree
-        root = octree
+        root = Octree
     else:
-        raise Exception('Invalid octree argument given: '+str(octree))
+        raise Exception('Invalid Octree argument given: '+str(Octree))
     
     Points = np.array(NodeCoords)[np.array(SurfConn)]   
     if root == None:
@@ -1461,11 +1461,11 @@ def PlaneSurfIntersection(pt, Normal, NodeCoords, SurfConn, eps=1e-14):
     return Intersections
 
 ## Inside Tests
-def isInsideSurf(pt, NodeCoords, SurfConn, ElemNormals, octree=None, eps=1e-8, ray=np.random.rand(3)):
+def isInsideSurf(pt, NodeCoords, SurfConn, ElemNormals, Octree=None, eps=1e-8, ray=np.random.rand(3)):
     
-    root = OctreeInputProcessor(NodeCoords, SurfConn, octree)
+    root = OctreeInputProcessor(NodeCoords, SurfConn, Octree)
         
-    intersections, distances, _ = RaySurfIntersection(pt,ray,NodeCoords,SurfConn,octree=root)
+    intersections, distances, _ = RaySurfIntersection(pt,ray,NodeCoords,SurfConn,Octree=root)
     posDistances = np.array([d for d in distances if d > eps])
     zero = np.any(np.abs(distances)<eps)
     # intersections2 = [intersections[i] for i,d in enumerate(distances) if d >= 0]
@@ -1487,14 +1487,14 @@ def isInsideSurf(pt, NodeCoords, SurfConn, ElemNormals, octree=None, eps=1e-8, r
             # Inside
             return True
 
-def isInsidesSurf(pts, NodeCoords, SurfConn, ElemNormals, octree='generate', eps=1e-8, rays=None):
+def isInsidesSurf(pts, NodeCoords, SurfConn, ElemNormals, Octree='generate', eps=1e-8, rays=None):
     
     if rays is None: rays = np.random.rand(len(pts),3)
     
-    root = OctreeInputProcessor(NodeCoords, SurfConn, octree)
+    root = OctreeInputProcessor(NodeCoords, SurfConn, Octree)
     import time
     tic = time.time()
-    intersections, distances, _ = RaysSurfIntersection(pts,rays,NodeCoords,SurfConn,octree=root) 
+    intersections, distances, _ = RaysSurfIntersection(pts,rays,NodeCoords,SurfConn,Octree=root) 
     print(time.time()-tic)
     tic = time.time()
     Insides = np.repeat(False,len(pts))
@@ -1591,19 +1591,19 @@ def PointsInTris(Tris,pts,method='BaryArea',eps=1e-12,inclusive=True):
             In = np.all([alpha>=eps,beta>=eps,gamma>=eps],axis=0) & (np.abs(alpha+beta+gamma-1) <= eps)
     return In
 
-def OctreeInputProcessor(NodeCoords, SurfConn, octree):
+def OctreeInputProcessor(NodeCoords, SurfConn, Octree):
     
-    if octree == None or octree == 'None' or octree == 'none':
+    if Octree == None or Octree == 'None' or Octree == 'none':
         # Won't use any octree structure to accelerate intersection tests
         root = None
-    elif octree == 'generate':
+    elif Octree == 'generate':
         # Create an octree structure based on the provided structure
         root = octree.Surf2Octree(NodeCoords,SurfConn)
-    elif type(octree) == octree.OctreeNode:
+    elif type(Octree) == octree.OctreeNode:
         # Using an already generated octree structure
         # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surf2Octree
-        root = octree
+        root = Octree
     else:
-        raise Exception('Invalid octree argument given: '+str(octree))
+        raise Exception('Invalid octree argument given: '+str(Octree))
         
     return root
