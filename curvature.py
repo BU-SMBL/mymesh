@@ -11,8 +11,30 @@ import warnings
 from scipy import ndimage
   
 def NormCurve(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
-    #
-    # Based on Goldfeather & Interrante (2004)
+    """
+    NormCurve Evaluate the curvatures of a surface mesh using the normal curvature approximation method
+    from Goldfeather & Interrante (2004).
+
+    Parameters
+    ----------
+    NodeCoords : list, np.ndarray
+        List of nodal coordinates.
+    SurfConn : list, np.ndarray
+        Nodal connectivity list for a surface mesh.
+    NodeNeighbors : list
+        List of neighbors for each node. This can be obtained
+        with utils.getNodeNeighbors or mesh.NodeNeighbors.
+    NodeNormals : list, np.ndarray
+        Unit normal vectors for each node in a nx3 array. This can be obtained
+        with utils.CalcFaceNormal and utils.Face2NodeNormal, or mesh.NodeNormals.
+
+    Returns
+    -------
+    MaxPrincipal : list
+        List of maximum principal curvatures for each node.
+    MinPrincipal : list
+        List of minimum principal curvatures for each node.
+    """  
     
     
     SurfNodes = np.unique(SurfConn)
@@ -86,9 +108,30 @@ def NormCurve(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
     return MaxPrincipal,MinPrincipal
                      
 def QuadFit(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
-    #QuadFit uses a local quadratic fitting method to determine the principal,
-    # mean, and Gaussian curvatures at each node in a triangular surface mesh
-    # Based on Goldfeather & Interrante (2004)
+    """
+    QuadFit Evaluate the curvatures of a surface mesh using the quadratic surface
+    fitting method from Goldfeather & Interrante (2004).
+
+    Parameters
+    ----------
+    NodeCoords : list, np.ndarray
+        List of nodal coordinates.
+    SurfConn : list, np.ndarray
+        Nodal connectivity list for a surface mesh.
+    NodeNeighbors : list
+        List of neighbors for each node. This can be obtained
+        with utils.getNodeNeighbors or mesh.NodeNeighbors.
+    NodeNormals : list, np.ndarray
+        Unit normal vectors for each node in a nx3 array. This can be obtained
+        with utils.CalcFaceNormal and utils.Face2NodeNormal, or mesh.NodeNormals.
+
+    Returns
+    -------
+    MaxPrincipal : list
+        List of maximum principal curvatures for each node.
+    MinPrincipal : list
+        List of minimum principal curvatures for each node.
+    """  
     
     
     SurfNodes = np.unique(SurfConn)
@@ -284,8 +327,31 @@ def CubicFit_iterative(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,Ignore=
     return MaxPrincipal,MinPrincipal
 
 def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
-    
-    # Based on Goldfeather & Interrante (2004)    
+    """
+    CubicFit Evaluate the curvatures of a surface mesh using the cubic surface
+    fitting method from Goldfeather & Interrante (2004).
+
+    Parameters
+    ----------
+    NodeCoords : list, np.ndarray
+        List of nodal coordinates.
+    SurfConn : list, np.ndarray
+        Nodal connectivity list for a surface mesh.
+    NodeNeighbors : list
+        List of neighbors for each node. This can be obtained
+        with utils.getNodeNeighbors or mesh.NodeNeighbors.
+    NodeNormals : list, np.ndarray
+        Unit normal vectors for each node in a nx3 array. This can be obtained
+        with utils.CalcFaceNormal and utils.Face2NodeNormal, or mesh.NodeNormals.
+
+    Returns
+    -------
+    MaxPrincipal : list
+        List of maximum principal curvatures for each node.
+    MinPrincipal : list
+        List of minimum principal curvatures for each node.
+    """    
+
     SurfNodes = np.unique(SurfConn)
     
     MaxPrincipal = [np.nan for i in range(len(NodeCoords))]
@@ -378,7 +444,22 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
     return MaxPrincipal,MinPrincipal
    
 def MeanCurvature(MaxPrincipal,MinPrincipal):
-    
+    """
+    MeanCurvature Calculate the mean curvature from the maximum and 
+    minimum 
+
+    Parameters
+    ----------
+    MaxPrincipal : list, float
+        Single value or list of maximum principal curvatures.
+    MinPrincipal : list, float
+        Single value or list of principal curvatures.
+
+    Returns
+    -------
+    mean : list, float
+        Single value or list of mean curvatures.
+    """    
     if type(MaxPrincipal) == np.ndarray:
         MaxPrincipal = MaxPrincipal.tolist()
     if type(MinPrincipal) == np.ndarray:
@@ -390,7 +471,22 @@ def MeanCurvature(MaxPrincipal,MinPrincipal):
     return mean
 
 def GaussianCurvature(MaxPrincipal,MinPrincipal):
-    
+    """
+    GaussianCurvature Calculate the Gaussian curvature from the maximum and 
+    minimum principal curvatures.
+
+    Parameters
+    ----------
+    MaxPrincipal : list, float
+        Single value or list of maximum principal curvatures.
+    MinPrincipal : list, float
+        Single value or list of principal curvatures.
+
+    Returns
+    -------
+    gaussian : list, float
+        Single value or list of Gaussian curvatures.
+    """  
     if type(MaxPrincipal) == np.ndarray:
         MaxPrincipal = MaxPrincipal.tolist()
     if type(MinPrincipal) == np.ndarray:
@@ -402,7 +498,22 @@ def GaussianCurvature(MaxPrincipal,MinPrincipal):
     return gaussian
 
 def Curvedness(MaxPrincipal,MinPrincipal):
-    # Ref: Koenderink, J.J. and Van Doorn, A.J., 1992. Surface shape and curvature scales. Image and vision computing, 10(8), pp.557-564.
+    """
+    Curvedness Calculate the curvedness from the maximum and minimum principal curvatures.
+    From Koenderink, J.J. and Van Doorn, A.J., 1992.
+
+    Parameters
+    ----------
+    MaxPrincipal : list, float
+        Single value or list of maximum principal curvatures.
+    MinPrincipal : list, float
+        Single value or list of principal curvatures.
+
+    Returns
+    -------
+    curvedness
+        Single value or list of curvedness values.
+    """
 
     curvedness = np.sqrt((np.asarray(MaxPrincipal)**2 + np.asarray(MinPrincipal)**2)/2)
     if len(curvedness) == 1 and type(MaxPrincipal) is int or type(MaxPrincipal) is float:
@@ -412,7 +523,22 @@ def Curvedness(MaxPrincipal,MinPrincipal):
     return curvedness
  
 def ShapeIndex(MaxPrincipal,MinPrincipal):
-    # Ref: Koenderink, J.J. and Van Doorn, A.J., 1992. Surface shape and curvature scales. Image and vision computing, 10(8), pp.557-564.
+    """
+    ShapeIndex Calculate shape indices from the maximum and minimum principal curvatures.
+    From Koenderink, J.J. and Van Doorn, A.J., 1992.
+
+    Parameters
+    ----------
+    MaxPrincipal : list, float
+        Single value or list of maximum principal curvatures.
+    MinPrincipal : list, float
+        Single value or list of principal curvatures.
+
+    Returns
+    -------
+    shape : list, float
+        Single value or list of shape indices.
+    """
     # Note: the equation from Koenderink & van Doorn has the equation: pi/2*arctan((min+max)/(min-max)), but this doesn't
     # seem to give values consistent with what are described as cups/caps - instead using pi/2*arctan((max+min)/(max-min))
     
@@ -440,17 +566,29 @@ def ShapeIndex(MaxPrincipal,MinPrincipal):
     return shape
 
 def ShapeCategory(shapeindex):
-    # Ref: Koenderink, J.J. and Van Doorn, A.J., 1992. Surface shape and curvature scales. Image and vision computing, 10(8), pp.557-564.
-    # Classifies the shape index into shape types
-    # 0 = Spherical Cup
-    # 1 = Trough
-    # 2 = Rut
-    # 3 = Saddle Rut
-    # 4 = Saddle
-    # 5 = Saddle Ridge
-    # 6 = Ridge
-    # 7 = Dome
-    # 8 = Spherical Cap
+    """
+    ShapeCategory Categorize shape indices into a nine point scale 
+    0 = Spherical Cup
+    1 = Trough
+    2 = Rut
+    3 = Saddle Rut
+    4 = Saddle
+    5 = Saddle Ridge
+    6 = Ridge
+    7 = Dome
+    8 = Spherical Cap
+    From Koenderink, J.J. and Van Doorn, A.J., 1992.
+
+    Parameters
+    ----------
+    shapeindex : list
+        List of shape indices.
+
+    Returns
+    -------
+    shape : list
+        List of shape categories.
+    """   
     shape = [-1 for i in range(len(shapeindex))]
     for i in range(len(shapeindex)):
         if shapeindex[i] < -7/8:
@@ -474,7 +612,29 @@ def ShapeCategory(shapeindex):
     return shape
                        
 def AnalyticalCurvature(F,NodeCoords):
-    # Curvature formulas for implicit curves and surfaces, Ron Goldman (2005)
+    """
+    AnalyticalCurvature Evaluate the curvature of an implicit function at a list of points located
+    on the corresponding implicit surface.
+    Based on Curvature formulas for implicit curves and surfaces, Ron Goldman (2005).
+
+    Parameters
+    ----------
+    F : function
+        Sympy symbolic function of three arguments (x,y,z)
+    NodeCoords : list, np.ndarray
+        List of node coordinates for evaluating the curvature.
+
+    Returns
+    -------
+    MaxPrincipal : np.ndarray
+        List of maximum principal curvatures for each node.
+    MinPrincipal : np.ndarray
+        List of minimum principal curvatures for each node.
+    gaussian : np.ndarray
+        List of Gaussian curvatures for each node.
+    mean : np.ndarray
+        List of mean curvatures.
+    """
     x, y, z = sp.symbols('x y z', real=True)
     if type(NodeCoords) is list: NodeCoords = np.asarray(NodeCoords)
 
@@ -578,8 +738,44 @@ def AnalyticalCurvature(F,NodeCoords):
     return MaxPrincipal, MinPrincipal, mean, gaussian
 
 def ImageCurvature(I,gaussian_sigma=1,voxelsize=1,brightobject=True):
-    # Note: Can lead to errors if surface is too close to the boundary of the image, consider building in padding based on gaussian_sigma
-    # If the 'inside' of the imaged object is darker than background, the signs of the curvatures will be flipped, in this case use brightobject=False
+    """
+    ImageCurvature Calculate curvatures based on a 3D image. Curvature values are calculated for all voxels in the image,
+    however, these curvature values are only meaningful at the surface of the imaged object(s). This can be used with 
+    utils.grid2fun, converter.im2voxel, contours.MarchingCubesImage to evaluate the voxel curvatures at points on the surface
+    of the imaged object(s).
+    Based on Curvature formulas for implicit curves and surfaces, Ron Goldman (2005).
+
+    NOTE: This can lead to errors if surface is too close to the boundary of the image, consider building in padding based on gaussian_sigma
+
+    Parameters
+    ----------
+    I : np.ndarray
+        3D array of grayscale voxel data.
+    gaussian_sigma : int, optional
+        Factor used in calculating image gradients, by default 1.
+        See scipy.ndimage.gaussian_filter.
+    voxelsize : int, float, optional
+        Voxel size of the image, by default 1.
+        This is necessary to determine the correct magnitudes of 
+        curvature. By default, the image coordinate system will 
+        be used, so principal curvatures will be in units of
+        (voxel)^-1
+    brightobject : bool, optional
+        Specifies whether the foreground of the image is bright or dark, by default True.
+        If the imaged object is darker than the background, set brightobject=False. This 
+        is important for determining the directionality of curvatures.
+
+    Returns
+    -------
+    MaxPrincipal : np.ndarray
+        List of maximum principal curvatures for each node.
+    MinPrincipal : np.ndarray
+        List of minimum principal curvatures for each node.
+    gaussian : np.ndarray
+        List of Gaussian curvatures for each node.
+    mean : np.ndarray
+        List of mean curvatures.
+    """ 
     
     if not brightobject:
         I = -np.array(I)
