@@ -12,7 +12,6 @@ from . import utils, rays, converter
 from scipy import spatial
 
 try:
-    import triangle # pip install triangle
     from plotly.offline import plot
     import plotly.graph_objects as go
 except:
@@ -327,25 +326,27 @@ def SciPy(NodeCoords):
     return NodeConn
 
 def Triangle(NodeCoords,Constraints=None,opts=''):
+    raise Exception('Delaunay triangulation using "triangle" is not supported in the current release. SciPy is used instead.')
     # Uses Triangle by Jonathan Shewchuk
     if Constraints is None or len(Constraints)==0:
         In = dict(vertices=NodeCoords)
     else:
         In = dict(vertices=NodeCoords,segments=Constraints)
     try:
-        Out = triangle.triangulate(In,'pc')
-        NodeConn = Out['triangles']
-        # NodeCoords = Out['vertices']
-        if len(Out['vertices']) != len(NodeCoords):
-            # If constraints are improperly defined, extra points may be added, but these points most likely already exist
-            for v in range(len(NodeCoords),len(Out['vertices'])):
-                # print(v)
-                All = np.all(np.abs(Out['vertices'][v]-NodeCoords)<1e-12,axis=1)
-                if np.any(All):
-                    NodeConn[NodeConn==v] = np.where(All)[0][0]
-            if np.any(NodeConn >= len(NodeCoords)):
-                a = 2
-                NodeCoords = Out['vertices']
+        NodeConn = SciPy(NodeCoords)
+        # Out = triangle.triangulate(In,'pc')
+        # NodeConn = Out['triangles']
+        # # NodeCoords = Out['vertices']
+        # if len(Out['vertices']) != len(NodeCoords):
+        #     # If constraints are improperly defined, extra points may be added, but these points most likely already exist
+        #     for v in range(len(NodeCoords),len(Out['vertices'])):
+        #         # print(v)
+        #         All = np.all(np.abs(Out['vertices'][v]-NodeCoords)<1e-12,axis=1)
+        #         if np.any(All):
+        #             NodeConn[NodeConn==v] = np.where(All)[0][0]
+        #     if np.any(NodeConn >= len(NodeCoords)):
+        #         a = 2
+        #         NodeCoords = Out['vertices']
     except:
         NodeConn = SciPy(NodeCoords)
 

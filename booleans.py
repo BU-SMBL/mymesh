@@ -142,7 +142,7 @@ def PlaneClip(pt, normal, Surf, fill=False, fill_h=None, tol=1e-8, flip=True, re
     #     for region in Regions:
     #         RegionConn = [SplitPlane.NodeConn[i] for i in region]
     #         point = utils.Centroids(SplitPlane.NodeCoords,[RegionConn[0]])
-    #         inside = rays.isInsideSurf(point, Surf.NodeCoords, Surf.NodeConn, Surf.ElemNormals, octree=None, eps=1e-8, ray=ray)
+    #         inside = rays.isInsideSurf(point, Surf.NodeCoords, Surf.NodeConn, Surf.ElemNormals, Octree=None, eps=1e-8, ray=ray)
     #         if inside:
     #             FillConn += RegionConn
     #     InsideNodes = set(np.unique(FillConn))
@@ -156,7 +156,7 @@ def PlaneClip(pt, normal, Surf, fill=False, fill_h=None, tol=1e-8, flip=True, re
     #             continue
     #         else:
     #             centroid = centroids[i]
-    #             if rays.isInsideSurf(centroid, Surf.NodeCoords, Surf.NodeConn, Surf.ElemNormals, octree=None, eps=1e-8, ray=ray):
+    #             if rays.isInsideSurf(centroid, Surf.NodeCoords, Surf.NodeConn, Surf.ElemNormals, Octree=None, eps=1e-8, ray=ray):
     #                 FillConn.append(elem)
     #             #     InsideNodes.update([n for n in elem if n not in Shared2])
     #             # else:
@@ -417,7 +417,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     AllBoundaryACentroids = utils.Centroids(SplitA.NodeCoords,[elem for i,elem in enumerate(SplitA.NodeConn) if i in AllBoundaryA])
     AllBoundaryBCentroids = utils.Centroids(SplitB.NodeCoords,[elem for i,elem in enumerate(SplitB.NodeConn) if i in AllBoundaryB])
     for i,centroid in enumerate(AllBoundaryACentroids):
-        check = rays.isInsideSurf(centroid,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,ray=ElemNormalsA[AllBoundaryA[i]]+np.random.rand(3)/1000,eps=eps)
+        check = rays.isInsideSurf(centroid,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,ray=ElemNormalsA[AllBoundaryA[i]]+np.random.rand(3)/1000,eps=eps)
         if check is True:
             AinB.add(AllBoundaryA[i])
         elif check is False:
@@ -427,7 +427,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
         else:
             AflipB.add(AllBoundaryA[i])
     for i,centroid in enumerate(AllBoundaryBCentroids):
-        check = rays.isInsideSurf(centroid,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,ray=ElemNormalsB[AllBoundaryB[i]]+np.random.rand(3)/1000,eps=eps)
+        check = rays.isInsideSurf(centroid,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,ray=ElemNormalsB[AllBoundaryB[i]]+np.random.rand(3)/1000,eps=eps)
         if check is True:
             BinA.add(AllBoundaryB[i])
         elif check is False:
@@ -442,7 +442,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
         # centroid = np.mean([SplitA.NodeCoords[n] for n in SplitA.NodeConn[RegionElems[0]]], axis=0)
         # normal = ElemNormalsA[RegionElems[0]]
         pt = SplitA.NodeCoords[RegionsA[r].pop()]
-        if rays.isInsideSurf(pt,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,eps=eps):
+        if rays.isInsideSurf(pt,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,eps=eps):
             # for e in RegionElems: AinB.add(e)
             AinB.update(RegionElems)
         else:
@@ -454,7 +454,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
         RegionElems = [e for e in range(len(SplitB.NodeConn)) if all([n in RegionsB[r] for n in SplitB.NodeConn[e]])] # Elem Set
         # centroid = np.mean([SplitB.NodeCoords[n] for n in SplitB.NodeConn[RegionElems[0]]], axis=0)
         pt = SplitB.NodeCoords[RegionsB[r].pop()]
-        if rays.isInsideSurf(pt,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,eps=eps):
+        if rays.isInsideSurf(pt,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,eps=eps):
             # for e in RegionElems: BinA.add(e)
             BinA.update(RegionElems)
         else:
@@ -473,7 +473,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     UnknownNodesA = set(elem for e in UnknownA for elem in SplitA.NodeConn[e]).difference(AinNodes).difference(AoutNodes).difference(SharedA)
     UnknownNodesB = set(elem for e in UnknownB for elem in SplitB.NodeConn[e]).difference(BinNodes).difference(BoutNodes).difference(SharedB)
     for node in UnknownNodesA:
-        check = rays.isInsideSurf(SplitA.NodeCoords[node],SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,octree=octB,ray=SplitA.NodeNormals[node],eps=eps)
+        check = rays.isInsideSurf(SplitA.NodeCoords[node],SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,ray=SplitA.NodeNormals[node],eps=eps)
         if check is True:
             AinNodes.add(node)
         elif check is False:
@@ -483,7 +483,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
         else:
             AflipNodes.add(node)
     for node in UnknownNodesB:
-        check = rays.isInsideSurf(SplitB.NodeCoords[node],SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,octree=octA,ray=SplitB.NodeNormals[node],eps=eps)
+        check = rays.isInsideSurf(SplitB.NodeCoords[node],SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,ray=SplitB.NodeNormals[node],eps=eps)
         if check is True:
             BinNodes.add(node)
         elif check is False:

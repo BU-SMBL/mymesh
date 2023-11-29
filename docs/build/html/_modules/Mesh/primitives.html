@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mesh.primitives &mdash; Mesh 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Mesh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Mesh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">Mesh.primitives</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for Mesh.primitives</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created Sept 2022</span>
+
+<span class="sd">@author: toj</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">gc</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">converter</span><span class="p">,</span> <span class="n">implicit</span><span class="p">,</span> <span class="n">mesh</span>
+
+<div class="viewcode-block" id="Box">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.primitives.Box">[docs]</a>
+<span class="k">def</span> <span class="nf">Box</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">meshobj</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;quad&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Box Generate a surface mesh of a rectangular box. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bounds : list</span>
+<span class="sd">        Six element list, [xmin,xmax,ymin,ymax,zmin,zmax].</span>
+<span class="sd">    h : float</span>
+<span class="sd">        Approximate element size.</span>
+<span class="sd">    meshobj : bool, optional</span>
+<span class="sd">        If true, will return a mesh object, if false, will return </span>
+<span class="sd">        NodeCoords and NodeConn. By default True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    BoxCoords : list</span>
+<span class="sd">        Node coordinates of the mesh. Returned if meshobj = False.</span>
+<span class="sd">    BoxConn : list</span>
+<span class="sd">        Nodal connectivities of the mesh. Returned if meshobj = False.</span>
+<span class="sd">    Box : Mesh.mesh</span>
+<span class="sd">        Mesh object containing the box mesh. Returned if meshobj = True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">GridCoords</span><span class="p">,</span> <span class="n">GridConn</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">BoxConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2surface</span><span class="p">(</span><span class="n">GridCoords</span><span class="p">,</span><span class="n">GridConn</span><span class="p">)</span>
+    <span class="n">BoxCoords</span><span class="p">,</span><span class="n">BoxConn</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">removeNodes</span><span class="p">(</span><span class="n">GridCoords</span><span class="p">,</span><span class="n">BoxConn</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
+        <span class="n">BoxConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">quad2tri</span><span class="p">(</span><span class="n">BoxConn</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">meshobj</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+            <span class="n">Box</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">BoxCoords</span><span class="p">,</span><span class="n">BoxConn</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Box</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">BoxCoords</span><span class="p">,</span><span class="n">BoxConn</span><span class="p">)</span>
+        <span class="n">Box</span><span class="o">.</span><span class="n">Type</span> <span class="o">=</span> <span class="s1">&#39;surf&#39;</span>
+        <span class="n">Box</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">Box</span>
+    <span class="k">return</span> <span class="n">BoxCoords</span><span class="p">,</span><span class="n">BoxConn</span></div>
+
+
+<div class="viewcode-block" id="Grid">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.primitives.Grid">[docs]</a>
+<span class="k">def</span> <span class="nf">Grid</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">meshobj</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Grid Generate a rectangular grid mesh.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bounds : list</span>
+<span class="sd">        Six element list, [xmin,xmax,ymin,ymax,zmin,zmax].</span>
+<span class="sd">    h : float</span>
+<span class="sd">        Element size.</span>
+<span class="sd">    meshobj : bool, optional</span>
+<span class="sd">        If true, will return a mesh object, if false, will return </span>
+<span class="sd">        NodeCoords and NodeConn. By default True.</span>
+<span class="sd">    exact_h : bool, optional</span>
+<span class="sd">        If true, will make a mesh where the element size is exactly</span>
+<span class="sd">        equal to what is specified, but the upper bounds may vary slightly.</span>
+<span class="sd">        Otherwise, the bounds will be strictly enforced, but element size may deviate</span>
+<span class="sd">        from the specified h. This may result in non-cubic elements. By default False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    GridCoords : list</span>
+<span class="sd">        Node coordinates of the mesh. Returned if meshobj = False.</span>
+<span class="sd">    GridConn : list</span>
+<span class="sd">        Nodal connectivities of the mesh. Returned if meshobj = False.</span>
+<span class="sd">    Grid : Mesh.mesh</span>
+<span class="sd">        Mesh object containing the grid mesh. Returned if meshobj = True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">hx</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="n">hy</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span> <span class="n">hz</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">hx</span> <span class="o">=</span> <span class="n">h</span><span class="p">;</span> <span class="n">hy</span> <span class="o">=</span> <span class="n">h</span><span class="p">;</span> <span class="n">hz</span> <span class="o">=</span> <span class="n">h</span>
+    
+    <span class="k">if</span> <span class="n">exact_h</span><span class="p">:</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">hx</span><span class="p">,</span><span class="n">hx</span><span class="p">)</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="n">hy</span><span class="p">,</span><span class="n">hy</span><span class="p">)</span>
+        <span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="n">hz</span><span class="p">,</span><span class="n">hz</span><span class="p">)</span>
+        <span class="n">nX</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+        <span class="n">nY</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span>
+        <span class="n">nZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">nX</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="n">hx</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">nY</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">/</span><span class="n">hy</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">nZ</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">bounds</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">-</span><span class="n">bounds</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="o">/</span><span class="n">hz</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">nX</span><span class="p">)</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">nY</span><span class="p">)</span>
+        <span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span><span class="n">nZ</span><span class="p">)</span>
+        
+
+    <span class="c1"># VoxelCoords = np.hstack([</span>
+    <span class="c1">#     np.repeat(xs,len(ys)*len(zs))[:,None],</span>
+    <span class="c1">#     np.tile(np.repeat(ys,len(xs)),len(zs)).flatten()[:,None],</span>
+    <span class="c1">#     np.tile(np.tile(zs,len(xs)).flatten(),len(ys)).flatten()[:,None]</span>
+    <span class="c1"># ])</span>
+    <span class="n">VoxelCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">))[:,</span><span class="kc">None</span><span class="p">],</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">)),</span><span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[:,</span><span class="kc">None</span><span class="p">],</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span><span class="nb">len</span><span class="p">(</span><span class="n">ys</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[:,</span><span class="kc">None</span><span class="p">]</span>
+    <span class="p">])</span>
+
+    <span class="n">Ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)),(</span><span class="n">nX</span><span class="p">,</span><span class="n">nY</span><span class="p">,</span><span class="n">nZ</span><span class="p">))</span>
+    
+    <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(((</span><span class="n">nX</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nY</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nZ</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="mi">8</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="n">VoxelConn</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">VoxelConn</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">VoxelConn</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">VoxelConn</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">VoxelConn</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">VoxelConn</span><span class="p">[:,</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">VoxelConn</span><span class="p">[:,</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">VoxelConn</span><span class="p">[:,</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">meshobj</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+            <span class="n">Grid</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">,</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Grid</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">,</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Grid</span>
+    <span class="k">return</span> <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span></div>
+
+
+<div class="viewcode-block" id="Grid2D">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.primitives.Grid2D">[docs]</a>
+<span class="k">def</span> <span class="nf">Grid2D</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">meshobj</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;quad&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Grid Generate a rectangular grid mesh.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bounds : list</span>
+<span class="sd">        Four element list, [xmin,xmax,ymin,ymax].</span>
+<span class="sd">    h : float</span>
+<span class="sd">        Element size.</span>
+<span class="sd">    meshobj : bool, optional</span>
+<span class="sd">        If true, will return a mesh object, if false, will return </span>
+<span class="sd">        NodeCoords and NodeConn. By default True.</span>
+<span class="sd">    exact_h : bool, optional</span>
+<span class="sd">        If true, will make a mesh where the element size is exactly</span>
+<span class="sd">        equal to what is specified, but the upper bounds may vary slightly.</span>
+<span class="sd">        Otherwise, the bounds will be strictly enforced, but element size may deviate</span>
+<span class="sd">        from the specified h. This may result in non-cubic elements. By default False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    GridCoords : list</span>
+<span class="sd">        Node coordinates of the mesh. Returned if meshobj = False.</span>
+<span class="sd">    GridConn : list</span>
+<span class="sd">        Nodal connectivities of the mesh. Returned if meshobj = False.</span>
+<span class="sd">    Grid : Mesh.mesh</span>
+<span class="sd">        Mesh object containing the grid mesh. Returned if meshobj = True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">hx</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="n">hy</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">hx</span> <span class="o">=</span> <span class="n">h</span><span class="p">;</span> <span class="n">hy</span> <span class="o">=</span> <span class="n">h</span>
+
+    <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span>
+        <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">exact_h</span><span class="p">:</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">hx</span><span class="p">,</span><span class="n">hx</span><span class="p">)</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="n">hy</span><span class="p">,</span><span class="n">hy</span><span class="p">)</span>
+        <span class="n">nX</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+        <span class="n">nY</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">nX</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="n">hx</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">nY</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">/</span><span class="n">hy</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">nX</span><span class="p">)</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">nY</span><span class="p">)</span>
+
+    <span class="n">GridCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ys</span><span class="p">))[:,</span><span class="kc">None</span><span class="p">],</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[:,</span><span class="kc">None</span><span class="p">],</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nX</span><span class="o">*</span><span class="n">nY</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="p">])</span>
+
+    <span class="n">Ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">GridCoords</span><span class="p">)),(</span><span class="n">nX</span><span class="p">,</span><span class="n">nY</span><span class="p">))</span>
+    
+    <span class="n">GridConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(((</span><span class="n">nX</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nY</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="mi">4</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="n">GridConn</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">GridConn</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">GridConn</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">GridConn</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
+        <span class="n">GridConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">quad2tri</span><span class="p">(</span><span class="n">GridConn</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">meshobj</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+            <span class="n">Grid</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">GridCoords</span><span class="p">,</span><span class="n">GridConn</span><span class="p">,</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Grid</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">GridCoords</span><span class="p">,</span><span class="n">GridConn</span><span class="p">,</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Grid</span>
+    <span class="k">return</span> <span class="n">GridCoords</span><span class="p">,</span> <span class="n">GridConn</span></div>
+
+
+<div class="viewcode-block" id="Plane">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.primitives.Plane">[docs]</a>
+<span class="k">def</span> <span class="nf">Plane</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">meshobj</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;quad&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plane Generate a 2D grid oriented on a plane</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pt : list, np.ndarray</span>
+<span class="sd">        Coordinates (x,y,z) of a point on the plane</span>
+<span class="sd">    normal : list, np.ndarray</span>
+<span class="sd">        Normal vector of the plane</span>
+<span class="sd">    bounds : list</span>
+<span class="sd">        Six element list, [xmin,xmax,ymin,ymax,zmin,zmax].</span>
+<span class="sd">    h : float</span>
+<span class="sd">        Element size.</span>
+<span class="sd">    meshobj : bool, optional</span>
+<span class="sd">        If true, will return a mesh object, if false, will return </span>
+<span class="sd">        NodeCoords and NodeConn. By default True.</span>
+<span class="sd">    exact_h : bool, optional</span>
+<span class="sd">        If true, will make a mesh where the element size is exactly</span>
+<span class="sd">        equal to what is specified, but the upper bounds may vary slightly.</span>
+<span class="sd">        Otherwise, the bounds will be strictly enforced, but element size may deviate</span>
+<span class="sd">        from the specified h. This may result in non-cubic elements. By default False.</span>
+<span class="sd">    ElemType : str, optional</span>
+<span class="sd">        Element type, by default &#39;quad&#39;. Options are &#39;tri&#39; or &#39;quad&#39;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    PlaneCoords : list</span>
+<span class="sd">        Node coordinates of the mesh. Returned if meshobj = False.</span>
+<span class="sd">    PlaneConn : list</span>
+<span class="sd">        Nodal connectivities of the mesh. Returned if meshobj = False.</span>
+<span class="sd">    plane : Mesh.mesh</span>
+<span class="sd">        Mesh object containing the planar mesh. Returned if meshobj = True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get rotation between the plane and the xy (z=0) plane</span>
+    <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">quat_rotate</span><span class="p">(</span><span class="n">rotAxis</span><span class="p">,</span><span class="n">angle</span><span class="p">):</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>               <span class="c1"># Quaternion Rotation</span>
+                <span class="n">rotAxis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+                <span class="n">rotAxis</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+                <span class="n">rotAxis</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span>
+    
+        <span class="n">R</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>   <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
+                <span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>   <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
+                <span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="p">]</span>
+        <span class="k">return</span> <span class="n">R</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">normal</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">normal</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kxn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">normal</span><span class="p">)</span>
+        <span class="n">rotAxis</span> <span class="o">=</span> <span class="n">kxn</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">kxn</span><span class="p">)</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">normal</span><span class="p">))</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">quat_rotate</span><span class="p">(</span><span class="n">rotAxis</span><span class="p">,</span><span class="n">angle</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span> <span class="o">!=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">axis1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">axis2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">axis1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">axis1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">axis2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">axis1</span><span class="p">)</span>
+    
+    <span class="n">axis1</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">axis1</span><span class="p">)</span>
+    <span class="n">axis2</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">axis2</span><span class="p">)</span>
+
+    <span class="n">BottomCorner</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">4</span><span class="p">]])</span>
+    <span class="n">TopCorner</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">5</span><span class="p">]])</span>
+
+    <span class="n">diagonal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">TopCorner</span><span class="o">-</span><span class="n">BottomCorner</span><span class="p">)</span>
+    <span class="n">corner1</span> <span class="o">=</span> <span class="n">pt</span> <span class="o">+</span> <span class="p">(</span><span class="n">axis1</span> <span class="o">*</span> <span class="p">(</span><span class="n">diagonal</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">axis2</span> <span class="o">*</span> <span class="p">(</span><span class="n">diagonal</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">corner2</span> <span class="o">=</span> <span class="n">pt</span> <span class="o">-</span> <span class="p">(</span><span class="n">axis1</span> <span class="o">*</span> <span class="p">(</span><span class="n">diagonal</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">axis2</span> <span class="o">*</span> <span class="p">(</span><span class="n">diagonal</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">corner3</span> <span class="o">=</span> <span class="n">pt</span> <span class="o">+</span> <span class="p">(</span><span class="n">axis1</span> <span class="o">*</span> <span class="p">(</span><span class="n">diagonal</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="n">axis2</span> <span class="o">*</span> <span class="p">(</span><span class="n">diagonal</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">corner4</span> <span class="o">=</span> <span class="n">pt</span> <span class="o">-</span> <span class="p">(</span><span class="n">axis1</span> <span class="o">*</span> <span class="p">(</span><span class="n">diagonal</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="n">axis2</span> <span class="o">*</span> <span class="p">(</span><span class="n">diagonal</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">Corners</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">corner1</span><span class="p">,</span> <span class="n">BottomCorner</span><span class="p">,</span> <span class="n">TopCorner</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">corner2</span><span class="p">,</span> <span class="n">BottomCorner</span><span class="p">,</span> <span class="n">TopCorner</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">corner3</span><span class="p">,</span> <span class="n">BottomCorner</span><span class="p">,</span> <span class="n">TopCorner</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">corner4</span><span class="p">,</span> <span class="n">BottomCorner</span><span class="p">,</span> <span class="n">TopCorner</span><span class="p">)</span>
+    <span class="p">])</span>
+    <span class="n">xyCorners</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">Corners</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">xyCorners</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">xyCorners</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">n</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">!=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">cross</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">rotAxis</span> <span class="o">=</span> <span class="n">cross</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">cross</span><span class="p">)</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">n</span><span class="p">))</span>
+        <span class="n">R2</span> <span class="o">=</span> <span class="n">quat_rotate</span><span class="p">(</span><span class="n">rotAxis</span><span class="p">,</span><span class="n">angle</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">R2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">GridCorners</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R2</span><span class="p">,</span><span class="n">xyCorners</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    
+    <span class="n">GridBounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">GridCorners</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">GridCorners</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">GridCorners</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">GridCorners</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">GridCoords</span><span class="p">,</span><span class="n">PlaneConn</span> <span class="o">=</span> <span class="n">Grid2D</span><span class="p">(</span><span class="n">GridBounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">GridCorners</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">exact_h</span><span class="o">=</span><span class="n">exact_h</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="n">ElemType</span><span class="p">)</span>
+
+    <span class="c1"># Rotate xy plane to proper orientation</span>
+    <span class="n">PlaneCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">R</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">R2</span><span class="p">),</span><span class="n">GridCoords</span><span class="o">.</span><span class="n">T</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># Translate</span>
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span><span class="n">PlaneCoords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span><span class="n">pt</span><span class="p">)</span> 
+    <span class="n">PlaneCoords</span> <span class="o">=</span> <span class="n">PlaneCoords</span> <span class="o">-</span> <span class="n">sd</span><span class="o">*</span><span class="n">normal</span>
+
+
+    <span class="k">if</span> <span class="n">meshobj</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+            <span class="n">plane</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">PlaneCoords</span><span class="p">,</span><span class="n">PlaneConn</span><span class="p">,</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plane</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">PlaneCoords</span><span class="p">,</span><span class="n">PlaneConn</span><span class="p">,</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">plane</span>
+    <span class="k">return</span> <span class="n">PlaneCoords</span><span class="p">,</span> <span class="n">PlaneConn</span></div>
+
+
+<div class="viewcode-block" id="Extrude">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.primitives.Extrude">[docs]</a>
+<span class="k">def</span> <span class="nf">Extrude</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;quad&#39;</span><span class="p">,</span> <span class="n">meshobj</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extrude Generate a surface mesh from a line mesh</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    line : mesh.mesh</span>
+<span class="sd">        Mesh object containing line segment elements in a 2D plane.</span>
+<span class="sd">    distance : int, float</span>
+<span class="sd">        Extrusion distance.</span>
+<span class="sd">    step : int, float</span>
+<span class="sd">        Element size for new elements in the extrusion direction.</span>
+<span class="sd">    axis : int, optional</span>
+<span class="sd">        Axis of extrusion, by default 2. This should be orthogonal to the plane of the 2D line mesh. </span>
+<span class="sd">        Options are 0, 1, or 2 for the x, y, or z axes, respectively. </span>
+<span class="sd">    ElemType : str, optional</span>
+<span class="sd">        Element type, by default &#39;quad&#39;. Options are &#39;tri&#39; or &#39;quad&#39;.</span>
+<span class="sd">    meshobj : bool, optional</span>
+<span class="sd">        If true, will return a mesh object, if false, will return </span>
+<span class="sd">        NodeCoords and NodeConn. By default True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NodeCoords : list</span>
+<span class="sd">        Node coordinates of the mesh. Returned if meshobj = False.</span>
+<span class="sd">    NodeConn : list</span>
+<span class="sd">        Nodal connectivities of the mesh. Returned if meshobj = False.</span>
+<span class="sd">    extruded : Mesh.mesh</span>
+<span class="sd">        Mesh object containing the extruded mesh. Returned if meshobj = True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span>
+    <span class="n">OriginalConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span>
+    <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">step</span><span class="p">,</span><span class="n">distance</span><span class="o">+</span><span class="n">step</span><span class="p">,</span><span class="n">step</span><span class="p">)):</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span>
+        <span class="n">temp</span><span class="p">[:,</span><span class="n">axis</span><span class="p">]</span> <span class="o">+=</span> <span class="n">s</span>
+        <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">OriginalConn</span><span class="o">+</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)),</span><span class="n">np</span><span class="o">.</span><span class="n">fliplr</span><span class="p">(</span><span class="n">OriginalConn</span><span class="o">+</span><span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)))]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">NodeConn</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
+        <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">quad2tri</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">meshobj</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+            <span class="n">extruded</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">extruded</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">extruded</span>
+    <span class="k">return</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span></div>
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Timothy O. Josephson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

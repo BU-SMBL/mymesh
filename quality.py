@@ -2,14 +2,13 @@
 """
 Created on Sun Jan 23 23:58:18 2022
 
+reference: Finite element modeling mesh quality, energy balance and validation methods: A review with recommendations associated with the modeling of bone tissue - Burkhart et al.
 @author: toj
 """
 import numpy as np
 
 import sys, copy, warnings
 from . import utils, converter
-
-# Finite element modeling mesh quality, energy balance and validation methods: A review with recommendations associated with the modeling of bone tissue - Burkhart et al.
 
 def AspectRatio(NodeCoords,NodeConn,verbose=False):
     """

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mesh.booleans &mdash; Mesh 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Mesh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Mesh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">Mesh.booleans</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for Mesh.booleans</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed Feb 16 11:28:28 2022</span>
+
+<span class="sd">@author: toj</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span><span class="o">,</span> <span class="nn">itertools</span><span class="o">,</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">spatial</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">utils</span><span class="p">,</span> <span class="n">octree</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">delaunay</span><span class="p">,</span> <span class="n">primitives</span>
+
+<div class="viewcode-block" id="MeshBooleans">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.booleans.MeshBooleans">[docs]</a>
+<span class="k">def</span> <span class="nf">MeshBooleans</span><span class="p">(</span><span class="n">Surf1</span><span class="p">,</span> <span class="n">Surf2</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MeshBooleans summary</span>
+<span class="sd">    https://dl.acm.org/doi/pdf/10.1145/15922.15904</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Surf1 : mesh.mesh</span>
+<span class="sd">        Mesh object containing a surface mesh</span>
+<span class="sd">    Surf2 : mesh.mesh</span>
+<span class="sd">        Mesh object containing a surface mesh</span>
+<span class="sd">    tol : type, optional</span>
+<span class="sd">        Tolerance value, by default 1e-8</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Union : mesh.mesh</span>
+<span class="sd">        Mesh object containing the union of the two input surfaces</span>
+<span class="sd">    Intersection : mesh.mesh</span>
+<span class="sd">        Mesh object containing the intersection of the two input surfaces</span>
+<span class="sd">    Difference : mesh.mesh</span>
+<span class="sd">        Mesh object containing the difference of the two input surfaces</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">tol</span><span class="o">/</span><span class="mi">100</span>
+    <span class="n">eps_final</span> <span class="o">=</span> <span class="n">tol</span><span class="o">*</span><span class="mi">10</span>
+    <span class="c1"># Split Mesh</span>
+    <span class="n">Split1</span><span class="p">,</span> <span class="n">Split2</span> <span class="o">=</span> <span class="n">SplitMesh</span><span class="p">(</span><span class="n">Surf1</span><span class="p">,</span> <span class="n">Surf2</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
+
+    <span class="n">Split1</span><span class="o">.</span><span class="n">cleanup</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span><span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">Split2</span><span class="o">.</span><span class="n">cleanup</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span><span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Get Shared Nodes</span>
+    <span class="n">Shared1</span><span class="p">,</span><span class="n">Shared2</span> <span class="o">=</span> <span class="n">GetSharedNodes</span><span class="p">(</span><span class="n">Split1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Split2</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
+    
+    <span class="c1"># Classify Tris</span>
+    <span class="n">AinB</span><span class="p">,</span> <span class="n">AoutB</span><span class="p">,</span> <span class="n">AsameB</span><span class="p">,</span> <span class="n">AflipB</span><span class="p">,</span> <span class="n">BinA</span><span class="p">,</span> <span class="n">BoutA</span><span class="p">,</span> <span class="n">BsameA</span><span class="p">,</span> <span class="n">BflipA</span> <span class="o">=</span> <span class="n">ClassifyTris</span><span class="p">(</span><span class="n">Split1</span><span class="p">,</span> <span class="n">Shared1</span><span class="p">,</span> <span class="n">Split2</span><span class="p">,</span> <span class="n">Shared2</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
+    <span class="c1"># Perform Boolean Operations</span>
+    <span class="c1"># Union</span>
+    <span class="n">AUtris</span> <span class="o">=</span> <span class="n">AoutB</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">AsameB</span><span class="p">)</span>
+    <span class="n">BUtris</span> <span class="o">=</span> <span class="n">BoutA</span>
+    <span class="n">AUConn</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">e</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Split1</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">AUtris</span><span class="p">]</span>
+    <span class="n">BUConn</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">e</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Split2</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">BUtris</span><span class="p">]</span>
+    <span class="c1"># Intersection</span>
+    <span class="n">AItris</span> <span class="o">=</span> <span class="n">AinB</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">AsameB</span><span class="p">)</span>
+    <span class="n">BItris</span> <span class="o">=</span> <span class="n">BinA</span>
+    <span class="n">AIConn</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">e</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Split1</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">AItris</span><span class="p">]</span>
+    <span class="n">BIConn</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">e</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Split2</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">BItris</span><span class="p">]</span>
+    <span class="c1"># Difference</span>
+    <span class="n">ADtris</span> <span class="o">=</span> <span class="n">AoutB</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">AflipB</span><span class="p">)</span>
+    <span class="n">BDtris</span> <span class="o">=</span> <span class="n">BinA</span>
+    <span class="n">ADConn</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">e</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Split1</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">ADtris</span><span class="p">]</span>
+    <span class="n">BDConn</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">e</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Split2</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">BDtris</span><span class="p">]</span>
+    
+    <span class="c1"># Merge and Cleanup Mesh</span>
+    <span class="n">MergedUCoords</span><span class="p">,</span> <span class="n">MergedUConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">MergeMesh</span><span class="p">(</span><span class="n">Split1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">AUConn</span><span class="p">,</span> <span class="n">Split2</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">BUConn</span><span class="p">)</span>
+    <span class="c1"># MergedUCoords, MergedUConn, _ = converter.removeNodes(MergedUCoords, MergedUConn)</span>
+    <span class="c1"># MergedUCoords, MergedUConn, _ = utils.DeleteDuplicateNodes(MergedUCoords, MergedUConn)</span>
+        
+    <span class="n">MergedICoords</span><span class="p">,</span> <span class="n">MergedIConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">MergeMesh</span><span class="p">(</span><span class="n">Split1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">AIConn</span><span class="p">,</span> <span class="n">Split2</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">BIConn</span><span class="p">)</span>
+    <span class="c1"># MergedICoords, MergedIConn, _ = converter.removeNodes(MergedICoords, MergedIConn)</span>
+    <span class="c1"># MergedICoords, MergedIConn, _ = utils.DeleteDuplicateNodes(MergedICoords, MergedIConn)</span>
+    
+    <span class="n">MergedDCoords</span><span class="p">,</span> <span class="n">MergedDConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">MergeMesh</span><span class="p">(</span><span class="n">Split1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">ADConn</span><span class="p">,</span> <span class="n">Split2</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">BDConn</span><span class="p">)</span>
+    <span class="c1"># MergedDCoords, MergedDConn, _ = converter.removeNodes(MergedDCoords, MergedDConn)</span>
+    <span class="c1"># MergedDCoords, MergedDConn, _ = utils.DeleteDuplicateNodes(MergedDCoords, MergedDConn)</span>
+    <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+        <span class="n">Union</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">MergedUCoords</span><span class="p">,</span><span class="n">MergedUConn</span><span class="p">)</span>
+        <span class="n">Intersection</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">MergedICoords</span><span class="p">,</span><span class="n">MergedIConn</span><span class="p">)</span>
+        <span class="n">Difference</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">MergedDCoords</span><span class="p">,</span><span class="n">MergedDConn</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Union</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">MergedUCoords</span><span class="p">,</span><span class="n">MergedUConn</span><span class="p">)</span>
+        <span class="n">Intersection</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">MergedICoords</span><span class="p">,</span><span class="n">MergedIConn</span><span class="p">)</span>
+        <span class="n">Difference</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">MergedDCoords</span><span class="p">,</span><span class="n">MergedDConn</span><span class="p">)</span>
+
+    <span class="c1"># Split elements by the Absolute large angle criteria, this will split degenerate collinear elements so that they can be easily cleaned up</span>
+    <span class="c1"># Union.NodeCoords,Union.NodeConn = improvement.Split(*Union,1,criteria=&#39;AbsLargeAngle&#39;,iterate=1,thetal=179)</span>
+    <span class="c1"># Intersection.NodeCoords,Intersection.NodeConn = improvement.Split(*Intersection,1,criteria=&#39;AbsLargeAngle&#39;,iterate=1,thetal=179)</span>
+    <span class="c1"># Difference.NodeCoords,Difference.NodeConn = improvement.Split(*Difference,1,criteria=&#39;AbsLargeAngle&#39;,iterate=1,thetal=179)</span>
+
+    <span class="n">Union</span><span class="o">.</span><span class="n">cleanup</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="n">eps_final</span><span class="p">,</span><span class="n">angletol</span><span class="o">=</span><span class="mf">5e-3</span><span class="p">)</span>
+    <span class="n">Intersection</span><span class="o">.</span><span class="n">cleanup</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="n">eps_final</span><span class="p">,</span><span class="n">angletol</span><span class="o">=</span><span class="mf">5e-3</span><span class="p">)</span>
+    <span class="n">Difference</span><span class="o">.</span><span class="n">cleanup</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="n">eps_final</span><span class="p">,</span><span class="n">angletol</span><span class="o">=</span><span class="mf">5e-3</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Intersection</span><span class="p">,</span> <span class="n">Difference</span></div>
+
+
+<div class="viewcode-block" id="PlaneClip">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.booleans.PlaneClip">[docs]</a>
+<span class="k">def</span> <span class="nf">PlaneClip</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="n">Surf</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_splitplane</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    
+    
+    <span class="n">Tris</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Surf</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="n">Surf</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">]</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+    <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">normal</span><span class="o">*</span><span class="n">Tris</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span><span class="n">pt</span><span class="p">)</span>
+    <span class="n">Intersections</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">((</span><span class="n">sd</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">tol</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">((</span><span class="n">sd</span> <span class="o">&gt;</span> <span class="n">tol</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="n">flip</span><span class="p">:</span>
+        <span class="n">Clipped</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">Surf</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Surf</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)[</span><span class="o">~</span><span class="n">Intersections</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">sd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Clipped</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">Surf</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Surf</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)[</span><span class="o">~</span><span class="n">Intersections</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">sd</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]))</span>
+
+    <span class="n">Intersected</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">Surf</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Surf</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="n">Intersections</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+    
+    <span class="n">mins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">Surf</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">maxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Surf</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">mins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">tol</span><span class="p">,</span><span class="n">maxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">tol</span><span class="p">,</span><span class="n">mins</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">tol</span><span class="p">,</span><span class="n">maxs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">tol</span><span class="p">,</span><span class="n">mins</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">tol</span><span class="p">,</span><span class="n">maxs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">tol</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">fill_h</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fill_h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">maxs</span><span class="o">-</span><span class="n">mins</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span>
+    <span class="n">Plane</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Plane</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">fill_h</span><span class="p">,</span> <span class="n">meshobj</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;tri&#39;</span><span class="p">)</span>
+
+    <span class="n">SplitSurf</span><span class="p">,</span> <span class="n">SplitPlane</span> <span class="o">=</span> <span class="n">SplitMesh</span><span class="p">(</span><span class="n">Intersected</span><span class="p">,</span><span class="n">Plane</span><span class="p">)</span> <span class="c1"># TODO: This could be done more efficiently for planar case</span>
+    <span class="n">SplitSurf</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+    <span class="n">SplitPlane</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+
+    <span class="c1"># if fill:</span>
+    <span class="c1">#     # TODO: Efficiency and Robustness</span>
+    <span class="c1">#     Shared1,Shared2 = GetSharedNodes(SplitSurf.NodeCoords, SplitPlane.NodeCoords, eps=tol)</span>
+    <span class="c1">#     root = octree.Surf2Octree(*Surf)</span>
+    <span class="c1">#     if np.any(np.abs(normal) != [0,0,1]):</span>
+    <span class="c1">#         ray = np.cross(normal, [0,0,1])</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         ray = np.cross(normal, [1,0,0])</span>
+
+    <span class="c1">#     AllBoundary = [i for i,elem in enumerate(SplitPlane.NodeConn) if all([n in Shared2 for n in elem])]  </span>
+        
+    <span class="c1">#     NotSharedConn = [elem for i,elem in enumerate(SplitPlane.NodeConn) if not any([n in Shared2 for n in elem]) and i not in AllBoundary] </span>
+    <span class="c1">#     SharedConn = [elem for i,elem in enumerate(SplitPlane.NodeConn) if any([n in Shared2 for n in elem]) and i not in AllBoundary]  </span>
+        
+    <span class="c1">#     Regions = utils.getConnectedElements(SplitPlane.NodeCoords,NotSharedConn)  # Node Sets</span>
+    <span class="c1">#     FillConn = []</span>
+    <span class="c1">#     for region in Regions:</span>
+    <span class="c1">#         RegionConn = [SplitPlane.NodeConn[i] for i in region]</span>
+    <span class="c1">#         point = utils.Centroids(SplitPlane.NodeCoords,[RegionConn[0]])</span>
+    <span class="c1">#         inside = rays.isInsideSurf(point, Surf.NodeCoords, Surf.NodeConn, Surf.ElemNormals, Octree=None, eps=1e-8, ray=ray)</span>
+    <span class="c1">#         if inside:</span>
+    <span class="c1">#             FillConn += RegionConn</span>
+    <span class="c1">#     InsideNodes = set(np.unique(FillConn))</span>
+    <span class="c1">#     OutsideNodes = set(range(SplitPlane.NNode)).difference(InsideNodes)</span>
+
+    <span class="c1">#     centroids = utils.Centroids(SplitPlane.NodeCoords,SharedConn)</span>
+    <span class="c1">#     for i,elem in enumerate(SharedConn):</span>
+    <span class="c1">#         if all([n in Shared2 or n in InsideNodes for n in elem]):</span>
+    <span class="c1">#             FillConn.append(elem)</span>
+    <span class="c1">#         elif all([n in Shared2 or n in InsideNodes for n in elem]):</span>
+    <span class="c1">#             continue</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             centroid = centroids[i]</span>
+    <span class="c1">#             if rays.isInsideSurf(centroid, Surf.NodeCoords, Surf.NodeConn, Surf.ElemNormals, Octree=None, eps=1e-8, ray=ray):</span>
+    <span class="c1">#                 FillConn.append(elem)</span>
+    <span class="c1">#             #     InsideNodes.update([n for n in elem if n not in Shared2])</span>
+    <span class="c1">#             # else:</span>
+    <span class="c1">#             #     OutsideNodes.update([n for n in elem if n not in Shared2])</span>
+
+
+    <span class="n">SplitTris</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">SplitSurf</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="n">SplitSurf</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">]</span>
+    <span class="n">sd2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">normal</span><span class="o">*</span><span class="n">SplitTris</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span><span class="n">pt</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">flip</span><span class="p">:</span>
+        <span class="n">Clipped2</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">SplitSurf</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">SplitSurf</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">sd2</span> <span class="o">&lt;=</span> <span class="n">tol</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]))</span>
+        <span class="c1"># if fill:</span>
+        <span class="c1">#     Clipped2.addElems(FillConn)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Clipped2</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">SplitSurf</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">SplitSurf</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">sd2</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">tol</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]))</span>
+        <span class="c1"># if fill:</span>
+        <span class="c1">#     Clipped2.addElems(FillConn)</span>
+    <span class="n">Clipped</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">Clipped2</span><span class="p">)</span>
+    <span class="n">Clipped</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">return_splitplane</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Clipped</span><span class="p">,</span><span class="n">SplitPlane</span>
+    <span class="k">return</span> <span class="n">Clipped</span></div>
+
+       
+<div class="viewcode-block" id="VoxelIntersect">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.booleans.VoxelIntersect">[docs]</a>
+<span class="k">def</span> <span class="nf">VoxelIntersect</span><span class="p">(</span><span class="n">VoxelCoordsA</span><span class="p">,</span> <span class="n">VoxelConnA</span><span class="p">,</span> <span class="n">VoxelCoordsB</span><span class="p">,</span> <span class="n">VoxelConnB</span><span class="p">):</span>
+    <span class="c1"># Requires Voxel meshes that exsits within the same grid</span>
+    <span class="n">centroidsA</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">VoxelCoordsA</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">VoxelConnA</span><span class="p">]</span>
+    <span class="n">centroidsB</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">VoxelCoordsB</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">VoxelConnB</span><span class="p">])</span>
+    
+    <span class="n">IConn</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">VoxelConnA</span><span class="p">)</span> <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">centroidsA</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="ow">in</span> <span class="n">centroidsB</span><span class="p">]</span>
+    <span class="n">ICoords</span><span class="p">,</span><span class="n">IConn</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">removeNodes</span><span class="p">(</span><span class="n">VoxelCoordsA</span><span class="p">,</span> <span class="n">IConn</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ICoords</span><span class="p">,</span> <span class="n">IConn</span></div>
+
+    
+<div class="viewcode-block" id="VoxelDifference">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.booleans.VoxelDifference">[docs]</a>
+<span class="k">def</span> <span class="nf">VoxelDifference</span><span class="p">(</span><span class="n">VoxelCoordsA</span><span class="p">,</span> <span class="n">VoxelConnA</span><span class="p">,</span> <span class="n">VoxelCoordsB</span><span class="p">,</span> <span class="n">VoxelConnB</span><span class="p">):</span>
+    <span class="c1"># Requires Voxel meshes that exsits within the same grid</span>
+    <span class="n">centroidsA</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">VoxelCoordsA</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">VoxelConnA</span><span class="p">]</span>
+    <span class="n">centroidsB</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">VoxelCoordsB</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">VoxelConnB</span><span class="p">])</span>
+    
+    <span class="n">DConn</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">VoxelConnA</span><span class="p">)</span> <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">centroidsA</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">centroidsB</span><span class="p">]</span>
+    <span class="n">DCoords</span><span class="p">,</span><span class="n">DConn</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">removeNodes</span><span class="p">(</span><span class="n">VoxelCoordsA</span><span class="p">,</span> <span class="n">DConn</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">DCoords</span><span class="p">,</span> <span class="n">DConn</span></div>
+
+
+<div class="viewcode-block" id="SplitMesh">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.booleans.SplitMesh">[docs]</a>
+<span class="k">def</span> <span class="nf">SplitMesh</span><span class="p">(</span><span class="n">Surf1</span><span class="p">,</span> <span class="n">Surf2</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+    
+    <span class="n">Surf1Intersections</span><span class="p">,</span><span class="n">Surf2Intersections</span><span class="p">,</span><span class="n">IntersectionPts</span> <span class="o">=</span> <span class="n">rays</span><span class="o">.</span><span class="n">SurfSurfIntersection</span><span class="p">(</span><span class="o">*</span><span class="n">Surf1</span><span class="p">,</span><span class="o">*</span><span class="n">Surf2</span><span class="p">,</span><span class="n">return_pts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="n">SurfIntersections12</span> <span class="o">=</span> <span class="p">[</span><span class="n">Surf1Intersections</span><span class="p">,</span><span class="n">Surf2Intersections</span><span class="p">]</span>
+    
+    <span class="n">Surf12</span> <span class="o">=</span> <span class="p">[</span><span class="n">Surf1</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">Surf2</span><span class="o">.</span><span class="n">copy</span><span class="p">()]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">surf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Surf12</span><span class="p">):</span>
+        <span class="c1"># Group nodes for each triangle</span>
+        <span class="n">SurfIntersections</span> <span class="o">=</span> <span class="n">SurfIntersections12</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span>
+        <span class="n">SplitGroupNodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">ArrayCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">]</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">surf</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">elemid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">SurfIntersections</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">IntersectionPts</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">elemid</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">elemid</span><span class="p">],</span> <span class="n">IntersectionPts</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">IntersectionPts</span><span class="p">[</span><span class="n">j</span><span class="p">])):</span>
+                    <span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">elemid</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">elemid</span><span class="p">],</span> <span class="p">[</span><span class="n">IntersectionPts</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">],</span><span class="n">IntersectionPts</span><span class="p">[</span><span class="n">j</span><span class="p">][(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">IntersectionPts</span><span class="p">[</span><span class="n">j</span><span class="p">])]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="n">ElemNormals</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">CalcFaceNormal</span><span class="p">(</span><span class="o">*</span><span class="n">surf</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">NElem</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="c1"># print(j)</span>
+                <span class="c1"># if j == 3595:</span>
+                <span class="c1">#     meep = &#39;morp&#39;</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">ElemNormals</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="c1"># Set edge constraints</span>
+                <span class="n">Constraints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span><span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span><span class="mi">2</span><span class="p">)])</span>
+                <span class="n">Constraints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]],</span><span class="n">Constraints</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">boundary</span> <span class="o">=</span> <span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span>
+                <span class="c1"># Reduce node list</span>
+                <span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="n">_</span><span class="p">,</span><span class="n">newId</span><span class="p">,</span><span class="n">idx</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">DeleteDuplicateNodes</span><span class="p">(</span><span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">],[],</span><span class="n">return_idx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
+                <span class="c1"># Tris = np.repeat([boundary],len(SplitGroupNodes[j]),axis=0)</span>
+                <span class="c1"># In = rays.PointsInTris(Tris,SplitGroupNodes[j],eps=eps)</span>
+
+                <span class="n">Constraints</span> <span class="o">=</span> <span class="n">newId</span><span class="p">[</span><span class="n">Constraints</span><span class="p">]</span>
+                <span class="n">Constraints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">Constraints</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="c1"># # Constraints = np.array([c for c in Constraints if c[0] != c[1]])</span>
+                <span class="c1"># bk = copy.copy(Constraints)</span>
+                <span class="c1"># pbk = copy.copy(SplitGroupNodes[j])</span>
+                <span class="c1"># # Check for intersections within the constraints</span>
+                <span class="c1"># combinations = np.array(list(itertools.combinations(range(len(Constraints)),2)))</span>
+                <span class="c1"># e1 = SplitGroupNodes[j][Constraints[combinations[:,0]]]</span>
+                <span class="c1"># e2 = SplitGroupNodes[j][Constraints[combinations[:,1]]]</span>
+                <span class="c1"># eIntersections,eIntersectionPts = rays.SegmentsSegmentsIntersection(e1,e2,return_intersection=True,endpt_inclusive=True,eps=eps)</span>
+                <span class="c1"># NewConstraints = np.empty((0,2),dtype=int)</span>
+                <span class="c1"># for ic,c in enumerate(Constraints):</span>
+                <span class="c1">#     # ids of other constraints that intersect with this constraint</span>
+                <span class="c1">#     ids = np.unique(np.array([combo for combo in combinations[eIntersections] if ic in combo]))</span>
+                <span class="c1">#     # Check collinear lines - currently rays.SegmentsSegmentsIntersection doesn&#39;t do this properly</span>
+                <span class="c1">#     coix = np.empty((0,3))</span>
+                <span class="c1">#     for combo in combinations[~eIntersections]:</span>
+                <span class="c1">#         if ic not in combo:</span>
+                <span class="c1">#             continue</span>
+                <span class="c1">#         segments = np.vstack(SplitGroupNodes[j][Constraints[combo]])</span>
+                <span class="c1">#         if np.linalg.norm(SplitGroupNodes[j][Constraints[combo[0]][0]] - </span>
+                <span class="c1">#                                 SplitGroupNodes[j][Constraints[combo[0]][1]]) &gt; eps:</span>
+                <span class="c1">#             check1 = np.linalg.norm(np.cross(segments[1]-segments[0], segments[2]-segments[0])) &lt; eps</span>
+                <span class="c1">#             check2 = np.linalg.norm(np.cross(segments[1]-segments[0], segments[3]-segments[0])) &lt; eps</span>
+                <span class="c1">#         elif np.linalg.norm(SplitGroupNodes[j][Constraints[combo[1]][0]] - </span>
+                <span class="c1">#                                 SplitGroupNodes[j][Constraints[combo[1]][1]]) &gt; eps:</span>
+                <span class="c1">#             check1 = np.linalg.norm(np.cross(segments[3]-segments[2], segments[0]-segments[2])) &lt; eps</span>
+                <span class="c1">#             check2 = np.linalg.norm(np.cross(segments[3]-segments[2], segments[1]-segments[2])) &lt; eps</span>
+                <span class="c1">#         else:</span>
+                <span class="c1">#             continue</span>
+                <span class="c1">#         if check1 and check2:</span>
+                <span class="c1">#             # For segments AB and CD if the (double) area of the triangles ABC and ABD are both (near) zero, the segments are collinear</span>
+                <span class="c1">#             # segsort = np.lexsort(segments.T) # Lexographic sort of the segments</span>
+                <span class="c1">#             segsort = np.lexsort((np.round(segments/eps)*eps).T) </span>
+                <span class="c1">#             if (0 in segsort[:2] and 1 in segsort[:2]) or (2 in segsort[:2] and 3 in segsort[:2]):</span>
+                <span class="c1">#                 # if both points if a segment are on the same side of the other, they at most intersect at an endpt</span>
+                <span class="c1">#                 if np.linalg.norm(np.diff(segments[segsort[1:3]],axis=0)) &lt; eps: # Norm of the difference between interior points</span>
+                <span class="c1">#                     # end point intersection</span>
+                <span class="c1">#                     coix = np.append(coix,[segments[segsort[1]]],axis=0)</span>
+                <span class="c1">#             else:</span>
+                <span class="c1">#                 # overlapping segments, get the two interior points</span>
+                <span class="c1">#                 coix = np.append(coix,segments[segsort[1:3]],axis=0)</span>
+                <span class="c1">#         elif check1:</span>
+                <span class="c1">#             segsort = np.lexsort(segments[[0,1,2]].T)</span>
+                <span class="c1">#             if segsort[1] == 2:</span>
+                <span class="c1">#                 coix = np.append(coix,[segments[2]],axis=0)</span>
+                <span class="c1">#         elif check2:</span>
+                <span class="c1">#             segsort = np.lexsort(segments[[0,1,3]].T)</span>
+                <span class="c1">#             if segsort[1] == 2:</span>
+                <span class="c1">#                 coix = np.append(coix,[segments[3]],axis=0)</span>
+                                
+                <span class="c1">#     ids = np.delete(ids,ids==ic)</span>
+                <span class="c1">#     if len(ids) == 0:</span>
+                <span class="c1">#         NewConstraints = np.append(NewConstraints,[c],axis=0)</span>
+                <span class="c1">#     else:</span>
+                <span class="c1">#         # corresponding intersection points</span>
+                <span class="c1">#         ixs = np.array([eIntersectionPts[eIntersections][x] for x,combo in enumerate(combinations[eIntersections]) if ic in combo])</span>
+                <span class="c1">#         ixs = np.append(ixs,coix,axis=0)</span>
+                <span class="c1">#         ixsort = ixs[np.lexsort((np.round(ixs/eps)*eps).T)]</span>
+
+                <span class="c1">#         NewConstraints = np.append(NewConstraints,np.vstack([np.arange(0,len(ixsort)-1),np.arange(1,len(ixsort))]).T+len(SplitGroupNodes[j]),axis=0)</span>
+                <span class="c1">#         SplitGroupNodes[j] = np.append(SplitGroupNodes[j],ixsort,axis=0)</span>
+
+                <span class="c1"># SplitGroupNodes[j], Constraints, _ = utils.DeleteDuplicateNodes(SplitGroupNodes[j],NewConstraints,tol=eps)</span>
+                <span class="c1"># Constraints = np.unique([c for c in Constraints if c[0] != c[1]],axis=0)</span>
+                <span class="c1"># SplitGroupNodes[j] = np.asarray(SplitGroupNodes[j])</span>
+                    <span class="c1"># import plotly.graph_objects as go</span>
+                    <span class="c1"># fig = go.Figure()</span>
+                    <span class="c1"># for i in range(len(Constraints)):</span>
+                    <span class="c1">#     fig.add_trace(go.Scatter(x=SplitGroupNodes[j][Constraints[i]][:,0], y=SplitGroupNodes[j][Constraints[i]][:,1],text=Constraints[i]))</span>
+                    <span class="c1"># fig.show()</span>
+
+                <span class="c1"># Transform to Local Coordinates</span>
+                <span class="c1"># Rotation matrix from global z (k=[0,0,1]) to local z(n)</span>
+                <span class="n">k</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="n">k</span> <span class="ow">or</span> <span class="n">n</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="c1"># rotAxis = k</span>
+                    <span class="c1"># angle = 0</span>
+                    <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+                    <span class="n">flatnodes</span> <span class="o">=</span> <span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="c1">#[:,0:2]</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">kxn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+                    <span class="n">rotAxis</span> <span class="o">=</span> <span class="n">kxn</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">kxn</span><span class="p">)</span>
+                    <span class="n">angle</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">n</span><span class="p">))</span>
+                    <span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>               <span class="c1"># Quaternion Rotation</span>
+                            <span class="n">rotAxis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+                            <span class="n">rotAxis</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+                            <span class="n">rotAxis</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span>
+                
+                    <span class="n">R</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>   <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
+                            <span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>   <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
+                            <span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="p">]</span>
+
+                    <span class="c1"># Delaunay Triangulation to retriangulate the split face</span>
+                    <span class="n">flatnodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="c1">#[:,0:2]#.tolist()</span>
+                    
+                <span class="c1"># conn = spatial.Delaunay(flatnodes,qhull_options=&quot;Qbb Qc Qz Q12&quot;).simplices   </span>
+                <span class="c1">###</span>
+                
+                
+                <span class="c1"># coords, conn = delaunay.Triangulate(flatnodes[:,0:2],method=&#39;scipy&#39;,tol=eps)  </span>
+                <span class="c1">## conn = delaunay.Triangulate(flatnodes,Constraints=idx[Constraints],method=&#39;Flips&#39;)     </span>
+                <span class="n">coords</span><span class="p">,</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">delaunay</span><span class="o">.</span><span class="n">Triangulate</span><span class="p">(</span><span class="n">flatnodes</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;Triangle&#39;</span><span class="p">,</span><span class="n">Constraints</span><span class="o">=</span><span class="n">Constraints</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>  
+                <span class="c1">## coords, conn = delaunay.Triangulate(flatnodes[:,0:2],method=&#39;scipy&#39;,Constraints=None,tol=eps)        </span>
+                <span class="c1">## coords,conn = delaunay.Triangle(flatnodes[:,0:2],Constraints=Constraints)</span>
+                <span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">R</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span><span class="n">flatnodes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">),</span><span class="mi">1</span><span class="p">)),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+                <span class="c1">###</span>
+                <span class="n">flip</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">CalcFaceNormal</span><span class="p">(</span><span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">],[</span><span class="n">conn</span><span class="p">[</span><span class="n">i</span><span class="p">]]),</span> <span class="n">n</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conn</span><span class="p">))]</span>
+                <span class="n">conn</span> <span class="o">=</span> <span class="p">(</span><span class="n">conn</span><span class="o">+</span><span class="n">surf</span><span class="o">.</span><span class="n">NNode</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">surf</span><span class="o">.</span><span class="n">addElems</span><span class="p">([</span><span class="n">elem</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">flip</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">else</span> <span class="n">elem</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">conn</span><span class="p">)])</span>
+                <span class="n">surf</span><span class="o">.</span><span class="n">addNodes</span><span class="p">(</span><span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="c1"># Collinear check</span>
+        <span class="n">Edges</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2edges</span><span class="p">(</span><span class="o">*</span><span class="n">surf</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;tri&#39;</span><span class="p">)</span>
+        <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span>
+        <span class="n">EdgePoints</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">Edges</span><span class="p">]</span>
+        <span class="n">ElemPoints</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">surf</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">]</span>
+        <span class="n">A2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">ElemPoints</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">ElemPoints</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">ElemPoints</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">ElemPoints</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">EdgeLen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">EdgePoints</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">EdgePoints</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Edges</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="p">),</span><span class="mi">3</span><span class="p">)),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">deviation</span> <span class="o">=</span> <span class="n">A2</span><span class="o">/</span><span class="n">EdgeLen</span> <span class="c1"># the double area devided by the longest side gives the deviation of the middple point from the line of the other two</span>
+        
+        <span class="n">iset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">SurfIntersections</span><span class="p">)</span>
+        <span class="n">colset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">deviation</span><span class="o">&lt;</span><span class="n">eps</span><span class="o">/</span><span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">surf</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">iset</span> <span class="ow">and</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">colset</span><span class="p">]</span>
+    <span class="n">Split1</span><span class="p">,</span> <span class="n">Split2</span> <span class="o">=</span> <span class="n">Surf12</span>
+
+    <span class="k">return</span> <span class="n">Split1</span><span class="p">,</span> <span class="n">Split2</span></div>
+
+    
+<div class="viewcode-block" id="GetSharedNodes">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.booleans.GetSharedNodes">[docs]</a>
+<span class="k">def</span> <span class="nf">GetSharedNodes</span><span class="p">(</span><span class="n">NodeCoordsA</span><span class="p">,</span> <span class="n">NodeCoordsB</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+    
+    <span class="n">RoundCoordsA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoordsA</span><span class="p">)</span><span class="o">/</span><span class="n">eps</span><span class="p">)</span><span class="o">*</span><span class="n">eps</span>
+    <span class="n">RoundCoordsB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoordsB</span><span class="p">)</span><span class="o">/</span><span class="n">eps</span><span class="p">)</span><span class="o">*</span><span class="n">eps</span>
+
+    <span class="n">setA</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">RoundCoordsA</span><span class="p">)</span>
+    <span class="n">setB</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">RoundCoordsB</span><span class="p">)</span>
+    <span class="n">setI</span> <span class="o">=</span> <span class="n">setA</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">setB</span><span class="p">)</span>
+    <span class="n">SharedA</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">coord</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">RoundCoordsA</span><span class="p">)</span> <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="ow">in</span> <span class="n">setI</span><span class="p">}</span>
+    <span class="n">SharedB</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">coord</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">RoundCoordsB</span><span class="p">)</span> <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="ow">in</span> <span class="n">setI</span><span class="p">}</span>
+
+    <span class="c1"># setA = set((round(coord[0],tol), round(coord[1],tol), round(coord[2],tol)) for coord in NodeCoordsA)</span>
+    <span class="c1"># setB = set((round(coord[0],tol), round(coord[1],tol), round(coord[2],tol)) for coord in NodeCoordsB)</span>
+    <span class="c1"># setI = setA.intersection(setB)</span>
+    
+    <span class="c1"># SharedA = {i for i,coord in enumerate(NodeCoordsA) if (round(coord[0],tol), round(coord[1],tol), round(coord[2],tol)) in setI}</span>
+    <span class="c1"># SharedB = {i for i,coord in enumerate(NodeCoordsB) if (round(coord[0],tol), round(coord[1],tol), round(coord[2],tol)) in setI}</span>
+    
+    <span class="k">return</span> <span class="n">SharedA</span><span class="p">,</span> <span class="n">SharedB</span></div>
+
+                           
+<div class="viewcode-block" id="ClassifyTris">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.booleans.ClassifyTris">[docs]</a>
+<span class="k">def</span> <span class="nf">ClassifyTris</span><span class="p">(</span><span class="n">SplitA</span><span class="p">,</span> <span class="n">SharedA</span><span class="p">,</span> <span class="n">SplitB</span><span class="p">,</span> <span class="n">SharedB</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+    <span class="c1"># Classifies each Triangle in A as inside, outside, or on the surface facing the same or opposite direction as surface B</span>
+    
+    
+    <span class="n">octA</span> <span class="o">=</span> <span class="kc">None</span><span class="c1"># octree.Surf2Octree(*SplitA)</span>
+    <span class="n">octB</span> <span class="o">=</span> <span class="kc">None</span><span class="c1">#octree.Surf2Octree(*SplitB)</span>
+    <span class="n">AllBoundaryA</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">SharedA</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])]</span>  
+    <span class="n">AllBoundaryB</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">SharedB</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])]</span>  
+    <span class="n">NotSharedConnA</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">SharedA</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])</span> <span class="ow">and</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">AllBoundaryA</span><span class="p">]</span>  
+    <span class="n">NotSharedConnB</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">SharedB</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])</span> <span class="ow">and</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">AllBoundaryB</span><span class="p">]</span>  
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">NotSharedConnA</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">RegionsA</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getConnectedNodes</span><span class="p">(</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NotSharedConnA</span><span class="p">)</span>  <span class="c1"># Node Sets</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">RegionsA</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">NotSharedConnB</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">RegionsB</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getConnectedNodes</span><span class="p">(</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NotSharedConnB</span><span class="p">)</span>  <span class="c1"># Node Sets</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">RegionsB</span> <span class="o">=</span> <span class="p">[]</span>
+        
+    <span class="n">ElemNormalsA</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">CalcFaceNormal</span><span class="p">(</span><span class="o">*</span><span class="n">SplitA</span><span class="p">)</span>
+    <span class="n">ElemNormalsB</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">CalcFaceNormal</span><span class="p">(</span><span class="o">*</span><span class="n">SplitB</span><span class="p">)</span>
+
+    <span class="n">AinB</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>    <span class="c1"># Elem Set</span>
+    <span class="n">AoutB</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>   <span class="c1"># Elem Set</span>
+    <span class="n">AsameB</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># Elem Set</span>
+    <span class="n">AflipB</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># Elem Set</span>
+    <span class="n">BinA</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>    <span class="c1"># Elem Set</span>
+    <span class="n">BoutA</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>   <span class="c1"># Elem Set</span>
+    <span class="n">BsameA</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># Elem Set</span>
+    <span class="n">BflipA</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># Elem Set</span>
+    
+    <span class="n">AllBoundaryACentroids</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Centroids</span><span class="p">(</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">AllBoundaryA</span><span class="p">])</span>
+    <span class="n">AllBoundaryBCentroids</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Centroids</span><span class="p">(</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">AllBoundaryB</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">centroid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">AllBoundaryACentroids</span><span class="p">):</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="n">rays</span><span class="o">.</span><span class="n">isInsideSurf</span><span class="p">(</span><span class="n">centroid</span><span class="p">,</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemNormalsB</span><span class="p">,</span><span class="n">Octree</span><span class="o">=</span><span class="n">octB</span><span class="p">,</span><span class="n">ray</span><span class="o">=</span><span class="n">ElemNormalsA</span><span class="p">[</span><span class="n">AllBoundaryA</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">check</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">AinB</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">AllBoundaryA</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">check</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">AoutB</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">AllBoundaryA</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">check</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">AsameB</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">AllBoundaryA</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">AflipB</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">AllBoundaryA</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">centroid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">AllBoundaryBCentroids</span><span class="p">):</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="n">rays</span><span class="o">.</span><span class="n">isInsideSurf</span><span class="p">(</span><span class="n">centroid</span><span class="p">,</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemNormalsA</span><span class="p">,</span><span class="n">Octree</span><span class="o">=</span><span class="n">octA</span><span class="p">,</span><span class="n">ray</span><span class="o">=</span><span class="n">ElemNormalsB</span><span class="p">[</span><span class="n">AllBoundaryB</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">check</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">BinA</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">AllBoundaryB</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">check</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">BoutA</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">AllBoundaryB</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">check</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">BsameA</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">AllBoundaryB</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">BflipA</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">AllBoundaryB</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">RegionsA</span><span class="p">)):</span>
+        <span class="n">RegionElems</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">))</span> <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">RegionsA</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]])]</span> <span class="c1"># Elem Set</span>
+        <span class="c1"># centroid = np.mean([SplitA.NodeCoords[n] for n in SplitA.NodeConn[RegionElems[0]]], axis=0)</span>
+        <span class="c1"># normal = ElemNormalsA[RegionElems[0]]</span>
+        <span class="n">pt</span> <span class="o">=</span> <span class="n">SplitA</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">RegionsA</span><span class="p">[</span><span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">rays</span><span class="o">.</span><span class="n">isInsideSurf</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemNormalsB</span><span class="p">,</span><span class="n">Octree</span><span class="o">=</span><span class="n">octB</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">):</span>
+            <span class="c1"># for e in RegionElems: AinB.add(e)</span>
+            <span class="n">AinB</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">RegionElems</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># for e in RegionElems: AoutB.add(e)</span>
+            <span class="n">AoutB</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">RegionElems</span><span class="p">)</span>
+            
+    <span class="c1">#</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">RegionsB</span><span class="p">)):</span>
+        <span class="n">RegionElems</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">))</span> <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">RegionsB</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]])]</span> <span class="c1"># Elem Set</span>
+        <span class="c1"># centroid = np.mean([SplitB.NodeCoords[n] for n in SplitB.NodeConn[RegionElems[0]]], axis=0)</span>
+        <span class="n">pt</span> <span class="o">=</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">RegionsB</span><span class="p">[</span><span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">rays</span><span class="o">.</span><span class="n">isInsideSurf</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemNormalsA</span><span class="p">,</span><span class="n">Octree</span><span class="o">=</span><span class="n">octA</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">):</span>
+            <span class="c1"># for e in RegionElems: BinA.add(e)</span>
+            <span class="n">BinA</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">RegionElems</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># for e in RegionElems: BoutA.add(e)</span>
+            <span class="n">BoutA</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">RegionElems</span><span class="p">)</span>
+
+    <span class="n">AinNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">elem</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">AinB</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>      <span class="c1"># Node Set</span>
+    <span class="n">AoutNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">elem</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">AoutB</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>    <span class="c1"># Node Set    </span>
+    <span class="n">AsameNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">();</span> <span class="n">AflipNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">BinNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">elem</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">BinA</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>      <span class="c1"># Node Set</span>
+    <span class="n">BoutNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">elem</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">BoutA</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>    <span class="c1"># Node Set</span>
+    <span class="n">BsameNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">();</span> <span class="n">BflipNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">UnknownA</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NElem</span><span class="p">))</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">AinB</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">AoutB</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">AsameB</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">AflipB</span><span class="p">)</span>
+    <span class="n">UnknownB</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NElem</span><span class="p">))</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">BinA</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">BoutA</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">BsameA</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">BflipA</span><span class="p">)</span>
+
+    <span class="n">UnknownNodesA</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">elem</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">UnknownA</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">])</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">AinNodes</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">AoutNodes</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">SharedA</span><span class="p">)</span>
+    <span class="n">UnknownNodesB</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">elem</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">UnknownB</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">])</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">BinNodes</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">BoutNodes</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">SharedB</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">UnknownNodesA</span><span class="p">:</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="n">rays</span><span class="o">.</span><span class="n">isInsideSurf</span><span class="p">(</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">node</span><span class="p">],</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemNormalsB</span><span class="p">,</span><span class="n">Octree</span><span class="o">=</span><span class="n">octB</span><span class="p">,</span><span class="n">ray</span><span class="o">=</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeNormals</span><span class="p">[</span><span class="n">node</span><span class="p">],</span><span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">check</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">AinNodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">check</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">AoutNodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">check</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">AsameNodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">AflipNodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">UnknownNodesB</span><span class="p">:</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="n">rays</span><span class="o">.</span><span class="n">isInsideSurf</span><span class="p">(</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">node</span><span class="p">],</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemNormalsA</span><span class="p">,</span><span class="n">Octree</span><span class="o">=</span><span class="n">octA</span><span class="p">,</span><span class="n">ray</span><span class="o">=</span><span class="n">SplitB</span><span class="o">.</span><span class="n">NodeNormals</span><span class="p">[</span><span class="n">node</span><span class="p">],</span><span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">check</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">BinNodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">check</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">BoutNodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">check</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">BsameNodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">BflipNodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+    <span class="n">ProblemsA</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">ProblemsB</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">UnknownA</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">AinNodes</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SharedA</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]]):</span>
+            <span class="n">AinB</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">AoutNodes</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SharedA</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]]):</span>
+            <span class="n">AoutB</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">AsameNodes</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SharedA</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]]):</span>
+            <span class="n">AsameB</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">AflipNodes</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SharedA</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitA</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]]):</span>
+            <span class="n">AflipB</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ProblemsA</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">UnknownB</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">BinNodes</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SharedB</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]]):</span>
+            <span class="n">BinA</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">BoutNodes</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SharedB</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]]):</span>
+            <span class="n">BoutA</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">BsameNodes</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SharedB</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]]):</span>
+            <span class="n">BsameA</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">BflipNodes</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SharedB</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]]):</span>
+            <span class="n">BflipA</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">BinNodes</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SharedB</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">BsameNodes</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">BflipNodes</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]])</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">BinNodes</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]]):</span>
+            <span class="n">BinA</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">BoutNodes</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SharedB</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">BsameNodes</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">BflipNodes</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]])</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="n">n</span> <span class="ow">in</span> <span class="n">BoutNodes</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">SplitB</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]]):</span>
+            <span class="n">BoutA</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ProblemsB</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ProblemsB</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">ProblemsA</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Some triangles failed to be labeled.&#39;</span><span class="p">)</span>
+       
+    <span class="k">return</span> <span class="n">AinB</span><span class="p">,</span> <span class="n">AoutB</span><span class="p">,</span> <span class="n">AsameB</span><span class="p">,</span> <span class="n">AflipB</span><span class="p">,</span> <span class="n">BinA</span><span class="p">,</span> <span class="n">BoutA</span><span class="p">,</span> <span class="n">BsameA</span><span class="p">,</span> <span class="n">BflipA</span></div>
+
+                        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Timothy O. Josephson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

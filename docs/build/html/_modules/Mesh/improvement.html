@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mesh.improvement &mdash; Mesh 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Mesh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Mesh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">Mesh.improvement</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for Mesh.improvement</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed Jan 26 09:27:53 2022</span>
+
+<span class="sd">@author: toj</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">warnings</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">random</span><span class="o">,</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">converter</span><span class="p">,</span> <span class="n">utils</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">octree</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span><span class="p">,</span> <span class="n">spatial</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse.linalg</span> <span class="kn">import</span> <span class="n">spsolve</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span>
+
+<div class="viewcode-block" id="SegmentSpringSmoothing">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.improvement.SegmentSpringSmoothing">[docs]</a>
+<span class="k">def</span> <span class="nf">SegmentSpringSmoothing</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">NodeNeighbors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ElemConn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">StiffnessFactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">FixedNodes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span><span class="n">Forces</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">L0Override</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">,</span>
+    <span class="n">CellCentered</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">FaceCentered</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">return_KF</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    SegmentSpringSmoothing - </span>
+<span class="sd">    Blom, F.J., 2000. Considerations on the spring analogy. International journal for numerical methods in fluids, 32(6), pp.647-668.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    NodeCoords : list</span>
+<span class="sd">        List of nodal coordinates.</span>
+<span class="sd">    NodeConn : list</span>
+<span class="sd">        Nodal connectivity list.</span>
+<span class="sd">    NodeNeighbors : list, optional</span>
+<span class="sd">        List of node neighboring nodes for each node in the mesh.</span>
+<span class="sd">        If provided with ElemConn, will avoid the need to recalculate, by default None.</span>
+<span class="sd">        If only one is provided, both will be recalculated.</span>
+<span class="sd">    ElemConn : list, optional</span>
+<span class="sd">        List of elements connected to each node.</span>
+<span class="sd">        If provided with NodeNeighbors, will avoid the need to recalculate, by default None.</span>
+<span class="sd">        If only one is provided, both will be recalculated.</span>
+<span class="sd">    StiffnessFactor : float, optional</span>
+<span class="sd">        Specifies a scaling factor for the stiffness of the springs. The default is 1.</span>
+<span class="sd">    FixedNotes : list or set, optional</span>
+<span class="sd">        Set of nodes to be held fixed. The default is set().</span>
+<span class="sd">    Forces : list, optional</span>
+<span class="sd">        Set of applied forces. If specified, forces must be specified for every node, </span>
+<span class="sd">        with a force of [0,0,0] applied to unloaded nodes. The default is None.</span>
+<span class="sd">    L0Override : str or float, optional</span>
+<span class="sd">        Override value for assigning the length of springs whose initial length is 0.</span>
+<span class="sd">        &#39;min&#39; : 0-length springs will be assigned to be equal to the shortest non-0-length spring in the mesh.</span>
+<span class="sd">        &#39;max&#39; : 0-length springs will be assigned to be equal to the longest spring in the mesh.</span>
+<span class="sd">        float : 0-length springs will be assigned to be equal to the specified float.</span>
+<span class="sd">        The default is &#39;min&#39;.</span>
+<span class="sd">    CellCentered : bool, optional</span>
+<span class="sd">        If true, will add cell (element)-centered springs, adding springs between each node in an element to</span>
+<span class="sd">        the element centrod, by default True.</span>
+<span class="sd">    FaceCentered : bool, optional</span>
+<span class="sd">        If true, will add face-centered springs, adding springs between each node in an element face to</span>
+<span class="sd">        the face centrod, by default True.</span>
+<span class="sd">    return_KF : bool, optional</span>
+<span class="sd">        If true, will return a tuple (K,F) containing the matrices (in scipy sparse formats) K and F of the</span>
+<span class="sd">        linear spring equation KU=F which is solved to find the the nodal displacements, by default False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Xnew : list</span>
+<span class="sd">        Updated list of nodal coordinates.</span>
+<span class="sd">    dXnew : list</span>
+<span class="sd">        List of nodal displacements to go from NodeCoords -&gt; Xnew</span>
+<span class="sd">    KF : tuple of sparse matrices, optional</span>
+<span class="sd">        If return_KF is true, the tuple of sparse matrice KF=(K,F) is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">NodeNeighbors</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">ElemConn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">NodeNeighbors</span><span class="p">,</span><span class="n">ElemConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getNodeNeighbors</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Forces</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">Forces</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">Forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">),</span><span class="mi">3</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">Forces</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">),</span> <span class="s1">&#39;Forces must be assigned for every node&#39;</span>
+    
+    <span class="n">TempCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NodeCoords</span><span class="o">+</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]])</span>
+    <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
+    <span class="n">RNeighbors</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">NodeNeighbors</span><span class="o">+</span><span class="p">[[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">Points</span> <span class="o">=</span> <span class="n">TempCoords</span><span class="p">[</span><span class="n">RNeighbors</span><span class="p">]</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">TempCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">-</span><span class="n">Points</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">TempCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">-</span><span class="n">Points</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">TempCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">-</span><span class="n">Points</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">L0Override</span> <span class="o">==</span> <span class="s1">&#39;min&#39;</span><span class="p">:</span>
+        <span class="n">minL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">lengths</span><span class="p">[</span><span class="n">lengths</span><span class="o">!=</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">lengths</span><span class="p">[</span><span class="n">lengths</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">minL</span>
+    <span class="k">elif</span> <span class="n">L0Override</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+        <span class="n">maxL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">lengths</span><span class="p">[</span><span class="n">lengths</span><span class="o">!=</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">lengths</span><span class="p">[</span><span class="n">lengths</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">maxL</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L0Override</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span><span class="nb">float</span><span class="p">)):</span>
+        <span class="n">lengths</span><span class="p">[</span><span class="n">lengths</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">L0Override</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid L0Override value. Must be &#39;min&#39;, &#39;max&#39;, an int, or a float&quot;</span><span class="p">)</span>
+
+    <span class="n">k</span> <span class="o">=</span> <span class="n">StiffnessFactor</span><span class="o">/</span><span class="n">lengths</span>
+
+    <span class="n">FixedArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">))</span>
+    <span class="n">Forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Forces</span><span class="p">)</span>
+    <span class="n">Forces</span><span class="p">[</span><span class="n">FixedArray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="n">Krows_diag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">))</span>
+    <span class="n">Kcols_diag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">))</span>
+    <span class="n">Kvals_diag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">k</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> 
+    <span class="k">if</span> <span class="n">CellCentered</span><span class="p">:</span>
+        <span class="n">centroids</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Centroids</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
+        <span class="n">centroids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">centroids</span><span class="p">,[[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">RElemConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">ElemConn</span><span class="p">)</span>
+        <span class="n">ElemConnCentroids</span> <span class="o">=</span> <span class="n">centroids</span><span class="p">[</span><span class="n">RElemConn</span><span class="p">]</span>
+        <span class="n">ElemConnCenterDist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">-</span><span class="n">ElemConnCentroids</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">-</span><span class="n">ElemConnCentroids</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">-</span><span class="n">ElemConnCentroids</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">kcenters</span> <span class="o">=</span> <span class="n">StiffnessFactor</span><span class="o">/</span><span class="n">ElemConnCenterDist</span>
+        <span class="n">Kvals_diag</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">kcenters</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">FaceCentered</span><span class="p">:</span>
+        <span class="n">faces</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
+        <span class="n">Faces</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">faces2unique</span><span class="p">(</span><span class="n">faces</span><span class="p">)</span>
+        <span class="n">fcentroids</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Centroids</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">Faces</span><span class="p">)</span>
+        <span class="n">fcentroids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fcentroids</span><span class="p">,[[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">FConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getElemConnectivity</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">Faces</span><span class="p">)</span>
+        <span class="n">RFConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">FConn</span><span class="p">)</span>
+        <span class="n">FConnCentroids</span> <span class="o">=</span> <span class="n">fcentroids</span><span class="p">[</span><span class="n">RFConn</span><span class="p">]</span>
+        <span class="n">FConnCenterDist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">-</span><span class="n">FConnCentroids</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">-</span><span class="n">FConnCentroids</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">-</span><span class="n">FConnCentroids</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">fkcenters</span> <span class="o">=</span> <span class="n">StiffnessFactor</span><span class="o">/</span><span class="n">FConnCenterDist</span>
+        <span class="n">Kvals_diag</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">fkcenters</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+
+    <span class="n">Kvals_diag</span><span class="p">[</span><span class="n">FixedArray</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">UnfixedNodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)))</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">)))</span>
+    
+    <span class="n">template</span> <span class="o">=</span> <span class="p">(</span><span class="n">RNeighbors</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">)[</span><span class="n">UnfixedNodes</span><span class="p">]</span>
+    <span class="n">flattemplate</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">Krows_off</span> <span class="o">=</span> <span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">*</span><span class="n">UnfixedNodes</span><span class="p">[:,</span><span class="kc">None</span><span class="p">])</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="n">flattemplate</span><span class="p">]</span>
+    <span class="n">Kcols_off</span> <span class="o">=</span> <span class="n">RNeighbors</span><span class="p">[</span><span class="n">UnfixedNodes</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="n">flattemplate</span><span class="p">]</span>
+    <span class="n">Kvals_off</span> <span class="o">=</span> <span class="o">-</span><span class="n">k</span><span class="p">[</span><span class="n">UnfixedNodes</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="n">flattemplate</span><span class="p">]</span>
+    
+    <span class="n">Krows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Krows_diag</span><span class="p">,</span><span class="n">Krows_off</span><span class="p">))</span>
+    <span class="n">Kcols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Kcols_diag</span><span class="p">,</span><span class="n">Kcols_off</span><span class="p">))</span>
+    <span class="n">Kvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Kvals_diag</span><span class="p">,</span><span class="n">Kvals_off</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">CellCentered</span><span class="p">:</span>
+        <span class="n">RNodeConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">NodeConn</span><span class="o">+</span><span class="p">[[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span><span class="n">fillval</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">pretemplate</span> <span class="o">=</span> <span class="n">RNodeConn</span><span class="p">[</span><span class="n">RElemConn</span><span class="p">]</span>
+        <span class="c1"># template = ((pretemplate &gt;= 0) &amp; (pretemplate != np.arange(len(NodeCoords))[:,None,None]))[UnfixedNodes]</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="p">(</span><span class="n">pretemplate</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)[</span><span class="n">UnfixedNodes</span><span class="p">]</span>
+        <span class="n">flattemplate</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">Krows_Ccentered</span> <span class="o">=</span> <span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">*</span><span class="n">UnfixedNodes</span><span class="p">[:,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">])</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="n">flattemplate</span><span class="p">]</span>
+        <span class="n">Kcols_Ccentered</span> <span class="o">=</span> <span class="n">pretemplate</span><span class="p">[</span><span class="n">UnfixedNodes</span><span class="p">][</span><span class="n">template</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">Kvals_Ccentered</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">kcenters</span><span class="p">[</span><span class="n">UnfixedNodes</span><span class="p">][:,:,</span><span class="kc">None</span><span class="p">],</span><span class="n">template</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">2</span><span class="p">)[</span><span class="n">template</span><span class="p">]</span><span class="o">/</span><span class="n">template</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">Krows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Krows</span><span class="p">,</span><span class="n">Krows_Ccentered</span><span class="p">))</span>
+        <span class="n">Kcols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Kcols</span><span class="p">,</span><span class="n">Kcols_Ccentered</span><span class="p">))</span>
+        <span class="n">Kvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Kvals</span><span class="p">,</span><span class="n">Kvals_Ccentered</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">FaceCentered</span><span class="p">:</span>
+        <span class="n">RFaces</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">Faces</span><span class="o">+</span><span class="p">[[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span><span class="n">fillval</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">pretemplate</span> <span class="o">=</span> <span class="n">RFaces</span><span class="p">[</span><span class="n">RFConn</span><span class="p">]</span>
+        <span class="c1"># template = ((pretemplate &gt;= 0) &amp; (pretemplate != np.arange(len(NodeCoords))[:,None,None]))[UnfixedNodes]</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="p">(</span><span class="n">pretemplate</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)[</span><span class="n">UnfixedNodes</span><span class="p">]</span>
+        <span class="n">flattemplate</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">Krows_Fcentered</span> <span class="o">=</span> <span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">*</span><span class="n">UnfixedNodes</span><span class="p">[:,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">])</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="n">flattemplate</span><span class="p">]</span>
+        <span class="n">Kcols_Fcentered</span> <span class="o">=</span> <span class="n">pretemplate</span><span class="p">[</span><span class="n">UnfixedNodes</span><span class="p">][</span><span class="n">template</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">Kvals_Fcentered</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">fkcenters</span><span class="p">[</span><span class="n">UnfixedNodes</span><span class="p">][:,:,</span><span class="kc">None</span><span class="p">],</span><span class="n">template</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">2</span><span class="p">)[</span><span class="n">template</span><span class="p">]</span><span class="o">/</span><span class="n">template</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">Krows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Krows</span><span class="p">,</span><span class="n">Krows_Fcentered</span><span class="p">))</span>
+        <span class="n">Kcols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Kcols</span><span class="p">,</span><span class="n">Kcols_Fcentered</span><span class="p">))</span>
+        <span class="n">Kvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Kvals</span><span class="p">,</span><span class="n">Kvals_Fcentered</span><span class="p">))</span>
+
+    <span class="n">K</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">((</span><span class="n">Kvals</span><span class="p">,(</span><span class="n">Krows</span><span class="p">,</span><span class="n">Kcols</span><span class="p">)))</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">Forces</span><span class="p">)</span>
+    <span class="n">dXnew</span> <span class="o">=</span> <span class="n">spsolve</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">tocsc</span><span class="p">(),</span> <span class="n">F</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+    
+    <span class="n">Xnew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span> <span class="o">+</span> <span class="n">dXnew</span>
+    <span class="n">Xnew</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">)]</span> <span class="c1"># Enforce fixed nodes</span>
+    <span class="k">if</span> <span class="n">return_KF</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Xnew</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">dXnew</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="p">(</span><span class="n">K</span><span class="p">,</span><span class="n">F</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Xnew</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">dXnew</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="NodeSpringSmoothing">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.improvement.NodeSpringSmoothing">[docs]</a>
+<span class="k">def</span> <span class="nf">NodeSpringSmoothing</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">NodeNeighbors</span><span class="p">,</span><span class="n">Stiffness</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">FixedNodes</span><span class="o">=</span><span class="p">[],</span><span class="n">Forces</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">maxIter</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span><span class="n">converge</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+    <span class="c1"># Blom, F.J., 2000. Considerations on the spring analogy. International journal for numerical methods in fluids, 32(6), pp.647-668.</span>
+    
+    <span class="k">if</span> <span class="n">Forces</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">Forces</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">Forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">Forces</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">),</span> <span class="s1">&#39;Forces must be assigned for every node&#39;</span>
+    
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">FixedNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">)</span>
+    
+    <span class="c1"># k = [[Stiffness for n in NodeNeighbors[i]] for i in range(len(NodeCoords))]   </span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">Stiffness</span>
+    
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
+    <span class="n">thinking</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">thinking</span><span class="p">:</span>
+        <span class="n">Xnew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="c1"># print(iteration)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">FixedNodes</span><span class="p">:</span>
+                <span class="n">Xnew</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
+                <span class="k">continue</span>
+            <span class="n">Xnew</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">k</span><span class="o">*</span><span class="n">X</span><span class="p">[</span><span class="n">n</span><span class="p">,:]</span> <span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">NodeNeighbors</span><span class="p">[</span><span class="n">i</span><span class="p">])],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">Forces</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="nb">sum</span><span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">NodeNeighbors</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="n">iteration</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">Xnew</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="o">&gt;</span> <span class="n">maxIter</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">Xnew</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">converge</span><span class="p">:</span>
+            <span class="n">thinking</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">Xnew</span><span class="p">)</span>
+                   
+    <span class="k">return</span> <span class="n">Xnew</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="LocalLaplacianSmoothing">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.improvement.LocalLaplacianSmoothing">[docs]</a>
+<span class="k">def</span> <span class="nf">LocalLaplacianSmoothing</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">iterate</span><span class="p">,</span><span class="n">NodeNeighbors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">FixedNodes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span><span class="n">FixFeatures</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    LocalLaplacianSmoothing Performs iterative Laplacian smoothing, repositioning each node</span>
+<span class="sd">    to the center of its adjacent nodes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    NodeCoords : list</span>
+<span class="sd">        List of nodal coordinates.</span>
+<span class="sd">    NodeConn : list</span>
+<span class="sd">        List of nodal coordinates.</span>
+<span class="sd">    iterate : int</span>
+<span class="sd">        Number of iterations to perform.</span>
+<span class="sd">    NodeNeighbors : list (or None), optional</span>
+<span class="sd">        List of node neighbors for each node in the mesh</span>
+<span class="sd">        If provided, will avoid the need to recalculate the element node neighbors, by default None</span>
+<span class="sd">    FixedNodes : set, optional</span>
+<span class="sd">        Set of nodes to hold fixed throughout the Laplacian smoothing process, by default set().</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NewCoords : list</span>
+<span class="sd">        List of updated nodal coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span> <span class="n">FixedNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">FixFeatures</span><span class="p">:</span>
+        <span class="n">edges</span><span class="p">,</span><span class="n">corners</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">DetectFeatures</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
+        <span class="n">FixedNodes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
+        <span class="n">FixedNodes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span>
+    <span class="n">NodeNeighbors</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getNodeNeighbors</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
+    <span class="n">ElemConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getElemConnectivity</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
+    <span class="n">lens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">NodeNeighbors</span><span class="p">])</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">NodeNeighbors</span><span class="p">,</span><span class="n">fillval</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">FreeNodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)))</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">))</span>
+    <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]])</span>
+    
+    <span class="n">ElemNormals</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">CalcFaceNormal</span><span class="p">(</span><span class="n">ArrayCoords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">NodeConn</span><span class="p">)</span>
+    <span class="n">NodeNormals</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Face2NodeNormal</span><span class="p">(</span><span class="n">ArrayCoords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemConn</span><span class="p">,</span><span class="n">ElemNormals</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterate</span><span class="p">):</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">lens</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">ArrayCoords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="kc">None</span><span class="p">,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span> <span class="o">+=</span> <span class="n">U</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span>
+
+    <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">NewCoords</span></div>
+
+
+<div class="viewcode-block" id="TangentialLaplacianSmoothing">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.improvement.TangentialLaplacianSmoothing">[docs]</a>
+<span class="k">def</span> <span class="nf">TangentialLaplacianSmoothing</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">iterate</span><span class="p">,</span><span class="n">FixedNodes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span><span class="n">FixFeatures</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TangentialLaplacianSmoothing Performs iterative Laplacian smoothing, repositioning each node</span>
+<span class="sd">        to the center of its adjacent nodes. Primarily for use on surface meshes, not well defined for </span>
+<span class="sd">        volume meshes.</span>
+<span class="sd">        Ohtake, Y., Belyaev, A., &amp; Pasko, A. (2003). Dynamic mesh optimization for polygonized implicit surfaces with sharp features. Visual Computer, 19(2–3), 115–126. https://doi.org/10.1007/s00371-002-0181-z</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        NodeCoords : list</span>
+<span class="sd">            List of nodal coordinates.</span>
+<span class="sd">        NodeConn : list</span>
+<span class="sd">            List of nodal coordinates.</span>
+<span class="sd">        iterate : int</span>
+<span class="sd">            Number of iterations to perform.</span>
+<span class="sd">        FixedNodes : set, optional</span>
+<span class="sd">            Set of nodes to hold fixed throughout the Laplacian smoothing process, by default set().</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NewCoords : list</span>
+<span class="sd">            List of updated nodal coordinates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>    
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span> <span class="n">FixedNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">FixFeatures</span><span class="p">:</span>
+            <span class="n">edges</span><span class="p">,</span><span class="n">corners</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">DetectFeatures</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
+            <span class="n">FixedNodes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
+            <span class="n">FixedNodes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span>
+        <span class="n">NodeNeighbors</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getNodeNeighbors</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
+        <span class="n">ElemConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getElemConnectivity</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
+        <span class="n">lens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">NodeNeighbors</span><span class="p">])</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">NodeNeighbors</span><span class="p">,</span><span class="n">fillval</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">FreeNodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)))</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">))</span>
+        <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]])</span>
+        
+        <span class="n">ElemNormals</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">CalcFaceNormal</span><span class="p">(</span><span class="n">ArrayCoords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">NodeConn</span><span class="p">)</span>
+        <span class="n">NodeNormals</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Face2NodeNormal</span><span class="p">(</span><span class="n">ArrayCoords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemConn</span><span class="p">,</span><span class="n">ElemNormals</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterate</span><span class="p">):</span>
+            <span class="n">Q</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">lens</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">ArrayCoords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="kc">None</span><span class="p">,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">U</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span><span class="o">*</span><span class="n">NodeNormals</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">NodeNormals</span><span class="p">)</span>
+            <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span> <span class="o">+=</span> <span class="n">R</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span>
+
+        <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">NewCoords</span></div>
+
+
+<div class="viewcode-block" id="GlobalLaplacianSmoothing">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.improvement.GlobalLaplacianSmoothing">[docs]</a>
+<span class="k">def</span> <span class="nf">GlobalLaplacianSmoothing</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">FeatureNodes</span><span class="o">=</span><span class="p">[],</span><span class="n">FixedNodes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span><span class="n">FeatureWeight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">BaryWeight</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">):</span>
+    <span class="c1"># Ji, Z., Liu, L. and Wang, G., 2005, December. A global laplacian </span>
+    <span class="c1"># smoothing approach with feature preservation. In Ninth International </span>
+    <span class="c1"># Conference on Computer Aided Design and Computer Graphics</span>
+    
+    <span class="n">NodeNeighbors</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getNodeNeighbors</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
+    
+    <span class="n">NNode</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
+    <span class="n">NFeature</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">FeatureNodes</span><span class="p">)</span>
+    <span class="n">NElem</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span>
+    
+    <span class="c1"># Vertex Weights (NNode x NNode)</span>
+
+    <span class="n">Lrows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">Lcols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">Lvals</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NNode</span><span class="p">):</span>
+        <span class="n">Lrows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="n">Lcols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="n">Lvals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">NodeNeighbors</span><span class="p">[</span><span class="n">row</span><span class="p">]:</span>
+            <span class="n">Lrows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">Lcols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+            <span class="n">Lvals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeNeighbors</span><span class="p">[</span><span class="n">row</span><span class="p">]))</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">((</span><span class="n">Lvals</span><span class="p">,(</span><span class="n">Lrows</span><span class="p">,</span><span class="n">Lcols</span><span class="p">)))</span>
+    <span class="c1"># L = np.zeros([NNode,NNode])</span>
+    <span class="c1"># for row in range(NNode):</span>
+    <span class="c1">#     # Vertex Weights</span>
+    <span class="c1">#     L[row,row] = 1</span>
+    <span class="c1">#     for col in NodeNeighbors[row]:</span>
+    <span class="c1">#         L[row,col] = -1/len(NodeNeighbors[row]) </span>
+            
+    <span class="c1"># Feature Weights (NFeature x NNode)</span>
+    <span class="k">if</span> <span class="n">NFeature</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">Frows</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">FeatureNodes</span><span class="p">]</span>
+        <span class="n">Fcols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">FeatureNodes</span><span class="p">]</span>
+        <span class="n">Fvals</span> <span class="o">=</span> <span class="p">[</span><span class="n">FeatureWeight</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NFeature</span><span class="p">)]</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">((</span><span class="n">Fvals</span><span class="p">,(</span><span class="n">Frows</span><span class="p">,</span><span class="n">Fcols</span><span class="p">)))</span>    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">NNode</span><span class="p">]))</span>
+    <span class="c1"># F = np.zeros([NFeature,NNode])</span>
+    <span class="c1"># for row in FeatureNodes:</span>
+    <span class="c1">#     F[row,row] = FeatureWeight</span>
+    
+    <span class="c1"># Barycenter Weights (NElem x NNode)</span>
+    <span class="n">Zrows</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NElem</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">[</span><span class="mi">0</span><span class="p">]))]</span>
+    <span class="n">Zcols</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">NodeConn</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">]</span>
+    <span class="n">Zvals</span> <span class="o">=</span> <span class="p">[</span><span class="n">BaryWeight</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NElem</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">[</span><span class="mi">0</span><span class="p">]))]</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">((</span><span class="n">Zvals</span><span class="p">,(</span><span class="n">Zrows</span><span class="p">,</span><span class="n">Zcols</span><span class="p">)))</span>
+    <span class="c1"># Z = np.zeros([NElem,NNode])</span>
+    <span class="c1"># for row in range(len(NodeConn)):</span>
+    <span class="c1">#     for col in NodeConn[row]:</span>
+    <span class="c1">#         Z[row,col] = BaryWeight</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">L</span><span class="p">,</span><span class="n">F</span><span class="p">,</span><span class="n">Z</span><span class="p">))</span><span class="o">.</span><span class="n">tocsc</span><span class="p">()</span>
+    <span class="n">At</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">AtA</span> <span class="o">=</span> <span class="n">At</span><span class="o">*</span><span class="n">A</span>
+    <span class="c1"># Vertex b Matrix (NNode x 1)</span>
+    <span class="c1"># bL = np.zeros([NNode,1])</span>
+    <span class="n">bL</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">NNode</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">))</span>
+    <span class="c1"># For each dimension:</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>        
+            
+        <span class="c1"># Feature b Matrix (NFeature x 1)</span>
+        <span class="c1"># bF = np.zeros([NFeature,1])</span>
+        <span class="k">if</span> <span class="n">NFeature</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">bFcols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">NFeature</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">bFrows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">FeatureNodes</span><span class="p">)</span>
+            <span class="n">bFvals</span> <span class="o">=</span> <span class="p">[</span><span class="n">FeatureWeight</span><span class="o">*</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">d</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">bFrows</span><span class="p">]</span>
+            <span class="c1"># for i,f in enumerate(FeatureNodes):</span>
+                <span class="c1"># bF[i] = FeatureWeight*NodeCoords[f][d]</span>
+            <span class="n">bF</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">((</span><span class="n">bFvals</span><span class="p">,(</span><span class="n">bFrows</span><span class="p">,</span><span class="n">bFcols</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bF</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="c1"># Bary b Matrix (NElem x 1)</span>
+        <span class="n">bZcols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">NElem</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">bZrows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">bZvals</span> <span class="o">=</span> <span class="p">[</span><span class="n">BaryWeight</span><span class="o">*</span><span class="nb">sum</span><span class="p">([</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="n">d</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">NodeConn</span><span class="p">]</span>
+        <span class="n">bZ</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">((</span><span class="n">bZvals</span><span class="p">,(</span><span class="n">bZrows</span><span class="p">,</span><span class="n">bZcols</span><span class="p">)))</span>
+        <span class="c1"># bZ = np.zeros([NElem,1])</span>
+        <span class="c1"># for i,elem in enumerate(NodeConn):</span>
+        <span class="c1">#     bZ[i] = BaryWeight*sum([NodeCoords[node][d] for node in elem])</span>
+            
+        <span class="n">b</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">bL</span><span class="p">,</span><span class="n">bF</span><span class="p">,</span><span class="n">bZ</span><span class="p">])</span>
+        <span class="n">NewCoords</span><span class="p">[:,</span><span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="n">spsolve</span><span class="p">(</span><span class="n">AtA</span><span class="p">,</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">At</span><span class="o">*</span><span class="n">b</span><span class="p">))</span>
+    <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">NewCoords</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">NewCoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">FixedNodes</span> <span class="k">else</span> <span class="n">coord</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">coord</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">NewCoords</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Timothy O. Josephson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

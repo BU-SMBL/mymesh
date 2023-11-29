@@ -220,7 +220,14 @@ class mesh:
             self.ElemSets[ElemSet] = range(nelem,self.NElem) 
         
     def copy(self):
-        
+        """
+        Create an independent copy of the mesh object.
+
+        Returns
+        -------
+        Mesh.mesh.mesh
+            Unlinked copy of the mesh object
+        """        
         M = mesh()
         M.NodeCoords = copy.copy(self.NodeCoords)
         M.NodeConn = copy.copy(self.NodeConn)
@@ -253,6 +260,18 @@ class mesh:
         
         return M
     def merge(self,Mesh2,tol=1e-14,cleanup=True):
+        """
+        Merge two mesh objects together.
+
+        Parameters
+        ----------
+        Mesh2 : _type_
+            _description_
+        tol : _type_, optional
+            _description_, by default 1e-14
+        cleanup : bool, optional
+            _description_, by default True
+        """        
         self.initialize(cleanup=cleanup)
         if type(Mesh2) is list:
             MeshList = Mesh2
@@ -308,10 +327,17 @@ class mesh:
 
     @property
     def NNode(self):
+        """
+        Number of nodes defined in the mesh. This may include nodes
+        that aren't connected to any elements.
+        """        
         self._NNode = len(self.NodeCoords)
         return self._NNode
     @property
     def NElem(self):
+        """
+        Number of elements defined in the mesh.
+        """
         self._NElem = len(self.NodeConn)
         return self._NElem
     @property
@@ -322,10 +348,6 @@ class mesh:
     def NFace(self):
         self._NFace = len(self.Faces)
         return self._NFace
-    @property
-    def NEdge(self):
-        self._NEdge = len(self.Edges)
-        return self._NEdge
     def __get_faces(self):
         if self.NElem > 0:
             # Get all element faces
@@ -526,6 +548,9 @@ class mesh:
         return self._NodeNormals
     @property
     def Centroids(self):
+        """
+        Centroids of every element in the mesh.
+        """
         if self._Centroids == []:
             if self.verbose: print('\n'+'\t'*self._printlevel+'Calculating element centroids...',end='')
             self._Centroids = utils.Centroids(*self)

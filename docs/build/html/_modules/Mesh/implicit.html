@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mesh.implicit &mdash; Mesh 0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Mesh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Mesh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">Mesh.implicit</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for Mesh.implicit</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Fri Jan 14 17:43:57 2022</span>
+
+<span class="sd">@author: toj</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># %%</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">interpolate</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">warnings</span><span class="o">,</span> <span class="nn">bisect</span>
+<span class="kn">import</span> <span class="nn">meshio</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">contour</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">octree</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">primitives</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KDTree</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Optional dependencies not found - some functions may not work properly&#39;</span><span class="p">)</span>
+
+<span class="c1"># Implicit functions</span>
+<div class="viewcode-block" id="gyroid">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.gyroid">[docs]</a>
+<span class="k">def</span> <span class="nf">gyroid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="lidinoid">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.lidinoid">[docs]</a>
+<span class="k">def</span> <span class="nf">lidinoid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">):</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">y</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">z</span>
+    <span class="k">return</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">X</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Z</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">Y</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">X</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Y</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Z</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Z</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">X</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.15</span></div>
+
+
+<div class="viewcode-block" id="primitive">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.primitive">[docs]</a>
+<span class="k">def</span> <span class="nf">primitive</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">):</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">y</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">z</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="neovius">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.neovius">[docs]</a>
+<span class="k">def</span> <span class="nf">neovius</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">):</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">y</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">z</span>
+    <span class="k">return</span> <span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Z</span><span class="p">))</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="diamond">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.diamond">[docs]</a>
+<span class="k">def</span> <span class="nf">diamond</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">z</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cylinder">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.cylinder">[docs]</a>
+<span class="k">def</span> <span class="nf">cylinder</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">r</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="cube">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.cube">[docs]</a>
+<span class="k">def</span> <span class="nf">cube</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">y2</span><span class="p">,</span><span class="n">z1</span><span class="p">,</span><span class="n">z2</span><span class="p">):</span>    
+    <span class="k">return</span> <span class="n">intersection</span><span class="p">(</span><span class="n">intersection</span><span class="p">(</span><span class="n">intersection</span><span class="p">(</span><span class="n">x1</span><span class="o">-</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="n">x2</span><span class="p">),</span><span class="n">intersection</span><span class="p">(</span><span class="n">y1</span><span class="o">-</span><span class="n">y</span><span class="p">,</span><span class="n">y</span><span class="o">-</span><span class="n">y2</span><span class="p">)),</span><span class="n">intersection</span><span class="p">(</span><span class="n">z1</span><span class="o">-</span><span class="n">z</span><span class="p">,</span><span class="n">z</span><span class="o">-</span><span class="n">z2</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="xplane">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.xplane">[docs]</a>
+<span class="k">def</span> <span class="nf">xplane</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">x0</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x0</span><span class="o">-</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="yplane">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.yplane">[docs]</a>
+<span class="k">def</span> <span class="nf">yplane</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">y0</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">y0</span><span class="o">-</span><span class="n">y</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="zplane">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.zplane">[docs]</a>
+<span class="k">def</span> <span class="nf">zplane</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">z0</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">z0</span><span class="o">-</span><span class="n">z</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sphere">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.sphere">[docs]</a>
+<span class="k">def</span> <span class="nf">sphere</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">z</span><span class="o">-</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span></div>
+
+
+<span class="c1"># Implicit function operators</span>
+<div class="viewcode-block" id="offset">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.offset">[docs]</a>
+<span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="n">fval</span><span class="p">,</span><span class="n">offset</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">fval</span><span class="o">-</span><span class="n">offset</span></div>
+
+
+<div class="viewcode-block" id="union">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.union">[docs]</a>
+<span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="n">fval1</span><span class="p">,</span><span class="n">fval2</span><span class="p">):</span>
+<span class="c1">#    return np.minimum(fval1,fval2)</span>
+    <span class="k">return</span> <span class="n">rMin</span><span class="p">(</span><span class="n">fval1</span><span class="p">,</span><span class="n">fval2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="diff">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.diff">[docs]</a>
+<span class="k">def</span> <span class="nf">diff</span><span class="p">(</span><span class="n">fval1</span><span class="p">,</span><span class="n">fval2</span><span class="p">):</span>
+<span class="c1">#    return np.minimum(fval1,-fval2)</span>
+    <span class="c1"># This has maybe been wrong for a long time changing min to max</span>
+    <span class="c1"># return rMin(fval1,-fval2)</span>
+    <span class="k">return</span> <span class="n">rMax</span><span class="p">(</span><span class="n">fval1</span><span class="p">,</span><span class="o">-</span><span class="n">fval2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="intersection">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.intersection">[docs]</a>
+<span class="k">def</span> <span class="nf">intersection</span><span class="p">(</span><span class="n">fval1</span><span class="p">,</span><span class="n">fval2</span><span class="p">):</span>
+<span class="c1">#    return np.maximum(fval1,fval2)</span>
+    <span class="k">return</span> <span class="n">rMax</span><span class="p">(</span><span class="n">fval1</span><span class="p">,</span><span class="n">fval2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="rMax">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.rMax">[docs]</a>
+<span class="k">def</span> <span class="nf">rMax</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="c1"># R-Function version of max(a,b) to yield a smoothly differentiable max - R0</span>
+    <span class="c1"># Implicit Functions With Guaranteed Differential Properties - Shapiro &amp; Tsukanov</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">alpha</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="n">p</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="n">p</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">alpha</span><span class="o">*</span><span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">p</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="n">m</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="rMin">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.rMin">[docs]</a>
+<span class="k">def</span> <span class="nf">rMin</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="c1"># R-Function version of min(a,b) to yield a smoothly differentiable min - R0</span>
+    <span class="c1"># Implicit Functions With Guaranteed Differential Properties - Shapiro &amp; Tsukanov</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">alpha</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">-</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="n">p</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="n">p</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">alpha</span><span class="o">*</span><span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">p</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="n">m</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VoxelMesh">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.VoxelMesh">[docs]</a>
+<span class="k">def</span> <span class="nf">VoxelMesh</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span><span class="n">xlims</span><span class="p">,</span><span class="n">ylims</span><span class="p">,</span><span class="n">zlims</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;liberal&#39;</span><span class="p">,</span><span class="n">values</span><span class="o">=</span><span class="s1">&#39;nodes&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    VoxelMesh Generate voxel mesh of a signed distance function</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sdf : function</span>
+<span class="sd">        DESCRIPTION.</span>
+<span class="sd">    xlims : list</span>
+<span class="sd">        [xmin, xmax]</span>
+<span class="sd">    ylims : list</span>
+<span class="sd">        [ymin, ymax].</span>
+<span class="sd">    zlims : list</span>
+<span class="sd">        [zmin, zmax].</span>
+<span class="sd">    h : numeric</span>
+<span class="sd">        Element side length.</span>
+<span class="sd">    mode : str</span>
+<span class="sd">        Voxel trimming model</span>
+<span class="sd">        notrim - will keep all voxels in the grid</span>
+<span class="sd">        liberal - will keep all voxels with at least 1 node inside the negative region of the field (val &lt;= 0)</span>
+<span class="sd">        moderate - will keep all voxels with the centroid inside the negative region of the field (val &lt;= 0)</span>
+<span class="sd">        conservative - will keep only voxels that are entirely inside the negative region of the field (val &lt;= 0)</span>
+<span class="sd">        The default is liberal.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NodeCoords : list</span>
+<span class="sd">        List of nodal coordinates for the voxel mesh</span>
+<span class="sd">    NodeConn : list</span>
+<span class="sd">        Nodal connectivity list for the voxel mesh </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>        
+    
+    <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn1</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">([</span><span class="n">xlims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">xlims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">ylims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">ylims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">zlims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">zlims</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span><span class="n">h</span><span class="p">,</span><span class="n">exact_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">meshobj</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">NodeVals</span> <span class="o">=</span> <span class="n">sdf</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s1">&#39;notrim&#39;</span><span class="p">:</span>
+        <span class="n">NodeConn</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">NodeConn1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;conservative&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">NodeVals</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">]):</span>
+                    <span class="n">NodeConn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;moderate&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">NodeVals</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>                   
+                    <span class="n">NodeConn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span><span class="s1">&#39;liberal&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">NodeVals</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">]):</span>
+                    <span class="n">NodeConn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+        <span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">OriginalIds</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">removeNodes</span><span class="p">(</span><span class="n">NodeCoords</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span><span class="n">NodeConn</span><span class="p">)</span>
+        <span class="n">NodeVals</span> <span class="o">=</span> <span class="n">NodeVals</span><span class="p">[</span><span class="n">OriginalIds</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>   
+        <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">NodeConn1</span>
+    
+    <span class="k">return</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">NodeVals</span></div>
+
+
+<div class="viewcode-block" id="SurfaceMesh">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.SurfaceMesh">[docs]</a>
+<span class="k">def</span> <span class="nf">SurfaceMesh</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span><span class="n">xlims</span><span class="p">,</span><span class="n">ylims</span><span class="p">,</span><span class="n">zlims</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mcmethod</span><span class="o">=</span><span class="s1">&#39;33&#39;</span><span class="p">):</span>
+    <span class="c1"># NodeCoords, NodeConn, NodeVals = VoxelMesh(sdf,xlims,ylims,zlims,h,mode=&#39;notrim&#39;,reinitialize=False)</span>
+    <span class="c1"># SurfCoords, SurfConn = contour.MarchingCubes(NodeCoords, NodeConn, NodeVals, threshold=threshold, flip=flip, method=mcmethod)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="n">hx</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="n">hy</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span> <span class="n">hz</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">hx</span> <span class="o">=</span> <span class="n">h</span><span class="p">;</span> <span class="n">hy</span> <span class="o">=</span> <span class="n">h</span><span class="p">;</span> <span class="n">hz</span> <span class="o">=</span> <span class="n">h</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">xlims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">xlims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">hx</span><span class="p">,</span><span class="n">hx</span><span class="p">)</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ylims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">ylims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">hy</span><span class="p">,</span><span class="n">hy</span><span class="p">)</span>
+    <span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">zlims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">zlims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">hz</span><span class="p">,</span><span class="n">hz</span><span class="p">)</span>
+
+    <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">zs</span><span class="p">)</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">sdf</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">)</span>
+    <span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">MarchingCubesImage</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="p">(</span><span class="n">hx</span><span class="p">,</span> <span class="n">hy</span><span class="p">,</span> <span class="n">hz</span><span class="p">),</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;original&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">,</span><span class="n">VertexValues</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">SurfCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">xlims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">SurfCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">ylims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">SurfCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">zlims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span></div>
+
+
+<div class="viewcode-block" id="grid2fun">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.grid2fun">[docs]</a>
+<span class="k">def</span> <span class="nf">grid2fun</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">,</span><span class="n">Vals</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span><span class="n">fill_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    grid2fun converts a voxel grid mesh (as made by VoxelMesh(mode=&#39;notrim&#39;) </span>
+<span class="sd">    or converter.makeGrid) into a function that can be evaluated at any point</span>
+<span class="sd">    within the bounds of the grid</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    VoxelCoords : List of Lists</span>
+<span class="sd">        List of nodal coordinates for the voxel mesh</span>
+<span class="sd">    VoxelConn : List of Lists</span>
+<span class="sd">       Nodal connectivity list for the voxel mesh.</span>
+<span class="sd">    Vals : list</span>
+<span class="sd">        List of values at each node or at each element.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fun : function</span>
+<span class="sd">        Interpolation function, takes arguments (x,y,z), to return an</span>
+<span class="sd">        evaluation of the function at the specified point.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Vals</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">):</span>
+        <span class="n">Coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">Vals</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxelConn</span><span class="p">):</span>
+        <span class="n">Coords</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Centroids</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Vals must be the same length as either VoxelCoords or VoxelConn&#39;</span><span class="p">)</span>
+    <span class="c1"># VoxelCoords = np.array(VoxelCoords)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Coords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+    
+    <span class="n">points</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">)</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Vals</span><span class="p">,[</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">Z</span><span class="p">)])</span>
+    
+    <span class="n">V</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">V</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="p">:</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">RegularGridInterpolator</span><span class="p">(</span><span class="n">points</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span><span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">fill_value</span><span class="o">=</span><span class="kc">None</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">fun</span></div>
+
+
+<div class="viewcode-block" id="grid2grad">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.grid2grad">[docs]</a>
+<span class="k">def</span> <span class="nf">grid2grad</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">,</span><span class="n">NodeVals</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    grid2grad converts a voxel grid mesh (as made by VoxelMesh(mode=&#39;notrim&#39;) </span>
+<span class="sd">    or converter.makeGrid) into a function that can be evaluated at any point</span>
+<span class="sd">    within the bounds of the grid to return the gradient of the function</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    VoxelCoords : List of Lists</span>
+<span class="sd">        List of nodal coordinates for the voxel mesh</span>
+<span class="sd">    VoxelConn : List of Lists</span>
+<span class="sd">       Nodal connectivity list for the voxel mesh.</span>
+<span class="sd">    NodeVals : list</span>
+<span class="sd">        List of values at each node.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    frad : function</span>
+<span class="sd">        Interpolation function, takes arguments (x,y,z), to return an</span>
+<span class="sd">        evaluation of the function gradient at the specified point.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">VoxelCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+    
+    <span class="n">points</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">)</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">NodeVals</span><span class="p">,[</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">Z</span><span class="p">)])</span>
+    <span class="c1"># Assumes (and requires) that all voxels are cubic and the same size</span>
+    <span class="n">VoxelSize</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">[</span><span class="n">VoxelConn</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="n">VoxelCoords</span><span class="p">[</span><span class="n">VoxelConn</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]]))</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="n">VoxelSize</span><span class="p">)</span>
+    <span class="n">grad</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">interpolate</span><span class="o">.</span><span class="n">interpn</span><span class="p">(</span><span class="n">points</span><span class="p">,</span><span class="n">G</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">G</span><span class="p">))])</span><span class="o">.</span><span class="n">T</span>
+    
+    <span class="k">return</span> <span class="n">grad</span></div>
+
+
+<div class="viewcode-block" id="mesh2sdf">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.mesh2sdf">[docs]</a>
+<span class="k">def</span> <span class="nf">mesh2sdf</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;nodes+centroids&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    mesh2sdf Generates a signed distance field for a mesh</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    M : mesh.mesh</span>
+<span class="sd">        Mesh object that will be used to define the distance field.</span>
+<span class="sd">    VoxelCoords : list</span>
+<span class="sd">        List of nodal coordinates for the voxel mesh on which the distance</span>
+<span class="sd">        field will be evaluated.</span>
+<span class="sd">    VoxelConn : list</span>
+<span class="sd">        Nodal connectivity list for the voxel mesh on which the distance field</span>
+<span class="sd">        will be evaluated.</span>
+<span class="sd">    method : str</span>
+<span class="sd">        Method to be used </span>
+<span class="sd">        nodes </span>
+<span class="sd">        nodes+centroids</span>
+<span class="sd">        centroids</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NodeVals : list</span>
+<span class="sd">        List of signed distance values evaluated at each node in the voxel grid.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;nodes&#39;</span><span class="p">:</span>
+        <span class="n">Normals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeNormals</span><span class="p">)</span>
+        <span class="n">SurfNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">SurfConn</span><span class="p">))</span>
+        <span class="n">Coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">SurfNodes</span> <span class="k">else</span> <span class="p">[</span><span class="mi">10</span><span class="o">**</span><span class="mi">32</span><span class="p">,</span><span class="mi">10</span><span class="o">**</span><span class="mi">32</span><span class="p">,</span><span class="mi">10</span><span class="o">**</span><span class="mi">32</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)])</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;centroids&#39;</span><span class="p">:</span>
+        <span class="n">Normals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">ElemNormals</span><span class="p">)</span>
+        <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span>
+        <span class="n">Coords</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Centroids</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="c1">#np.array([np.mean(NodeCoords[elem],axis=0) for elem in M.SurfConn])</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;nodes+centroids&#39;</span><span class="p">:</span>
+        <span class="n">Normals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeNormals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">ElemNormals</span><span class="p">))</span>
+        <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span>
+        <span class="n">SurfNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">SurfConn</span><span class="p">))</span>
+        <span class="n">Coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">n</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">SurfNodes</span> <span class="k">else</span> <span class="p">[</span><span class="mi">10</span><span class="o">**</span><span class="mi">32</span><span class="p">,</span><span class="mi">10</span><span class="o">**</span><span class="mi">32</span><span class="p">,</span><span class="mi">10</span><span class="o">**</span><span class="mi">32</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)],</span> <span class="n">utils</span><span class="o">.</span><span class="n">Centroids</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Invalid method - use &quot;nodes&quot;, &quot;centroids&quot;, or &quot;nodes+centroids&quot;&#39;</span><span class="p">)</span>
+    
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">KDTree</span><span class="p">(</span><span class="n">Coords</span><span class="p">,</span> <span class="n">leaf_size</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  
+    <span class="n">Out</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">Out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">Out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">rs</span> <span class="o">=</span> <span class="n">VoxelCoords</span> <span class="o">-</span> <span class="n">Coords</span><span class="p">[</span><span class="n">cs</span><span class="p">]</span>
+    <span class="n">signs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rs</span><span class="o">*</span><span class="n">Normals</span><span class="p">[</span><span class="n">cs</span><span class="p">,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="c1"># [np.sign(np.dot(rs[i],Normals[cs[i]])) for i in range(len(ds))]</span>
+    <span class="n">NodeVals</span> <span class="o">=</span> <span class="n">signs</span><span class="o">*</span><span class="n">ds</span>
+    
+    <span class="k">return</span> <span class="n">NodeVals</span></div>
+
+
+<div class="viewcode-block" id="mesh2udf">
+<a class="viewcode-back" href="../../Mesh.html#Mesh.implicit.mesh2udf">[docs]</a>
+<span class="k">def</span> <span class="nf">mesh2udf</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    mesh2udf Generates an unsigned distance field for a mesh</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    M : mesh.mesh</span>
+<span class="sd">        Mesh object that will be used to define the distance field.</span>
+<span class="sd">    VoxelCoords : list</span>
+<span class="sd">        List of nodal coordinates for the voxel mesh on which the distance</span>
+<span class="sd">        field will be evaluated.</span>
+<span class="sd">    VoxelConn : list</span>
+<span class="sd">        Nodal connectivity list for the voxel mesh on which the distance field</span>
+<span class="sd">        will be evaluated.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NodeVals : list</span>
+<span class="sd">        List of signed distance values evaluated at each node in the voxel grid.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span>
+
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">KDTree</span><span class="p">(</span><span class="n">Coords</span><span class="p">,</span> <span class="n">leaf_size</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  
+    <span class="n">Out</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">NodeVals</span> <span class="o">=</span> <span class="n">Out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">NodeVals</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Timothy O. Josephson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

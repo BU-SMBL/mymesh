@@ -20,7 +20,7 @@ def Box(bounds,h,meshobj=True,ElemType='quad'):
         Approximate element size.
     meshobj : bool, optional
         If true, will return a mesh object, if false, will return 
-        NodeCoords and NodeConn. By default False.
+        NodeCoords and NodeConn. By default True.
 
     Returns
     -------
@@ -58,7 +58,7 @@ def Grid(bounds, h, meshobj=True, exact_h=False):
         Element size.
     meshobj : bool, optional
         If true, will return a mesh object, if false, will return 
-        NodeCoords and NodeConn. By default False.
+        NodeCoords and NodeConn. By default True.
     exact_h : bool, optional
         If true, will make a mesh where the element size is exactly
         equal to what is specified, but the upper bounds may vary slightly.
@@ -139,7 +139,7 @@ def Grid2D(bounds, h, z=0, meshobj=True, exact_h=False, ElemType='quad'):
         Element size.
     meshobj : bool, optional
         If true, will return a mesh object, if false, will return 
-        NodeCoords and NodeConn. By default False.
+        NodeCoords and NodeConn. By default True.
     exact_h : bool, optional
         If true, will make a mesh where the element size is exactly
         equal to what is specified, but the upper bounds may vary slightly.
@@ -214,19 +214,27 @@ def Plane(pt, normal, bounds, h, meshobj=True, exact_h=False, ElemType='quad'):
         Normal vector of the plane
     bounds : list
         Six element list, [xmin,xmax,ymin,ymax,zmin,zmax].
-    h : _type_
-        _description_
+    h : float
+        Element size.
     meshobj : bool, optional
-        _description_, by default True
+        If true, will return a mesh object, if false, will return 
+        NodeCoords and NodeConn. By default True.
     exact_h : bool, optional
-        _description_, by default False
+        If true, will make a mesh where the element size is exactly
+        equal to what is specified, but the upper bounds may vary slightly.
+        Otherwise, the bounds will be strictly enforced, but element size may deviate
+        from the specified h. This may result in non-cubic elements. By default False.
     ElemType : str, optional
-        _description_, by default 'quad'
+        Element type, by default 'quad'. Options are 'tri' or 'quad'.
 
     Returns
     -------
-    _type_
-        _description_
+    PlaneCoords : list
+        Node coordinates of the mesh. Returned if meshobj = False.
+    PlaneConn : list
+        Nodal connectivities of the mesh. Returned if meshobj = False.
+    plane : Mesh.mesh
+        Mesh object containing the planar mesh. Returned if meshobj = True.
     """
     # Get rotation between the plane and the xy (z=0) plane
     normal = np.asarray(normal)/np.linalg.norm(normal)
@@ -292,7 +300,7 @@ def Plane(pt, normal, bounds, h, meshobj=True, exact_h=False, ElemType='quad'):
     
     GridBounds = np.array([np.min(GridCorners,axis=0)[0],np.max(GridCorners,axis=0)[0],np.min(GridCorners,axis=0)[1],np.max(GridCorners,axis=0)[1]])
 
-    GridCoords,GridConn = Grid2D(GridBounds, h, z=GridCorners[0,2], exact_h=exact_h, ElemType=ElemType)
+    GridCoords,PlaneConn = Grid2D(GridBounds, h, z=GridCorners[0,2], exact_h=exact_h, ElemType=ElemType)
 
     # Rotate xy plane to proper orientation
     PlaneCoords = np.dot(np.linalg.inv(R),np.dot(np.linalg.inv(R2),GridCoords.T)).T
@@ -304,13 +312,42 @@ def Plane(pt, normal, bounds, h, meshobj=True, exact_h=False, ElemType='quad'):
 
     if meshobj:
         if 'mesh' in dir(mesh):
-            plane = mesh.mesh(PlaneCoords,GridConn,'surf')
+            plane = mesh.mesh(PlaneCoords,PlaneConn,'surf')
         else:
-            plane = mesh(PlaneCoords,GridConn,'surf')
+            plane = mesh(PlaneCoords,PlaneConn,'surf')
         return plane
-    return PlaneCoords, GridConn
+    return PlaneCoords, PlaneConn
 
 def Extrude(line, distance, step, axis=2, ElemType='quad', meshobj=True):
+    """
+    Extrude Generate a surface mesh from a line mesh
+
+    Parameters
+    ----------
+    line : mesh.mesh
+        Mesh object containing line segment elements in a 2D plane.
+    distance : int, float
+        Extrusion distance.
+    step : int, float
+        Element size for new elements in the extrusion direction.
+    axis : int, optional
+        Axis of extrusion, by default 2. This should be orthogonal to the plane of the 2D line mesh. 
+        Options are 0, 1, or 2 for the x, y, or z axes, respectively. 
+    ElemType : str, optional
+        Element type, by default 'quad'. Options are 'tri' or 'quad'.
+    meshobj : bool, optional
+        If true, will return a mesh object, if false, will return 
+        NodeCoords and NodeConn. By default True.
+
+    Returns
+    -------
+    NodeCoords : list
+        Node coordinates of the mesh. Returned if meshobj = False.
+    NodeConn : list
+        Nodal connectivities of the mesh. Returned if meshobj = False.
+    extruded : Mesh.mesh
+        Mesh object containing the extruded mesh. Returned if meshobj = True.
+    """    
     NodeCoords = np.array(line.NodeCoords)
     OriginalConn = np.array(line.NodeConn)
     NodeConn = np.empty((0,4))

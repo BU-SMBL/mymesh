@@ -1,0 +1,117 @@
+Mesh package
+============
+
+Submodules
+----------
+
+Mesh.booleans module
+--------------------
+
+.. automodule:: Mesh.booleans
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mesh.contour module
+-------------------
+
+.. automodule:: Mesh.contour
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mesh.converter module
+---------------------
+
+.. automodule:: Mesh.converter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mesh.curvature module
+---------------------
+
+.. automodule:: Mesh.curvature
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mesh.delaunay module
+--------------------
+
+.. automodule:: Mesh.delaunay
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mesh.implicit module
+--------------------
+
+.. automodule:: Mesh.implicit
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mesh.improvement module
+-----------------------
+
+.. automodule:: Mesh.improvement
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mesh.mesh module
+----------------
+
+.. automodule:: Mesh.mesh
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mesh.octree module
+------------------
+
+.. automodule:: Mesh.octree
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mesh.primitives module
+----------------------
+
+.. automodule:: Mesh.primitives
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mesh.quality module
+-------------------
+
+.. automodule:: Mesh.quality
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mesh.rays module
+----------------
+
+.. automodule:: Mesh.rays
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Mesh.utils module
+-----------------
+
+.. automodule:: Mesh.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: Mesh
+   :members:
+   :undoc-members:
+   :show-inheritance:
