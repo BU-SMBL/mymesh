@@ -3828,9 +3828,10 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     tableIdx = np.dot(inside, 2**np.arange(inside.shape[1] - 1, -1, -1))
     
     if method == 'original':
-        tableIdx[tableIdx > 127] = 128 - (tableIdx[tableIdx > 127]-127)
+        flip = tableIdx > 127
+        tableIdx[flip] = 128 - (tableIdx[flip]-127)
         edgeList =  LookupTable[tableIdx]
-        edgeConnections = np.array([x for y in edgeList for x in y if len(x) != 0])
+        edgeConnections = np.array([x[::-1] if flip[i] else x for i,y in enumerate(edgeList) for x in y if len(x) != 0])
         numbering = np.array([j for j,y in enumerate(edgeList) for i,x in enumerate(y) if len(x) != 0])
     
     elif method == '33':
