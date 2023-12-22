@@ -72,7 +72,7 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
     # MergedICoords, MergedIConn, _ = converter.removeNodes(MergedICoords, MergedIConn)
     # MergedICoords, MergedIConn, _ = utils.DeleteDuplicateNodes(MergedICoords, MergedIConn)
     
-    MergedDCoords, MergedDConn = utils.MergeMesh(Split1.NodeCoords, ADConn, Split2.NodeCoords, BDConn)
+    MergedDCoords, MergedDConn = utils.MergeMesh(Split1.NodeCoords, ADConn, Split2.NodeCoords, np.fliplr(BDConn).tolist())
     # MergedDCoords, MergedDConn, _ = converter.removeNodes(MergedDCoords, MergedDConn)
     # MergedDCoords, MergedDConn, _ = utils.DeleteDuplicateNodes(MergedDCoords, MergedDConn)
     if 'mesh' in dir(mesh):
