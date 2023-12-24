@@ -226,8 +226,8 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
                 n = ElemNormals[j]
                 # Set edge constraints
                 Constraints = np.transpose([np.arange(3,len(SplitGroupNodes[j]),2), np.arange(4,len(SplitGroupNodes[j]),2)])
-                Constraints = np.append([[0,1],[1,2],[2,0]],Constraints,axis=0)
-                boundary = SplitGroupNodes[j][:3]
+                # Constraints = np.append([[0,1],[1,2],[2,0]],Constraints,axis=0)
+                # boundary = SplitGroupNodes[j][:3]
                 # Reduce node list
                 SplitGroupNodes[j],_,newId,idx = utils.DeleteDuplicateNodes(SplitGroupNodes[j],[],return_idx=True,tol=eps)
                 # Tris = np.repeat([boundary],len(SplitGroupNodes[j]),axis=0)
