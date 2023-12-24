@@ -594,16 +594,18 @@ def TrianglesTrianglesIntersectionPts(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
     d2s = -np.sum(N2s*Tri2s[:,0,:],axis=1)
 
     # Signed distances from vertices in Tri1 to Plane2:
-    sd1s = np.round([np.sum(N2s*Tri1s[:,i],axis=1)+d2s for i in range(3)],16).T
+    sd1s = np.array([np.sum(N2s*Tri1s[:,i],axis=1)+d2s for i in range(3)]).T
     signs1 = np.sign(sd1s)
+    signs1[np.abs(sd1s) < eps] = 0
     
     # Plane1 (N1.X+d1): 
     N1s = np.cross(np.subtract(Tri1s[:,1],Tri1s[:,0]),np.subtract(Tri1s[:,2],Tri1s[:,0]))
     d1s = -np.sum(N1s*Tri1s[:,0,:],axis=1)
     
     # Signed distances from vertices in Tri1 to Plane2:
-    sd2s = np.round([np.sum(N1s*Tri2s[:,i],axis=1)+d1s for i in range(3)],16).T
+    sd2s = np.array([np.sum(N1s*Tri2s[:,i],axis=1)+d1s for i in range(3)]).T
     signs2 = np.sign(sd2s)
+    signs2[np.abs(sd2s) < eps] = 0
     
     # Intersection line of Tri1 & Tri2: L = O+tD
     Ds = np.cross(N1s,N2s)
