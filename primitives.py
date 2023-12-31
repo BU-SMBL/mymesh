@@ -6,9 +6,9 @@ Created Sept 2022
 """
 import numpy as np
 import gc
-from . import converter, implicit, mesh
+from . import converter, implicit, mesh, delaunay
 
-def Box(bounds,h,meshobj=True,ElemType='quad'):
+def Box(bounds, h, meshobj=True, ElemType='quad'):
     """
     Box Generate a surface mesh of a rectangular box. 
 
@@ -331,4 +331,57 @@ def Extrude(line, distance, step, axis=2, ElemType='quad', meshobj=True):
         return extruded
     return NodeCoords, NodeConn
 
+def Cylinder(bounds, resolution, axis=2, axis_step=None, meshobj=True):
+    bounds = np.asarray(bounds)
+    if axis == 2:
+        lbounds = bounds
+        order = [0,1,2]
+    elif axis == 1:
+        lbounds = bounds[[0,1,4,5,2,3]]
+        order = [0,2,1]
+    elif axis == 0:
+        lbounds = bounds[[4,5,2,3,0,1]]
+        order = [2,1,0]
+    else:
+        raise Exception('Axis must be 0 (x), 1 (y), or 2 (z).')
+    
+    height = lbounds[5] - lbounds[4]
+    if axis_step is None:
+        axis_step = height
+
+    a = (lbounds[1] - lbounds[0])/2   
+    b = (lbounds[3] - lbounds[2])/2   
+    ashift = lbounds[0] + a
+    bshift = lbounds[2] + b
+
+    t = np.linspace(0,2*np.pi,resolution+1)
+    t = np.append(t, t[0])
+
+    x = a*np.cos(t) + ashift
+    y = b*np.sin(t) + bshift
+    z = np.repeat(lbounds[4],len(x))
+    xyz = [x,y,z]
+
+    coords = np.column_stack(xyz)[:,order]
+    conn = np.column_stack([np.arange(0,len(t)-1), np.arange(1,len(t))])
+
+    line = mesh(coords, conn)
+
+    cyl = Extrude(line, height, axis_step, axis=axis, ElemType='tri')
+
+    capconn = delaunay.ConvexHullFanTriangulation(np.arange(line.NNode))
+
+    cap1 = mesh(line.NodeCoords, np.fliplr(capconn))
+    cap2 = mesh(np.copy(line.NodeCoords), capconn)
+    cap2.NodeCoords[:,axis] += height
+
+    cyl.merge(cap1)
+    cyl.merge(cap2)
+    cyl.cleanup()
+
+    if meshobj:
+        return cyl
+    return cyl.NodeCoords, cyl.NodeConn
+        
+        
 
