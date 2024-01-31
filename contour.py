@@ -3696,10 +3696,7 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
                     else:
                         raise Exception('Invalid interpolation method')
                     if return_anchors:
-                        if flip:
-                            anchor = [node1,node2][np.argmax([v1,v2])] # Pick the point in positive domain
-                        else:
-                            anchor = [node1,node2][np.argmin([v1,v2])] # Pick the point in negative domain
+                        anchor = [node1,node2][np.argmin([v1,v2])] # Pick the point in negative domain 
                         Anchors.append(anchor)
 
                         # if (edgeLookup[n][0] == 0 and edgeLookup[n][1] == 1) or (edgeLookup[n][0] == 2 and edgeLookup[n][1] == 3):
