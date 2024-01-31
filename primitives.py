@@ -365,14 +365,20 @@ def Cylinder(bounds, resolution, axis=2, axis_step=None, meshobj=True):
     coords = np.column_stack(xyz)[:,order]
     conn = np.column_stack([np.arange(0,len(t)-1), np.arange(1,len(t))])
 
-    line = mesh(coords, conn)
-
+    if 'mesh' in dir(mesh):
+        line = mesh.mesh(coords, conn)
+    else:
+        line = mesh(coords, conn)
     cyl = Extrude(line, height, axis_step, axis=axis, ElemType='tri')
 
     capconn = delaunay.ConvexHullFanTriangulation(np.arange(line.NNode))
 
-    cap1 = mesh(line.NodeCoords, np.fliplr(capconn))
-    cap2 = mesh(np.copy(line.NodeCoords), capconn)
+    if 'mesh' in dir(mesh):
+        cap1 = mesh.mesh(line.NodeCoords, np.fliplr(capconn))
+        cap2 = mesh.mesh(np.copy(line.NodeCoords), capconn)
+    else:
+        cap1 = mesh(line.NodeCoords, np.fliplr(capconn))
+        cap2 = mesh(np.copy(line.NodeCoords), capconn)
     cap2.NodeCoords[:,axis] += height
 
     cyl.merge(cap1)
