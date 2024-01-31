@@ -497,7 +497,7 @@ class mesh:
         return self._SurfElemConn
     @property
     def ElemNormals(self):
-        if self._ElemNormals == []:
+        if np.size(self._ElemNormals) == 0:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Calculating surface element normals...',end='')
                 self._printlevel+=1
@@ -515,7 +515,7 @@ class mesh:
         self._NodeNormalsMethod = method
     @property
     def NodeNormals(self):
-        if self._NodeNormals == []:
+        if np.size(self._NodeNormals) == 0:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Calculating surface node normals...',end='')
                 self._printlevel+=1
@@ -526,7 +526,7 @@ class mesh:
         return self._NodeNormals
     @property
     def Centroids(self):
-        if self._Centroids == []:
+        if np.size(self._Centroids) == 0:
             if self.verbose: print('\n'+'\t'*self._printlevel+'Calculating element centroids...',end='')
             self._Centroids = utils.Centroids(*self)
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
