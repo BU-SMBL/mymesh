@@ -77,9 +77,22 @@ def diff(fval1,fval2):
     # return rMin(fval1,-fval2)
     return rMax(fval1,-fval2)
 
+def diff_old(fval1, fval2):
+    return rMin(fval1,-fval2)
+    
+
 def intersection(fval1,fval2):
 #    return np.maximum(fval1,fval2)
     return rMax(fval1,fval2)
+
+def unionf(f1,f2):
+    return lambda x,y,z : rMin(f1(x,y,z),f2(x,y,z))
+
+def difff(f1,f2):
+    return lambda x,y,z : rMax(f1(x,y,z),-f2(x,y,z))
+
+def intersectionf(f1,f2):
+    return lambda x,y,z : rMax(f1(x,y,z),f2(x,y,z))
 
 def rMax(a,b,alpha=0,m=0,p=2):
     # R-Function version of max(a,b) to yield a smoothly differentiable max - R0
@@ -137,6 +150,8 @@ def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',values='nodes'):
     
     NodeCoords, NodeConn1 = primitives.Grid([xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]],h,exact_h=True, meshobj=False)
     NodeVals = sdf(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
+    if np.min(NodeVals) > 0:
+        return [], []
     if mode != 'notrim':
         NodeConn = []
         for elem in NodeConn1:
@@ -389,7 +404,7 @@ def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
         Normals = np.array(list(M.NodeNormals) + list(M.ElemNormals))
         NodeCoords = np.array(M.NodeCoords)
         SurfNodes = set(np.unique(M.SurfConn))
-        Coords = np.append([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)], utils.Centroids(M.NodeCoords,M.SurfConn),axis=0)
+        Coords = np.append([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)], utils.Centroids(M.NodeCoords,M.SurfConn),axis=0).astype(float)
     else:
         raise Exception('Invalid method - use "nodes", "centroids", or "nodes+centroids"')
     
