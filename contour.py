@@ -3754,7 +3754,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     # if VertexValues, Image data is assumed to be vertices
     
     if np.issubdtype(I.dtype, np.unsignedinteger):
-        I = I.astype(np.dtype(I.dtype.name.replace('uint', 'int')))
+        I = I.astype(float)
         
     assert len(I.shape) == 3, 'I must be a 3D numpy array of image data. For 2D, use MarchingSquaresImage.'
     I = I - threshold  
