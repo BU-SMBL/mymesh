@@ -3753,6 +3753,9 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     # Image data is assumed to be voxel data and will be interpolated to vertices to get the corners of each 'square'
     # if VertexValues, Image data is assumed to be vertices
     
+    if np.issubdtype(I.dtype, np.unsignedinteger):
+        I = I.astype(np.dtype(I.dtype.name.replace('uint', 'int')))
+        
     assert len(I.shape) == 3, 'I must be a 3D numpy array of image data. For 2D, use MarchingSquaresImage.'
     I = I - threshold  
     if method == 'original':
@@ -4115,12 +4118,12 @@ def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method=
 
     # dualgrid_method could be centroid or qef_min
 
-    root = octree.Function2Octree(func, grad, bounds, maxsize=maxsize, minsize=minsize, strategy=octree_strategy, eps=octree_eps)
+    root = octree.Function2Octree(func, grad, bounds, maxsize=maxsize, minsize=minsize, strategy=octree_strategy, eps=octree_eps, npts=3)
     DualCoords, DualConn = octree.Octree2Dual(root,method=dualgrid_method)
     NodeValues = func(DualCoords[:,0],DualCoords[:,1],DualCoords[:,2])
     TriCoords, TriConn = MarchingCubes(DualCoords, DualConn, NodeValues)
             
-    return TriCoords, TriConn
+    return TriCoords, TriConn, root, DualCoords, DualConn, NodeValues
 
 
 
