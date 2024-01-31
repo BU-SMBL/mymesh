@@ -389,7 +389,7 @@ def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
         Normals = np.array(list(M.NodeNormals) + list(M.ElemNormals))
         NodeCoords = np.array(M.NodeCoords)
         SurfNodes = set(np.unique(M.SurfConn))
-        Coords = np.append([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)], utils.Centroids(M.NodeCoords,M.NodeConn),axis=0)
+        Coords = np.append([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)], utils.Centroids(M.NodeCoords,M.SurfConn),axis=0)
     else:
         raise Exception('Invalid method - use "nodes", "centroids", or "nodes+centroids"')
     
