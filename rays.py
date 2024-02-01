@@ -1329,13 +1329,13 @@ def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, ep
         spintersectionPtsZ = scipy.sparse.lil_matrix((len(pts),len(SurfConn)))
 
 
-        spintersections[RayIds[outintersections],TriIds[outintersections]] = TriIds[outintersections]
+        spintersections[RayIds[outintersections],TriIds[outintersections]] = TriIds[outintersections]+1 # +1 so that TriId = 0 doesn't get lost in sparse
         spdistances[RayIds[outintersections],TriIds[outintersections]] = outdistances+1e-32
         spintersectionPtsX[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts[:,0]+1e-32
         spintersectionPtsY[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts[:,1]+1e-32
         spintersectionPtsZ[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts[:,2]+1e-32
 
-        intersections = [x.toarray()[x.nonzero()] for x in spintersections.tocsr()]
+        intersections = [x.toarray()[x.nonzero()]-1 for x in spintersections.tocsr()]
         distances = [(x.toarray()[x.nonzero()]-1e-32) for x in spdistances.tocsr()]        
         intersectionPts = [np.vstack([x.toarray()[x.nonzero()],y.toarray()[y.nonzero()],z.toarray()[z.nonzero()]]).T-1e-32 for x,y,z in zip(spintersectionPtsX.tocsr(),spintersectionPtsY.tocsr(),spintersectionPtsZ.tocsr())]
 
@@ -1494,11 +1494,7 @@ def isInsidesSurf(pts, NodeCoords, SurfConn, ElemNormals, Octree='generate', eps
     if rays is None: rays = np.random.rand(len(pts),3)
     
     root = OctreeInputProcessor(NodeCoords, SurfConn, Octree)
-    import time
-    tic = time.time()
     intersections, distances, _ = RaysSurfIntersection(pts,rays,NodeCoords,SurfConn,Octree=root) 
-    print(time.time()-tic)
-    tic = time.time()
     Insides = np.repeat(False,len(pts))
     for i in range(len(intersections)):
         posDistances = distances[i][distances[i] > eps]
@@ -1515,7 +1511,6 @@ def isInsidesSurf(pts, NodeCoords, SurfConn, ElemNormals, Octree='generate', eps
             else:
                 # Inside
                 Insides[i] = True
-    print(time.time()-tic)
     return Insides
 
 def isInsideBox(pt, xlim, ylim, zlim):
