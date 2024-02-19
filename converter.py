@@ -18,7 +18,7 @@ except:
 
 def solid2surface(NodeCoords,NodeConn):
     """
-    solid2surface Extract the 2D surface elements from a 3D volume mesh
+    Extract the 2D surface elements from a 3D volume mesh
 
     Parameters
     ----------
@@ -39,7 +39,7 @@ def solid2surface(NodeCoords,NodeConn):
 
 def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False):
     """
-    solid2faces Convert solid mesh to faces. The will be one face for each side of each element,
+    Convert solid mesh to faces. The will be one face for each side of each element,
     i.e. there will be duplicate faces for non-surface faces. Use faces2surface(Faces) to extract
     only the surface faces or face2unique(Faces) to remove duplicates.
 
@@ -106,7 +106,7 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
 
 def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeConn=False,return_EdgeElem=False,):
     """
-    solid2edges Convert solid mesh to edges. The will be one edge for each edge of each element,
+    Convert solid mesh to edges. The will be one edge for each edge of each element,
     i.e. there will be multiple entries for shared edges. Solid2Edges is also suitable for use 
     with 2D or surface meshes. It differes from surface2edges in that surface2edges returns only 
     exposed edges of unclosed surfaces.
@@ -297,7 +297,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
 
 def EdgesByElement(NodeCoords,NodeConn,ElemType='auto'):
     """
-    EdgesByElement Returns edges grouped by the element from which they came.
+    Returns edges grouped by the element from which they came.
     TODO: This can/should be rewritten based on solid2edges using EdgeConn
 
     Parameters
@@ -345,7 +345,7 @@ def EdgesByElement(NodeCoords,NodeConn,ElemType='auto'):
 
 def solid2tets(NodeCoords,NodeConn,return_ids=False):
     """
-    solid2tets Decompose all elements of a 3D volume mesh to tetrahedra.
+    Decompose all elements of a 3D volume mesh to tetrahedra.
     NOTE the generated tetrahedra will not generally be continuously oriented, i.e.
     edges of child tetrahedra may not be aligned between one parent element 
     and its neighbor, and thus the resulting mesh will typically be invalid.
@@ -399,7 +399,7 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
 
 def hex2tet(NodeCoords,NodeConn,method='1to5'):
     """
-    hex2tet Decompose all elements of a 3D hexahedral mesh to tetrahedra.
+    Decompose all elements of a 3D hexahedral mesh to tetrahedra.
     Generally solid2tets should be used rather than hex2tet directly
     NOTE the generated tetrahedra will not generally be continuously oriented, i.e.
     edges of child tetrahedra may not be aligned between one parent element 
@@ -494,7 +494,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to5'):
 
 def wedge2tet(NodeCoords,NodeConn):
     """
-    wedge2tet Decompose all elements of a 3D wedge-element mesh to tetrahedra.
+    Decompose all elements of a 3D wedge-element mesh to tetrahedra.
     Generally solid2tets should be used rather than wedge2tet directly
     NOTE the generated tetrahedra will not generally be continuously oriented, i.e.
     edges of child tetrahedra may not be aligned between one parent element 
@@ -529,7 +529,7 @@ def wedge2tet(NodeCoords,NodeConn):
 
 def pyramid2tet(NodeCoords,NodeConn):
     """
-    pyramid2tet Decompose all elements of a 3D pyramidal mesh to tetrahedra.
+    Decompose all elements of a 3D pyramidal mesh to tetrahedra.
     Generally solid2tets should be used rather than pyramid2tet directly
     NOTE the generated tetrahedra will not generally be continuously oriented, i.e.
     edges of child tetrahedra may not be aligned between one parent element 
@@ -568,7 +568,7 @@ def pyramid2tet(NodeCoords,NodeConn):
 
 def faces2surface(Faces):
     """
-    faces2surface Identify surface elements, i.e. faces that aren't shared between two elements
+    Identify surface elements, i.e. faces that aren't shared between two elements
 
     Parameters
     ----------
@@ -593,7 +593,7 @@ def faces2surface(Faces):
 
 def faces2unique(Faces,return_idx=False,return_inv=False):
     """
-    faces2unique reduce set of mesh faces to contain only unique faces, i.e. there will only
+    Reduce set of mesh faces to contain only unique faces, i.e. there will only
     be one entry to indicate a face shared between two elements.
 
     Parameters
@@ -638,7 +638,6 @@ def faces2unique(Faces,return_idx=False,return_inv=False):
 
 def faces2faceelemconn(Faces,FaceConn,FaceElem,return_UniqueFaceInfo=False):
     """
-    faces2faceelemconn 
     FaceElemConn gives the elements connected to each face (max 2), ordered such that the element that the face
     is facing (based on face normal direction) is listed first. If the face is only attached to one element (such
     as on the surface), the other entry will be np.nan. 
@@ -701,7 +700,7 @@ def faces2faceelemconn(Faces,FaceConn,FaceElem,return_UniqueFaceInfo=False):
 
 def edges2unique(Edges,return_idx=False,return_inv=False,return_counts=False):
     """
-    edges2unique reduce set of mesh edges to contain only unique edges, i.e. there will only
+    Reduce set of mesh edges to contain only unique edges, i.e. there will only
     be one entry to indicate a edge shared between multiple elements.
 
     Parameters
@@ -745,7 +744,7 @@ def edges2unique(Edges,return_idx=False,return_inv=False,return_counts=False):
 
 def tet2faces(NodeCoords,NodeConn):
     """
-    tet2faces extract triangular faces from all elements of a purely 4-Node tetrahedral mesh.
+    Extract triangular faces from all elements of a purely 4-Node tetrahedral mesh.
     All faces will be ordered such that the nodes are in counter-clockwise order when
     viewed from outside of the element. Best practice is to use solid2faces, rather than 
     using tet2faces directly.
@@ -793,7 +792,7 @@ def tet2faces(NodeCoords,NodeConn):
 
 def hex2faces(NodeCoords,NodeConn):
     """
-    hex2faces extract quadrilateral faces from all elements of a purely 8-Node hexahedral mesh.
+    Extract quadrilateral faces from all elements of a purely 8-Node hexahedral mesh.
     All faces will be ordered such that the nodes are in counter-clockwise order when
     viewed from outside of the element. Best practice is to use solid2faces, rather than 
     using hex2faces directly.
@@ -829,7 +828,7 @@ def hex2faces(NodeCoords,NodeConn):
 
 def pyramid2faces(NodeCoords,NodeConn):
     """
-    pyramid2faces extract triangular and quadrilateral faces from all elements of a 
+    Extract triangular and quadrilateral faces from all elements of a 
     purely 5-Node pyramidal mesh. All faces will be ordered such that the nodes are in 
     counter-clockwise order when viewed from outside of the element. Best practice is to 
     use solid2faces, rather than using pyramid2faces directly.
@@ -861,7 +860,7 @@ def pyramid2faces(NodeCoords,NodeConn):
         
 def wedge2faces(NodeCoords,NodeConn):
     """
-    wedge2faces extract triangular and quadrilateral faces from all elements of a purely 
+    Extract triangular and quadrilateral faces from all elements of a purely 
     6-Node wedge elemet mesh. All faces will be ordered such that the nodes are in 
     counter-clockwise order when viewed from outside of the element. Best practice is 
     to use solid2faces, rather than using wedge2faces directly.
@@ -893,7 +892,7 @@ def wedge2faces(NodeCoords,NodeConn):
 
 def tri2edges(NodeCoords,NodeConn,ReturnType=list):
     """
-    tri2edges extract edges from all elements of a purely 3-Node triangular mesh.
+    Extract edges from all elements of a purely 3-Node triangular mesh.
     Best practice is to use solid2edges, rather than using tri2edges directly.
 
     Parameters
@@ -912,7 +911,6 @@ def tri2edges(NodeCoords,NodeConn,ReturnType=list):
         List of nodal connectivity of the mesh edges.
     """
     # Note that some code relies on these edges being in the order that they're currently in
-    # edges = [[] for i in range(3*len(NodeConn))]
     
     # Explode surface elements into edges
     if len(NodeConn) > 0:
@@ -934,7 +932,7 @@ def tri2edges(NodeCoords,NodeConn,ReturnType=list):
 
 def quad2edges(NodeCoords,NodeConn,ReturnType=list):
     """
-    quad2edges extract edges from all elements of a purely 4-Node quadrilateral mesh.
+    Extract edges from all elements of a purely 4-Node quadrilateral mesh.
     Best practice is to use solid2edges, rather than using quad2edges directly.
 
     Parameters
@@ -973,7 +971,7 @@ def quad2edges(NodeCoords,NodeConn,ReturnType=list):
 
 def polygon2edges(NodeCoords,NodeConn,ReturnType=list):
     """
-    polygon2edges extract edges from all elements of a polygonal mesh.
+    Extract edges from all elements of a polygonal mesh.
     Best practice is to use solid2edges, rather than using polygon2edges directly.
 
     Parameters
@@ -999,7 +997,7 @@ def polygon2edges(NodeCoords,NodeConn,ReturnType=list):
 
 def tet2edges(NodeCoords,NodeConn,ReturnType=list):
     """
-    tet2edges extract edges from all elements of a purely 4-Node tetrahedral mesh.
+    Extract edges from all elements of a purely 4-Node tetrahedral mesh.
     Best practice is to use solid2edges, rather than using tet2edges directly.
 
     Parameters
@@ -1039,7 +1037,7 @@ def tet2edges(NodeCoords,NodeConn,ReturnType=list):
 
 def pyramid2edges(NodeCoords,NodeConn,ReturnType=list):
     """
-    pyramid2edges extract edges from all elements of a purely 5-Node pyramidal mesh.
+    Extract edges from all elements of a purely 5-Node pyramidal mesh.
     Best practice is to use solid2edges, rather than using pyramid2edges directly.
 
     Parameters
@@ -1080,7 +1078,7 @@ def pyramid2edges(NodeCoords,NodeConn,ReturnType=list):
 
 def wedge2edges(NodeCoords,NodeConn,ReturnType=list):
     """
-    wedge2edges extract edges from all elements of a purely 6-Node wedge element mesh.
+    Extract edges from all elements of a purely 6-Node wedge element mesh.
     Best practice is to use solid2edges, rather than using wedge2edges directly.
 
     Parameters
@@ -1122,7 +1120,7 @@ def wedge2edges(NodeCoords,NodeConn,ReturnType=list):
 
 def hex2edges(NodeCoords,NodeConn,ReturnType=list):
     """
-    hex2edges extract edges from all elements of a purely 8-Node hexahedral mesh.
+    Extract edges from all elements of a purely 8-Node hexahedral mesh.
     Best practice is to use solid2edges, rather than using hex2edges directly.
 
     Parameters
@@ -1167,7 +1165,7 @@ def hex2edges(NodeCoords,NodeConn,ReturnType=list):
 
 def quad2tri(QuadNodeConn):
     """
-    quad2tri Converts a quadrilateral mesh to a triangular mesh by splitting each quad into 2 tris  
+    Converts a quadrilateral mesh to a triangular mesh by splitting each quad into 2 tris  
 
     Parameters
     ----------
@@ -1187,7 +1185,7 @@ def quad2tri(QuadNodeConn):
         
 def tet102tet4(Tet10NodeConn):
     """
-    tet102tet4 Converts a 10 node tetradehdral mesh to a 4 node tetradehedral mesh.
+    Converts a 10 node tetradehdral mesh to a 4 node tetradehedral mesh.
     Assumes a 10 node tetrahedral numbering scheme where the first 4 nodes define the
     tetrahedral vertices, the remaining nodes are thus neglected.
 
@@ -1209,7 +1207,7 @@ def tet102tet4(Tet10NodeConn):
      
 def surf2edges(NodeCoords,NodeConn,ElemType='auto'):
     """
-    surf2edges Extract the edges of an unclosed surface mesh.
+    Extract the edges of an unclosed surface mesh.
     This differs from solid2edges in that it doesn't return any
     interior mesh edges, and for a volume mesh or closed surface,
     surf2edges will return [].
@@ -1226,25 +1224,6 @@ def surf2edges(NodeCoords,NodeConn,ElemType='auto'):
     Edges : list
         List of nodal connectivities for exposed edges.
     """
-    # TODO: this should be revamped to utilize solid2edges, edges2unique
-
-    # edges = [[0,0] for i in range(3*len(NodeConn))]
-    # if len(NodeConn) == 0:
-    #     return edges
-    
-    # # Explode surface elements into edges
-    # for i in range(len(NodeConn)):
-    #     edges[3*i+0] = [NodeConn[i][j] for j in [0,1]]
-    #     edges[3*i+1] = [NodeConn[i][j] for j in [1,2]]
-    #     edges[3*i+2] = [NodeConn[i][j] for j in [0,2]]
-    # # Identify surface elements, i.e. triangles that aren't shared between two elements
-    # sortedConn = np.sort(edges,axis=1)
-    # unique,counts = np.unique(sortedConn,axis=0,return_counts=True)
-    # uedges = unique[np.where(counts==1)].tolist()
-    # sC = sortedConn.tolist()
-    # # SurfIdx = [np.where(np.all(surfs[i] == sC,axis=1))[0].tolist()[0] for i in range(len(surfs))]
-    # EdgeIdx = [sC.index(uedges[i]) for i in range(len(uedges))]
-    # Edges = np.array(edges)[EdgeIdx].tolist()
 
     edges = solid2edges(NodeCoords, NodeConn, ElemType=ElemType)
     UEdges, indices, counts = edges2unique(edges, return_idx=True, return_counts=True)
@@ -1256,7 +1235,7 @@ def surf2edges(NodeCoords,NodeConn,ElemType='auto'):
 
 def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
     """
-    im2voxel Convert 3D image data to a cubic mesh. Each voxel will be represented by an element.
+    Convert 3D image data to a cubic mesh. Each voxel will be represented by an element.
 
     Parameters
     ----------
@@ -1332,28 +1311,6 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
             else:
                 return [], [], []
         print('Loading image data from {:s}...'.format(img))
-        # with tempfile.TemporaryDirectory() as Dir:
-        #     with h5py.File(os.path.join(Dir,"images.hdf5"), "w") as f:
-        #         if ftype == 'tiff':
-        #             temp = cv2.imread(files[0])
-        #             imgs = (cv2.imread(file) for file in files)
-        #         else:
-        #             temp = pydicom.dcmread(files[0]).pixel_array
-        #             imgs = (pydicom.dcmread(file).pixel_array for file in files)
-                
-        #         data = f.create_dataset('img',(len(files),temp.shape[0],temp.shape[1]))
-        #         i = 0
-        #         for I in tqdm.tqdm(imgs, total=len(files)):
-        #             if len(I.shape) == 3:
-        #                 data[i] = I[:,:,0]
-        #             else:
-        #                 data[i] = I
-        #             i += 1
-        #         if scalefactor != 1:
-        #             img = ndimage.zoom(np.array(data),scalefactor,order=scaleorder)
-        #             voxelsize /= scalefactor
-        #         else:
-        #             img = np.array(data)
         if ftype == 'tiff':
             temp = cv2.imread(files[0])
             if len(temp.shape) > 2:
@@ -1464,154 +1421,83 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
     if return_gradient:
         VoxelData = (VoxelData,GradData)
     return VoxelCoords, VoxelConn, VoxelData
-
-#%% -----------------------------------------------------------
-# TODO: Below functions need to be revisitied, may be unstable.
-# -------------------------------------------------------------
-
-def edge2corners(NodeCoords,EdgeConn,angle=150):
-    corners = []
-    EdgeNodeNeighbors,EdgeElemConn = utils.getNodeNeighbors(NodeCoords,EdgeConn)
-    for i in range(len(NodeCoords)):
-        if len(EdgeNodeNeighbors[i]) == 2:
-            A = NodeCoords[i]
-            B = NodeCoords[EdgeNodeNeighbors[i][0]]
-            C = NodeCoords[EdgeNodeNeighbors[i][1]]
-                
-            a2 = (B[0]-C[0])**2 + (B[1]-C[1])**2 + (B[2]-C[2])**2
-            b2 = (C[0]-A[0])**2 + (C[1]-A[1])**2 + (C[2]-A[2])**2
-            b = np.sqrt(b2)
-            c2 = (A[0]-B[0])**2 + (A[1]-B[1])**2 + (A[2]-B[2])**2
-            c = np.sqrt(c2)
-            
-            # Law of cosines
-            alpha = np.arccos((b2+c2-a2)/(2*b*c))*180/np.pi
-            if alpha < angle:
-                corners.append(i)
-    return corners
         
-def GridMesh(xlims,ylims,zlims,h):
+def surf2voxel(SurfCoords,SurfConn,h,Octree='generate',mode='any'):
     """
-    GridMesh Generate structured hexahedral mesh with element size h
+    Convert a surface mesh to a filled voxel mesh. The surface must be 
+    closed to work properly, unexpected behavior could occur with unclosed
+    surfaces.
 
     Parameters
     ----------
-    xlims : list
-        [xmin, xmax]
-    ylims : list
-        [ymin, ymax].
-    zlims : list
-        [zmin, zmax].
-    h : numeric
-        Element side length.
-                
+    SurfCoords : array_like
+        Node coordinates of the surface mesh
+    SurfConn : array_like
+        Node connectivity of the surface mesh
+    h : float
+        Voxel size for the output mesh.
+    Octree : str, octree.OctreeNode, None, optional
+        Octree setting, by default 'generate'. 
+        'generate' will construct an octree for use in creating the voxel mesh, None will not use an octree. Alternatively, if an existing 
+        octree structure exists, that can be provided.
+    mode : str, optional
+        Mode for determining which elements are kept, by default 'any'.
+        Voxels will be kept if:
+        'any' - if any node of a voxel is inside the surface, 
+        'all' - if all nodes of a voxel are inside the surface, 
+        'centroid' - if the centroid of the voxel is inside the surface.
+
     Returns
     -------
-    NodeCoords : list
-        List of nodal coordinates.
-    NodeConn : list
-        List of nodal connectivities.
+    VoxelCoords : np.ndarray
+        Node coordinates of the voxel mesh
+    VoxelConn : np.ndarray
+        Node connectivity of the voxel mesh
 
-    """   
-    warnings.warn('GridMesh is now deprecated, primitives.Grid should be used instead')     
-    nX = int(np.round((xlims[1]-xlims[0])/h))
-    nY = int(np.round((ylims[1]-ylims[0])/h))
-    nZ = int(np.round((zlims[1]-zlims[0])/h))
-    X, Y, Z = np.mgrid[xlims[0]:xlims[1]:nX*1j, 
-                        ylims[0]:ylims[1]:nY*1j, 
-                        zlims[0]:zlims[1]:nZ*1j]
-    Xshape = X.shape
-    # print(0)
-    # x = np.round(X.flatten(),decimals=16)
-    # y = np.round(Y.flatten(),decimals=16)
-    # z = np.round(Z.flatten(),decimals=16)
-    x = X.flatten()
-    y = Y.flatten()
-    z = Z.flatten()
-    del X, Y, Z
-    gc.collect()
-    # print(1)
-    ids = np.arange(len(x))
-    Ids = np.reshape(ids,Xshape)
-    # print(2)
-    del ids
-    gc.collect()
-    NodeCoords = np.vstack([x,y,z]).transpose()
-    # pd.DataFrame(NodeCoords).to_csv('NodeCoords.csv')
-    # print(3)
-    del x, y, z
-    gc.collect()
-    NodeConn = [[] for i in range(nX-1) for j in range(nY-1) for k in range(nZ-1)] 
-    l = 0
-    for i in range(nX-1):
-        # print(i)
-        for j in range(nY-1):
-            for k in range(nZ-1):
-                idxs = [Ids[i,j,k],Ids[i+1,j,k],Ids[i+1,j+1,k],Ids[i,j+1,k],Ids[i,j,k+1],Ids[i+1,j,k+1],Ids[i+1,j+1,k+1],Ids[i,j+1,k+1]]
-                NodeConn[l] = idxs
-                # f.write(','.join([str(x) for x in idxs]) + '\n')
-                l += 1
-            
-    return NodeCoords,NodeConn
+    """    
 
-def Surf2Voxel(SurfCoords,SurfConn,h):
-    # Very Slow right now
-    arrayCoords = np.array(SurfCoords)
-    xlims = [min(arrayCoords[:,0]), max(arrayCoords[:,0])]
-    ylims = [min(arrayCoords[:,1]), max(arrayCoords[:,1])]
-    zlims = [min(arrayCoords[:,2]), max(arrayCoords[:,2])]
-    GridCoords,GridConn = GridMesh(xlims,ylims,zlims,h)
+    arrayCoords = np.asarray(SurfCoords)
+    bounds = np.column_stack([np.min(arrayCoords,axis=0),np.max(arrayCoords,axis=0)]).flatten()
+    GridCoords,GridConn = primitives.Grid(bounds,h)
     
-    VoxelConn = []
-    k = 0
-    for elem in GridConn:
-        k+=1 
-        print(k)
-        for trielem in SurfConn:
-            xlim = [GridCoords[elem[0]][0],GridCoords[elem[6]][0]]
-            ylim = [GridCoords[elem[0]][1],GridCoords[elem[6]][1]]
-            zlim = [GridCoords[elem[0]][2],GridCoords[elem[6]][2]]
-            if rays.TriangleBoxIntersection(arrayCoords[trielem], xlim, ylim, zlim):
-                VoxelConn.append(elem)
-                break
+    if mode.lower() == 'centroid':
+        centroids = utils.Centroids(GridCoords, GridConn)
+        Inside = rays.isInsidesSurf(centroids, SurfCoords, SurfConn, Octree=Octree)
+        VoxelConn = GridConn[Inside]
+    else:
+        Inside = rays.isInsidesSurf(GridCoords, SurfCoords, SurfConn, Octree=Octree)
+        ElemInsides = Inside[GridConn]
+
+        if mode.lower() == 'any':
+            VoxelConn = GridConn[np.any(ElemInsides,axis=1)]
+        elif mode.lower() == 'all':
+            VoxelConn = GridConn[np.all(ElemInsides,axis=1)]
+        else:
+            raise Exception('mode must be "any", "all", or "centroid".')
+
     VoxelCoords,VoxelConn,_ = removeNodes(GridCoords,VoxelConn)
     return VoxelCoords,VoxelConn
 
-def makeGrid(xlims, ylims, zlims, VoxelSize):
-    warnings.warn('makeGrid is now deprecated, primitives.Grid should be used instead.')
-    h = VoxelSize
-    nX = int(np.round((xlims[1]-xlims[0])/h))
-    nY = int(np.round((ylims[1]-ylims[0])/h))
-    nZ = int(np.round((zlims[1]-zlims[0])/h))
-    xs = np.arange(xlims[0],xlims[1]+h,h)
-    ys = np.arange(ylims[0],ylims[1]+h,h)
-    zs = np.arange(zlims[0],zlims[1]+h,h)
-    X, Y, Z = np.meshgrid(xs,ys,zs,indexing='ij')
-    Xshape = X.shape
-    x = X.flatten()
-    y = Y.flatten()
-    z = Z.flatten()
-    del X, Y, Z, xs, ys, zs
-    gc.collect()
-    ids = np.arange(len(x))
-    Ids = np.reshape(ids,Xshape)
-    del ids
-    gc.collect()
-    VoxelCoords = np.vstack([x,y,z]).transpose()
-    del x, y, z
-    gc.collect()
-    VoxelConn = [[] for i in range(nX-1) for j in range(nY-1) for k in range(nZ-1)] 
-    l = 0
-    for i in range(nX-1):
-        for j in range(nY-1):
-            for k in range(nZ-1):
-                idxs = [Ids[i,j,k],Ids[i+1,j,k],Ids[i+1,j+1,k],Ids[i,j+1,k],Ids[i,j,k+1],Ids[i+1,j,k+1],Ids[i+1,j+1,k+1],Ids[i,j+1,k+1]]
-                VoxelConn[l] = idxs
-                l += 1
-    VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
-    return VoxelCoords, VoxelConn
-
 def voxel2im(VoxelCoords, VoxelConn, Vals):
+    """
+    Convert a rectilinear voxel mesh (grid) to an 3D image matrix.
+
+    Parameters
+    ----------
+    VoxelCoords : array_like
+        Node coordinates of the voxel mesh
+    VoxelConn : array_like
+        Node connectivity of the voxel mesh
+    Vals : array_like
+        Values associated with either the nodes (len(Vals)=len(VoxelCoords)) or elements (len(Vals)=len(VoxelConn)) that will be stored in the image matrix.
+
+    Returns
+    -------
+    I : np.ndarray
+        3D array of image data. This data is ordered such that the three axes of the
+        array (0, 1, 2) correspond to (z, y, x). I.e. I[i,:,:] will give a 2D array in the yx plane at z-position i. 
+
+    """
     if type(VoxelCoords) == list: VoxelCoords = np.array(VoxelCoords)
     if len(Vals) == len(VoxelCoords):
         # Node values
@@ -1626,10 +1512,29 @@ def voxel2im(VoxelCoords, VoxelConn, Vals):
     return I
 
 def removeNodes(NodeCoords,NodeConn):
-    # removeNodes Removes nodes that aren't held by any element
+    """
+    Removes nodes that aren't held by any element
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates
+    NodeConn : array_like
+        Node connectivity
+
+    Returns
+    -------
+    NewNodeCoords : list
+        New set of node coordinates where unused nodes have been removed
+    NewNodeConn : list
+        Renumbered set of node connectivities to be consistent with NewNodeCoords
+    OriginalIds : np.ndarray
+        The indices the original IDs of the nodes still in the mesh. This can be used
+        to remove entries in associated node data (ex. new_data = old_data[OriginalIds]).
+    """    
+    # removeNodes 
     OriginalIds, inverse = np.unique([n for elem in NodeConn for n in elem],return_inverse=True)
     NewNodeCoords = [NodeCoords[i] for i in OriginalIds]
-    # NewNodeConn = np.reshape(inverse,np.shape(NodeConn)).tolist()
     
     NewNodeConn = [[] for elem in NodeConn]
     k = 0
@@ -1644,11 +1549,45 @@ def removeNodes(NodeCoords,NodeConn):
     return NewNodeCoords, NewNodeConn, OriginalIds
 
 def surf2dual(NodeCoords,SurfConn,Centroids=None,ElemConn=None,NodeNormals=None,sort='ccw'):
+    """
+    Convert a surface mesh to it's dual mesh.
+    NOTE: this function has undergone limited testing and hasn't been optimized.
+    NOTE: The polygonal meshes that result from this function aren't well supported 
+    by most of the other functions of this library.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates
+    SurfConn : array_like
+        Surface mesh node connectivity
+    Centroids : array_like, optional
+        Element centroids, by default None. If none are provided, they will
+        be calculated for use within this function.
+    ElemConn : list, optional
+        Node-Element connectivity, by default None. If none are provided, they will
+        be calculated for use within this function. ElemConn can be obtained from
+        utils.getElemConnectivity()
+    NodeNormals : array_like, optional
+        Normal vectors for each node in the surface mesh, by default None. If none are provided, they will be calculated for use within this function. These are needed
+        for proper ordering of the nodes in the dual mesh.
+    sort : str, optional
+        Which direction to sort the dual mesh elements about their centroid.
+        Options are clockwise ('cw') or counter-clockwise ('ccw'), by default 'ccw'. 
+
+    Returns
+    -------
+    DualCoords : list
+        Node coordinates of the dual mesh
+    DualConn : list
+        Node connectivity of the dual mesh
+
+    """    
     if not Centroids:
         Centroids = utils.Centroids(NodeCoords,SurfConn)
     if not ElemConn:
-        _,ElemConn = utils.getNodeNeighbors(NodeCoords,SurfConn,ElemType='polygon')
-    if not NodeNormals and (sort == 'ccw' or sort == 'CCW' or sort == 'cw' or sort == 'CW'):
+        ElemConn = utils.getElemConnectivity(NodeCoords,SurfConn,ElemType='auto')
+    if not NodeNormals:
         ElemNormals = utils.CalcFaceNormal(NodeCoords,SurfConn)
         NodeNormals = utils.Face2NodeNormal(NodeCoords,SurfConn,ElemConn,ElemNormals)
     
@@ -1662,7 +1601,7 @@ def surf2dual(NodeCoords,SurfConn,Centroids=None,ElemConn=None,NodeNormals=None,
             # Transform to local coordinate system
             # Rotation matrix from global z (k=[0,0,1]) to local z (N)
             k = [0,0,1]
-            if N == k:
+            if np.array_equal(N, k):
                 rotAxis = k
                 angle = 0
             elif np.all(N == [0,0,-1]):
