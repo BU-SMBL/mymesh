@@ -1558,11 +1558,8 @@ def TetMeshVol(NodeCoords, NodeConn):
         Volume contained within the tetrahedral mesh.
 
     """
-    def TetVolume(nodes):
-        return np.abs(np.dot(np.subtract(nodes[0],nodes[1]),
-                      np.cross(np.subtract(nodes[1],nodes[3]),
-                               np.subtract(nodes[2],nodes[3]))))/6
-    V = sum([TetVolume([NodeCoords[node] for node in elem]) for elem in NodeConn])
+    vs = quality.Volume(NodeCoords, NodeConn)
+    V = np.sum(vs)
     return V
 
 def MVBB(Points, method='exact', return_matrix=False):
