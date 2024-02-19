@@ -12,44 +12,26 @@ from . import converter, rays, octree, improvement, quality
 def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     """
     getNodeNeighbors Gives the connected nodes for each node in the mesh
-    TODO: This should probably split into getNodeNeighbors and getElemConn -  the only shared
-    operation is solid2edges (edges could be an optional input argument to each)
 
     Parameters
     ----------
-    NodeCoords : list
+    NodeCoords : array_like
         List of nodal coordinates.
-    NodeConn : list
+    NodeConn : array_like
         Nodal connectivity list.
+    ElemType : str, optional
+        Type of element contained in the mesh, by default 'auto'.
+        See converter.solid2edges() for details.
+        'auto' is suitable for most element types and mixed-element meshes,
+        4-node elements are assumed to be tets, not quads.
 
     Returns
     -------
     NodeNeighbors : list
         List of neighboring nodes for each node in NodeCoords.
-    ElemConn : list
-        List of elements connected to each node for each node in NodeCoords.
     """
 
-    # NodeNeighbors = [set() for i in range(len(NodeCoords))]    # Neighboring nodes for each vertex
-    # ElemConn = [set() for i in range(len(NodeCoords))]         # Connected elements for each vertex 
-    # for i in range(len(NodeConn)):
-    #     edges = converter.solid2edges(NodeCoords, [NodeConn[i]], ElemType=ElemType)
-    #     for edge in edges:
-    #         for j in edge:
-    #             NodeNeighbors[j].add(edge[edge.index(j)-1])
-    #             ElemConn[j].add(i)
-    #### 
     Edges,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True, ElemType=ElemType, ReturnType=np.ndarray)
-    # NodeNeighbors = [set() for i in range(len(NodeCoords))] 
-    # ElemConn = [set() for i in range(len(NodeCoords))]         # Connected elements for each vertex 
-    # for i in range(len(Edges)):
-    #     NodeNeighbors[Edges[i][0]].add(Edges[i][1])
-    #     NodeNeighbors[Edges[i][1]].add(Edges[i][0])
-    #     ElemConn[Edges[i][0]].add(EdgeElem[i])
-    #     ElemConn[Edges[i][1]].add(EdgeElem[i])
-    # NodeNeighbors = [list(s) for s in NodeNeighbors]  
-    # ElemConn = [list(s) for s in ElemConn] 
-    ####
     
     UEdges,idx,inv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
     NotInMesh = set(range(len(NodeCoords))).difference(np.unique(UEdges))
@@ -59,11 +41,30 @@ def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
 
     key_func = lambda x : x[0]
     NodeNeighbors = [[z for y,z in x[1] if z != -1] for x in itertools.groupby(zip(Idx[arg],Neighbors[arg]), key_func)]
-    
 
-    return NodeNeighbors#,ElemConn               
+    return NodeNeighbors             
 
 def getElemConnectivity(NodeCoords,NodeConn,ElemType='auto'):
+    """
+    getElemConnectivity _summary_
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        Nodal connectivity list.
+    ElemType : str, optional
+        Type of element contained in the mesh, by default 'auto'.
+        See converter.solid2edges() for details.
+        'auto' is suitable for most element types and mixed-element meshes,
+        4-node elements are assumed to be tets, not quads.
+
+    Returns
+    -------
+    ElemConn : list
+        List of elements connected to each node.
+    """    
     Edges,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True, ElemType=ElemType, ReturnType=np.ndarray)
     NodeNeighbors = [set() for i in range(len(NodeCoords))] 
     ElemConn = [set() for i in range(len(NodeCoords))]         # Connected elements for each vertex 
@@ -120,8 +121,8 @@ def getNodeNeighborhoodByRadius(NodeCoords,NodeConn,Radius):
         List of nodal coordinates.
     NodeConn : list
         Nodal connectivity list.
-    nRings : int
-        Number of rings to include.
+    radius : float
+        Radius of around each node.
 
     Returns
     -------
@@ -180,16 +181,6 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
     """
     # Get Element neighbors 
     ElemNeighbors = [set() for i in range(len(NodeConn))]
-    # if mode == 'node':
-        # SetConn = [set(elem) for elem in NodeConn]
-        # for i,elem in enumerate(SetConn):
-        #     ElemNeighbors[i] = [j for j,s in enumerate(SetConn) if len(elem.intersection(s)) == 2]
-        
-        # if not ElemConn: _,ElemConn = getNodeNeighbors(NodeCoords,NodeConn)
-        # SetElemConn = [set(E) for E in ElemConn]
-
-        # for i,e in enumerate(NodeConn):
-        #     ElemNeighbors[i] = 
     if mode=='node':
         ElemConn = getElemConnectivity(NodeCoords,NodeConn)
         for i,elem in enumerate(NodeConn):
@@ -209,7 +200,6 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
         r = np.repeat(np.arange(len(UEdgeConn))[:,None],UEdgeConn.shape[1],axis=1)
         EECidx = (UEdgeElem[UEdgeConn] == r).astype(int)
         EdgeElemConn[UEdgeConn,EECidx] = r
-        # EdgeElemConn = EdgeElemConn.astype(int)
 
         for i in range(len(EdgeElemConn)):
             if not any(np.isnan(EdgeElemConn[i])):
@@ -231,7 +221,6 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
         RFaceConn = inv[Rfaceconn] # Faces attached to each element
         # Face-Element Connectivity
         FaceElemConn = np.nan*(np.ones((len(RFaces),2)))
-
 
         FECidx = (FaceElem[RFaceConn] == np.repeat(np.arange(len(NodeConn))[:,None],RFaceConn.shape[1],axis=1)).astype(int)
         FaceElemConn[RFaceConn,FECidx] = np.repeat(np.arange(len(NodeConn))[:,None],RFaceConn.shape[1],axis=1)
@@ -259,8 +248,10 @@ def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,BarrierNodes=set())
     NodeConn : list of lists
         Nodal connectivity list.
     NodeNeighbors : list, optional
-        List of neighboring nodes for each node in NodeCoords. The defau lt is 
+        List of neighboring nodes for each node in NodeCoords. The default is 
         None. If no value is provided, it will be computed with getNodeNeighbors
+    BarrierNodes : set, optional
+        Set of nodes that can separate regions.
 
     Returns
     -------
@@ -317,14 +308,12 @@ def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge',Barr
     BarrierElems : set, optional
         Set of barrier elements that the connected region cannot move past. 
         They can be included in a region, but will not connect to their neighbors
-        
 
     Returns
     -------
     ElemRegions : list of sets
         Each set in the list contains a region of connected nodes.
     """
-    # warnings.warn('getConnectedElements is still under development.')
     ElemRegions = []
     if not ElemNeighbors: ElemNeighbors = getElemNeighbors(NodeCoords,NodeConn,mode=mode)
     if len(BarrierElems) > 0:
@@ -351,7 +340,6 @@ def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge',Barr
             nCurrent = len(region)
         todo.difference_update(region)
         ElemRegions.append(region)
-        
     
     return ElemRegions  
 
@@ -398,7 +386,7 @@ def Centroids(NodeCoords,NodeConn):
 def CalcFaceNormal(NodeCoords,SurfConn):
     """
     CalcFaceNormal Calculates normal vectors on the faces of a triangular 
-    surface mesh. Asumes triangles are in counter-clockwise when viewed from the outside
+    surface mesh. Assumes triangles are in counter-clockwise when viewed from the outside
 
     Parameters
     ----------
@@ -413,21 +401,6 @@ def CalcFaceNormal(NodeCoords,SurfConn):
         List of element surface normals .
 
     """
-    # def func(elem):
-    #     p0 = NodeCoords[elem[0]]
-    #     p1 = NodeCoords[elem[1]]
-    #     p2 = NodeCoords[elem[2]]
-        
-    #     U = np.subtract(p1,p0)
-    #     V = np.subtract(p2,p0)
-        
-    #     Nx = U[1]*V[2] - U[2]*V[1]
-    #     Ny = U[2]*V[0] - U[0]*V[2]
-    #     Nz = U[0]*V[1] - U[1]*V[0]
-    #     d = np.sqrt(Nx**2+Ny**2+Nz**2)
-    #     return [Nx/d,Ny/d,Nz/d]
-    # ElemNormals = [func(elem) for elem in SurfConn]
-
     ArrayCoords = np.append(NodeCoords,[[np.nan,np.nan,np.nan]],axis=0)
     points = ArrayCoords[PadRagged(SurfConn)]
 
@@ -488,9 +461,7 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
         Masknan = Mask0.astype(float)
         Masknan[Mask0 == 0] = np.nan 
         Ns = np.vstack([ElemNormals,[np.nan,np.nan,np.nan]])[R]
-        # elemlens = [len(e) for e in NodeConn]
-        # RNodeConn = -1*np.ones([len(NodeConn),max(elemlens)],dtype=int)
-        # for i,elem in enumerate(NodeConn): RNodeConn[i,:elemlens[i]] = elem
+
         RNodeConn = PadRagged(NodeConn,fillval=-1)
         ArrayConn = np.vstack([RNodeConn,-1*np.ones((1,RNodeConn.shape[1]),dtype=int)])
         IncidentNodes = ArrayConn[R]
@@ -731,6 +702,8 @@ def BaryTri(Nodes, Pt):
 
     """
     
+    assert (np.shape(Nodes)[0] == 3) & (np.shape(Nodes)[1] in (2,3)), 'Nodes must be a 3x3 or 3x2 array_like'
+
     A = Nodes[0]
     B = Nodes[1]
     C = Nodes[2]
@@ -832,7 +805,7 @@ def BaryTet(Nodes, Pt):
     
     return alpha, beta, gamma, delta
 
-def Project2Surface(Point,Normal,NodeCoords,SurfConn,tol=np.inf,Octree='generate'):
+def Project2Surface(Points,Normals,NodeCoords,SurfConn,tol=np.inf,Octree='generate'):
     """
     Project2Surface Projects a node (NodeCoord) along its normal vector (NodeNormal) onto the 
     surface defined by NodeCoord and SurfConn, returns the index of the 
@@ -859,71 +832,8 @@ def Project2Surface(Point,Normal,NodeCoords,SurfConn,tol=np.inf,Octree='generate
         octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by octree.Surf2Octree(NodeCoords,SurfConn)
     Returns
     -------
-    elemID : int
-        Index of the element in SurfConn that the point gets projected onto.
-    alpha : float
-        First barycentric coordinate of the projected point relative to the triangle identified by elemId
-    beta : float
-        Second barycentric coordinate of the projected point relative to the triangle identified by elemId
-    gamma : float
-        Third barycentric coordinate of the projected point relative to the triangle identified by elemId
-    """
-    if type(NodeCoords) is list: NodeCoords = np.array(NodeCoords)
-    if type(SurfConn) is list: SurfConn = np.array(SurfConn)
-
-    intersections, distances, intersectionPts = rays.RaySurfIntersection(Point, Normal, NodeCoords, SurfConn, Octree=Octree)
-    if len(intersections) == 0:
-        elemID = alpha = beta = gamma = -1
-    elif min(np.abs(distances)) > tol:
-        elemID = alpha = beta = gamma = -1
-    else:
-        try:
-            idx = np.where(np.abs(distances) == min(np.abs(distances)))[0][0]
-            p = intersectionPts[idx]
-            elemID = intersections[idx]
-            pts = NodeCoords[SurfConn[elemID]]
-            alpha,beta,gamma = BaryTri(pts,p)
-        except:
-            print(distances)
-            elemID = alpha = beta = gamma = -1
-
-    return elemID,alpha,beta,gamma
-
-def Project2Surface2(Points,Normals,NodeCoords,SurfConn,tol=np.inf,Octree='generate'):
-    """
-    Project2Surface Projects a node (NodeCoord) along its normal vector (NodeNormal) onto the 
-    surface defined by NodeCoord and SurfConn, returns the index of the 
-    element (elemID) that contains the projected node and the barycentric 
-    coordinates (alpha, beta, gamma) of that projection within that element
-
-    Parameters
-    ----------
-    Point : list or np.ndarray
-        Coordinates of the point to be projected on to the surface.
-    Normal : list or np.ndarray
-        Vector along which the point will be projected.
-    NodeCoords : list or np.ndarray
-        Node coordinates list of the mesh that the point is being projected to.
-    SurfConn : list or np.ndarray
-        Nodal connectivity of the surface mesh that the point is being projected to.
-    tol : float, optional
-        Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
-        Octree : str (or octree.OctreeNode), optional
-        octree options. An octree representation of the surface can significantly
-        improve mapping speeds, by default 'generate'.
-        'generate' - Will generate an octree for use in surface mapping.
-        'none' or None - Won't generate an octree and will use a brute force approach.
-        octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by octree.Surf2Octree(NodeCoords,SurfConn)
-    Returns
-    -------
-    elemID : int
-        Index of the element in SurfConn that the point gets projected onto.
-    alpha : float
-        First barycentric coordinate of the projected point relative to the triangle identified by elemId
-    beta : float
-        Second barycentric coordinate of the projected point relative to the triangle identified by elemId
-    gamma : float
-        Third barycentric coordinate of the projected point relative to the triangle identified by elemId
+    MappingMatrix : np.ndarray
+        nx4 array consisting of the element ID (in SurfConn) and three barycentric coordinates (alpha, beta, gamma) for each point in Points
     """
     if type(NodeCoords) is list: NodeCoords = np.array(NodeCoords)
     if type(SurfConn) is list: SurfConn = np.array(SurfConn)
@@ -947,29 +857,13 @@ def Project2Surface2(Points,Normals,NodeCoords,SurfConn,tol=np.inf,Octree='gener
     beta[mappedbool] = betas
     gamma[mappedbool] = gammas
 
-    MappingMatrix = np.vstack([elemID, alpha, beta, gamma]).T
-
-
-    # if len(intersections) == 0:
-    #     elemID = alpha = beta = gamma = -1
-    # elif min(np.abs(distances)) > tol:
-    #     elemID = alpha = beta = gamma = -1
-    # else:
-    #     try:
-    #         idx = np.where(np.abs(distances) == min(np.abs(distances)))[0][0]
-    #         p = intersectionPts[idx]
-    #         elemID = intersections[idx]
-    #         pts = NodeCoords[SurfConn[elemID]]
-    #         alpha,beta,gamma = BaryTri(pts,p)
-    #     except:
-    #         print(distances)
-    #         elemID = alpha = beta = gamma = -1
+    MappingMatrix = np.column_stack([elemID, alpha, beta, gamma])
 
     return MappingMatrix
 
 def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verbose=False, Octree='generate', return_octree=False):
     """
-    SurfMapping Generate a mapping matrix from surface 1 (NodeCoords1, SurfConn1) to surface 2 (NodeCoords2, SurfConn2)
+    Generate a mapping matrix from surface 1 (NodeCoords1, SurfConn1) to surface 2 (NodeCoords2, SurfConn2)
     Each row of the mapping matrix contains an element ID followed by barycentric coordinates alpha, beta, gamma
     that define the position of the nodes of surface 1 (NodeCoords1) relative to the specified surface element of 
     surface 2 (SurfConn2). An element ID of -1 indicates a failed mapping.
@@ -1012,6 +906,8 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     if type(SurfConn1) is list: SurfConn1 = np.array(SurfConn1)
     if type(SurfConn2) is list: SurfConn2 = np.array(SurfConn2)
 
+    assert SurfConn1.shape[1] == SurfConn2.shape[1] == 3, 'Currently only triangular surfaces are supported.'
+
     ElemConn1 = getElemConnectivity(NodeCoords1, SurfConn1)
     ElemNormals1 = CalcFaceNormal(NodeCoords1, SurfConn1)
     NodeNormals1 = Face2NodeNormal(NodeCoords1, SurfConn1, ElemConn1, ElemNormals1, method='angle')
@@ -1020,15 +916,9 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
 
     
     if Octree == 'generate': Octree = octree.Surf2Octree(NodeCoords2,SurfConn2)
-    # tic = time.time()
     MappingMatrix = -1*np.ones((len(NodeCoords1),4))
-    MappingMatrix[Surf1Nodes,:] = Project2Surface2(NodeCoords1[Surf1Nodes,:], NodeNormals1[Surf1Nodes,:], NodeCoords2, SurfConn2, tol=tol, Octree=Octree)
-    # print(time.time()-tic)
-    # tic = time.time()
-    # MappingMatrix = -1*np.ones((len(NodeCoords1),4))
-    # for i in Surf1Nodes:
-    #     MappingMatrix[i] = Project2Surface(NodeCoords1[i], NodeNormals1[i], NodeCoords2, SurfConn2, tol=tol, Octree=Octree)
-    # print(time.time()-tic)
+    MappingMatrix[Surf1Nodes,:] = Project2Surface(NodeCoords1[Surf1Nodes,:], NodeNormals1[Surf1Nodes,:], NodeCoords2, SurfConn2, tol=tol, Octree=Octree)
+    
     if verbose: 
         failcount = np.sum(MappingMatrix[list(Surf1Nodes),0] == -1)
         print('{:.3f}% of nodes mapped'.format((len(Surf1Nodes)-failcount)/len(Surf1Nodes)*100))
@@ -1148,7 +1038,6 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False):
     
     """
 
-    # assert len(NodeCoords) > 0, 'No nodes in mesh.'
     if len(NodeCoords) == 0:
         if return_idx:
             return NodeCoords,NodeConn,[],[]
@@ -1175,21 +1064,36 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False):
     return NodeCoords2,NodeConn2,newIds
 
 def RelabelNodes(NodeCoords,NodeConn,newIds,faces=None):
+    """
+    Relabel the nodes in the mesh according to the newIds list
 
-    # newIds is a list of node ids where the new index is located at the old index
-    # def func(newIds,elem):
-    #     return [newIds[node] for node in elem]
-    # NewConn = pool(delayed(func)(newIds,elem) for elem in NodeConn)
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        Nodal connectivity list.
+    newIds : list
+        list of node ids where the new index is located at the old index
+    faces : list, optional
+        list of face elements, that will also be relabel, by default None
+
+    Returns
+    -------
+    NewCoords : array_like
+        Relabeled of nodal coordinates.
+    NewConn : array_like
+        Relabeled nodal connectivity list.
+    """    
+    
     NewConn = ExtractRagged(np.append(newIds,[-1])[PadRagged(NodeConn)],dtype=int)
     if faces != None: 
         if len(faces) > 0: 
             NewFaces = ExtractRagged(np.append(newIds,[-1])[PadRagged(faces)],dtype=int)
         else:
             NewFaces = faces
-    NewCoords = np.nan*np.ones(np.shape(NodeCoords)) # [[] for i in range(len(NodeCoords))]
+    NewCoords = np.nan*np.ones(np.shape(NodeCoords)) 
     NewCoords[newIds.astype(int)] = np.array(NodeCoords)
-    # for i,node in enumerate(NodeCoords):
-    #     NewCoords[newIds[i]] = node
     if faces != None:
         return NewCoords,NewConn,NewFaces
     else:
@@ -1217,7 +1121,6 @@ def DeleteDegenerateElements(NodeCoords,NodeConn,tol=1e-12,angletol=1e-3,strict=
     """
 
     # Remove elements that have a collapsed edge - i.e. two collinear edges
-    # TODO: when tol!=0, using CollapseSlivers this is an imperfect solution (at a minimum, tol parameter should be changed)
     if len(NodeConn) == 0:
         return NodeCoords,NodeConn
     if strict:
@@ -1316,14 +1219,12 @@ def DeleteDegenerateElements(NodeCoords,NodeConn,tol=1e-12,angletol=1e-3,strict=
 
             NewCoords,NewConn,_ = DeleteDuplicateNodes(NewCoords,NewConn,tol=tol)
             NewCoords,NewConn = DeleteDegenerateElements(NewCoords,NewConn,strict=True)
-            # if len(converter.surf2edges(NewCoords,NewConn)) > 0:
-            #     print('merp')
                 
     return NewCoords,NewConn
 
 def MirrorMesh(NodeCoords,NodeConn,x=None,y=None,z=None):
     """
-    MirrorMesh Creates a mirrored copy of a mesh by mirroring about the planes
+    Creates a mirrored copy of a mesh by mirroring about the planes
     defined by X=x, Y=y, and Z=z
 
     Parameters
@@ -1364,7 +1265,7 @@ def MirrorMesh(NodeCoords,NodeConn,x=None,y=None,z=None):
     
 def MergeMesh(NodeCoords1, NodeConn1, NodeCoords2, NodeConn2, NodeVals1=[], NodeVals2=[], cleanup=True):
     """
-    MergeMesh Merge two meshes together
+    Merge two meshes together
 
     Parameters
     ----------
@@ -1469,34 +1370,12 @@ def DetectFeatures(NodeCoords,SurfConn,angle=25):
     unq,counts = np.unique(FeatureNodes,return_counts=True)
     corners = unq[counts>2].tolist()
     edges = unq[counts<=2].tolist()
-    # angle = 140
-    # ElemNormals = CalcFaceNormal(NodeCoords,SurfConn)
-    # ElemNeighbors = getElemNeighbors(NodeCoords,SurfConn,mode='edge')
-    # edges = []
-    # corners = []
-    # for i in range(len(SurfConn)):  # For each element:
-    #     Ni = ElemNormals[i]
-    #     sharedNodes = []
-    #     for j in ElemNeighbors[i]:   # For each adjacent element:
-    #         Nj = ElemNormals[j]
-    #         theta = 180 - np.arccos(min([1,abs(np.dot(Ni,Nj)/(np.linalg.norm(Ni)*np.linalg.norm(Nj)))]))*180/np.pi
-    #         if theta <= angle:
-    #             sharedNodes.append(np.intersect1d(SurfConn[i],SurfConn[j]).tolist())
-    #     unq,counts = np.unique([x for sublist in sharedNodes for x in sublist],return_counts=True)
-    #     for j in range(len(unq)):
-    #         if counts[j] == 1:
-    #             edges.append(unq[j])
-    #         else:   # counts >= 2
-    #             corners.append(unq[j])
-    # edges = np.unique(edges).tolist()
-    # corners = np.unique(corners).tolist()
-    # edges = [edge for edge in edges if edge not in corners]
 
     return edges,corners
 
 def PeelHex(NodeCoords,NodeConn,nLayers=1):
     """
-    PeelHex Removes the specified number of layers from a hexahedral mesh
+    Removes the specified number of layers from a hexahedral mesh
 
     Parameters
     ----------
@@ -1522,7 +1401,7 @@ def PeelHex(NodeCoords,NodeConn,nLayers=1):
         been removed.
 
     """
-    
+
     NewCoords = copy.copy(NodeCoords)
     NewConn = copy.copy(NodeConn)   
     PeelConn = []
@@ -1532,7 +1411,6 @@ def PeelHex(NodeCoords,NodeConn,nLayers=1):
         SurfNodeSet = set(SurfNodes)
         PeelConn += [NewConn[i] for i in range(len(NewConn)) if (set(NewConn[i])&SurfNodeSet)]
         NewConn = [NewConn[i] for i in range(len(NewConn)) if not (set(NewConn[i])&SurfNodeSet)]
-        
     
     PeelCoords,PeelConn,_ = converter.removeNodes(NewCoords,PeelConn)
     PeeledCoords,PeeledConn,_ = converter.removeNodes(NewCoords,NewConn)
@@ -1588,9 +1466,9 @@ def makePyramidLayer(VoxelCoords,VoxelConn,PyramidHeight=None):
 
 def makeVoxelLayer(VoxelCoords,VoxelConn):
     """
-    makeVoxelLayer For a given voxel mesh, will generate a layer of voxels that
-    wrap around the current voxel mesh. To merge the pyramid 
-    layer with the voxel mesh, use MergeMesh
+    For a given voxel mesh, will generate a layer of voxels that
+    wrap around the current voxel mesh. 
+    NOTE: This has the potential to create overlapping voxels
 
     Parameters
     ----------
@@ -1603,13 +1481,12 @@ def makeVoxelLayer(VoxelCoords,VoxelConn):
 
     Returns
     -------
-    LayerCoords : TYPE
-        DESCRIPTION.
+    LayerCoords : list
+        New node coordinates.
     LayerConn : TYPE
-        DESCRIPTION.
+        New node connectivity.
 
     """
-    # TODO: This has the potential to create overlapping voxels
     VoxelSize = abs(VoxelCoords[VoxelConn[0][0]][0] - VoxelCoords[VoxelConn[0][1]][0])
         
     SurfConn = converter.solid2surface(VoxelCoords,VoxelConn)
@@ -1705,41 +1582,6 @@ def PadRagged(In,fillval=-1):
         Padded array.
     """
     Out = np.array(list(itertools.zip_longest(*In,fillvalue=fillval))).T
-    return Out
-
-def ExtractRagged_old(In,delval=-1,dtype=None):
-    """
-    ExtractRagged Extracts a list of list from a 2d numpy array, removing the 
-    specified value, generally creating a ragged array unless there is no padding
-
-    Parameters
-    ----------
-    In : numpy.ndarray
-        Input array.
-    delval : int (or other), optional
-        Padding value to be removed from the input array, by default -1.
-    dtype : type, optional
-        type to cast the output result to, by default None.
-        If None, no casting will be performed.
-
-    Returns
-    -------
-    Out : list
-        Output list of lists with the specified value <delval> removed.
-    """
-    if dtype:
-        if type(In) is list: In = np.array(In)
-        In = In.astype(dtype)
-        delval = np.array([delval]).astype(dtype)[0]
-    if np.any(delval == In):
-        if len(In.shape) == 2:
-            Out = [[x for x in y if x != delval] for y in In]
-        elif len(In.shape) == 3:
-            Out = [[[x for x in y if x != delval] for y in z if all([x!= delval for x in y])] for z in In]
-        else:
-            raise Exception('Currently only supported for 2- or 3D matrices')
-    else:
-        Out = In.tolist()
     return Out
 
 def ExtractRagged(In,delval=-1,dtype=None):
