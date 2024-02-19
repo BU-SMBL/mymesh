@@ -1591,30 +1591,29 @@ def MVBB(Points, method='exact', return_matrix=False):
     """    
 
     if method.lower() in ('calipers', 'exact'):
-        hull = scipy.spatial.ConvexHull(points)
-        hull_mesh = mesh.mesh(points, hull.simplices)
-        hull_mesh.cleanup()
-        hull_points = np.asarray(hull_mesh.NodeCoords).T
+        hull = scipy.spatial.ConvexHull(Points)
+        hull_points, hull_facets,_ = converter.removeNodes(Points, hull.simplices)
+        hull_points = np.asarray(hull_points)
 
         # Calculate rotation matrices to align each hull facet with [0,0,-1] (so that it's rotated to the minimal z plane)
-        normals = np.asarray(hull_mesh.ElemNormals)
+        normals = np.asarray(CalcFaceNormal(hull_points, hull_facets))
         rot_axes = np.cross(normals, [0,0,-1])
         rot_axes = rot_axes/np.linalg.norm(rot_axes,axis=1)[:,None]
         thetas = np.arccos(np.sum(normals*[0,0,-1],axis=1))
         outer_prod = rot_axes[:, np.newaxis, :] * rot_axes[:, :, np.newaxis]
-        cross_prod_matrices = np.zeros((hull_mesh.NElem, 3, 3))
+        cross_prod_matrices = np.zeros((len(hull_facets), 3, 3))
         cross_prod_matrices[:,0,1] = -rot_axes[:,2]
         cross_prod_matrices[:,1,0] =  rot_axes[:,2]
         cross_prod_matrices[:,0,2] =  rot_axes[:,1]
         cross_prod_matrices[:,2,0] = -rot_axes[:,1]
         cross_prod_matrices[:,1,2] = -rot_axes[:,0]
         cross_prod_matrices[:,2,1] =  rot_axes[:,0]
-        rot_matrices = np.cos(thetas)[:,None,None]*np.repeat([np.eye(3)],hull_mesh.NElem,axis=0) + np.sin(thetas)[:,None,None]*cross_prod_matrices + (1 - np.cos(thetas))[:,None,None]*outer_prod
+        rot_matrices = np.cos(thetas)[:,None,None]*np.repeat([np.eye(3)],len(hull_facets),axis=0) + np.sin(thetas)[:,None,None]*cross_prod_matrices + (1 - np.cos(thetas))[:,None,None]*outer_prod
 
         # NOTE: might be able to reduce memory usage by not explicitly obtaining the rotation matrices (see https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle)
 
         # For each possible rotation, rotate all of the points
-        rotated_points = rot_matrices @ hull_points[None, :, :]
+        rotated_points = rot_matrices @ hull_points.T[None, :, :]
 
         # Get the local coordinate system axis-aligned bounding boxes for each rotation
         mins = np.min(rotated_points, axis=2)
