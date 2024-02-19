@@ -20,7 +20,7 @@ try:
 except:
     warnings.warn('Optional dependencies not found - some functions may not work properly')
 
-# SDF primitives
+# implicit function primitives
 def gyroid(x,y,z):
     return np.sin(2*np.pi*x)*np.cos(2*np.pi*y) + np.sin(2*np.pi*y)*np.cos(2*np.pi*z) + np.sin(2*np.pi*z)*np.cos(2*np.pi*x)
 
@@ -68,11 +68,9 @@ def offset(fval,offset):
     return fval-offset
 
 def union(fval1,fval2):
-#    return np.minimum(fval1,fval2)
     return rMin(fval1,fval2)
 
 def diff(fval1,fval2):
-#    return np.minimum(fval1,-fval2)
     # This has maybe been wrong for a long time changing min to max
     # return rMin(fval1,-fval2)
     return rMax(fval1,-fval2)
@@ -80,9 +78,7 @@ def diff(fval1,fval2):
 def diff_old(fval1, fval2):
     return rMin(fval1,-fval2)
     
-
 def intersection(fval1,fval2):
-#    return np.maximum(fval1,fval2)
     return rMax(fval1,fval2)
 
 def unionf(f1,f2):
@@ -291,7 +287,8 @@ def FastMarchingMethod(VoxelCoords, VoxelConn, NodeVals):
         Lists of reinitialized node values.
 
     """
-    # 
+    warnings.warn('FastMarchingMethod is not fully functional.')
+
     # 3D
     N = 3
     # For now this is only for obtaining a signed distance function, so F = 1 everywhere
@@ -448,6 +445,8 @@ def mesh2udf(M,VoxelCoords,VoxelConn):
     return NodeVals
 
 def DoubleDualResampling(sdf,NodeCoords,NodeConn,DualCoords,DualConn,eps=1e-3,c=2):
+    warnings.warn('DoubleDualResampling is not fully functional and may be unstable.')
+
     # Ohtake, Y., and Belyaev, A. G. (March 26, 2003). "Dual-Primal Mesh Optimization for Polygonized Implicit Surfaces With Sharp Features ." ASME. J. Comput. Inf. Sci. Eng. December 2002; 2(4): 277–284. https://doi.org/10.1115/1.1559153
     DualCoords,DualConn,gradP = DualMeshOptimization(sdf,NodeCoords,NodeConn,DualCoords,DualConn,eps=eps,return_grad=True)
     DualNeighbors,ElemConn = utils.getNodeNeighbors(DualCoords,DualConn,ElemType='polygon')
@@ -474,6 +473,8 @@ def DoubleDualResampling(sdf,NodeCoords,NodeConn,DualCoords,DualConn,eps=1e-3,c=
     
 def DualMeshOptimization(sdf,NodeCoords,NodeConn,DualCoords,DualConn,eps=1e-3,return_grad=False):
     # Ohtake, Y., and Belyaev, A. G. (March 26, 2003). "Dual-Primal Mesh Optimization for Polygonized Implicit Surfaces With Sharp Features ." ASME. J. Comput. Inf. Sci. Eng. December 2002; 2(4): 277–284. https://doi.org/10.1115/1.1559153
+    warnings.warn('DualMeshOptimization is not fully functional and may be unstable.')
+    
     def GradF(q,h):
         g = [-1,0,1]
         X = np.array([q[0]+h*x for x in g for y in g for z in g])
@@ -703,6 +704,7 @@ def AdaptiveSubdivision(sdf,NodeCoords,NodeConn,threshold=1e-3):
      
 def DualPrimalOptimization(sdf,NodeCoords,NodeConn,eps=1e-3,nIter=2):
     # Ohtake, Y., and Belyaev, A. G. (March 26, 2003). "Dual-Primal Mesh Optimization for Polygonized Implicit Surfaces With Sharp Features ." ASME. J. Comput. Inf. Sci. Eng. December 2002; 2(4): 277–284. https://doi.org/10.1115/1.1559153
+    warnings.warn('DualPrimalOptimization is not fully functional and may be unstable.')
        
     def PrimalMeshOptimization(DualCoords,DualConn,gradP,tau=10**3):
         ArrayCoords = np.zeros([len(DualConn),3])
@@ -1356,172 +1358,3 @@ def TetMesh(sdf,bounds,h,verbose=True,TetgenSwitches=['-pq1.1/25','-Y','-o/150']
         print('Total Meshing Time: %.4f min' % ((VoxelTime + MarchingTime + SurfOptTime + SmoothingTime + SliverTime + TetTime + AssemblyTime)/60))
         print('------------------------------------------')
     return tetmesh 
-
-def scaffold(x,y,z):
-    # scale = 2
-    # thickness = 0.35
-    sdf = primitive
-    scale = 1
-    thickness = 1
-    offp = offset(sdf(x/scale,y/scale,z/scale),thickness/2)
-    offn = offset(sdf(x/scale,y/scale,z/scale),-thickness/2)  
-    return intersection(-diff(offn,offp),10*cube(x,y,z,0,1,0,1,0,1))
-
-def scaffold_capped(x,y,z):
-    sdf = primitive
-    scale = 1
-    thickness = 1
-    offp = offset(sdf(x/scale,y/scale,z/scale),thickness/2)
-    offn = offset(sdf(x/scale,y/scale,z/scale),-thickness/2)  
-    scaff = intersection(-diff(offn,offp),10*cube(x,y,z,0,1,0,1,-.1,1.1))
-    cap = 10*cube(x,y,z,0,1,0,1,1,1.1)
-    cup = 10*cube(x,y,z,0,1,0,1,-0.1,0.0)
-    return union(union(scaff,cap),cup)
-
-def fluid(x,y,z):
-    # scale = 2
-    # thickness = 0.35
-    sdf = gyroid
-    scale = 1
-    thickness = 1
-    offp = offset(sdf(x/scale,y/scale,z/scale),thickness/2)
-    offn = offset(sdf(x/scale,y/scale,z/scale),-thickness/2)  
-    return intersection(diff(offn,offp),10*cube(x,y,z,0,1,0,1,0,1))
-
-def fluid_buffered(x,y,z):
-    sdf = gyroid
-    scale = 1
-    thickness = 1
-    offp = offset(sdf(x/scale,y/scale,z/scale),thickness/2)
-    offn = offset(sdf(x/scale,y/scale,z/scale),-thickness/2)  
-    c = 10*cube(x,y,z,-.1,1.1,-.1,1.1,0,1)
-    return -diff(intersection(-diff(offn,offp),10*cube(x,y,z,0,1,0,1,-.1,1.1)),c)
-
-def fluid_tank(x,y,z):
-    buff = 0.1
-    c = 10*cube(x,y,z,-buff,1+buff,-buff,1+buff,-0.09999,1.099999)
-    return -diff(scaffold_capped(x,y,z),c)
-    
-def scaffold3x3(x,y,z):
-    sdf = primitive
-    scale = 1
-    thickness = 1
-    offp = offset(sdf(x/scale,y/scale,z/scale),thickness/2)
-    offn = offset(sdf(x/scale,y/scale,z/scale),-thickness/2)  
-    return intersection(intersection(-diff(offn,offp),cube(x,y,z,-1.5,1.5,-1.5,1.5,0,3)),cylinder(x,y,1.5))
-
-def fluid3x3(x,y,z):
-    sdf = primitive
-    scale = 1
-    thickness = 1
-    offp = offset(sdf(x/scale,y/scale,z/scale),thickness/2)
-    offn = offset(sdf(x/scale,y/scale,z/scale),-thickness/2)  
-    return intersection(intersection(diff(offn,offp),cube(x,y,z,-1.5,1.5,-1.5,1.5,0,3)),cylinder(x,y,1.5))
-
-def fluidball(x,y,z):
-    scale = 2
-    thickness = 0.35
-    offp = offset(gyroid(
-        x/scale,y/scale,z/scale),thickness/2)
-    offn = offset(gyroid(x/scale,y/scale,z/scale),-thickness/2)  
-    return intersection(diff(offn,offp),sphere(x,y,z,1.5,[0,0,1.5]))
-
-def demo():
-    hexcore = HexCore(fluid_buffered, [-0.1,1.1,-0.1,1.1,0,1], 0.05, verbose=True, nBL=3)
-    tetmesh = TetMesh(scaffold, [0,1,0,1,0,1], 0.05, verbose=True)
-    return tetmesh,hexcore
-def writeVTK(filename,NodeCoords,NodeConn):
-    
-    with open(filename,'w') as f:
-        f.write('# vtk DataFile Version 5.1\n')
-        f.write(filename + '\n')
-        f.write('ASCII\n')
-        f.write('DATASET UNSTRUCTURED_GRID\n')
-        f.write('POINTS {:d} float\n'.format(len(NodeCoords)))
-        for node in NodeCoords:
-            f.write('{:f} {:f} {:f}\n'.format(*node))
-        
-        f.write('CELLS {:d} {:d}\n'.format(len(NodeConn),len([n for elem in NodeConn for n in elem])+len(NodeConn)))
-        offset = 0 
-        f.write('OFFSETS vtktypeint64\n')
-        for elem in NodeConn:
-            f.write(str(offset) + '\n')
-            offset += len(elem)
-        f.write('CONNECTIVITY vtktypeint64\n')
-        for elem in NodeConn:
-            f.write(' '.join([str(n) for n in elem]) + '\n')
-        
-        f.write('CELL_TYPES {:d}\n'.format(len(NodeConn)))
-        for i in range(len(NodeConn)):
-            f.write('7\n')
-
-def TPMSGeometricAnalysis(func,c,L,h,verbose=True,writeVTUs=False,SurfOpt=False,return_mesh=False,MCInterp='linear'):
-    # func should be the implicit function of the TPMS, before offsetting/thickening
-    def scaffold(x,y,z):
-        scale = L
-        thickness = c
-        sdf = func
-        offp = offset(sdf(x/scale,y/scale,z/scale),thickness/2)
-        offn = offset(sdf(x/scale,y/scale,z/scale),-thickness/2)  
-        return intersection(-diff(offn,offp),10*cube(x,y,z,0,1,0,1,0,1))
-        # return -diff(offn,offp)
-    
-    bounds = [0,L,0,L,0,L]
-    NodeCoords, NodeConn, NodeVals = VoxelMesh(scaffold,[bounds[0]-h,bounds[1]+3*h],[bounds[2]-h,bounds[3]+3*h],[bounds[4]-h,bounds[5]+3*h],h,mode='notrim',reinitialize=False)
-    # sdf = FastMarchingMethod(NodeCoords,NodeConn,NodeVals)
-    # print(max(sdf),min(sdf))
-    ScaffCoords,ScaffConn = contour.ParchingCubes(NodeCoords,NodeConn,NodeVals,interpolation=MCInterp,method='33',threshold=0)
-    
-    try:
-        if SurfOpt: ScaffCoords,ScaffConn = SurfFlowOptimization(scaffold,ScaffCoords,ScaffConn)
-    except:
-        pass
-    
-    M = mesh(ScaffCoords,ScaffConn)
-    M.verbose = False
-    if writeVTUs: M.Mesh2Meshio().write('Scaffold.vtu')
-    v = mesh2sdf(M,NodeCoords,NodeConn)
-    # if writeVTUs: meshio.Mesh(NodeCoords,[('hexahedron',NodeConn)],point_data={'v':NodeVals,'d':v}).write('sdf.vtu')
-
-    TPMSCoords,TPMSConn,TPMSVals = VoxelMesh(func,[bounds[0],bounds[1]],[bounds[2],bounds[3]],[bounds[4],bounds[5]],h,mode='notrim',reinitialize=False)
-    TPMSSurfCoords,TPMSSurfConn = contour.ParchingCubes(TPMSCoords,TPMSConn,TPMSVals,interpolation='linear',method='33',threshold=0)
-    # mesh(TPMSSurfCoords,TPMSSurfConn).write('TPMS.vtu')
-    Points = np.array(TPMSSurfCoords)[np.array(TPMSSurfConn)]
-    Area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2
-    Atpms = sum(Area)
-    Vtpms = utils.TriSurfVol(ScaffCoords, ScaffConn)
-    Vcell = 1
-    rho = Vtpms/Vcell   
-    t = Vtpms/Atpms
-
-    # Thickness v2: (Not necessarily better...)
-    center = np.array(NodeCoords[np.where(np.array(v) == min(v))[0][0]])
-    radius = abs(min(v))
-    # t = 2*radius
-    # print(2*radius)
-    if writeVTUs: 
-        sphereSDF = lambda x,y,z : sphere(x,y,z,radius,center)
-        coords,conn,vals = VoxelMesh(sphereSDF,(center[0]-2*radius,center[0]+2*radius),(center[1]-2*radius,center[1]+2*radius),(center[2]-2*radius,center[2]+2*radius),radius/10,mode='notrim',reinitialize=False)
-        sCoords,sConn = contour.ParchingCubes(coords,conn,vals,interpolation='linear',method='33',threshold=0)
-        mesh(sCoords,sConn).write('Thickness_Sphere.vtu')
-
-    # Pore Size:
-    center = np.array(NodeCoords[np.where(np.array(v) == max(v))[0][0]])
-    radius = max(v)
-    if writeVTUs: 
-        sphereSDF = lambda x,y,z : sphere(x,y,z,radius,center)
-        coords,conn,vals = VoxelMesh(sphereSDF,(center[0]-2*radius,center[0]+2*radius),(center[1]-2*radius,center[1]+2*radius),(center[2]-2*radius,center[2]+2*radius),radius/10,mode='notrim',reinitialize=False)
-        sCoords,sConn = contour.ParchingCubes(coords,conn,vals,interpolation='linear',method='33',threshold=0)
-        mesh(sCoords,sConn).write('Pore_Sphere.vtu')
-
-    if verbose:
-        print('------------------------------------------')
-        print('Scaffold Thickness: {:.4f}'.format(t))
-        print('Scaffold Volume Fraction: {:.4f}'.format(rho))
-        print('Scaffold Pore Radius: {:.4f}'.format(radius))
-        print('------------------------------------------')
-    if return_mesh:
-        return t, rho, radius, mesh(ScaffCoords,ScaffConn)
-    return t, rho, radius
-
-# %%
