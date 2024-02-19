@@ -6,8 +6,9 @@ Created on Wed Sep 29 18:31:03 2021
 """
 
 import numpy as np
+import scipy
 import sys, warnings, copy, time, itertools
-from . import converter, rays, octree, improvement, quality
+from . import converter, rays, octree, improvement, quality, mesh
 
 def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     """
@@ -1563,6 +1564,89 @@ def TetMeshVol(NodeCoords, NodeConn):
                                np.subtract(nodes[2],nodes[3]))))/6
     V = sum([TetVolume([NodeCoords[node] for node in elem]) for elem in NodeConn])
     return V
+
+def MVBB(Points, method='exact', return_matrix=False):
+    """
+    Calculate the minimum volume bounding box of the set of points
+
+    Parameters
+    ----------
+    Points : array_like
+        nx3 point coordinates.
+    method : str, optional
+        method to use for calculating the MVBB, by default 'calipers'.
+        'calpiers' (or 'exact') - Use the rotating calipers method to calculate the exact MVBB
+        'pca' (or 'approx') - Use principal component analysis to calculate an approximate MVBB
+    return_matrix : bool, optional
+        option to return the rotation matrix that aligns the input Points with the local coordinate
+        system of the MVBB, by default False.
+    Returns
+    -------
+    mvbb : np.ndarray
+        Coordinates of the corners of the MVBB
+    mat : np.ndarray, optional
+        Rotation matrix that aligns the input Points with the local coordinate
+        system of the MVBB
+    
+    """    
+
+    if method.lower() in ('calipers', 'exact'):
+        hull = scipy.spatial.ConvexHull(points)
+        hull_mesh = mesh.mesh(points, hull.simplices)
+        hull_mesh.cleanup()
+        hull_points = np.asarray(hull_mesh.NodeCoords).T
+
+        # Calculate rotation matrices to align each hull facet with [0,0,-1] (so that it's rotated to the minimal z plane)
+        normals = np.asarray(hull_mesh.ElemNormals)
+        rot_axes = np.cross(normals, [0,0,-1])
+        rot_axes = rot_axes/np.linalg.norm(rot_axes,axis=1)[:,None]
+        thetas = np.arccos(np.sum(normals*[0,0,-1],axis=1))
+        outer_prod = rot_axes[:, np.newaxis, :] * rot_axes[:, :, np.newaxis]
+        cross_prod_matrices = np.zeros((hull_mesh.NElem, 3, 3))
+        cross_prod_matrices[:,0,1] = -rot_axes[:,2]
+        cross_prod_matrices[:,1,0] =  rot_axes[:,2]
+        cross_prod_matrices[:,0,2] =  rot_axes[:,1]
+        cross_prod_matrices[:,2,0] = -rot_axes[:,1]
+        cross_prod_matrices[:,1,2] = -rot_axes[:,0]
+        cross_prod_matrices[:,2,1] =  rot_axes[:,0]
+        rot_matrices = np.cos(thetas)[:,None,None]*np.repeat([np.eye(3)],hull_mesh.NElem,axis=0) + np.sin(thetas)[:,None,None]*cross_prod_matrices + (1 - np.cos(thetas))[:,None,None]*outer_prod
+
+        # NOTE: might be able to reduce memory usage by not explicitly obtaining the rotation matrices (see https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle)
+
+        # For each possible rotation, rotate all of the points
+        rotated_points = rot_matrices @ hull_points[None, :, :]
+
+        # Get the local coordinate system axis-aligned bounding boxes for each rotation
+        mins = np.min(rotated_points, axis=2)
+        maxs = np.max(rotated_points, axis=2)
+
+        # Calculate the box volumes and find the smallest
+        side_lengths = maxs - mins
+        volumes = np.prod(side_lengths,axis=1)
+        min_idx = np.argmin(volumes)
+
+        # Get local coordinates of the MVBB
+        rotated_bb = np.array([[mins[min_idx, 0], mins[min_idx, 1], mins[min_idx, 2]],
+                               [maxs[min_idx, 0], mins[min_idx, 1], mins[min_idx, 2]],
+                               [maxs[min_idx, 0], maxs[min_idx, 1], mins[min_idx, 2]],
+                               [mins[min_idx, 0], maxs[min_idx, 1], mins[min_idx, 2]],
+                               [mins[min_idx, 0], mins[min_idx, 1], maxs[min_idx, 2]],
+                               [maxs[min_idx, 0], mins[min_idx, 1], maxs[min_idx, 2]],
+                               [maxs[min_idx, 0], maxs[min_idx, 1], maxs[min_idx, 2]],
+                               [mins[min_idx, 0], maxs[min_idx, 1], maxs[min_idx, 2]],
+                            ])
+        # Return the MVBB to the original coordinate system
+        mat = rot_matrices[min_idx]
+        mvbb = (np.linalg.inv(mat)@rotated_bb.T).T
+
+    elif method.lower() in ('pca', 'approx'):
+        pass
+    else:
+        raise Exception('Invalid method. Must be "calipers", "pca", "exact" or "approx".')
+
+    if return_matrix:
+        return mvbb, mat
+    return mvbb
 
 def PadRagged(In,fillval=-1):
     """
