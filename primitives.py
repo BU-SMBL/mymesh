@@ -10,12 +10,12 @@ from . import converter, implicit, mesh, delaunay
 
 def Box(bounds, h, meshobj=True, ElemType='quad'):
     """
-    Box Generate a surface mesh of a rectangular box. 
+    Generate a surface mesh of a rectangular box. 
 
     Parameters
     ----------
     bounds : list
-        Six element list, [xmin,xmax,ymin,ymax,zmin,zmax].
+        Six element list of bounds [xmin,xmax,ymin,ymax,zmin,zmax].
     h : float
         Approximate element size.
     meshobj : bool, optional
@@ -28,8 +28,8 @@ def Box(bounds, h, meshobj=True, ElemType='quad'):
         Node coordinates of the mesh. Returned if meshobj = False.
     BoxConn : list
         Nodal connectivities of the mesh. Returned if meshobj = False.
-    Box : Mesh.mesh
-        Mesh object containing the box mesh. Returned if meshobj = True.
+    box : Mesh.mesh
+        Mesh object containing the box mesh. Returned if meshobj = True (default).
     """    
     GridCoords, GridConn = Grid(bounds,h,exact_h=False)
     BoxConn = converter.solid2surface(GridCoords,GridConn)
@@ -38,22 +38,22 @@ def Box(bounds, h, meshobj=True, ElemType='quad'):
         BoxConn = converter.quad2tri(BoxConn)
     if meshobj:
         if 'mesh' in dir(mesh):
-            Box = mesh.mesh(BoxCoords,BoxConn)
+            box = mesh.mesh(BoxCoords,BoxConn)
         else:
-            Box = mesh(BoxCoords,BoxConn)
-        Box.Type = 'surf'
-        Box.cleanup()
-        return Box
+            box = mesh(BoxCoords,BoxConn)
+        box.Type = 'surf'
+        box.cleanup()
+        return box
     return BoxCoords,BoxConn
 
 def Grid(bounds, h, meshobj=True, exact_h=False):
     """
-    Grid Generate a rectangular grid mesh.
+    Generate a 3D rectangular grid mesh.
 
     Parameters
     ----------
     bounds : list
-        Six element list, [xmin,xmax,ymin,ymax,zmin,zmax].
+        Six element list, of bounds [xmin,xmax,ymin,ymax,zmin,zmax].
     h : float
         Element size.
     meshobj : bool, optional
@@ -72,7 +72,7 @@ def Grid(bounds, h, meshobj=True, exact_h=False):
     GridConn : list
         Nodal connectivities of the mesh. Returned if meshobj = False.
     Grid : Mesh.mesh
-        Mesh object containing the grid mesh. Returned if meshobj = True.
+        Mesh object containing the grid mesh. Returned if meshobj = True (default).
     """    
     if type(h) is tuple or type(h) is list:
         hx = h[0];hy = h[1]; hz = h[2]
@@ -129,7 +129,7 @@ def Grid(bounds, h, meshobj=True, exact_h=False):
 
 def Grid2D(bounds, h, z=0, meshobj=True, exact_h=False, ElemType='quad'):
     """
-    Grid Generate a rectangular grid mesh.
+    Generate a rectangular grid mesh.
 
     Parameters
     ----------
@@ -153,7 +153,7 @@ def Grid2D(bounds, h, z=0, meshobj=True, exact_h=False, ElemType='quad'):
     GridConn : list
         Nodal connectivities of the mesh. Returned if meshobj = False.
     Grid : Mesh.mesh
-        Mesh object containing the grid mesh. Returned if meshobj = True.
+        Mesh object containing the grid mesh. Returned if meshobj = True (default).
     """    
     if type(h) is tuple or type(h) is list or type(h) is np.ndarray:
         hx = h[0];hy = h[1]
@@ -204,7 +204,7 @@ def Grid2D(bounds, h, z=0, meshobj=True, exact_h=False, ElemType='quad'):
 
 def Plane(pt, normal, bounds, h, meshobj=True, exact_h=False, ElemType='quad'):
     """
-    Plane Generate a 2D grid oriented on a plane
+    Generate a 2D grid oriented on a plane
 
     Parameters
     ----------
@@ -225,8 +225,12 @@ def Plane(pt, normal, bounds, h, meshobj=True, exact_h=False, ElemType='quad'):
 
     Returns
     -------
-    _type_
-        _description_
+    PlaneCoords : list
+        Node coordinates of the mesh. Returned if meshobj = False.
+    PlaneConn : list
+        Nodal connectivities of the mesh. Returned if meshobj = False.
+    plane : Mesh.mesh
+        Mesh object containing the plane mesh. Returned if meshobj = True (default).
     """
     # Get rotation between the plane and the xy (z=0) plane
     normal = np.asarray(normal)/np.linalg.norm(normal)
@@ -300,17 +304,45 @@ def Plane(pt, normal, bounds, h, meshobj=True, exact_h=False, ElemType='quad'):
     # Translate
     sd = np.dot(normal,PlaneCoords[0])-np.dot(normal,pt) 
     PlaneCoords = PlaneCoords - sd*normal
+    PlaneConn = GridConn
 
 
     if meshobj:
         if 'mesh' in dir(mesh):
-            plane = mesh.mesh(PlaneCoords,GridConn,'surf')
+            plane = mesh.mesh(PlaneCoords,PlaneConn,'surf')
         else:
-            plane = mesh(PlaneCoords,GridConn,'surf')
+            plane = mesh(PlaneCoords,PlaneConn,'surf')
         return plane
-    return PlaneCoords, GridConn
+    return PlaneCoords, PlaneConn
 
 def Extrude(line, distance, step, axis=2, ElemType='quad', meshobj=True):
+    """
+    Extrude a 2D line mesh to a 3D surface
+
+    Parameters
+    ----------
+    line : mesh
+        mesh object of 2D 
+    distance : _type_
+        _description_
+    step : _type_
+        _description_
+    axis : int, optional
+        _description_, by default 2
+    ElemType : str, optional
+        _description_, by default 'quad'
+    meshobj : bool, optional
+        _description_, by default True
+
+    Returns
+    -------
+    NodeCoords : list
+        Node coordinates of the mesh. Returned if meshobj = False.
+    NodeConn : list
+        Nodal connectivities of the mesh. Returned if meshobj = False.
+    extruded : Mesh.mesh
+        Mesh object containing the extruded mesh. Returned if meshobj = True (default).
+    """    
     NodeCoords = np.array(line.NodeCoords)
     OriginalConn = np.array(line.NodeConn)
     NodeConn = np.empty((0,4))
@@ -332,6 +364,35 @@ def Extrude(line, distance, step, axis=2, ElemType='quad', meshobj=True):
     return NodeCoords, NodeConn
 
 def Cylinder(bounds, resolution, axis=2, axis_step=None, meshobj=True):
+    """
+    Generate an axis-aligned cylindrical surface mesh
+
+    Parameters
+    ----------
+    ----------
+    bounds : list
+        Six element list of bounds [xmin,xmax,ymin,ymax,zmin,zmax].
+        NodeCoords and NodeConn. By default False.
+    resolution : int
+        Number of points in the circumference of the cylinder
+    axis : int, optional
+        Long axis of the cylinder (i.e. the circular ends will lie in the plane of the other two axes).
+        Must be 0, 1, or 2 (x, y, z), by default 2
+    axis_step : float, optional
+        Element size in the <axis> direction, by default it will be set to the full length of the cylinder.
+    meshobj : bool, optional
+        If true, will return a mesh object, if false, will return 
+
+    Returns
+    -------
+    NodeCoords : list
+        Node coordinates of the mesh. Returned if meshobj = False.
+    NodeConn : list
+        Nodal connectivities of the mesh. Returned if meshobj = False.
+    cyl : Mesh.mesh
+        Mesh object containing the cylinder mesh. Returned if meshobj = True (default).
+
+    """    
     bounds = np.asarray(bounds)
     if axis == 2:
         lbounds = bounds
