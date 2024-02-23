@@ -141,17 +141,17 @@ class mesh:
             setattr(self,properties,[])
         else:
             raise Exception('Invalid input.')
-    def cleanup(self,tol=1e-10,angletol=1e-3,strict=False):
+    def cleanup(self,tol=1e-10):
         # TODO: This needs to be improved so other variables that point to nodes or elements are updated accordingly
         
         self.reset()
-        self.NodeCoords,self.NodeConn,_ = utils.DeleteDuplicateNodes(self.NodeCoords,self.NodeConn,tol=tol)
-        if self.NElem > 0 and len(self.NodeConn[0]) == 3:
-            # Currently only valid for tris
-            self.NodeCoords,self.NodeConn = utils.DeleteDegenerateElements(*self,tol=tol,angletol=angletol,strict=strict)
-        elif self.NElem > 0:
-            self.NodeCoords,self.NodeConn = utils.DeleteDegenerateElements(*self,angletol=angletol,strict=True)
-        self.NodeCoords,self.NodeConn,_ = converter.removeNodes(self.NodeCoords,self.NodeConn)
+        self.NodeCoords,self.NodeConn,newIds,idx = utils.DeleteDuplicateNodes(self.NodeCoords,self.NodeConn,tol=tol,return_idx=True)
+        for key in self.NodeData.keys():
+            self.NodeData[key] = np.asarray(self.NodeData[key])[idx]
+            
+        self.NodeCoords,self.NodeConn,OrigIds = converter.removeNodes(self.NodeCoords,self.NodeConn)
+        for key in self.NodeData.keys():
+            self.NodeData[key] = np.asarray(self.NodeData[key])[OrigIds]
         
     def validate(self):
         assert type(self.NodeCoords) == list, 'Invalid type for model.mesh.NodeCoords'
