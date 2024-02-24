@@ -11,14 +11,8 @@ import numpy as np
 from scipy.spatial import distance
 from scipy import optimize, interpolate
 import sys, os, time, copy, warnings, bisect
-import meshio
 
 from . import utils, converter, contour, quality, improvement, TetGen, rays, octree, mesh, primitives
-
-try:
-    from sklearn.neighbors import KDTree
-except:
-    warnings.warn('Optional dependencies not found - some functions may not work properly')
 
 # implicit function primitives
 def gyroid(x,y,z):
@@ -388,7 +382,10 @@ def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
         List of signed distance values evaluated at each node in the voxel grid.
 
     """
-    
+    try:
+        from sklearn.neighbors import KDTree
+    except:
+        raise ImportError('mesh2sdf requires scikit-learn (sklearn). Install with: pip install scikit-learn')
     if method == 'nodes':
         Normals = np.asarray(M.NodeNormals)
         SurfNodes = set(np.unique(M.SurfConn))
@@ -436,6 +433,10 @@ def mesh2udf(M,VoxelCoords,VoxelConn):
         List of signed distance values evaluated at each node in the voxel grid.
 
     """
+    try:
+        from sklearn.neighbors import KDTree
+    except:
+        raise ImportError('mesh2udf requires scikit-learn (sklearn). Install with: pip install scikit-learn')
     Coords = np.asarray(M.NodeCoords)
 
     tree = KDTree(Coords, leaf_size=2)  
@@ -1040,7 +1041,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
         gamma = np.arccos(np.sum(v20*-v12,axis=1)/(l20*l12))
         angles = np.vstack([alpha,beta,gamma]).T
         # Dihedrals:
-        dihedrals = quality.DihedralAngles(NewElemNormals,ElemNeighbors)
+        dihedrals = quality.SurfDihedralAngles(NewElemNormals,ElemNeighbors)
         # Normal Flipping:
         NormDot = np.sum(NewElemNormals * ElemNormals,axis=1)
 

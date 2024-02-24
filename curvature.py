@@ -5,7 +5,6 @@ Created on Wed Sep 29 14:10:08 2021
 @author: toj
 """
 import numpy as np
-import sympy as sp
 from . import utils, converter
 import warnings
 from scipy import ndimage
@@ -635,6 +634,10 @@ def AnalyticalCurvature(F,NodeCoords):
     mean : np.ndarray
         List of mean curvatures.
     """
+    try:
+        import sympy as sp
+    except:
+        raise ImportError('AnalyticalCurvature requires sympy. Install with: pip install sympy.')
     x, y, z = sp.symbols('x y z', real=True)
     if type(NodeCoords) is list: NodeCoords = np.asarray(NodeCoords)
 

@@ -9,9 +9,7 @@ from . import utils, improvement, converter, quality, rays, curvature
 from sys import getsizeof
 import scipy
 import numpy as np
-import copy, warnings, pickle
-import meshio
-import json
+import copy, warnings, pickle, json
 
 class mesh:
     def __init__(self,*args):
@@ -1029,7 +1027,10 @@ class mesh:
             raise Exception('Unrecognized file')   
     def Mesh2Meshio(self,PointData={},CellData={}):
         
-        # points = self.NodeCoords
+        try:
+            import meshio
+        except:
+            raise ImportError('mesh.Mesh2Meshio() requires the meshio library. Install with: pip install meshio')
 
         if type(PointData) is list or type(PointData) is np.ndarray:
             self.NodeData['_NodeVals_'] = PointData
@@ -1078,6 +1079,10 @@ class mesh:
         return m
 
     def write(self,filename,binary=None):
+        try:
+            import meshio
+        except:
+            raise ImportError('mesh.write() requires the meshio library. Install with: pip install meshio')
         if self.NNode == 0:
             warnings.warn('Mesh empty - file not written.')
             return
@@ -1087,7 +1092,10 @@ class mesh:
         else:
             m.write(filename)
     def Meshio2Mesh(m):
-        
+        try:
+            import meshio
+        except:
+            raise ImportError('mesh.Meshio2Mesh() requires the meshio library. Install with: pip install meshio')
         if int(meshio.__version__.split('.')[0]) >= 5 and int(meshio.__version__.split('.')[1]) >= 2:
             NodeConn = [elem for cells in m.cells for elem in cells.data.tolist()]
         else:
@@ -1120,6 +1128,10 @@ class mesh:
         M : mesh.mesh
             Mesh object
         """        
+        try:
+            import meshio
+        except:
+            raise ImportError('mesh.read() requires the meshio library. Install with: pip install meshio')
         m = meshio.read(file)
         M = mesh.Meshio2Mesh(m)
 
