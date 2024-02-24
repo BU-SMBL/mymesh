@@ -341,7 +341,7 @@ def EdgesByElement(NodeCoords,NodeConn,ElemType='auto'):
 def solid2tets(NodeCoords,NodeConn,return_ids=False):
     """
     Decompose all elements of a 3D volume mesh to tetrahedra.
-    NOTE the generated tetrahedra will not generally be continuously oriented, i.e.
+    NOTE the generated tetrahedra will not necessarily be continuously oriented, i.e.
     edges of child tetrahedra may not be aligned between one parent element 
     and its neighbor, and thus the resulting mesh will typically be invalid.
     The primary use-case for this method is for methods like quality.Volume
@@ -374,7 +374,7 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
     hexs = [NodeConn[i] for i in hexIdx]
 
 
-    _,fromhex = hex2tet([],hexs,method='1to5')
+    _,fromhex = hex2tet([],hexs,method='1to6')
     TetConn = tets + pyramid2tet([],pyrs) + wedge2tet([],wdgs) + fromhex
     if return_ids:
         # Element ids of the tets connected to the original elements
@@ -392,16 +392,17 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
         return TetConn, ElemIds
     return TetConn
 
-def hex2tet(NodeCoords,NodeConn,method='1to5'):
+def hex2tet(NodeCoords,NodeConn,method='1to6'):
     """
     Decompose all elements of a 3D hexahedral mesh to tetrahedra.
     Generally solid2tets should be used rather than hex2tet directly
-    NOTE the generated tetrahedra will not generally be continuously oriented, i.e.
-    edges of child tetrahedra may not be aligned between one parent element 
+
+    NOTE the generated tetrahedra of the '1to5' method will not be continuously oriented, 
+    i.e. edges of child tetrahedra may not be aligned between one parent element 
     and its neighbor, and thus the resulting mesh will typically be invalid.
     The primary use-case for this method is for methods like quality.Volume
     which utilize the geometric properties of tetrahedra to determine properties of 
-    the parent elements.
+    the parent elements. '1to6' or '1to24' will generate continuously oriented tetrahedra.
     
 
     Parameters
@@ -410,13 +411,29 @@ def hex2tet(NodeCoords,NodeConn,method='1to5'):
         List of nodal coordinates.
     NodeConn : list
         Nodal connectivity list. All elements should be 8-Node hexahedral elements.
-
+    method : str, optional
+        Method of decomposition to use for tetrahedralization.
+        '1to5'  - Not continuously oriented, no nodes added
+        '1to6'  - Continuously oriented, no nodes added
+        '1to24' - Continuously oriented, nodes added at center of element and element faces
+        
     Returns
     -------
     NewCoords : list
-        New list of nodal coordinates.
+        New list of nodal coordinates. For '1to5' or '1to6', this will be unchanged from
+        the input.
     TetConn, list
         Nodal connectivity list of generated tetrahedra
+
+
+    Examples
+    --------
+    >>> # A single hexahedral element
+    >>> HexCoords, HexConn = primitives.Grid([0,1,0,1,0,1],1)
+    >>> TetCoords1to5, TetConn1to5 = converter.hex2tet(HexCoords, HexConn, method='1to5')
+    >>> TetCoords1to6, TetConn1to6 = converter.hex2tet(HexCoords, HexConn, method='1to6')
+    >>> TetCoords1to24, TetConn1to24 = converter.hex2tet(HexCoords, HexConn, method='1to24')
+
     """
     if method == '1to5':
         if len(NodeConn) > 0:
@@ -434,19 +451,18 @@ def hex2tet(NodeCoords,NodeConn,method='1to5'):
     elif method == '1to6':
         if len(NodeConn) > 0:
             ArrayConn = np.asarray(NodeConn)
-            TetConn = -1*np.ones((len(NodeConn)*5,4))
+            TetConn = -1*np.ones((len(NodeConn)*6,4))
             TetConn[0::6] = ArrayConn[:,[0,1,3,5]]
-            TetConn[1::6] = ArrayConn[:,[1,2,3,6]]
+            TetConn[1::6] = ArrayConn[:,[5,2,3,6]]
             TetConn[2::6] = ArrayConn[:,[0,5,3,4]]
             TetConn[3::6] = ArrayConn[:,[3,7,4,5]]
-            TetConn[4::6] = ArrayConn[:,[2,6,3,5]]
-            TetConn[5::6] = ArrayConn[:,[5,7,6,3]]
+            TetConn[4::6] = ArrayConn[:,[1,2,3,5]]
+            TetConn[5::6] = ArrayConn[:,[5,6,7,3]]
 
             TetConn = TetConn.astype(int).tolist()
         else:
             TetConn = []
         NewCoords = NodeCoords
-
     elif method == '1to24':
         ArrayCoords = np.asarray(NodeCoords)
         ArrayConn = np.asarray(NodeConn)
@@ -459,13 +475,13 @@ def hex2tet(NodeCoords,NodeConn,method='1to5'):
         Face4Centroids = np.mean(ArrayCoords[ArrayConn[:,[3,0,4,7]]],axis=1)
         Face5Centroids = np.mean(ArrayCoords[ArrayConn[:,[4,5,6,7]]],axis=1)
 
-        CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*0,len(NodeCoords)+len(NodeConn)*1))
-        Face0CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*1,len(NodeCoords)+len(NodeConn)*2))
-        Face1CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*2,len(NodeCoords)+len(NodeConn)*3))
-        Face2CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*3,len(NodeCoords)+len(NodeConn)*4))
-        Face3CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*4,len(NodeCoords)+len(NodeConn)*5))
-        Face4CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*5,len(NodeCoords)+len(NodeConn)*6))
-        Face5CentroidIds = np.array(range(len(NodeCoords)+len(NodeConn)*6,len(NodeCoords)+len(NodeConn)*7))
+        CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*0,len(NodeCoords)+len(NodeConn)*1)
+        Face0CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*1,len(NodeCoords)+len(NodeConn)*2)
+        Face1CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*2,len(NodeCoords)+len(NodeConn)*3)
+        Face2CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*3,len(NodeCoords)+len(NodeConn)*4)
+        Face3CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*4,len(NodeCoords)+len(NodeConn)*5)
+        Face4CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*5,len(NodeCoords)+len(NodeConn)*6)
+        Face5CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*6,len(NodeCoords)+len(NodeConn)*7)
         
         NewCoords = np.vstack([ArrayCoords,Centroids,Face0Centroids,Face1Centroids,Face2Centroids,Face3Centroids,Face4Centroids,Face5Centroids])        
         
@@ -571,11 +587,6 @@ def pyramid2tet(NodeCoords,NodeConn):
         Tets = Tets.astype(int).tolist()
     else:
         Tets = []
-    # idx = np.array([
-    #     [0,1,2,4],
-    #     [0,2,3,4]
-    # ])
-    # Tets = np.array(elem)[idx].tolist()
     return Tets
 
 def faces2surface(Faces):
