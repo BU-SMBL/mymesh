@@ -10,11 +10,6 @@ import numpy as np
 from scipy import ndimage, sparse
 import sys, os, warnings, glob, gc, tempfile
 from . import utils, rays, primitives
-try:
-    import h5py, tqdm
-    import cv2, pydicom
-except:
-    warnings.warn('Optional dependencies not found - some functions may not work properly')
 
 def solid2surface(NodeCoords,NodeConn):
     """
@@ -436,7 +431,23 @@ def hex2tet(NodeCoords,NodeConn,method='1to5'):
         else:
             TetConn = []
         NewCoords = NodeCoords
-    elif method=='1to24':
+    elif method == '1to6':
+        if len(NodeConn) > 0:
+            ArrayConn = np.asarray(NodeConn)
+            TetConn = -1*np.ones((len(NodeConn)*5,4))
+            TetConn[0::6] = ArrayConn[:,[0,1,3,5]]
+            TetConn[1::6] = ArrayConn[:,[1,2,3,6]]
+            TetConn[2::6] = ArrayConn[:,[0,5,3,4]]
+            TetConn[3::6] = ArrayConn[:,[3,7,4,5]]
+            TetConn[4::6] = ArrayConn[:,[2,6,3,5]]
+            TetConn[5::6] = ArrayConn[:,[5,7,6,3]]
+
+            TetConn = TetConn.astype(int).tolist()
+        else:
+            TetConn = []
+        NewCoords = NodeCoords
+
+    elif method == '1to24':
         ArrayCoords = np.asarray(NodeCoords)
         ArrayConn = np.asarray(NodeConn)
 
@@ -489,6 +500,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to5'):
         TetConn[22::24] = np.hstack([ArrayConn[:,[7,6]],Face5CentroidIds[:,None],CentroidIds[:,None]])
         TetConn[23::24] = np.hstack([ArrayConn[:,[4,7]],Face5CentroidIds[:,None],CentroidIds[:,None]])
 
+    
 
     return NewCoords, TetConn
 
@@ -738,7 +750,8 @@ def edges2unique(Edges,return_idx=False,return_inv=False,return_counts=False):
         inv = np.array([])
         counts = np.array([])
 
-    out = np.array([UEdges,idx,inv,counts],dtype=object)[np.array([True,return_idx,return_inv,return_counts])]
+    check = [True,return_idx,return_inv,return_counts]
+    out = [o for i,o in enumerate([UEdges, idx, inv, counts]) if check[i]]
 
     return out
 
@@ -1295,13 +1308,21 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
             dicoms = glob.glob(os.path.join(path,'*.DCM'))
             dicoms.sort()
         if len(tiffs) > 0 & len(dicoms) > 0:
-            warnings.warn('Image directory: "{:s}" contains both .tiff and .dcm files - only loading dcm files.')
+            warnings.warn('Image directory: "{:s}" contains .dcm files as well as other image file types - only loading dcm files.')
             files = dicoms
             ftype = 'dcm'
         elif len(tiffs) > 0:
+            try:
+                import cv2
+            except:
+                raise ImportError('im2voxel requires opencv-python (cv2) to load tiff, jpg, or png files. Install with: pip install opencv-python')
             files = tiffs
             ftype = 'tiff'
         elif len(dicoms) > 0:
+            try:
+                import cv2
+            except:
+                raise ImportError('im2voxel requires pydicom to load DICOM files. Install with: pip install pydicom')
             files = dicoms
             ftype = 'dcm'
         else:
@@ -1312,6 +1333,7 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
                 return [], [], []
         print('Loading image data from {:s}...'.format(img))
         if ftype == 'tiff':
+            
             temp = cv2.imread(files[0])
             if len(temp.shape) > 2:
                 multichannel = True
