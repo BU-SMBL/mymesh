@@ -12,7 +12,7 @@ from . import converter, rays, octree, improvement, quality, mesh
 
 def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     """
-    getNodeNeighbors Gives the connected nodes for each node in the mesh
+    Determines the adjacent nodes for each node in the mesh
 
     Parameters
     ----------
@@ -47,7 +47,7 @@ def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
 
 def getElemConnectivity(NodeCoords,NodeConn,ElemType='auto'):
     """
-    getElemConnectivity _summary_
+    Determines the elements connected to each node in the mesh
 
     Parameters
     ----------
@@ -413,7 +413,7 @@ def CalcFaceNormal(NodeCoords,SurfConn):
     N = np.vstack([Nx,Ny,Nz]).T
     d = np.linalg.norm(N,axis=1)
     with np.errstate(divide='ignore', invalid='ignore'):
-        ElemNormals = (N/d[:,None]).tolist()
+        ElemNormals = (N/d[:,None])
 
     return ElemNormals
 
@@ -1223,7 +1223,43 @@ def DeleteDegenerateElements(NodeCoords,NodeConn,tol=1e-12,angletol=1e-3,strict=
                 
     return NewCoords,NewConn
 
-def MirrorMesh(NodeCoords,NodeConn,x=None,y=None,z=None):
+def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf'):
+    """
+    Checks for elements with degenerate edges and either changes the element type or 
+    removes the element depending on how degenerate it is. Elements
+    with less than 3 (for surface meshes) or 4 (for volume meshes) unique nodes will be deleted, others will be reduced (ex. a quad with 3 unique nodes will be converted 
+    to a triangle). The ordering of nodes will be kept.
+
+    This function only changes the mesh of an element in NodeConn has the same node number
+    more than once. For meshes that have two differently numbered nodes at the same 
+    location, first use utils.DeleteDuplicateNodes.
+
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates
+    NodeConn : list, array_like
+        Node connectivity
+    type : str, optional
+        Specifies whether the mesh contains surface elements (tris, quads) or volume
+        elements (tets, hexs, etc.). Must be either "surf" or "vol". By default "surf".
+
+    Returns
+    -------
+    NodeCoords : array_like
+        Node coordinates (these are simply passed through from the input)
+    NewConn : list, array_like
+        Updated node connectivity 
+    """
+    if Type=='surf':
+        NewConn = [u[i.argsort()].tolist() for u, i in (np.unique(elem, return_index=True) for elem in NodeConn) if len(u) >= 3]
+    elif Type=='vol':
+        NewConn = [u[i.argsort()].tolist() for u, i in (np.unique(elem, return_index=True) for elem in NodeConn) if len(u) >= 3]
+
+    return NodeCoords, NewConn
+
+def MirrorMesh(NodeCoords, NodeConn,x=None,y=None,z=None):
     """
     Creates a mirrored copy of a mesh by mirroring about the planes
     defined by X=x, Y=y, and Z=z
