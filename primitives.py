@@ -6,7 +6,7 @@ Created Sept 2022
 """
 import numpy as np
 import gc
-from . import converter, implicit, mesh, delaunay
+from . import utils, converter, implicit, mesh, delaunay
 
 def Box(bounds, h, meshobj=True, ElemType='quad'):
     """
@@ -348,7 +348,7 @@ def Extrude(line, distance, step, axis=2, ElemType='quad', meshobj=True):
         Mesh object containing the extruded mesh. Returned if meshobj = True (default).
     """    
     NodeCoords = np.array(line.NodeCoords)
-    OriginalConn = np.array(line.NodeConn)
+    OriginalConn = np.asarray(line.NodeConn)
     NodeConn = np.empty((0,4))
     for i,s in enumerate(np.arange(step,distance+step,step)):
         temp = np.array(line.NodeCoords)
@@ -356,7 +356,7 @@ def Extrude(line, distance, step, axis=2, ElemType='quad', meshobj=True):
         NodeCoords = np.append(NodeCoords, temp, axis=0)
 
         NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
-        NodeConn = NodeConn.astype(int)
+    NodeConn = NodeConn.astype(int)
     if ElemType == 'tri':
         NodeConn = converter.quad2tri(NodeConn)
     if meshobj:
@@ -367,12 +367,74 @@ def Extrude(line, distance, step, axis=2, ElemType='quad', meshobj=True):
         return extruded
     return NodeCoords, NodeConn
 
-def Cylinder(bounds, resolution, axis=2, axis_step=None, meshobj=True):
+def Revolve(line, angle, anglestep, center=[0,0,0], axis=2, ElemType='quad', meshobj=True):
+    
+    if np.isscalar(axis):
+        assert axis in (0, 1, 2), 'axis must be either 0, 1, or 2 (indicating x, y, z axes) or a 3 element vector.'
+        if axis == 0:
+            axis = [1, 0, 0]
+        elif axis == 1:
+            axis = [0, 1, 0]
+        else:
+            axis = [0, 0, 1]
+    else:
+        assert isinstance(axis, (list, tuple, np.ndarray)), 'axis must be either 0, 1, or 2 (indicating x, y, z axes) or a 3 element vector.'
+        axis = axis/np.linalg.norm(axis)
+    
+    thetas = np.arange(0, angle+anglestep, anglestep)
+    outer_prod = np.outer(axis,axis)
+    cross_prod_matrix = np.zeros((3,3))
+    cross_prod_matrix[0,1] = -axis[2]
+    cross_prod_matrix[1,0] =  axis[2]
+    cross_prod_matrix[0,2] =  axis[1]
+    cross_prod_matrix[2,0] = -axis[1]
+    cross_prod_matrix[1,2] = -axis[0]
+    cross_prod_matrix[2,1] =  axis[0]
+
+    rot_matrices = np.cos(thetas)[:,None,None]*np.repeat([np.eye(3)],len(thetas),axis=0) + np.sin(thetas)[:,None,None]*np.repeat([cross_prod_matrix],len(thetas),axis=0) + (1 - np.cos(thetas))[:,None,None]*np.repeat([outer_prod],len(thetas),axis=0)
+
+    R = np.repeat([np.eye(4)],len(thetas),axis=0)
+    R[:,:3,:3] = rot_matrices
+
+    NodeCoords = np.array(line.NodeCoords)
+    OriginalConn = np.asarray(line.NodeConn)
+    NodeConn = np.empty((0,4))
+
+    padded = np.hstack([NodeCoords, np.ones((len(NodeCoords),1))])
+    T = np.array([
+                [1, 0, 0, -center[0]],
+                [0, 1, 0, -center[1]],
+                [0, 0, 1, -center[2]],
+                [0, 0, 0, 1],
+                ])
+    Tinv = np.linalg.inv(T)
+    for i,r in enumerate(R[1:]):
+        temp = np.linalg.multi_dot([Tinv,r,T,padded.T]).T[:,:3]
+        NodeCoords = np.append(NodeCoords, temp, axis=0)
+
+        NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
+
+    NodeConn = NodeConn.astype(int)
+
+    if ElemType == 'tri':
+        NodeConn = converter.quad2tri(NodeConn)
+    NodeCoords, NodeConn, _ = utils.DeleteDuplicateNodes(NodeCoords, NodeConn)
+    NodeCoords, NodeConn = utils.CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf')
+
+    if meshobj:
+        if 'mesh' in dir(mesh):
+            revolve = mesh.mesh(NodeCoords,NodeConn,'surf')
+        else:
+            revolve = mesh(NodeCoords,NodeConn,'surf')
+        return revolve
+    return NodeCoords, NodeConn
+
+
+def Cylinder(bounds, resolution, axis=2, axis_step=None, ElemType='tri', meshobj=True, cap=True):
     """
     Generate an axis-aligned cylindrical surface mesh
 
     Parameters
-    ----------
     ----------
     bounds : list
         Six element list of bounds [xmin,xmax,ymin,ymax,zmin,zmax].
@@ -384,8 +446,15 @@ def Cylinder(bounds, resolution, axis=2, axis_step=None, meshobj=True):
         Must be 0, 1, or 2 (x, y, z), by default 2
     axis_step : float, optional
         Element size in the <axis> direction, by default it will be set to the full length of the cylinder.
+    ElemType : str, optional
+        Specify the element type of the walls of tje cylinder mesh. This can either be 
+        'quad' for a quadrilateral mesh or 'tri' for a triangular mesh, by default 'tri'.
+        The ends of the cylinder will be triangular regardless of this input.
     meshobj : bool, optional
-        If true, will return a mesh object, if false, will return 
+        If True, will return a mesh object, if false, will return NodeCoords, NodeConn
+    cap : bool, optional
+        If True, will close the ends of the cylinder, otherwise it will leave them open, by 
+        default True.
 
     Returns
     -------
@@ -435,24 +504,94 @@ def Cylinder(bounds, resolution, axis=2, axis_step=None, meshobj=True):
     else:
         line = mesh(coords, conn)
     cyl = Extrude(line, height, axis_step, axis=axis, ElemType='tri')
+    if cap:
+        capconn = delaunay.ConvexHullFanTriangulation(np.arange(line.NNode))
 
-    capconn = delaunay.ConvexHullFanTriangulation(np.arange(line.NNode))
+        if 'mesh' in dir(mesh):
+            cap1 = mesh.mesh(line.NodeCoords, np.fliplr(capconn))
+            cap2 = mesh.mesh(np.copy(line.NodeCoords), capconn)
+        else:
+            cap1 = mesh(line.NodeCoords, np.fliplr(capconn))
+            cap2 = mesh(np.copy(line.NodeCoords), capconn)
+        cap2.NodeCoords[:,axis] += height
 
-    if 'mesh' in dir(mesh):
-        cap1 = mesh.mesh(line.NodeCoords, np.fliplr(capconn))
-        cap2 = mesh.mesh(np.copy(line.NodeCoords), capconn)
-    else:
-        cap1 = mesh(line.NodeCoords, np.fliplr(capconn))
-        cap2 = mesh(np.copy(line.NodeCoords), capconn)
-    cap2.NodeCoords[:,axis] += height
-
-    cyl.merge(cap1)
-    cyl.merge(cap2)
-    cyl.cleanup()
+        cyl.merge(cap1)
+        cyl.merge(cap2)
+        cyl.cleanup()
 
     if meshobj:
         return cyl
     return cyl.NodeCoords, cyl.NodeConn
         
         
+def Sphere(center, radius, theta_resolution=10, phi_resolution=10, ElemType='tri'):
+    """
+    Generate a sphere (or ellipsoid)
+    The total number of points will be phi_resolution*(theta_resolution-2) + 2
+
+    Parameters
+    ----------
+    center : array_like
+        Three element array of the coordinates of the center of the sphere.
+    radius : scalar or array_like
+        The radius of the sphere. Radius can be specified as a scalar radius of the sphere 
+        or three element array of half-axes for an ellipsoid. 
+    theta_resolution : int, optional
+        Number of circular (or elliptical) cross sections sampled along the z axis, by default 10.
+    phi_resolution : int, optional
+        Number of circumferential points for each cross section, by default 10.
+    ElemType : str, optional
+        Specify the element type of the mesh. This can either be 'quad' for 
+        a quadrilateral mesh or 'tri' for a triangular mesh, by default 'tri'.
+        If 'quad' is specified, there will still be some triangles at z axis "poles".
+
+    Returns
+    -------
+    sphere, Mesh.mesh
+        Mesh object containing the cylinder mesh.
+        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
+        the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
+        by running: `NodeCoords, NodeConn = primitives.Sphere(...)`
+
+
+    Examples
+    ________
+    >>> # A unit sphere
+    >>> sphere = primitives.Sphere([0,0,0], 1)
+
+    >>> # An ellipsoid
+    >>> sphere = primitives.Sphere([0,0,0], (1,2,3), theta_resolution=20, phi_resolution=20, ElemType='quad')
+
+    """
+
+    if isinstance(radius, (list, tuple, np.ndarray)):
+        assert len(radius) == 3, 'radius must either be a scalar or a 3 element array_like.'
+    elif np.isscalar(radius):
+        radius = np.repeat(radius,3)
+    else:
+        raise TypeError('radius must either be a scalar or a 3 element array_like.')
+
+    # Create cross section
+    t = np.linspace(0,np.pi,theta_resolution)
+
+    x = np.repeat(center[0],len(t))
+    y = center[1] + radius[1]*np.sin(t)
+    z = center[2] + radius[2]*np.cos(t)
+    xyz = [x,y,z]
+
+    coords = np.column_stack(xyz)
+    conn = np.column_stack([np.arange(0,len(t)-1), np.arange(1,len(t))])
+
+    if 'mesh' in dir(mesh):
+        circle = mesh.mesh(coords, conn)
+    else:
+        circle = mesh(coords, conn)
+    
+    # Revolve cross section
+    sphere = Revolve(circle, 2*np.pi, 2*np.pi/(phi_resolution), center=center, axis=2, ElemType=ElemType)
+
+    # Perform z-scaling for ellipsoids
+    sphere.NodeCoords[:,0] = (sphere.NodeCoords[:,0] - center[0])*radius[0]/radius[1] + center[0]
+
+    return sphere
 
