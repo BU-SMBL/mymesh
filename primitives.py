@@ -21,6 +21,9 @@ def Box(bounds, h, meshobj=True, ElemType='quad'):
     meshobj : bool, optional
         If true, will return a mesh object, if false, will return 
         NodeCoords and NodeConn. By default False.
+    ElemType : str, optional
+        Specify the element type of the grid mesh. This can either be 'quad' for 
+        a quadrilateral mesh or 'tri' for a triangular mesh, by default 'quad'.
 
     Returns
     -------
@@ -46,7 +49,7 @@ def Box(bounds, h, meshobj=True, ElemType='quad'):
         return box
     return BoxCoords,BoxConn
 
-def Grid(bounds, h, meshobj=True, exact_h=False):
+def Grid(bounds, h, meshobj=True, exact_h=False, ElemType='hex'):
     """
     Generate a 3D rectangular grid mesh.
 
@@ -64,6 +67,9 @@ def Grid(bounds, h, meshobj=True, exact_h=False):
         equal to what is specified, but the upper bounds may vary slightly.
         Otherwise, the bounds will be strictly enforced, but element size may deviate
         from the specified h. This may result in non-cubic elements. By default False.
+    ElemType : str, optional
+        Specify the element type of the grid mesh. This can either be 'hex' for 
+        a hexahedral mesh or 'tet' for a tetrahedral mesh, by default 'hex'.
 
     Returns
     -------
@@ -95,37 +101,35 @@ def Grid(bounds, h, meshobj=True, exact_h=False):
         zs = np.linspace(bounds[4],bounds[5],nZ)
         
 
-    # VoxelCoords = np.hstack([
-    #     np.repeat(xs,len(ys)*len(zs))[:,None],
-    #     np.tile(np.repeat(ys,len(xs)),len(zs)).flatten()[:,None],
-    #     np.tile(np.tile(zs,len(xs)).flatten(),len(ys)).flatten()[:,None]
-    # ])
-    VoxelCoords = np.hstack([
+    GridCoords = np.hstack([
         np.repeat(xs,len(ys)*len(zs))[:,None],
         np.tile(np.repeat(ys,len(zs)),len(xs)).flatten()[:,None],
         np.tile(np.tile(zs,len(xs)).flatten(),len(ys)).flatten()[:,None]
     ])
 
-    Ids = np.reshape(np.arange(len(VoxelCoords)),(nX,nY,nZ))
+    Ids = np.reshape(np.arange(len(GridCoords)),(nX,nY,nZ))
     
-    VoxelConn = np.zeros(((nX-1)*(nY-1)*(nZ-1),8),dtype=int)
+    GridConn = np.zeros(((nX-1)*(nY-1)*(nZ-1),8),dtype=int)
 
-    VoxelConn[:,0] = Ids[:-1,:-1,:-1].flatten()
-    VoxelConn[:,1] = Ids[1:,:-1,:-1].flatten()
-    VoxelConn[:,2] = Ids[1:,1:,:-1].flatten()
-    VoxelConn[:,3] = Ids[:-1,1:,:-1].flatten()
-    VoxelConn[:,4] = Ids[:-1,:-1,1:].flatten()
-    VoxelConn[:,5] = Ids[1:,:-1,1:].flatten()
-    VoxelConn[:,6] = Ids[1:,1:,1:].flatten()
-    VoxelConn[:,7] = Ids[:-1,1:,1:].flatten()
+    GridConn[:,0] = Ids[:-1,:-1,:-1].flatten()
+    GridConn[:,1] = Ids[1:,:-1,:-1].flatten()
+    GridConn[:,2] = Ids[1:,1:,:-1].flatten()
+    GridConn[:,3] = Ids[:-1,1:,:-1].flatten()
+    GridConn[:,4] = Ids[:-1,:-1,1:].flatten()
+    GridConn[:,5] = Ids[1:,:-1,1:].flatten()
+    GridConn[:,6] = Ids[1:,1:,1:].flatten()
+    GridConn[:,7] = Ids[:-1,1:,1:].flatten()
+
+    if ElemType == 'tet':
+        GridCoords, GridConn = converter.hex2tet(GridCoords, GridConn, method='1to6')
     
     if meshobj:
         if 'mesh' in dir(mesh):
-            Grid = mesh.mesh(VoxelCoords,VoxelConn,'vol')
+            Grid = mesh.mesh(GridCoords,GridConn,'vol')
         else:
-            Grid = mesh(VoxelCoords,VoxelConn,'vol')
+            Grid = mesh(GridCoords,GridConn,'vol')
         return Grid
-    return VoxelCoords, VoxelConn
+    return GridCoords, GridConn
 
 def Grid2D(bounds, h, z=0, meshobj=True, exact_h=False, ElemType='quad'):
     """
