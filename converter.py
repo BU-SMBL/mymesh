@@ -356,12 +356,18 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
     NodeConn : list
         Nodal connectivity list.
     return_ids : bool, optional
-        Element ids of the tets connected to the original elements, by default False
+        Element IDs of the tets connected to the original elements, by default False
 
     Returns
     -------
-    TetConn, list
+    TetCoords : list
+        Nodal coordinates of the generated tetrahedra. Depending on what elements are in the original mesh,
+        new nodes may have been added.
+    TetConn : list
         Nodal connectivity list of generated tetrahedra
+    ElemIds : list, optional
+        If return_ids = True, a list of the element ids of the new tetrahedra for each 
+        of the original elements.
     """    
     Ls = np.array([len(elem) for elem in NodeConn])
     tetIdx = np.where(Ls == 4)[0]
@@ -374,8 +380,14 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
     hexs = [NodeConn[i] for i in hexIdx]
 
 
-    _,fromhex = hex2tet([],hexs,method='1to6')
-    TetConn = tets + pyramid2tet([],pyrs) + wedge2tet([],wdgs) + fromhex
+    if len(pyrIdx) > 0 or len(wdgIdx) > 0:
+        hexmethod = '1to14'
+    else:
+        hexmethod = '1to6'
+    TetCoords,fromhex = hex2tet(NodeCoords,hexs,method=hexmethod)
+    TetCoords,fromwdg = wedge2tet(TetCoords,wdgs,method='1to20')
+    TetCoords,frompyr = pyramid2tet(TetCoords,pyrs,method='1to4')
+    TetConn = tets + frompyr + fromwdg + fromhex
     if return_ids:
         # Element ids of the tets connected to the original elements
         ElemIds_i = np.concatenate((tetIdx,np.repeat(pyrIdx,2),np.repeat(wdgIdx,3),np.repeat(hexIdx,5)))
@@ -389,8 +401,8 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
         ElemIds = utils.ExtractRagged(ElemIds,dtype=int)
     
     if return_ids:
-        return TetConn, ElemIds
-    return TetConn
+        return TetCoords, TetConn, ElemIds
+    return TetCoords, TetConn
 
 def hex2tet(NodeCoords,NodeConn,method='1to6'):
     """
@@ -435,33 +447,30 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
     >>> TetCoords1to24, TetConn1to24 = converter.hex2tet(HexCoords, HexConn, method='1to24')
 
     """
+    if len(NodeConn) == 0:
+        return NodeCoords, NodeConn
+
     if method == '1to5':
-        if len(NodeConn) > 0:
-            ArrayConn = np.asarray(NodeConn)
-            TetConn = -1*np.ones((len(NodeConn)*5,4))
-            TetConn[0::5] = ArrayConn[:,[0,1,3,4]]
-            TetConn[1::5] = ArrayConn[:,[1,2,3,6]]
-            TetConn[2::5] = ArrayConn[:,[4,6,5,1]]
-            TetConn[3::5] = ArrayConn[:,[4,7,6,3]]
-            TetConn[4::5] = ArrayConn[:,[4,6,1,3]]
-            TetConn = TetConn.astype(int).tolist()
-        else:
-            TetConn = []
+        ArrayConn = np.asarray(NodeConn)
+        TetConn = -1*np.ones((len(NodeConn)*5,4))
+        TetConn[0::5] = ArrayConn[:,[0,1,3,4]]
+        TetConn[1::5] = ArrayConn[:,[1,2,3,6]]
+        TetConn[2::5] = ArrayConn[:,[4,6,5,1]]
+        TetConn[3::5] = ArrayConn[:,[4,7,6,3]]
+        TetConn[4::5] = ArrayConn[:,[4,6,1,3]]
+        TetConn = TetConn.astype(int).tolist()
         NewCoords = NodeCoords
     elif method == '1to6':
-        if len(NodeConn) > 0:
-            ArrayConn = np.asarray(NodeConn)
-            TetConn = -1*np.ones((len(NodeConn)*6,4))
-            TetConn[0::6] = ArrayConn[:,[0,1,3,5]]
-            TetConn[1::6] = ArrayConn[:,[5,2,3,6]]
-            TetConn[2::6] = ArrayConn[:,[0,5,3,4]]
-            TetConn[3::6] = ArrayConn[:,[3,7,4,5]]
-            TetConn[4::6] = ArrayConn[:,[1,2,3,5]]
-            TetConn[5::6] = ArrayConn[:,[5,6,7,3]]
+        ArrayConn = np.asarray(NodeConn)
+        TetConn = -1*np.ones((len(NodeConn)*6,4))
+        TetConn[0::6] = ArrayConn[:,[0,1,3,5]]
+        TetConn[1::6] = ArrayConn[:,[5,2,3,6]]
+        TetConn[2::6] = ArrayConn[:,[0,5,3,4]]
+        TetConn[3::6] = ArrayConn[:,[3,7,4,5]]
+        TetConn[4::6] = ArrayConn[:,[1,2,3,5]]
+        TetConn[5::6] = ArrayConn[:,[5,7,6,3]]
 
-            TetConn = TetConn.astype(int).tolist()
-        else:
-            TetConn = []
+        TetConn = TetConn.astype(int).tolist()
         NewCoords = NodeCoords
     elif method == '1to24':
         ArrayCoords = np.asarray(NodeCoords)
@@ -515,21 +524,20 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
         TetConn[21::24] = np.hstack([ArrayConn[:,[6,5]],Face5CentroidIds[:,None],CentroidIds[:,None]])
         TetConn[22::24] = np.hstack([ArrayConn[:,[7,6]],Face5CentroidIds[:,None],CentroidIds[:,None]])
         TetConn[23::24] = np.hstack([ArrayConn[:,[4,7]],Face5CentroidIds[:,None],CentroidIds[:,None]])
-
     
 
     return NewCoords, TetConn
 
-def wedge2tet(NodeCoords,NodeConn):
+def wedge2tet(NodeCoords, NodeConn, method='1to3'):
     """
     Decompose all elements of a 3D wedge-element mesh to tetrahedra.
     Generally solid2tets should be used rather than wedge2tet directly
-    NOTE the generated tetrahedra will not generally be continuously oriented, i.e.
-    edges of child tetrahedra may not be aligned between one parent element 
+    NOTE the generated tetrahedra of the '1to3' method will not be continuously oriented, 
+    i.e. edges of child tetrahedra may not be aligned between one parent element 
     and its neighbor, and thus the resulting mesh will typically be invalid.
     The primary use-case for this method is for methods like quality.Volume
     which utilize the geometric properties of tetrahedra to determine properties of 
-    the parent elements.
+    the parent elements. '1to14' or '1to36' will generate continuously oriented tetrahedra.
 
     Parameters
     ----------
@@ -537,34 +545,182 @@ def wedge2tet(NodeCoords,NodeConn):
         List of nodal coordinates.
     NodeConn : list
         Nodal connectivity list. All elements should be 6-Node wedge elements.
+    method : str, optional
+        Method of decomposition to use for tetrahedralization.
+        '1to3'  - Not continuously oriented, no nodes added
+        '1to14' - Continuously oriented, nodes added at center of element and element faces
+        '1to36' - Continuously oriented, nodes added at center of element, element faces, and element edges
 
     Returns
     -------
     TetConn, list
         Nodal connectivity list of generated tetrahedra
+
+    Examples
+    --------
+    >>> # A single wedge element
+    >>> WedgeCoords = np.array([[0., 0., 0.],
+                                [1., 0., 0.],
+                                [0.5, 1., 0.],
+                                [0., 0., 1.],
+                                [1., 0., 1.],
+                                [0.5, 1., 1.]])
+    >>> WedgeConn = [[0,1,2,3,4,5]]
+    >>> TetCoords1to3, TetConn1to3 = converter.wedge2tet(WedgeCoords, WedgeConn, method='1to3')
+    >>> TetCoords1to14, TetConn1to14 = converter.wedge2tet(WedgeCoords, WedgeConn, method='1to14')
+    >>> TetCoords1to36, TetConn1to36 = converter.wedge2tet(WedgeCoords, WedgeConn, method='1to36')
     """
     if len(NodeConn) == 0:
-        return []
+        return NodeCoords, NodeConn
 
     ArrayConn = np.asarray(NodeConn)
-    Tets = -1*np.ones((len(NodeConn)*3,4))
-    Tets[0::3] = ArrayConn[:,[0,1,2,3]]
-    Tets[1::3] = ArrayConn[:,[1,2,3,4]]
-    Tets[2::3] = ArrayConn[:,[4,5,2,3]]
-    Tets = Tets.astype(int).tolist()
+    if method == '1to3':
+        TetConn = -1*np.ones((len(NodeConn)*3,4))
+        TetConn[0::3] = ArrayConn[:,[0,1,2,3]]
+        TetConn[1::3] = ArrayConn[:,[1,2,3,4]]
+        TetConn[2::3] = ArrayConn[:,[4,5,2,3]]
+        TetConn = TetConn.astype(int).tolist()
+        NewCoords = NodeCoords
 
-    return Tets
+    elif method == '1to14':
+        
+        ArrayCoords = np.asarray(NodeCoords)
+        ArrayConn = np.asarray(NodeConn)
 
-def pyramid2tet(NodeCoords,NodeConn):
+        Centroids = utils.Centroids(ArrayCoords,NodeConn)
+        Face0Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1,4,3]]],axis=1)
+        Face1Centroids = np.mean(ArrayCoords[ArrayConn[:,[1,4,5,2]]],axis=1)
+        Face2Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,2,5,3]]],axis=1)
+
+
+        CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*0,len(NodeCoords)+len(NodeConn)*1)
+        Face0CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*1,len(NodeCoords)+len(NodeConn)*2)
+        Face1CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*2,len(NodeCoords)+len(NodeConn)*3)
+        Face2CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*3,len(NodeCoords)+len(NodeConn)*4)
+        
+        NewCoords = np.vstack([ArrayCoords,Centroids,Face0Centroids,Face1Centroids,Face2Centroids])        
+        
+        TetConn = 0*np.ones((len(NodeConn)*14,4))
+        TetConn[0::14] = np.hstack([ArrayConn[:,[0,1,2]],CentroidIds[:,None]])
+        TetConn[1::14] = np.hstack([ArrayConn[:,[5,4,3]],CentroidIds[:,None]])
+
+        TetConn[2::14] = np.hstack([ArrayConn[:,[0,1]],CentroidIds[:,None],Face0CentroidIds[:,None]])
+        TetConn[3::14] = np.hstack([ArrayConn[:,[1,2]],CentroidIds[:,None],Face1CentroidIds[:,None]])
+        TetConn[4::14] = np.hstack([ArrayConn[:,[2,0]],CentroidIds[:,None],Face2CentroidIds[:,None]])
+
+        TetConn[5::14] = np.hstack([ArrayConn[:,[4,3]],CentroidIds[:,None],Face0CentroidIds[:,None]])
+        TetConn[6::14] = np.hstack([ArrayConn[:,[5,4]],CentroidIds[:,None],Face1CentroidIds[:,None]])
+        TetConn[7::14] = np.hstack([ArrayConn[:,[3,5]],CentroidIds[:,None],Face2CentroidIds[:,None]])
+
+        TetConn[8::14] = np.hstack([ArrayConn[:,[0,3]],Face0CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[9::14] = np.hstack([ArrayConn[:,[0,3]],CentroidIds[:,None],Face2CentroidIds[:,None]])
+        TetConn[10::14] = np.hstack([ArrayConn[:,[2,5]],Face2CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[11::14] = np.hstack([ArrayConn[:,[2,5]],CentroidIds[:,None],Face1CentroidIds[:,None]])
+        TetConn[12::14] = np.hstack([ArrayConn[:,[1,4]],Face1CentroidIds[:,None],CentroidIds[:,None]])
+        TetConn[13::14] = np.hstack([ArrayConn[:,[1,4]],CentroidIds[:,None],Face0CentroidIds[:,None]])
+
+
+        TetConn = TetConn.astype(int).tolist()
+
+    elif method == '1to36':
+        
+        ArrayCoords = np.asarray(NodeCoords)
+        ArrayConn = np.asarray(NodeConn)
+
+        Centroids = utils.Centroids(ArrayCoords,NodeConn)
+        Face0Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1,4,3]]],axis=1)
+        Face1Centroids = np.mean(ArrayCoords[ArrayConn[:,[1,4,5,2]]],axis=1)
+        Face2Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,2,5,3]]],axis=1)
+        Face3Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1,2]]],axis=1)
+        Face4Centroids = np.mean(ArrayCoords[ArrayConn[:,[3,4,5]]],axis=1)
+
+        Edge0Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,3]]],axis=1)
+        Edge1Centroids = np.mean(ArrayCoords[ArrayConn[:,[1,4]]],axis=1)
+        Edge2Centroids = np.mean(ArrayCoords[ArrayConn[:,[2,5]]],axis=1)
+        Edge3Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1]]],axis=1)
+        Edge4Centroids = np.mean(ArrayCoords[ArrayConn[:,[1,2]]],axis=1)
+        Edge5Centroids = np.mean(ArrayCoords[ArrayConn[:,[2,0]]],axis=1)
+        Edge6Centroids = np.mean(ArrayCoords[ArrayConn[:,[3,4]]],axis=1)
+        Edge7Centroids = np.mean(ArrayCoords[ArrayConn[:,[4,5]]],axis=1)
+        Edge8Centroids = np.mean(ArrayCoords[ArrayConn[:,[5,3]]],axis=1)
+
+        CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*0,len(NodeCoords)+len(NodeConn)*1)
+        Face0CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*1,len(NodeCoords)+len(NodeConn)*2)
+        Face1CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*2,len(NodeCoords)+len(NodeConn)*3)
+        Face2CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*3,len(NodeCoords)+len(NodeConn)*4)
+        Face3CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*4,len(NodeCoords)+len(NodeConn)*5)
+        Face4CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*5,len(NodeCoords)+len(NodeConn)*6)
+        Edge0CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*6,len(NodeCoords)+len(NodeConn)*7)
+        Edge1CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*7,len(NodeCoords)+len(NodeConn)*8)
+        Edge2CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*8,len(NodeCoords)+len(NodeConn)*9)
+        Edge3CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*9,len(NodeCoords)+len(NodeConn)*10)
+        Edge4CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*10,len(NodeCoords)+len(NodeConn)*11)
+        Edge5CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*11,len(NodeCoords)+len(NodeConn)*12)
+        Edge6CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*12,len(NodeCoords)+len(NodeConn)*13)
+        Edge7CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*13,len(NodeCoords)+len(NodeConn)*14)
+        Edge8CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*14,len(NodeCoords)+len(NodeConn)*15)
+        
+        NewCoords = np.vstack([ArrayCoords,Centroids,Face0Centroids,Face1Centroids,Face2Centroids,Face3Centroids,
+        Face4Centroids,Edge0Centroids,Edge1Centroids,Edge2Centroids,Edge3Centroids,Edge4Centroids,Edge5Centroids, 
+        Edge6Centroids,Edge7Centroids,Edge8Centroids])        
+        
+        TetConn = 0*np.ones((len(NodeConn)*36,4))
+
+        TetConn[0::36] = np.hstack([ArrayConn[:,[0]],Edge3CentroidIds[:,None],CentroidIds[:,None],Face0CentroidIds[:,None]])
+        TetConn[1::36] = np.hstack([ArrayConn[:,[1]],CentroidIds[:,None],Edge3CentroidIds[:,None],Face0CentroidIds[:,None]])
+        TetConn[2::36] = np.hstack([ArrayConn[:,[1]],Edge4CentroidIds[:,None],CentroidIds[:,None],Face1CentroidIds[:,None]])
+        TetConn[3::36] = np.hstack([ArrayConn[:,[2]],CentroidIds[:,None],Edge4CentroidIds[:,None],Face1CentroidIds[:,None]])
+        TetConn[4::36] = np.hstack([ArrayConn[:,[2]],Edge5CentroidIds[:,None],CentroidIds[:,None],Face2CentroidIds[:,None]])
+        TetConn[5::36] = np.hstack([ArrayConn[:,[0]],CentroidIds[:,None],Edge5CentroidIds[:,None],Face2CentroidIds[:,None]])
+
+        TetConn[6::36] = np.hstack([ArrayConn[:,[3]],CentroidIds[:,None],Edge6CentroidIds[:,None],Face0CentroidIds[:,None]])
+        TetConn[7::36] = np.hstack([ArrayConn[:,[4]],Edge6CentroidIds[:,None],CentroidIds[:,None],Face0CentroidIds[:,None]])
+        TetConn[8::36] = np.hstack([ArrayConn[:,[4]],CentroidIds[:,None],Edge7CentroidIds[:,None],Face1CentroidIds[:,None]])
+        TetConn[9::36] = np.hstack([ArrayConn[:,[5]],Edge7CentroidIds[:,None],CentroidIds[:,None],Face1CentroidIds[:,None]])
+        TetConn[10::36] = np.hstack([ArrayConn[:,[5]],CentroidIds[:,None],Edge8CentroidIds[:,None],Face2CentroidIds[:,None]])
+        TetConn[11::36] = np.hstack([ArrayConn[:,[3]],Edge8CentroidIds[:,None],CentroidIds[:,None],Face2CentroidIds[:,None]])
+
+        TetConn[12::36] = np.hstack([Face0CentroidIds[:,None],Edge0CentroidIds[:,None],CentroidIds[:,None],ArrayConn[:,[0]]])
+        TetConn[13::36] = np.hstack([Edge0CentroidIds[:,None],Face2CentroidIds[:,None],CentroidIds[:,None],ArrayConn[:,[0]]])
+        TetConn[14::36] = np.hstack([Face1CentroidIds[:,None],Edge1CentroidIds[:,None],CentroidIds[:,None],ArrayConn[:,[1]]])
+        TetConn[15::36] = np.hstack([Edge1CentroidIds[:,None],Face0CentroidIds[:,None],CentroidIds[:,None],ArrayConn[:,[1]]])
+        TetConn[16::36] = np.hstack([Face2CentroidIds[:,None],Edge2CentroidIds[:,None],CentroidIds[:,None],ArrayConn[:,[2]]])
+        TetConn[17::36] = np.hstack([Edge2CentroidIds[:,None],Face1CentroidIds[:,None],CentroidIds[:,None],ArrayConn[:,[2]]])
+
+        TetConn[18::36] = np.hstack([CentroidIds[:,None],Edge0CentroidIds[:,None],Face0CentroidIds[:,None],ArrayConn[:,[3]]])
+        TetConn[19::36] = np.hstack([CentroidIds[:,None],Face2CentroidIds[:,None],Edge0CentroidIds[:,None],ArrayConn[:,[3]]])
+        TetConn[20::36] = np.hstack([CentroidIds[:,None],Edge1CentroidIds[:,None],Face1CentroidIds[:,None],ArrayConn[:,[4]]])
+        TetConn[21::36] = np.hstack([CentroidIds[:,None],Face0CentroidIds[:,None],Edge1CentroidIds[:,None],ArrayConn[:,[4]]])
+        TetConn[22::36] = np.hstack([CentroidIds[:,None],Edge2CentroidIds[:,None],Face2CentroidIds[:,None],ArrayConn[:,[5]]])
+        TetConn[23::36] = np.hstack([CentroidIds[:,None],Face1CentroidIds[:,None],Edge2CentroidIds[:,None],ArrayConn[:,[5]]])
+
+        TetConn[24::36] = np.hstack([CentroidIds[:,None],Edge3CentroidIds[:,None],ArrayConn[:,[0]],Face3CentroidIds[:,None]])
+        TetConn[25::36] = np.hstack([CentroidIds[:,None],ArrayConn[:,[0]],Edge5CentroidIds[:,None],Face3CentroidIds[:,None]])
+        TetConn[26::36] = np.hstack([CentroidIds[:,None],Edge4CentroidIds[:,None],ArrayConn[:,[1]],Face3CentroidIds[:,None]])
+        TetConn[27::36] = np.hstack([CentroidIds[:,None],ArrayConn[:,[1]],Edge3CentroidIds[:,None],Face3CentroidIds[:,None]])
+        TetConn[28::36] = np.hstack([CentroidIds[:,None],Edge5CentroidIds[:,None],ArrayConn[:,[2]],Face3CentroidIds[:,None]])
+        TetConn[29::36] = np.hstack([CentroidIds[:,None],ArrayConn[:,[2]],Edge4CentroidIds[:,None],Face3CentroidIds[:,None]])
+
+        TetConn[30::36] = np.hstack([CentroidIds[:,None],ArrayConn[:,[3]],Edge6CentroidIds[:,None],Face4CentroidIds[:,None]])
+        TetConn[31::36] = np.hstack([CentroidIds[:,None],Edge8CentroidIds[:,None],ArrayConn[:,[3]],Face4CentroidIds[:,None]])
+        TetConn[32::36] = np.hstack([CentroidIds[:,None],ArrayConn[:,[4]],Edge7CentroidIds[:,None],Face4CentroidIds[:,None]])
+        TetConn[33::36] = np.hstack([CentroidIds[:,None],Edge6CentroidIds[:,None],ArrayConn[:,[4]],Face4CentroidIds[:,None]])
+        TetConn[34::36] = np.hstack([CentroidIds[:,None],ArrayConn[:,[5]],Edge8CentroidIds[:,None],Face4CentroidIds[:,None]])
+        TetConn[35::36] = np.hstack([CentroidIds[:,None],Edge7CentroidIds[:,None],ArrayConn[:,[5]],Face4CentroidIds[:,None]])
+
+        TetConn = TetConn.astype(int).tolist()
+
+    return NewCoords, TetConn
+
+def pyramid2tet(NodeCoords,NodeConn, method='1to2'):
     """
     Decompose all elements of a 3D pyramidal mesh to tetrahedra.
     Generally solid2tets should be used rather than pyramid2tet directly
-    NOTE the generated tetrahedra will not generally be continuously oriented, i.e.
-    edges of child tetrahedra may not be aligned between one parent element 
-    and its neighbor, and thus the resulting mesh will typically be invalid.
-    The primary use-case for this method is for methods like quality.Volume
-    which utilize the geometric properties of tetrahedra to determine properties of 
-    the parent elements.
+    NOTE the generated tetrahedra from 1 to 2 will not necessarily be continuously 
+    oriented, i.e. edges of child tetrahedra may not be aligned between one 
+    parent element and its neighbor, and thus the resulting mesh will typically be invalid.
+    1 to 4 splitting is guaranteed to be consistent with other pyramids as well as as hexs
+    split with 1to24 and wedges split with 1to20.
     
 
     Parameters
@@ -578,16 +734,49 @@ def pyramid2tet(NodeCoords,NodeConn):
     -------
     TetConn, list
         Nodal connectivity list of generated tetrahedra
+
+    Examples
+    --------
+    >>> # A single pyramid element
+    >>> PyramidCoords = np.array([[0., 0., 0.],
+                                [1., 0., 0.],
+                                [1., 1., 0.],
+                                [0., 1., 0.],
+                                [0.5, 0.5, 1.]])
+    >>> PyramidConn = [[0,1,2,3,4]]
+    >>> TetCoords1to2, TetConn1to2 = converter.pyramid2tet(PyramidCoords, PyramidConn, method='1to2')
+    >>> TetCoords1to4, TetConn1to4 = converter.pyramid2tet(PyramidCoords, PyramidConn, method='1to4')
     """
-    if len(NodeConn) > 0:
+    if len(NodeConn) == 0:
+        return NodeCoords, NodeConn
+    
+    if method == '1to2':
         ArrayConn = np.asarray(NodeConn)
-        Tets = -1*np.ones((len(NodeConn)*2,4))
-        Tets[0::2] = ArrayConn[:,[0,1,2,4]]
-        Tets[1::2] = ArrayConn[:,[0,2,3,4]]
-        Tets = Tets.astype(int).tolist()
-    else:
-        Tets = []
-    return Tets
+        TetConn = -1*np.ones((len(NodeConn)*2,4))
+        TetConn[0::2] = ArrayConn[:,[0,1,2,4]]
+        TetConn[1::2] = ArrayConn[:,[0,2,3,4]]
+        TetConn = TetConn.astype(int).tolist()
+        NewCoords = NodeCoords
+    
+    elif method == '1to4':
+        
+        ArrayCoords = np.asarray(NodeCoords)
+        ArrayConn = np.asarray(NodeConn)
+
+        Face0Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1,2,3]]],axis=1)
+        Face0CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*0,len(NodeCoords)+len(NodeConn)*1)
+        
+        NewCoords = np.vstack([ArrayCoords,Face0Centroids])        
+        
+        TetConn = -1*np.ones((len(NodeConn)*4,4))
+        TetConn[0::4] = np.hstack([Face0CentroidIds[:,None],ArrayConn[:,[0,1,4]]])
+        TetConn[1::4] = np.hstack([Face0CentroidIds[:,None],ArrayConn[:,[1,2,4]]])
+        TetConn[2::4] = np.hstack([Face0CentroidIds[:,None],ArrayConn[:,[2,3,4]]])
+        TetConn[3::4] = np.hstack([Face0CentroidIds[:,None],ArrayConn[:,[3,0,4]]])
+
+        TetConn = TetConn.astype(int).tolist()
+
+    return NewCoords, TetConn
 
 def faces2surface(Faces):
     """
