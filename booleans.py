@@ -65,16 +65,9 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
     
     # Merge and Cleanup Mesh
     MergedUCoords, MergedUConn = utils.MergeMesh(Split1.NodeCoords, AUConn, Split2.NodeCoords, BUConn)
-    # MergedUCoords, MergedUConn, _ = converter.removeNodes(MergedUCoords, MergedUConn)
-    # MergedUCoords, MergedUConn, _ = utils.DeleteDuplicateNodes(MergedUCoords, MergedUConn)
-        
     MergedICoords, MergedIConn = utils.MergeMesh(Split1.NodeCoords, AIConn, Split2.NodeCoords, BIConn)
-    # MergedICoords, MergedIConn, _ = converter.removeNodes(MergedICoords, MergedIConn)
-    # MergedICoords, MergedIConn, _ = utils.DeleteDuplicateNodes(MergedICoords, MergedIConn)
-    
     MergedDCoords, MergedDConn = utils.MergeMesh(Split1.NodeCoords, ADConn, Split2.NodeCoords, np.fliplr(BDConn).tolist())
-    # MergedDCoords, MergedDConn, _ = converter.removeNodes(MergedDCoords, MergedDConn)
-    # MergedDCoords, MergedDConn, _ = utils.DeleteDuplicateNodes(MergedDCoords, MergedDConn)
+
     if 'mesh' in dir(mesh):
         Union = mesh.mesh(MergedUCoords,MergedUConn)
         Intersection = mesh.mesh(MergedICoords,MergedIConn)
@@ -84,15 +77,9 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
         Intersection = mesh(MergedICoords,MergedIConn)
         Difference = mesh(MergedDCoords,MergedDConn)
 
-    # Split elements by the Absolute large angle criteria, this will split degenerate collinear elements so that they can be easily cleaned up
-    # Union.NodeCoords,Union.NodeConn = improvement.Split(*Union,1,criteria='AbsLargeAngle',iterate=1,thetal=179)
-    # Intersection.NodeCoords,Intersection.NodeConn = improvement.Split(*Intersection,1,criteria='AbsLargeAngle',iterate=1,thetal=179)
-    # Difference.NodeCoords,Difference.NodeConn = improvement.Split(*Difference,1,criteria='AbsLargeAngle',iterate=1,thetal=179)
-
     Union.cleanup(tol=eps_final,angletol=5e-3)
     Intersection.cleanup(tol=eps_final,angletol=5e-3)
     Difference.cleanup(tol=eps_final,angletol=5e-3)
-
 
     return Union, Intersection, Difference
 
@@ -117,7 +104,7 @@ def PlaneClip(pt, normal, Surf, fill=False, fill_h=None, tol=1e-8, flip=True, re
     bounds = [mins[0]-tol,maxs[0]+tol,mins[1]-tol,maxs[1]+tol,mins[2]-tol,maxs[2]+tol]
     if fill_h is None:
         fill_h = np.linalg.norm(maxs-mins)/10
-    Plane = primitives.Plane(pt, normal, bounds, fill_h, meshobj=True, exact_h=False, ElemType='tri')
+    Plane = primitives.Plane(pt, normal, bounds, fill_h, exact_h=False, ElemType='tri')
 
     SplitSurf, SplitPlane = SplitMesh(Intersected,Plane) # TODO: This could be done more efficiently for planar case
     SplitSurf.cleanup()
@@ -220,97 +207,21 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
         ElemNormals = utils.CalcFaceNormal(*surf)
         for j in range(surf.NElem):
             if len(SplitGroupNodes[j]) > 3:
-                # print(j)
-                # if j == 3595:
-                #     meep = 'morp'
+
                 n = ElemNormals[j]
                 # Set edge constraints
                 Constraints = np.transpose([np.arange(3,len(SplitGroupNodes[j]),2), np.arange(4,len(SplitGroupNodes[j]),2)])
-                # Constraints = np.append([[0,1],[1,2],[2,0]],Constraints,axis=0)
-                # boundary = SplitGroupNodes[j][:3]
+
                 # Reduce node list
                 SplitGroupNodes[j],_,newId,idx = utils.DeleteDuplicateNodes(SplitGroupNodes[j],[],return_idx=True,tol=eps)
-                # Tris = np.repeat([boundary],len(SplitGroupNodes[j]),axis=0)
-                # In = rays.PointsInTris(Tris,SplitGroupNodes[j],eps=eps)
 
                 Constraints = newId[Constraints]
                 Constraints = np.unique(np.sort(Constraints,axis=1),axis=0)
-                # # Constraints = np.array([c for c in Constraints if c[0] != c[1]])
-                # bk = copy.copy(Constraints)
-                # pbk = copy.copy(SplitGroupNodes[j])
-                # # Check for intersections within the constraints
-                # combinations = np.array(list(itertools.combinations(range(len(Constraints)),2)))
-                # e1 = SplitGroupNodes[j][Constraints[combinations[:,0]]]
-                # e2 = SplitGroupNodes[j][Constraints[combinations[:,1]]]
-                # eIntersections,eIntersectionPts = rays.SegmentsSegmentsIntersection(e1,e2,return_intersection=True,endpt_inclusive=True,eps=eps)
-                # NewConstraints = np.empty((0,2),dtype=int)
-                # for ic,c in enumerate(Constraints):
-                #     # ids of other constraints that intersect with this constraint
-                #     ids = np.unique(np.array([combo for combo in combinations[eIntersections] if ic in combo]))
-                #     # Check collinear lines - currently rays.SegmentsSegmentsIntersection doesn't do this properly
-                #     coix = np.empty((0,3))
-                #     for combo in combinations[~eIntersections]:
-                #         if ic not in combo:
-                #             continue
-                #         segments = np.vstack(SplitGroupNodes[j][Constraints[combo]])
-                #         if np.linalg.norm(SplitGroupNodes[j][Constraints[combo[0]][0]] - 
-                #                                 SplitGroupNodes[j][Constraints[combo[0]][1]]) > eps:
-                #             check1 = np.linalg.norm(np.cross(segments[1]-segments[0], segments[2]-segments[0])) < eps
-                #             check2 = np.linalg.norm(np.cross(segments[1]-segments[0], segments[3]-segments[0])) < eps
-                #         elif np.linalg.norm(SplitGroupNodes[j][Constraints[combo[1]][0]] - 
-                #                                 SplitGroupNodes[j][Constraints[combo[1]][1]]) > eps:
-                #             check1 = np.linalg.norm(np.cross(segments[3]-segments[2], segments[0]-segments[2])) < eps
-                #             check2 = np.linalg.norm(np.cross(segments[3]-segments[2], segments[1]-segments[2])) < eps
-                #         else:
-                #             continue
-                #         if check1 and check2:
-                #             # For segments AB and CD if the (double) area of the triangles ABC and ABD are both (near) zero, the segments are collinear
-                #             # segsort = np.lexsort(segments.T) # Lexographic sort of the segments
-                #             segsort = np.lexsort((np.round(segments/eps)*eps).T) 
-                #             if (0 in segsort[:2] and 1 in segsort[:2]) or (2 in segsort[:2] and 3 in segsort[:2]):
-                #                 # if both points if a segment are on the same side of the other, they at most intersect at an endpt
-                #                 if np.linalg.norm(np.diff(segments[segsort[1:3]],axis=0)) < eps: # Norm of the difference between interior points
-                #                     # end point intersection
-                #                     coix = np.append(coix,[segments[segsort[1]]],axis=0)
-                #             else:
-                #                 # overlapping segments, get the two interior points
-                #                 coix = np.append(coix,segments[segsort[1:3]],axis=0)
-                #         elif check1:
-                #             segsort = np.lexsort(segments[[0,1,2]].T)
-                #             if segsort[1] == 2:
-                #                 coix = np.append(coix,[segments[2]],axis=0)
-                #         elif check2:
-                #             segsort = np.lexsort(segments[[0,1,3]].T)
-                #             if segsort[1] == 2:
-                #                 coix = np.append(coix,[segments[3]],axis=0)
-                                
-                #     ids = np.delete(ids,ids==ic)
-                #     if len(ids) == 0:
-                #         NewConstraints = np.append(NewConstraints,[c],axis=0)
-                #     else:
-                #         # corresponding intersection points
-                #         ixs = np.array([eIntersectionPts[eIntersections][x] for x,combo in enumerate(combinations[eIntersections]) if ic in combo])
-                #         ixs = np.append(ixs,coix,axis=0)
-                #         ixsort = ixs[np.lexsort((np.round(ixs/eps)*eps).T)]
-
-                #         NewConstraints = np.append(NewConstraints,np.vstack([np.arange(0,len(ixsort)-1),np.arange(1,len(ixsort))]).T+len(SplitGroupNodes[j]),axis=0)
-                #         SplitGroupNodes[j] = np.append(SplitGroupNodes[j],ixsort,axis=0)
-
-                # SplitGroupNodes[j], Constraints, _ = utils.DeleteDuplicateNodes(SplitGroupNodes[j],NewConstraints,tol=eps)
-                # Constraints = np.unique([c for c in Constraints if c[0] != c[1]],axis=0)
-                # SplitGroupNodes[j] = np.asarray(SplitGroupNodes[j])
-                    # import plotly.graph_objects as go
-                    # fig = go.Figure()
-                    # for i in range(len(Constraints)):
-                    #     fig.add_trace(go.Scatter(x=SplitGroupNodes[j][Constraints[i]][:,0], y=SplitGroupNodes[j][Constraints[i]][:,1],text=Constraints[i]))
-                    # fig.show()
 
                 # Transform to Local Coordinates
                 # Rotation matrix from global z (k=[0,0,1]) to local z(n)
                 k=[0,0,1]
                 if n == k or n == [0,0,-1]:
-                    # rotAxis = k
-                    # angle = 0
                     R = np.eye(3)
                     flatnodes = SplitGroupNodes[j]#[:,0:2]
 
@@ -329,23 +240,17 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
                             ]
 
                     # Delaunay Triangulation to retriangulate the split face
-                    flatnodes = np.matmul(R,np.transpose(SplitGroupNodes[j])).T#[:,0:2]#.tolist()
+                    flatnodes = np.matmul(R,np.transpose(SplitGroupNodes[j])).T
                     
-                # conn = spatial.Delaunay(flatnodes,qhull_options="Qbb Qc Qz Q12").simplices   
-                ###
-                
-                
-                # coords, conn = delaunay.Triangulate(flatnodes[:,0:2],method='scipy',tol=eps)  
-                ## conn = delaunay.Triangulate(flatnodes,Constraints=idx[Constraints],method='Flips')     
                 coords, conn = delaunay.Triangulate(flatnodes[:,0:2],method='Triangle',Constraints=Constraints,tol=eps)  
-                ## coords, conn = delaunay.Triangulate(flatnodes[:,0:2],method='scipy',Constraints=None,tol=eps)        
-                ## coords,conn = delaunay.Triangle(flatnodes[:,0:2],Constraints=Constraints)
+
                 SplitGroupNodes[j] = np.matmul(np.linalg.inv(R),np.append(coords,flatnodes[0,2]*np.ones((len(coords),1)),axis=1).T).T
                 ###
                 flip = [np.dot(utils.CalcFaceNormal(SplitGroupNodes[j],[conn[i]]), n)[0] < 0 for i in range(len(conn))]
                 conn = (conn+surf.NNode).tolist()
                 surf.addElems([elem[::-1] if flip[i] else elem for i,elem in enumerate(conn)])
                 surf.addNodes(SplitGroupNodes[j].tolist())
+
         # Collinear check
         Edges = converter.solid2edges(*surf,ElemType='tri')
         ArrayCoords = np.array(surf.NodeCoords)
@@ -353,7 +258,7 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
         ElemPoints = ArrayCoords[surf.NodeConn]
         A2 = np.linalg.norm(np.cross(ElemPoints[:,1]-ElemPoints[:,0],ElemPoints[:,2]-ElemPoints[:,0]),axis=1)
         EdgeLen = np.max(np.linalg.norm(EdgePoints[:,0]-EdgePoints[:,1],axis=1).reshape((int(len(Edges)/3),3)),axis=1)
-        deviation = A2/EdgeLen # the double area devided by the longest side gives the deviation of the middple point from the line of the other two
+        deviation = A2/EdgeLen # the double area divided by the longest side gives the deviation of the middle point from the line of the other two
         
         iset = set(SurfIntersections)
         colset = set(np.where(deviation<eps/2)[0])
@@ -373,23 +278,15 @@ def GetSharedNodes(NodeCoordsA, NodeCoordsB, eps=1e-10):
     SharedA = {i for i,coord in enumerate(RoundCoordsA) if tuple(coord) in setI}
     SharedB = {i for i,coord in enumerate(RoundCoordsB) if tuple(coord) in setI}
 
-    # setA = set((round(coord[0],tol), round(coord[1],tol), round(coord[2],tol)) for coord in NodeCoordsA)
-    # setB = set((round(coord[0],tol), round(coord[1],tol), round(coord[2],tol)) for coord in NodeCoordsB)
-    # setI = setA.intersection(setB)
-    
-    # SharedA = {i for i,coord in enumerate(NodeCoordsA) if (round(coord[0],tol), round(coord[1],tol), round(coord[2],tol)) in setI}
-    # SharedB = {i for i,coord in enumerate(NodeCoordsB) if (round(coord[0],tol), round(coord[1],tol), round(coord[2],tol)) in setI}
-    
     return SharedA, SharedB
                            
 def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     # Classifies each Triangle in A as inside, outside, or on the surface facing the same or opposite direction as surface B
     
-    
     octA = None# octree.Surf2Octree(*SplitA)
-    octB = None#octree.Surf2Octree(*SplitB)
-    AllBoundaryA = [i for i,elem in enumerate(SplitA.NodeConn) if all([n in SharedA for n in elem])]  
-    AllBoundaryB = [i for i,elem in enumerate(SplitB.NodeConn) if all([n in SharedB for n in elem])]  
+    octB = None# octree.Surf2Octree(*SplitB)
+    AllBoundaryA = np.array([i for i,elem in enumerate(SplitA.NodeConn) if all([n in SharedA for n in elem])])
+    AllBoundaryB = np.array([i for i,elem in enumerate(SplitB.NodeConn) if all([n in SharedB for n in elem])])  
     NotSharedConnA = [elem for i,elem in enumerate(SplitA.NodeConn) if not any([n in SharedA for n in elem]) and i not in AllBoundaryA]  
     NotSharedConnB = [elem for i,elem in enumerate(SplitB.NodeConn) if not any([n in SharedB for n in elem]) and i not in AllBoundaryB]  
     
@@ -402,8 +299,8 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     else:
         RegionsB = []
         
-    ElemNormalsA = utils.CalcFaceNormal(*SplitA)
-    ElemNormalsB = utils.CalcFaceNormal(*SplitB)
+    ElemNormalsA = np.asarray(utils.CalcFaceNormal(*SplitA))
+    ElemNormalsB = np.asarray(utils.CalcFaceNormal(*SplitB))
 
     AinB = set()    # Elem Set
     AoutB = set()   # Elem Set
@@ -414,51 +311,37 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     BsameA = set()  # Elem Set
     BflipA = set()  # Elem Set
     
-    AllBoundaryACentroids = utils.Centroids(SplitA.NodeCoords,[elem for i,elem in enumerate(SplitA.NodeConn) if i in AllBoundaryA])
-    AllBoundaryBCentroids = utils.Centroids(SplitB.NodeCoords,[elem for i,elem in enumerate(SplitB.NodeConn) if i in AllBoundaryB])
-    for i,centroid in enumerate(AllBoundaryACentroids):
-        check = rays.isInsideSurf(centroid,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,ray=ElemNormalsA[AllBoundaryA[i]]+np.random.rand(3)/1000,eps=eps)
-        if check is True:
-            AinB.add(AllBoundaryA[i])
-        elif check is False:
-            AoutB.add(AllBoundaryA[i])
-        elif check > 0:
-            AsameB.add(AllBoundaryA[i])
-        else:
-            AflipB.add(AllBoundaryA[i])
-    for i,centroid in enumerate(AllBoundaryBCentroids):
-        check = rays.isInsideSurf(centroid,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,ray=ElemNormalsB[AllBoundaryB[i]]+np.random.rand(3)/1000,eps=eps)
-        if check is True:
-            BinA.add(AllBoundaryB[i])
-        elif check is False:
-            BoutA.add(AllBoundaryB[i])
-        elif check > 0:
-            BsameA.add(AllBoundaryB[i])
-        else:
-            BflipA.add(AllBoundaryB[i])
+    if len(AllBoundaryA) > 0:
+        AllBoundaryACentroids = utils.Centroids(SplitA.NodeCoords,[elem for i,elem in enumerate(SplitA.NodeConn) if i in AllBoundaryA])
+        check = rays.isInsidesSurf(AllBoundaryACentroids,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,rays=ElemNormalsA[AllBoundaryA],eps=eps)
+        AinB.update(AllBoundaryA[check == True])
+        AoutB.update(AllBoundaryA[check == False])
+        AsameB.update(AllBoundaryA[check > 0])
+        AflipB.update(AllBoundaryA[check <= 0])
+    
+    if len(AllBoundaryB) > 0:
+        AllBoundaryBCentroids = utils.Centroids(SplitB.NodeCoords,[elem for i,elem in enumerate(SplitB.NodeConn) if i in AllBoundaryB])
+        check = rays.isInsidesSurf(AllBoundaryBCentroids,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,rays=ElemNormalsB[AllBoundaryB],eps=eps)
+        BinA.update(AllBoundaryA[check == True])
+        BoutA.update(AllBoundaryA[check == False])
+        BsameA.update(AllBoundaryA[check > 0])
+        BflipA.update(AllBoundaryA[check <= 0])
 
     for r in range(len(RegionsA)):
         RegionElems = [e for e in range(len(SplitA.NodeConn)) if all([n in RegionsA[r] for n in SplitA.NodeConn[e]])] # Elem Set
-        # centroid = np.mean([SplitA.NodeCoords[n] for n in SplitA.NodeConn[RegionElems[0]]], axis=0)
-        # normal = ElemNormalsA[RegionElems[0]]
         pt = SplitA.NodeCoords[RegionsA[r].pop()]
         if rays.isInsideSurf(pt,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,eps=eps):
-            # for e in RegionElems: AinB.add(e)
             AinB.update(RegionElems)
         else:
-            # for e in RegionElems: AoutB.add(e)
             AoutB.update(RegionElems)
             
     #
     for r in range(len(RegionsB)):
         RegionElems = [e for e in range(len(SplitB.NodeConn)) if all([n in RegionsB[r] for n in SplitB.NodeConn[e]])] # Elem Set
-        # centroid = np.mean([SplitB.NodeCoords[n] for n in SplitB.NodeConn[RegionElems[0]]], axis=0)
         pt = SplitB.NodeCoords[RegionsB[r].pop()]
         if rays.isInsideSurf(pt,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,eps=eps):
-            # for e in RegionElems: BinA.add(e)
             BinA.update(RegionElems)
         else:
-            # for e in RegionElems: BoutA.add(e)
             BoutA.update(RegionElems)
 
     AinNodes = set(elem for e in AinB for elem in SplitA.NodeConn[e])      # Node Set
