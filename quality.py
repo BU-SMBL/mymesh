@@ -13,7 +13,7 @@ from . import utils, converter
 
 def AspectRatio(NodeCoords,NodeConn,verbose=False):
     """
-    AspectRatio Calculates element aspect ratios for each element in the mesh.
+    Calculates element aspect ratios for each element in the mesh.
     For all element types, the aspect ratio is calculated as the length of the longest
     edge divided by the length of the shortest edge of an element.
 
@@ -55,7 +55,7 @@ def AspectRatio(NodeCoords,NodeConn,verbose=False):
 
 def Orthogonality(NodeCoords,NodeConn,verbose=False):
     """
-    Orthogonality Calculates element orthogonality for each element in the mesh.
+    Calculates element orthogonality for each element in the mesh.
     For all element types, orthogonality is calculated by determing the minimum 
     of the angle cosines between face normal vectors (Ai) and the element centroid
     to face centroid vectors (fi) and the angle cosines between Ai and the element
@@ -123,7 +123,7 @@ def Orthogonality(NodeCoords,NodeConn,verbose=False):
 
 def InverseOrthogonality(NodeCoords,NodeConn,verbose=False):
     """
-    InverseOrthogonality Calculates element inverse orthogonality for each element in the mesh.
+    Calculates element inverse orthogonality for each element in the mesh.
     For all element types, inverse orthogonality is calculated as 1-orthogonality.
 
     Inverse orthogonality ranges from 0 to 1, with 0 being the best element quality
@@ -160,7 +160,7 @@ def InverseOrthogonality(NodeCoords,NodeConn,verbose=False):
 
 def OrthogonalQuality(NodeCoords,NodeConn,verbose=False):
     """
-    OrthogonalQuality Calculates element orthogonality for each element in the mesh.
+    Calculates element orthogonality for each element in the mesh.
     For all element types, orthogonal quality is calculated as 1-InverseOrthogonalQuality.
 
     Orthogonal quality ranges from 0 to 1, with 1 being the best element quality
@@ -196,7 +196,7 @@ def OrthogonalQuality(NodeCoords,NodeConn,verbose=False):
 
 def InverseOrthogonalQuality(NodeCoords,NodeConn,verbose=False):
     """
-    InverseOrthogonalQuality Calculates element inverse orthogonal quality for each 
+    Calculates element inverse orthogonal quality for each 
     element in the mesh. For tetrahedral, wedge, and pyramidal elements, inverse orthogonal
     quality is calculated as the maximum of skewness and inverse orthogonality. For hexahedral
     elements, inverse orthogonal quality is simply the inverse orthogonality.
@@ -239,7 +239,7 @@ def InverseOrthogonalQuality(NodeCoords,NodeConn,verbose=False):
 
 def Skewness(NodeCoords,NodeConn,verbose=False,tetmethod='volume'):
     """
-    Skewness Calculates element skewness for each element in the mesh. 
+    Calculates element skewness for each element in the mesh. 
     For triangular, hexahedral, wedge, and pyramidal elements, skewness is 
     calculated by the equiangular skewness method. 
     For tetrahedral elements, skewness is calculated by either the equiangular
@@ -306,7 +306,7 @@ def Skewness(NodeCoords,NodeConn,verbose=False,tetmethod='volume'):
 
 def tri_skewness(NodeCoords,NodeConn):
     """
-    tri_skewness Calculates triangular skewness for each triangle in the mesh. 
+    Calculates triangular skewness for each triangle in the mesh. 
     Mesh should be strictly triangular.
 
     Skewness ranges from 0 to 1, with 0 being the best element quality
@@ -351,7 +351,7 @@ def tri_skewness(NodeCoords,NodeConn):
 
 def quad_skewness(NodeCoords,NodeConn):
     """
-    quad_skewness Calculates quadrilateral skewness for each triangle in the mesh. 
+    Calculates quadrilateral skewness for each triangle in the mesh. 
     Mesh should be strictly quadrilateral.
 
     Skewness ranges from 0 to 1, with 0 being the best element quality
@@ -403,7 +403,7 @@ def quad_skewness(NodeCoords,NodeConn):
 
 def tet_vol_skewness(NodeCoords,NodeConn):
     """
-    tet_vol_skewness Calculates element skewness for each tetrahedral element in the mesh
+    Calculates element skewness for each tetrahedral element in the mesh
     using the equilateral volume skewness method.
 
     Skewness ranges from 0 to 1, with 0 being the best element quality
@@ -442,7 +442,7 @@ def tet_vol_skewness(NodeCoords,NodeConn):
 
 def equiangular_skewness(NodeCoords,NodeConn):
     """
-    equiangular_skewness Calculates element skewness for each element in the mesh
+    Calculates element skewness for each element in the mesh
     using the equiangular skewness method.
 
     Skewness ranges from 0 to 1, with 0 being the best element quality
@@ -482,20 +482,37 @@ def equiangular_skewness(NodeCoords,NodeConn):
     return skew
 
 def Area(NodeCoords,NodeConn):
-    # Currently only for triangular meshes
+    """
+    Calculates element areas for each element in the mesh.
+    TODO: Currently only valid for triangular meshes
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        List of nodal connectivities.
+
+    Returns
+    -------
+    A : np.ndarray
+        Array of area for each element.
+    """    
+    assert np.shape(NodeConn)[1] == 3, 'Currently only valid for triangular elements.'
     Points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
     Area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2 
+
     return Area
 
 def Volume(NodeCoords,NodeConn,verbose=False):
     """
-    Volume Calculates element volumes for each element in the mesh.
+    Calculates element volumes for each element in the mesh.
 
     Parameters
     ----------
-    NodeCoords : list
+    NodeCoords : array_like
         List of nodal coordinates.
-    NodeConn : list
+    NodeConn : array_like
         List of nodal connectivities.
     verbose : bool, optional
         If true, will print min, max, and mean element volume, by default False.
@@ -508,7 +525,7 @@ def Volume(NodeCoords,NodeConn,verbose=False):
     if len(NodeConn) == 0:
         return []
     ArrayCoords = np.asarray(NodeCoords)    
-    TetConn,ElemIds = converter.solid2tets(NodeCoords,NodeConn,return_ids=True)     
+    ArrayCoords,TetConn,ElemIds = converter.solid2tets(NodeCoords,NodeConn,return_ids=True)     
     ArrayConn = np.array(TetConn)
     pt0 = ArrayCoords[ArrayConn][:,0]
     pt1 = ArrayCoords[ArrayConn][:,1]
@@ -533,7 +550,23 @@ def Volume(NodeCoords,NodeConn,verbose=False):
     return V
 
 def MinDihedral(NodeCoords,NodeConn,verbose=False):
+    """
+    Calculate the minimum dihedral angle between element faces
 
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        List of nodal connectivities.
+    verbose : bool, optional
+        If true, will print min, max, and mean element min dihedral angle, by default False.
+
+    Returns
+    -------
+    MinAngles : np.ndarray
+        Array of minimum dihedral angles for each angle.
+    """    
     Faces, FaceConn, FaceElem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
     Normals = np.asarray(utils.CalcFaceNormal(NodeCoords,Faces))
 
@@ -557,7 +590,23 @@ def MinDihedral(NodeCoords,NodeConn,verbose=False):
     return MinAngles
 
 def MaxDihedral(NodeCoords,NodeConn,verbose=False):
+    """
+    Calculate the maximum dihedral angle between element faces
 
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        List of nodal connectivities.
+    verbose : bool, optional
+        If true, will print min, max, and mean element max dihedral angle, by default False.
+
+    Returns
+    -------
+    MaxAngles : np.ndarray
+        Array of maximum dihedral angles for each angle.
+    """ 
     Faces, FaceConn, FaceElem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
     Normals = np.asarray(utils.CalcFaceNormal(NodeCoords,Faces))
 
@@ -580,23 +629,50 @@ def MaxDihedral(NodeCoords,NodeConn,verbose=False):
         print('------------------------------------------')
     return MaxAngles
 
-def dihedralAngle(Ni,Nj,Abs=True):
-    # (In Radians) based on element normals Ni, Nj
-    if Abs:
-        return np.arccos(min([1,abs(np.dot(Ni,Nj)/(np.linalg.norm(Ni)*np.linalg.norm(Nj)))]))
-    else:
-        return np.arccos(np.round(np.dot(Ni,Nj)/(np.linalg.norm(Ni)*np.linalg.norm(Nj)),16))
 
 def dihedralAngles(Nis,Njs,Abs=False):
-    # Vectorized dihedral angles between two sets of normal vectors
+    """
+    Calculate dihedral angles between paired normal vectors. This function
+    is primarily for internal use with MinDihedral() and MaxDihedral()
+
+    Parameters
+    ----------
+    Nis : array_like
+        First list of normal vectors
+    Njs : array_like
+        Second list of normal vectors
+    Abs : bool, optional
+        Determines whether to calculate the angles as 
+        arccos(abs(...)) or arccos(...), by default False
+
+    Returns
+    -------
+    angles : np.ndarray
+        Dihedral angles
+    """    
     if Abs:
         angles = np.arccos(np.clip(np.abs(np.sum((np.asarray(Nis)*np.asarray(Njs)),axis=1)),0,1))
     else:
         angles = np.arccos(np.clip(np.sum((np.asarray(Nis)*np.asarray(Njs)),axis=1),-1,1))
     return angles
 
-def DihedralAngles(ElemNormals,ElemNeighbors):
-    # Dihedral angles between (surface/face) elements and their neighbors
+def SurfDihedralAngles(ElemNormals,ElemNeighbors):
+    """
+    Calculate dihedral angles between adjacent faces in a triangular surface mesh
+
+    Parameters
+    ----------
+    ElemNormals : array_like
+        Array of normal vectors for each face in a surface mesh (ex. from utils.CalcFaceNormal or mesh.ElemNormals)
+    ElemNeighbors : array_like
+        List of element neighbor IDs for each element in the triangular 
+        surface mesh (each element should have three neighbors). 
+
+    Returns
+    -------
+    angles : np.ndarray
+        Dihedral angles between adjacent element faces
+    """    
     ElemNormals = np.asarray(ElemNormals)
     ElemNeighbors = np.asarray(ElemNeighbors)
     NeighborNormals = ElemNormals[ElemNeighbors]

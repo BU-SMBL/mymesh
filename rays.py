@@ -354,7 +354,28 @@ def RayBoxesIntersection(pt, ray, xlims, ylims, zlims):
     return intersections
 
 def PlaneBoxIntersection(pt, Normal, xlim, ylim, zlim):
-    
+    """
+    Intersection algorithm for detecting intersections between a plane (defined by a point and normal vector) and an axis-aligned box.
+
+    Parameters
+    ----------
+    pt : array_like
+        3D coordinates for a point on the plane
+    Normal : array_like
+        3D vector representing the normal vector to the plane
+    xlim : array_like
+        Two element list, array, or tuple with the upper and lower x-direction bounds for an axis-aligned box.
+    ylim : array_like
+        Two element list, array, or tuple with the upper and lower y-direction bounds for an axis-aligned box.
+    zlim : array_like
+        Two element list, array, or tuple with the upper and lower z-direction bounds for an axis-aligned box.
+
+    Returns
+    -------
+    _type_
+        _description_
+    """    
+
     BoxCoords = [
         [xlim[0],ylim[0],zlim[0]],
         [xlim[1],ylim[0],zlim[0]],
@@ -1683,12 +1704,13 @@ def isInsideSurf(pt, NodeCoords, SurfConn, ElemNormals, Octree=None, eps=1e-8, r
             # Inside
             return True
 
-def isInsidesSurf(pts, NodeCoords, SurfConn, ElemNormals, Octree='generate', eps=1e-8, rays=None):
+def isInsidesSurf(pts, NodeCoords, SurfConn, ElemNormals=None, Octree='generate', eps=1e-8, rays=None):
     
     if rays is None: 
         rays = np.random.rand(len(pts),3)
         rays /= np.linalg.norm(rays,axis=1)[:,None]
-    
+    if ElemNormals is None:
+        ElemNormals = utils.CalcFaceNormal(NodeCoords, SurfConn)
     root = OctreeInputProcessor(NodeCoords, SurfConn, Octree)
     intersections, distances, _ = RaysSurfIntersection(pts,rays,NodeCoords,SurfConn,Octree=root) 
     Insides = np.repeat(False,len(pts))

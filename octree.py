@@ -19,7 +19,34 @@ class OctreeNode():
         self.limits = []
         self.vertices = []
         self.level = level
-        
+
+    def maxDepth(self):
+        depth = self.level
+        def recur(node, depth):
+            if node.level > depth:
+                depth = node.level
+            for child in node.children:
+                depth = recur(child, depth)
+            return depth
+        depth = recur(self, depth)
+        return depth
+
+    def getLevel(self, level):
+
+        def recur(node,nodes):
+            if node.level == level:
+                nodes.append(node)
+                return nodes
+            elif node.state == 'empty':
+                return nodes
+            elif node.state == 'root' or node.state == 'branch':
+                for child in node.children:
+                    nodes = recur(child,nodes)
+            return nodes
+
+        nodes = []
+        return recur(self,nodes)
+
     def PointInNode(self,point,inclusive=True):
         if inclusive:
             return all([(self.centroid[d]-self.size/2) <= point[d] and (self.centroid[d]+self.size/2) >= point[d] for d in range(3)])
@@ -334,18 +361,18 @@ def SearchOctreeTri(tri,node,nodes=[],inclusive=True):
     
 def getAllLeaf(root):
     # Return a list of all terminal(leaf) nodes in the octree
-    def recur(node,leaf):
+    def recur(node,leaves):
         if node.state == 'leaf':
-            leaf.append(node)
-            return leaf
+            leaves.append(node)
+            return leaves
         elif node.state == 'empty':
-            return leaf
+            return leaves
         elif node.state == 'root' or node.state == 'branch':
             for child in node.children:
-                leaf = recur(child,leaf)
-        return leaf
-    leaf = []
-    return recur(root,leaf)
+                leaves = recur(child,leaves)
+        return leaves
+    leaves = []
+    return recur(root,leaves)
 
 def Voxel2Octree(VoxelCoords, VoxelConn):
     if type(VoxelCoords) is list:

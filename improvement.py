@@ -12,176 +12,35 @@ from scipy import sparse, spatial
 from scipy.sparse.linalg import spsolve
 from scipy.optimize import minimize
 
-def CollapseSlivers_old(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=[], verbose=False):
-    
-    if type(NodeCoords) is np.array: NodeCoords = NodeCoords.tolist()
-    if type(NodeConn) is np.array: NodeConn = NodeConn.tolist()
-    NewCoords = np.array(NodeCoords)
-    NewConn = copy.copy(NodeConn)
-    fixed = set(FixedNodes)
-    if verbose:
-        print('Initial Skewness:')
-    skew = quality.Skewness(NewCoords,NewConn,verbose=verbose)
-    if verbose:
-        print(str(sum([1 for i in skew if i > skewThreshold])) + ' slivers')
-    ignore = []
-    while max([s for i,s in enumerate(skew) if i not in ignore]) > skewThreshold:
-        NewCoords = np.array(NewCoords)
-        ignore = []
-        for i,elem in enumerate(NewConn):
-            # s = Qualit1y.get_skewness([NewCoords[n] for n in elem])
-            if skew[i] <= skewThreshold:
-            # if s <= skewThreshold:
-                continue
-            if len(elem) == 3:
-                # Triangluar Mesh
-                A = NewCoords[elem[0]]
-                B = NewCoords[elem[1]]
-                C = NewCoords[elem[2]]
-                if all(A == B) or all(B == C) or all(A == C):
-                    # Already collapsed
-                    continue
-                a2 = (B[0]-C[0])**2 + (B[1]-C[1])**2 + (B[2]-C[2])**2
-                a = np.sqrt(a2)
-                b2 = (C[0]-A[0])**2 + (C[1]-A[1])**2 + (C[2]-A[2])**2
-                b = np.sqrt(b2)
-                c2 = (A[0]-B[0])**2 + (A[1]-B[1])**2 + (A[2]-B[2])**2
-                c = np.sqrt(c2)
-                
-                minside = min([a,b,c])
-                if minside == a:
-                    # Collapse vertices B and C
-                    if elem[2] not in fixed:
-                        NewCoords[elem[2]] = B
-                    elif elem[1] not in fixed:
-                        NewCoords[elem[1]] = C
-                    else:
-                        ignore.append(i)
-                elif minside == b:
-                    # Collapse vertices A and C
-                    if elem[0] not in fixed:
-                        NewCoords[elem[0]] = C
-                    elif elem[2] not in fixed:
-                        NewCoords[elem[2]] = A
-                    else:
-                        ignore.append(i)
-                elif minside == c:
-                    # Collapse vertices A and B
-                    if elem[1] not in fixed:
-                        NewCoords[elem[1]] = A
-                    elif elem[0] not in fixed:
-                        NewCoords[elem[0]] = B
-                    else:
-                        ignore.append(i)
-            elif len(elem) == 4:
-                # Tetrahedral Mesh
-                A = NewCoords[elem[0]]
-                B = NewCoords[elem[1]]
-                C = NewCoords[elem[2]]
-                D = NewCoords[elem[3]]
-                if A == B or B == C or A == C or A == D or D == B or D == C:
-                    # Already collapsed
-                    continue
-                CB2 = (B[0]-C[0])**2 + (B[1]-C[1])**2 + (B[2]-C[2])**2
-                CB = np.sqrt(CB2)
-                AC2 = (C[0]-A[0])**2 + (C[1]-A[1])**2 + (C[2]-A[2])**2
-                AC = np.sqrt(AC2)
-                AB2 = (A[0]-B[0])**2 + (A[1]-B[1])**2 + (A[2]-B[2])**2
-                AB = np.sqrt(AB2)
-                AD2 = (A[0]-D[0])**2 + (A[1]-D[1])**2 + (A[2]-D[2])**2
-                AD = np.sqrt(AD2)
-                BD2 = (B[0]-D[0])**2 + (B[1]-D[1])**2 + (B[2]-D[2])**2
-                BD = np.sqrt(BD2)
-                CD2 = (C[0]-D[0])**2 + (C[1]-D[1])**2 + (C[2]-D[2])**2
-                CD = np.sqrt(CD2)
-                
-                sides = [CB,AC,AB,AD,BD,CD]
-                thinking = True
-                while thinking:
-                    if len(sides) == 0:
-                        ignore.append(i)
-                        thinking = False
-                        break
-                    minside = min(sides)
-                    if minside == CB:
-                        # Collapse vertices B and C
-                        if elem[2] not in fixed:
-                            NewCoords[elem[2]] = B
-                            thinking = False
-                        elif elem[1] not in fixed:
-                            NewCoords[elem[1]] = C
-                            thinking = False
-                        else:
-                            sides.remove(CB)
-                    elif minside == AC:
-                        # Collapse vertices A and C
-                        if elem[0] not in fixed:
-                            NewCoords[elem[0]] = C
-                            thinking = False
-                        elif elem[2] not in fixed:
-                            NewCoords[elem[2]] = A
-                            thinking = False
-                        else:
-                            sides.remove(AC)
-                    elif minside == AB:
-                        # Collapse vertices A and B
-                        if elem[1] not in fixed:
-                            NewCoords[elem[1]] = A 
-                            thinking = False
-                        elif elem[0] not in fixed:
-                            NewCoords[elem[0]] = B
-                            thinking = False
-                        else:
-                            sides.remove(AB)
-                    elif minside == AD:
-                        # Collapse vertices A and D
-                        if elem[3] not in fixed:
-                            NewCoords[elem[3]] = A 
-                            thinking = False
-                        elif elem[0] not in fixed:
-                            NewCoords[elem[0]] = D
-                            thinking = False
-                        else:
-                            sides.remove(AD)
-                    elif minside == BD:
-                        # Collapse vertices B and D
-                        if elem[3] not in fixed:
-                            NewCoords[elem[3]] = B 
-                            thinking = False
-                        elif elem[1] not in fixed:
-                            NewCoords[elem[1]] = D
-                            thinking = False
-                        else:
-                            sides.remove(BD)
-                    elif minside == CD:
-                        # Collapse vertices C and D
-                        if elem[3] not in fixed:
-                            NewCoords[elem[3]] = C
-                            thinking = False 
-                        elif elem[2] not in fixed:
-                            NewCoords[elem[2]] = D
-                            thinking = False
-                        else:
-                            sides.remove(CD)
-                
-                
-        NewCoords,NewConn,_ = utils.DeleteDuplicateNodes(NewCoords,NewConn)
-        NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
-        NewCoords,NewConn,_ = converter.removeNodes(NewCoords,NewConn)
-            
-        if verbose:
-            print('Improved Skewness:')
-        skew = quality.Skewness(NewCoords,NewConn,verbose=verbose)
-        if verbose:
-            print(str(sum([1 for i in skew if i > skewThreshold])) + ' slivers remaining')
-    
-    return NewCoords, NewConn
-
 def CollapseSlivers(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=set(), verbose=False):
-    
+    """
+    Collapse sliver elements above a skewness threshold (default 0.9)
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates
+    NodeConn : list, array_like
+        Nodal connectivites
+    skewThreshold : float, optional
+        Skewness threshold to determine whether an element is a sliver,
+        by default 0.9
+    FixedNodes : set, optional
+        Set of nodes to be held in place and not affected by
+        the sliver collapse operation, by default set().
+    verbose : bool, optional
+        If True, will report , by default False
+
+    Returns
+    -------
+    NewCoords : array_like
+        New node coordinate array
+    NewConn : array_like
+        New node connectivity array
+    """    
     if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
     ArrayCoords = np.asarray(NodeCoords)
-    skew = quality.Skewness(ArrayCoords,NodeConn,verbose=verbose)
+    skew = quality.Skewness(ArrayCoords,NodeConn,verbose=False)
     Slivers = np.where(skew>skewThreshold)[0]
     if len(Slivers) > 0:
 
@@ -317,50 +176,6 @@ def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
 
     NewCoords = ArrayCoords.tolist()
     return NewCoords
-
-def SegmentSpringSmoothing_old(NodeCoords,NodeConn,NodeNeighbors,StiffnessFactor=1,FixedNodes=set(),Displacements=None,Forces=None):
-    # Blom, F.J., 2000. Considerations on the spring analogy. International journal for numerical methods in fluids, 32(6), pp.647-668.
-    
-    if Forces == None or len(Forces) == 0:
-        Forces = np.zeros((len(NodeCoords),3))
-    else:
-        assert len(Forces) == len(NodeCoords), 'Forces must be assigned for every node'
-        
-    if Displacements == None or len(Displacements) == 0:
-        Displacements = np.zeros(np.shape(NodeCoords))
-    else:
-        assert len(Displacements) == len(NodeCoords), 'Forces must be assigned for every node'
-    
-    
-    def dist(p1,p2):
-        return np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2 + (p1[2]-p2[2])**2)
-    lengths = [[dist(NodeCoords[i],NodeCoords[n]) for n in NodeNeighbors[i]] for i in range(len(NodeCoords))]
-    minL = min([l for L in lengths for l in L if l!=0])
-    k = [[StiffnessFactor/max(li,minL) for li in lengths[i]] for i in range(len(NodeCoords))]
-   
-    Krows = []
-    Kcols = []
-    Kvals = []
-    for i in range(len(NodeCoords)):
-        Krows.append(i)
-        Kcols.append(i)
-        
-        if i not in FixedNodes:
-            Kvals.append(sum(k[i]))
-            for j,col in enumerate(NodeNeighbors[i]):
-                Krows.append(i)
-                Kcols.append(col)
-                Kvals.append(-1*k[i][j])
-        else:
-            Kvals.append(1)
-            Forces[i] = [0,0,0]
-    K = sparse.coo_matrix((Kvals,(Krows,Kcols)))
-    
-    dXnew = spsolve(K.tocsc(), sparse.csc_matrix(Forces)).toarray()
-    
-    Xnew = np.array(NodeCoords) + dXnew
-    
-    return Xnew.tolist(), dXnew.tolist()
     
 def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
     StiffnessFactor=1,FixedNodes=set(),Forces=None,L0Override='min',
@@ -623,52 +438,52 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,Fixed
 
 def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),FixFeatures=False):
         
-        """
-        TangentialLaplacianSmoothing Performs iterative Laplacian smoothing, repositioning each node
-        to the center of its adjacent nodes. Primarily for use on surface meshes, not well defined for 
-        volume meshes.
-        Ohtake, Y., Belyaev, A., & Pasko, A. (2003). Dynamic mesh optimization for polygonized implicit surfaces with sharp features. Visual Computer, 19(2–3), 115–126. https://doi.org/10.1007/s00371-002-0181-z
+    """
+    TangentialLaplacianSmoothing Performs iterative Laplacian smoothing, repositioning each node
+    to the center of its adjacent nodes. Primarily for use on surface meshes, not well defined for 
+    volume meshes.
+    Ohtake, Y., Belyaev, A., & Pasko, A. (2003). Dynamic mesh optimization for polygonized implicit surfaces with sharp features. Visual Computer, 19(2–3), 115–126. https://doi.org/10.1007/s00371-002-0181-z
 
-        Parameters
-        ----------
-        NodeCoords : list
-            List of nodal coordinates.
-        NodeConn : list
-            List of nodal coordinates.
-        iterate : int
-            Number of iterations to perform.
-        FixedNodes : set, optional
-            Set of nodes to hold fixed throughout the Laplacian smoothing process, by default set().
+    Parameters
+    ----------
+    NodeCoords : list
+        List of nodal coordinates.
+    NodeConn : list
+        List of nodal coordinates.
+    iterate : int
+        Number of iterations to perform.
+    FixedNodes : set, optional
+        Set of nodes to hold fixed throughout the Laplacian smoothing process, by default set().
 
-        Returns
-        -------
-        NewCoords : list
-            List of updated nodal coordinates.
-        """    
+    Returns
+    -------
+    NewCoords : list
+        List of updated nodal coordinates.
+    """    
 
-        if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
-        if FixFeatures:
-            edges,corners = utils.DetectFeatures(NodeCoords,NodeConn)
-            FixedNodes.update(edges)
-            FixedNodes.update(corners)
-        NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
-        ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
-        lens = np.array([len(n) for n in NodeNeighbors])
-        r = utils.PadRagged(NodeNeighbors,fillval=-1)
-        FreeNodes = list(set(range(len(NodeCoords))).difference(FixedNodes))
-        ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
-        
-        ElemNormals = utils.CalcFaceNormal(ArrayCoords[:-1],NodeConn)
-        NodeNormals = utils.Face2NodeNormal(ArrayCoords[:-1],NodeConn,ElemConn,ElemNormals)
-        
-        for i in range(iterate):
-            Q = ArrayCoords[r]
-            U = (1/lens)[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
-            R = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
-            ArrayCoords[FreeNodes] += R[FreeNodes]
+    if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
+    if FixFeatures:
+        edges,corners = utils.DetectFeatures(NodeCoords,NodeConn)
+        FixedNodes.update(edges)
+        FixedNodes.update(corners)
+    NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
+    ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
+    lens = np.array([len(n) for n in NodeNeighbors])
+    r = utils.PadRagged(NodeNeighbors,fillval=-1)
+    FreeNodes = list(set(range(len(NodeCoords))).difference(FixedNodes))
+    ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
+    
+    ElemNormals = utils.CalcFaceNormal(ArrayCoords[:-1],NodeConn)
+    NodeNormals = utils.Face2NodeNormal(ArrayCoords[:-1],NodeConn,ElemConn,ElemNormals)
+    
+    for i in range(iterate):
+        Q = ArrayCoords[r]
+        U = (1/lens)[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
+        R = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
+        ArrayCoords[FreeNodes] += R[FreeNodes]
 
-        NewCoords = ArrayCoords[:-1]
-        return NewCoords
+    NewCoords = ArrayCoords[:-1]
+    return NewCoords
 
 def GlobalLaplacianSmoothing(NodeCoords,NodeConn,FeatureNodes=[],FixedNodes=set(),FeatureWeight=1,BaryWeight=1/3):
     # Ji, Z., Liu, L. and Wang, G., 2005, December. A global laplacian 
@@ -803,85 +618,6 @@ def FlipEdge(NodeCoords,NodeConn,i,j):
     # if set(Newi) not in SetConn and set(Newj) not in SetConn:
     return Newi,Newj
 
-def DelaunayFlips(NodeCoords,NodeConn,ElemNeighbors=None):
-    NewConn = copy.copy(NodeConn)
-    NodeCoords = np.array(NodeCoords)
-    if ElemNeighbors==None: ElemNeighbors = utils.getElemNeighbors(NodeCoords,NodeConn)
-
-    eps = 1e-12
-    # Circumcenters
-    Points = NodeCoords[np.array(NodeConn)]
-    a = np.linalg.norm(Points[:,1]-Points[:,2],axis=1)
-    b = np.linalg.norm(Points[:,2]-Points[:,0],axis=1)
-    c = np.linalg.norm(Points[:,1]-Points[:,0],axis=1)
-    wA = a**2 * (b**2 + c**2 - a**2)
-    wB = b**2 * (c**2 + a**2 - b**2)
-    wC = c**2 * (a**2 + b**2 - c**2)
-    O = (wA[:,None]*Points[:,0] + wB[:,None]*Points[:,1] + wC[:,None]*Points[:,2])/(wA + wB + wC)[:,None]
-    # Circumradii
-    R = np.linalg.norm(O-Points[:,0,:],axis=1)
-    # NeighborPoints = Points[ElemNeighbors]
-    # NeighborDists = np.linalg.norm(NeighborPoints-O[:,None,None,:],axis=3) + eps
-    # Flips = np.any(NeighborDists < R[:,None,None],axis=2)
-
-    flips = 1
-    # while flips > 0:
-    # print(flips)
-    flips = 0
-    for i in range(len(NewConn)):
-        for j in ElemNeighbors[i]:
-            if len(set(ElemNeighbors[i]).intersection(ElemNeighbors[j])) > 0:
-                # This condition checks if the flip will be legal
-                continue
-            if np.any(np.linalg.norm(Points[j]-O[i],axis=1) + eps < R[i]):
-                flips+=1
-                oldi = copy.copy(NewConn[i]); oldj = copy.copy(NewConn[j])
-                Newi,Newj = FlipEdge(NodeCoords,NewConn,i,j)
-                NewConn[i] = Newi; NewConn[j] = Newj
-                ENi = []; ENj = []
-                Si = set(Newi); Sj = set(Newj)
-                for k in np.unique([ElemNeighbors[i] + ElemNeighbors[j]]):
-                    if len(Si.intersection(NewConn[k])) == 2:
-                        ENi.append(k)
-                    if len(Sj.intersection(NewConn[k])) == 2:
-                        ENj.append(k)
-                if len(ENi) != 3 or len(ENj) != 3:
-                    NewConn[i] = oldi; NewConn[j] = oldj
-                    continue
-                for k in np.unique([ElemNeighbors[i] + ElemNeighbors[j]]):
-                    if i in ElemNeighbors[k]: ElemNeighbors[k].remove(i)
-                    if j in ElemNeighbors[k]: ElemNeighbors[k].remove(j)
-                    if len(Si.intersection(NewConn[k])) == 2:
-                        ElemNeighbors[k].append(i)
-                    if len(Sj.intersection(NewConn[k])) == 2:
-                        ElemNeighbors[k].append(j)  
-
-                Points[i] = NodeCoords[Newi]
-                Points[j] = NodeCoords[Newj]
-                a = np.linalg.norm(Points[i,1]-Points[i,2])
-                b = np.linalg.norm(Points[i,2]-Points[i,0])
-                c = np.linalg.norm(Points[i,1]-Points[i,0])
-                wA = a**2 * (b**2 + c**2 - a**2)
-                wB = b**2 * (c**2 + a**2 - b**2)
-                wC = c**2 * (a**2 + b**2 - c**2)
-                O[i] = (wA*Points[i,0] + wB*Points[i,1] + wC*Points[i,2])/(wA + wB + wC)
-                R[i] = np.linalg.norm(O[i]-Points[i,0])
-
-                a = np.linalg.norm(Points[j,1]-Points[j,2])
-                b = np.linalg.norm(Points[j,2]-Points[j,0])
-                c = np.linalg.norm(Points[j,1]-Points[j,0])
-                wA = a**2 * (b**2 + c**2 - a**2)
-                wB = b**2 * (c**2 + a**2 - b**2)
-                wC = c**2 * (a**2 + b**2 - c**2)
-                O[j] = (wA*Points[j,0] + wB*Points[j,1] + wC*Points[j,2])/(wA + wB + wC)
-                R[j] = np.linalg.norm(O[j]-Points[j,0])
-
-                # NewConn[i] = Newi; NewConn[j] = Newj
-                ElemNeighbors[i] = ENi; ElemNeighbors[j] = ENj
-                break
-
-    return NewConn, ElemNeighbors
-
 def ValenceImprovementFlips(NodeCoords,NodeConn,NodeNeighbors,ElemNeighbors):
 
     Array = np.array(NodeCoords)
@@ -975,33 +711,6 @@ def AngleReductionFlips(NodeCoords,NodeConn,NodeNeighbors=None,FixedNodes=[]):
     while thinking:
         iter += 1
         flips = 0
-        # ElemEdges = np.array(converter.EdgesByElement(NewCoords,NewConn))
-        # SortElemEdges = np.sort(ElemEdges,axis=2)
-
-        # ElemEdgeVectors = NewCoords[ElemEdges[:,:,1]] - NewCoords[ElemEdges[:,:,0]]
-        # ElemLengths = np.linalg.norm(ElemEdgeVectors,axis=2)
-        # # Opposite angles corresponding to each edge
-        # OppositeAngles = np.zeros(ElemLengths.shape)
-        # OppositeAngles[:,0] = np.arccos(np.sum(ElemEdgeVectors[:,2]*-ElemEdgeVectors[:,1],axis=1)/(ElemLengths[:,1]*ElemLengths[:,2]))
-        # OppositeAngles[:,1] = np.arccos(np.sum(ElemEdgeVectors[:,0]*-ElemEdgeVectors[:,2],axis=1)/(ElemLengths[:,0]*ElemLengths[:,2]))
-        # OppositeAngles[:,2] = np.arccos(np.sum(ElemEdgeVectors[:,1]*-ElemEdgeVectors[:,0],axis=1)/(ElemLengths[:,1]*ElemLengths[:,0]))
-        
-        # AllEdges = SortElemEdges.reshape((SortElemEdges.shape[0]*SortElemEdges.shape[1],SortElemEdges.shape[2]))
-        # AllAngles = OppositeAngles.reshape(SortElemEdges.shape[0]*SortElemEdges.shape[1])
-        # AllLengths = ElemLengths.reshape(SortElemEdges.shape[0]*SortElemEdges.shape[1])
-
-        # ElemIdxs = np.arange(len(NewConn))
-        # ElemRef = np.vstack([ElemIdxs,ElemIdxs,ElemIdxs]).T.reshape(SortElemEdges.shape[0]*SortElemEdges.shape[1])
-        # # Unique set of edges:
-        # Edges,Idx,Inv = np.unique(AllEdges,axis=0,return_index=True,return_inverse=True)
-        # Lengths = AllLengths[Idx]   # Length of edge in 'Edges'
-        # # For each edge, contains the indices for the 2 adjacent elements
-        # ConnectedElements = [[] for i in range(len(Edges))]
-        # for i,I in enumerate(Inv): ConnectedElements[I].append(ElemRef[i])      # TODO: This might be a bottleneck
-        # ConnectedElements = np.array(ConnectedElements)
-        # Angles = [[] for i in range(len(Edges))]
-        # for i,I in enumerate(Inv): Angles[I].append(AllAngles[i])     # Opposite angle corresponding to edge in 'Edges'
-
         
         Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True)
         UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
@@ -1072,24 +781,12 @@ def AngleReductionFlips(NodeCoords,NodeConn,NodeNeighbors=None,FixedNodes=[]):
             
             Edges[k] = NewEdge
 
-            # Update angles 
-            # Note this could flip the relationship between the angle and the connected elements
-            # but this doesn't actually matter here
-            # v1 = NewCoords[NewEdge[0]] - NewCoords[Edge[0]]
-            # v2 = NewCoords[NewEdge[1]] - NewCoords[Edge[0]]
-            # v3 = NewCoords[NewEdge[0]] - NewCoords[Edge[1]]
-            # v4 = NewCoords[NewEdge[1]] - NewCoords[Edge[1]]
-            # Angles[k][0] = np.arccos(np.dot(v1,v2)/(np.prod([np.linalg.norm([v1,v2],axis=1)])))
-            # Angles[k][1] = np.arccos(np.dot(v3,v4)/(np.prod([np.linalg.norm([v3,v4],axis=1)])))
-
             flips += 1
-        # print(flips)
         if flips < len(NonDelaunay)-nskipped:
             thinking = True
             NodeNeighbors = utils.getNodeNeighbors(NewCoords, NewConn)    
         else:
             thinking = False
-
 
     return NewConn
 
