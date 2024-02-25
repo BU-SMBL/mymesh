@@ -138,7 +138,7 @@ def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',values='nodes'):
 
     """        
     
-    NodeCoords, NodeConn1 = primitives.Grid([xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]],h,exact_h=True, meshobj=False)
+    NodeCoords, NodeConn1 = primitives.Grid([xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]],h,exact_h=True)
     NodeVals = sdf(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
     if np.min(NodeVals) > 0:
         return [], []

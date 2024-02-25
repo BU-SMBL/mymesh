@@ -1567,7 +1567,7 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         ylims = [0,(ny)*voxelsize]
         zlims = [0,(nz)*voxelsize]
         bounds = [xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]]
-        VoxelCoords, VoxelConn = primitives.Grid(bounds, voxelsize, exact_h=False, meshobj=False)
+        VoxelCoords, VoxelConn = primitives.Grid(bounds, voxelsize, exact_h=False)
         if multichannel:
             VoxelData = np.column_stack([I.flatten(order='F') for I in multiimg])
         else:
@@ -1587,7 +1587,7 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
                     crop[4]/zscale,crop[5]/zscale]
         else:
             bounds = crop
-        VoxelCoords, VoxelConn = primitives.Grid(bounds, voxelsize, exact_h=False, meshobj=False)
+        VoxelCoords, VoxelConn = primitives.Grid(bounds, voxelsize, exact_h=False)
         mins = np.round(np.min(VoxelCoords,axis=0)/voxelsize).astype(int)
         maxs = np.round(np.max(VoxelCoords,axis=0)/voxelsize).astype(int)
         if multichannel:
