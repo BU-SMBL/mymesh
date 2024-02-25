@@ -8,7 +8,7 @@ import numpy as np
 import gc
 from . import utils, converter, implicit, mesh, delaunay
 
-def Box(bounds, h, meshobj=True, ElemType='quad'):
+def Box(bounds, h, ElemType='quad'):
     """
     Generate a surface mesh of a rectangular box. 
 
@@ -18,38 +18,33 @@ def Box(bounds, h, meshobj=True, ElemType='quad'):
         Six element list of bounds [xmin,xmax,ymin,ymax,zmin,zmax].
     h : float
         Approximate element size.
-    meshobj : bool, optional
-        If true, will return a mesh object, if false, will return 
-        NodeCoords and NodeConn. By default False.
     ElemType : str, optional
         Specify the element type of the grid mesh. This can either be 'quad' for 
         a quadrilateral mesh or 'tri' for a triangular mesh, by default 'quad'.
 
     Returns
     -------
-    BoxCoords : list
-        Node coordinates of the mesh. Returned if meshobj = False.
-    BoxConn : list
-        Nodal connectivities of the mesh. Returned if meshobj = False.
     box : Mesh.mesh
-        Mesh object containing the box mesh. Returned if meshobj = True (default).
+        Mesh object containing the box mesh. 
+        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
+        the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
+        by running: `NodeCoords, NodeConn = primitives.Box(...)`
     """    
     GridCoords, GridConn = Grid(bounds,h,exact_h=False)
     BoxConn = converter.solid2surface(GridCoords,GridConn)
     BoxCoords,BoxConn,_ = converter.removeNodes(GridCoords,BoxConn)
     if ElemType == 'tri':
         BoxConn = converter.quad2tri(BoxConn)
-    if meshobj:
-        if 'mesh' in dir(mesh):
-            box = mesh.mesh(BoxCoords,BoxConn)
-        else:
-            box = mesh(BoxCoords,BoxConn)
-        box.Type = 'surf'
-        box.cleanup()
-        return box
-    return BoxCoords,BoxConn
 
-def Grid(bounds, h, meshobj=True, exact_h=False, ElemType='hex'):
+    if 'mesh' in dir(mesh):
+        box = mesh.mesh(BoxCoords,BoxConn)
+    else:
+        box = mesh(BoxCoords,BoxConn)
+    box.Type = 'surf'
+    box.cleanup()
+    return box
+
+def Grid(bounds, h, exact_h=False, ElemType='hex'):
     """
     Generate a 3D rectangular grid mesh.
 
@@ -59,9 +54,6 @@ def Grid(bounds, h, meshobj=True, exact_h=False, ElemType='hex'):
         Six element list, of bounds [xmin,xmax,ymin,ymax,zmin,zmax].
     h : float
         Element size.
-    meshobj : bool, optional
-        If true, will return a mesh object, if false, will return 
-        NodeCoords and NodeConn. By default False.
     exact_h : bool, optional
         If true, will make a mesh where the element size is exactly
         equal to what is specified, but the upper bounds may vary slightly.
@@ -73,18 +65,19 @@ def Grid(bounds, h, meshobj=True, exact_h=False, ElemType='hex'):
 
     Returns
     -------
-    GridCoords : list
-        Node coordinates of the mesh. Returned if meshobj = False.
-    GridConn : list
-        Nodal connectivities of the mesh. Returned if meshobj = False.
     Grid : Mesh.mesh
-        Mesh object containing the grid mesh. Returned if meshobj = True (default).
+        Mesh object containing the grid mesh.
+        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
+        the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
+        by running: `NodeCoords, NodeConn = primitives.Grid(...)`
     """    
     if type(h) is tuple or type(h) is list:
         hx = h[0];hy = h[1]; hz = h[2]
     else:
         hx = h; hy = h; hz = h
-    
+    if len(bounds) == 4:
+        Grid = Grid2D(bounds, h, exact_h=exact_h)
+        return Grid
     if exact_h:
         xs = np.arange(bounds[0],bounds[1]+hx,hx)
         ys = np.arange(bounds[2],bounds[3]+hy,hy)
@@ -123,15 +116,13 @@ def Grid(bounds, h, meshobj=True, exact_h=False, ElemType='hex'):
     if ElemType == 'tet':
         GridCoords, GridConn = converter.hex2tet(GridCoords, GridConn, method='1to6')
     
-    if meshobj:
-        if 'mesh' in dir(mesh):
-            Grid = mesh.mesh(GridCoords,GridConn,'vol')
-        else:
-            Grid = mesh(GridCoords,GridConn,'vol')
-        return Grid
-    return GridCoords, GridConn
+    if 'mesh' in dir(mesh):
+        Grid = mesh.mesh(GridCoords,GridConn,'vol')
+    else:
+        Grid = mesh(GridCoords,GridConn,'vol')
+    return Grid
 
-def Grid2D(bounds, h, z=0, meshobj=True, exact_h=False, ElemType='quad'):
+def Grid2D(bounds, h, z=0, exact_h=False, ElemType='quad'):
     """
     Generate a rectangular grid mesh.
 
@@ -141,23 +132,22 @@ def Grid2D(bounds, h, z=0, meshobj=True, exact_h=False, ElemType='quad'):
         Four element list, [xmin,xmax,ymin,ymax].
     h : float
         Element size.
-    meshobj : bool, optional
-        If true, will return a mesh object, if false, will return 
-        NodeCoords and NodeConn. By default False.
     exact_h : bool, optional
         If true, will make a mesh where the element size is exactly
         equal to what is specified, but the upper bounds may vary slightly.
         Otherwise, the bounds will be strictly enforced, but element size may deviate
-        from the specified h. This may result in non-cubic elements. By default False.
+        from the specified h. This may result in non-square elements. By default False.
+    ElemType : str, optional
+        Specify the element type of the grid mesh. This can either be 'quad' for 
+        a quadrilateral mesh or 'tri' for a triangular mesh, by default 'quad'.
 
     Returns
     -------
-    GridCoords : list
-        Node coordinates of the mesh. Returned if meshobj = False.
-    GridConn : list
-        Nodal connectivities of the mesh. Returned if meshobj = False.
     Grid : Mesh.mesh
-        Mesh object containing the grid mesh. Returned if meshobj = True (default).
+        Mesh object containing the grid mesh.
+        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
+        the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
+        by running: `NodeCoords, NodeConn = primitives.Grid2D(...)`
     """    
     if type(h) is tuple or type(h) is list or type(h) is np.ndarray:
         hx = h[0];hy = h[1]
@@ -198,15 +188,13 @@ def Grid2D(bounds, h, z=0, meshobj=True, exact_h=False, ElemType='quad'):
     if ElemType == 'tri':
         GridConn = converter.quad2tri(GridConn)
     
-    if meshobj:
-        if 'mesh' in dir(mesh):
-            Grid = mesh.mesh(GridCoords,GridConn,'surf')
-        else:
-            Grid = mesh(GridCoords,GridConn,'surf')
-        return Grid
-    return GridCoords, GridConn
+    if 'mesh' in dir(mesh):
+        Grid = mesh.mesh(GridCoords,GridConn,'surf')
+    else:
+        Grid = mesh(GridCoords,GridConn,'surf')
+    return Grid
 
-def Plane(pt, normal, bounds, h, meshobj=True, exact_h=False, ElemType='quad'):
+def Plane(pt, normal, bounds, h, exact_h=False, ElemType='quad'):
     """
     Generate a 2D grid oriented on a plane
 
@@ -218,23 +206,24 @@ def Plane(pt, normal, bounds, h, meshobj=True, exact_h=False, ElemType='quad'):
         Normal vector of the plane
     bounds : list
         Six element list, [xmin,xmax,ymin,ymax,zmin,zmax].
-    h : _type_
-        _description_
-    meshobj : bool, optional
-        _description_, by default True
+    h : float
+        Element size.
     exact_h : bool, optional
-        _description_, by default False
+        If true, will make a mesh where the element size is exactly
+        equal to what is specified, but the upper bounds may vary slightly.
+        Otherwise, the bounds will be strictly enforced, but element size may deviate
+        from the specified h. This may result in non-square elements. By default False.
     ElemType : str, optional
-        _description_, by default 'quad'
+        Specify the element type of the grid mesh. This can either be 'quad' for 
+        a quadrilateral mesh or 'tri' for a triangular mesh, by default 'quad'.
 
     Returns
     -------
-    PlaneCoords : list
-        Node coordinates of the mesh. Returned if meshobj = False.
-    PlaneConn : list
-        Nodal connectivities of the mesh. Returned if meshobj = False.
     plane : Mesh.mesh
-        Mesh object containing the plane mesh. Returned if meshobj = True (default).
+        Mesh object containing the plane mesh.
+        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
+        the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
+        by running: `NodeCoords, NodeConn = primitives.Extrude(...)`
     """
     # Get rotation between the plane and the xy (z=0) plane
     normal = np.asarray(normal)/np.linalg.norm(normal)
@@ -311,126 +300,13 @@ def Plane(pt, normal, bounds, h, meshobj=True, exact_h=False, ElemType='quad'):
     PlaneConn = GridConn
 
 
-    if meshobj:
-        if 'mesh' in dir(mesh):
-            plane = mesh.mesh(PlaneCoords,PlaneConn,'surf')
-        else:
-            plane = mesh(PlaneCoords,PlaneConn,'surf')
-        return plane
-    return PlaneCoords, PlaneConn
-
-def Extrude(line, distance, step, axis=2, ElemType='quad', meshobj=True):
-    """
-    Extrude a 2D line mesh to a 3D surface
-
-    Parameters
-    ----------
-    line : mesh
-        mesh object of 2D 
-    distance : _type_
-        _description_
-    step : _type_
-        _description_
-    axis : int, optional
-        _description_, by default 2
-    ElemType : str, optional
-        _description_, by default 'quad'
-    meshobj : bool, optional
-        _description_, by default True
-
-    Returns
-    -------
-    NodeCoords : list
-        Node coordinates of the mesh. Returned if meshobj = False.
-    NodeConn : list
-        Nodal connectivities of the mesh. Returned if meshobj = False.
-    extruded : Mesh.mesh
-        Mesh object containing the extruded mesh. Returned if meshobj = True (default).
-    """    
-    NodeCoords = np.array(line.NodeCoords)
-    OriginalConn = np.asarray(line.NodeConn)
-    NodeConn = np.empty((0,4))
-    for i,s in enumerate(np.arange(step,distance+step,step)):
-        temp = np.array(line.NodeCoords)
-        temp[:,axis] += s
-        NodeCoords = np.append(NodeCoords, temp, axis=0)
-
-        NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
-    NodeConn = NodeConn.astype(int)
-    if ElemType == 'tri':
-        NodeConn = converter.quad2tri(NodeConn)
-    if meshobj:
-        if 'mesh' in dir(mesh):
-            extruded = mesh.mesh(NodeCoords,NodeConn,'surf')
-        else:
-            extruded = mesh(NodeCoords,NodeConn,'surf')
-        return extruded
-    return NodeCoords, NodeConn
-
-def Revolve(line, angle, anglestep, center=[0,0,0], axis=2, ElemType='quad', meshobj=True):
-    
-    if np.isscalar(axis):
-        assert axis in (0, 1, 2), 'axis must be either 0, 1, or 2 (indicating x, y, z axes) or a 3 element vector.'
-        if axis == 0:
-            axis = [1, 0, 0]
-        elif axis == 1:
-            axis = [0, 1, 0]
-        else:
-            axis = [0, 0, 1]
+    if 'mesh' in dir(mesh):
+        plane = mesh.mesh(PlaneCoords,PlaneConn,'surf')
     else:
-        assert isinstance(axis, (list, tuple, np.ndarray)), 'axis must be either 0, 1, or 2 (indicating x, y, z axes) or a 3 element vector.'
-        axis = axis/np.linalg.norm(axis)
-    
-    thetas = np.arange(0, angle+anglestep, anglestep)
-    outer_prod = np.outer(axis,axis)
-    cross_prod_matrix = np.zeros((3,3))
-    cross_prod_matrix[0,1] = -axis[2]
-    cross_prod_matrix[1,0] =  axis[2]
-    cross_prod_matrix[0,2] =  axis[1]
-    cross_prod_matrix[2,0] = -axis[1]
-    cross_prod_matrix[1,2] = -axis[0]
-    cross_prod_matrix[2,1] =  axis[0]
+        plane = mesh(PlaneCoords,PlaneConn,'surf')
+    return plane
 
-    rot_matrices = np.cos(thetas)[:,None,None]*np.repeat([np.eye(3)],len(thetas),axis=0) + np.sin(thetas)[:,None,None]*np.repeat([cross_prod_matrix],len(thetas),axis=0) + (1 - np.cos(thetas))[:,None,None]*np.repeat([outer_prod],len(thetas),axis=0)
-
-    R = np.repeat([np.eye(4)],len(thetas),axis=0)
-    R[:,:3,:3] = rot_matrices
-
-    NodeCoords = np.array(line.NodeCoords)
-    OriginalConn = np.asarray(line.NodeConn)
-    NodeConn = np.empty((0,4))
-
-    padded = np.hstack([NodeCoords, np.ones((len(NodeCoords),1))])
-    T = np.array([
-                [1, 0, 0, -center[0]],
-                [0, 1, 0, -center[1]],
-                [0, 0, 1, -center[2]],
-                [0, 0, 0, 1],
-                ])
-    Tinv = np.linalg.inv(T)
-    for i,r in enumerate(R[1:]):
-        temp = np.linalg.multi_dot([Tinv,r,T,padded.T]).T[:,:3]
-        NodeCoords = np.append(NodeCoords, temp, axis=0)
-
-        NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
-
-    NodeConn = NodeConn.astype(int)
-
-    if ElemType == 'tri':
-        NodeConn = converter.quad2tri(NodeConn)
-    NodeCoords, NodeConn, _ = utils.DeleteDuplicateNodes(NodeCoords, NodeConn)
-    NodeCoords, NodeConn = utils.CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf')
-
-    if meshobj:
-        if 'mesh' in dir(mesh):
-            revolve = mesh.mesh(NodeCoords,NodeConn,'surf')
-        else:
-            revolve = mesh(NodeCoords,NodeConn,'surf')
-        return revolve
-    return NodeCoords, NodeConn
-
-
-def Cylinder(bounds, resolution, axis=2, axis_step=None, ElemType='tri', meshobj=True, cap=True):
+def Cylinder(bounds, resolution, axis=2, axis_step=None, ElemType='tri', cap=True):
     """
     Generate an axis-aligned cylindrical surface mesh
 
@@ -450,20 +326,17 @@ def Cylinder(bounds, resolution, axis=2, axis_step=None, ElemType='tri', meshobj
         Specify the element type of the walls of tje cylinder mesh. This can either be 
         'quad' for a quadrilateral mesh or 'tri' for a triangular mesh, by default 'tri'.
         The ends of the cylinder will be triangular regardless of this input.
-    meshobj : bool, optional
-        If True, will return a mesh object, if false, will return NodeCoords, NodeConn
     cap : bool, optional
         If True, will close the ends of the cylinder, otherwise it will leave them open, by 
         default True.
 
     Returns
     -------
-    NodeCoords : list
-        Node coordinates of the mesh. Returned if meshobj = False.
-    NodeConn : list
-        Nodal connectivities of the mesh. Returned if meshobj = False.
     cyl : Mesh.mesh
-        Mesh object containing the cylinder mesh. Returned if meshobj = True (default).
+        Mesh object containing the cylinder mesh.
+        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
+        the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
+        by running: `NodeCoords, NodeConn = primitives.Cylinder(...)`
 
     """    
     bounds = np.asarray(bounds)
@@ -519,11 +392,8 @@ def Cylinder(bounds, resolution, axis=2, axis_step=None, ElemType='tri', meshobj
         cyl.merge(cap2)
         cyl.cleanup()
 
-    if meshobj:
-        return cyl
-    return cyl.NodeCoords, cyl.NodeConn
-        
-        
+    return cyl
+               
 def Sphere(center, radius, theta_resolution=10, phi_resolution=10, ElemType='tri'):
     """
     Generate a sphere (or ellipsoid)
@@ -595,3 +465,135 @@ def Sphere(center, radius, theta_resolution=10, phi_resolution=10, ElemType='tri
 
     return sphere
 
+def Extrude(line, distance, step, axis=2, ElemType='quad'):
+    """
+    Extrude a 2D line mesh to a 3D surface
+
+    Parameters
+    ----------
+    line : mesh
+        mesh object of 2D line mesh
+    distance : scalar
+        Extrusion distance
+    step : scalar
+        Step size in the extrusion direction
+    axis : int, optional
+        Extrusion axis, either 0 (x), 1 (y), or 2 (z), by default 2
+    ElemType : str, optional
+        Specify the element type of the grid mesh. This can either be 'quad' for 
+        a quadrilateral mesh or 'tri' for a triangular mesh, by default 'quad'.
+
+    Returns
+    -------
+    extruded : Mesh.mesh
+        Mesh object containing the extruded mesh.
+        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
+        the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
+        by running: `NodeCoords, NodeConn = primitives.Extrude(...)`
+    """    
+    NodeCoords = np.array(line.NodeCoords)
+    OriginalConn = np.asarray(line.NodeConn)
+    NodeConn = np.empty((0,4))
+    for i,s in enumerate(np.arange(step,distance+step,step)):
+        temp = np.array(line.NodeCoords)
+        temp[:,axis] += s
+        NodeCoords = np.append(NodeCoords, temp, axis=0)
+
+        NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
+    NodeConn = NodeConn.astype(int)
+    if ElemType == 'tri':
+        NodeConn = converter.quad2tri(NodeConn)
+    if 'mesh' in dir(mesh):
+        extruded = mesh.mesh(NodeCoords,NodeConn,'surf')
+    else:
+        extruded = mesh(NodeCoords,NodeConn,'surf')
+    return extruded
+
+def Revolve(line, angle, anglestep, center=[0,0,0], axis=2, ElemType='quad'):
+    """
+    Revolve a 2D line mesh to a 3D surface
+
+    Parameters
+    ----------
+    line : Mesh.mesh
+        Mesh object of 2d line mesh
+    angle : scalar
+        Angle (in radians) to revolve the line by. For a full rotation, angle=2*np.pi
+    anglestep : scalar
+        Step size (in radians) at which to sample the revolution.
+    center : array_like, optional
+        Three element vector denoting the center of revolution (i.e. a point on the axis),
+        by default [0,0,0]
+    axis : int or array_like, optional
+        Axis of revolution. This can be specified as either 0 (x), 1 (y), or 2 (z) or a 
+        three element vector denoting the axis, by default 2.
+    ElemType : str, optional
+        Specify the element type of the grid mesh. This can either be 'quad' for 
+        a quadrilateral mesh or 'tri' for a triangular mesh, by default 'quad'. 
+        If 'quad', some degenerate quads may be converted to tris.
+
+    Returns
+    -------
+    revolve : Mesh.mesh
+        Mesh object containing the revolved mesh.
+        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
+        the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
+        by running: `NodeCoords, NodeConn = primitives.Revolve(...)`
+    """    
+    if np.isscalar(axis):
+        assert axis in (0, 1, 2), 'axis must be either 0, 1, or 2 (indicating x, y, z axes) or a 3 element vector.'
+        if axis == 0:
+            axis = [1, 0, 0]
+        elif axis == 1:
+            axis = [0, 1, 0]
+        else:
+            axis = [0, 0, 1]
+    else:
+        assert isinstance(axis, (list, tuple, np.ndarray)), 'axis must be either 0, 1, or 2 (indicating x, y, z axes) or a 3 element vector.'
+        axis = axis/np.linalg.norm(axis)
+    
+    thetas = np.arange(0, angle+anglestep, anglestep)
+    outer_prod = np.outer(axis,axis)
+    cross_prod_matrix = np.zeros((3,3))
+    cross_prod_matrix[0,1] = -axis[2]
+    cross_prod_matrix[1,0] =  axis[2]
+    cross_prod_matrix[0,2] =  axis[1]
+    cross_prod_matrix[2,0] = -axis[1]
+    cross_prod_matrix[1,2] = -axis[0]
+    cross_prod_matrix[2,1] =  axis[0]
+
+    rot_matrices = np.cos(thetas)[:,None,None]*np.repeat([np.eye(3)],len(thetas),axis=0) + np.sin(thetas)[:,None,None]*np.repeat([cross_prod_matrix],len(thetas),axis=0) + (1 - np.cos(thetas))[:,None,None]*np.repeat([outer_prod],len(thetas),axis=0)
+
+    R = np.repeat([np.eye(4)],len(thetas),axis=0)
+    R[:,:3,:3] = rot_matrices
+
+    NodeCoords = np.array(line.NodeCoords)
+    OriginalConn = np.asarray(line.NodeConn)
+    NodeConn = np.empty((0,4))
+
+    padded = np.hstack([NodeCoords, np.ones((len(NodeCoords),1))])
+    T = np.array([
+                [1, 0, 0, -center[0]],
+                [0, 1, 0, -center[1]],
+                [0, 0, 1, -center[2]],
+                [0, 0, 0, 1],
+                ])
+    Tinv = np.linalg.inv(T)
+    for i,r in enumerate(R[1:]):
+        temp = np.linalg.multi_dot([Tinv,r,T,padded.T]).T[:,:3]
+        NodeCoords = np.append(NodeCoords, temp, axis=0)
+
+        NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
+
+    NodeConn = NodeConn.astype(int)
+
+    if ElemType == 'tri':
+        NodeConn = converter.quad2tri(NodeConn)
+    NodeCoords, NodeConn, _ = utils.DeleteDuplicateNodes(NodeCoords, NodeConn)
+    NodeCoords, NodeConn = utils.CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf')
+
+    if 'mesh' in dir(mesh):
+        revolve = mesh.mesh(NodeCoords,NodeConn,'surf')
+    else:
+        revolve = mesh(NodeCoords,NodeConn,'surf')
+    return revolve
