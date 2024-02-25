@@ -7,7 +7,7 @@ Created on Sat Jan 22 09:18:20 2022
 #%%
 import time
 import sys
-from . import utils, octree
+from . import utils, octree, converter
 import numpy as np
 import scipy
 import copy, warnings
@@ -3986,7 +3986,8 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
     Anchors = []
     AnchorAxis = []
     AnchorDir = []
-    NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
+    # NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
+    NodeValues = np.asarray(NodeValues) - threshold
     if flip:
         NodeValues = -1*NodeValues
     if method == '33':
@@ -4114,6 +4115,194 @@ def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method=
     TriCoords, TriConn = MarchingCubes(DualCoords, DualConn, NodeValues)
             
     return TriCoords, TriConn, root, DualCoords, DualConn, NodeValues
+
+def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,interpolation='linear', method='surface', mixed_elements=False, flip=False):
+    """
+    Marching tetrahedra algorithm for extracting an isosurface from a tetrahedral mesh. This can be used
+    to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).
+
+    Bloomenthal, J. (1994). An Implicit Surface Polygonizer. Graphics Gems, 324-349. https://doi.org/10.1016/b978-0-12-336156-1.50040-9
+
+    Parameters
+    ----------
+    TetNodeCoords : array_like
+        Node coordinates for the input tetrahedral mesh
+    TetNodeConn : array_like
+        Node connectivity for the input tetrahedral mesh. All elements must be tetrahedra.
+    NodeValues : array_like
+        Values at each node in the mesh that are used to extract the isosurface
+    threshold : int, optional
+        Isosurface level, by default 0
+    interpolation : str, optional
+        Interpolation to interpolate the position of the new nodes along the edges
+        of the input mesh, by default 'linear'.
+        'midpoint' - No interpolation is performed, new nodes are placed at the midpoint of edges
+        'linear' - Linear interpolation is performed between adjacent nodes on the input mesh.
+    method : str, optional
+        Determines whether to generate a surface mesh ('surface') or volume mesh ('volume'), 
+        by default 'surface'
+    mixed_elements : bool, optional
+        If True, the generated mesh will have mixed element types (triangles/quadrilaterals, tetrahedra/wedges), otherwise a single element type (triangles, tetrahedra), by default False. For surface
+        meshes, either version is generated directly. For a volume mesh, a mixed mesh is generated initially and then converted to tetrahedra using converter.solid2tets()
+        which results in additional computational cost.
+    flip : bool, optional
+        Flip the interior/exterior of the mesh, by default False.
+        By default, values less than the threshold are assumed to be the "inside" 
+        of the mesh. If the inside is denoted by values greater than the threshold,
+        set flip=True.
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        Node coordinates of the generated mesh
+    NodeConn : list
+        Node connetivity for the generated mesh
+
+
+    Examples
+    --------
+    >>> # Create a uniform tetrahedral grid
+    >>> Grid = primitives.Grid([0,2,0,2,0,2],0.1,ElemType='tet')
+    >>> # Define an implicit function for two spheres and evaluate on the grid
+    >>> func = lambda x,y,z : implicit.union(implicit.sphere(x,y,z,0.3,[0.7,0.7,0.7]),implicit.sphere(x,y,z,0.3,[1.2,1.2,1.2]))
+    >>> NodeValues = func(Grid.NodeCoords[:,0],Grid.NodeCoords[:,1],Grid.NodeCoords[:,2])
+    >>> # Perform marching tetrahedra
+    >>> NodeCoords, NodeConn = contour.MarchingTetrahedra(Grid.NodeCoords,Grid.NodeConn,NodeValues, method='surface')
+
+
+    """    
+    MT_Lookup = np.array([
+            [],                     # 0-0000
+            [[3, 5, 4]],            # 1-0001
+            [[4, 2, 1]],            # 2-0010
+            [[1, 3, 5], [1, 5, 2]], # 3-0011
+            [[0, 3, 1]],            # 4-0100
+            [[1, 0, 5], [1, 5, 4]], # 5-0101
+            [[0, 3, 4], [0, 4, 2]], # 6-0110
+            [[0, 5, 2]],            # 7-0111
+            [[0, 2, 5]],            # 8-1000
+            [[0, 2, 4], [0, 4, 3]], # 9-1001
+            [[0, 1, 4], [0, 4, 5]], # 10-1010
+            [[0, 1, 3]],            # 11-1011
+            [[1, 2, 5], [1, 5, 3]], # 12-1100
+            [[1, 2, 4]],            # 13-1101
+            [[3, 4, 5]],            # 14-1110
+            []                      # 15-1111
+        ],dtype=object)
+
+    MTMixed_Lookup = np.array([
+            [],             # 0-0000
+            [[3, 5, 4]],    # 1-0001
+            [[4, 2, 1]],    # 2-0010
+            [[1, 3, 5, 2]], # 3-0011
+            [[0, 3, 1]],    # 4-0100
+            [[1, 0, 5, 4]], # 5-0101
+            [[0, 3, 4, 2]], # 6-0110
+            [[0, 5, 2]],    # 7-0111
+            [[0, 2, 5]],    # 8-1000
+            [[0, 2, 4, 3]], # 9-1001
+            [[0, 1, 4, 5]], # 10-1010
+            [[0, 1, 3]],    # 11-1011
+            [[1, 2, 5, 3]], # 12-1100
+            [[1, 2, 4]],    # 13-1101
+            [[3, 4, 5]],    # 14-1110
+            []              # 15-1111
+        ],dtype=object)
+
+    MTVMixed_Lookup = np.array([
+            [],                     # 0-0000
+            [[9, 3, 5, 4]],         # 1-0001
+            [[8, 4, 2, 1]],         # 2-0010
+            [[3, 5, 9, 1, 2, 8]],   # 3-0011
+            [[7, 0, 3, 1]],         # 4-0100
+            [[1, 0, 7, 4, 5, 9]],   # 5-0101
+            [[0, 3, 7, 2, 4, 8]],   # 6-0110
+            [[7, 9, 8, 0, 5, 2]],   # 7-0111
+            [[6, 0, 2, 5]],         # 8-1000
+            [[0, 2, 6, 3, 4, 9]],   # 9-1001
+            [[1, 4, 8, 0, 5, 6]],   # 10-1010
+            [[6, 8, 9, 0, 1, 3]],   # 11-1011
+            [[3, 1, 7, 5, 2, 6]],   # 12-1100
+            [[7, 6, 9, 1, 2, 4]],   # 13-1101
+            [[7, 8, 6, 3, 4, 5]],   # 14-1110
+            [[6, 7, 8, 9]]          # 15-1111
+        ],dtype=object)
+    
+    edgeLookup = np.array([
+        [0, 1],  # (0) Edge 0 - Between nodes 0 and 1
+        [1, 2],  # (1) Edge 1
+        [2, 0],  # (2) Edge 2
+        [1, 3],  # (3) Edge 3
+        [2, 3],  # (4) Edge 4
+        [0, 3],  # (5) Edge 5
+        [0, 0],  # (6) Node 0
+        [1, 1],  # (7) Node 1
+        [2, 2],  # (8) Node 2
+        [3, 3],  # (9) Node 3
+        ])
+
+    TetNodeConn = np.asarray(TetNodeConn)
+    NodeValues = np.asarray(NodeValues) - threshold
+    if flip:
+        NodeValues = -1*NodeValues
+
+    # Determine configuration of nodes
+    TetVals = NodeValues[TetNodeConn]
+    inside = TetVals <= 0
+    ints = np.sum(inside * 2**np.arange(0,4)[::-1], axis=1)
+
+    # Query lookup tables
+    if method.lower() == 'surface':
+        if mixed_elements:
+            element_lists = MTMixed_Lookup[ints]
+        else:
+            element_lists = MT_Lookup[ints]
+    elif method.lower() == 'volume':
+        element_lists = MTVMixed_Lookup[ints]
+    else:
+        raise Exception('Invalid method, method must be "surface" or "volume".')
+
+    # Process lookup results
+    tetnum, elem = zip(*[(i,e) for i,lst in enumerate(element_lists) for e in lst if len(lst) > 0])
+    tetnum = np.array(tetnum)
+    nelem = len(tetnum)
+
+    relevant_tets = TetNodeConn[tetnum]
+    interpolation_pairs = np.array([pair for i in range(len(elem)) for pair in relevant_tets[i,edgeLookup[elem[i]]]])
+
+    # Interpolation
+    if interpolation.lower() == 'midpoint':
+        NodeCoords = np.mean(TetNodeCoords[interpolation_pairs],axis=1)
+    elif interpolation.lower() == 'linear':
+        coords1 = TetNodeCoords[interpolation_pairs[:,0]]
+        coords2 = TetNodeCoords[interpolation_pairs[:,1]]
+        vals1 = NodeValues[interpolation_pairs[:,0]][:,None]
+        vals2 = NodeValues[interpolation_pairs[:,1]][:,None]
+        check = np.all(coords1 == coords2, axis=1)
+        NodeCoords = np.copy(coords1)
+        NodeCoords[~check] = coords1[~check] + (0 - vals1[~check])*(coords2[~check] - coords1[~check])/(vals2[~check]-vals1[~check])
+        
+    else:
+        raise Exception('interpolation must be either "midpoint" or "linear"')
+
+    # Format points into NodeCoords, NodeConn
+    if method.lower() == 'surface' and not mixed_elements:
+        NodeConn = np.reshape(np.arange(nelem*3), (nelem, 3))
+    else:
+        lengths = [len(e) for e in elem]
+        sums = np.append([0],np.cumsum(lengths))
+        NodeConn = [[n+sums[i] for n in range(lengths[i])] for i in range(len(lengths))]
+        
+        if method.lower() == 'volume' and not mixed_elements:
+            NodeCoords, NodeConn = converter.solid2tets(NodeCoords, NodeConn)
+
+    NodeCoords,NodeConn,_,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True)
+
+    if method.lower() == 'surface' or (method.lower() == 'volume' and not mixed_elements):
+        # TODO: CleanupDegenerateElements currently doesn't handle volume elements properly
+        NodeCoords,NodeConn = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf')
+
+    return NodeCoords, NodeConn
 
 def MarchingSquaresLookup_Tri(i):
     assert i < 16, 'There are only 16 possible states of the square, i must be less than 16'
@@ -4929,3 +5118,5 @@ def generateLookup():
     # i = 26
     # bits = np.array([int(b) for b in list('{:08b}'.format(i))])
     # lookuptab
+# %%
+ 
