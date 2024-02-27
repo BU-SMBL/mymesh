@@ -317,8 +317,8 @@ def RayBoxesIntersection(pt, ray, xlims, ylims, zlims):
         tmin = (xlims[:,1] - pt[0]) * divx
         tmax = (xlims[:,0] - pt[0]) * divx
     else:
-        tmin = np.sign(xlim[:,0] - pt[0])*np.inf
-        tmax = np.sign(xlim[:,1] - pt[0])*np.inf
+        tmin = np.sign(xlims[:,0] - pt[0])*np.inf
+        tmax = np.sign(xlims[:,1] - pt[0])*np.inf
     
     if ray[1] > 0:
         divy = 1/ray[1]
