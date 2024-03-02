@@ -589,7 +589,7 @@ def Revolve(line, angle, anglestep, center=[0,0,0], axis=2, ElemType='quad'):
 
     if ElemType == 'tri':
         NodeConn = converter.quad2tri(NodeConn)
-    NodeCoords, NodeConn, _ = utils.DeleteDuplicateNodes(NodeCoords, NodeConn)
+    NodeCoords, NodeConn = utils.DeleteDuplicateNodes(NodeCoords, NodeConn)
     NodeCoords, NodeConn = utils.CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf')
 
     if 'mesh' in dir(mesh):

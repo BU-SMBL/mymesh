@@ -1013,7 +1013,7 @@ Octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False
         return NodeVals2, Octree
     return NodeVals2
 
-def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False):
+def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False,return_inv=False):
     """
     DeleteDuplicateNodes Remove nodes that are duplicated in the mesh, either at exactly the same location as another 
     node or a distance < tol apart. Nodes are renumbered and elements reconnected such that the geometry and structure
@@ -1027,15 +1027,37 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False):
         Nodal connectivity list.
     tol : float, optional
         Tolerance value to be used when determining if two nodes are the same. The default is 1e-14.
-
+    return_idx : bool, optional
+        Returns the indices of each row of NodeCoords in the order that they're sorted place into the new array, by default False.
+    return_inv : bool, optional
+        Returns the indices that reverse the operation, by default False.
     Returns
     -------
-    NodeCoords2 : list
+    NewCoords : list
         Updated node coordinates without duplicates.
-    NodeConn2 : list 
+    NewConn : list 
         Updated node connectivity without duplicate nodes.
-    newIds : list
-        List of node ids used to relabel the node connectivity. The new node id for a node referenced in the original mesh can be obtained as newId = newIds[oldId]. This can be used to reorder data that was associated with the original mesh to be consistent with the new mesh.
+    idx : np.ndarray
+        Array of indices that convert from from the original node coordinates to the new node coordinates (NewCoords = [NodeCoords[i] for i in idx])
+    inv : np.ndarray
+        Array of indices that can reverse the operation to convert from from the new node coordinates to old node coordinates (NodeCoords = [NewCoords[i] for i in inv]).
+    
+
+    Examples
+    --------
+    >>> NodeCoords = [
+        [0,0,0],
+        [0,1,0],
+        [1,1,0],
+        [0,0,0],
+        [1,1,0],
+        [1,0,0]
+    ]
+    >>> NodeConn = [[0,1,2],[3,4,5]]
+
+    >>> NewCoords, NewConn, idx, inv = utils.DeleteDuplicateNodes(NodeCoords,NodeConn, return_idx=True,return_inv=True)
+    >>> NewCoords == [NodeCoords[i] for i in idx]
+    >>> NodeCoords == [NewCoords[i] for i in inv]
     
     """
 
@@ -1048,21 +1070,20 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False):
         arrayCoords = np.round(np.array(NodeCoords)/tol)*tol
     else:
         arrayCoords = np.array(NodeCoords)
-    unq,idx,inv = np.unique(arrayCoords, return_inverse=True, return_index=True, axis=0)
-    newIds = np.arange(len(unq))[inv]
+    unq,idx,inv = np.unique(arrayCoords, return_index=True, return_inverse=True, axis=0)
     if type(NodeCoords) is list:
-        NodeCoords2 = np.asarray(NodeCoords)[idx].tolist()
+        NewCoords = np.asarray(NodeCoords)[idx].tolist()
     else:
-        NodeCoords2 = np.asarray(NodeCoords)[idx]
+        NewCoords = np.asarray(NodeCoords)[idx]
     if len(NodeConn) > 0:
-        tempIds = np.append(newIds,-1)
+        tempIds = np.append(inv,-1)
         R = PadRagged(NodeConn,fillval=-1)
-        NodeConn2 = ExtractRagged(tempIds[R],delval=-1)
+        NewConn = ExtractRagged(tempIds[R],delval=-1)
     else:
-        NodeConn2 = NodeConn
-    if return_idx:
-        return NodeCoords2,NodeConn2,newIds,idx
-    return NodeCoords2,NodeConn2,newIds
+        NewConn = NodeConn
+
+    returns = (True, True, return_idx, return_inv)
+    return tuple(output for i,output in enumerate((NewCoords, NewConn, idx, inv)) if returns[i])
 
 def RelabelNodes(NodeCoords,NodeConn,newIds,faces=None):
     """
@@ -1218,7 +1239,7 @@ def DeleteDegenerateElements(NodeCoords,NodeConn,tol=1e-12,angletol=1e-3,strict=
             else:
                 Thinking = False
 
-            NewCoords,NewConn,_ = DeleteDuplicateNodes(NewCoords,NewConn,tol=tol)
+            NewCoords,NewConn = DeleteDuplicateNodes(NewCoords,NewConn,tol=tol)
             NewCoords,NewConn = DeleteDegenerateElements(NewCoords,NewConn,strict=True)
                 
     return NewCoords,NewConn
@@ -1252,10 +1273,26 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf'):
     NewConn : list, array_like
         Updated node connectivity 
     """
+    def rowunique(NodeConn, min_node):
+        # based on unutbu's answer to https://stackoverflow.com/questions/26958233/numpy-row-wise-unique-elements
+        PadConn = PadRagged(NodeConn)
+    
+        weight = 1j*np.linspace(0, PadConn.shape[1], PadConn.shape[0], endpoint=False)
+        uConn = PadConn + weight[:, np.newaxis]
+        u, ind = np.unique(uConn, return_index=True)
+        uConn = -1*np.ones_like(PadConn)
+        np.put(uConn, ind, PadConn.flat[ind])
+        
+        uConn = uConn[np.sum(uConn!=-1,axis=1) >= min_node]
+        NewConn = ExtractRagged(uConn)
+        return NewConn
+
     if Type=='surf':
-        NewConn = [u[i.argsort()].tolist() for u, i in (np.unique(elem, return_index=True) for elem in NodeConn) if len(u) >= 3]
+        NewConn = rowunique(NodeConn, 3)
     elif Type=='vol':
-        NewConn = [u[i.argsort()].tolist() for u, i in (np.unique(elem, return_index=True) for elem in NodeConn) if len(u) >= 3]
+        NewConn = rowunique(NodeConn, 4)
+    else:
+        raise ValueError(f'Type must be "surf" or "vol", not {Type:s}.')
 
     return NodeCoords, NewConn
 
@@ -1357,14 +1394,14 @@ def MergeMesh(NodeCoords1, NodeConn1, NodeCoords2, NodeConn2, NodeVals1=[], Node
         for i in range(len(NodeVals1)):
             MergeVals[i] = NodeVals1[i] + NodeVals2[i]
         if cleanup:
-            MergeCoords,MergeConn,newIds = DeleteDuplicateNodes(MergeCoords,MergeConn)
+            MergeCoords,MergeConn,inv = DeleteDuplicateNodes(MergeCoords,MergeConn,return_inv=True)
             for i in range(len(MergeVals)):
-                MergeVals[i] = [MergeVals[i][j] for j in newIds]
+                MergeVals[i] = [MergeVals[i][j] for j in idx]
                 
             return MergeCoords, MergeConn, MergeVals
     
     elif cleanup:
-        MergeCoords,MergeConn,_ = DeleteDuplicateNodes(MergeCoords,MergeConn)
+        MergeCoords,MergeConn = DeleteDuplicateNodes(MergeCoords,MergeConn)
     return MergeCoords, MergeConn
     
 def DetectFeatures(NodeCoords,SurfConn,angle=25):
@@ -1698,6 +1735,107 @@ def AABB(Points):
                     [mins[0], maxs[1], maxs[2]],
                     ])
     return aabb
+
+def SortRaggedByLength(In, return_idx=False, return_inv=False, return_separators=False):
+    """
+    Sorted a ragged list of lists by the length of each sublist
+
+    Parameters
+    ----------
+    In : list
+        List of lists to be sorted
+    return_idx : bool, optional
+        Returns the indices of each row of In in the order that they're sorted into Out, by default False.
+    return_inv : bool, optional
+        Returns the indices that reverse the sorting operation, by default False.
+    return_separators : bool, optional
+        Returns the indices that separate sections of the list by length. Determining these separators requires a small amount of additional work, by default False. 
+
+    Returns
+    -------
+    Out : list
+        List of lists sorted by row length
+    idx : np.ndarray, optional
+        Indices used to reorder In to Out. These are the indices of each row of In in the order that they're sorted into Out. Returned if return_idx is True.
+    inv : np.ndarray, optional
+        Indices to recover the original List (in) from the output (Out). Return if return_inv us True.
+    separators : np.ndarray, optional
+        Indices of Out that separate sections of the list by length. These separators will always include 0 as the first separator and len(Out) as the last separator. With the exception of the last separator, each separator is the start of a new section and are set such that the sublists of equal-length lists can be accessed by slices with two adjacent separators. 
+
+    Examples
+    --------
+    >>> In = [[0,1], [2, 3, 4, 5], [6, 7], [8, 9, 10]]
+    >>> Out, idx, inv = utils.SortRaggedByLength(In, return_idx=True, return_inv=True)
+    >>> Out
+    >>> [In[i] for i in idx] == Out
+    >>> [Out[i] for i in inv] == In
+    """
+    lengths = np.array([len(row) for row in In])
+    idx = lengths.argsort()
+    Out = [In[i] for i in idx]
+
+    if return_separators:
+        separators = np.concatenate([[0], np.where(np.diff(lengths[idx])!=0)[0]+1, [len(Out)]])
+    else:
+        separators = None
+    
+    if return_inv:
+        inv = np.zeros(len(idx),dtype=int) 
+        inv[idx] = np.arange(len(idx),dtype=int)
+    else:
+        inv = None
+
+    returns = (True, return_idx, return_inv, return_separators)
+    if sum(returns) > 1:
+        return tuple(output for i,output in enumerate((Out, idx, inv, separators)) if returns[i])
+    return Out
+
+def SplitRaggedByLength(In, return_idx=False, return_inv=False):
+    """
+    Split a ragged list of lists into a list of array_like groupings of the original list in which all rows are equal length. The returned list will be the length of the number of unique row lengths of the original list of lists.
+
+    Parameters
+    ----------
+    In : list
+        List of lists to be sorted
+    return_idx : bool, optional
+        Returns the indices of each row of In in the order that they're sorted into Out, by default False.
+
+    Returns
+    -------
+    Out : list
+        List of array_like groupings of the original list in which all rows are equal length.
+    idx : np.ndarray, optional
+        Indices used to reorder In to Out. These are the indices of each row of In in the order that they're sorted into Out. Returned if return_idx is True.
+    inv : np.ndarray, optional
+        Indices to recover the original List (in) from the output (Out). Return if return_inv us True.
+    Examples
+    --------
+    >>> In = [[0,1], [2, 3, 4, 5], [6, 7], [8, 9, 10]]
+    >>> Out = utils.SplitRaggedByLength(In)
+    >>> Out
+    """    
+    out = SortRaggedByLength(In, return_idx=return_idx, return_inv=return_inv, return_separators=True)
+
+    out = list(out)[::-1]
+    In_sorted, In_idx, In_inv, separators = [out.pop() if b else None for b in (True, return_idx, return_inv, True)]
+
+    Out = [In_sorted[separators[i]:separators[i+1]] for i in range(len(separators)-1)]
+
+    if return_idx:
+        idx = [In_idx[separators[i]:separators[i+1]] for i in range(len(separators)-1)]
+    else:
+        idx = None
+
+    if return_inv:
+        inv = [In_inv[separators[i]:separators[i+1]] for i in range(len(separators)-1)]
+    else:
+        inv = None
+
+    returns = (True, return_idx, return_inv)
+    if sum(returns) > 1:
+        return tuple(output for i,output in enumerate((Out, idx, inv)) if returns[i])
+    return Out
 
 def PadRagged(In,fillval=-1):
     """

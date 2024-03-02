@@ -385,7 +385,7 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
     else:
         hexmethod = '1to6'
     TetCoords,fromhex = hex2tet(NodeCoords,hexs,method=hexmethod)
-    TetCoords,fromwdg = wedge2tet(TetCoords,wdgs,method='1to20')
+    TetCoords,fromwdg = wedge2tet(TetCoords,wdgs,method='1to14')
     TetCoords,frompyr = pyramid2tet(TetCoords,pyrs,method='1to4')
     TetConn = tets + frompyr + fromwdg + fromhex
     if return_ids:
@@ -1695,7 +1695,7 @@ def surf2voxel(SurfCoords,SurfConn,h,Octree='generate',mode='any'):
         elif mode.lower() == 'all':
             VoxelConn = GridConn[np.all(ElemInsides,axis=1)]
         else:
-            raise Exception('mode must be "any", "all", or "centroid".')
+            raise ValueError('mode must be "any", "all", or "centroid".')
 
     VoxelCoords,VoxelConn,_ = removeNodes(GridCoords,VoxelConn)
     return VoxelCoords,VoxelConn

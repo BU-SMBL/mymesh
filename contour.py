@@ -3623,7 +3623,7 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', metho
             
     NewConn = np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F')
     if cleanup:
-        NewCoords,NewConn,_,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
+        NewCoords,NewConn,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
         if (interpolation=='linear' or interpolation=='cubic') and method=='triangle':
             NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
             
@@ -3726,7 +3726,7 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
                 if len(elem) > 0:
                     NewConn.append(elem)  
     if cleanup:                  
-        NewCoords,NewConn,_,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
+        NewCoords,NewConn,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
         if interpolation=='linear' and method=='triangle':
             NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
     else:
@@ -3774,7 +3774,9 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         X,Y,Z = np.meshgrid(x1,y1,z1)
         Xv, Yv, Zv = np.meshgrid(np.arange(-Padding,I.shape[2]+(1+Padding)),
                                  np.arange(-Padding,I.shape[1]+(1+Padding)),
-                                 np.arange(-Padding,I.shape[0]+(1+Padding)))*np.asarray(h)[:,None,None,None]
+                                 np.arange(-Padding,I.shape[0]+(1+Padding)),
+                                 indexing='ij'
+                                 )*np.asarray(h)[:,None,None,None]
 
         X -= Padding*h[0]
         Y -= Padding*h[1]
@@ -3783,12 +3785,14 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         
         # TODO: This is major bottleneck for cubic
         interp = scipy.interpolate.RegularGridInterpolator((z1,y1,x1),I,fill_value=None,method='linear',bounds_error=False)
-        Iv = interp((Zv.flatten(),Yv.flatten(),Xv.flatten())).reshape(Xv.shape)
+        Iv = interp((Xv.flatten(),Yv.flatten(),Zv.flatten())).reshape(Xv.shape)
         X = Xv; Y = Yv; Z = Zv; I = Iv; 
     else:
         X, Y, Z = np.meshgrid(np.arange(-Padding,I.shape[0]+(Padding)),
                                  np.arange(-Padding,I.shape[1]+(Padding)),
-                                 np.arange(-Padding,I.shape[2]+(Padding)))*np.asarray(h)[:,None,None,None]
+                                 np.arange(-Padding,I.shape[2]+(Padding)),
+                                 indexing='ij'
+                                 )*np.asarray(h)[:,None,None,None]
         I = np.pad(I,Padding,mode=edgemode)
     edgeLookup = np.array([
         [0, 1],  # Edge 0 - Between nodes 0 and 1
@@ -3815,6 +3819,8 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     
     vals = I[icubes,jcubes,kcubes]
     inside = (vals <= 0).astype(int)
+    if not np.any(inside):
+        return np.empty((0,3)), np.empty((0,3))
     tableIdx = np.dot(inside, 2**np.arange(inside.shape[1] - 1, -1, -1))
     
     if method == 'original':
@@ -3896,9 +3902,10 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
             
             # overwrite with quadratic for a ~ 0
             near0 = np.isclose(a,0)
-            roots[near0] = np.vstack([(-c[near0] + np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]), 
-                                       (-c[near0] - np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]),
-                                        np.repeat(np.nan,len(b[near0]))]).T
+            with np.errstate(divide='ignore', invalid='ignore'):
+                roots[near0] = np.vstack([(-c[near0] + np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]), 
+                                        (-c[near0] - np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]),
+                                            np.repeat(np.nan,len(b[near0]))]).T
             Roots.append(roots)
         xRoots = Roots[0]
         yRoots = Roots[1]
@@ -3906,38 +3913,39 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         
         NewCoords = np.nan*np.ones((v.shape[0],3))
         eps = 1e-10
-        xCheck = (x[xbool,1,None] <= xRoots) & (x[xbool,2,None] >= xRoots) & np.isreal(xRoots)
-        xcubic = np.repeat(False,len(xbool)); xlinear = np.repeat(False,len(xbool))
-        xcubic[xbool] = np.sum(xCheck,axis=1)==1
-        xlinear[xbool] = np.sum(xCheck,axis=1)!=1
-        xlin = x[xbool][np.sum(xCheck,axis=1)!=1]; vxlin = v[xbool][np.sum(xCheck,axis=1)!=1]; 
-        NewCoords[xcubic,0] = xRoots[np.sum(xCheck,axis=1)==1][xCheck[np.sum(xCheck,axis=1)==1]]
-        # Fall back to linear for any failed interpolations
-        NewCoords[xlinear,0] = xlin[:,1] + np.nan_to_num((0-vxlin[:,1])*(xlin[:,2]-xlin[:,1])/(vxlin[:,2]-vxlin[:,1]))
-        NewCoords[xbool,1] = y[xbool,1]
-        NewCoords[xbool,2] = z[xbool,1]
-        
-        yCheck = (y[ybool,1,None] <= yRoots) & (y[ybool,2,None] >= yRoots) & np.isreal(yRoots)
-        ycubic = np.repeat(False,len(ybool)); ylinear = np.repeat(False,len(ybool))
-        ycubic[ybool] = np.sum(yCheck,axis=1)==1
-        ylinear[ybool] = np.sum(yCheck,axis=1)!=1
-        ylin = y[ybool][np.sum(yCheck,axis=1)!=1]; vylin = v[ybool][np.sum(yCheck,axis=1)!=1]; 
-        NewCoords[ybool,0] = x[ybool,1]
-        NewCoords[ycubic,1] = yRoots[np.sum(yCheck,axis=1)==1][yCheck[np.sum(yCheck,axis=1)==1]]
-        # Fall back to linear for any failed interpolations
-        NewCoords[ylinear,1] = ylin[:,1] + np.nan_to_num((0-vylin[:,1])*(ylin[:,2]-ylin[:,1])/(vylin[:,2]-vylin[:,1]))
-        NewCoords[ybool,2] = z[ybool,1]
-        
-        zCheck = (z[zbool,1,None] <= zRoots) & (z[zbool,2,None] >= zRoots) & np.isreal(zRoots)
-        zcubic = np.repeat(False,len(zbool)); zlinear = np.repeat(False,len(zbool))
-        zcubic[zbool] = np.sum(zCheck,axis=1)==1
-        zlinear[zbool] = np.sum(zCheck,axis=1)!=1
-        zlin = z[zbool][np.sum(zCheck,axis=1)!=1]; vzlin = v[zbool][np.sum(zCheck,axis=1)!=1]; 
-        NewCoords[zbool,0] = x[zbool,1]
-        NewCoords[zbool,1] = y[zbool,1]
-        NewCoords[zcubic,2] = zRoots[np.sum(zCheck,axis=1)==1][zCheck[np.sum(zCheck,axis=1)==1]]
-        # Fall back to linear for any failed interpolations
-        NewCoords[zlinear,2] = zlin[:,1] + np.nan_to_num((0-vzlin[:,1])*(zlin[:,2]-zlin[:,1])/(vzlin[:,2]-vzlin[:,1]))
+        with np.errstate(divide='ignore', invalid='ignore'):
+            xCheck = (x[xbool,1,None] <= xRoots) & (x[xbool,2,None] >= xRoots) & np.isreal(xRoots)
+            xcubic = np.repeat(False,len(xbool)); xlinear = np.repeat(False,len(xbool))
+            xcubic[xbool] = np.sum(xCheck,axis=1)==1
+            xlinear[xbool] = np.sum(xCheck,axis=1)!=1
+            xlin = x[xbool][np.sum(xCheck,axis=1)!=1]; vxlin = v[xbool][np.sum(xCheck,axis=1)!=1]; 
+            NewCoords[xcubic,0] = xRoots[np.sum(xCheck,axis=1)==1][xCheck[np.sum(xCheck,axis=1)==1]]
+            # Fall back to linear for any failed interpolations
+            NewCoords[xlinear,0] = xlin[:,1] + np.nan_to_num((0-vxlin[:,1])*(xlin[:,2]-xlin[:,1])/(vxlin[:,2]-vxlin[:,1]))
+            NewCoords[xbool,1] = y[xbool,1]
+            NewCoords[xbool,2] = z[xbool,1]
+            
+            yCheck = (y[ybool,1,None] <= yRoots) & (y[ybool,2,None] >= yRoots) & np.isreal(yRoots)
+            ycubic = np.repeat(False,len(ybool)); ylinear = np.repeat(False,len(ybool))
+            ycubic[ybool] = np.sum(yCheck,axis=1)==1
+            ylinear[ybool] = np.sum(yCheck,axis=1)!=1
+            ylin = y[ybool][np.sum(yCheck,axis=1)!=1]; vylin = v[ybool][np.sum(yCheck,axis=1)!=1]; 
+            NewCoords[ybool,0] = x[ybool,1]
+            NewCoords[ycubic,1] = yRoots[np.sum(yCheck,axis=1)==1][yCheck[np.sum(yCheck,axis=1)==1]]
+            # Fall back to linear for any failed interpolations
+            NewCoords[ylinear,1] = ylin[:,1] + np.nan_to_num((0-vylin[:,1])*(ylin[:,2]-ylin[:,1])/(vylin[:,2]-vylin[:,1]))
+            NewCoords[ybool,2] = z[ybool,1]
+            
+            zCheck = (z[zbool,1,None] <= zRoots) & (z[zbool,2,None] >= zRoots) & np.isreal(zRoots)
+            zcubic = np.repeat(False,len(zbool)); zlinear = np.repeat(False,len(zbool))
+            zcubic[zbool] = np.sum(zCheck,axis=1)==1
+            zlinear[zbool] = np.sum(zCheck,axis=1)!=1
+            zlin = z[zbool][np.sum(zCheck,axis=1)!=1]; vzlin = v[zbool][np.sum(zCheck,axis=1)!=1]; 
+            NewCoords[zbool,0] = x[zbool,1]
+            NewCoords[zbool,1] = y[zbool,1]
+            NewCoords[zcubic,2] = zRoots[np.sum(zCheck,axis=1)==1][zCheck[np.sum(zCheck,axis=1)==1]]
+            # Fall back to linear for any failed interpolations
+            NewCoords[zlinear,2] = zlin[:,1] + np.nan_to_num((0-vzlin[:,1])*(zlin[:,2]-zlin[:,1])/(vzlin[:,2]-vzlin[:,1]))
         
     elif interpolation == "linear" or interpolation == "midpoint":
         
@@ -3973,7 +3981,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
             
     NewConn = np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F')
     if cleanup:
-        NewCoords,NewConn,_,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
+        NewCoords,NewConn,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
         if (interpolation=='linear' or interpolation=='cubic') and method=='triangle':
             NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
             
@@ -4092,7 +4100,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
                 if len(elem) > 0:
                     TriNodeConn.append(elem)  
                       
-    TriNodeCoords,TriNodeConn,_,Idx = utils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,return_idx=True)
+    TriNodeCoords,TriNodeConn,Idx = utils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,return_idx=True)
     if interpolation=='linear':
         TriNodeCoords,TriNodeConn = utils.DeleteDegenerateElements(TriNodeCoords,TriNodeConn,strict=True)
     if return_anchors: 
@@ -4240,7 +4248,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,inter
         [2, 2],  # (8) Node 2
         [3, 3],  # (9) Node 3
         ])
-
+    TetNodeCoords = np.asarray(TetNodeCoords)
     TetNodeConn = np.asarray(TetNodeConn)
     NodeValues = np.asarray(NodeValues) - threshold
     if flip:
@@ -4260,7 +4268,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,inter
     elif method.lower() == 'volume':
         element_lists = MTVMixed_Lookup[ints]
     else:
-        raise Exception('Invalid method, method must be "surface" or "volume".')
+        raise ValueError('Invalid method, method must be "surface" or "volume".')
 
     # Process lookup results
     tetnum, elem = zip(*[(i,e) for i,lst in enumerate(element_lists) for e in lst if len(lst) > 0])
@@ -4268,38 +4276,46 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,inter
     nelem = len(tetnum)
 
     relevant_tets = TetNodeConn[tetnum]
-    interpolation_pairs = np.array([pair for i in range(len(elem)) for pair in relevant_tets[i,edgeLookup[elem[i]]]])
+    
+    PadElem = utils.PadRagged(elem)
+    PadEdgeLookup = np.vstack([edgeLookup, [-1,-1]])
+    pad_relevant_tets = np.hstack([relevant_tets, -1*np.ones((len(elem),1))])
+    
+    lookup_indices = pad_relevant_tets[:, PadEdgeLookup]
+    interpolation_pairs = (lookup_indices[np.arange(len(elem))[:, None], PadElem]).reshape((np.prod(PadElem.shape),2))
+    interpolation_pairs = (interpolation_pairs[np.any(interpolation_pairs!=-1,axis=1)]).astype(int)
+    
+    uinterpolation_pairs,inv = np.unique(interpolation_pairs,axis=0,return_inverse=True)
 
     # Interpolation
     if interpolation.lower() == 'midpoint':
-        NodeCoords = np.mean(TetNodeCoords[interpolation_pairs],axis=1)
+        NodeCoords = np.mean(TetNodeCoords[uinterpolation_pairs],axis=1)
     elif interpolation.lower() == 'linear':
-        coords1 = TetNodeCoords[interpolation_pairs[:,0]]
-        coords2 = TetNodeCoords[interpolation_pairs[:,1]]
-        vals1 = NodeValues[interpolation_pairs[:,0]][:,None]
-        vals2 = NodeValues[interpolation_pairs[:,1]][:,None]
-        check = np.all(coords1 == coords2, axis=1)
-        NodeCoords = np.copy(coords1)
-        NodeCoords[~check] = coords1[~check] + (0 - vals1[~check])*(coords2[~check] - coords1[~check])/(vals2[~check]-vals1[~check])
-        
+        check = uinterpolation_pairs[:,0] != uinterpolation_pairs[:,1]
+        coords1 = TetNodeCoords[uinterpolation_pairs[check,0]]
+        coords2 = TetNodeCoords[uinterpolation_pairs[check,1]]
+        vals1 = NodeValues[uinterpolation_pairs[check,0]][:,None]
+        vals2 = NodeValues[uinterpolation_pairs[check,1]][:,None]
+        NodeCoords = np.copy(TetNodeCoords[uinterpolation_pairs[:,0]])
+        NodeCoords[check] = coords1 + (0 - vals1)*(coords2 - coords1)/(vals2-vals1)
+         
     else:
         raise Exception('interpolation must be either "midpoint" or "linear"')
 
     # Format points into NodeCoords, NodeConn
     if method.lower() == 'surface' and not mixed_elements:
-        NodeConn = np.reshape(np.arange(nelem*3), (nelem, 3))
+        NodeConn = inv[np.reshape(np.arange(nelem*3), (nelem, 3))]
     else:
         lengths = [len(e) for e in elem]
         sums = np.append([0],np.cumsum(lengths))
-        NodeConn = [[n+sums[i] for n in range(lengths[i])] for i in range(len(lengths))]
+        NodeConn = [[inv[n+sums[i]] for n in range(lengths[i])] for i in range(len(lengths))]
         
         if method.lower() == 'volume' and not mixed_elements:
             NodeCoords, NodeConn = converter.solid2tets(NodeCoords, NodeConn)
 
-    NodeCoords,NodeConn,_,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True)
+    NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True)
 
     if method.lower() == 'surface' or (method.lower() == 'volume' and not mixed_elements):
-        # TODO: CleanupDegenerateElements currently doesn't handle volume elements properly
         NodeCoords,NodeConn = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf')
 
     return NodeCoords, NodeConn

@@ -372,8 +372,7 @@ def NodeSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors,Stiffness=1,FixedNodes
     
 def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,FixedNodes=set(),FixFeatures=False):
     """
-    LocalLaplacianSmoothing Performs iterative Laplacian smoothing, repositioning each node
-    to the center of its adjacent nodes.
+    LocalLaplacianSmoothing Performs iterative Laplacian smoothing, repositioning each node to the center of its adjacent nodes.
 
     Parameters
     ----------
@@ -394,24 +393,6 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,Fixed
     NewCoords : list
         List of updated nodal coordinates.
     """    
-    # if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
-    
-    # if FixFeatures:
-    #     edges,corners = utils.DetectFeatures(NodeCoords,NodeConn)
-    #     FixedNodes.update(edges)
-    #     FixedNodes.update(corners)
-
-
-    # Nodes = set(range(len(NodeCoords))).difference(FixedNodes)
-    # if not NodeNeighbors: NodeNeighbors = utils.getNodeNeighbors(NodeCoords, NodeConn)
-    # NewCoords = copy.copy(NodeCoords)#[node for node in NodeCoords]
-    # OldCoords = copy.copy(NodeCoords)
-    # for it in range(iterate):        
-    #     for i in Nodes:
-    #         Ni = len(NodeNeighbors[i])
-    #         if Ni > 0:
-    #             NewCoords[i] = (1/Ni * np.sum([OldCoords[NodeNeighbors[i][j]] for j in range(len(NodeNeighbors[i]))],axis=0)).tolist() 
-    #     OldCoords = copy.copy(NewCoords)
     if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
     if FixFeatures:
         edges,corners = utils.DetectFeatures(NodeCoords,NodeConn)
@@ -421,7 +402,8 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,Fixed
     ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
     lens = np.array([len(n) for n in NodeNeighbors])
     r = utils.PadRagged(NodeNeighbors,fillval=-1)
-    FreeNodes = list(set(range(len(NodeCoords))).difference(FixedNodes))
+    idx = np.unique(NodeConn)
+    FreeNodes = list(set(idx).difference(FixedNodes))
     ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
     
     ElemNormals = utils.CalcFaceNormal(ArrayCoords[:-1],NodeConn)
@@ -439,10 +421,8 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,Fixed
 def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),FixFeatures=False):
         
     """
-    TangentialLaplacianSmoothing Performs iterative Laplacian smoothing, repositioning each node
-    to the center of its adjacent nodes. Primarily for use on surface meshes, not well defined for 
-    volume meshes.
-    Ohtake, Y., Belyaev, A., & Pasko, A. (2003). Dynamic mesh optimization for polygonized implicit surfaces with sharp features. Visual Computer, 19(2–3), 115–126. https://doi.org/10.1007/s00371-002-0181-z
+    TangentialLaplacianSmoothing Performs iterative Laplacian smoothing, repositioning each node to the center of its adjacent nodes. Primarily for use on surface meshes, not well defined for volume meshes.
+    Ohtake, Y., Belyaev, A., & Pasko, A. (2003). Dynamic mesh optimization for polygonized implicit surfaces with sharp features. Visual Computer, 19(2-3), 115-126. https://doi.org/10.1007/s00371-002-0181-z
 
     Parameters
     ----------
@@ -470,7 +450,9 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),Fi
     ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
     lens = np.array([len(n) for n in NodeNeighbors])
     r = utils.PadRagged(NodeNeighbors,fillval=-1)
-    FreeNodes = list(set(range(len(NodeCoords))).difference(FixedNodes))
+    idx = np.unique(NodeConn)
+    FreeNodes = list(set(idx).difference(FixedNodes))
+
     ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
     
     ElemNormals = utils.CalcFaceNormal(ArrayCoords[:-1],NodeConn)
@@ -482,7 +464,8 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),Fi
         R = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
         ArrayCoords[FreeNodes] += R[FreeNodes]
 
-    NewCoords = ArrayCoords[:-1]
+    NewCoords = np.copy(NodeCoords)
+    NewCoords[idx] = ArrayCoords[idx]
     return NewCoords
 
 def GlobalLaplacianSmoothing(NodeCoords,NodeConn,FeatureNodes=[],FixedNodes=set(),FeatureWeight=1,BaryWeight=1/3):
@@ -1052,7 +1035,7 @@ def Contract(NodeCoords, NodeConn, h, iterate='converge', FixedNodes=set(), FixF
         if k == 0:
             break
 
-    NewCoords,NewConn,_ = utils.DeleteDuplicateNodes(NewCoords,NewConn)
+    NewCoords,NewConn = utils.DeleteDuplicateNodes(NewCoords,NewConn)
 
     if type(NewCoords) is np.ndarray: NewCoords = NewCoords.tolist()
     return NewCoords, NewConn

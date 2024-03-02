@@ -33,7 +33,7 @@ def Triangulate(NodeCoords,Constraints=None,method='Flips',tol=1e-8):
     Points = np.asarray(NodeCoords)
 
     if Constraints is None or len(Constraints) == 0:
-        Points,_,newId,idx = utils.DeleteDuplicateNodes(Points,[],return_idx=True,tol=tol)
+        Points,_,idx = utils.DeleteDuplicateNodes(Points,[],return_idx=True,tol=tol)
         if method == 'NonDelauanay':
             Hull = ConvexHull_GiftWrapping(Points,IncludeCollinear=True)
             NodeConn = idx[TriangleSplittingTriangulation(Points,Hull=Hull)]
@@ -266,7 +266,7 @@ def SplitConstraints_2d(NodeCoords,Constraints,tol=1e-12):
             NewConstraints = np.append(NewConstraints,np.vstack([np.arange(0,len(ixsort)-1),np.arange(1,len(ixsort))]).T+len(NodeCoords),axis=0)
             NodeCoords = np.append(NodeCoords,ixsort,axis=0)
 
-    NodeCoords, Constraints, _ = utils.DeleteDuplicateNodes(NodeCoords,NewConstraints,tol=10*tol)
+    NodeCoords, Constraints = utils.DeleteDuplicateNodes(NodeCoords,NewConstraints,tol=10*tol)
     Constraints = np.unique([c for c in Constraints if c[0] != c[1]],axis=0)
     NodeCoords = np.asarray(NodeCoords)
 

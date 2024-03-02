@@ -213,7 +213,7 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
                 Constraints = np.transpose([np.arange(3,len(SplitGroupNodes[j]),2), np.arange(4,len(SplitGroupNodes[j]),2)])
 
                 # Reduce node list
-                SplitGroupNodes[j],_,newId,idx = utils.DeleteDuplicateNodes(SplitGroupNodes[j],[],return_idx=True,tol=eps)
+                SplitGroupNodes[j],_,idx,newId = utils.DeleteDuplicateNodes(SplitGroupNodes[j],[],return_idx=True,return_inv=True,tol=eps)
 
                 Constraints = newId[Constraints]
                 Constraints = np.unique(np.sort(Constraints,axis=1),axis=0)
