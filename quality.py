@@ -537,15 +537,13 @@ def Volume(NodeCoords,NodeConn,verbose=False):
 
     if verbose:
         minVol = min(V)
-        minOrd = np.floor(np.log10(minVol))
         maxVol = max(V)
-        maxOrd = np.floor(np.log10(maxVol))
         meanVol = np.mean(V)
         meanOrd = np.floor(np.log10(meanVol))
         print('------------------------------------------')
-        print(f'Minimum Volume: {minVol/10**minOrd:.3f}e{minOrd:.0f} on Element {np.where(V==minVol)[0][0]:.0f}')
-        print(f'Maximum Volume: {maxVol/10**maxOrd:.3f}e{maxOrd:.0f} on Element {np.where(V==maxVol)[0][0]:.0f}')
-        print(f'Mean Volume: {meanVol/10**meanOrd:.3f}e{meanOrd:.0f}')
+        print(f'Minimum Volume: {minVol:.2e} on Element {np.where(V==minVol)[0][0]:.0f}')
+        print(f'Maximum Volume: {maxVol:.2e} on Element {np.where(V==maxVol)[0][0]:.0f}')
+        print(f'Mean Volume: {meanVol:.2e}')
         print('------------------------------------------')
     return V
 
