@@ -14,6 +14,195 @@ import sys, os, time, copy, warnings, bisect
 
 from . import utils, converter, contour, quality, improvement, TetGen, rays, octree, mesh, primitives
 
+# Mesh generators
+def VoxelMesh(func, bounds, h, threshold=0, threshold_dir=-1, mode='any', args=(), kwargs={}):
+    """
+    VoxelMesh Generate voxel mesh of an implicit function
+
+    Parameters
+    ----------
+    func : function
+        Implicit function that describes the geometry of the object to be meshed. The function should be of the form v = f(x,y,z,*args,**kwargs) where x, y, and z are 1D numpy arrays of x, y and z coordinates and v is a 1D numpy array of function values. Additional arguments and keyword arguments may be passed through args and kwargs.
+    bounds : array_like
+        6 element array, list, or tuple with the minimum and maximum bounds in each direction that the function will be evaluated. This should be formatted as: [xmin, xmax, ymin, ymax, zmin, zmax]
+    h : scalar, tuple
+        Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).
+    threshold : scalar
+        Isovalue threshold to use for keeping/removing elements, by default 0.
+    threshold_dir : signed integer
+        If threshold_dir is negative (default), values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_dir is positive, by default -1.
+    mode : str, optional
+        Mode for determining which elements are kept, by default 'any'.
+        Voxels will be kept if:
+        'any' - if any node of a voxel is inside the surface, 
+        'all' - if all nodes of a voxel are inside the surface, 
+        'centroid' - if the centroid of the voxel is inside the surface. Centroids performs additional evaluation of the function, which could slow mesh generation for expensive to evaluate functions,
+        'boundary' - if the voxel contains values above and below the threshold,
+        'notrim' - all voxels are kept
+    args : tuple, optional
+        Tuple of additional positional arguments for func, by default ().
+    kwargs : dict, optional
+        Dictionary of additional keyword arguments for func, by default {}
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        List of nodal coordinates for the voxel mesh
+    NodeConn : np.ndarray
+        Nodal connectivity list for the voxel mesh 
+    NodeValues : np.ndarray
+        Function values evaluated at each point
+
+    """        
+    
+    if not isinstance(h, (list, tuple, np.ndarray)):
+        h = (h,h,h)
+
+    NodeCoords, GridConn = primitives.Grid(bounds, h, exact_h=False)
+    NodeVals = func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2], *args, **kwargs)
+    if np.sign(threshold_dir) == 1:
+        NodeVals = -1*NodeVals
+        threshold = -1*threshold
+
+    if np.min(NodeVals) >= threshold:
+        return [], []
+    if mode != 'notrim':
+        if mode.lower() == 'centroid':
+            centroids = utils.Centroids(NodeCoords, GridConn)
+            Inside = func(centroids[:,0], centroids[:,1], centroids[:,2]) <= threshold
+            VoxelConn = GridConn[Inside]
+        else:
+            Inside = NodeVals <= threshold
+            ElemInsides = Inside[GridConn]
+
+            if mode.lower() == 'any':
+                VoxelConn = GridConn[np.any(ElemInsides,axis=1)]
+            elif mode.lower() == 'all':
+                VoxelConn = GridConn[np.all(ElemInsides,axis=1)]
+            elif mode.lower() == 'boundary':
+                VoxelConn = GridConn[np.any(ElemInsides,axis=1) & ~np.all(ElemInsides,axis=1)]
+            else:
+                raise Exception('mode must be "any", "all", "centroid", "boundary", or "notrim".')
+
+        NodeCoords, NodeConn, OriginalIds = converter.removeNodes(NodeCoords,VoxelConn)
+        NodeVals = NodeVals[OriginalIds]
+    else:   
+        NodeConn = GridConn
+    
+    return NodeCoords, NodeConn, NodeVals
+
+def SurfaceMesh(func, bounds, h, threshold=0, threshold_dir=-1, method='mc', interpolation='linear', args=(), kwargs={}):
+    """
+    Generate a surface mesh of an implicit function 
+
+    Parameters
+    ----------
+    func : function
+        Implicit function that describes the geometry of the object to be meshed. The function should be of the form v = f(x,y,z,*args,**kwargs) where x, y, and z are 1D numpy arrays of x, y and z coordinates and v is a 1D numpy array of function values. For method='mc', x, y, and z will be 3D coordinate arrays and v must be 3D as well. Additional arguments and keyword arguments may be passed through args and kwargs.
+    bounds : array_like
+        6 element array, list, or tuple with the minimum and maximum bounds in each direction that the function will be evaluated. This should be formatted as: [xmin, xmax, ymin, ymax, zmin, zmax]
+    h : scalar, tuple
+        Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).
+    threshold : scalar
+        Isovalue threshold to use for keeping/removing elements, by default 0.
+    threshold_dir : signed integer
+        If threshold_dir is negative (default), values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_dir is positive, by default -1.
+    method : str, optional
+        Surface triangulation method, by default 'mc'.
+        'mc' : Marching cubes (see contour.MarchingCubesImage) (default)
+        'mc33' : Marching cubes 33 (see contour.MarchingCubes)
+        'mt' : Marching tetrahedra (see contour.MarchingTetrahedra)
+    interpolation : str, optional
+        Method of interpolation used for placing the vertices on the approximated isosurface. This can be 'midpoint', 'linear', or 'cubic', by default 'linear'. If 'cubic' is selected, method is overridden to be 'mc'. 
+    args : tuple, optional
+        Tuple of additional positional arguments for func, by default ().
+    kwargs : dict, optional
+        Dictionary of additional keyword arguments for func, by default {}.
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        List of nodal coordinates for the surface mesh
+    NodeConn : np.ndarray
+        Nodal connectivity list for the surface mesh 
+    """
+
+    if not isinstance(h, (list, tuple, np.ndarray)):
+        h = (h,h,h)
+
+    if np.sign(threshold_dir) == 1:
+        flip = True
+    else:
+        flip = False
+
+    if method == 'mc' or interpolation=='cubic':
+        if method != 'mc':
+            warnings.warn('Using cubic interpolation overrides contour method to be marching cubes ("mc").')
+        xs = np.arange(bounds[0],bounds[1]+h[0],h[0])
+        ys = np.arange(bounds[2],bounds[3]+h[1],h[1])
+        zs = np.arange(bounds[4],bounds[5]+h[2],h[2])
+
+        X,Y,Z = np.meshgrid(xs,ys,zs,indexing='ij')
+        F = func(X,Y,Z,*args,**kwargs)
+        SurfCoords, SurfConn = contour.MarchingCubesImage(F, h=h, threshold=threshold, flip=flip, method='original', interpolation=interpolation,VertexValues=True)
+        SurfCoords[:,0] += bounds[0]
+        SurfCoords[:,1] += bounds[2]
+        SurfCoords[:,2] += bounds[4]
+    elif method == 'mc33':
+        NodeCoords, NodeConn, NodeVals = VoxelMesh(func, bounds, h, threshold=threshold, threshold_dir=1, mode='boundary',*args,**kwargs)
+        SurfCoords, SurfConn = contour.MarchingCubes(NodeCoords, NodeConn, NodeVals, method='33', threshold=threshold,flip=flip)
+    elif method == 'mt':
+        NodeCoords, NodeConn, NodeVals = VoxelMesh(func, bounds, h, threshold=threshold, threshold_dir=threshold, mode='boundary',*args,**kwargs)
+        NodeCoords, NodeConn = converter.hex2tet(NodeCoords, NodeConn, method='1to6')
+        SurfCoords, SurfConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, NodeVals, method='surface', threshold=threshold,flip=flip)
+    
+    return SurfCoords, SurfConn
+
+def TetMesh(func, bounds, h, threshold=0, threshold_dir=-1, interpolation='linear'):
+    """
+    Generate a tetrahedral mesh of an implicit function 
+
+    Parameters
+    ----------
+    func : function
+        Implicit function that describes the geometry of the object to be meshed. The function should be of the form v = f(x,y,z,*args,**kwargs) where x, y, and z are 1D numpy arrays of x, y and z coordinates and v is a 1D numpy array of function values. For method='mc', x, y, and z will be 3D coordinate arrays and v must be 3D as well. Additional arguments and keyword arguments may be passed through args and kwargs.
+    bounds : array_like
+        6 element array, list, or tuple with the minimum and maximum bounds in each direction that the function will be evaluated. This should be formatted as: [xmin, xmax, ymin, ymax, zmin, zmax]
+    h : scalar, tuple
+        Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).
+    threshold : scalar
+        Isovalue threshold to use for keeping/removing elements, by default 0.
+    threshold_dir : signed integer
+        If threshold_dir is negative (default), values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_dir is positive, by default -1.
+    interpolation : str, optional
+        Method of interpolation used for placing the vertices on the approximated isosurface. This can be 'midpoint', 'linear', by default 'linear'. 
+    args : tuple, optional
+        Tuple of additional positional arguments for func, by default ().
+    kwargs : dict, optional
+        Dictionary of additional keyword arguments for func, by default {}.
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        List of nodal coordinates for the surface mesh
+    NodeConn : np.ndarray
+        Nodal connectivity list for the surface mesh 
+    """
+
+    if not isinstance(h, (list, tuple, np.ndarray)):
+        h = (h,h,h)
+
+    if np.sign(threshold_dir) == 1:
+        flip = True
+    else:
+        flip = False
+
+    NodeCoords, NodeConn, NodeVals = VoxelMesh(func, bounds, h, threshold=threshold, threshold_dir=threshold, mode='any', args=args, kwargs=kwargs)
+    NodeCoords, NodeConn = converter.hex2tet(NodeCoords, NodeConn, method='1to6')
+    TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, NodeVals, method='volume', threshold=threshold, flip=flip, interpolation=interpolation)
+
+    return TetCoords, TetConn 
+
 # implicit function primitives
 def gyroid(x,y,z):
     return np.sin(2*np.pi*x)*np.cos(2*np.pi*y) + np.sin(2*np.pi*y)*np.cos(2*np.pi*z) + np.sin(2*np.pi*z)*np.cos(2*np.pi*x)
@@ -93,93 +282,6 @@ def rMin(a,b,alpha=0,m=0,p=2):
     # R-Function version of min(a,b) to yield a smoothly differentiable min - R0
     # Implicit Functions With Guaranteed Differential Properties - Shapiro & Tsukanov
     return 1/(1+alpha)*(a+b-(np.maximum(a**p+b**p - 2*alpha*a*b,0))**(1/p)) * (a**2 + b**2)**(m/2)
-
-def sMax(a,b,p):
-    # p-norm smooth maximum
-    return np.linalg.norm([a,b],ord=p,axis=0)
-
-def sMin(a,b,k):
-    # polynomial smooth minimum
-    h = np.max([k-abs(a-b), np.zeros(np.shape(a))],axis=0)/k
-    return np.min([a,b],axis=0)-h**2*k*(1/4)
-
-def sUnion(fval1,fval2,k):
-    return sMin(fval1,fval2,k)
-
-def VoxelMesh(sdf,xlims,ylims,zlims,h,mode='liberal',values='nodes'):
-    """
-    VoxelMesh Generate voxel mesh of a signed distance function
-
-    Parameters
-    ----------
-    sdf : function
-        DESCRIPTION.
-    xlims : list
-        [xmin, xmax]
-    ylims : list
-        [ymin, ymax].
-    zlims : list
-        [zmin, zmax].
-    h : numeric
-        Element side length.
-    mode : str
-        Voxel trimming model
-        notrim - will keep all voxels in the grid
-        liberal - will keep all voxels with at least 1 node inside the negative region of the field (val <= 0)
-        moderate - will keep all voxels with the centroid inside the negative region of the field (val <= 0)
-        conservative - will keep only voxels that are entirely inside the negative region of the field (val <= 0)
-        The default is liberal.
-    Returns
-    -------
-    NodeCoords : list
-        List of nodal coordinates for the voxel mesh
-    NodeConn : list
-        Nodal connectivity list for the voxel mesh 
-
-    """        
-    
-    NodeCoords, NodeConn1 = primitives.Grid([xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]],h,exact_h=True)
-    NodeVals = sdf(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
-    if np.min(NodeVals) > 0:
-        return [], []
-    if mode != 'notrim':
-        NodeConn = []
-        for elem in NodeConn1:
-            if mode == 'conservative':
-                if all([NodeVals[node] <= 0 for node in elem]):
-                    NodeConn.append(elem)
-            elif mode == 'moderate':
-                if np.mean([NodeVals[node] for node in elem]) <= 0:                   
-                    NodeConn.append(elem)
-            elif mode =='liberal':
-                if any([NodeVals[node] <= 0 for node in elem]):
-                    NodeConn.append(elem)
-        NodeCoords,NodeConn,OriginalIds = converter.removeNodes(NodeCoords.tolist(),NodeConn)
-        NodeVals = NodeVals[OriginalIds]
-    else:   
-        NodeConn = NodeConn1
-    
-    return NodeCoords, NodeConn, NodeVals
-
-def SurfaceMesh(sdf,xlims,ylims,zlims,h,threshold=0, flip=False, mcmethod='33'):
-    # NodeCoords, NodeConn, NodeVals = VoxelMesh(sdf,xlims,ylims,zlims,h,mode='notrim',reinitialize=False)
-    # SurfCoords, SurfConn = contour.MarchingCubes(NodeCoords, NodeConn, NodeVals, threshold=threshold, flip=flip, method=mcmethod)
-
-    if isinstance(h, (list, tuple, np.ndarray)):
-        hx = h[0];hy = h[1]; hz = h[2]
-    else:
-        hx = h; hy = h; hz = h
-    xs = np.arange(xlims[0],xlims[1]+hx,hx)
-    ys = np.arange(ylims[0],ylims[1]+hy,hy)
-    zs = np.arange(zlims[0],zlims[1]+hz,hz)
-
-    X,Y,Z = np.meshgrid(xs,ys,zs)
-    F = sdf(X,Y,Z)
-    SurfCoords, SurfConn = contour.MarchingCubesImage(F, h=(hx, hy, hz), threshold=threshold, flip=False, method='original', interpolation='cubic',VertexValues=True)
-    SurfCoords[:,0] += xlims[0]
-    SurfCoords[:,1] += ylims[0]
-    SurfCoords[:,2] += zlims[0]
-    return SurfCoords, SurfConn
 
 def grid2fun(VoxelCoords,VoxelConn,Vals,method='linear',fill_value=None):
     """
@@ -699,7 +801,7 @@ def AdaptiveSubdivision(sdf,NodeCoords,NodeConn,threshold=1e-3):
             thinking = False
             
     NewNodeConn = [elem for elem in NewNodeConn if (type(elem[0]) != list)] + [e for elem in NewNodeConn if (type(elem[0]) == list) for e in elem]
-    NewNodeCoords,NewNodeConn,_ = utils.DeleteDuplicateNodes(NewNodeCoords,NewNodeConn)
+    NewNodeCoords,NewNodeConn = utils.DeleteDuplicateNodes(NewNodeCoords,NewNodeConn)
             
     return NewNodeCoords,NewNodeConn
      
@@ -977,7 +1079,7 @@ def SurfFlowOptimization(sdf,NodeCoords,NodeConn,h,ZRIter=50,NZRIter=50,NZIter=5
     # mesh.mesh(NodeCoords,NodeConn).Mesh2Meshio().write(str(k)+'.vtu');k+=1
 
     if Subdivision: NodeCoords, NodeConn = AdaptiveSubdivision(sdf, NodeCoords, NodeConn,threshold=1e-3)
-    NodeCoords,NodeConn,_ = utils.DeleteDuplicateNodes(NodeCoords,NodeConn)
+    NodeCoords,NodeConn = utils.DeleteDuplicateNodes(NodeCoords,NodeConn)
     NewCoords = np.array(NodeCoords)
     # mesh.mesh(NewCoords,NodeConn).Mesh2Meshio().write(str(k)+'.vtu');k+=1
 
@@ -1163,7 +1265,7 @@ def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25',
         PyramidCoords, PyramidConn = utils.makePyramidLayer(PeeledCoords,PeeledConn)
         PyrSurf = converter.solid2surface(PyramidCoords,PyramidConn)
         TriSurf = [elem for elem in PyrSurf if len(elem) == 3]
-        TriCoords,TriSurf,_ = utils.DeleteDuplicateNodes(PyramidCoords,TriSurf)
+        TriCoords,TriSurf = utils.DeleteDuplicateNodes(PyramidCoords,TriSurf)
     else:
         TriCoords = []
         TriSurf = []
@@ -1264,98 +1366,8 @@ def HexCore(sdf,bounds,h,nBL=3,nPeel=1,verbose=True,TetgenSwitches=['-pq1.1/25',
         print('------------------------------------------')
     return hexcore  
 
-def TetMesh(sdf,bounds,h,verbose=True,TetgenSwitches=['-pq1.1/25','-Y','-o/150'],
-            MCInterp='midpoint',SurfOpt=True,GLS=False,SkewThreshold=None):
-    """
-    TetMesh - Generate a Tetrahedral Mesh for a given signed distance function
-    (or similar isosurface implicit function)
 
-    Parameters
-    ----------
-    sdf : function
-        Signed distance (or similar) function that takes x, y, z coordinates
-        and returns a value
-    bounds : list
-        Bounds of the domain of interest in the form 
-        [xmin,xmax,ymin,ymax,zmin,zmax].
-    h : Element Size
-        Element size of the initial voxel field
-    verbose : bool, optional
-        Specifies whether or not to print status updates during runtime. The default is True.
-    TetgenSwitches : list, optional
-        List of TetGen switches to specify tetrahedral meshing options. 
-        See https://www.wias-berlin.de/software/tetgen/switches.html 
-        The default is ['-pq', '-Y'].
-    MCInterp : Interpolaton method for marching cubes. 
-        Options are: 'midpoint', 'linear'.
-        The default is 'midpoint'.
-    SurfOpt : Perform Surface Flow Optimization. The default is True.
-    GLS : Perform Global Laplacian Smoothing on the surface mesh. The default is False.
-    skewThreshold : float, optional
-        Skewness threshold above which triangles will be considered slivers
-        and collapsed. The default is None.
 
-    Returns
-    -------
-    tetmesh : mesh.mesh
-        mesh object containing the generated mesh.
-    """
-    
-    VoxelTime = MarchingTime = SurfOptTime = SmoothingTime = SliverTime = TetTime = AssemblyTime = 0
-    
-    if verbose: print('Generating Initial Voxel Mesh...')
-    tic = time.time()
-    NodeCoords, NodeConn, NodeVals = VoxelMesh(sdf,[bounds[0]-h,bounds[1]+3*h],[bounds[2]-h,bounds[3]+3*h],[bounds[4]-h,bounds[5]+3*h],h,mode='liberal')
-    VoxelTime += time.time()-tic
-    
-    if verbose: print('Performing Marching Cubes Surface Construction...')
-    tic = time.time()
-    TriNodeCoords,TriNodeConn = contour.MarchingCubes(NodeCoords,NodeConn,NodeVals,interpolation=MCInterp,method='33',threshold=0)
-    MarchingTime += time.time()-tic
-    if SurfOpt:
-        if verbose: print('Surface Optimization...')
-        tic = time.time()        
-        TriNodeCoords,TriNodeConn = SurfFlowOptimization(sdf,TriNodeCoords,TriNodeConn)
-        SurfOptTime += time.time()-tic
-   
-    if GLS:
-        if verbose: print('Smoothing Mesh...')
-        tic = time.time()
-        TriNodeCoords = improvement.GlobalLaplacianSmoothing(TriNodeCoords,TriNodeConn,[],FeatureWeight=1,BaryWeight=1/3)
-        SurfOptTime += time.time()-tic
 
-    if SkewThreshold:
-        if verbose: print('Collapsing Surface Mesh Slivers...')
-        tic = time.time()
-        TriNodeCoords,TriNodeConn = improvement.CollapseSlivers(TriNodeCoords,TriNodeConn,skewThreshold=SkewThreshold,verbose=verbose)
-        SurfOptTime += time.time()-tic
-    # mesh.mesh(TriNodeCoords,TriNodeConn).Mesh2Meshio().write('opt.vtu')
-    if verbose: print('Tet Meshing with TetGen...')    
-    tic = time.time()
-    v = np.array(NodeVals)
-    hconn = [elem for elem in NodeConn if all(v[elem] > 0)]
-    holes = utils.Centroids(NodeCoords,hconn)
-    
-    if '-Y' not in TetgenSwitches:
-        TetgenSwitches.append('-Y') 
-        warnings.warn('-Y switch is required to maintain the surface mesh input to tetgen. Proceeding with -Y')
-    TetCoords, TetConn = TetGen.tetgen(TriNodeCoords,TriNodeConn,holes=holes,verbose=verbose==2,BoundingBox=True,switches=TetgenSwitches)
-    TetTime = time.time()-tic
-    
-    if verbose: print('Assembling Mesh...')
-    tic = time.time()
-    tetmesh = mesh.mesh(TetCoords,TetConn)
-    tetmesh.initialize()
-    tetmesh.validate()
-    AssemblyTime = time.time() - tic
-    
-    if verbose:
-        print('------------------------------------------')
-        print('Voxel Mesh Generated in %.4fs' % VoxelTime)
-        print('Marching Cubes Performed in %.4fs' % MarchingTime)
-        print('Surface Optimization Completed in %.4fs' % SurfOptTime)
-        print('Tets Generated in %.4fs' % TetTime)
-        print('Meshes Assembled in %.4fs' % AssemblyTime)
-        print('Total Meshing Time: %.4f min' % ((VoxelTime + MarchingTime + SurfOptTime + SmoothingTime + SliverTime + TetTime + AssemblyTime)/60))
-        print('------------------------------------------')
-    return tetmesh 
+
+# %%
