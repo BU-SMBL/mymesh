@@ -1,8 +1,90 @@
 # -*- coding: utf-8 -*-
 """
+Various mesh utilities 
+
 Created on Wed Sep 29 18:31:03 2021
 
 @author: toj
+
+
+.. currentmodule:: Mesh.utils
+
+
+Mesh Connectivity
+=================
+.. autosummary::
+    :toctree: submodules/
+
+    getNodeNeighbors
+    getElemConnectivity
+    getNodeNeighborhood
+    getNodeNeighborhoodByRadius
+    getElemNeighbors
+    getConnectedNodes
+    getConnectedElements
+
+Node/Element Information
+========================
+.. autosummary::
+    :toctree: submodules/
+
+    Centroids
+    CalcFaceNormal
+    Face2NodeNormal
+
+Mesh Manipulations
+==================
+.. autosummary::
+    :toctree: submodules/
+
+    MirrorMesh
+    MergeMesh
+    PeelHex
+    makePyramidLayer
+
+Surface Projection
+==================
+.. autosummary::
+    :toctree: submodules/
+
+    ValueMapping
+    SurfMapping
+    Project2Surface
+    BaryTri
+    BaryTris
+    BaryTet
+
+Mesh Measurements
+=================
+.. autosummary::
+    :toctree: submodules/
+
+    DetectFeatures
+    TriSurfVol
+    TetMeshVol
+    MVBB
+    AABB
+
+Mesh Clean Up
+=============
+.. autosummary::
+    :toctree: submodules/
+
+    DeleteDuplicateNodes
+    DeleteDegenerateElements
+    CleanupDegenerateElements
+    RelabelNodes
+
+Miscellaneous 
+=============
+.. autosummary::
+    :toctree: submodules/
+
+    SortRaggedByLength
+    SplitRaggedByLength
+    PadRagged
+    ExtractRagged
+
 """
 
 import numpy as np
@@ -30,6 +112,7 @@ def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     -------
     NodeNeighbors : list
         List of neighboring nodes for each node in NodeCoords.
+    
     """
 
     Edges,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True, ElemType=ElemType, ReturnType=np.ndarray)
@@ -77,8 +160,7 @@ def getElemConnectivity(NodeCoords,NodeConn,ElemType='auto'):
 
 def getNodeNeighborhood(NodeCoords,NodeConn,nRings):
     """
-    getNodeNeighborhood Gives the connected nodes in an n ring neighborhood 
-    for each node in the mesh
+    Gives the connected nodes in an n ring neighborhood for each node in the mesh
 
     Parameters
     ----------
@@ -113,8 +195,7 @@ def getNodeNeighborhood(NodeCoords,NodeConn,nRings):
             
 def getNodeNeighborhoodByRadius(NodeCoords,NodeConn,Radius):
     """
-    getNodeNeighborhoodByRadius Gives the connected nodes in a neighborhood 
-    with a specified radius for each node in the mesh.
+    Gives the connected nodes in a neighborhood with a specified radius for each node in the mesh.
 
     Parameters
     ----------
@@ -155,7 +236,7 @@ def getNodeNeighborhoodByRadius(NodeCoords,NodeConn,Radius):
 
 def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
     """
-    getElemNeighbors Get list of neighboring elements for each element in the mesh.
+    Get list of neighboring elements for each element in the mesh.
 
     Parameters
     ----------
@@ -239,7 +320,7 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
 
 def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,BarrierNodes=set()):
     """
-    getConnectedNodes Identifies groups of connected nodes. For a fully 
+    Identifies groups of connected nodes. For a fully 
     connected mesh, a single region will be identified
 
     Parameters
@@ -292,7 +373,7 @@ def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,BarrierNodes=set())
 
 def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge',BarrierElems=set()):
     """
-    getConnectedElements Identifies groups of connected nodes. For a fully 
+    Identifies groups of connected nodes. For a fully 
     connected mesh, a single region will be identified
 
     Parameters
@@ -344,25 +425,9 @@ def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge',Barr
     
     return ElemRegions  
 
-def SurfElemNeighbors(NodeCoords,SurfConn):
-    warnings.warn('Deprecation Warning - Use getElemNeighbors instead')
-    ElemNeighbors = [[] for i in range(len(SurfConn))]
-    NodeConnList = np.reshape(SurfConn,np.array(SurfConn).size)
-    NodeConnArray = np.array(SurfConn)
-    dims = NodeConnArray.shape
-    
-    # An element is neighboring another element when two nodes are shared
-    for i in range(len(SurfConn)):        
-        bool0 = (NodeConnArray[i,0] == NodeConnList)*1
-        bool1 = (NodeConnArray[i,1] == NodeConnList)*1
-        bool2 = (NodeConnArray[i,2] == NodeConnList)*1
-        
-        ElemNeighbors[i] = np.where(np.sum(np.reshape(bool0+bool1+bool2,dims),axis=1)==2)[0].tolist()
-    return ElemNeighbors
-
 def Centroids(NodeCoords,NodeConn):
     """
-    Centroids calculate element centroids.
+    Calculate element centroids.
 
     Parameters
     ----------
@@ -386,7 +451,7 @@ def Centroids(NodeCoords,NodeConn):
     
 def CalcFaceNormal(NodeCoords,SurfConn):
     """
-    CalcFaceNormal Calculates normal vectors on the faces of a triangular 
+    Calculates normal vectors on the faces of a triangular 
     surface mesh. Assumes triangles are in counter-clockwise when viewed from the outside
 
     Parameters
@@ -419,7 +484,7 @@ def CalcFaceNormal(NodeCoords,SurfConn):
 
 def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
     """
-    Face2NodeNormal Calculate node normal vectors based on the element face normals
+    Calculate node normal vectors based on the element face normals.
 
     Parameters
     ----------
@@ -808,10 +873,7 @@ def BaryTet(Nodes, Pt):
 
 def Project2Surface(Points,Normals,NodeCoords,SurfConn,tol=np.inf,Octree='generate'):
     """
-    Project2Surface Projects a node (NodeCoord) along its normal vector (NodeNormal) onto the 
-    surface defined by NodeCoord and SurfConn, returns the index of the 
-    element (elemID) that contains the projected node and the barycentric 
-    coordinates (alpha, beta, gamma) of that projection within that element
+    Projects a node (NodeCoord) along its normal vector (NodeNormal) onto the surface defined by NodeCoord and SurfConn, returns the index of the element (elemID) that contains the projected node and the barycentric coordinates (alpha, beta, gamma) of that projection within that element
 
     Parameters
     ----------
@@ -927,10 +989,9 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
         return MappingMatrix, Octree
     return MappingMatrix
 
-def ValueMapping(NodeCoords1, SurfConn1, NodeVals1, NodeCoords2, SurfConn2, tol=np.inf, 
-Octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False, return_octree=False):
+def ValueMapping(NodeCoords1, SurfConn1, NodeVals1, NodeCoords2, SurfConn2, tol=np.inf, Octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False, return_octree=False):
     """
-    ValueMapping Maps nodal values <NodeVals1> from surface 1 to surface 2
+    Maps nodal values <NodeVals1> from surface 1 to surface 2
     - Currently only supports triangluar surface meshes
     TODO: Multi-value mapping may produce errors - need to better verify.
     
@@ -1015,8 +1076,7 @@ Octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False
 
 def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False,return_inv=False):
     """
-    DeleteDuplicateNodes Remove nodes that are duplicated in the mesh, either at exactly the same location as another 
-    node or a distance < tol apart. Nodes are renumbered and elements reconnected such that the geometry and structure
+    Remove nodes that are duplicated in the mesh, either at exactly the same location as another node or a distance < tol apart. Nodes are renumbered and elements reconnected such that the geometry and structure
     of the mesh remains unchanged. 
 
     Parameters
@@ -1054,11 +1114,13 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False,return_i
         [1,0,0]
     ]
     >>> NodeConn = [[0,1,2],[3,4,5]]
-
     >>> NewCoords, NewConn, idx, inv = utils.DeleteDuplicateNodes(NodeCoords,NodeConn, return_idx=True,return_inv=True)
+    >>> NewConn
+    [[0, 1, 3], [0, 3, 2]]
     >>> NewCoords == [NodeCoords[i] for i in idx]
+    True
     >>> NodeCoords == [NewCoords[i] for i in inv]
-    
+    True
     """
 
     if len(NodeCoords) == 0:
@@ -1084,6 +1146,43 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False,return_i
 
     returns = (True, True, return_idx, return_inv)
     return tuple(output for i,output in enumerate((NewCoords, NewConn, idx, inv)) if returns[i])
+
+def RemoveNodes(NodeCoords,NodeConn):
+    """
+    Removes nodes that aren't held by any element
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates
+    NodeConn : array_like
+        Node connectivity
+
+    Returns
+    -------
+    NewNodeCoords : list
+        New set of node coordinates where unused nodes have been removed
+    NewNodeConn : list
+        Renumbered set of node connectivities to be consistent with NewNodeCoords
+    OriginalIds : np.ndarray
+        The indices the original IDs of the nodes still in the mesh. This can be used
+        to remove entries in associated node data (ex. new_data = old_data[OriginalIds]).
+    """    
+    # removeNodes 
+    OriginalIds, inverse = np.unique([n for elem in NodeConn for n in elem],return_inverse=True)
+    NewNodeCoords = [NodeCoords[i] for i in OriginalIds]
+    
+    NewNodeConn = [[] for elem in NodeConn]
+    k = 0
+    for i,elem in enumerate(NodeConn):
+        temp = []
+        for e in elem:
+            temp.append(inverse[k])
+            k += 1
+        NewNodeConn[i] = temp
+    
+    
+    return NewNodeCoords, NewNodeConn, OriginalIds
 
 def RelabelNodes(NodeCoords,NodeConn,newIds,faces=None):
     """
@@ -1123,7 +1222,7 @@ def RelabelNodes(NodeCoords,NodeConn,newIds,faces=None):
 
 def DeleteDegenerateElements(NodeCoords,NodeConn,tol=1e-12,angletol=1e-3,strict=False):
     """
-    DeleteDegenerateElements Deletes degenerate elements from a mesh.
+    Deletes degenerate elements from a mesh.
     TODO: Currently only valid for triangles.
     Parameters
     ----------
@@ -1307,11 +1406,11 @@ def MirrorMesh(NodeCoords, NodeConn,x=None,y=None,z=None):
         Nodal Coordinates.
     NodeConn : list
         Nodal Connectivity.
-    x : Numeric, optional
+    x : float, optional
         YZ plane at X = x. The default is None.
-    y : TYPE, optional
+    y : float, optional
         XZ plane at Y = y. The default is None.
-    z : TYPE, optional
+    z : float, optional
         XY plane at Z = z. The default is None.
 
     Returns
@@ -1322,18 +1421,13 @@ def MirrorMesh(NodeCoords, NodeConn,x=None,y=None,z=None):
         Nodal Connectivity of Mirrored Elements.
     """
     
-    MirroredCoords = [copy.copy(node) for node in NodeCoords]
-    MirroredConn = [copy.copy(elem) for elem in NodeConn]
+    MirroredCoords = np.array(NodeCoords)
     if x != None:
-        for i in range(len(MirroredCoords)):
-            MirroredCoords[i][0] = -(MirroredCoords[i][0] - x) + x 
+        MirroredCoords = -(MirroredCoords[:,0] - x) + x 
     if y != None:
-        for i in range(len(MirroredCoords)):
-            MirroredCoords[i][1] = -(MirroredCoords[i][1] - y) + y
+        MirroredCoords = -(MirroredCoords[:,1] - y) + y
     if z != None:
-        for i in range(len(MirroredCoords)):
-            MirroredCoords[i][2] = -(MirroredCoords[i][2] - z) + z
-    
+        MirroredCoords = -(MirroredCoords[:,2] - z) + z 
     
     return MirroredCoords, MirroredConn
     
@@ -1406,8 +1500,8 @@ def MergeMesh(NodeCoords1, NodeConn1, NodeCoords2, NodeConn2, NodeVals1=[], Node
     
 def DetectFeatures(NodeCoords,SurfConn,angle=25):
     """
-    DetectFeatures Classifies nodes as edges or corners if the angle between adjacent
-    surface elements is less than or equal to <angle> (deg)
+    Classifies nodes as edges or corners if the angle between adjacent
+    surface elements is less than or equal to `angle`.
 
     Parameters
     ----------
@@ -1493,9 +1587,8 @@ def PeelHex(NodeCoords,NodeConn,nLayers=1):
     
 def makePyramidLayer(VoxelCoords,VoxelConn,PyramidHeight=None):
     """
-    makePyramidLayer For a given voxel mesh, will generate a set of pyramid 
-    elements that cover the surface of the voxel mesh. To merge the pyramid 
-    layer with the voxel mesh, use MergeMesh
+    For a given voxel mesh, will generate a set of pyramid 
+    elements that cover the surface of the voxel mesh. To merge the pyramid layer with the voxel mesh, use MergeMesh
 
     Parameters
     ----------
@@ -1587,7 +1680,7 @@ def makeVoxelLayer(VoxelCoords,VoxelConn):
         
 def TriSurfVol(NodeCoords, SurfConn):
     """
-    TriSurfVol Calculates the volume contained within a surface mesh
+    Calculates the volume contained within a surface mesh
     Based on 'Efficient feature extraction for 2D/3D objects in mesh 
     representation.' - Zhang, C. and Chen, T., 2001
     
@@ -1616,7 +1709,7 @@ def TriSurfVol(NodeCoords, SurfConn):
     
 def TetMeshVol(NodeCoords, NodeConn):
     """
-    TetMeshVol Calculates the volume contained within a tetrahedral mesh
+    Calculates the volume contained within a tetrahedral mesh
     
     Parameters
     ----------
@@ -1839,7 +1932,7 @@ def SplitRaggedByLength(In, return_idx=False, return_inv=False):
 
 def PadRagged(In,fillval=-1):
     """
-    PadRagged Pads a 2d list of lists with variable length into a rectangular 
+    Pads a 2d list of lists with variable length into a rectangular 
     numpy array with specified fill value.
 
     Parameters
@@ -1858,6 +1951,23 @@ def PadRagged(In,fillval=-1):
     return Out
 
 def ExtractRagged(In,delval=-1,dtype=None):
+    """
+    Convert a padded numpy array to a ragged list of list by removing entries that match the specified value.
+
+    Parameters
+    ----------
+    In : np.ndarray
+        Input array
+    delval : int, optional
+        Value to remove from the input array, by default -1
+    dtype : type, optional
+        Data type to cast the array to, by default the data type is unchanged.
+
+    Returns
+    -------
+    Out : list
+        Output list of lists with the specified value removed.
+    """    
     if dtype:
         if type(In) is list: In = np.array(In)
         In = In.astype(dtype)
@@ -1866,7 +1976,6 @@ def ExtractRagged(In,delval=-1,dtype=None):
     if not np.all(where):
         if len(In.shape) == 2:
             Out = np.split(In[where],np.cumsum(np.sum(where,axis=1)))[:-1]
-            # Out = [x.tolist() for x in Out]
         elif len(In.shape) == 3:
             Out = [[[x for x in y if x != delval] for y in z if all([x!= delval for x in y])] for z in In]
         else:

@@ -1,8 +1,35 @@
 
 """
+Mesh generation for pre-defined shapes
+
 Created Sept 2022
 
 @author: toj
+
+
+.. currentmodule:: Mesh.primitives
+
+
+Shapes
+======
+.. autosummary::
+    :toctree: submodules/
+    
+    Box
+    Grid
+    Grid2D
+    Plane
+    Cylinder
+    Sphere
+
+2D to 3D Constructions
+======================
+.. autosummary::
+    :toctree: submodules/
+
+    Extrude
+    Revolve
+
 """
 import numpy as np
 import gc
@@ -19,16 +46,24 @@ def Box(bounds, h, ElemType='quad'):
     h : float
         Approximate element size.
     ElemType : str, optional
-        Specify the element type of the grid mesh. This can either be 'quad' for 
-        a quadrilateral mesh or 'tri' for a triangular mesh, by default 'quad'.
+        Specify the element type of the grid mesh. This can either be 'quad' for a quadrilateral mesh or 'tri' for a triangular mesh, by default 'quad'.
 
     Returns
     -------
     box : Mesh.mesh
         Mesh object containing the box mesh. 
-        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
-        the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
-        by running: `NodeCoords, NodeConn = primitives.Box(...)`
+
+
+    .. note:: 
+        Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Box(...)``
+
+    Examples
+    --------
+    .. plot::
+
+        box = primitives.Box([0,1,0,1,0,1], 0.05, ElemType='tri')
+        box.plot(bgcolor='w', show_edges=True)
+
     """    
     GridCoords, GridConn = Grid(bounds,h,exact_h=False)
     BoxConn = converter.solid2surface(GridCoords,GridConn)
@@ -67,9 +102,14 @@ def Grid(bounds, h, exact_h=False, ElemType='hex'):
     -------
     Grid : Mesh.mesh
         Mesh object containing the grid mesh.
-        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
+        
+
+    .. note:: 
+        Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
         the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
-        by running: `NodeCoords, NodeConn = primitives.Grid(...)`
+        by running: ``NodeCoords, NodeConn = primitives.Grid(...)``
+
+
     """    
     if type(h) is tuple or type(h) is list:
         hx = h[0];hy = h[1]; hz = h[2]
@@ -145,9 +185,13 @@ def Grid2D(bounds, h, z=0, exact_h=False, ElemType='quad'):
     -------
     Grid : Mesh.mesh
         Mesh object containing the grid mesh.
-        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
+        
+
+    .. note::
+        Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
         the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
-        by running: `NodeCoords, NodeConn = primitives.Grid2D(...)`
+        by running: ``NodeCoords, NodeConn = primitives.Grid2D(...)``
+
     """    
     if type(h) is tuple or type(h) is list or type(h) is np.ndarray:
         hx = h[0];hy = h[1]
@@ -221,9 +265,13 @@ def Plane(pt, normal, bounds, h, exact_h=False, ElemType='quad'):
     -------
     plane : Mesh.mesh
         Mesh object containing the plane mesh.
-        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
+        
+
+    .. note:: 
+        Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
         the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
-        by running: `NodeCoords, NodeConn = primitives.Extrude(...)`
+        by running: ``NodeCoords, NodeConn = primitives.Extrude(...)``
+
     """
     # Get rotation between the plane and the xy (z=0) plane
     normal = np.asarray(normal)/np.linalg.norm(normal)
@@ -323,7 +371,7 @@ def Cylinder(bounds, resolution, axis=2, axis_step=None, ElemType='tri', cap=Tru
     axis_step : float, optional
         Element size in the <axis> direction, by default it will be set to the full length of the cylinder.
     ElemType : str, optional
-        Specify the element type of the walls of tje cylinder mesh. This can either be 
+        Specify the element type of the walls of the cylinder mesh. This can either be 
         'quad' for a quadrilateral mesh or 'tri' for a triangular mesh, by default 'tri'.
         The ends of the cylinder will be triangular regardless of this input.
     cap : bool, optional
@@ -334,9 +382,19 @@ def Cylinder(bounds, resolution, axis=2, axis_step=None, ElemType='tri', cap=Tru
     -------
     cyl : Mesh.mesh
         Mesh object containing the cylinder mesh.
-        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
+        
+
+    .. note:: 
+        Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
         the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
-        by running: `NodeCoords, NodeConn = primitives.Cylinder(...)`
+        by running: ``NodeCoords, NodeConn = primitives.Cylinder(...)``
+    
+    Examples
+    --------
+    .. plot::
+
+        cyl = primitives.Cylinder([0,1,0,1,0,1], 20, axis_step=0.25, axis=0)
+        cyl.plot(bgcolor='w', show_edges=True)
 
     """    
     bounds = np.asarray(bounds)
@@ -419,18 +477,24 @@ def Sphere(center, radius, theta_resolution=10, phi_resolution=10, ElemType='tri
     -------
     sphere, Mesh.mesh
         Mesh object containing the cylinder mesh.
-        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
-        the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
-        by running: `NodeCoords, NodeConn = primitives.Sphere(...)`
+        
+
+    .. note:: 
+        Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Sphere(...)``
 
 
     Examples
     ________
-    >>> # A unit sphere
-    >>> sphere = primitives.Sphere([0,0,0], 1)
+    .. plot::
 
-    >>> # An ellipsoid
-    >>> sphere = primitives.Sphere([0,0,0], (1,2,3), theta_resolution=20, phi_resolution=20, ElemType='quad')
+        sphere = primitives.Sphere([0,0,0], 1)
+        sphere.plot(bgcolor='w', show_edges=True)
+
+    .. plot::
+
+        ellipsoid = primitives.Sphere([0,0,0], (0.5,1,1.5),
+        theta_resolution=20, phi_resolution=20)
+        ellipsoid.plot(bgcolor='w', show_edges=True)
 
     """
 
@@ -487,9 +551,11 @@ def Extrude(line, distance, step, axis=2, ElemType='quad'):
     -------
     extruded : Mesh.mesh
         Mesh object containing the extruded mesh.
-        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
-        the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
-        by running: `NodeCoords, NodeConn = primitives.Extrude(...)`
+        
+
+    .. note:: 
+        Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Extrude(...)``
+
     """    
     NodeCoords = np.array(line.NodeCoords)
     OriginalConn = np.asarray(line.NodeConn)
@@ -536,9 +602,11 @@ def Revolve(line, angle, anglestep, center=[0,0,0], axis=2, ElemType='quad'):
     -------
     revolve : Mesh.mesh
         Mesh object containing the revolved mesh.
-        NOTE Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
-        the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
-        by running: `NodeCoords, NodeConn = primitives.Revolve(...)`
+        
+
+    .. note:: 
+        Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Revolve(...)``
+
     """    
     if np.isscalar(axis):
         assert axis in (0, 1, 2), 'axis must be either 0, 1, or 2 (indicating x, y, z axes) or a 3 element vector.'

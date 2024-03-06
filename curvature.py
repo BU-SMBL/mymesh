@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+Tools for calculating curvature
+
 Created on Wed Sep 29 14:10:08 2021
 
 @author: toj
@@ -11,7 +13,7 @@ from scipy import ndimage
   
 def NormCurve(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
     """
-    NormCurve Evaluate the curvatures of a surface mesh using the normal curvature approximation method
+    Evaluate the curvatures of a surface mesh using the normal curvature approximation method
     from Goldfeather & Interrante (2004).
 
     Parameters
@@ -108,7 +110,7 @@ def NormCurve(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
                      
 def QuadFit(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
     """
-    QuadFit Evaluate the curvatures of a surface mesh using the quadratic surface
+    Evaluate the curvatures of a surface mesh using the quadratic surface
     fitting method from Goldfeather & Interrante (2004).
 
     Parameters
@@ -196,138 +198,9 @@ def QuadFit(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
         MinPrincipal[i] = min(v)    # Min Principal Curvature
     return MaxPrincipal,MinPrincipal
 
-def CubicFit_iterative(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,Ignore=set(),IgnoreFeatures=False):
-    #
-    # Based on Goldfeather & Interrante (2004)    
-    if IgnoreFeatures:
-        edges,corners = utils.DetectFeatures(NodeCoords,SurfConn)
-        FeatureNodes = set(edges).union(corners)
-        Ignore.update(FeatureNodes)
-    SurfNodes = np.unique(SurfConn)
-    # EdgeConn = converter.surf2edges(NodeCoords,SurfConn)
-    # EdgeNodes = set()#set(np.unique(EdgeConn))
-    
-    MaxPrincipal = [np.nan for i in range(len(NodeCoords))]
-    MinPrincipal = [np.nan for i in range(len(NodeCoords))]
-    
-    k = [0,0,1]
-    for i in SurfNodes:
-        p = NodeCoords[i]   # Coordinates of the current node
-        n = np.multiply(-1,NodeNormals[i]).tolist()  # Unit normal vector of the current node
-        
-        # Rotation matrix from global z (k=[0,0,1]) to local z (n)
-        if n == k:
-            rotAxis = k
-            angle = 0
-        elif n == [-1*i for i in k]:
-            rotAxis = [1,0,0]
-            angle = np.pi
-        else:
-            rotAxis = np.cross(k,n)/np.linalg.norm(np.cross(k,n))
-            angle = np.arccos(np.dot(k,n))
-        q = [np.cos(angle/2),               # Quaternion Rotation
-             rotAxis[0]*np.sin(angle/2),
-             rotAxis[1]*np.sin(angle/2),
-             rotAxis[2]*np.sin(angle/2)]
-    
-        R = [[2*(q[0]**2+q[1]**2)-1,   2*(q[1]*q[2]-q[0]*q[3]), 2*(q[1]*q[3]+q[0]*q[2]), 0],
-             [2*(q[1]*q[2]+q[0]*q[3]), 2*(q[0]**2+q[2]**2)-1,   2*(q[2]*q[3]-q[0]*q[1]), 0],
-             [2*(q[1]*q[3]-q[0]*q[2]), 2*(q[2]*q[3]+q[0]*q[1]), 2*(q[0]**2+q[3]**2)-1,   0],
-             [0,                       0,                       0,                       1]
-             ]
-        # Translation to map p to (0,0,0)
-        T = [[1,0,0,-p[0]],
-             [0,1,0,-p[1]],
-             [0,0,1,-p[2]],
-             [0,0,0,1]]
-        
-        Amat = []
-        Bmat = []
-        for j in range(len(NodeNeighborhoods[i])):
-            # Get adjacent nodes
-            if NodeNeighborhoods[i][j] in Ignore:
-                # Skip ignored nodes
-                continue
-            cq = [x for x in NodeCoords[NodeNeighborhoods[i][j]]]
-            nq = [x for x in NodeNormals[NodeNeighborhoods[i][j]]]
-            cq.append(1)
-            nq.append(1)
-            # Transform to local coordinate system
-            [xj,yj,zj,one] = np.matmul(np.matmul(T,cq),R)
-            [aj,bj,cj,one] = np.matmul(nq,R)
-            if cj == 0:
-                cj = 1
-            # Scale z by 2/k^2, where k=sqrt(x^2+y^2)
-            scale = 2/(xj**2+yj**2)  
-            # Assemble matrices for least squares
-            Amat.append([scale/2*xj**2, scale*xj*yj, scale/2*yj**2, scale*xj**3, scale*xj**2*yj, scale*xj*yj**2, scale*yj**3])
-            Bmat.append(scale*zj)
-            Amat.append([scale*xj, scale*yj, 0, scale*3*xj**2, scale*2*xj*yj, scale*yj**2, 0])
-            Bmat.append(-scale*aj/cj)
-            Amat.append([0, scale*xj, scale*yj, 0, scale*xj**2, scale*2*xj*yj, scale*3*yj**2])
-            Bmat.append(-scale*bj/cj)
-            
-        # add buffer if edge node
-        # if i in EdgeNodes:
-        #     for j in range(len(NodeNeighborhoods[i])):
-        #         if NodeNeighborhoods[i][j] not in EdgeNodes:
-        #             if NodeNeighborhoods[i][j] in Ignore:
-        #                 # Skip ignored nodes
-        #                 continue
-        #             # For nodes in the neighborhood that aren't also edge nodes
-        #             cq = [x for x in NodeCoords[NodeNeighborhoods[i][j]]]
-        #             nq = [x for x in NodeNormals[NodeNeighborhoods[i][j]]]
-        #             cq.append(1)
-        #             nq.append(1)
-        #             # Transform to local coordinate system
-        #             [xj,yj,zj,one] = np.matmul(np.matmul(T,cq),R)
-        #             [aj,bj,cj,one] = np.matmul(nq,R)
-                    
-        #             # Rotate 180 about the central node/local z axis
-        #             q2 = [np.cos(np.pi/2),               # Quaternion Rotation
-        #                  rotAxis[0]*np.sin(np.pi/2),
-        #                  rotAxis[1]*np.sin(np.pi/2),
-        #                  rotAxis[2]*np.sin(np.pi/2)]
-                
-        #             R2 = [[2*(q2[0]**2+q2[1]**2)-1,   2*(q2[1]*q2[2]-q2[0]*q2[3]), 2*(q2[1]*q2[3]+q2[0]*q2[2]), 0],
-        #                  [2*(q2[1]*q2[2]+q2[0]*q2[3]), 2*(q2[0]**2+q2[2]**2)-1,   2*(q2[2]*q2[3]-q2[0]*q2[1]), 0],
-        #                  [2*(q2[1]*q2[3]-q2[0]*q2[2]), 2*(q2[2]*q2[3]+q2[0]*q2[1]), 2*(q2[0]**2+q2[3]**2)-1,   0],
-        #                  [0,                       0,                       0,                       1]
-        #                  ]
-        #             [xj,yj,zj,one] = np.matmul([xj,yj,zj,one],R2)
-        #             [aj,bj,cj,one] = np.matmul([aj,bj,cj,one],R2)
-        #             # Scale z by 2/k^2, where k=sqrt(x^2+y^2)
-        #             scale = 2/(xj**2+yj**2)  
-        #             # Assemble matrices for least squares
-        #             Amat.append([scale/2*xj**2, scale*xj*yj, scale/2*yj**2, scale*xj**3, scale*xj**2*yj, scale*xj*yj**2, scale*yj**3])
-        #             Bmat.append(scale*zj)
-        #             Amat.append([scale*xj, scale*yj, 0, scale*3*xj**2, scale*2*xj*yj, scale*yj**2, 0])
-        #             Bmat.append(-scale*aj/cj)
-        #             Amat.append([0, scale*xj, scale*yj, 0, scale*xj**2, scale*2*xj*yj, scale*3*yj**2])
-        #             Bmat.append(-scale*bj/cj)
-        
-        if len(Bmat) > 6:
-            try:   
-                A = np.matmul(np.transpose(Amat),Amat)
-                B = np.matmul(np.transpose(Amat),Bmat)
-                X = np.linalg.solve(A,B)
-                W = [[X[0],X[1]],
-                    [X[1],X[2]]]
-                [v,x] = np.linalg.eig(W)
-            except:
-                warnings.warn('curvature problem.')
-                v = [np.nan,np.nan]
-            # Weingarten Matrix
-            
-        else:
-            v = [np.nan,np.nan]
-        MaxPrincipal[i] = max(v)    # Max Principal Curvature
-        MinPrincipal[i] = min(v)    # Min Principal Curvature
-    return MaxPrincipal,MinPrincipal
-
 def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
     """
-    CubicFit Evaluate the curvatures of a surface mesh using the cubic surface
+    Evaluate the curvatures of a surface mesh using the cubic surface
     fitting method from Goldfeather & Interrante (2004).
 
     Parameters
@@ -444,7 +317,7 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
    
 def MeanCurvature(MaxPrincipal,MinPrincipal):
     """
-    MeanCurvature Calculate the mean curvature from the maximum and 
+    Calculate the mean curvature from the maximum and 
     minimum 
 
     Parameters
@@ -471,7 +344,7 @@ def MeanCurvature(MaxPrincipal,MinPrincipal):
 
 def GaussianCurvature(MaxPrincipal,MinPrincipal):
     """
-    GaussianCurvature Calculate the Gaussian curvature from the maximum and 
+    Calculate the Gaussian curvature from the maximum and 
     minimum principal curvatures.
 
     Parameters
@@ -498,7 +371,7 @@ def GaussianCurvature(MaxPrincipal,MinPrincipal):
 
 def Curvedness(MaxPrincipal,MinPrincipal):
     """
-    Curvedness Calculate the curvedness from the maximum and minimum principal curvatures.
+    Calculate the curvedness from the maximum and minimum principal curvatures.
     From Koenderink, J.J. and Van Doorn, A.J., 1992.
 
     Parameters
@@ -523,7 +396,7 @@ def Curvedness(MaxPrincipal,MinPrincipal):
  
 def ShapeIndex(MaxPrincipal,MinPrincipal):
     """
-    ShapeIndex Calculate shape indices from the maximum and minimum principal curvatures.
+    Calculate shape indices from the maximum and minimum principal curvatures.
     From Koenderink, J.J. and Van Doorn, A.J., 1992.
 
     Parameters
@@ -541,18 +414,6 @@ def ShapeIndex(MaxPrincipal,MinPrincipal):
     # Note: the equation from Koenderink & van Doorn has the equation: pi/2*arctan((min+max)/(min-max)), but this doesn't
     # seem to give values consistent with what are described as cups/caps - instead using pi/2*arctan((max+min)/(max-min))
     
-    # if type(MaxPrincipal) == np.ndarray:
-    #     MaxPrincipal = MaxPrincipal.tolist()
-    # if type(MinPrincipal) == np.ndarray:
-    #     MinPrincipal = MinPrincipal.tolist()
-    # if type(MaxPrincipal) == list and type(MinPrincipal) == list and len(MaxPrincipal) == len(MinPrincipal):
-    #     shape = [(2/np.pi) * np.arctan((MaxPrincipal[i] + MinPrincipal[i])/(MaxPrincipal[i] - MinPrincipal[i])) if (MaxPrincipal[i] != MinPrincipal[i]) else 1 if MaxPrincipal[i]>0 else -1 for i in range(len(MaxPrincipal))]
-    # elif (type(MaxPrincipal) == int or type(MaxPrincipal) == float) and (type(MinPrincipal) == int or type(MinPrincipal) == float):
-    #     if MaxPrincipal != MinPrincipal:
-    #         shape = (2/np.pi) * np.arctan((MinPrincipal + MaxPrincipal)/(MinPrincipal - MaxPrincipal))
-    #     else:
-    #         shape = 0
-    
     MaxPrincipal = np.asarray(MaxPrincipal) 
     MinPrincipal = np.asarray(MinPrincipal) 
     with np.errstate(divide='ignore', invalid='ignore'):
@@ -566,7 +427,7 @@ def ShapeIndex(MaxPrincipal,MinPrincipal):
 
 def ShapeCategory(shapeindex):
     """
-    ShapeCategory Categorize shape indices into a nine point scale 
+    Categorize shape indices into a nine point scale 
     0 = Spherical Cup
     1 = Trough
     2 = Rut
@@ -612,7 +473,7 @@ def ShapeCategory(shapeindex):
                        
 def AnalyticalCurvature(F,NodeCoords):
     """
-    AnalyticalCurvature Evaluate the curvature of an implicit function at a list of points located
+    Evaluate the curvature of an implicit function at a list of points located
     on the corresponding implicit surface.
     Based on Curvature formulas for implicit curves and surfaces, Ron Goldman (2005).
 
@@ -742,7 +603,7 @@ def AnalyticalCurvature(F,NodeCoords):
 
 def ImageCurvature(I,gaussian_sigma=1,voxelsize=1,brightobject=True):
     """
-    ImageCurvature Calculate curvatures based on a 3D image. Curvature values are calculated for all voxels in the image,
+    Calculate curvatures based on a 3D image. Curvature values are calculated for all voxels in the image,
     however, these curvature values are only meaningful at the surface of the imaged object(s). This can be used with 
     utils.grid2fun, converter.im2voxel, contours.MarchingCubesImage to evaluate the voxel curvatures at points on the surface
     of the imaged object(s).

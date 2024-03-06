@@ -1,8 +1,41 @@
 # -*- coding: utf-8 -*-
 """
+Element quality measurements
+
 Created on Sun Jan 23 23:58:18 2022
 
 @author: toj
+
+.. currentmodule:: Mesh.quality
+
+Quality Metrics
+===============
+.. autosummary::
+    :toctree: submodules/
+
+    AspectRatio
+    Orthogonality
+    InverseOrthogonality
+    OrthogonalQuality
+    InverseOrthogonalQuality
+    Skewness
+    MinDihedral
+    MaxDihedral
+    Area
+    Volume
+
+Quality Calculation Helper Functions
+====================================
+.. autosummary::
+    :toctree: submodules/
+
+    tri_skewness
+    quad_skewness
+    tet_vol_skewness
+    equiangular_skewness
+    dihedralAngles
+    SurfDihedralAngles
+
 """
 import numpy as np
 
@@ -304,6 +337,152 @@ def Skewness(NodeCoords,NodeConn,verbose=False,tetmethod='volume'):
 
     return skew
 
+def MinDihedral(NodeCoords,NodeConn,verbose=False):
+    """
+    Calculate the minimum dihedral angle between element faces
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        List of nodal connectivities.
+    verbose : bool, optional
+        If true, will print min, max, and mean element min dihedral angle, by default False.
+
+    Returns
+    -------
+    MinAngles : np.ndarray
+        Array of minimum dihedral angles for each angle.
+    """    
+    Faces, FaceConn, FaceElem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
+    Normals = np.asarray(utils.CalcFaceNormal(NodeCoords,Faces))
+
+    tetkey = np.array([[0,1],[0,2],[0,3],[1,2],[2,3],[3,1]])
+    pyrkey = np.array([[0,1],[0,2],[0,3],[0,4],[1,2],[2,3],[3,4],[4,1]])
+    wdgkey = np.array([[0,1],[0,2],[0,3],[1,2],[2,3],[3,1],[1,4],[2,4],[3,4]])
+    hexkey = np.array([[0,1],[0,2],[0,3],[0,4],[1,2],[2,3],[3,4],[4,1],[1,5],[2,5],[3,5],[4,5]])
+
+    elemkeys = [tetkey if len(elem)==4 else pyrkey if len(elem)==5 else wdgkey if len(elem)==6 else hexkey if len(elem)==8 else [] for elem in NodeConn]
+    MinAngles = np.array([np.min(dihedralAngles(Normals[FaceConn[i]][elemkeys[i][:,0]],Normals[FaceConn[i]][elemkeys[i][:,1]],Abs=True)) for i in range(len(NodeConn))])
+
+    if verbose:
+        minAngle = min(MinAngles)
+        maxAngle = max(MinAngles)
+        meanAngle = np.mean(MinAngles)
+        print('------------------------------------------')
+        print(f'Minimum Minimum Dihedral Angle: {minAngle*180/np.pi:.3f}° on Element {np.where(MinAngles==minAngle)[0][0]:.0f}')
+        print(f'Maximum Minimum Dihedral Angle: {maxAngle*180/np.pi:.3f}° on Element {np.where(MinAngles==maxAngle)[0][0]:.0f}')
+        print(f'Mean Minimum Dihedral Angle: {meanAngle*180/np.pi:.3f}°')
+        print('------------------------------------------')
+    return MinAngles
+
+def MaxDihedral(NodeCoords,NodeConn,verbose=False):
+    """
+    Calculate the maximum dihedral angle between element faces
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        List of nodal connectivities.
+    verbose : bool, optional
+        If true, will print min, max, and mean element max dihedral angle, by default False.
+
+    Returns
+    -------
+    MaxAngles : np.ndarray
+        Array of maximum dihedral angles for each angle.
+    """ 
+    Faces, FaceConn, FaceElem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
+    Normals = np.asarray(utils.CalcFaceNormal(NodeCoords,Faces))
+
+    tetkey = np.array([[0,1],[0,2],[0,3],[1,2],[2,3],[3,1]])
+    pyrkey = np.array([[0,1],[0,2],[0,3],[0,4],[1,2],[2,3],[3,4],[4,1]])
+    wdgkey = np.array([[0,1],[0,2],[0,3],[1,2],[2,3],[3,1],[1,4],[2,4],[3,4]])
+    hexkey = np.array([[0,1],[0,2],[0,3],[0,4],[1,2],[2,3],[3,4],[4,1],[1,5],[2,5],[3,5],[4,5]])
+
+    elemkeys = [tetkey if len(elem)==4 else pyrkey if len(elem)==5 else wdgkey if len(elem)==6 else hexkey if len(elem)==8 else [] for elem in NodeConn]
+    MaxAngles = np.array([np.max(dihedralAngles(Normals[FaceConn[i]][elemkeys[i][:,0]],Normals[FaceConn[i]][elemkeys[i][:,1]],Abs=True)) for i in range(len(NodeConn))])
+
+    if verbose:
+        minAngle = min(MaxAngles)
+        maxAngle = max(MaxAngles)
+        meanAngle = np.mean(MaxAngles)
+        print('------------------------------------------')
+        print(f'Minimum Maximum Dihedral Angle: {minAngle*180/np.pi:.3f}° on Element {np.where(MaxAngles==minAngle)[0][0]:.0f}')
+        print(f'Maximum Maximum Dihedral Angle: {maxAngle*180/np.pi:.3f}° on Element {np.where(MaxAngles==maxAngle)[0][0]:.0f}')
+        print(f'Mean Maximum Dihedral Angle: {meanAngle*180/np.pi:.3f}°')
+        print('------------------------------------------')
+    return MaxAngles
+
+def Area(NodeCoords,NodeConn):
+    """
+    Calculates element areas for each element in the mesh.
+    TODO: Currently only valid for triangular meshes
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        List of nodal connectivities.
+
+    Returns
+    -------
+    A : np.ndarray
+        Array of area for each element.
+    """    
+    assert np.shape(NodeConn)[1] == 3, 'Currently only valid for triangular elements.'
+    Points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
+    Area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2 
+
+    return Area
+
+def Volume(NodeCoords,NodeConn,verbose=False):
+    """
+    Calculates element volumes for each element in the mesh.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        List of nodal connectivities.
+    verbose : bool, optional
+        If true, will print min, max, and mean element volume, by default False.
+
+    Returns
+    -------
+    V : np.ndarray
+        Array of volumes for each element.
+    """
+    if len(NodeConn) == 0:
+        return []
+    ArrayCoords = np.asarray(NodeCoords)    
+    ArrayCoords,TetConn,ElemIds = converter.solid2tets(NodeCoords,NodeConn,return_ids=True)     
+    ArrayConn = np.asarray(TetConn)
+    pt0 = ArrayCoords[ArrayConn][:,0]
+    pt1 = ArrayCoords[ArrayConn][:,1]
+    pt2 = ArrayCoords[ArrayConn][:,2]
+    pt3 = ArrayCoords[ArrayConn][:,3]
+    vol = -np.sum((pt0-pt1)*np.cross((pt1-pt3),(pt2-pt3)),axis=1)/6
+    vol = np.append(vol,0)
+    V = np.sum(vol[utils.PadRagged(ElemIds)],axis=1)
+
+    if verbose:
+        minVol = min(V)
+        maxVol = max(V)
+        meanVol = np.mean(V)
+        meanOrd = np.floor(np.log10(meanVol))
+        print('------------------------------------------')
+        print(f'Minimum Volume: {minVol:.2e} on Element {np.where(V==minVol)[0][0]:.0f}')
+        print(f'Maximum Volume: {maxVol:.2e} on Element {np.where(V==maxVol)[0][0]:.0f}')
+        print(f'Mean Volume: {meanVol:.2e}')
+        print('------------------------------------------')
+    return V
+
 def tri_skewness(NodeCoords,NodeConn):
     """
     Calculates triangular skewness for each triangle in the mesh. 
@@ -481,153 +660,6 @@ def equiangular_skewness(NodeCoords,NodeConn):
 
     return skew
 
-def Area(NodeCoords,NodeConn):
-    """
-    Calculates element areas for each element in the mesh.
-    TODO: Currently only valid for triangular meshes
-
-    Parameters
-    ----------
-    NodeCoords : array_like
-        List of nodal coordinates.
-    NodeConn : array_like
-        List of nodal connectivities.
-
-    Returns
-    -------
-    A : np.ndarray
-        Array of area for each element.
-    """    
-    assert np.shape(NodeConn)[1] == 3, 'Currently only valid for triangular elements.'
-    Points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
-    Area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2 
-
-    return Area
-
-def Volume(NodeCoords,NodeConn,verbose=False):
-    """
-    Calculates element volumes for each element in the mesh.
-
-    Parameters
-    ----------
-    NodeCoords : array_like
-        List of nodal coordinates.
-    NodeConn : array_like
-        List of nodal connectivities.
-    verbose : bool, optional
-        If true, will print min, max, and mean element volume, by default False.
-
-    Returns
-    -------
-    V : np.ndarray
-        Array of volumes for each element.
-    """
-    if len(NodeConn) == 0:
-        return []
-    ArrayCoords = np.asarray(NodeCoords)    
-    ArrayCoords,TetConn,ElemIds = converter.solid2tets(NodeCoords,NodeConn,return_ids=True)     
-    ArrayConn = np.array(TetConn)
-    pt0 = ArrayCoords[ArrayConn][:,0]
-    pt1 = ArrayCoords[ArrayConn][:,1]
-    pt2 = ArrayCoords[ArrayConn][:,2]
-    pt3 = ArrayCoords[ArrayConn][:,3]
-    vol = -np.sum((pt0-pt1)*np.cross((pt1-pt3),(pt2-pt3)),axis=1)/6
-    vol = np.append(vol,0)
-    V = np.sum(vol[utils.PadRagged(ElemIds)],axis=1)
-
-    if verbose:
-        minVol = min(V)
-        maxVol = max(V)
-        meanVol = np.mean(V)
-        meanOrd = np.floor(np.log10(meanVol))
-        print('------------------------------------------')
-        print(f'Minimum Volume: {minVol:.2e} on Element {np.where(V==minVol)[0][0]:.0f}')
-        print(f'Maximum Volume: {maxVol:.2e} on Element {np.where(V==maxVol)[0][0]:.0f}')
-        print(f'Mean Volume: {meanVol:.2e}')
-        print('------------------------------------------')
-    return V
-
-def MinDihedral(NodeCoords,NodeConn,verbose=False):
-    """
-    Calculate the minimum dihedral angle between element faces
-
-    Parameters
-    ----------
-    NodeCoords : array_like
-        List of nodal coordinates.
-    NodeConn : array_like
-        List of nodal connectivities.
-    verbose : bool, optional
-        If true, will print min, max, and mean element min dihedral angle, by default False.
-
-    Returns
-    -------
-    MinAngles : np.ndarray
-        Array of minimum dihedral angles for each angle.
-    """    
-    Faces, FaceConn, FaceElem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
-    Normals = np.asarray(utils.CalcFaceNormal(NodeCoords,Faces))
-
-    tetkey = np.array([[0,1],[0,2],[0,3],[1,2],[2,3],[3,1]])
-    pyrkey = np.array([[0,1],[0,2],[0,3],[0,4],[1,2],[2,3],[3,4],[4,1]])
-    wdgkey = np.array([[0,1],[0,2],[0,3],[1,2],[2,3],[3,1],[1,4],[2,4],[3,4]])
-    hexkey = np.array([[0,1],[0,2],[0,3],[0,4],[1,2],[2,3],[3,4],[4,1],[1,5],[2,5],[3,5],[4,5]])
-
-    elemkeys = [tetkey if len(elem)==4 else pyrkey if len(elem)==5 else wdgkey if len(elem)==6 else hexkey if len(elem)==8 else [] for elem in NodeConn]
-    MinAngles = np.array([np.min(dihedralAngles(Normals[FaceConn[i]][elemkeys[i][:,0]],Normals[FaceConn[i]][elemkeys[i][:,1]],Abs=True)) for i in range(len(NodeConn))])
-
-    if verbose:
-        minAngle = min(MinAngles)
-        maxAngle = max(MinAngles)
-        meanAngle = np.mean(MinAngles)
-        print('------------------------------------------')
-        print(f'Minimum Minimum Dihedral Angle: {minAngle*180/np.pi:.3f}° on Element {np.where(MinAngles==minAngle)[0][0]:.0f}')
-        print(f'Maximum Minimum Dihedral Angle: {maxAngle*180/np.pi:.3f}° on Element {np.where(MinAngles==maxAngle)[0][0]:.0f}')
-        print(f'Mean Minimum Dihedral Angle: {meanAngle*180/np.pi:.3f}°')
-        print('------------------------------------------')
-    return MinAngles
-
-def MaxDihedral(NodeCoords,NodeConn,verbose=False):
-    """
-    Calculate the maximum dihedral angle between element faces
-
-    Parameters
-    ----------
-    NodeCoords : array_like
-        List of nodal coordinates.
-    NodeConn : array_like
-        List of nodal connectivities.
-    verbose : bool, optional
-        If true, will print min, max, and mean element max dihedral angle, by default False.
-
-    Returns
-    -------
-    MaxAngles : np.ndarray
-        Array of maximum dihedral angles for each angle.
-    """ 
-    Faces, FaceConn, FaceElem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
-    Normals = np.asarray(utils.CalcFaceNormal(NodeCoords,Faces))
-
-    tetkey = np.array([[0,1],[0,2],[0,3],[1,2],[2,3],[3,1]])
-    pyrkey = np.array([[0,1],[0,2],[0,3],[0,4],[1,2],[2,3],[3,4],[4,1]])
-    wdgkey = np.array([[0,1],[0,2],[0,3],[1,2],[2,3],[3,1],[1,4],[2,4],[3,4]])
-    hexkey = np.array([[0,1],[0,2],[0,3],[0,4],[1,2],[2,3],[3,4],[4,1],[1,5],[2,5],[3,5],[4,5]])
-
-    elemkeys = [tetkey if len(elem)==4 else pyrkey if len(elem)==5 else wdgkey if len(elem)==6 else hexkey if len(elem)==8 else [] for elem in NodeConn]
-    MaxAngles = np.array([np.max(dihedralAngles(Normals[FaceConn[i]][elemkeys[i][:,0]],Normals[FaceConn[i]][elemkeys[i][:,1]],Abs=True)) for i in range(len(NodeConn))])
-
-    if verbose:
-        minAngle = min(MaxAngles)
-        maxAngle = max(MaxAngles)
-        meanAngle = np.mean(MaxAngles)
-        print('------------------------------------------')
-        print(f'Minimum Maximum Dihedral Angle: {minAngle*180/np.pi:.3f}° on Element {np.where(MaxAngles==minAngle)[0][0]:.0f}')
-        print(f'Maximum Maximum Dihedral Angle: {maxAngle*180/np.pi:.3f}° on Element {np.where(MaxAngles==maxAngle)[0][0]:.0f}')
-        print(f'Mean Maximum Dihedral Angle: {meanAngle*180/np.pi:.3f}°')
-        print('------------------------------------------')
-    return MaxAngles
-
-
 def dihedralAngles(Nis,Njs,Abs=False):
     """
     Calculate dihedral angles between paired normal vectors. This function
@@ -676,9 +708,4 @@ def SurfDihedralAngles(ElemNormals,ElemNeighbors):
     NeighborNormals = ElemNormals[ElemNeighbors]
     angles = np.arccos(np.clip(np.sum((np.array(ElemNormals)[:,None]*NeighborNormals),axis=2),-1,1))
     return angles
-    
-def tet_volume(nodes):
-    return -np.dot(np.subtract(nodes[0],nodes[1]),np.cross(np.subtract(nodes[1],nodes[3]),np.subtract(nodes[2],nodes[3])))/6
-
-
     
