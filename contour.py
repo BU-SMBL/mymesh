@@ -1,6 +1,37 @@
 # -*- coding: utf-8 -*-
 """
+Mesh contouring tools for extracting isosurfaces from images or implicit functions
+
 Created on Sat Jan 22 09:18:20 2022
+
+
+.. currentmodule:: Mesh.contour
+
+Contouring
+==========
+.. autosummary::
+    :toctree: submodules/
+
+    MarchingSquares
+    MarchingSquaresImage
+    MarchingCubes
+    MarchingCubesImage
+    DualMarchingCubes
+    MarchingTetrahedra
+
+Helper Functions
+================
+.. autosummary::
+    :toctree: submodules/
+
+    MarchingSquaresLookup_Tri
+    MarchingSquaresLookup_Edge
+    MarchingCubesLookup
+    MarchingCubes33Lookup
+    isConnected
+    InternalConnection
+    generateLookup33
+    generateLookup
 
 @author: toj
 """
@@ -3452,8 +3483,46 @@ MC33_Signs = np.array([-1,
          -1])
 
 def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', method='triangle', flip=False, edgemode='constant', cleanup=True):
-    # edgemode is for handling edges when interpolation is greater than linear (see np.pad for options)
-    # Image data is assumed to be voxel data and will be interpolated to vertices to get the corners of each 'square'
+    """
+    Marching squares algorithm applied to 2D image data.
+
+    Image data is assumed to be pixel data and will be interpolated to vertices to get the corners of each square. 
+
+    Parameters
+    ----------
+    I : np.ndarray
+        Image array (2D) of grayscale data
+    h : float or tuple, optional
+        Element (pixel) size. Can be specified as a single value for isotropic pixel sizes or a tuple of two values, by default 1
+    threshold : int, optional
+        Isosurface level that defines the boundary, by default 0
+    z : float, optional
+        z coordinate that will be used for all nodes, by default 0.
+    interpolation : str, optional
+        Interpolation to interpolate the position of the new nodes along the edges of the input mesh, by default 'linear'. 
+        
+        'midpoint' - No interpolation is performed, new nodes are placed at the midpoint of edges 
+        
+        'linear' - Bilinear interpolation is performed between adjacent nodes on the input mesh
+
+        'cubic' - Bicubic interpolation is performed between adjacent nodes on the input mesh
+    method : str, optional
+        Mesh generation method, either 'edge' for a line mesh of the boundary or 'triangle' for a filled triangular mesh, by default 'triangle'
+    flip : bool, optional
+        Flip the interior/exterior of the mesh, by default False. By default, values less than the threshold are assumed to be the “inside” of the mesh. If the inside is denoted by values greater than the threshold, set flip=True.
+    edgemode : str, optional
+        For interpolation='cubic', edgemode specifies how to handle boundary nodes. The image matrix will be padded using ``np.pad(I, 1, mode=edgemode)``, by default 'constant'
+    cleanup : bool, optional
+        Determines whether or not to perform mesh cleanup, removing degenerate elements and duplicate nodes, by default True
+
+    Returns
+    -------
+    NewCoords : np.ndarray
+        Numpy array of node coordinates for the contour mesh
+    NewConn : list
+        List of node connectivities 
+
+    """    
     
     assert len(I.shape) == 2, 'I must be a 2D numpy array of image data. For 3D, use MarchingCubesImage.'
     I = I - threshold  
@@ -3630,6 +3699,8 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', metho
     return NewCoords, NewConn
 
 def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation='linear', method='triangle', flip=False, return_anchors=False, cleanup=True):
+
+
     NewCoords = []
     NewConn = []
     Anchors = []
@@ -4124,10 +4195,9 @@ def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method=
             
     return TriCoords, TriConn, root, DualCoords, DualConn, NodeValues
 
-def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,interpolation='linear', method='surface', mixed_elements=False, flip=False):
+def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False):
     """
-    Marching tetrahedra algorithm for extracting an isosurface from a tetrahedral mesh. This can be used
-    to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).
+    Marching tetrahedra algorithm for extracting an isosurface from a tetrahedral mesh. This can be used to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).
 
     Bloomenthal, J. (1994). An Implicit Surface Polygonizer. Graphics Gems, 324-349. https://doi.org/10.1016/b978-0-12-336156-1.50040-9
 
@@ -4144,7 +4214,9 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,inter
     interpolation : str, optional
         Interpolation to interpolate the position of the new nodes along the edges
         of the input mesh, by default 'linear'.
+
         'midpoint' - No interpolation is performed, new nodes are placed at the midpoint of edges
+
         'linear' - Linear interpolation is performed between adjacent nodes on the input mesh.
     method : str, optional
         Determines whether to generate a surface mesh ('surface') or volume mesh ('volume'), 
@@ -4158,6 +4230,8 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,inter
         By default, values less than the threshold are assumed to be the "inside" 
         of the mesh. If the inside is denoted by values greater than the threshold,
         set flip=True.
+    return_NodeValues : bool, optional
+        Return the node values for each node in the tetrahedral mesh. If method='surface', these will all be `threshold`, if method='volume', these will be `threshold` for the surface nodes and the original grid values for the interior nodes
 
     Returns
     -------
@@ -4250,6 +4324,10 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,inter
         ])
     TetNodeCoords = np.asarray(TetNodeCoords)
     TetNodeConn = np.asarray(TetNodeConn)
+    if return_NodeValues: 
+        if (method.lower() == 'volume') and (not mixed_elements):
+            raise Exception('Returning node values for purely tetrahedral meshes (method="lower", mixed_elements=False) is currently unsupported.')
+        orig_NodeValues = np.copy(NodeValues)
     NodeValues = np.asarray(NodeValues) - threshold
     if flip:
         NodeValues = -1*NodeValues
@@ -4290,6 +4368,10 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,inter
     # Interpolation
     if interpolation.lower() == 'midpoint':
         NodeCoords = np.mean(TetNodeCoords[uinterpolation_pairs],axis=1)
+        if return_NodeValues: 
+            NewValues = np.zeros(len(NodeCoords))
+            NewValues = np.mean(NodeValues[uinterpolation_pairs],axis=1)
+
     elif interpolation.lower() == 'linear':
         check = uinterpolation_pairs[:,0] != uinterpolation_pairs[:,1]
         coords1 = TetNodeCoords[uinterpolation_pairs[check,0]]
@@ -4297,10 +4379,19 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,inter
         vals1 = NodeValues[uinterpolation_pairs[check,0]][:,None]
         vals2 = NodeValues[uinterpolation_pairs[check,1]][:,None]
         NodeCoords = np.copy(TetNodeCoords[uinterpolation_pairs[:,0]])
-        NodeCoords[check] = coords1 + (0 - vals1)*(coords2 - coords1)/(vals2-vals1)
+        coefficient = (0 - vals1)/(vals2-vals1)
+        position = coords1 + coefficient*(coords2 - coords1)
+        position[coefficient.flatten() >= 1] = coords2[coefficient.flatten() >= 1]  # This is to prevent floating pt errors inverting elements
+        NodeCoords[check] =  position
+
+
+
+        if return_NodeValues: 
+            NewValues = np.zeros(len(NodeCoords))
+            NewValues[~check] = NodeValues[uinterpolation_pairs[~check,0]]
          
     else:
-        raise Exception('interpolation must be either "midpoint" or "linear"')
+        raise ValueError('interpolation must be either "midpoint" or "linear"')
 
     # Format points into NodeCoords, NodeConn
     if method.lower() == 'surface' and not mixed_elements:
@@ -4317,6 +4408,10 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,inter
 
     if method.lower() == 'surface' or (method.lower() == 'volume' and not mixed_elements):
         NodeCoords,NodeConn = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf')
+
+    if return_NodeValues:
+        NewValues = NewValues[Idx]
+        return NodeCoords, NodeConn, NewValues
 
     return NodeCoords, NodeConn
 
@@ -5134,5 +5229,4 @@ def generateLookup():
     # i = 26
     # bits = np.array([int(b) for b in list('{:08b}'.format(i))])
     # lookuptab
-# %%
  
