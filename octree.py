@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+Octree data structure 
+
 Created on Mon Jan 31 22:52:03 2022
 
 @author: toj

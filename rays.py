@@ -1,8 +1,53 @@
 # -*- coding: utf-8 -*-
 """
+Ray casting and intersection tests
+
 Created on Tue Feb  1 15:23:07 2022
 
 @author: toj
+
+.. currentmodule:: Mesh.rays
+
+
+Intersection Tests
+==================
+.. autosummary::
+    :toctree: submodules/
+
+    RayTriangleIntersection
+    RayTrianglesIntersection
+    RaysTrianglesIntersection
+    RayBoxIntersection
+    RayBoxesIntersection
+    PlaneBoxIntersection
+    PlaneTriangleIntersection
+    PlaneTrianglesIntersection
+    TriangleTriangleIntersection
+    TriangleTriangleIntersectionPt
+    TrianglesTrianglesIntersection
+    TrianglesTrianglesIntersectionPts
+    TriangleBoxIntersection
+    BoxTrianglesIntersection
+    SegmentSegmentIntersection
+    SegmentsSegmentsIntersection
+    RaySegmentsIntersection
+    RaySurfIntersection
+    RaysSurfIntersection
+    RayOctreeIntersection
+    SurfSelfIntersection
+    SurfSurfIntersection
+    PlaneSurfIntersection
+
+Inside/Outside Tests
+====================
+.. autosummary::
+    :toctree: submodules/
+
+    isInsideSurf
+    isInsideBox
+    isInsideVoxel
+    PointInTri
+    PointsInTris
 """
 #%%
 from . import utils, octree, delaunay
@@ -16,14 +61,10 @@ def RayTriangleIntersection(pt, ray, TriCoords, bidirectional=False, eps=1e-6):
     Möller-Trumbore intersection algorithm to detect whether a ray intersects with a triangle.
     Möller, T., & Trumbore, B. (2005). Fast, minimum storage ray/triangle intersection. In ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198746
 
-    For multiple triangles, see RayTrianglesIntersection() and for multiple rays, see
-    RaysTrianglesIntersection(). 
+    For multiple triangles, see :func:`RayTrianglesIntersection` and for multiple rays, see
+    :func:`RaysTrianglesIntersection`. 
     
-    When choosing between RayTriangleIntersection, RayTrianglesIntersection, and RaysTrianglesIntersection,
-    one should generally only choose the one that has as much vectorization as is needed, and not more.
-    For example, RayTriangleIntersection will generally be slightly more efficient than RayTrianglesIntersection
-    if only one triangle is being considered, but RayTrianglesIntersection will be significantly faster than using 
-    RayTriangleIntersection many times within a loop.
+    When choosing between  :func:`RayTriangleIntersection`,  :func:`RayTrianglesIntersection`, and  :func:`RaysTrianglesIntersection`, one should generally only choose the one that has as much vectorization as is needed, and not more. For example, RayTriangleIntersection will generally be slightly more efficient than  :func:`RayTrianglesIntersection` if only one triangle is being considered, but  :func:`RayTrianglesIntersection` will be significantly faster than using :func:`RayTriangleIntersection` many times within a loop.
 
     Parameters
     ----------
@@ -33,7 +74,7 @@ def RayTriangleIntersection(pt, ray, TriCoords, bidirectional=False, eps=1e-6):
         3D vector of ray direction. This should, in general, be a unit vector.
     TriCoords : array_like
         Coordinates of the three vertices of the triangle in the format
-        np.array([[a, b, c], [d, e, f], [g, h, i]])
+        ``np.array([[a, b, c], [d, e, f], [g, h, i]])``
     bidirectional : bool, optional
         Determines whether to check for intersections only the direction the ray is pointing,
         or in both directions (±ray), by default False.
@@ -74,17 +115,13 @@ def RayTriangleIntersection(pt, ray, TriCoords, bidirectional=False, eps=1e-6):
 
 def RayTrianglesIntersection(pt, ray, Tris, bidirectional=False, eps=1e-14):
     """
-    Möller-Trumbore intersection algorithm to detect whether a ray intersects with a set of triangles.
+    Vectorized Möller-Trumbore intersection algorithm to detect whether a ray intersects with a set of triangles.
     Möller, T., & Trumbore, B. (2005). Fast, minimum storage ray/triangle intersection. In ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198746
 
     This is a vectorized form of RayTriangleIntersection for multiple triangles. For multiple rays,
     see RaysTrianglesIntersection(). 
     
-    When choosing between RayTriangleIntersection, RayTrianglesIntersection, and RaysTrianglesIntersection,
-    one should generally only choose the one that has as much vectorization as is needed, and not more.
-    For example, RayTriangleIntersection will generally be slightly more efficient than RayTrianglesIntersection
-    if only one triangle is being considered, but RayTrianglesIntersection will be significantly faster than using 
-    RayTriangleIntersection many times within a loop.
+    When choosing between  :func:`RayTriangleIntersection`,  :func:`RayTrianglesIntersection`, and  :func:`RaysTrianglesIntersection`, one should generally only choose the one that has as much vectorization as is needed, and not more. For example, RayTriangleIntersection will generally be slightly more efficient than  :func:`RayTrianglesIntersection` if only one triangle is being considered, but  :func:`RayTrianglesIntersection` will be significantly faster than using :func:`RayTriangleIntersection` many times within a loop.
 
     Parameters
     ----------
@@ -94,7 +131,7 @@ def RayTrianglesIntersection(pt, ray, Tris, bidirectional=False, eps=1e-14):
         3D vector of ray direction. This should, in general, be a unit vector.
     Tris : array_like
         Coordinates of triangle vertices for each triangle in the format
-        np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...)
+        ``np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...)``
         Should have shape (n,3,3) for n triangles.
     bidirectional : bool, optional
         Determines whether to check for intersections only the direction the ray is pointing,
@@ -138,21 +175,15 @@ def RayTrianglesIntersection(pt, ray, Tris, bidirectional=False, eps=1e-14):
 
 def RaysTrianglesIntersection(pts, rays, Tris, bidirectional=False, eps=1e-14):
     """
-    Möller-Trumbore intersection algorithm to detect intersections between a pairwise set of rays and a set of triangles.
+    Vectorized Möller-Trumbore intersection algorithm to detect intersections between a pairwise set of rays and a set of triangles.
     Möller, T., & Trumbore, B. (2005). Fast, minimum storage ray/triangle intersection. In ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198746
 
-    Note that with this version of the intersection test, there must be one ray for each triangle. itertools.combinations
-    can be useful for constructing such a set of pairwise combinations, or see RaysSurfIntersection which handles this and
-    can utilize octree acceleration. 
+    Note:
+        With this version of the intersection test, there must be one ray for each triangle. itertools.combinations can be useful for constructing such a set of pairwise combinations, or see :func:`RaysSurfIntersection` which handles this and can utilize octree acceleration. 
 
-    This is a vectorized form of RayTriangleIntersection for multiple triangles. For a single ray with multiple triangles,
-    see RaysTrianglesIntersection(). 
+    This is a vectorized form of :func:`RayTriangleIntersection` for multiple triangles. For a single ray with multiple triangles, see :func:`RaysTrianglesIntersection`. 
     
-    When choosing between RayTriangleIntersection, RayTrianglesIntersection, and RaysTrianglesIntersection,
-    one should generally only choose the one that has as much vectorization as is needed, and not more.
-    For example, RayTriangleIntersection will generally be slightly more efficient than RayTrianglesIntersection
-    if only one triangle is being considered, but RayTrianglesIntersection will be significantly faster than using 
-    RayTriangleIntersection many times within a loop.
+    When choosing between  :func:`RayTriangleIntersection`, :func:`RayTrianglesIntersection`, and  :func:`RaysTrianglesIntersection`, one should generally only choose the one that has as much vectorization as is needed, and not more. For example, RayTriangleIntersection will generally be slightly more efficient than  :func:`RayTrianglesIntersection` if only one triangle is being considered, but  :func:`RayTrianglesIntersection` will be significantly faster than using :func:`RayTriangleIntersection` many times within a loop.
 
     Parameters
     ----------
@@ -164,7 +195,7 @@ def RaysTrianglesIntersection(pts, rays, Tris, bidirectional=False, eps=1e-14):
         Should have shape (n, 3) for n rays.
     Tris : array_like
         Coordinates of triangle vertices for each triangle in the format
-        np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...).
+        ``np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...)``.
         Should have shape (n,3,3) for n triangles.
     bidirectional : bool, optional
         Determines whether to check for intersections only the direction the ray is pointing,
@@ -207,7 +238,7 @@ def RaysTrianglesIntersection(pts, rays, Tris, bidirectional=False, eps=1e-14):
 
 def RayBoxIntersection(pt, ray, xlim, ylim, zlim):
     """
-    Intersection algorithm for detecting intersections between a ray and an axis-aligned box
+    Intersection algorithm for detecting intersections between a ray and an axis-aligned box.
     Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748
 
     Parameters
@@ -282,8 +313,8 @@ def RayBoxIntersection(pt, ray, xlim, ylim, zlim):
 
 def RayBoxesIntersection(pt, ray, xlims, ylims, zlims):
     """
-    Intersection algorithm for detecting intersections between a ray and an axis-aligned box
-    Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://doi.org
+    Vectorized intersection algorithm for detecting intersections between a ray and a set of axis-aligned boxes.
+    Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748
 
     Parameters
     ----------
@@ -355,7 +386,7 @@ def RayBoxesIntersection(pt, ray, xlims, ylims, zlims):
 
 def PlaneBoxIntersection(pt, Normal, xlim, ylim, zlim):
     """
-    Intersection algorithm for detecting intersections between a plane (defined by a point and normal vector) and an axis-aligned box.
+    Intersection algorithm for detecting intersections between a plane and an axis-aligned box.
 
     Parameters
     ----------
@@ -372,8 +403,8 @@ def PlaneBoxIntersection(pt, Normal, xlim, ylim, zlim):
 
     Returns
     -------
-    _type_
-        _description_
+    intersection : bool
+        True if there is an intersection, otherwise False.
     """    
 
     BoxCoords = [
@@ -391,41 +422,105 @@ def PlaneBoxIntersection(pt, Normal, xlim, ylim, zlim):
     signs = [np.sign(x) for x in sd]
     if all(signs) == 1 or all(signs) == -1:
         # No Intersection, all points on same side of plane
-        return False
+        intersection = False
     else:
         # Intersection, points on different sides of the plane
-        return True
+        intersection = True
+    return intersection
     
 def PlaneTriangleIntersection(pt, Normal, TriCoords):
+    """
+    Intersection test for detecting intersections between a plane and a triangle.
+
+    An intersection will be detected if points are on different sides of the plane, or if any points lie exactly on the plane.
+
+    Parameters
+    ----------
+    pt : array_like
+        3 element array, point on plane 
+    Normal : array_like
+        3 element array, normal vector to plane 
+    TriCoords : array_like
+        Coordinates of the three vertices of the triangle in the format
+        ``np.array([[a, b, c], [d, e, f], [g, h, i]])``
+
+    Returns
+    -------
+    intersection : bool
+        True if there is an intersection, otherwise False.
+    """    
     # Signed Distances from the vertices of the box to the plane
     sd = [np.dot(Normal,p)-np.dot(Normal,pt) for p in TriCoords]
     signs = [np.sign(x) for x in sd]
     if all(signs) == 1 or all(signs) == -1:
         # No Intersection, all points on same side of plane
-        return False
+        intersection = False
     else:
         # Intersection, points on different sides of the plane
-        return True
+        intersection = True
+    return intersection
     
 def PlaneTrianglesIntersection(pt, Normal, Tris, eps=1e-14):
+    """
+    Vectorized intersection test for detecting intersections between a plane and a set of triangles.
+
+    An intersection will be detected if points are on different sides of the plane, or if any points lie exactly on the plane. That are a distance +/- eps from the plane will be considered as on the plane.
+
+    Parameters
+    ----------
+    pt : array_like
+        3 element array, point on plane 
+    Normal : array_like
+        3 element array, normal vector to plane 
+    Tris : array_like
+        Coordinates of triangle vertices for each triangle in the format
+        np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...).
+        Should have shape (n,3,3) for n triangles.
+    eps : float, optional
+        Small parameter used to determine if a value is sufficiently close to 0, by default 1e-14
+
+    Returns
+    -------
+    intersections : np.ndarray
+        Array of bools for each triangle, True of there is an intersection, otherwise False.
+    """   
 
     Tris = np.asarray(Tris)
     pt = np.asarray(pt)
     Normal = np.asarray(Normal)/np.linalg.norm(Normal)
     sd = np.sum(Normal*Tris,axis=2) - np.dot(Normal,pt)
-    Intersection = ~(np.all((sd < -eps),axis=1) | np.all((sd > eps),axis=1))
+    intersections = ~(np.all((sd < -eps),axis=1) | np.all((sd > eps),axis=1))
 
-    return Intersection
+    return intersections
     
 def TriangleTriangleIntersection(Tri1,Tri2,eps=1e-14,edgeedge=False):
-    
-    # If <edgeedge> is true, two triangles that meet exactly at the edges will be counted as an intersection
-    #   this inclues two adjacent triangles that share an edge, but also cases where two points of Tri1 lie exactly on the edges of Tri2
+    """
+    Intersection test for two triangles. 
+
+    Möller, T. (1997). Fast triangle-triangle intersection test. Journal of Graphics Tools, 2(2), 25-30. https://doi.org/10.1080/10867651.1997.10487472
+
+    Parameters
+    ----------
+    Tri1 : array_like
+        Coordinates of the three vertices of the first triangle in the format
+        ``np.array([[a, b, c], [d, e, f], [g, h, i]])``
+    Tri2 : array_like
+        Coordinates of the three vertices of the second triangle in the format
+        ``np.array([[a, b, c], [d, e, f], [g, h, i]])``
+    eps : float, optional
+        Small parameter used to determine if a value is sufficiently close to 0, by default 1e-14
+    edgeedge : bool, optional
+        If ``edgeedge`` is true, two triangles that meet exactly at the edges will be counted as an intersection, by default False. This inclues two adjacent triangles that share an edge, but also cases where two points of Tri1 lie exactly on the edges of Tri2.
+
+    Returns
+    -------
+    intersection : bool
+        True if there is an intersection, otherwise False.
+    """    
 
     if type(Tri1) is list: Tri1 = np.array(Tri1)
     if type(Tri2) is list: Tri2 = np.array(Tri2)
 
-    # Moller 1997
     # Plane2 (N2.X+d2):
     N2 = np.cross(np.subtract(Tri2[1,:],Tri2[0,:]),np.subtract(Tri2[2,:],Tri2[0,:]))
     d2 = -np.dot(N2,Tri2[0,:])
@@ -530,7 +625,29 @@ def TriangleTriangleIntersection(Tri1,Tri2,eps=1e-14,edgeedge=False):
     return True
 
 def TriangleTriangleIntersectionPt(Tri1,Tri2,eps=1e-14, edgeedge=False):
-    # Moller 1997
+    """
+    Intersection test for two triangles that returns the point(s) of intersection. 
+
+    Möller, T. (1997). Fast triangle-triangle intersection test. Journal of Graphics Tools, 2(2), 25-30. https://doi.org/10.1080/10867651.1997.10487472
+    
+    Parameters
+    ----------
+    Tri1 : array_like
+        Coordinates of the three vertices of the first triangle in the format
+        ``np.array([[a, b, c], [d, e, f], [g, h, i]])``
+    Tri2 : array_like
+        Coordinates of the three vertices of the second triangle in the format
+        ``np.array([[a, b, c], [d, e, f], [g, h, i]])``
+    eps : float, optional
+        Small parameter used to determine if a value is sufficiently close to 0, by default 1e-14
+    edgeedge : bool, optional
+        If ``edgeedge`` is true, two triangles that meet exactly at the edges will be counted as an intersection, by default False. This inclues two adjacent triangles that share an edge, but also cases where two points of Tri1 lie exactly on the edges of Tri2.
+
+    Returns
+    -------
+    points : array_like
+        Array of points where the two triangles intersect.
+    """    
     
     # Plane2 (N2.X+d2):
     N2 = np.cross(np.subtract(Tri2[1],Tri2[0]),np.subtract(Tri2[2],Tri2[0]))
@@ -664,8 +781,31 @@ def TriangleTriangleIntersectionPt(Tri1,Tri2,eps=1e-14, edgeedge=False):
     return edge
     
 def TrianglesTrianglesIntersection(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
-    
-    # Vectorized version of TriangleTriangleIntersection to perform simultaneous comparisons between the triangles in Tri1s and Tri2s
+    """
+    Vectorized intersection test for two sets of triangles. 
+
+    Möller, T. (1997). Fast triangle-triangle intersection test. Journal of Graphics Tools, 2(2), 25-30. https://doi.org/10.1080/10867651.1997.10487472
+
+    Parameters
+    ----------
+    Tri1s : array_like
+        Coordinates of triangle vertices for each triangle in the format
+        ``np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...)``.
+        Should have shape (n,3,3) for n triangles.
+    Tri2s : array_like
+        Coordinates of triangle vertices for each triangle in the format
+        ``np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...)``.
+        Should have shape (n,3,3) for n triangles.
+    eps : float, optional
+        Small parameter used to determine if a value is sufficiently close to 0, by default 1e-14
+    edgeedge : bool, optional
+        If ``edgeedge`` is true, two triangles that meet exactly at the edges will be counted as an intersection, by default False. This inclues two adjacent triangles that share an edge, but also cases where two points of Tri1 lie exactly on the edges of Tri2.
+
+    Returns
+    -------
+    Intersections : np.ndarray
+        Array of bools for each pair of triangles. True if there is an intersection, otherwise False.
+    """    
     # TODO: Currently considering coplanar as a non-intersection, need to implement a separate coplanar test
     
     # Plane2 (N2.X+d2):
@@ -805,8 +945,33 @@ def TrianglesTrianglesIntersection(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
     return Intersections
     
 def TrianglesTrianglesIntersectionPts(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
-    
-    # Vectorized version of TriangleTriangleIntersection to perform simultaneous comparisons between the triangles in Tri1s and Tri2s
+    """
+    Vectorized intersection test for two sets of triangles that returns the intersection point(s) between each pair of triangles. 
+
+    Möller, T. (1997). Fast triangle-triangle intersection test. Journal of Graphics Tools, 2(2), 25-30. https://doi.org/10.1080/10867651.1997.10487472
+
+    Parameters
+    ----------
+    Tri1s : array_like
+        Coordinates of triangle vertices for each triangle in the format
+        ``np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...)``.
+        Should have shape (n,3,3) for n triangles.
+    Tri2s : array_like
+        Coordinates of triangle vertices for each triangle in the format
+        ``np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...)``.
+        Should have shape (n,3,3) for n triangles.
+    eps : float, optional
+        Small parameter used to determine if a value is sufficiently close to 0, by default 1e-14
+    edgeedge : bool, optional
+        If ``edgeedge`` is true, two triangles that meet exactly at the edges will be counted as an intersection, by default False. This inclues two adjacent triangles that share an edge, but also cases where two points of Tri1 lie exactly on the edges of Tri2.
+
+    Returns
+    -------
+    Intersections : np.ndarray
+        Array of bools for each pair of triangles. True if there is an intersection, otherwise False.
+    IntersectionPts : list
+        List of intersection point(s) for each pair of triangle.
+    """    
     # TODO: Currently considering coplanar as a non-intersection, need to implement a separate coplanar test
     
     # Plane2 (N2.X+d2):
@@ -1067,6 +1232,32 @@ def TrianglesTrianglesIntersectionPts(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
     return Intersections, IntersectionPts
 
 def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCenter=None):
+    """
+    Intersection test for detecting intersections between a triangle and a box.
+
+    Akenine-Möller, T. (2005). Fast 3D triangle-box overlap testing. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198747
+
+    Parameters
+    ----------
+    TriCoords : array_like
+        Coordinates of the three vertices of the triangle in the format
+        ``np.array([[a, b, c], [d, e, f], [g, h, i]])``
+    xlim : array_like
+        2 element array of the lower and upper bounds of the box in the x direction ``[xmin, xmax]``
+    ylim : array_like
+        2 element array of the lower and upper bounds of the box in the y direction ``[ymin, ymax]``
+    zlim : array_like
+        2 element array of the lower and upper bounds of the box in the z direction ``[zmin, zmax]``
+    TriNormal : array_like, optional
+        Triangle normal vector, by default None. Will be computed if not provided.
+    BoxCenter : array_like, optional
+        Coordinates of the center of the box, by default None. Will be computed if not provided.
+
+    Returns
+    -------
+    intersection : bool
+        True if there is an intersection, otherwise False.
+    """    
     # Akenine-Moller (2001) Fast 3D Triangle-Box Overlap Test
     if not BoxCenter: BoxCenter = np.mean([xlim,ylim,zlim],axis=1)
     f0 = np.subtract(TriCoords[1],TriCoords[0])
@@ -1173,8 +1364,33 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     return True
 
 def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=None):
-    # Akenine-Moller (2001) Fast 3D Triangle-Box Overlap Test
-    # Vectorized version of TriangleBoxIntersection to test multiple triangles against a single box
+    """
+    Intersection test for detecting intersections between a triangle and a box. A vectorized version of :func:`TriangleBoxIntersection` for one box and multiple triangles
+
+    Akenine-Möller, T. (2005). Fast 3D triangle-box overlap testing. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198747
+
+    Parameters
+    ----------
+    Tris : array_like
+        Coordinates of triangle vertices for each triangle in the format
+        np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...).
+        Should have shape (n,3,3) for n triangles.
+    xlim : array_like
+        2 element array of the lower and upper bounds of the box in the x direction ``[xmin, xmax]``
+    ylim : array_like
+        2 element array of the lower and upper bounds of the box in the y direction ``[ymin, ymax]``
+    zlim : array_like
+        2 element array of the lower and upper bounds of the box in the z direction ``[zmin, zmax]``
+    TriNormal : array_like, optional
+        Triangle normal vector, by default None. Will be computed if not provided.
+    BoxCenter : array_like, optional
+        Coordinates of the center of the box, by default None. Will be computed if not provided.
+
+    Returns
+    -------
+    intersection : bool
+        True if there is an intersection, otherwise False.
+    """    
     if not BoxCenter: BoxCenter = np.mean([xlim,ylim,zlim],axis=1)
     
     if type(Tris) is list: Tris = np.array(Tris)
@@ -1677,32 +1893,57 @@ def PlaneSurfIntersection(pt, Normal, NodeCoords, SurfConn, eps=1e-14):
     Intersections = PlaneTrianglesIntersection(pt, Normal, NodeCoords[SurfConn], eps=eps)
     return Intersections
 
-## Inside Tests
+## Inside/Outside Tests
 def isInsideSurf(pt, NodeCoords, SurfConn, ElemNormals, Octree=None, eps=1e-8, ray=np.random.rand(3)):
-    
+    """
+    Test to determine whether a point is inside a surface mesh.
+
+    Parameters
+    ----------
+    pt : array_like
+        3D coordinates for the starting point of the ray.
+    NodeCoords : array_like
+        List of node coordinates
+    SurfConn : array_like
+        Node connectivity of elements. This function is only valid for triangular surface meshes.
+    ElemNormals : array_like
+        Element normal vectors 
+    Octree : None, str, or octree.octreeNode, optional
+        Determines whether to use/generate an octree data structure for acceleration of the intersection testing, by default None. 
+        'generate' - Will generate an octree structure of the surface
+        None - Will not use an octree structure
+        octree.octreeNode - Octree data structure precomputed using :func:`Mesh.octree.Surf2Octree`
+    eps : float, optional
+        Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8
+    ray : array_like, optional
+        Ray that will be cast to determine whether the point is inside or outside the surface, by default np.random.rand(3). For a closed, manifold surface, the choice of ray shouldn't matter.
+
+    Returns
+    -------
+    inside : bool
+        True if the point is inside the surface, otherwise False.
+    """    
     root = OctreeInputProcessor(NodeCoords, SurfConn, Octree)
         
     intersections, distances, _ = RaySurfIntersection(pt,ray,NodeCoords,SurfConn,Octree=root)
     posDistances = np.array([d for d in distances if d > eps])
     zero = np.any(np.abs(distances)<eps)
-    # intersections2 = [intersections[i] for i,d in enumerate(distances) if d >= 0]
     
     # Checking unique to not double count instances where ray intersects an edge
     if len(np.unique(np.round(posDistances/eps)))%2 == 0 and not zero:
-        # print(distances)
         # No intersection
-        return False
+        inside = False
+        return inside
     else:
         dist = min(np.abs(distances))
         if dist < eps:
             closest = np.array(intersections)[np.abs(distances)==dist][0]
             dot = np.dot(ray,ElemNormals[closest])
-            if dot > 0:
-                a = 'merp'
             return dot
         else:
             # Inside
-            return True
+            inside = True
+            return inside
 
 def isInsidesSurf(pts, NodeCoords, SurfConn, ElemNormals=None, Octree='generate', eps=1e-8, rays=None):
     
@@ -1735,7 +1976,7 @@ def isInsideBox(pt, xlim, ylim, zlim):
     lims = [xlim,ylim,zlim]
     return all([lims[d][0] < pt[d] and lims[d][1] > pt[d] for d in range(3)])
 
-def InsideVoxel(pts, VoxelCoords, VoxelConn, inclusive=True):    
+def isInsideVoxel(pts, VoxelCoords, VoxelConn, inclusive=True):    
     Root = octree.Voxel2Octree(VoxelCoords, VoxelConn)
     inside = [False for i in range(len(pts))]
     for i,pt in enumerate(pts):

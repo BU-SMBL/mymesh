@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+Boolean operations for meshes
+
 Created on Wed Feb 16 11:28:28 2022
 
 @author: toj
@@ -12,7 +14,7 @@ from . import mesh, converter, utils, octree, rays, improvement, delaunay, primi
 
 def MeshBooleans(Surf1, Surf2, tol=1e-8):
     """
-    MeshBooleans summary
+    Boolean (union, intersection, difference) for two surface meshes.
     https://dl.acm.org/doi/pdf/10.1145/15922.15904
 
     Parameters

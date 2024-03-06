@@ -1,23 +1,78 @@
 # -*- coding: utf-8 -*-
 """
+Implicit meshing tools
+
 Created on Fri Jan 14 17:43:57 2022
 
 @author: toj
+
+.. currentmodule:: Mesh.implicit
+
+
+Mesh Generation
+===============
+.. autosummary::
+    :toctree: submodules/
+
+    VoxelMesh
+    SurfaceMesh
+    TetMesh
+
+Implicit Functions
+==================
+.. autosummary::
+    :toctree: submodules/
+
+    gyroid
+    lidinoid
+    primitive
+    neovius
+    diamond
+    cylinder
+    cube
+    xplane
+    yplane
+    zplane
+    sphere
+
+Implicit Function Operators
+===========================
+.. autosummary::
+    :toctree: submodules/
+
+    offset
+    union
+    diff
+    intersection
+    unionf
+    difff
+    intersectionf
+    rMax
+    rMin
+
+Other Implicit Mesh Utilities
+=============================
+.. autosummary::
+    :toctree: submodules/
+
+    mesh2sdf
+    mesh2udf
+    grid2fun
+    grid2grad
 """
 
 # %%
 
 import numpy as np
-from scipy.spatial import distance
 from scipy import optimize, interpolate
 import sys, os, time, copy, warnings, bisect
 
-from . import utils, converter, contour, quality, improvement, TetGen, rays, octree, mesh, primitives
+from . import utils, converter, contour, quality, improvement, rays, octree, mesh, primitives
 
 # Mesh generators
 def VoxelMesh(func, bounds, h, threshold=0, threshold_dir=-1, mode='any', args=(), kwargs={}):
     """
-    VoxelMesh Generate voxel mesh of an implicit function
+    Generate voxel mesh of an implicit function
 
     Parameters
     ----------
@@ -46,12 +101,18 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_dir=-1, mode='any', args=(
 
     Returns
     -------
-    NodeCoords : np.ndarray
-        List of nodal coordinates for the voxel mesh
-    NodeConn : np.ndarray
-        Nodal connectivity list for the voxel mesh 
-    NodeValues : np.ndarray
-        Function values evaluated at each point
+    voxel : Mesh.mesh
+        Mesh object containing the voxel mesh. The values of the function at each node are stored in voxel.NodeData['func']
+
+        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = implicit.VoxelMesh(...)``
+
+    Examples
+    --------
+    .. plot::
+
+        voxel = implicit.VoxelMesh(implicit.gyroid, [0,1,0,1,0,1], 0.05)
+        voxel.plot(bgcolor='w', scalars=voxel.NodeData['func'])
+
 
     """        
     
@@ -84,12 +145,15 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_dir=-1, mode='any', args=(
             else:
                 raise Exception('mode must be "any", "all", "centroid", "boundary", or "notrim".')
 
-        NodeCoords, NodeConn, OriginalIds = converter.removeNodes(NodeCoords,VoxelConn)
+        NodeCoords, NodeConn, OriginalIds = utils.RemoveNodes(NodeCoords,VoxelConn)
         NodeVals = NodeVals[OriginalIds]
     else:   
         NodeConn = GridConn
     
-    return NodeCoords, NodeConn, NodeVals
+    voxel = mesh.mesh(NodeCoords, NodeConn)
+    voxel.NodeData['func'] = NodeVals
+
+    return voxel
 
 def SurfaceMesh(func, bounds, h, threshold=0, threshold_dir=-1, method='mc', interpolation='linear', args=(), kwargs={}):
     """
@@ -110,7 +174,9 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_dir=-1, method='mc', int
     method : str, optional
         Surface triangulation method, by default 'mc'.
         'mc' : Marching cubes (see contour.MarchingCubesImage) (default)
+
         'mc33' : Marching cubes 33 (see contour.MarchingCubes)
+
         'mt' : Marching tetrahedra (see contour.MarchingTetrahedra)
     interpolation : str, optional
         Method of interpolation used for placing the vertices on the approximated isosurface. This can be 'midpoint', 'linear', or 'cubic', by default 'linear'. If 'cubic' is selected, method is overridden to be 'mc'. 
@@ -121,10 +187,17 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_dir=-1, method='mc', int
 
     Returns
     -------
-    NodeCoords : np.ndarray
-        List of nodal coordinates for the surface mesh
-    NodeConn : np.ndarray
-        Nodal connectivity list for the surface mesh 
+    surface : Mesh.mesh
+        Mesh object containing the surface mesh.
+
+        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = implicit.SurfaceMesh(...)``
+
+    Examples
+    --------
+    .. plot::
+
+        surface = implicit.SurfaceMesh(implicit.gyroid, [0,1,0,1,0,1], 0.05)
+        surface.plot(bgcolor='w')
     """
 
     if not isinstance(h, (list, tuple, np.ndarray)):
@@ -149,16 +222,17 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_dir=-1, method='mc', int
         SurfCoords[:,1] += bounds[2]
         SurfCoords[:,2] += bounds[4]
     elif method == 'mc33':
-        NodeCoords, NodeConn, NodeVals = VoxelMesh(func, bounds, h, threshold=threshold, threshold_dir=1, mode='boundary',*args,**kwargs)
-        SurfCoords, SurfConn = contour.MarchingCubes(NodeCoords, NodeConn, NodeVals, method='33', threshold=threshold,flip=flip)
+        voxel = VoxelMesh(func, bounds, h, threshold=threshold, threshold_dir=1, mode='boundary',*args,**kwargs)
+        SurfCoords, SurfConn = contour.MarchingCubes(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['func'], method='33', threshold=threshold,flip=flip)
     elif method == 'mt':
         NodeCoords, NodeConn, NodeVals = VoxelMesh(func, bounds, h, threshold=threshold, threshold_dir=threshold, mode='boundary',*args,**kwargs)
         NodeCoords, NodeConn = converter.hex2tet(NodeCoords, NodeConn, method='1to6')
-        SurfCoords, SurfConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, NodeVals, method='surface', threshold=threshold,flip=flip)
-    
-    return SurfCoords, SurfConn
+        SurfCoords, SurfConn = contour.MarchingTetrahedra(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['func'], method='surface', threshold=threshold,flip=flip)
 
-def TetMesh(func, bounds, h, threshold=0, threshold_dir=-1, interpolation='linear'):
+    surface = mesh.mesh(SurfCoords, SurfConn)
+    return surface
+
+def TetMesh(func, bounds, h, threshold=0, threshold_dir=-1, interpolation='linear', args=(), kwargs={}):
     """
     Generate a tetrahedral mesh of an implicit function 
 
@@ -183,10 +257,17 @@ def TetMesh(func, bounds, h, threshold=0, threshold_dir=-1, interpolation='linea
 
     Returns
     -------
-    NodeCoords : np.ndarray
-        List of nodal coordinates for the surface mesh
-    NodeConn : np.ndarray
-        Nodal connectivity list for the surface mesh 
+    tet : Mesh.mesh
+        Mesh object containing the tetrahedral mesh.
+
+        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = implicit.TetMesh(...)``
+
+    Examples
+    --------
+    .. plot::
+
+        tet = implicit.TetMesh(implicit.gyroid, [0,1,0,1,0,1], 0.05)
+        tet.plot(bgcolor='w')
     """
 
     if not isinstance(h, (list, tuple, np.ndarray)):
@@ -197,11 +278,12 @@ def TetMesh(func, bounds, h, threshold=0, threshold_dir=-1, interpolation='linea
     else:
         flip = False
 
-    NodeCoords, NodeConn, NodeVals = VoxelMesh(func, bounds, h, threshold=threshold, threshold_dir=threshold, mode='any', args=args, kwargs=kwargs)
-    NodeCoords, NodeConn = converter.hex2tet(NodeCoords, NodeConn, method='1to6')
-    TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, NodeVals, method='volume', threshold=threshold, flip=flip, interpolation=interpolation)
+    voxel = VoxelMesh(func, bounds, h, threshold=threshold, threshold_dir=threshold, mode='any', args=args, kwargs=kwargs)
+    NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
+    TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['func'], method='volume', threshold=threshold, flip=flip, interpolation=interpolation)
 
-    return TetCoords, TetConn 
+    tet = mesh.mesh(TetCoords, TetConn)
+    return tet
 
 # implicit function primitives
 def gyroid(x,y,z):
@@ -285,9 +367,7 @@ def rMin(a,b,alpha=0,m=0,p=2):
 
 def grid2fun(VoxelCoords,VoxelConn,Vals,method='linear',fill_value=None):
     """
-    grid2fun converts a voxel grid mesh (as made by VoxelMesh(mode='notrim') 
-    or converter.makeGrid) into a function that can be evaluated at any point
-    within the bounds of the grid
+    Converts a voxel grid mesh into a function that can be evaluated at any point within the bounds of the grid.
 
     Parameters
     ----------
@@ -327,9 +407,7 @@ def grid2fun(VoxelCoords,VoxelConn,Vals,method='linear',fill_value=None):
 
 def grid2grad(VoxelCoords,VoxelConn,NodeVals,method='linear'):
     """
-    grid2grad converts a voxel grid mesh (as made by VoxelMesh(mode='notrim') 
-    or converter.makeGrid) into a function that can be evaluated at any point
-    within the bounds of the grid to return the gradient of the function
+    Converts a voxel grid mesh into a function. The function can be evaluated at any point within the bounds of the grid to return the gradient of the function.
 
     Parameters
     ----------
@@ -460,7 +538,7 @@ def FastMarchingMethod(VoxelCoords, VoxelConn, NodeVals):
 
 def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
     """
-    mesh2sdf Generates a signed distance field for a mesh
+    Generates a signed distance field for a mesh.
 
     Parameters
     ----------
@@ -516,7 +594,7 @@ def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
 
 def mesh2udf(M,VoxelCoords,VoxelConn):
     """
-    mesh2udf Generates an unsigned distance field for a mesh
+    Generates an unsigned distance field for a mesh.
 
     Parameters
     ----------

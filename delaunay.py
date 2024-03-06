@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+Delaunay triangulation
+
 Created on Sat Jan 15 12:02:26 2022
 
 @author: toj

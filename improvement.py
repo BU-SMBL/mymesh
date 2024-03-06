@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+Mesh quality improvement.
+
 Created on Wed Jan 26 09:27:53 2022
 
 @author: toj
@@ -70,7 +72,7 @@ def CollapseSlivers(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=set(), v
                     RNodeConn[RNodeConn == Edges[edge][0]] = Edges[edge][1]
                 break
         NewCoords,NewConn = utils.DeleteDegenerateElements(ArrayCoords,NewConn,strict=True)
-        NewCoords = NewCoords.tolist()
+        NewCoords = NewCoords
     else:
         NewCoords = NodeCoords
         NewConn = NodeConn
