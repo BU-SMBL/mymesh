@@ -5,7 +5,7 @@ Created on Wed Sep  1 16:20:47 2021
 @author: toj
 """
 
-from . import utils, improvement, converter, quality, rays, curvature
+from . import utils, improvement, converter, quality, rays, curvature, visualize
 from sys import getsizeof
 import scipy
 import numpy as np
@@ -21,6 +21,7 @@ class mesh:
         # Properties:
         self._SurfConn = []
         self._NodeNeighbors = []
+        self._ElemNeighbors = []
         self._ElemConn = []
         self._SurfNodeNeighbors = []
         self._SurfElemConn = []
@@ -143,11 +144,11 @@ class mesh:
         # TODO: This needs to be improved so other variables that point to nodes or elements are updated accordingly
         
         self.reset()
-        self.NodeCoords,self.NodeConn,newIds,idx = utils.DeleteDuplicateNodes(self.NodeCoords,self.NodeConn,tol=tol,return_idx=True)
+        self.NodeCoords,self.NodeConn,idx,newIds = utils.DeleteDuplicateNodes(self.NodeCoords,self.NodeConn,tol=tol,return_idx=True,return_inv=True)
         for key in self.NodeData.keys():
             self.NodeData[key] = np.asarray(self.NodeData[key])[idx]
             
-        self.NodeCoords,self.NodeConn,OrigIds = converter.removeNodes(self.NodeCoords,self.NodeConn)
+        self.NodeCoords,self.NodeConn,OrigIds = utils.RemoveNodes(self.NodeCoords,self.NodeConn)
         for key in self.NodeData.keys():
             self.NodeData[key] = np.asarray(self.NodeData[key])[OrigIds]
         
@@ -271,22 +272,7 @@ class mesh:
                     self.addNodes([M.NodeCoords[node] for node in M.NodeSets[keyName]],NodeSet=keyName)
             else:
                 self.addNodes(M.NodeCoords)
-            # Add Edges 
-            # if len(M.EdgeSets) > 1:
-            #     keys = list(M.EdgeSets.keys())
-            #     for i in range(len(keys)):
-            #         keyName = keys[i]
-            #         self.addEdges([[node+NNode for node in M.Edges()[edge]] for edge in M.EdgeSets[keyName]],EdgeSet=keyName)
-            # else:
-            #     self.addEdges([[node+NNode for node in M.Edges()[edge]] for edge in range(len(M.Edges()))])
-            # # Add Faces  
-            # if len(M.FaceSets) > 1:
-            #     keys = list(M.FaceSets.keys())
-            #     for i in range(len(keys)):
-            #         keyName = keys[i]
-            #         self.addFaces([[node+NNode for node in M.Faces()[face]] for face in M.FaceSets[keyName]],FaceSet=keyName)
-            # else:
-            #     self.addFaces([[node+NNode for node in M.Faces()[face]] for face in range(len(M.Faces()))])
+
             # Add Elems
             if len(M.ElemSets) > 1:
                 keys = list(M.ElemSets.keys())
@@ -296,10 +282,25 @@ class mesh:
             else:
                 self.addElems([[node+NNode for node in M.NodeConn[elem]] for elem in range(len(M.NodeConn))])
                     
-            
-            self._FaceElemConn = self._FaceElemConn + [[elem + NElem for elem in elemconn] for elemconn in M._FaceElemConn]
-            self._FaceConn = self._FaceConn + [[face + NFace for face in faceconn] for faceconn in M._FaceConn]
-            # TODO: EdgeELemConn, EdgeConn
+            # Add Node and Element Data
+            for key in self.NodeData.keys():
+                if not key in M.NodeData.keys():
+                    M.NodeData[key] = np.nan * np.ones_like(self.NodeData[key])
+                if len(np.shape(self.NodeData[key])) == 1:
+                    # 1D data
+                    self.NodeData[key] = np.append(self.NodeData[key], M.NodeData[key])
+                else: 
+                    self.NodeData[key] = np.vstack(self.NodeData[key], M.NodeData[key])
+
+            for key in self.ElemData.keys():
+                if not key in M.ElemData.keys():
+                    M.ElemData[key] = np.nan * np.ones_like(self.ElemData[key])
+                if len(np.shape(self.ElemData[key])) == 1:
+                    # 1D data
+                    self.ElemData[key] = np.append(self.ElemData[key], M.ElemData[key])
+                else: 
+                    self.ElemData[key] = np.vstack(self.ElemData[key], M.ElemData[key])
+
         # Cleanup
         if cleanup:
             self.cleanup(tol=tol)
@@ -463,6 +464,13 @@ class mesh:
             self._NodeNeighbors = utils.getNodeNeighbors(*self)
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
         return self._NodeNeighbors
+    @property
+    def ElemNeighbors(self):
+        if self._ElemNeighbors == []:
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying element neighbors...',end='')
+            self._ElemNeighbors = utils.getElemNeighbors(*self)
+            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+        return self._ElemNeighbors
     @property
     def ElemConn(self):
         if self._ElemConn == []:
@@ -840,7 +848,7 @@ class mesh:
 
         # Reduce or remove degenerate wedges -- TODO: This can probably be made more efficient
         # self.cleanup()
-        self.NodeCoords,self.NodeConn,_ = utils.DeleteDuplicateNodes(self.NodeCoords,self.NodeConn)
+        self.NodeCoords,self.NodeConn = utils.DeleteDuplicateNodes(self.NodeCoords,self.NodeConn)
         Unq = [np.unique(elem,return_index=True,return_inverse=True) for elem in self.NodeConn]
         key = utils.PadRagged([u[1][u[2]] for u in Unq],fillval=-1)
 
@@ -1025,7 +1033,7 @@ class mesh:
                 self.__dict__ = json.load(f)
         else:
             raise Exception('Unrecognized file')   
-    def Mesh2Meshio(self,PointData={},CellData={}):
+    def mymesh2meshio(self,PointData={},CellData={}):
         
         try:
             import meshio
@@ -1086,12 +1094,12 @@ class mesh:
         if self.NNode == 0:
             warnings.warn('Mesh empty - file not written.')
             return
-        m = self.Mesh2Meshio()
+        m = self.mymesh2meshio()
         if binary is not None:
             m.write(filename,binary=binary)
         else:
             m.write(filename)
-    def Meshio2Mesh(m):
+    def meshio2mymesh(m):
         try:
             import meshio
         except:
@@ -1101,7 +1109,7 @@ class mesh:
         else:
             # Support for older meshio version
             NodeConn = [elem for cells in m.cells for elem in cells[1].tolist()]
-        NodeCoords = m.points.tolist()
+        NodeCoords = m.points
         M = mesh(NodeCoords,NodeConn)
         if len(m.point_data) > 0 :
             for key in m.point_data.keys():
@@ -1133,7 +1141,7 @@ class mesh:
         except:
             raise ImportError('mesh.read() requires the meshio library. Install with: pip install meshio')
         m = meshio.read(file)
-        M = mesh.Meshio2Mesh(m)
+        M = mesh.meshio2mymesh(m)
 
         return M  
             
@@ -1175,4 +1183,19 @@ class mesh:
             M.ElemData['Image Data'] = VoxelData
             if return_nodedata: M.NodeData['Image Data'] = NodeData
         return M
-        
+
+    def view(self, **kwargs):
+        visualize.View(self, **kwargs)    
+
+    def plot(self, **kwargs):
+        import matplotlib.pyplot as plt
+
+        kwargs['return_image'] = True
+        kwargs['interactive'] = False
+        kwargs['hide'] = True
+        img = visualize.View(self, **kwargs)
+
+        fig, ax = plt.subplots()
+        ax.imshow(img)
+        ax.set_axis_off()
+        plt.show()
