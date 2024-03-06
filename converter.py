@@ -1,8 +1,56 @@
 # -*- coding: utf-8 -*-
 """
+Mesh conversion tools
+
 Created on Sun Aug  1 17:48:50 2021
 
 @author: toj
+
+.. currentmodule:: Mesh.converter
+
+
+Mesh type conversion
+====================
+.. autosummary::
+    :toctree: submodules/
+
+    solid2surface
+    im2voxel
+    voxel2im
+    surf2voxel
+    solid2faces
+    solid2edges
+    EdgesByElement
+    faces2surface
+    faces2unique
+    edges2unique
+    tet2faces
+    hex2faces
+    pyramid2faces
+    wedge2faces
+    tri2edges
+    quad2edges
+    polygon2edges
+    tet2edges
+    pyramid2edges
+    wedge2edges
+    hex2edges
+    surf2edges
+    surf2dual
+    
+Element type conversion
+=======================
+.. autosummary::
+    :toctree: submodules/
+
+    solid2tets
+    hex2tet
+    wedge2tet
+    pyramid2tet
+    quad2tri
+    tet102tet4
+
+
 """
 
 import numpy as np
@@ -35,8 +83,7 @@ def solid2surface(NodeCoords,NodeConn):
 def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False):
     """
     Convert solid mesh to faces. The will be one face for each side of each element,
-    i.e. there will be duplicate faces for non-surface faces. Use faces2surface(Faces) to extract
-    only the surface faces or face2unique(Faces) to remove duplicates.
+    i.e. there will be duplicate faces for non-surface faces. Use faces2surface(Faces) to extract only the surface faces or face2unique(Faces) to remove duplicates.
 
     Parameters
     ----------
@@ -103,8 +150,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
     """
     Convert solid mesh to edges. The will be one edge for each edge of each element,
     i.e. there will be multiple entries for shared edges. Solid2Edges is also suitable for use 
-    with 2D or surface meshes. It differes from surface2edges in that surface2edges returns only 
-    exposed edges of unclosed surfaces.
+    with 2D or surface meshes. It differs from surface2edges in that surface2edges returns only exposed edges of unclosed surfaces.
 
     Parameters
     ----------
@@ -403,6 +449,53 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
     if return_ids:
         return TetCoords, TetConn, ElemIds
     return TetCoords, TetConn
+
+def surf2tris(NodeCoords,NodeConn,return_ids=False):
+    """
+    Decompose all elements of a surface mesh to triangles.
+    
+
+    Parameters
+    ----------
+    NodeCoords : list
+        List of nodal coordinates.
+    NodeConn : list
+        Nodal connectivity list.
+    return_ids : bool, optional
+        Element IDs of the tris connected to the original elements, by default False
+
+    Returns
+    -------
+    TriCoords : list
+        Nodal coordinates of the generated triangles. 
+    TriConn : list
+        Nodal connectivity list of generated triangles.
+    ElemIds : list, optional
+        If return_ids = True, a list of the element ids of the new triangles for each 
+        of the original elements.
+    """    
+    Ls = np.array([len(elem) for elem in NodeConn])
+    triIdx = np.where(Ls == 3)[0]
+    quadIdx = np.where(Ls == 4)[0]
+    tris = [NodeConn[i] for i in triIdx]
+    quads = [NodeConn[i] for i in quadIdx]
+
+    TriCoords = NodeCoords
+    fromquad = quad2tri(quads)
+    TriConn = tris + fromquad
+    if return_ids:
+        # Element ids of the tris connected to the original elements
+        ElemIds_i = np.concatenate((triIdx,np.repeat(quadIdx,2)))
+        ElemIds_j = np.concatenate((np.repeat(0,len(triIdx)), 
+                np.repeat([[0,1]],len(quadIdx),axis=0).reshape(len(quadIdx)*2),                   
+                ))
+        ElemIds = -1*np.ones((len(NodeConn),6))
+        ElemIds[ElemIds_i,ElemIds_j] = np.arange(len(TriConn))
+        ElemIds = utils.ExtractRagged(ElemIds,dtype=int)
+    
+    if return_ids:
+        return TriCoords, TriConn, ElemIds
+    return TriCoords, TriConn
 
 def hex2tet(NodeCoords,NodeConn,method='1to6'):
     """
@@ -1754,6 +1847,7 @@ def removeNodes(NodeCoords,NodeConn):
         The indices the original IDs of the nodes still in the mesh. This can be used
         to remove entries in associated node data (ex. new_data = old_data[OriginalIds]).
     """    
+    warnings.warn('Deprecation warning: converter.removeNodes should be replaced by utils.RemoveNodes.')
     # removeNodes 
     OriginalIds, inverse = np.unique([n for elem in NodeConn for n in elem],return_inverse=True)
     NewNodeCoords = [NodeCoords[i] for i in OriginalIds]
