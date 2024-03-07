@@ -460,8 +460,8 @@ def Volume(NodeCoords,NodeConn,verbose=False):
     """
     if len(NodeConn) == 0:
         return []
-    ArrayCoords = np.asarray(NodeCoords)    
     ArrayCoords,TetConn,ElemIds = converter.solid2tets(NodeCoords,NodeConn,return_ids=True)     
+    ArrayCoords = np.asarray(ArrayCoords)   
     ArrayConn = np.asarray(TetConn)
     pt0 = ArrayCoords[ArrayConn][:,0]
     pt1 = ArrayCoords[ArrayConn][:,1]
