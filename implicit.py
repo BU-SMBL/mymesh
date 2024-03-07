@@ -150,7 +150,10 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_dir=-1, mode='any', args=(
     else:   
         NodeConn = GridConn
     
-    voxel = mesh.mesh(NodeCoords, NodeConn)
+    if 'mesh' in dir(mesh):
+        voxel = mesh.mesh(NodeCoords, NodeConn)
+    else:
+        voxel = mesh(NodeCoords, NodeConn)
     voxel.NodeData['func'] = NodeVals
 
     return voxel
@@ -229,7 +232,12 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_dir=-1, method='mc', int
         NodeCoords, NodeConn = converter.hex2tet(NodeCoords, NodeConn, method='1to6')
         SurfCoords, SurfConn = contour.MarchingTetrahedra(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['func'], method='surface', threshold=threshold,flip=flip)
 
-    surface = mesh.mesh(SurfCoords, SurfConn)
+    
+    if 'mesh' in dir(mesh):
+        surface = mesh.mesh(SurfCoords, SurfConn)
+    else:
+        surface = mesh(SurfCoords, SurfConn)
+        
     return surface
 
 def TetMesh(func, bounds, h, threshold=0, threshold_dir=-1, interpolation='linear', args=(), kwargs={}):
@@ -282,7 +290,11 @@ def TetMesh(func, bounds, h, threshold=0, threshold_dir=-1, interpolation='linea
     NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
     TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['func'], method='volume', threshold=threshold, flip=flip, interpolation=interpolation)
 
-    tet = mesh.mesh(TetCoords, TetConn)
+    if 'mesh' in dir(mesh):
+        tet = mesh.mesh(TetCoords, TetConn)
+    else:
+        tet = mesh.mesh(TetCoords, TetConn)
+        
     return tet
 
 # implicit function primitives
