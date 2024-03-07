@@ -8,7 +8,7 @@ Created on Wed Jan 26 09:27:53 2022
 """
 
 import numpy as np
-import sys, warnings, time, random, copy
+import sys, warnings, time, random, copy, tqdm
 from . import converter, utils, quality, rays, octree
 from scipy import sparse, spatial
 from scipy.sparse.linalg import spsolve
@@ -372,7 +372,7 @@ def NodeSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors,Stiffness=1,FixedNodes
                    
     return Xnew.tolist()
     
-def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,FixedNodes=set(),FixFeatures=False):
+def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None, ElemConn=None,FixedNodes=set(),FixFeatures=False):
     """
     LocalLaplacianSmoothing Performs iterative Laplacian smoothing, repositioning each node to the center of its adjacent nodes.
 
@@ -384,9 +384,12 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,Fixed
         List of nodal coordinates.
     iterate : int
         Number of iterations to perform.
-    NodeNeighbors : list (or None), optional
-        List of node neighbors for each node in the mesh
+    NodeNeighbors : list/None, optional
+        List of node neighbors for each node in the mesh, as calculated by :func:``utils.getNodeNeighbors``.
         If provided, will avoid the need to recalculate the element node neighbors, by default None
+    ElemConn : list/None, optional
+        List of elements connected to each node in the mesh, as calculated by :func:``utils.getElemConnectivity``. 
+         If provided, will avoid the need to recalculate the element node neighbors, by default None
     FixedNodes : set, optional
         Set of nodes to hold fixed throughout the Laplacian smoothing process, by default set().
 
@@ -400,16 +403,15 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,Fixed
         edges,corners = utils.DetectFeatures(NodeCoords,NodeConn)
         FixedNodes.update(edges)
         FixedNodes.update(corners)
-    NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
-    ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
+    if NodeNeighbors is None:
+        NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
+    if ElemConn is None:
+        ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
     lens = np.array([len(n) for n in NodeNeighbors])
     r = utils.PadRagged(NodeNeighbors,fillval=-1)
     idx = np.unique(NodeConn)
     FreeNodes = list(set(idx).difference(FixedNodes))
     ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
-    
-    ElemNormals = utils.CalcFaceNormal(ArrayCoords[:-1],NodeConn)
-    NodeNormals = utils.Face2NodeNormal(ArrayCoords[:-1],NodeConn,ElemConn,ElemNormals)
     
     for i in range(iterate):
         Q = ArrayCoords[r]
@@ -448,8 +450,10 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),Fi
         edges,corners = utils.DetectFeatures(NodeCoords,NodeConn)
         FixedNodes.update(edges)
         FixedNodes.update(corners)
-    NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
-    ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
+    if NodeNeighbors is None:
+        NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
+    if ElemConn is None:
+        ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
     lens = np.array([len(n) for n in NodeNeighbors])
     r = utils.PadRagged(NodeNeighbors,fillval=-1)
     idx = np.unique(NodeConn)
@@ -1042,191 +1046,188 @@ def Contract(NodeCoords, NodeConn, h, iterate='converge', FixedNodes=set(), FixF
     if type(NewCoords) is np.ndarray: NewCoords = NewCoords.tolist()
     return NewCoords, NewConn
 
-def TetOpt(NodeCoords, NodeConn, ElemConn=None, objective='eta', method='BFGS', p=2, FreeNodes='all', FixedNodes=set(), iterate=1):
-    # Escobar, et al. 2003. “Simultaneous untangling and smoothing of tetrahedral meshes.”
+def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='inverted', FixedNodes=set(), iterate=1):
+    """
+    Simultaneous untangling and smoothing for tetrahedral mehses. Optimization-based smoothing for untangling inverted elements.
 
-    if FreeNodes == 'all': FreeNodes = set(range(len(NodeCoords)))
-    if type(FreeNodes) is list: FreeNodes = set(FreeNodes)
-    FreeNodes = FreeNodes.difference(FixedNodes)
+    Escobar, et al. 2003. “Simultaneous untangling and smoothing of tetrahedral meshes.”
 
-    # if ElemConn is None: _,ElemConn = utils.getNodeNeighbors(NodeCoords,NodeConn)
-    if ElemConn is None: ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
-    ArrayCoords = np.array(NodeCoords); ArrayConn = np.asarray(NodeConn)
-    assert ArrayConn.dtype != 'O', 'Input mesh must be purely tetrahedral.'
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates
+    NodeConn : array_like
+        Node connectivity. This should be mx4 for a purely tetrahedral mesh.
+    ElemConn : list, optional
+        Option to provide pre-computed element connectivity, (``mesh.ElemConn`` of ``utils.getElemConnectivity()``). If not provided it will be computed, by default None.
+    method : str, optional
+        Optimization method for ``scipy.optimize.minimize <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize>``_, by default 'BFGS'. 
+    FreeNodes : str/set/array_like, optional
+        Nodes allowed to move during the optimization. This can be a set, array_like, or a string. If a str, this can be "all" or "inverted" to operate on all nodes or only the nodes connected to inverted elements, by default 'inverted'. Any fixed nodes will be removed from the set of free nodes
+    FixedNodes : set/array_like, optional
+        Nodes to hold fixed during the optimization. These will be removed from the set of free nodes, by default set().
+    iterate : int, optional
+        Number of passes if the free nodes in the mesh, by default 1.
+    verbose : bool, optional
+        If True, will use a tqdm progress bar to indicate the progress of each iteration.
 
-    eps = 100*np.finfo(float).eps
-    # LooseNodes = set([i for i in range(len(NodeCoords)) if len(ElemConn[i]) == 0])
-    # FreeNodes = set(range(len(NodeCoords))).difference(FixedNodes).difference(LooseNodes)
+    Returns
+    -------
+    NewCoords : np.ndarray
+        New node coordinates.
+    NodeConn : np.ndarray
+        Node connectivity, unchanged/passed through from input. 
+    """    
+
+    NodeCoords = np.asarray(NodeCoords)
+    NewConn = np.asarray(NodeConn)
+
+    if type(FreeNodes) is str:
+        if FreeNodes.lower() == 'all': 
+            FreeNodes = set(NewConn.flatten())
+        elif FreeNodes.lower() == 'inverted':
+            V = quality.Volume(NodeCoords, NewConn)
+            FreeNodes = set(list(NewConn[V <= 0].flatten()))
+
+    elif type(FreeNodes) is np.ndarray:
+        FreeNodes = set(FreeNodes.tolist())
+
+    elif isinstance(FreeNodes, (list, tuple)): 
+        FreeNodes = set(FreeNodes)
+
+    FreeNodes = np.array(list(FreeNodes.difference(FixedNodes)))
+
+    if ElemConn is None:
+        ElemConn = utils.getElemConnectivity(NodeCoords, NewConn)
+    assert np.shape(NewConn) == (len(NewConn), 4), 'Mesh must be purely tetrahedral, with only 4 node elements in NodeConn.'
     
-    # W = np.array([[1, 1/2, 1/2],[0, np.sqrt(3)/2, np.sqrt(3)/6],[0, 0, np.sqrt(2)/np.sqrt(3)]])
     Winv = np.array([
                 [ 1.        , -0.57735027, -0.40824829],
                 [ 0.        ,  1.15470054, -0.40824829],
                 [ 0.        ,  0.        ,  1.22474487]])
-    def tet_jacobians(ArrayCoords,LocalConn):
-        # Escobar, et al. 2003. “Simultaneous untangling and smoothing of tetrahedral meshes.”
-        Points = ArrayCoords[LocalConn]
-        x = Points[:,:,0]; y = Points[:,:,1]; z = Points[:,:,2]
-        # A = np.swapaxes(np.swapaxes(np.array([
-        #     [x[:,1]-x[:,0], x[:,2]-x[:,0], x[:,3]-x[:,0]],
-        #     [y[:,1]-y[:,0], y[:,2]-y[:,0], y[:,3]-y[:,0]],
-        #     [z[:,1]-z[:,0], z[:,2]-z[:,0], z[:,3]-z[:,0]],
-        #     ]),0,2),1,2)
-        A = np.zeros((len(LocalConn),3,3))
-        A[:,0,:] = x[:,1:4]-x[:,0,None]
-        A[:,1,:] = y[:,1:4]-y[:,0,None]
-        A[:,2,:] = z[:,1:4]-z[:,0,None]
 
-        # Affine map that takes an equilateral tetrahedron Ti(v0,v1,v2,v3) to a given 
-        # tetrahedron T(x0,x1,x2,x3) is: x=Aw^-v1+x0. It's jacobian is S=AW^-1
+    def func(NodeCoords, NodeConn, nodeid):
+        p = 1 # p-norm
+        x = NodeCoords[:,0][NodeConn]
+        y = NodeCoords[:,1][NodeConn]
+        z = NodeCoords[:,2][NodeConn]
 
-        S = np.matmul(A,Winv)
-        return S
-    def dS(i,var,ArrayCoords,LocalConn):
+        A = np.moveaxis(np.array([
+            [x[:,1] - x[:,0], x[:,2] - x[:,0], x[:,3] - x[:,0]],
+            [y[:,1] - y[:,0], y[:,2] - y[:,0], y[:,3] - y[:,0]],
+            [z[:,1] - z[:,0], z[:,2] - z[:,0], z[:,3] - z[:,0]],
+        ]), 2, 0)
 
-        idx = np.where(LocalConn == i)[1]
-        tetidx = np.arange(len(LocalConn))
-        x = np.zeros((len(LocalConn),4)); y = np.zeros((len(LocalConn),4)); z = np.zeros((len(LocalConn),4))
-        if var == 'x':
-            x[tetidx,idx] = 1
-        elif var == 'y':
-            y[tetidx,idx] = 1
-        elif var == 'z':
-            z[tetidx,idx] = 1
+        # Jacobian matrix
+        S = np.matmul(A, Winv)
+
+        # Frobenius norm
+        Snorm = np.linalg.norm(S, axis=(1,2), ord='fro')
+
+        sigma = np.linalg.det(S)
+
+        eps = np.finfo(float).eps
+        delta = np.sqrt(eps*(eps - sigma.min())) if sigma.min() < eps else 0
+        h = 0.5 * (sigma + np.sqrt(sigma**2 + 4*delta**2))
+
+        a = (NodeConn == nodeid).astype(int)
+
+        zero = np.zeros_like(a[:,0])
+
+        dSdx = np.matmul(np.moveaxis(np.array([
+            [a[:,1] - a[:,0], a[:,2] - a[:,0], a[:,3] - a[:,0]],
+            [zero, zero, zero],
+            [zero, zero, zero]
+        ]), 2, 0), Winv)
+        dsigmadx = np.linalg.det(dSdx)
+
+        dSdy = np.matmul(np.moveaxis(np.array([
+            [zero, zero, zero],
+            [a[:,1] - a[:,0], a[:,2] - a[:,0], a[:,3] - a[:,0]],
+            [zero, zero, zero]
+        ]), 2, 0), Winv)
+        dsigmady = np.linalg.det(dSdy)
+
+        dSdz = np.matmul(np.moveaxis(np.array([
+            [zero, zero, zero],
+            [zero, zero, zero],
+            [a[:,1] - a[:,0], a[:,2] - a[:,0], a[:,3] - a[:,0]]
+        ]), 2, 0), Winv)
+        dsigmadz = np.linalg.det(dSdz)
+
+        Snorm2 = Snorm**2
+        eta = Snorm2 / (3 * h**(2/3))
+        K = np.linalg.norm(eta, ord=p)
+
+        # deta/dalpha = [deta/dx, deta/dy, deta/dz]
+        detadalpha = np.vstack([           
+            2*eta*(
+                np.trace(np.matmul(dSdx.swapaxes(1,2), S), axis1=1, axis2=2)/Snorm2 - dsigmadx/(3*np.sqrt(sigma**2 + 4*delta**2))
+            ),
+            2*eta*(
+                np.trace(np.matmul(dSdy.swapaxes(1,2), S), axis1=1, axis2=2)/Snorm2 - dsigmady/(3*np.sqrt(sigma**2 + 4*delta**2))
+            ),
+            2*eta*(
+                np.trace(np.matmul(dSdz.swapaxes(1,2), S), axis1=1, axis2=2)/Snorm2 - dsigmadz/(3*np.sqrt(sigma**2 + 4*delta**2))
+            )
+        ])
+
+        # Chain rule: dK/dalpha = dK/deta * deta/dalpha
+        dKdeta = eta * np.abs(eta)**(p-2) / np.linalg.norm(eta, ord=p)**(p-1)
+        dKdalpha = np.matmul(dKdeta, detadalpha.T)
+
+        return K, dKdalpha
+
+    def q(NodeCoords,NodeConn):
+        x = NodeCoords[:,0][NodeConn]
+        y = NodeCoords[:,1][NodeConn]
+        z = NodeCoords[:,2][NodeConn]
+
+        A = np.moveaxis(np.array([
+            [x[:,1] - x[:,0], x[:,2] - x[:,0], x[:,3] - x[:,0]],
+            [y[:,1] - y[:,0], y[:,2] - y[:,0], y[:,3] - y[:,0]],
+            [z[:,1] - z[:,0], z[:,2] - z[:,0], z[:,3] - z[:,0]],
+        ]), 2, 0)
+
+        # Jacobian matrix
+        S = np.matmul(A, Winv)
+
+        # Frobenius norm
+        Snorm = np.linalg.norm(S, axis=(1,2), ord='fro')
+
+        sigma = np.linalg.det(S)
+
+        qeta = 3*sigma**(2/3)/Snorm**2
+
+        return qeta
+
+    def obj(x, nodeid):
+        
+        NewCoords[nodeid] = x
+        LocalConn = NewConn[ElemConn[nodeid]]
+        f, jac = func(NewCoords,NewConn, nodeid)
+        print(np.nanmean(q(NewCoords, NewConn)))
+
+        return f, jac
+    
+    qeta2 = np.append(qeta, np.nan)
+    nodeqs = np.nanmean(qeta2[utils.PadRagged(ElemConn, fillval=-1)[FreeNodes,:]], axis=1)
+
+    NewCoords = np.copy(NodeCoords)
+
+    nodeids = FreeNodes[nodeqs.argsort()]
+    for i in iterate:
+        if verbose:
+            iterable = tqdm.tqdm(nodeids, desc=f'Iteration {i:d}/{iterate:d}:')
         else:
-            raise Exception('Invalid var.')
+            iterable = nodeids
+        for nodeid in iterable:
+            print(nodeid)
+            x0 = NewCoords[nodeid]
+            out = minimize(obj, x0, jac=True, args=(nodeid), method='L-BFGS-B', options=dict(maxiter=10))
+            NewCoords[nodeid] = out.x
 
-        # dA = np.swapaxes(np.swapaxes(np.array([
-        #     [x[:,1]-x[:,0], x[:,2]-x[:,0], x[:,3]-x[:,0]],
-        #     [y[:,1]-y[:,0], y[:,2]-y[:,0], y[:,3]-y[:,0]],
-        #     [z[:,1]-z[:,0], z[:,2]-z[:,0], z[:,3]-z[:,0]],
-        #     ]),0,2),1,2)
-        dA = np.swapaxes(np.array([
-            [x[:,1]-x[:,0], y[:,1]-y[:,0], z[:,1]-z[:,0]],
-            [x[:,2]-x[:,0], y[:,2]-y[:,0], z[:,2]-z[:,0]],
-            [x[:,3]-x[:,0], y[:,3]-y[:,0], z[:,3]-z[:,0]],
-            ]),0,2)
-        
-        dS = np.matmul(dA,Winv)
-        return dS
-    def dS_x(i,LocalConn):
-        x = (LocalConn == i).astype(int)
-        dA = np.zeros((LocalConn.shape[0],3,3))
-        dA[:,0,0] = x[:,1]-x[:,0]
-        dA[:,0,1] = x[:,2]-x[:,0]
-        dA[:,0,2] = x[:,3]-x[:,0]
-        dS = np.matmul(dA,Winv)
-        return dS
-    def dS_y(i,LocalConn):
-        y = (LocalConn == i).astype(int)
-        dA = np.zeros((LocalConn.shape[0],3,3))
-        dA[:,1,0] = y[:,1]-y[:,0]
-        dA[:,1,1] = y[:,2]-y[:,0]
-        dA[:,1,2] = y[:,3]-y[:,0]
-        dS = np.matmul(dA,Winv)
-        return dS
-    def dS_z(i,LocalConn):
-        z = (LocalConn == i).astype(int)
-        dA = np.zeros((LocalConn.shape[0],3,3))
-        dA[:,2,0] = z[:,1]-z[:,0]
-        dA[:,2,1] = z[:,2]-z[:,0]
-        dA[:,2,2] = z[:,3]-z[:,0]
-        dS = np.matmul(dA,Winv)
-        return dS
-    
-    if objective == 'eta':
-        def eta(x,i,LocalConn):
-            # x is the new coordinate of the node with index i
-            ArrayCoords[i] = x
-            S = tet_jacobians(ArrayCoords,LocalConn)
-            sigma = np.linalg.det(S)
-            min_sigma = np.min(sigma)
-            if min_sigma >= eps:
-                delta = 0
-                h = sigma
-            else:
-                delta = np.sqrt(eps*(eps-min_sigma))
-                h = 1/2 * (sigma + np.sqrt(sigma**2 + 4*delta**2))
-            e = np.linalg.norm(S,'fro',axis=(1,2))**2 / (3*h**(2/3))
-            return e, delta, S, sigma
-        def K_eta(x,i,LocalConn): 
-            K = np.linalg.norm(eta(x,i,LocalConn)[0],ord=p)
-            return K
-        def grad_K_eta(x,i,LocalConn):
-            
-            e,delta,S,sigma = eta(x,i,LocalConn)
-            # S = tet_jacobians(ArrayCoords,LocalConn)
-            # sigma = np.linalg.det(S)
-            # da_S = np.array([dS(i,a,ArrayCoords,LocalConn) for a in ['x','y','z']])
-            da_S = [dS_x(i,LocalConn), dS_y(i,LocalConn), dS_z(i,LocalConn)]
-            da_sigma = np.array([sigma * np.trace(np.matmul(np.linalg.inv(S), da_S[j]),axis1=1,axis2=2) for j in range(3)])
-
-            da_eta = (2*e)*np.array([
-                np.trace(np.matmul(np.swapaxes(da_S[j],1,2),S),axis1=1,axis2=2)/np.linalg.norm(S,'fro',axis=(1,2))**2 - 
-                da_sigma[j]/(3*np.sqrt(sigma**2 + 4*delta**2))
-                for j in range(3)])
-
-            # grad_K = np.linalg.norm(da_eta,axis=1,ord=p)
-            grad_K = np.array([1/p * np.sum(e**p)**(1/p-1) * p*np.sum(e**(p-1)*da_eta[j]) for j in range(3)])
-
-            return grad_K
-        
-        ifun = lambda x,i,LocalConn : K_eta(x,i,LocalConn)
-        igrad = lambda x,i,LocalConn : grad_K_eta(x,i,LocalConn)
-    elif objective == 'kappa':
-        def kappa(x,i,LocalConn):
-            # x is the new coordinate of the node with index i
-            ArrayCoords[i] = x
-            S = tet_jacobians(ArrayCoords,LocalConn)
-            sigma = np.linalg.det(S)
-            Sigma = sigma[:,None,None]*np.linalg.inv(S)
-            if min(sigma) >= eps:
-                delta = 0
-                h = sigma
-            else:
-                delta = np.sqrt(eps*(eps-min(sigma)))
-                h = 1/2 * (sigma + np.sqrt(sigma**2 + 4*delta**2))
-
-            k = np.linalg.norm(S,'fro',axis=(1,2)) * np.linalg.norm(Sigma,'fro',axis=(1,2)) / (3*h)
-            return k, delta
-        def K_kappa(x,i,LocalConn): return np.linalg.norm(kappa(x,i,LocalConn)[0],ord=p)
-        def grad_K_kappa(x,i,LocalConn):
-            k,delta = kappa(x,i,LocalConn)
-            S = tet_jacobians(ArrayCoords,LocalConn)
-            sigma = np.linalg.det(S)
-            Sigma = sigma[:,None,None]*np.linalg.inv(S)
-
-            da_S = np.array([dS(i,a,ArrayCoords,LocalConn) for a in ['x','y','z']])
-            da_sigma = np.array([np.linalg.det(da_S[j]) for j in range(3)])
-            da_Sigma = np.array([sigma[:,None,None]*np.linalg.inv(da_S[j]) + da_sigma[j,:,None,None]*np.linalg.inv(S) for j in range(3)])
-            da_kappa = (k)*np.array([
-                np.trace(np.matmul(np.swapaxes(da_S[j],1,2), S),axis1=1,axis2=2)/np.linalg.norm(S,'fro',axis=(1,2))**2 +
-                np.trace(np.matmul(np.swapaxes(da_Sigma[j],1,2), Sigma),axis1=1,axis2=2)/np.linalg.norm(S,'fro',axis=(1,2))**2 - 
-                da_sigma[j]/np.sqrt(sigma**2 + 4*delta**2)
-                for j in range(3)])
-
-            grad_K = np.linalg.norm(da_kappa,axis=1,ord=p)
-            return grad_K
-
-        ifun = lambda x,i,LocalConn : K_kappa(x,i,LocalConn)
-        igrad = lambda x,i,LocalConn : grad_K_kappa(x,i,LocalConn)
-
-    else:
-        raise Exception('Invalid objective. Must be "eta" or "kappa".')
-    for iter in range(iterate):
-        for i in FreeNodes:
-            LocalConn = ArrayConn[ElemConn[i]]
-            if len(LocalConn) == 0:
-                continue
-            fun = lambda x : ifun(x,i,LocalConn)
-            grad = lambda x : igrad(x,i,LocalConn)
-            x0 = ArrayCoords[i]
-            # out = minimize(fun,x0,jac=grad,method='BFGS')
-            out = minimize(fun,x0,jac=grad,method=method)
-            # ArrayCoords[i] = out.x
-    
-    NewCoords = ArrayCoords.tolist()
-    return NewCoords
+    return NewCoords, NodeConn
 
 def Tet23Flip(NodeCoords,NodeConn,Faces,FaceElemConn,FaceConn,FaceID,quality,QualityMetric='Skewness',Validate=True):
     
