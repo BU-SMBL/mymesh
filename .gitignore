@@ -1,17 +1,10 @@
 # Ignore Directories:
 .vscode/
 .pylint.d/
-__pychace__/
+__pycache__/
 *.vtu
 Usurped/
-docs/source/modules.rst
 docs/make.bat
 docs/Makefile
-docs/source/conf.py
-docs/source/index.rst
-docs/source/Mesh.rst
-__pycache__/*
-docs/build/_sources/modules.rst.txt
-docs/build/_sources/Mesh.rst.txt
-docs/build/_sources/index.rst.txt
-__pycache__/primitives.cpython-38.pyc
+docs/source/generated/
+docs/build/
