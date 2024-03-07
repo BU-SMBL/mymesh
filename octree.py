@@ -7,6 +7,7 @@ Created on Mon Jan 31 22:52:03 2022
 @author: toj
 """
 import numpy as np
+import scipy
 import sys, copy
 from . import rays, utils
 
@@ -157,9 +158,11 @@ class OctreeNode():
             #
             # create grid of sample points
             
-            e, crosses_zero = runQEF(self, func, grad, npts=npts, eps=eps)
-            if e > eps and crosses_zero:
+            e = runQEF(self, func, grad, npts=npts, eps=eps)
+            if e > eps: #and crosses_zero:
                 subdivide = True
+            else:
+                merp = 2
             
         elif strategy == 'EDError':
             npts = 3
@@ -723,7 +726,7 @@ def Print(root):
     
     recur(root)
     
-def runQEF(node, func, grad, npts=5, eps=0.01):
+def runQEF(node, func, grad, npts=3, eps=0.01):
     # ref: https://www.mattkeeter.com/projects/qef/
     # n = 5 # arbitrary
     # eps = .01 # arbitrary
@@ -739,31 +742,37 @@ def runQEF(node, func, grad, npts=5, eps=0.01):
     
     p = np.vstack([xi,yi,zi]).T
     
-    # A = np.nan_to_num(g/np.linalg.norm(g,axis=1)[:,None])
-    # B = np.sum(A*p,axis=1)
+    res = scipy.optimize.least_squares(qef_error, node.centroid, args=(p, f, g))
     
-    # xopt = np.linalg.solve(A.T@A,A.T@B)
-    # node.data['xopt'] = xopt
-    
-    
-    # e = (A@xopt - B).T @ (A@xopt - B)
-    
-    # More readable, less efficient:
-    # Ti = lambda i, x, y, z : np.dot(g[i], np.array([x,y,z]) - np.array([xi[i],yi[i],zi[i]]))
-    # E = lambda w, x, y, z : np.sum([(w - Ti(i,x,y,z))**2 / (1 + np.linalg.norm(g[i])**2) for i in range(len(xi))])
-    # e = [E(f[i],xi[i],yi[i],zi[i]) for i in range(len(xi))]
-
+    node.data['xopt'] = res.x
+    e = np.mean(qef_error(res.x, p, f, g)**2)
+    return e
     # Evaluate QEF at each subgrid point
-    def E(f,x,y,z):
-        t = np.sum(g[:,None,:] * (np.vstack([x,y,z]).T - np.vstack([xi, yi, zi]).T[:,None,:]),axis=2)
-        e = np.sum((f[None,:] - t)**2 / (1 + np.linalg.norm(g,axis=1)**2)[:,None], axis=0)
-        return e
+    # def E(f,x,y,z):
+    #     t = np.sum(g[:,None,:] * (np.vstack([x,y,z]).T - np.vstack([xi, yi, zi]).T[:,None,:]),axis=2)
+    #     e = np.sum((f[None,:] - t)**2 / (1 + np.linalg.norm(g,axis=1)**2)[:,None], axis=0)
+    #     return e
     
-    e = np.nan_to_num(E(f,xi,yi,zi))
-    idx = np.argmin(e)
-    node.data['xopt'] = p[idx]
-    # print(e[idx])
-    crosses_zero = True if len(np.unique(np.sign(f))) > 1 else False
-    if crosses_zero:
-        a = 2
-    return e[idx], crosses_zero
+    # e = np.nan_to_num(E(f,xi,yi,zi))
+    # idx = np.argmin(e)
+    # node.data['xopt'] = p[idx]
+    # # print(e[idx])
+    # crosses_zero = True if len(np.unique(np.sign(f))) > 1 else False
+    # if crosses_zero:
+    #     a = 2
+    # return e[idx], crosses_zero
+    
+def qef_error(x, points, values, gradients):
+    # x is the point (u, v, z) we are trying to find that minimizes the QEF
+    u, v, z = x
+    errors = []
+    for point, value, gradient in zip(points, values, gradients):
+        xi, yi, zi = point
+        gx, gy, gz = gradient
+        grad_norm_sq = gx**2 + gy**2 + gz**2
+        # Compute Ti(x, y, z)
+        Ti = gx * (xi - u) + gy * (yi - v) + gz * (zi - z)
+        # Compute the error term for this sample point
+        error = (Ti - value)**2 / (1 + grad_norm_sq)
+        errors.append(error)
+    return np.sqrt(errors)
