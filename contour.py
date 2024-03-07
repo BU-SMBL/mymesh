@@ -3838,21 +3838,15 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     
     
     if not VertexValues:
-        x1 = np.arange(0,I.shape[2]*h[0],h[0]) + h[0]/2
-        y1 = np.arange(0,I.shape[1]*h[1],h[1]) + h[1]/2
-        z1 = np.arange(0,I.shape[0]*h[2],h[2]) + h[2]/2
+        x1 = np.arange(0,I.shape[2])*h[0] + h[0]/2
+        y1 = np.arange(0,I.shape[1])*h[1] + h[1]/2
+        z1 = np.arange(0,I.shape[0])*h[2] + h[2]/2
 
-        X,Y,Z = np.meshgrid(x1,y1,z1)
         Xv, Yv, Zv = np.meshgrid(np.arange(-Padding,I.shape[2]+(1+Padding)),
                                  np.arange(-Padding,I.shape[1]+(1+Padding)),
                                  np.arange(-Padding,I.shape[0]+(1+Padding)),
                                  indexing='ij'
                                  )*np.asarray(h)[:,None,None,None]
-
-        X -= Padding*h[0]
-        Y -= Padding*h[1]
-        Z -= Padding*h[2]
-        
         
         # TODO: This is major bottleneck for cubic
         interp = scipy.interpolate.RegularGridInterpolator((z1,y1,x1),I,fill_value=None,method='linear',bounds_error=False)
