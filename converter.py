@@ -427,22 +427,24 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
 
 
     if len(pyrIdx) > 0 or len(wdgIdx) > 0:
-        hexmethod = '1to14'
+        hexmethod = '1to24'
+        hexn = 24
     else:
         hexmethod = '1to6'
+        hexn=6
     TetCoords,fromhex = hex2tet(NodeCoords,hexs,method=hexmethod)
     TetCoords,fromwdg = wedge2tet(TetCoords,wdgs,method='1to14')
     TetCoords,frompyr = pyramid2tet(TetCoords,pyrs,method='1to4')
     TetConn = tets + frompyr + fromwdg + fromhex
     if return_ids:
         # Element ids of the tets connected to the original elements
-        ElemIds_i = np.concatenate((tetIdx,np.repeat(pyrIdx,2),np.repeat(wdgIdx,3),np.repeat(hexIdx,5)))
+        ElemIds_i = np.concatenate((tetIdx,np.repeat(pyrIdx,4),np.repeat(wdgIdx,14),np.repeat(hexIdx,hexn)))
         ElemIds_j = np.concatenate((np.repeat(0,len(tetIdx)), 
-                np.repeat([[0,1]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*2),                   
-                np.repeat([[0,1,2]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*3),   
-                np.repeat([[0,1,2,3,4]],len(hexIdx),axis=0).reshape(len(hexIdx)*5),                    
+                np.repeat([np.arange(4)],len(pyrIdx),axis=0).reshape(len(pyrIdx)*4),                   
+                np.repeat([np.arange(14)],len(wdgIdx),axis=0).reshape(len(wdgIdx)*14),   
+                np.repeat([np.arange(hexn)],len(hexIdx),axis=0).reshape(len(hexIdx)*hexn),                    
                 ))
-        ElemIds = -1*np.ones((len(NodeConn),6))
+        ElemIds = -1*np.ones((len(NodeConn),np.maximum(14,hexn)))
         ElemIds[ElemIds_i,ElemIds_j] = np.arange(len(TetConn))
         ElemIds = utils.ExtractRagged(ElemIds,dtype=int)
     
