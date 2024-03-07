@@ -1381,8 +1381,46 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf'):
         u, ind = np.unique(uConn, return_index=True)
         uConn = -1*np.ones_like(PadConn)
         np.put(uConn, ind, PadConn.flat[ind])
-        
-        uConn = uConn[np.sum(uConn!=-1,axis=1) >= min_node]
+
+        # Special attention need for degenerate wedge elements
+        to_delete = np.sum(uConn!=-1,axis=1) < min_node
+        if PadConn.shape[1] >= 6:
+            wedge_rows = np.sum(PadConn!=-1,axis=1) == 6
+            wedge2tet = np.where((wedge_rows) & (np.sum(uConn!=-1,axis=1) == 4))[0]
+            wedge2pyr = np.where((wedge_rows) & (np.sum(uConn!=-1,axis=1) == 5))[0]
+
+            tetints = np.sum((uConn[wedge2tet, :6] == -1) * 2**np.arange(0,6)[::-1], axis=1)
+            # Note that the number of possible cases is much less than the maximum 6 digit binary (63) 
+            # since unique always keeps the first occurence of a duplicate, and there can only be two "1"s
+
+            # Cases where a quad face has collapsed make the pyramid degenerate plane, should be removed
+            to_delete[wedge2tet[np.isin(tetints, (9,18))]] = True
+
+            # Reordering for proper tets
+            uConn[wedge2tet[tetints == 10], :6] = uConn[wedge2tet[tetints == 10]][:,[0,3,1,5,2,4]]    # node 2, 4 removed
+            uConn[wedge2tet[tetints == 12], :6] = uConn[wedge2tet[tetints == 12]][:,[0,4,1,5,2,3]]    # node 2, 3 removed
+
+
+
+            # Okay cases: 3, 5, 6, 17, 24
+            if np.any(~np.isin(tetints, (3,5,6,9,10,12,17,18,24))):
+                warnings.warn(f'Unaccounted for wedge-to-tet case(s) in CleanupDegenerateElements: {str(np.unique(tetints[~np.isin(tetints, (3,5,6,9,10,12,17,18,24))])):s}. This is a bug, please report.')
+
+            pyrints = np.sum((uConn[wedge2pyr, :6] == -1) * 2**np.arange(0,6)[::-1], axis=1)
+
+            # Pyramids need to be reordered (note case 32 where node 0 is removed never occurs since unique always keeps the first occurence of a duplicate)
+            uConn[wedge2pyr[pyrints == 1], :6] = uConn[wedge2pyr[pyrints == 1]][:,[0,3,4,1,2,5]]    # node 5 removed
+            uConn[wedge2pyr[pyrints == 2], :6] = uConn[wedge2pyr[pyrints == 2]][:,[0,2,5,3,1,4]]    # node 4 removed
+            uConn[wedge2pyr[pyrints == 4], :6] = uConn[wedge2pyr[pyrints == 4]][:,[1,4,5,2,0,3]]    # node 3 removed
+            uConn[wedge2pyr[pyrints == 8], :6] = uConn[wedge2pyr[pyrints == 8]][:,[0,3,4,1,5,2]]    # node 2 removed
+            uConn[wedge2pyr[pyrints == 16], :6] = uConn[wedge2pyr[pyrints == 16]][:,[0,2,5,3,4,1]]  # node 1 removed
+            if np.any(~np.isin(pyrints, [1,2,4,8,16])):
+                warnings.warn(f'Unaccounted for wedge-to-pyr case(s) in CleanupDegenerateElements: {str(np.unique(pyrints[~np.isin(pyrints, [1,2,4,8,16])])):s}. This is a bug, please report.')
+
+        if PadConn.shape[1] >= 8:
+            warnings.warn('CleanupDegenerateElements has not yet been optimized for hexs. Improperly numbered/inverted elements may occur.')
+
+        uConn = uConn[~to_delete]
         NewConn = ExtractRagged(uConn)
         return NewConn
 

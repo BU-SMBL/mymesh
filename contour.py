@@ -4189,7 +4189,7 @@ def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method=
             
     return TriCoords, TriConn, root, DualCoords, DualConn, NodeValues
 
-def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False):
+def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False, cleanup_tol=1e-12):
     """
     Marching tetrahedra algorithm for extracting an isosurface from a tetrahedral mesh. This can be used to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).
 
@@ -4226,7 +4226,8 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,inter
         set flip=True.
     return_NodeValues : bool, optional
         Return the node values for each node in the tetrahedral mesh. If method='surface', these will all be `threshold`, if method='volume', these will be `threshold` for the surface nodes and the original grid values for the interior nodes
-
+    cleanup_tol : float, optional
+        Tolerance value used to classify whether two nodes are sufficiently close to be considered a single node (see :func:`utils.DeleteDuplicateNodes`), by default 1e-12.
     Returns
     -------
     NodeCoords : np.ndarray
@@ -4378,8 +4379,6 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,inter
         position[coefficient.flatten() >= 1] = coords2[coefficient.flatten() >= 1]  # This is to prevent floating pt errors inverting elements
         NodeCoords[check] =  position
 
-
-
         if return_NodeValues: 
             NewValues = np.zeros(len(NodeCoords))
             NewValues[~check] = NodeValues[uinterpolation_pairs[~check,0]]
@@ -4394,14 +4393,12 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0,inter
         lengths = [len(e) for e in elem]
         sums = np.append([0],np.cumsum(lengths))
         NodeConn = [[inv[n+sums[i]] for n in range(lengths[i])] for i in range(len(lengths))]
-        
-        if method.lower() == 'volume' and not mixed_elements:
-            NodeCoords, NodeConn = converter.solid2tets(NodeCoords, NodeConn)
 
-    NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True)
+    NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
+    NodeCoords,NodeConn = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf')
 
-    if method.lower() == 'surface' or (method.lower() == 'volume' and not mixed_elements):
-        NodeCoords,NodeConn = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf')
+    if method.lower() == 'volume' and not mixed_elements:
+        NodeCoords, NodeConn = converter.solid2tets(NodeCoords, NodeConn)
 
     if return_NodeValues:
         NewValues = NewValues[Idx]
