@@ -1815,8 +1815,8 @@ def AABB(Points):
     aabb : np.ndarray
         Coordinates of the corners of the AABB
     """    
-    mins = np.min(Points, axis=2)
-    maxs = np.max(Points, axis=2)
+    mins = np.min(Points, axis=0)
+    maxs = np.max(Points, axis=0)
 
     aabb = np.array([[mins[0], mins[1], mins[2]],
                     [maxs[0], mins[1], mins[2]],
