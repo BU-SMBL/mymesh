@@ -372,9 +372,9 @@ def NodeSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors,Stiffness=1,FixedNodes
                    
     return Xnew.tolist()
     
-def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None, ElemConn=None,FixedNodes=set(),FixFeatures=False):
+def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,ElemConn=None,FixedNodes=set(),FixFeatures=False):
     """
-    LocalLaplacianSmoothing Performs iterative Laplacian smoothing, repositioning each node to the center of its adjacent nodes.
+    Performs iterative Laplacian smoothing, repositioning each node to the center of its adjacent nodes.
 
     Parameters
     ----------
@@ -395,8 +395,11 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None, Elem
 
     Returns
     -------
-    NewCoords : list
+    NewCoords : np.ndarray
         List of updated nodal coordinates.
+    NodeConn : list/np.ndarray
+        Original node connectivity passed through
+
     """    
     if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
     if FixFeatures:
@@ -420,9 +423,9 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None, Elem
 
     NewCoords = ArrayCoords[:-1]
     
-    return NewCoords
+    return NewCoords, NodeConn
 
-def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),FixFeatures=False):
+def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,ElemConn=None,FixedNodes=set(),FixFeatures=False):
         
     """
     TangentialLaplacianSmoothing Performs iterative Laplacian smoothing, repositioning each node to the center of its adjacent nodes. Primarily for use on surface meshes, not well defined for volume meshes.
@@ -436,6 +439,12 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),Fi
         List of nodal coordinates.
     iterate : int
         Number of iterations to perform.
+    NodeNeighbors : list/None, optional
+        List of node neighbors for each node in the mesh, as calculated by :func:``utils.getNodeNeighbors``.
+        If provided, will avoid the need to recalculate the element node neighbors, by default None
+    ElemConn : list/None, optional
+        List of elements connected to each node in the mesh, as calculated by :func:``utils.getElemConnectivity``. 
+         If provided, will avoid the need to recalculate the element node neighbors, by default None
     FixedNodes : set, optional
         Set of nodes to hold fixed throughout the Laplacian smoothing process, by default set().
 
@@ -443,6 +452,8 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),Fi
     -------
     NewCoords : list
         List of updated nodal coordinates.
+    NodeConn : list/np.ndarray
+        Original node connectivity passed through
     """    
 
     if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
@@ -472,7 +483,8 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,FixedNodes=set(),Fi
 
     NewCoords = np.copy(NodeCoords)
     NewCoords[idx] = ArrayCoords[idx]
-    return NewCoords
+
+    return NewCoords, NodeConn
 
 def GlobalLaplacianSmoothing(NodeCoords,NodeConn,FeatureNodes=[],FixedNodes=set(),FeatureWeight=1,BaryWeight=1/3):
     # Ji, Z., Liu, L. and Wang, G., 2005, December. A global laplacian 
@@ -1046,7 +1058,7 @@ def Contract(NodeCoords, NodeConn, h, iterate='converge', FixedNodes=set(), FixF
     if type(NewCoords) is np.ndarray: NewCoords = NewCoords.tolist()
     return NewCoords, NewConn
 
-def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='inverted', FixedNodes=set(), iterate=1):
+def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='inverted', FixedNodes=set(), iterate=1, verbose=True):
     """
     Simultaneous untangling and smoothing for tetrahedral mehses. Optimization-based smoothing for untangling inverted elements.
 
@@ -1095,7 +1107,7 @@ def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='invert
     elif isinstance(FreeNodes, (list, tuple)): 
         FreeNodes = set(FreeNodes)
 
-    FreeNodes = np.array(list(FreeNodes.difference(FixedNodes)))
+    FreeNodes = np.array(list(FreeNodes.difference(FixedNodes)),dtype=int)
 
     if ElemConn is None:
         ElemConn = utils.getElemConnectivity(NodeCoords, NewConn)
@@ -1210,13 +1222,14 @@ def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='invert
 
         return f, jac
     
+    qeta = q(NodeCoords, NodeConn)
     qeta2 = np.append(qeta, np.nan)
-    nodeqs = np.nanmean(qeta2[utils.PadRagged(ElemConn, fillval=-1)[FreeNodes,:]], axis=1)
+    nodeqs = np.nanmean(qeta2[utils.PadRagged(ElemConn, fillval=-1).astype(int)[FreeNodes,:]], axis=1)
 
     NewCoords = np.copy(NodeCoords)
 
     nodeids = FreeNodes[nodeqs.argsort()]
-    for i in iterate:
+    for i in range(iterate):
         if verbose:
             iterable = tqdm.tqdm(nodeids, desc=f'Iteration {i:d}/{iterate:d}:')
         else:
