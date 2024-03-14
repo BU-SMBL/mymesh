@@ -18,8 +18,16 @@ Mesh type conversion
     im2voxel
     voxel2im
     surf2voxel
+    surf2dual
+    
+Connectivity conversion
+=======================
+.. autosummary::
+    :toctree: submodules/
+
     solid2faces
     solid2edges
+    surf2edges
     EdgesByElement
     faces2surface
     faces2unique
@@ -35,9 +43,7 @@ Mesh type conversion
     pyramid2edges
     wedge2edges
     hex2edges
-    surf2edges
-    surf2dual
-    
+
 Element type conversion
 =======================
 .. autosummary::
@@ -57,7 +63,7 @@ import numpy as np
 
 from scipy import ndimage, sparse
 import sys, os, warnings, glob, gc, tempfile
-from . import utils, rays, primitives
+from . import utils, rays, primitives, image
 
 def solid2surface(NodeCoords,NodeConn):
     """
@@ -160,14 +166,25 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
         Nodal connectivity list.
     ElemType : str, optional
         Specifies the element type contained within the mesh, by default 'auto'.
-        'auto' or 'mixed' - Will detect element type by the number of nodes present in each element. NOTE that 4-node elements are assumed to be tets, not quads
+
+        'auto' or 'mixed' - Will detect element type by the number of nodes present in each element. 
+
         'tri' - All elements treated as 3-node triangular elements.
+
         'quad' - All elements treated as 4-node quadrilateral elements.
+
         'tet' - All elements treated as 4-node tetrahedral elements.
+
         'pyramid' - All elements treated as 5-node wedge elements.
+
         'wedge' - All elements treated as 6-node quadrilateral elements.
+
         'hex' - All elements treated as 8-node quadrilateral elements.
+
         'polygon' - All elements treated as n-node polygonal elements. TODO: add support for return_EdgeConn and return_EdgeElem
+
+    .. note: 
+        If ElemType is 'auto' or 'mixed', 4-node elements are assumed to be tets, not quads.
 
     return_EdgeConn : bool, optional
         If true, will return EdgeConn, the Edge Connectivity of each element.
@@ -1577,84 +1594,26 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
     """    
     multichannel = False
 
+
     if type(voxelsize) is list or type(voxelsize) is tuple:
         assert len(voxelsize) == 3, 'If specified as a list or tuple, voxelsize must have a length of 3.'
-        xscale = voxelsize[0]
-        yscale = voxelsize[1]
-        zscale = voxelsize[2]
+        xscale = voxelsize[0] / scalefactor
+        yscale = voxelsize[1] / scalefactor
+        zscale = voxelsize[2] / scalefactor
         voxelsize = 1
         rectangular_elements=True
     else:
+        voxelsize /= scalefactor
         rectangular_elements=False
-    if type(img) == list:
-        img = np.array(img)
-    if type(img) == np.ndarray:
-        assert len(img.shape) == 3, 'Image data must be a 3D array.'
-        if scalefactor != 1:
-            img = ndimage.zoom(img,scalefactor,order=scaleorder)
-            voxelsize /= scalefactor
-    elif type(img) == str:
-        path = img
-        tiffs = glob.glob(os.path.join(path,'*.tiff')) + glob.glob(os.path.join(path,'*.tif')) + glob.glob(os.path.join(path,'*.jpg')) + glob.glob(os.path.join(path,'*.jpeg')) + glob.glob(os.path.join(path,'*.png'))
-        tiffs.sort()
-        dicoms = glob.glob(os.path.join(path,'*.dcm'))
-        dicoms.sort()
-        if len(dicoms) == 0:
-            dicoms = glob.glob(os.path.join(path,'*.DCM'))
-            dicoms.sort()
-        if len(tiffs) > 0 & len(dicoms) > 0:
-            warnings.warn('Image directory: "{:s}" contains .dcm files as well as other image file types - only loading dcm files.')
-            files = dicoms
-            ftype = 'dcm'
-        elif len(tiffs) > 0:
-            try:
-                import cv2
-            except:
-                raise ImportError('im2voxel requires opencv-python (cv2) to load tiff, jpg, or png files. Install with: pip install opencv-python')
-            files = tiffs
-            ftype = 'tiff'
-        elif len(dicoms) > 0:
-            try:
-                import cv2
-            except:
-                raise ImportError('im2voxel requires pydicom to load DICOM files. Install with: pip install pydicom')
-            files = dicoms
-            ftype = 'dcm'
-        else:
-            warnings.warn('Image directory is empty.')
-            if return_nodedata:
-                return [], [], [], []
-            else:
-                return [], [], []
-        print('Loading image data from {:s}...'.format(img))
-        if ftype == 'tiff':
-            
-            temp = cv2.imread(files[0])
-            if len(temp.shape) > 2:
-                multichannel = True
-                multiimgs = [np.array([cv2.imread(file)[:,:,i] for file in files]) for i in range(temp.shape[2])]
-                imgs = multiimgs[0]
-            else:
-                multichannel = False
-                imgs = np.array([cv2.imread(file) for file in files])
-        else:
-            # temp = pydicom.dcmread(files[0]).pixel_array
-            imgs = np.array([pydicom.dcmread(file).pixel_array for file in files])
-        
-        if scalefactor != 1:
-            if multichannel:
-                multiimg = [ndimage.zoom(I,scalefactor,order=scaleorder) for I in multiimgs]
-                img = multiimg[0]
-            else:
-                img = ndimage.zoom(imgs,scalefactor,order=scaleorder)
-            voxelsize /= scalefactor
-        else:
-            if multichannel:
-                multiimg = multiimgs
-            img = imgs
-    else:
-        raise Exception('Type {:s} not supported'.format(str(type(img))))
     
+    if isinstance(img, tuple):
+        if scalefactor != 1:
+            img = tuple([image.read(i, scalefactor, scaleorder) for i in img])
+        multichannel = True
+        multiimg = img
+        img = multiimg[0]
+    else:
+        img = image.read(img, scalefactor, scaleorder)
     
     if crop is None:
         (nz,ny,nx) = img.shape
@@ -1706,14 +1665,14 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
             VoxelConn = VoxelConn[VoxelData>=threshold]
             VoxelData = VoxelData[VoxelData>=threshold]
             if return_gradient: GradData = GradData[VoxelData>=threshold]
-            VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
+            VoxelCoords,VoxelConn,_ = utils.RemoveNodes(VoxelCoords,VoxelConn)
             VoxelConn = np.asarray(VoxelConn)
 
         elif threshold_direction == -1:
             VoxelConn = VoxelConn[VoxelData<=threshold]
             VoxelData = VoxelData[VoxelData<=threshold]
             if return_gradient: GradData = GradData[VoxelData<=threshold]
-            VoxelCoords,VoxelConn,_ = removeNodes(VoxelCoords,VoxelConn)
+            VoxelCoords,VoxelConn,_ = utils.RemoveNodes(VoxelCoords,VoxelConn)
             VoxelConn = np.asarray(VoxelConn)
         else:
             raise Exception('threshold_direction must be 1 or -1, where 1 indicates that values >= threshold will be kept and -1 indicates that values <= threshold will be kept.')
@@ -1792,7 +1751,7 @@ def surf2voxel(SurfCoords,SurfConn,h,Octree='generate',mode='any'):
         else:
             raise ValueError('mode must be "any", "all", or "centroid".')
 
-    VoxelCoords,VoxelConn,_ = removeNodes(GridCoords,VoxelConn)
+    VoxelCoords,VoxelConn,_ = utils.RemoveNodes(GridCoords,VoxelConn)
     return VoxelCoords,VoxelConn
 
 def voxel2im(VoxelCoords, VoxelConn, Vals):

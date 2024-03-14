@@ -175,7 +175,7 @@ def VoxelIntersect(VoxelCoordsA, VoxelConnA, VoxelCoordsB, VoxelConnB):
     centroidsB = set([tuple(np.mean([VoxelCoordsB[n] for n in elem],axis=0).tolist()) for elem in VoxelConnB])
     
     IConn = [elem for i,elem in enumerate(VoxelConnA) if tuple(centroidsA[i]) in centroidsB]
-    ICoords,IConn,_ = converter.removeNodes(VoxelCoordsA, IConn)
+    ICoords,IConn,_ = utils.RemoveNodes(VoxelCoordsA, IConn)
     return ICoords, IConn
     
 def VoxelDifference(VoxelCoordsA, VoxelConnA, VoxelCoordsB, VoxelConnB):
@@ -184,7 +184,7 @@ def VoxelDifference(VoxelCoordsA, VoxelConnA, VoxelCoordsB, VoxelConnB):
     centroidsB = set([tuple(np.mean([VoxelCoordsB[n] for n in elem],axis=0).tolist()) for elem in VoxelConnB])
     
     DConn = [elem for i,elem in enumerate(VoxelConnA) if tuple(centroidsA[i]) not in centroidsB]
-    DCoords,DConn,_ = converter.removeNodes(VoxelCoordsA, DConn)
+    DCoords,DConn,_ = utils.RemoveNodes(VoxelCoordsA, DConn)
     return DCoords, DConn
 
 def SplitMesh(Surf1, Surf2, eps=1e-12):
@@ -222,8 +222,8 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
 
                 # Transform to Local Coordinates
                 # Rotation matrix from global z (k=[0,0,1]) to local z(n)
-                k=[0,0,1]
-                if n == k or n == [0,0,-1]:
+                k=np.array([0,0,1])
+                if np.array_equal(n, k) or np.array_equal(n, -k):
                     R = np.eye(3)
                     flatnodes = SplitGroupNodes[j]#[:,0:2]
 

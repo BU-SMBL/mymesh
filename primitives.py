@@ -53,7 +53,6 @@ def Box(bounds, h, ElemType='quad'):
     box : Mesh.mesh
         Mesh object containing the box mesh. 
 
-
     .. note:: 
         Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Box(...)``
 
@@ -67,7 +66,7 @@ def Box(bounds, h, ElemType='quad'):
     """    
     GridCoords, GridConn = Grid(bounds,h,exact_h=False)
     BoxConn = converter.solid2surface(GridCoords,GridConn)
-    BoxCoords,BoxConn,_ = converter.removeNodes(GridCoords,BoxConn)
+    BoxCoords,BoxConn,_ = utils.RemoveNodes(GridCoords,BoxConn)
     if ElemType == 'tri':
         BoxConn = converter.quad2tri(BoxConn)
 
@@ -434,7 +433,7 @@ def Cylinder(bounds, resolution, axis=2, axis_step=None, ElemType='tri', cap=Tru
         line = mesh.mesh(coords, conn)
     else:
         line = mesh(coords, conn)
-    cyl = Extrude(line, height, axis_step, axis=axis, ElemType='tri')
+    cyl = Extrude(line, height, axis_step, axis=axis, ElemType=ElemType)
     if cap:
         capconn = delaunay.ConvexHullFanTriangulation(np.arange(line.NNode))
 
