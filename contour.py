@@ -4043,7 +4043,8 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
                 ]).T
     else:
         raise Exception('Invalid input "{:s}" for interpolation. Must be one of "midpoint", "linear", or "cubic".'.format(interpolation))
-            
+    
+    NewCoords = np.fliplr(NewCoords) # Flipping so that index 0 for the image -> z axis
     NewConn = np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F')
     if cleanup:
         NewCoords,NewConn,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
@@ -4227,7 +4228,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     return_NodeValues : bool, optional
         Return the node values for each node in the tetrahedral mesh. If method='surface', these will all be `threshold`, if method='volume', these will be `threshold` for the surface nodes and the original grid values for the interior nodes
     cleanup_tol : float, optional
-        Tolerance value used to classify whether two nodes are sufficiently close to be considered a single node (see :func:`utils.DeleteDuplicateNodes`), by default 1e-12.
+        Tolerance value used to classify whether two nodes are sufficiently close to be considered a single node (see :func:`Mesh.utils.DeleteDuplicateNodes`), by default 1e-12.
     Returns
     -------
     NodeCoords : np.ndarray
@@ -4399,7 +4400,8 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
 
     if method.lower() == 'volume' and not mixed_elements:
         NodeCoords, NodeConn = converter.solid2tets(NodeCoords, NodeConn)
-
+        NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
+        
     if return_NodeValues:
         NewValues = NewValues[Idx]
         return NodeCoords, NodeConn, NewValues

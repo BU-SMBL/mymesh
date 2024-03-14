@@ -84,6 +84,7 @@ Miscellaneous
     SplitRaggedByLength
     PadRagged
     ExtractRagged
+    identify_type
 
 """
 
@@ -247,13 +248,13 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
     mode : str, optional
         Neighbor mode, will determine what type of connectivity constitutes an element
         neighbor, by default 'face'.
-        'node' : Any elements that share at least one node are considered neighbors. TODO: Not currently implemeneted.
+        'node' : Any elements that share at least one node are considered neighbors. TODO: Not currently implemented.
         'edge' : Any elements that share an edge are considered neighbors.
         'face' : Any elements that share a face are considered neighbors. NOTE that in surface meshes, no elements share faces.
     ElemConn : list, optional
         Node-Element connectivity of the mesh as obtained by getNodeNeighbors.
         If supplied, won't require an additional call to getNodeNeighbors.
-        Only relevant if mode = 'node', by default None.
+        Only relevant if mode == 'node', by default None.
 
     Returns
     -------
@@ -498,11 +499,15 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
         List of element normal vectors.
     method : str, optional
         Method used to determine node normals. The default is 'Angle'.
-        Angle - performs an angle weighted average of connected element normals
-        Average - performs a simple averaging of connected element normals
-        MostVisible - Determines the most visible normal - Aubry et al. 2007
-        MostVisible_Loop - Non-vectorized version of MostVisible, slower but more readable
-        MostVisible_Iter - Iterative method for determining the most visible normal - Aubry et al. 2007
+
+        - Angle - performs an angle weighted average of connected element normals :cite:p:`Thurrner1998`
+        - Average - performs a simple averaging of connected element normals
+        - MostVisible - determines the most visible normal :cite:p:`Aubry2008a`
+        - MostVisible_Loop - non-vectorized version of MostVisible, slower but more readable
+        - MostVisible_Iter - iterative method for determining the most visible normal :cite:p:`Aubry2008a`
+
+        MostVisible_Loop and MostVisible_Iter are included for completeness, but in
+        general, MostVisible should be used instead.
 
     Returns
     -------
@@ -612,32 +617,8 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
                 continue
             angles = [0 for j in range(len(ElemConn[i]))]
             elemnormals = [np.array(ElemNormals[elem]) for elem in ElemConn[i]]
-            if method == 'angle_old':
-                # Based on: Grit Thürrner & Charles A. Wüthrich (1998)
-                # Perform angle weighted average to compute vertex normals
-                # Calculate the angles to use as weights
-                for j in range(len(ElemConn[i])):  
-                    # Loop through the neighboring elements for this node
-                    n1 = NodeCoords[i]  # Coordinates of this node
-                    n2n3 = []           
-                    for k in range(len(NodeConn[ElemConn[i][j]])):  
-                         # Loop through each node in that neighboring element
-                        if NodeConn[ElemConn[i][j]][k] != i:
-                            n2n3.append(NodeCoords[NodeConn[ElemConn[i][j]][k]])
-                    n2 = n2n3[0]
-                    n3 = n2n3[1]
-                    # Using the dot product to calculate the angle of the neighboring element at the current node (Node i)
-                    a = np.subtract(n3,n1)   # Vector a
-                    b = np.subtract(n2,n1)   # Vector b
-                    angles[j] = np.arccos(np.dot(a,b)/(np.linalg.norm(a)*np.linalg.norm(b)))
-                top = np.sum([np.multiply(angles[j],elemnormals[j]) for j in range(len(angles))],0)
-                bottom = np.linalg.norm(top)
-                if bottom == 0:
-                    NodeNormals[i] = [np.nan,np.nan,np.nan]
-                else:
-                    NodeNormals[i] = (top/bottom).tolist()
 
-            elif method == 'MostVisible_Loop':
+            if method == 'MostVisible_Loop':
                 
                 # This is kept for readability; 'MostVisible' is a vectorized equivalent that performs significantly faster
                 
@@ -669,15 +650,6 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
                         Nj = elemnormals[j]
                         for k in range(j+1,len(elemnormals)):
                             Nk = elemnormals[k]
-                            # denom = (Ni[0]-Nj[0])*(Ni[1]-Nk[1]) - (Ni[0]-Nk[0])*(Ni[1]-Nj[1])
-                            # if denom == 0:
-                            #     continue
-                            # Ncx = ((Ni[2]-Nk[2])*(Ni[1]-Nj[1]) - (Ni[2]-Nj[2])*(Ni[1]*Nk[1]))/denom
-                            # Ncy = ((Ni[0]-Nk[0])*(Ni[2]-Nj[2]) - (Ni[0]-Nj[0])*(Ni[2]-Nk[2]))/denom
-                            # Ncz = 1/np.sqrt(1 + Ncx*Ncx + Ncy*Ncy)
-                            # Ncx = Ncx*Ncz
-                            # Ncy = Ncy*Ncz
-                            # Nc = [Ncx, Ncy, Ncz]
 
                             denom = (2*np.linalg.norm(np.cross(Ni-Nk,Nj-Nk))**2) 
                             if denom == 0:
@@ -693,9 +665,6 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
                             if scal < 0:
                                 Nc = [-1*n for n in Nc]
                                 scal = -scal
-                            # Nb = Ni+Nj
-                            # Nb = Nb/np.linalg.norm(Nb)
-                            # scal = np.dot(Nc,Ni)
                             if scal < scalmin:
                                 pass
                             elif any((np.dot(Nl,Nc) - scal) < eps for Nl in elemnormals):
@@ -1105,14 +1074,12 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False,return_i
 
     Examples
     --------
-    >>> NodeCoords = [
-        [0,0,0],
-        [0,1,0],
-        [1,1,0],
-        [0,0,0],
-        [1,1,0],
-        [1,0,0]
-    ]
+    >>> NodeCoords = [[0.,0.,0.],
+                      [0.,1.,0.],
+                      [1.,1.,0.],
+                      [0.,0.,0.],
+                      [1.,1.,0.],
+                      [1.,0.,0.]]
     >>> NodeConn = [[0,1,2],[3,4,5]]
     >>> NewCoords, NewConn, idx, inv = utils.DeleteDuplicateNodes(NodeCoords,NodeConn, return_idx=True,return_inv=True)
     >>> NewConn
@@ -1618,8 +1585,8 @@ def PeelHex(NodeCoords,NodeConn,nLayers=1):
         PeelConn += [NewConn[i] for i in range(len(NewConn)) if (set(NewConn[i])&SurfNodeSet)]
         NewConn = [NewConn[i] for i in range(len(NewConn)) if not (set(NewConn[i])&SurfNodeSet)]
     
-    PeelCoords,PeelConn,_ = converter.removeNodes(NewCoords,PeelConn)
-    PeeledCoords,PeeledConn,_ = converter.removeNodes(NewCoords,NewConn)
+    PeelCoords,PeelConn,_ = RemoveNodes(NewCoords,PeelConn)
+    PeeledCoords,PeeledConn,_ = RemoveNodes(NewCoords,NewConn)
     
     return PeeledCoords, PeeledConn, PeelCoords, PeelConn
     
@@ -1653,7 +1620,7 @@ def makePyramidLayer(VoxelCoords,VoxelConn,PyramidHeight=None):
         PyramidHeight = abs(VoxelCoords[VoxelConn[0][0]][0] - VoxelCoords[VoxelConn[0][1]][0])/2
         
     SurfConn = converter.solid2surface(VoxelCoords,VoxelConn)
-    SurfCoords, SurfConn, _ = converter.removeNodes(VoxelCoords,SurfConn)
+    SurfCoords, SurfConn, _ = RemoveNodes(VoxelCoords,SurfConn)
     
     FaceNormals = CalcFaceNormal(SurfCoords,SurfConn)
     ArrayCoords = np.array(SurfCoords)
@@ -1695,7 +1662,7 @@ def makeVoxelLayer(VoxelCoords,VoxelConn):
     VoxelSize = abs(VoxelCoords[VoxelConn[0][0]][0] - VoxelCoords[VoxelConn[0][1]][0])
         
     SurfConn = converter.solid2surface(VoxelCoords,VoxelConn)
-    SurfCoords, SurfConn, _ = converter.removeNodes(VoxelCoords,SurfConn)
+    SurfCoords, SurfConn, _ = RemoveNodes(VoxelCoords,SurfConn)
     
     FaceNormals = CalcFaceNormal(SurfCoords,SurfConn)
     ArrayCoords = np.array(SurfCoords)
@@ -1788,7 +1755,7 @@ def MVBB(Points, return_matrix=False):
     """    
 
     hull = scipy.spatial.ConvexHull(Points)
-    hull_points, hull_facets,_ = converter.removeNodes(Points, hull.simplices)
+    hull_points, hull_facets,_ = RemoveNodes(Points, hull.simplices)
     hull_points = np.asarray(hull_points)
 
     # Calculate rotation matrices to align each hull facet with [0,0,-1] (so that it's rotated to the minimal z plane)
@@ -2021,3 +1988,81 @@ def ExtractRagged(In,delval=-1,dtype=None):
     else:
         Out = In.tolist()
     return Out
+
+def identify_type(NodeCoords, NodeConn):
+        """
+        Classify the mesh as either a surface or volume.
+        A mesh is classified as a volume mesh ('vol') if any elements are unambiguous 
+        volume elements - pyramid (5 nodes), wedge (6), hexahedron (8), or if 
+        any of a random sample of 10 elements (or all elements if NElem < 10) has
+        a volume less than machine precision (``np.finfo(float).eps``). 
+        Alternatively, a surface mesh ('surf') is identified if any of the elements is 
+        a triangle (3 nodes). In the case of a mesh containing both triangular
+        and volume elements, the mesh will be classified arbitrarily by whichever
+        appears first in NodeConn. 
+
+        This approach has a chance of mislabeling the mesh in some rare or 
+        non-standard scenarios, but attempts to be as efficient as possible
+        to minimize overhead when creating a mesh. Potentially ambiguous meshes
+        are:
+
+        - 
+            Meshes containing both triangular elements and volume elements 
+            (this should generally be avoided as most functions aren't set up
+            to handle that case).
+        - 
+            Tetrahedral meshes with many degenerate elements with 
+            abs(vol) < machine precision. 
+        - Quadrilateral meshes with non-planar elements.
+
+        In such cases, Type should be specified explicitly when creating the mesh
+        object.
+
+        Returns
+        -------
+        Type : str
+            Mesh type, either 'surf', 'vol', or 'empty'.
+        """        
+
+        # Check if the mesh is empty
+        NNode = len(NodeCoords)
+        NElem = len(NodeConn)
+        if NNode == 0 or NElem == 0:
+            Type = 'empty'
+            return Type
+        
+        # Check node dimensions, if it's 2D, then it must be a surface
+        if len(NodeCoords[0]) == 2:
+            Type = 'surf'
+            return Type
+
+        # Check element lengths
+        lengths = (len(e) for e in NodeConn)
+        vol_elem_set = {5,6,8} # Set of unambiguous volume element lengths
+        for l in lengths:
+            # NOTE: any mesh containing triangle and volume elements will be 
+            # arbitrarily classified by whichever comes first.
+            if l <= 3:
+                # The presence of any triangular (or line) elements triggers 'surf'
+                Type = 'surf'
+                return Type
+        
+            elif l in vol_elem_set:
+                # The presence of any unambiguous volume elements triggers 'vol'
+                Type = 'vol'
+                return Type
+
+        # If still ambiguous, check volumes of a random selection of elements
+        if NElem > 10:
+            TempConn = [NodeConn[i] for i in np.random.randint(NElem,size=(10))]
+        else:
+            TempConn = NodeConn
+        v = quality.Volume(NodeCoords, TempConn, verbose=False)
+        if np.max(np.abs(v)) > np.finfo(float).eps:
+            # If any of the sampled element volumes exceed machine precision,
+            # mesh is assumed to be a volume mesh, otherwise a surface
+            Type = 'vol'
+        else:
+            Type = 'surf'
+
+        return Type

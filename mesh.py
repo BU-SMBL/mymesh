@@ -3,6 +3,11 @@
 Created on Wed Sep  1 16:20:47 2021
 
 @author: toj
+
+mesh class
+==========
+
+
 """
 
 from . import utils, improvement, converter, quality, rays, curvature, visualize
@@ -11,14 +16,77 @@ import scipy
 import numpy as np
 import copy, warnings, pickle, json
 
-class mesh:
-    def __init__(self,*args):
+class mesh:  
+    """
+    The :class:`mesh` class stores the nodes (``NodeCoords``) and elements (or node connectivity, ``NodeConn``) as its primary attributes. 
+
+    Parameters
+    ----------
+    NodeCoords : array_like, optional
+        Node coordinates, by default None
+    NodeConn : list, array_like, optional
+        Node connectivity of elements, by default None
+    Type : str or None, optional
+        Mesh type, 'surf' for surface or 'vol' for volume. If not provided,
+        it will be determined automatically (meth:`mesh.identify_type`), by default None
+    verbose : bool, optional
+        If true, some operations will print activity or other information, 
+        by default True
+
+    Attributes
+    ----------
+    NodeData
+        Node data dictionary for storing scalar or vector data associated with 
+        each node in the mesh. Each entry should be an array_like with the same
+        length as the number of nodes in the mesh. When using :meth:`mesh.write`, 
+        this data will be transferred to the written file if supported by that
+        file type.
+    ElemData 
+        Element data dictionary for storing scalar or vector data associated with 
+        each element in the mesh. Each entry should be an array_like with the same
+        length as the number of elements in the mesh. When using :meth:`mesh.write`, 
+        this data will be transferred to the written file if supported by that
+        file type.
+    NodeSets
+        Dictionary used for creating named sets of nodes. Each entry should 
+        be a set (or array_like) of node numbers.
+    ElemSets
+        Dictionary used for creating named sets of elements. Each entry should 
+        be a set (or array_like) of element numbers.
+    FaceSets 
+        Dictionary used for creating named sets of faces. Each entry should 
+        be a set (or array_like) of face numbers.
+    EdgeSets 
+        Dictionary used for creating named sets of edges. Each entry should 
+        be a set (or array_like) of edge numbers.
+
+    """    
+
+    def __init__(self, NodeCoords=None, NodeConn=None, Type=None, verbose=True):
         # Primary attributes
-        self.NodeCoords = []
-        self.NodeConn = []
-        self.Type = 'vol' # Valid options are 'surf' and 'vol'
+        if NodeCoords is None:
+            self.NodeCoords = np.empty((0,3))
+        else:
+            if not isinstance(NodeCoords, (list,np.ndarray,tuple)):
+                raise ValueError(f'NodeCoords must be a list, np.ndarray or tuple, not {str(type(NodeCoords)):s}.')
+            self.NodeCoords = NodeCoords
+
+        if NodeConn is None:
+            self.NodeConn = []
+        else:
+            if not isinstance(NodeConn, (list,np.ndarray,tuple)):
+                raise ValueError(f'NodeConn must be a list, np.ndarray or tuple, not {str(type(NodeConn)):s}.')
+            self.NodeConn = NodeConn
+
+        if Type is None:
+            self.Type = self.identify_type()
+        else:
+            self.Type = Type
+
+        self.verbose = verbose
 
         # Properties:
+        self._Surface = None
         self._SurfConn = []
         self._NodeNeighbors = []
         self._ElemNeighbors = []
@@ -28,18 +96,13 @@ class mesh:
         self._ElemNormals = []
         self._NodeNormals = []
         self._Centroids = []
-        self._Faces = []  # Used for FVM/CFD meshes, not for use in 2D
-        self._FaceConn = [] # For each element, gives the indices of connected faces
+        self._Faces = []  
+        self._FaceConn = [] 
         self._FaceElemConn = [] # For each face, gives the indices of connected elements (nan -> surface)
         self._Edges = []    
         self._EdgeConn = []
         self._EdgeElemConn = []
         self._NodeNormalsMethod = 'Angle'
-        self._NFace = 0
-        self._NEdge = 0
-        self._NNode = 0
-        self._NElem = 0
-        self.nNode = []
         
         # Sets:
         self.NodeSets = {}
@@ -51,34 +114,21 @@ class mesh:
         self.NodeData = {}
         self.ElemData = {}
         
-        self.nD = 0
-        for i,arg in enumerate(args):
-            if i == 0:
-                self.NodeCoords = arg
-            elif i == 1:
-                self.NodeConn = arg
-                if len(self.NodeConn) > 0:
-                    self.nNode = len(self.NodeConn[0])
-            elif i == 2:
-                self.Type = arg
-        
-        self.verbose = True
         self._printlevel = 0
-        self.initialize(cleanup=False)
     def __sizeof__(self):
         size = 0
+        # Base attributes
         size += getsizeof(self.NodeCoords)
         size += getsizeof(self.NodeConn)
+        size += getsizeof(self.Type)
+        
+        # Property attributes
         size += getsizeof(self._Faces)
         size += getsizeof(self._FaceConn)
         size += getsizeof(self._FaceElemConn)
         size += getsizeof(self._Edges)
         size += getsizeof(self._EdgeConn)
         size += getsizeof(self._EdgeElemConn)
-        size += getsizeof(self._NElem)
-        size += getsizeof(self.nNode)
-        size += getsizeof(self._NNode)
-        size += getsizeof(self.nD)
         size += getsizeof(self._SurfConn)
         size += getsizeof(self._NodeNeighbors)
         size += getsizeof(self._ElemConn)
@@ -87,33 +137,447 @@ class mesh:
         size += getsizeof(self._ElemNormals)
         size += getsizeof(self._NodeNormals)
         size += getsizeof(self._Centroids)
+
+        # Sets & Data
+        size += getsizeof(self.NodeSets)
+        size += getsizeof(self.EdgeSets)
+        size += getsizeof(self.FaceSets)
+        size += getsizeof(self.ElemSets)
+        size += getsizeof(self.NodeData)
+        size += getsizeof(self.ElemData)
+
+
         return size
     def __repr__(self):
-        if self.Type == 'surf':
+        if self.Type.lower() in ('surf', 'surface'):
             Type = 'Surface'
-        elif self.Type == 'vol':
+        elif self.Type in ('vol', 'volume'):
             Type = 'Volume'
         else:
             Type = 'Unknown'
         return 'Mesh Object\nType: {0:s}\n{1:d} Nodes\n{2:d} Elements'.format(Type,self.NNode,self.NElem)
     def __iter__(self):
         return iter((self.NodeCoords,self.NodeConn))
-    def initialize(self,cleanup=True):
-        if cleanup: self.cleanup()
-        if len(self.NodeCoords) > 0:
-            self.setnD()
-    def reset(self,properties=None,keep=[]):
+    
+    # Properties
+    @property
+    def points(self):
+        """ Alias for ``NodeCoords`` """
+        return self.NodeCoords
+    @points.setter
+    def points(self,NodeCoords):
+        self.NodeCoords = NodeCoords
+    @property
+    def cells(self):
+        """ Alias for ``NodeConn`` """
+        return self.NodeConn
+    @cells.setter
+    def cells(self,NodeConn):
+        self.NodeConn = NodeConn
+    @property 
+    def ND(self):
         """
-        reset Reset all or specified properties
+        Number of spatial dimensions. This is based on how many components each
+        node coordinate has.
+        """
+        return np.shape(self.NodeCoords)[1]
+    @property
+    def NNode(self):
+        """
+        Number of nodes in the mesh.
+        """        
+        return len(self.NodeCoords)
+    @property
+    def NElem(self):
+        """
+        Number of elements in the mesh.
+        """   
+        return len(self.NodeConn)
+    @property
+    def NEdge(self):
+        """
+        Number of edges in the mesh. If edges haven't been determined yet, they 
+        will be. 
+        """   
+        return len(self.Edges)
+    @property
+    def NFace(self):
+        """
+        Number of faces in the mesh. If faces haven't been determined yet, they 
+        will be. 
+        """  
+        return len(self.Faces)
+    @property
+    def Faces(self):
+        """
+        Element faces. Each face is defined as a list of node indices.
+        """        
+        if self._Faces == []:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying element faces...',end='')
+                self._printlevel+=1
+
+            self._Faces, self._FaceConn, self._FaceElemConn = self._get_faces()
+
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
+        return self._Faces
+    @property
+    def FaceConn(self):
+        """
+        Element-face connectivity. For each element, lists the connected faces.
+        See :ref:`connectivity` for more info.
+        """
+        if self._FaceConn == []:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying element-face connectivity...',end='')
+                self._printlevel+=1
+
+            self._Faces, self._FaceConn, self._FaceElemConn = self._get_faces()
+            
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
+        return self._FaceConn
+    @property
+    def FaceElemConn(self):
+        """
+        Face-element connectivity. For each face, lists the connected elements.
+        See :ref:`connectivity` for more info.
+        """
+        if self._FaceElemConn == []:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying element face-element connectivity...',end='')
+                self._printlevel+=1
+
+            self._Faces, self._FaceConn, self._FaceElemConn = self._get_faces()
+            
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
+        return self._FaceElemConn
+    @property
+    def Edges(self):
+        """
+        Element edges. Each edge is defined as a list of node indices.
+        """        
+        if self._Edges == []:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying element edges...',end='')
+                self._printlevel+=1
+
+            self._Edges, self._EdgeConn, self._EdgeElemConn = self._get_edges()
+
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
+        return self._Edges
+    @property
+    def EdgeConn(self):
+        """
+        Element-edge connectivity. For each element, lists the connected edges.
+        See :ref:`connectivity` for more info.
+        """
+        if self._FaceConn == []:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying element-edge connectivity...',end='')
+                self._printlevel+=1
+
+            self._Edges, self._EdgeConn, self._EdgeElemConn = self._get_edges()
+            
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
+        return self._EdgeConn
+    @property
+    def EdgeElemConn(self):
+        """
+        Edge-element connectivity. For each edge, lists the connected elements.
+        See :ref:`connectivity` for more info.
+        """
+        if self._EdgeElemConn == []:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying element edge-element connectivity...',end='')
+                self._printlevel+=1
+
+            self._Edges, self._EdgeConn, self._EdgeElemConn = self._get_edges()
+            
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
+        return self._EdgeElemConn
+    @property
+    def SurfConn(self):
+        """
+        Node connectivity for the surface mesh. If the mesh is already a surface, this is the same as ``NodeConn``.
+        """        
+        if self.Type == 'surf':
+            SurfConn = self.NodeConn
+        else:
+            if self._SurfConn == []:
+                if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying surface...',end='')
+                self._SurfConn = converter.solid2surface(*self)
+                if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+            SurfConn = self._SurfConn
+        return SurfConn
+    @property
+    def NodeNeighbors(self):
+        """
+        Node neighbors. For each node, lists adjacent nodes.
+        See :ref:`connectivity` for more info.
+        """
+        if self._NodeNeighbors == []:
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying volume node neighbors...',end='')
+            self._NodeNeighbors = utils.getNodeNeighbors(*self)
+            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+        return self._NodeNeighbors
+    @property
+    def ElemNeighbors(self):
+        """
+        Element neighbors. For each element, lists adjacent elements.
+        See :ref:`connectivity` for more info.
+        """
+        if self._ElemNeighbors == []:
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying element neighbors...',end='')
+            if self.Type == 'surf':
+                mode = 'edge'
+            elif self.Type == 'vol':
+                mode = 'face'
+            self._ElemNeighbors = utils.getElemNeighbors(*self, mode=mode)
+            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+        return self._ElemNeighbors
+    @property
+    def ElemConn(self):
+        """ 
+        Node-Element connectivity. For each node, lists the connected elements.
+        See :ref:`connectivity` for more info.
+        """
+        if self._ElemConn == []:
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying volume node element connectivity...',end='')
+            self._ElemConn = utils.getElemConnectivity(*self)
+            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+        return self._ElemConn
+    @property
+    def SurfNodeNeighbors(self):
+        """
+        Node neighbors for the surface mesh.
+        """
+        if self._SurfNodeNeighbors == []:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying surface node neighbors...',end='')
+                self._printlevel+=1
+            self._SurfNodeNeighbors = utils.getNodeNeighbors(self.NodeCoords,self.SurfConn)
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
+        return self._SurfNodeNeighbors
+    @property
+    def SurfElemConn(self):
+        """
+        Node-Element connectivity for the surface mesh.
+        """
+        if self._SurfElemConn == []:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying surface node element connectivity...',end='')
+                self._printlevel+=1
+            self._SurfElemConn = utils.getElemConnectivity(self.NodeCoords,self.SurfConn)
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
+                
+        return self._SurfElemConn
+    @property
+    def ElemNormals(self):
+        """
+        Surface element normal vectors. For volume meshes, these will 
+        be calculated in reference to the surface mesh (:attr:`SurfConn`).
+        """
+        if np.size(self._ElemNormals) == 0:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Calculating surface element normals...',end='')
+                self._printlevel+=1
+            self._ElemNormals = utils.CalcFaceNormal(self.NodeCoords,self.SurfConn)
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
+        return self._ElemNormals        
+    @property
+    def NodeNormalsMethod(self):
+        """
+        Sets the method for calculating surface node normals. By default, 
+        "Angle". If the method gets changed, previously computed normal 
+        vectors will be cleared. See :func:`~Mesh.utils.Face2NodeNormal` for options 
+        and more details. 
+        """
+        return self._NodeNormalsMethod
+    @NodeNormalsMethod.setter
+    def NodeNormalsMethod(self,method):
+        self._NodeNormals = []
+        self._NodeNormalsMethod = method
+    @property
+    def NodeNormals(self):
+        """
+        Surface node normal vectors. Non-surface nodes will receive 
+        [np.nan, np.nan, np.nan]. There are several methods for computing
+        surface normal vectors at the nodes, the method to be used can be
+        set with :attr:`NodeNormalsMethod`. See :func:`~Mesh.utils.Face2NodeNormal` 
+        for more details. 
+        """
+        if np.size(self._NodeNormals) == 0:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Calculating surface node normals...',end='')
+                self._printlevel+=1
+            self._NodeNormals = utils.Face2NodeNormal(self.NodeCoords,self.SurfConn,self.SurfElemConn,self.ElemNormals,method=self.NodeNormalsMethod)
+            if self.verbose: 
+                self._printlevel-=1
+                print('Done', end='\n'+'\t'*self._printlevel)
+        return self._NodeNormals
+    @property
+    def Centroids(self):
+        """ Element centroids. """
+        if np.size(self._Centroids) == 0:
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Calculating element centroids...',end='')
+            self._Centroids = utils.Centroids(*self)
+            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+        return self._Centroids
+    @property
+    def EulerCharacteristic(self):
+        """ 
+        Topological Euler characteristic number. For volume meshes, the surface mesh is used. To prevent unattached nodes from influencing
+        the vertex count, vertices are counted as the number of unique nodes
+        referenced in :attr:`mesh.Edges`.
+
+        .. math:: \\chi = V-E+F
+
+        E: number of edges
+
+        V: number of vertices
+
+        F: number of faces
+
+        """
+        if self.Type == 'vol':
+            E = self.Surface.NEdge
+            V = len(np.unique(self.Surface.Edges))
+            F = self.Surface.NFace
+        else:
+            E = self.NEdge
+            V = len(np.unique(self.Edges))
+            F = self.NFace
+
+        return V - E + F
+    @property
+    def Genus(self):
+        """
+        Topological genus calculated from the Euler characteristic. For volume
+        meshes, the surface mesh is used.
+
+        .. math:: g = -(\\chi - 2)/2
+
+        """
+        return -(self.EulerCharacteristic - 2)/2
+    @property
+    def Surface(self):
+        """
+        :class:`mesh` object representation of the surface mesh. 
+        ``Surface.NodeCoords`` and ``Surface.NodeConn`` are aliases of 
+        ``NodeCoords`` and ``SurfConn``, so changes to one will change the 
+        other, however some operations may break this link. 
+        """
+        if self.Type == 'vol':
+            if self._Surface is None:
+                self._Surface = mesh(self.NodeCoords, self.SurfConn, 'surf')
+            surf = self._Surface
+        else:
+            surf = self
+        return surf
+    
+    # Methods
+    ## Maintenance Methods
+    def identify_type(self):
+        """
+        Classify the mesh as either a surface or volume.
+        A mesh is classified as a volume mesh ('vol') if any elements are unambiguous 
+        volume elements - pyramid (5 nodes), wedge (6), hexahedron (8), or if 
+        any of a random sample of 10 elements (or all elements if NElem < 10) has
+        a volume less than machine precision (``np.finfo(float).eps``). 
+        Alternatively, a surface mesh ('surf') is identified if any of the elements is 
+        a triangle (3 nodes). In the case of a mesh containing both triangular
+        and volume elements, the mesh will be classified arbitrarily by whichever
+        appears first in NodeConn. 
+
+        This approach has a chance of mislabeling the mesh in some rare or 
+        non-standard scenarios, but attempts to be as efficient as possible
+        to minimize overhead when creating a mesh. Potentially ambiguous meshes
+        are:
+
+        - 
+            Meshes containing both triangular elements and volume elements 
+            (this should generally be avoided as most functions aren't set up
+            to handle that case).
+        - 
+            Tetrahedral meshes with many degenerate elements with 
+            abs(vol) < machine precision. 
+        - Quadrilateral meshes with non-planar elements.
+
+        In such cases, Type should be specified explicitly when creating the mesh
+        object.
+
+        Returns
+        -------
+        Type : str
+            Mesh type, either 'surf', 'vol', or 'empty'.
+        """        
+
+        Type = utils.identify_type(*self)
+
+        return Type
+    def validate(self):
+        """
+        Check validity of the mesh. This will verify that ``NodeCoords`` and
+        ``NodeConn`` are of an appropriate type, confirm the mesh is non-empty, 
+        check that elements don't reference non-existant nodes, and that the 
+        ``Type`` is a valid option ('vol' or 'surf'). If any of these checks
+        fail, an assertion error will be raised. Additionally, a warning will
+        be issued if a volume mesh has any inverted elements.
+        """
+
+        assert isinstance(self.NodeCoords, (list,np.ndarray,tuple)), f'Invalid type:{str(type(self.NodeCoords)):s} for mesh.NodeCoords.'
+        assert len(self.NodeCoords) > 0, 'Undefined Node Coordinates'
+        assert isinstance(NodeCoords, (list,np.ndarray,tuple)), f'Invalid type:{str(type(self.NodeCoords)):s} for mesh.NodeConn.'
+        assert len(self.NodeConn), 'Undefined Node Connectivity'
+        assert max([max(elem) for elem in self.NodeConn]) <= len(self.NodeCoords), 'NodeConn references undefined nodes'
+        
+        assert self.Type in ('vol', 'surf'), 'Invalid mesh type.'
+
+        if self.Type == 'vol':
+            v = quality.Volume(*self)
+            if np.nanmin(v) < 0:
+                warnings.warn(f'Mesh has {np.sum(v < 0):d} inverted elements.')
+
+    def reset(self,properties=None,keep=None):
+        """
+        Reset some or all properties. If no arguments are provided,
+        all cached mesh properties will be reset. 
 
         Parameters
         ----------
         properties : NoneType, str, or list, optional
-            If specified as a string or list of strings, will reset the properties specified by those names, the default is None
+            If specified as a string or list of strings, will reset the properties specified by those names. By default, all properties
+            other than those specified by ``keep`` will be reset.
+        keep : NoneType, str or list, optional
+            If specified as a string or list of strings, the corresponding
+            properties will not be reset. If the same entry is found in
+            ``properties`` and ``keep``, the former takes precedence and
+            the property will be cleared. By default, None.
+
         """        
         # Reset calculated mesh attributes
         if type(keep) is str:
             keep = [keep]
+        elif keep is None:
+            keep = []
         if properties == None:
             if 'SurfConn' not in keep: self._SurfConn = []
             if 'NodeNeighbors' not in keep: self._NodeNeighbors = []
@@ -129,6 +593,7 @@ class mesh:
             if 'Faces' not in keep: self._Faces = []
             if 'Faces' not in keep or 'FaceConn' not in keep: self._FaceConn = []
             if 'Faces' not in keep or 'FaceElemConn' not in keep: self._FaceElemConn = [] 
+            if 'Surface' not in keep: self._Surface = None
         elif type(properties) is list:
             for prop in properties:
                 if prop[0] != '_':
@@ -151,27 +616,36 @@ class mesh:
         self.NodeCoords,self.NodeConn,OrigIds = utils.RemoveNodes(self.NodeCoords,self.NodeConn)
         for key in self.NodeData.keys():
             self.NodeData[key] = np.asarray(self.NodeData[key])[OrigIds]
+    def copy(self):
         
-    def validate(self):
-        assert type(self.NodeCoords) == list, 'Invalid type for model.mesh.NodeCoords'
-        assert len(self.NodeCoords) > 0, 'Undefined Node Coordinates'
-        assert type(self.NodeConn) == list, 'Invalid type for model.mesh.NodeConn'
-        assert len(self.NodeConn), 'Undefined Nodal Connectivity'
-        assert max([max(elem) for elem in self.NodeConn]) <= len(self.NodeCoords), 'NodeConn references undefined nodes'
-        v = quality.Volume(*self)
-        if np.nanmin(v) < 0:
-            warnings.warn('VALIDATION WARNING: Mesh has inverted elements')
-    def setnD(self):
-        if len(self.NodeCoords[0]) == 3:
-            self.nD = 3
-        elif len(self.NodeCoords[0]) == 2:
-            self.nD = 2
+        M = mesh(copy.copy(self.NodeCoords), copy.copy(self.NodeConn), self.Type)
+        
+        M._Faces = copy.copy(self._Faces)
+        M._FaceConn = copy.copy(self._FaceConn)
+        M._FaceElemConn = copy.copy(self._FaceElemConn)
+        M._Edges = copy.copy(self._Edges)
+        
+        M.NodeSets = copy.copy(self.NodeSets)
+        M.EdgeSets = copy.copy(self.EdgeSets)
+        M.FaceSets = copy.copy(self.FaceSets)
+        M.ElemSets = copy.copy(self.ElemSets)
 
-    def defineMesh(self,NodeCoords,NodeConn):
-        self.addNodes(NodeCoords)
-        self.addElems(NodeConn)
-        self.nNode = len(NodeConn[0])
-        self.setnD()
+        M.NodeData = copy.copy(self.NodeData)
+        M.ElemData = copy.copy(self.ElemData)
+        
+        M._SurfConn = copy.copy(self._SurfConn)
+        M._NodeNeighbors = copy.copy(self._NodeNeighbors)
+        M._ElemConn = copy.copy(self._ElemConn)
+        M._SurfNodeNeighbors = copy.copy(self._SurfNodeNeighbors)
+        M._SurfElemConn = copy.copy(self._SurfElemConn)
+        M._ElemNormals = copy.copy(self._ElemNormals)
+        M._NodeNormals = copy.copy(self._NodeNormals)
+        M._Centroids = copy.copy(self._Centroids)
+        M.verbose = self.verbose
+        
+        return M
+    
+    # Modification Methods
     def addNodes(self,NewNodeCoords,NodeSet=None):
         if type(NewNodeCoords) is np.ndarray:
             NewNodeCoords = NewNodeCoords.tolist()
@@ -218,41 +692,22 @@ class mesh:
         elif ElemSet:
             self.ElemSets[ElemSet] = range(nelem,self.NElem) 
         
-    def copy(self):
-        
-        M = mesh()
-        M.NodeCoords = copy.copy(self.NodeCoords)
-        M.NodeConn = copy.copy(self.NodeConn)
-        
-        M.nNode = copy.copy(self.nNode)
-        M.nD = copy.copy(self.nD)
-        
-        M._Faces = copy.copy(self._Faces)
-        M._FaceConn = copy.copy(self._FaceConn)
-        M._FaceElemConn = copy.copy(self._FaceElemConn)
-        M._Edges = copy.copy(self._Edges)
-        
-        M.NodeSets = copy.copy(self.NodeSets)
-        M.EdgeSets = copy.copy(self.EdgeSets)
-        M.FaceSets = copy.copy(self.FaceSets)
-        M.ElemSets = copy.copy(self.ElemSets)
+    def merge(self,Mesh2,cleanup=True,tol=1e-14):
+        """
+        Merge multiple meshes together into the current mesh.
 
-        M.NodeData = copy.copy(self.NodeData)
-        M.ElemData = copy.copy(self.ElemData)
+        Parameters
+        ----------
+        Mesh2 : Mesh.mesh or list
+            Second mesh, or list of meshes, to merge with the current mesh.
+        cleanup : bool, optional
+            Determines whether or not to :meth:``~mesh.cleanup`` the merged
+            mesh, by default True.
+        tol : float, optional
+            Cleanup tolerance for identifying duplicate nodes (see 
+            :meth:``~mesh.cleanup``), by default 1e-14
         
-        M._SurfConn = copy.copy(self._SurfConn)
-        M._NodeNeighbors = copy.copy(self._NodeNeighbors)
-        M._ElemConn = copy.copy(self._ElemConn)
-        M._SurfNodeNeighbors = copy.copy(self._SurfNodeNeighbors)
-        M._SurfElemConn = copy.copy(self._SurfElemConn)
-        M._ElemNormals = copy.copy(self._ElemNormals)
-        M._NodeNormals = copy.copy(self._NodeNormals)
-        M._Centroids = copy.copy(self._Centroids)
-        M.verbose = copy.copy(self.verbose)
-        
-        return M
-    def merge(self,Mesh2,tol=1e-14,cleanup=True):
-        self.initialize(cleanup=cleanup)
+        """        
         if type(Mesh2) is list:
             MeshList = Mesh2
         else:
@@ -261,8 +716,6 @@ class mesh:
             # Original Stats
             NNode = self.NNode
             NElem = self.NElem
-            NFace = self._NFace
-            NEdge = self._NEdge
             
             # Add Nodes
             if len(M.NodeSets) > 1:
@@ -304,248 +757,6 @@ class mesh:
         # Cleanup
         if cleanup:
             self.cleanup(tol=tol)
-
-    @property
-    def NNode(self):
-        self._NNode = len(self.NodeCoords)
-        return self._NNode
-    @property
-    def NElem(self):
-        self._NElem = len(self.NodeConn)
-        return self._NElem
-    @property
-    def NEdge(self):
-        self._NEdge = len(self.Edges)
-        return self._NEdge
-    @property
-    def NFace(self):
-        self._NFace = len(self.Faces)
-        return self._NFace
-    @property
-    def NEdge(self):
-        self._NEdge = len(self.Edges)
-        return self._NEdge
-    def __get_faces(self):
-        if self.NElem > 0:
-            # Get all element faces
-            faces,faceconn,faceelem = converter.solid2faces(self.NodeCoords,self.NodeConn,return_FaceConn=True,return_FaceElem=True)
-            # Pad Ragged arrays in case of mixed-element meshes
-            Rfaces = utils.PadRagged(faces)
-            Rfaceconn = utils.PadRagged(faceconn)
-            # Get all unique element faces (accounting for flipped versions of faces)
-            _,idx,inv = np.unique(np.sort(Rfaces,axis=1),axis=0,return_index=True,return_inverse=True)
-            RFaces = Rfaces[idx]
-            FaceElem = faceelem[idx]
-            RFaces = np.append(RFaces, np.repeat(-1,RFaces.shape[1])[None,:],axis=0)
-            inv = np.append(inv,-1)
-            RFaceConn = inv[Rfaceconn] # Faces attached to each element
-            # Face-Element Connectivity
-            FaceElemConn = np.nan*(np.ones((len(RFaces),2))) # Elements attached to each face
-
-            FECidx = (FaceElem[RFaceConn] == np.repeat(np.arange(self.NElem)[:,None],RFaceConn.shape[1],axis=1)).astype(int)
-            FaceElemConn[RFaceConn,FECidx] = np.repeat(np.arange(self.NElem)[:,None],RFaceConn.shape[1],axis=1)
-            FaceElemConn = [[int(x) if not np.isnan(x) else x for x in y] for y in FaceElemConn[:-1]]
-
-
-            Faces = utils.ExtractRagged(RFaces[:-1],dtype=int)
-            FaceConn = utils.ExtractRagged(RFaceConn,dtype=int)
-            return Faces, FaceConn, FaceElemConn
-        else:
-            return [], [], []
-    def __get_edges(self):
-        # TODO: This might not work properly with mixed element types - but I think it shoud
-        if self.NElem > 0:
-            # Get all element edges
-            edges, edgeconn, edgeelem = converter.solid2edges(self.NodeCoords,self.NodeConn,return_EdgeConn=True,return_EdgeElem=True)
-            # Convert to unique edges
-            Edges, UIdx, UInv = converter.edges2unique(edges,return_idx=True,return_inv=True)
-            EdgeElem = np.asarray(edgeelem)[UIdx]
-            EdgeConn = UInv[utils.PadRagged(edgeconn)]
-            
-            rows = EdgeConn.flatten()
-            cols = np.repeat(np.arange(self.NElem),[len(x) for x in EdgeConn])
-            data = np.ones(len(rows))
-            
-            mat = scipy.sparse.coo_matrix((data,(rows,cols)),shape=(len(Edges),self.NElem)).tocsr()
-            EdgeElemConn = [list(mat.indices[mat.indptr[i]:mat.indptr[i+1]]) for i in range(mat.shape[0])]
-            
-            return Edges, EdgeConn, EdgeElemConn
-        else:
-            return [], [], []
-    @property
-    def Faces(self):
-        if self._Faces == []:
-            if self.verbose: 
-                print('\n'+'\t'*self._printlevel+'Identifying element faces...',end='')
-                self._printlevel+=1
-
-            self._Faces, self._FaceConn, self._FaceElemConn = self.__get_faces()
-
-            if self.verbose: 
-                self._printlevel-=1
-                print('Done', end='\n'+'\t'*self._printlevel)
-        return self._Faces
-    @property
-    def FaceConn(self):
-        if self._FaceConn == []:
-            if self.verbose: 
-                print('\n'+'\t'*self._printlevel+'Identifying element-face connectivity...',end='')
-                self._printlevel+=1
-
-            self._Faces, self._FaceConn, self._FaceElemConn = self.__get_faces()
-            
-            if self.verbose: 
-                self._printlevel-=1
-                print('Done', end='\n'+'\t'*self._printlevel)
-        return self._FaceConn
-    @property
-    def FaceElemConn(self):
-        if self._FaceElemConn == []:
-            if self.verbose: 
-                print('\n'+'\t'*self._printlevel+'Identifying element face-element connectivity...',end='')
-                self._printlevel+=1
-
-            self._Faces, self._FaceConn, self._FaceElemConn = self.__get_faces()
-            
-            if self.verbose: 
-                self._printlevel-=1
-                print('Done', end='\n'+'\t'*self._printlevel)
-        return self._FaceElemConn
-    @property
-    def Edges(self):
-        if self._Edges == []:
-            if self.verbose: 
-                print('\n'+'\t'*self._printlevel+'Identifying element edges...',end='')
-                self._printlevel+=1
-
-            self._Edges, self._EdgeConn, self._EdgeElemConn = self.__get_edges()
-
-            if self.verbose: 
-                self._printlevel-=1
-                print('Done', end='\n'+'\t'*self._printlevel)
-        return self._Edges
-    @property
-    def EdgeConn(self):
-        if self._FaceConn == []:
-            if self.verbose: 
-                print('\n'+'\t'*self._printlevel+'Identifying element-edge connectivity...',end='')
-                self._printlevel+=1
-
-            self._Edges, self._EdgeConn, self._EdgeElemConn = self.__get_edges()
-            
-            if self.verbose: 
-                self._printlevel-=1
-                print('Done', end='\n'+'\t'*self._printlevel)
-        return self._EdgeConn
-    @property
-    def EdgeElemConn(self):
-        if self._EdgeElemConn == []:
-            if self.verbose: 
-                print('\n'+'\t'*self._printlevel+'Identifying element edge-element connectivity...',end='')
-                self._printlevel+=1
-
-            self._Edges, self._EdgeConn, self._EdgeElemConn = self.__get_edges()
-            
-            if self.verbose: 
-                self._printlevel-=1
-                print('Done', end='\n'+'\t'*self._printlevel)
-        return self._EdgeElemConn
-    @property
-    def SurfConn(self):
-        if self._SurfConn == []:
-            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying surface...',end='')
-            self._SurfConn = converter.solid2surface(*self)
-            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
-        return self._SurfConn
-    @property
-    def NodeNeighbors(self):
-        if self._NodeNeighbors == []:
-            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying volume node neighbors...',end='')
-            self._NodeNeighbors = utils.getNodeNeighbors(*self)
-            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
-        return self._NodeNeighbors
-    @property
-    def ElemNeighbors(self):
-        if self._ElemNeighbors == []:
-            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying element neighbors...',end='')
-            self._ElemNeighbors = utils.getElemNeighbors(*self)
-            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
-        return self._ElemNeighbors
-    @property
-    def ElemConn(self):
-        if self._ElemConn == []:
-            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying volume node element connectivity...',end='')
-            self._ElemConn = utils.getElemConnectivity(*self)
-            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
-        return self._ElemConn
-    @property
-    def SurfNodeNeighbors(self):
-        if self._SurfNodeNeighbors == []:
-            if self.verbose: 
-                print('\n'+'\t'*self._printlevel+'Identifying surface node neighbors...',end='')
-                self._printlevel+=1
-            self._SurfNodeNeighbors = utils.getNodeNeighbors(self.NodeCoords,self.SurfConn)
-            if self.verbose: 
-                self._printlevel-=1
-                print('Done', end='\n'+'\t'*self._printlevel)
-        return self._SurfNodeNeighbors
-    @property
-    def SurfElemConn(self):
-        if self._SurfElemConn == []:
-            if self.verbose: 
-                print('\n'+'\t'*self._printlevel+'Identifying surface node element connectivity...',end='')
-                self._printlevel+=1
-            self._SurfElemConn = utils.getElemConnectivity(self.NodeCoords,self.SurfConn)
-            if self.verbose: 
-                self._printlevel-=1
-                print('Done', end='\n'+'\t'*self._printlevel)
-                
-        return self._SurfElemConn
-    @property
-    def ElemNormals(self):
-        if np.size(self._ElemNormals) == 0:
-            if self.verbose: 
-                print('\n'+'\t'*self._printlevel+'Calculating surface element normals...',end='')
-                self._printlevel+=1
-            self._ElemNormals = utils.CalcFaceNormal(self.NodeCoords,self.SurfConn)
-            if self.verbose: 
-                self._printlevel-=1
-                print('Done', end='\n'+'\t'*self._printlevel)
-        return self._ElemNormals        
-    @property
-    def NodeNormalsMethod(self):
-        return self._NodeNormalsMethod
-    @NodeNormalsMethod.setter
-    def NodeNormalsMethod(self,method):
-        self._NodeNormals = []
-        self._NodeNormalsMethod = method
-    @property
-    def NodeNormals(self):
-        if np.size(self._NodeNormals) == 0:
-            if self.verbose: 
-                print('\n'+'\t'*self._printlevel+'Calculating surface node normals...',end='')
-                self._printlevel+=1
-            self._NodeNormals = utils.Face2NodeNormal(self.NodeCoords,self.SurfConn,self.SurfElemConn,self.ElemNormals,method=self.NodeNormalsMethod)
-            if self.verbose: 
-                self._printlevel-=1
-                print('Done', end='\n'+'\t'*self._printlevel)
-        return self._NodeNormals
-    @property
-    def Centroids(self):
-        if np.size(self._Centroids) == 0:
-            if self.verbose: print('\n'+'\t'*self._printlevel+'Calculating element centroids...',end='')
-            self._Centroids = utils.Centroids(*self)
-            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
-        return self._Centroids
-    
-    # Topological Properties
-    @property
-    def EulerCharacteristic(self):
-        return self.NNode - self.NEdge + self.NFace
-    @property
-    def Genus(self):
-        return -(self.EulerCharacteristic - 2)/2
-    
     def RenumberNodesBySet(self):
         # Re-organize the order of nodes based on their node sets and make required adjustments to other stored values
         setkeys = self.NodeSets.keys()
@@ -598,10 +809,16 @@ class mesh:
         self._FaceElemConn = NewFaceElemConn.tolist()
         self._FaceConn = utils.ExtractRagged(NewFaceConn,dtype=int)
     
+    def AxisAlign(self):
+        pass
+
     def CreateBoundaryLayer(self,nLayers,FixedNodes=set(),StiffnessFactor=1,Thickness=None,OptimizeTets=True,FaceSets='surf'):
         """
-        CreateBoundaryLayer Generate boundary layer elements 
-        Based partially on 'A Procedure for Tetrahedral Boundary Layer Mesh Generation' - Bottaso and Detomi
+        Generate boundary layer elements.
+        Based partially on Bottasso, C. L., & Detomi, D. (2002). A procedure for 
+        tetrahedral boundary layer mesh generation. Engineering with Computers, 
+        18(1), 66-79. https://doi.org/10.1007/s003660200006 :cite:p:`Bottasso2002`
+        
         Currently surfaces must be strictly triangular.
 
         Parameters
@@ -635,7 +852,6 @@ class mesh:
             FaceSets = [FaceSets]
 
         # Create first layer with 0 thickness
-        self.reset('SurfConn')
         NOrigElem = self.NElem
         OrigConn = copy.copy(self.NodeConn)
         self.NodeNormalsMethod = 'MostVisible'
@@ -658,7 +874,6 @@ class mesh:
                 ForceNodes.update(FaceNodes)
             NoGrowthNodes = surfnodes.difference(ForceNodes)
             FixedNodes.update(NoGrowthNodes)
-
 
         newsurfconn = [[node+len(self.NodeCoords) for node in elem] for elem in surfconn]
         newsurfnodes = np.unique(newsurfconn)
@@ -918,38 +1133,41 @@ class mesh:
             # NewCoords[NodeIds] = NewRelevantCoords
         self.reset()
     
-    def getQuality(self,metrics=['Skewness','Aspect Ratio','Inverse Orthogonal quality','Inverse Orthogonality','Min Dihedral(deg)','Max Dihedral(deg)','Volume']):
+    ## Mesh Measurements Methods
+    def getQuality(self,metrics=['Skewness','Aspect Ratio','Inverse Orthogonal quality','Inverse Orthogonality','Min Dihedral(deg)','Max Dihedral(deg)','Volume'], verbose=None):
         
-        quality = {}
+        if verbose is None:
+            verbose = self.verbose
+        qual = {}
         if type(metrics) is str: metrics = [metrics]
         for metric in metrics:
-            if metric == 'Skewness':
-                quality[metric] = quality.Skewness(*self,verbose=self.verbose)
-            elif metric == 'Aspect Ratio':
-                quality[metric] = quality.AspectRatio(*self,verbose=self.verbose)    
-            elif metric == 'Inverse Orthogonal quality':
-                quality[metric] = quality.InverseOrthogonalQuality(*self,verbose=self.verbose)
-            elif metric == 'Orthogonal quality':
-                quality[metric] = quality.OrthogonalQuality(*self,verbose=self.verbose)
-            elif metric == 'Inverse Orthogonality':
-                quality[metric] = quality.InverseOrthogonality(*self,verbose=self.verbose)
-            elif metric == 'Orthogonality':
-                quality[metric] = quality.Orthogonality(*self,verbose=self.verbose)
-            elif metric == 'Min Dihedral':
-                quality[metric] = quality.MinDihedral(*self,verbose=self.verbose)
-            elif metric == 'Min Dihedral(deg)':
-                quality[metric] = quality.MinDihedral(*self,verbose=self.verbose)*180/np.pi
-            elif metric == 'Max Dihedral':
-                quality[metric] = quality.MaxDihedral(*self,verbose=self.verbose)
-            elif metric == 'Max Dihedral(deg)':
-                quality[metric] = quality.MaxDihedral(*self,verbose=self.verbose)*180/np.pi
-            
-            elif metric == 'Volume':
-                quality[metric] = quality.Volume(*self,verbose=self.verbose)
+            assert isinstance(metric, str), 'Invalid quality metric. Metrics must be strings.'
+            m = metric.lower()
+            if m == 'skewness':
+                qual[metric] = quality.Skewness(*self,verbose=verbose)
+            elif m == 'aspect ratio':
+                qual[metric] = quality.AspectRatio(*self,verbose=verbose)    
+            elif m == 'inverse orthogonal quality':
+                qual[metric] = quality.InverseOrthogonalQuality(*self,verbose=verbose)
+            elif m == 'orthogonal quality':
+                qual[metric] = quality.OrthogonalQuality(*self,verbose=verbose)
+            elif m == 'inverse orthogonality':
+                qual[metric] = quality.InverseOrthogonality(*self,verbose.verbose)
+            elif m == 'orthogonality':
+                qual[metric] = quality.Orthogonality(*self,verbose=verbose)
+            elif m == 'min dihedral':
+                qual[metric] = quality.MinDihedral(*self,verbose=verbose)
+            elif m == 'min dihedral(deg)':
+                qual[metric] = quality.MinDihedral(*self,verbose=verbose)*180/np.pi
+            elif m == 'max dihedral':
+                qual[metric] = quality.MaxDihedral(*self,verbose=verbose)
+            elif m == 'max dihedral(deg)':
+                qual[metric] = quality.MaxDihedral(*self,verbose=verbose)*180/np.pi
+            elif m == 'volume':
+                qual[metric] = quality.Volume(*self,verbose=verbose)
             else:
-                raise Exception('Invalid quality metric.')
-        return quality
-
+                raise Exception(f'Invalid quality metric "{metric:s}".')
+        return qual
     def getCurvature(self,metrics=['Max Principal','Min Principal', 'Curvedness', 'Shape Index', 'Mean', 'Gaussian'], nRings=1, SplitFeatures=False):
         
         if type(metrics) is str: metrics = [metrics]
@@ -1003,52 +1221,13 @@ class mesh:
         
         return Curvature
 
-    def save(self,filename,method='pickle'):
-        
-        self.NodeConn = [[int(n) for n in elem] for elem in self.NodeConn]
-        self._Faces = [[int(n) for n in face] for face in self._Faces]
-        self._SurfConn = [[int(n) for n in face] for face in self._SurfConn]
-        
-        if method=='pickle' or '.pickle' in filename:
-            if '.pickle' not in filename: filename += '.pickle'
-            with open(filename,'wb') as f:
-                pickle.dump(self,f)
-        elif method=='json' or '.json' in filename:
-            if '.json' not in filename: filename += '.json'
-            with open(filename,'w') as f:
-                json.dump(self.__dict__,f)
-                
-        else:
-            raise Exception('Unknown method')
-    def load(self,filename,method='pickle'):
-        
-        if method=='pickle' or '.pickle' in filename:
-            if '.pickle' not in filename: filename += '.pickle'
-            with open(filename,'rb') as f:
-                temp = pickle.load(f)
-            self.__dict__ = temp.__dict__
-        elif method=='json' or '.json' in filename:
-            if '.json' not in filename: filename += '.json'
-            with open(filename,'r') as f:
-                self.__dict__ = json.load(f)
-        else:
-            raise Exception('Unrecognized file')   
-    def mymesh2meshio(self,PointData={},CellData={}):
+    ## File I/O Methods
+    def mymesh2meshio(self):
         
         try:
             import meshio
         except:
             raise ImportError('mesh.Mesh2Meshio() requires the meshio library. Install with: pip install meshio')
-
-        if type(PointData) is list or type(PointData) is np.ndarray:
-            self.NodeData['_NodeVals_'] = PointData
-        elif type(PointData) is dict:
-            self.NodeData = {**self.NodeData,**PointData}
-        
-        if type(CellData) is list or type(CellData) is np.ndarray:
-            self.ElemData['_ElemVals_'] = CellData
-        elif type(CellData) is dict:
-            self.ElemData = {**self.ElemData,**CellData}
 
         celldict = dict()
         elemlengths = np.array([len(elem) for elem in self.NodeConn])
@@ -1085,12 +1264,8 @@ class mesh:
         elems = [e for e in [('line',edges),('triangle',tris),('quad',quads),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10)] if len(e[1]) > 0]
         m = meshio.Mesh(self.NodeCoords, elems, point_data=self.NodeData, cell_data=celldict)
         return m
-
     def write(self,filename,binary=None):
-        try:
-            import meshio
-        except:
-            raise ImportError('mesh.write() requires the meshio library. Install with: pip install meshio')
+
         if self.NNode == 0:
             warnings.warn('Mesh empty - file not written.')
             return
@@ -1121,10 +1296,9 @@ class mesh:
         M.ElemSets = m.cell_sets    # TODO: This might not give the expected result
 
         return M
-    
     def read(file):
         """
-        read read a mesh file written in any file type supported by meshio
+        Read a mesh file written in any file type supported by meshio
 
         Parameters
         ----------
@@ -1143,11 +1317,11 @@ class mesh:
         m = meshio.read(file)
         M = mesh.meshio2mymesh(m)
 
-        return M  
-            
+        return M          
     def imread(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
         """
-        imread load a 3d image stack into a voxel mesh  using converter.im2voxel
+        Load an into a voxel mesh. :func:``~Mesh.converter.im2voxel`` is
+        used to perform the conversion.
 
         Parameters
         ----------
@@ -1184,9 +1358,9 @@ class mesh:
             if return_nodedata: M.NodeData['Image Data'] = NodeData
         return M
 
+    ## Visualization Methods
     def view(self, **kwargs):
         visualize.View(self, **kwargs)    
-
     def plot(self, **kwargs):
         import matplotlib.pyplot as plt
 
@@ -1199,3 +1373,52 @@ class mesh:
         ax.imshow(img)
         ax.set_axis_off()
         plt.show()
+
+    ## Helper Functions
+    def _get_faces(self):
+        if self.NElem > 0:
+            # Get all element faces
+            faces,faceconn,faceelem = converter.solid2faces(self.NodeCoords,self.NodeConn,return_FaceConn=True,return_FaceElem=True)
+            # Pad Ragged arrays in case of mixed-element meshes
+            Rfaces = utils.PadRagged(faces)
+            Rfaceconn = utils.PadRagged(faceconn)
+            # Get all unique element faces (accounting for flipped versions of faces)
+            _,idx,inv = np.unique(np.sort(Rfaces,axis=1),axis=0,return_index=True,return_inverse=True)
+            RFaces = Rfaces[idx]
+            FaceElem = faceelem[idx]
+            RFaces = np.append(RFaces, np.repeat(-1,RFaces.shape[1])[None,:],axis=0)
+            inv = np.append(inv,-1)
+            RFaceConn = inv[Rfaceconn] # Faces attached to each element
+            # Face-Element Connectivity
+            FaceElemConn = np.nan*(np.ones((len(RFaces),2))) # Elements attached to each face
+
+            FECidx = (FaceElem[RFaceConn] == np.repeat(np.arange(self.NElem)[:,None],RFaceConn.shape[1],axis=1)).astype(int)
+            FaceElemConn[RFaceConn,FECidx] = np.repeat(np.arange(self.NElem)[:,None],RFaceConn.shape[1],axis=1)
+            FaceElemConn = [[int(x) if not np.isnan(x) else x for x in y] for y in FaceElemConn[:-1]]
+
+
+            Faces = utils.ExtractRagged(RFaces[:-1],dtype=int)
+            FaceConn = utils.ExtractRagged(RFaceConn,dtype=int)
+            return Faces, FaceConn, FaceElemConn
+        else:
+            return [], [], []
+    def _get_edges(self):
+        # TODO: This might not work properly with mixed element types - but I think it shoud
+        if self.NElem > 0:
+            # Get all element edges
+            edges, edgeconn, edgeelem = converter.solid2edges(self.NodeCoords,self.NodeConn,return_EdgeConn=True,return_EdgeElem=True)
+            # Convert to unique edges
+            Edges, UIdx, UInv = converter.edges2unique(edges,return_idx=True,return_inv=True)
+            EdgeElem = np.asarray(edgeelem)[UIdx]
+            EdgeConn = UInv[utils.PadRagged(edgeconn)]
+            
+            rows = EdgeConn.flatten()
+            cols = np.repeat(np.arange(self.NElem),[len(x) for x in EdgeConn])
+            data = np.ones(len(rows))
+            
+            mat = scipy.sparse.coo_matrix((data,(rows,cols)),shape=(len(Edges),self.NElem)).tocsr()
+            EdgeElemConn = [list(mat.indices[mat.indptr[i]:mat.indptr[i+1]]) for i in range(mat.shape[0])]
+            
+            return Edges, EdgeConn, EdgeElemConn
+        else:
+            return [], [], []

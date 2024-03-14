@@ -40,15 +40,15 @@ Quality Calculation Helper Functions
 import numpy as np
 
 import sys, copy, warnings
-from . import utils, converter
+from . import utils, converter, mesh
 
 # Finite element modeling mesh quality, energy balance and validation methods: A review with recommendations associated with the modeling of bone tissue - Burkhart et al.
 
 def AspectRatio(NodeCoords,NodeConn,verbose=False):
     """
     Calculates element aspect ratios for each element in the mesh.
-    For all element types, the aspect ratio is calculated as the length of the longest
-    edge divided by the length of the shortest edge of an element.
+    For all element types, the aspect ratio is calculated as the length of the 
+    longest edge divided by the length of the shortest edge of an element.
 
     Aspect ratio is >= 1, with 1 being the optimal element quality.
 
@@ -68,6 +68,7 @@ def AspectRatio(NodeCoords,NodeConn,verbose=False):
     """
     ArrayCoords = np.asarray(NodeCoords)
     Edges,EdgeConn = converter.solid2edges(NodeCoords,NodeConn,return_EdgeConn=True,return_EdgeElem=False)
+    Edges = np.asarray(Edges)
     EdgePoints = ArrayCoords[Edges]
     EdgeVec = EdgePoints[:,1] - EdgePoints[:,0]
     lengths = np.append(np.linalg.norm(EdgeVec,axis=1),[np.nan])
@@ -89,7 +90,7 @@ def AspectRatio(NodeCoords,NodeConn,verbose=False):
 def Orthogonality(NodeCoords,NodeConn,verbose=False):
     """
     Calculates element orthogonality for each element in the mesh.
-    For all element types, orthogonality is calculated by determing the minimum 
+    For all element types, orthogonality is calculated by determining the minimum 
     of the angle cosines between face normal vectors (Ai) and the element centroid
     to face centroid vectors (fi) and the angle cosines between Ai and the element
     centroid to neighbor element centroid (ci).
@@ -270,7 +271,7 @@ def InverseOrthogonalQuality(NodeCoords,NodeConn,verbose=False):
 
     return iorthoq
 
-def Skewness(NodeCoords,NodeConn,verbose=False,tetmethod='volume'):
+def Skewness(NodeCoords,NodeConn,verbose=False,simplexmethod='size'):
     """
     Calculates element skewness for each element in the mesh. 
     For triangular, hexahedral, wedge, and pyramidal elements, skewness is 
@@ -290,9 +291,9 @@ def Skewness(NodeCoords,NodeConn,verbose=False,tetmethod='volume'):
     verbose : bool, optional
         If true, will print min, max, and mean element quality, as well 
         as the number of 'slivers' i.e. elements with skewness above 0.9, by default False.
-    tetmethod : str, optional
-        Method to be used for tetrahedral skewness, by default 'volume'.
-        'volume' - uses equilateral volume skewness method.
+    simplexmethod : str, optional
+        Method to be used for triangular/tetrahedral skewness, by default 'size'.
+        'size' - uses equilateral area/volume skewness method.
         'angle' - uses equiangular skewness method.
 
     Returns
@@ -300,16 +301,31 @@ def Skewness(NodeCoords,NodeConn,verbose=False,tetmethod='volume'):
     skew : np.ndarray
         Array of skewness for each element.
     """
-    # tetmethod: 'volume' or 'angle'
 
-    if tetmethod == 'angle':
+    Type = utils.identify_type(NodeCoords, NodeConn)
+
+    
+    if simplexmethod == 'angle':
         skew = equiangular_skewness(NodeCoords,NodeConn)
-    elif tetmethod == 'volume':
+
+    elif simplexmethod == 'size':
         skew = np.zeros(len(NodeConn))
 
         Ls = np.array([len(elem) for elem in NodeConn])
-        tetIdx = np.where(Ls == 4)[0]
-        otherIdx = np.where(Ls != 4)[0]
+        
+        if Type == 'surf':
+            triIdx = np.where(Ls == 3)[0]
+            tetIdx = []
+            otherIdx = np.where((Ls != 3))[0]
+        elif Type == 'vol':
+            tetIdx = np.where(Ls == 4)[0]
+            triIdx = []
+            otherIdx = np.where(Ls != 4)[0]
+
+        if len(triIdx) > 0:
+            Tris = [NodeConn[i] for i in triIdx]
+            TriSkew = tri_area_skewness(NodeCoords,Tris)
+            skew[triIdx] = TriSkew
         if len(tetIdx) > 0:
             Tets = [NodeConn[i] for i in tetIdx]
             TetSkew = tet_vol_skewness(NodeCoords,Tets)
@@ -320,7 +336,7 @@ def Skewness(NodeCoords,NodeConn,verbose=False,tetmethod='volume'):
             skew[otherIdx] = OtherSkew
 
     else:
-        raise Exception('Invalid tetmethod argument. Must be "angle" or "volume".')
+        raise Exception('Invalid simplexmethod argument. Must be "angle" or "size".')
     
     
     if verbose:
@@ -417,10 +433,10 @@ def MaxDihedral(NodeCoords,NodeConn,verbose=False):
         print('------------------------------------------')
     return MaxAngles
 
-def Area(NodeCoords,NodeConn):
+def Area(NodeCoords,NodeConn,Type=None):
     """
-    Calculates element areas for each element in the mesh.
-    TODO: Currently only valid for triangular meshes
+    Calculates element areas for each element in the mesh. For volume elements,
+    the area will be the total surface area of each element. 
 
     Parameters
     ----------
@@ -428,17 +444,37 @@ def Area(NodeCoords,NodeConn):
         List of nodal coordinates.
     NodeConn : array_like
         List of nodal connectivities.
+    Type : str
+        Specifies whether the mesh is a surface ('surf') or volume ('vol') mesh.
+        If None, will be automatically determined by 
+        :func:`utils.identify_type`, by default, None.
 
     Returns
     -------
     A : np.ndarray
         Array of area for each element.
-    """    
-    assert np.shape(NodeConn)[1] == 3, 'Currently only valid for triangular elements.'
-    Points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
-    Area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2 
 
-    return Area
+    """    
+    # assert np.shape(NodeConn)[1] == 3, 'Currently only valid for triangular elements.'
+    if Type is None:
+        Type = utils.identify_type(NodeCoords,NodeConn)
+    if Type == 'surf':
+        ArrayCoords,TriConn,ElemIds = converter.surf2tris(NodeCoords,NodeConn,return_ids=True)     
+        ArrayCoords = np.asarray(ArrayCoords)
+
+        Points = np.asarray(NodeCoords)[np.asarray(TriConn)]
+        area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2 
+        area = np.append(area,0)
+        A = np.sum(area[utils.PadRagged(ElemIds)],axis=1)
+    else:
+        # Calculate element surface area
+        Faces, FaceConn = converter.solid2faces(NodeCoords, NodeConn, return_FaceConn=True)
+
+        area = Area(NodeCoords, Faces, 'surf')
+        area = np.append(area,0)
+        A = np.sum(area[utils.PadRagged(FaceConn)],axis=1)
+
+    return A
 
 def Volume(NodeCoords,NodeConn,verbose=False):
     """
@@ -525,12 +561,51 @@ def tri_skewness(NodeCoords,NodeConn):
     thetaMin = np.min([alpha,beta,gamma],axis=0)
     thetaEqui = np.pi/3
 
-    skew = np.max([(thetaMax-thetaEqui)/(np.pi-thetaEqui),(thetaEqui-thetaMin)/(thetaEqui)],axis=0)
+    skew = np.maximum((thetaMax-thetaEqui)/(np.pi-thetaEqui),(thetaEqui-thetaMin)/(thetaEqui))
+    return skew
+
+def tri_area_skewness(NodeCoords,NodeConn):
+    """
+    Calculates element skewness for each triangular element in the mesh
+    using the equilateral area skewness method.
+
+    Skewness ranges from 0 to 1, with 0 being the best element quality
+    and 1 being the worst.
+
+    Parameters
+    ----------
+    NodeCoords : list
+        List of nodal coordinates.
+    NodeConn : list
+        List of nodal connectivities.
+
+    Returns
+    -------
+    skew : np.ndarray
+        Array of skewness for each element.
+    """
+    
+    # Area-based
+    if np.shape(NodeCoords)[1] == 2:
+        NodeCoords = np.hstack([NodeCoords, np.zeros((len(NodeCoords,1)))])
+    A = Area(NodeCoords,NodeConn)
+    points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
+    # edge lengths
+    e1 = points[:,0] - points[:,2]
+    e2 = points[:,1] - points[:,2]
+    l1 = np.linalg.norm(e1,axis=1)
+    l2 = np.linalg.norm(e2,axis=1)
+    # Circumcircle
+    with np.errstate(divide='ignore', invalid='ignore'):
+        R = l1 * l2 * np.linalg.norm(e1-e2,axis=1)/(2*(np.linalg.norm(np.cross(e1, e2),axis=1)))
+
+        Aideal = 3*np.sqrt(3)/4 * R**2
+        skew = (Aideal - A)/Aideal
     return skew
 
 def quad_skewness(NodeCoords,NodeConn):
     """
-    Calculates quadrilateral skewness for each triangle in the mesh. 
+    Calculates quadrilateral skewness for each quad in the mesh. 
     Mesh should be strictly quadrilateral.
 
     Skewness ranges from 0 to 1, with 0 being the best element quality

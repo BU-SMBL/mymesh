@@ -4,25 +4,31 @@ Created on Thu Mar 24 13:51:50 2022
 
 @author: toj
 
-.. currentmodule:: Mesh
+
 
 Objects
 =======
 .. autosummary::
     :toctree: generated/
 
+    .. currentmodule:: Mesh.mesh
+
     mesh
- 
+
+
+.. currentmodule:: Mesh
+
 Submodules
 ===============
 .. autosummary::
     :toctree: generated/
 
-    booleans        --- Mesh booleans
+    booleans  
     contour
     converter
     curvature
     delaunay
+    image
     implicit
     improvement
     octree
@@ -34,4 +40,4 @@ Submodules
 
 """
 from .mesh import mesh
-from . import booleans, contour, curvature, delaunay, implicit, improvement, octree, primitives, quality, TetGen, utils, visualize
+from . import booleans, contour, curvature, delaunay, image, implicit, improvement, octree, primitives, quality, utils, visualize

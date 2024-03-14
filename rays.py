@@ -8,7 +8,6 @@ Created on Tue Feb  1 15:23:07 2022
 
 .. currentmodule:: Mesh.rays
 
-
 Intersection Tests
 ==================
 .. autosummary::
@@ -60,6 +59,7 @@ def RayTriangleIntersection(pt, ray, TriCoords, bidirectional=False, eps=1e-6):
     """
     Möller-Trumbore intersection algorithm to detect whether a ray intersects with a triangle.
     Möller, T., & Trumbore, B. (2005). Fast, minimum storage ray/triangle intersection. In ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198746
+    :cite:p:`Moller2005`
 
     For multiple triangles, see :func:`RayTrianglesIntersection` and for multiple rays, see
     :func:`RaysTrianglesIntersection`. 
@@ -117,6 +117,7 @@ def RayTrianglesIntersection(pt, ray, Tris, bidirectional=False, eps=1e-14):
     """
     Vectorized Möller-Trumbore intersection algorithm to detect whether a ray intersects with a set of triangles.
     Möller, T., & Trumbore, B. (2005). Fast, minimum storage ray/triangle intersection. In ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198746
+    :cite:p:`Moller2005`
 
     This is a vectorized form of RayTriangleIntersection for multiple triangles. For multiple rays,
     see RaysTrianglesIntersection(). 
@@ -177,6 +178,7 @@ def RaysTrianglesIntersection(pts, rays, Tris, bidirectional=False, eps=1e-14):
     """
     Vectorized Möller-Trumbore intersection algorithm to detect intersections between a pairwise set of rays and a set of triangles.
     Möller, T., & Trumbore, B. (2005). Fast, minimum storage ray/triangle intersection. In ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198746
+    :cite:p:`Moller2005`
 
     Note:
         With this version of the intersection test, there must be one ray for each triangle. itertools.combinations can be useful for constructing such a set of pairwise combinations, or see :func:`RaysSurfIntersection` which handles this and can utilize octree acceleration. 
@@ -240,6 +242,7 @@ def RayBoxIntersection(pt, ray, xlim, ylim, zlim):
     """
     Intersection algorithm for detecting intersections between a ray and an axis-aligned box.
     Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748
+    :cite:p:`Williams2005`
 
     Parameters
     ----------
@@ -315,6 +318,7 @@ def RayBoxesIntersection(pt, ray, xlims, ylims, zlims):
     """
     Vectorized intersection algorithm for detecting intersections between a ray and a set of axis-aligned boxes.
     Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748
+    :cite:p:`Williams2005`
 
     Parameters
     ----------
@@ -498,6 +502,7 @@ def TriangleTriangleIntersection(Tri1,Tri2,eps=1e-14,edgeedge=False):
     Intersection test for two triangles. 
 
     Möller, T. (1997). Fast triangle-triangle intersection test. Journal of Graphics Tools, 2(2), 25-30. https://doi.org/10.1080/10867651.1997.10487472
+    :cite:p:`Moller1997`
 
     Parameters
     ----------
@@ -629,7 +634,8 @@ def TriangleTriangleIntersectionPt(Tri1,Tri2,eps=1e-14, edgeedge=False):
     Intersection test for two triangles that returns the point(s) of intersection. 
 
     Möller, T. (1997). Fast triangle-triangle intersection test. Journal of Graphics Tools, 2(2), 25-30. https://doi.org/10.1080/10867651.1997.10487472
-    
+    :cite:p:`Moller1997`
+
     Parameters
     ----------
     Tri1 : array_like
@@ -785,6 +791,7 @@ def TrianglesTrianglesIntersection(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
     Vectorized intersection test for two sets of triangles. 
 
     Möller, T. (1997). Fast triangle-triangle intersection test. Journal of Graphics Tools, 2(2), 25-30. https://doi.org/10.1080/10867651.1997.10487472
+    :cite:p:`Moller1997`
 
     Parameters
     ----------
@@ -949,6 +956,7 @@ def TrianglesTrianglesIntersectionPts(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
     Vectorized intersection test for two sets of triangles that returns the intersection point(s) between each pair of triangles. 
 
     Möller, T. (1997). Fast triangle-triangle intersection test. Journal of Graphics Tools, 2(2), 25-30. https://doi.org/10.1080/10867651.1997.10487472
+    :cite:p:`Moller1997`
 
     Parameters
     ----------
@@ -1236,6 +1244,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     Intersection test for detecting intersections between a triangle and a box.
 
     Akenine-Möller, T. (2005). Fast 3D triangle-box overlap testing. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198747
+    :cite:p:`Akenine-Moller2005`
 
     Parameters
     ----------
@@ -1368,6 +1377,7 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
     Intersection test for detecting intersections between a triangle and a box. A vectorized version of :func:`TriangleBoxIntersection` for one box and multiple triangles
 
     Akenine-Möller, T. (2005). Fast 3D triangle-box overlap testing. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198747
+    :cite:p:`Akenine-Moller2005`
 
     Parameters
     ----------

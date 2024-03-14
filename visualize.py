@@ -1,6 +1,15 @@
 """
 Mesh visualization and plotting
 
+:mod:`Mesh.visualize` is in the early stages of development. For more 
+full-featured mesh visualization, a mesh (``M``) can be converted to a PyVista
+mesh:
+
+.. code-block::
+
+    import pyvista as pv
+    pvmesh = pv.wrap(M.mymesh2meshio())
+
 Created on Sun Feb 25 14:07:16 2024
 
 @author: toj
