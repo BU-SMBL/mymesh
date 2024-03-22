@@ -6,7 +6,7 @@ Created on Sun Jan 23 23:58:18 2022
 
 @author: toj
 
-.. currentmodule:: Mesh.quality
+.. currentmodule:: mymesh.quality
 
 Quality Metrics
 ===============
@@ -476,7 +476,7 @@ def Area(NodeCoords,NodeConn,Type=None):
 
     return A
 
-def Volume(NodeCoords,NodeConn,verbose=False):
+def Volume(NodeCoords,NodeConn,verbose=False,ElemType='auto'):
     """
     Calculates element volumes for each element in the mesh.
 
@@ -488,6 +488,11 @@ def Volume(NodeCoords,NodeConn,verbose=False):
         List of nodal connectivities.
     verbose : bool, optional
         If true, will print min, max, and mean element volume, by default False.
+    ElemType : str, optional
+        Specifies which element type the mesh contains. For any input other than 
+        'tet', elements will be temporarily converted to tet sub-elements for 
+        the purposes of volume calculation, then summed to get the full element
+        volume
 
     Returns
     -------
@@ -496,22 +501,28 @@ def Volume(NodeCoords,NodeConn,verbose=False):
     """
     if len(NodeConn) == 0:
         return []
-    ArrayCoords,TetConn,ElemIds = converter.solid2tets(NodeCoords,NodeConn,return_ids=True)     
-    ArrayCoords = np.asarray(ArrayCoords)   
-    ArrayConn = np.asarray(TetConn)
+    if ElemType != 'tet':
+        ArrayCoords,TetConn,ElemIds = converter.solid2tets(NodeCoords,NodeConn,return_ids=True)     
+        ArrayCoords = np.asarray(ArrayCoords)   
+        ArrayConn = np.asarray(TetConn)
+    else:
+        ArrayCoords = np.asarray(NodeCoords)
+        ArrayConn = np.asarray(NodeConn)
     pt0 = ArrayCoords[ArrayConn][:,0]
     pt1 = ArrayCoords[ArrayConn][:,1]
     pt2 = ArrayCoords[ArrayConn][:,2]
     pt3 = ArrayCoords[ArrayConn][:,3]
     vol = -np.sum((pt0-pt1)*np.cross((pt1-pt3),(pt2-pt3)),axis=1)/6
-    vol = np.append(vol,0)
-    V = np.sum(vol[utils.PadRagged(ElemIds)],axis=1)
+    if ElemType != 'tet':
+        vol = np.append(vol,0)
+        V = np.sum(vol[utils.PadRagged(ElemIds)],axis=1)
+    else:
+        V = vol
 
     if verbose:
         minVol = min(V)
         maxVol = max(V)
         meanVol = np.mean(V)
-        meanOrd = np.floor(np.log10(meanVol))
         print('------------------------------------------')
         print(f'Minimum Volume: {minVol:.2e} on Element {np.where(V==minVol)[0][0]:.0f}')
         print(f'Maximum Volume: {maxVol:.2e} on Element {np.where(V==maxVol)[0][0]:.0f}')
@@ -655,7 +666,7 @@ def quad_skewness(NodeCoords,NodeConn):
     skew = np.max([(thetaMax-thetaEqui)/(np.pi-thetaEqui),(thetaEqui-thetaMin)/(thetaEqui)],axis=0)
     return skew
 
-def tet_vol_skewness(NodeCoords,NodeConn):
+def tet_vol_skewness(NodeCoords, NodeConn, V=None):
     """
     Calculates element skewness for each tetrahedral element in the mesh
     using the equilateral volume skewness method.
@@ -665,10 +676,13 @@ def tet_vol_skewness(NodeCoords,NodeConn):
 
     Parameters
     ----------
-    NodeCoords : list
+    NodeCoords : array_like
         List of nodal coordinates.
-    NodeConn : list
+    NodeConn : list, array_like
         List of nodal connectivities.
+    V : array_like, optional
+        Volume of tetrahedra. If not provided, the volumes will be calculated.
+
 
     Returns
     -------
@@ -677,7 +691,10 @@ def tet_vol_skewness(NodeCoords,NodeConn):
     """
     
     # Volume-based
-    V = Volume(NodeCoords,NodeConn)
+    if V is None:
+        V = Volume(NodeCoords,NodeConn,ElemType='tet')
+    else:
+        V = np.asarray(V)
     points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
     # edge lengths
     a = np.linalg.norm(points[:,0] - points[:,3],axis=1)

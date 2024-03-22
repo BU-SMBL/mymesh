@@ -6,7 +6,7 @@ Created on Tue Feb  1 15:23:07 2022
 
 @author: toj
 
-.. currentmodule:: Mesh.rays
+.. currentmodule:: mymesh.rays
 
 Intersection Tests
 ==================
@@ -1922,7 +1922,7 @@ def isInsideSurf(pt, NodeCoords, SurfConn, ElemNormals, Octree=None, eps=1e-8, r
         Determines whether to use/generate an octree data structure for acceleration of the intersection testing, by default None. 
         'generate' - Will generate an octree structure of the surface
         None - Will not use an octree structure
-        octree.octreeNode - Octree data structure precomputed using :func:`Mesh.octree.Surf2Octree`
+        octree.octreeNode - Octree data structure precomputed using :func:`mymesh.octree.Surf2Octree`
     eps : float, optional
         Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8
     ray : array_like, optional

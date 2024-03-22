@@ -7,7 +7,7 @@ Created on Wed Sep 29 18:31:03 2021
 @author: toj
 
 
-.. currentmodule:: Mesh.utils
+.. currentmodule:: mymesh.utils
 
 
 Mesh Connectivity
@@ -107,7 +107,8 @@ def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
         Type of element contained in the mesh, by default 'auto'.
         See converter.solid2edges() for details.
         'auto' is suitable for most element types and mixed-element meshes,
-        4-node elements are assumed to be tets, not quads.
+        4-node elements are assumed to be tets, not quads, unless ElemType is 
+        set to 'quad' or 'surf'.
 
     Returns
     -------
@@ -143,7 +144,8 @@ def getElemConnectivity(NodeCoords,NodeConn,ElemType='auto'):
         Type of element contained in the mesh, by default 'auto'.
         See converter.solid2edges() for details.
         'auto' is suitable for most element types and mixed-element meshes,
-        4-node elements are assumed to be tets, not quads.
+        4-node elements are assumed to be tets, not quads, unless ElemType is 
+        set to 'quad' or 'surf'.
 
     Returns
     -------
@@ -291,6 +293,7 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
         ElemNeighbors = [list(s) for s in ElemNeighbors] 
 
     elif mode=='face':
+        #TODO: This needs to updated, can be made faster, should use converter.faces2unique
         faces,faceconn,faceelem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
         # Pad Ragged arrays in case of mixed-element meshes
         Rfaces = PadRagged(faces)
@@ -1137,7 +1140,7 @@ def RemoveNodes(NodeCoords,NodeConn):
     """    
     # removeNodes 
     OriginalIds, inverse = np.unique([n for elem in NodeConn for n in elem],return_inverse=True)
-    NewNodeCoords = [NodeCoords[i] for i in OriginalIds]
+    NewNodeCoords = np.asarray(NodeCoords)[OriginalIds]
     
     NewNodeConn = [[] for elem in NodeConn]
     k = 0

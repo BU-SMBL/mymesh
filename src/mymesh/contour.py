@@ -5,7 +5,7 @@ Mesh contouring tools for extracting isosurfaces from images or implicit functio
 Created on Sat Jan 22 09:18:20 2022
 
 
-.. currentmodule:: Mesh.contour
+.. currentmodule:: mymesh.contour
 
 Contouring
 ==========
@@ -3834,9 +3834,6 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     if interpolation == "cubic":
         Padding = 1
     
-    
-    
-    
     if not VertexValues:
         x1 = np.arange(0,I.shape[2])*h[0] + h[0]/2
         y1 = np.arange(0,I.shape[1])*h[1] + h[1]/2
@@ -4228,7 +4225,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     return_NodeValues : bool, optional
         Return the node values for each node in the tetrahedral mesh. If method='surface', these will all be `threshold`, if method='volume', these will be `threshold` for the surface nodes and the original grid values for the interior nodes
     cleanup_tol : float, optional
-        Tolerance value used to classify whether two nodes are sufficiently close to be considered a single node (see :func:`Mesh.utils.DeleteDuplicateNodes`), by default 1e-12.
+        Tolerance value used to classify whether two nodes are sufficiently close to be considered a single node (see :func:`mymesh.utils.DeleteDuplicateNodes`), by default 1e-12.
     Returns
     -------
     NodeCoords : np.ndarray

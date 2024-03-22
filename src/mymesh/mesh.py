@@ -212,7 +212,7 @@ class mesh:
         """
         Element faces. Each face is defined as a list of node indices.
         """        
-        if self._Faces == []:
+        if len(self._Faces) == 0:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying element faces...',end='')
                 self._printlevel+=1
@@ -229,7 +229,7 @@ class mesh:
         Element-face connectivity. For each element, lists the connected faces.
         See :ref:`connectivity` for more info.
         """
-        if self._FaceConn == []:
+        if len(self._FaceConn) == 0:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying element-face connectivity...',end='')
                 self._printlevel+=1
@@ -246,7 +246,7 @@ class mesh:
         Face-element connectivity. For each face, lists the connected elements.
         See :ref:`connectivity` for more info.
         """
-        if self._FaceElemConn == []:
+        if len(self._FaceElemConn) == 0:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying element face-element connectivity...',end='')
                 self._printlevel+=1
@@ -262,7 +262,7 @@ class mesh:
         """
         Element edges. Each edge is defined as a list of node indices.
         """        
-        if self._Edges == []:
+        if len(self._Edges) == 0:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying element edges...',end='')
                 self._printlevel+=1
@@ -279,7 +279,7 @@ class mesh:
         Element-edge connectivity. For each element, lists the connected edges.
         See :ref:`connectivity` for more info.
         """
-        if self._FaceConn == []:
+        if len(self._EdgeConn) == 0:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying element-edge connectivity...',end='')
                 self._printlevel+=1
@@ -296,7 +296,7 @@ class mesh:
         Edge-element connectivity. For each edge, lists the connected elements.
         See :ref:`connectivity` for more info.
         """
-        if self._EdgeElemConn == []:
+        if len(self._EdgeElemConn) == 0:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying element edge-element connectivity...',end='')
                 self._printlevel+=1
@@ -329,7 +329,7 @@ class mesh:
         """
         if self._NodeNeighbors == []:
             if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying volume node neighbors...',end='')
-            self._NodeNeighbors = utils.getNodeNeighbors(*self)
+            self._NodeNeighbors = utils.getNodeNeighbors(*self,ElemType=self.Type)
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
         return self._NodeNeighbors
     @property
@@ -355,7 +355,7 @@ class mesh:
         """
         if self._ElemConn == []:
             if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying volume node element connectivity...',end='')
-            self._ElemConn = utils.getElemConnectivity(*self)
+            self._ElemConn = utils.getElemConnectivity(*self, ElemType=self.Type)
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
         return self._ElemConn
     @property
@@ -407,7 +407,7 @@ class mesh:
         """
         Sets the method for calculating surface node normals. By default, 
         "Angle". If the method gets changed, previously computed normal 
-        vectors will be cleared. See :func:`~Mesh.utils.Face2NodeNormal` for options 
+        vectors will be cleared. See :func:`~mymesh.utils.Face2NodeNormal` for options 
         and more details. 
         """
         return self._NodeNormalsMethod
@@ -421,7 +421,7 @@ class mesh:
         Surface node normal vectors. Non-surface nodes will receive 
         [np.nan, np.nan, np.nan]. There are several methods for computing
         surface normal vectors at the nodes, the method to be used can be
-        set with :attr:`NodeNormalsMethod`. See :func:`~Mesh.utils.Face2NodeNormal` 
+        set with :attr:`NodeNormalsMethod`. See :func:`~mymesh.utils.Face2NodeNormal` 
         for more details. 
         """
         if np.size(self._NodeNormals) == 0:
@@ -698,7 +698,7 @@ class mesh:
 
         Parameters
         ----------
-        Mesh2 : Mesh.mesh or list
+        Mesh2 : mymesh.mesh or list
             Second mesh, or list of meshes, to merge with the current mesh.
         cleanup : bool, optional
             Determines whether or not to :meth:``~mesh.cleanup`` the merged
@@ -1320,7 +1320,7 @@ class mesh:
         return M          
     def imread(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
         """
-        Load an into a voxel mesh. :func:``~Mesh.converter.im2voxel`` is
+        Load an into a voxel mesh. :func:``~mymesh.converter.im2voxel`` is
         used to perform the conversion.
 
         Parameters
@@ -1360,7 +1360,8 @@ class mesh:
 
     ## Visualization Methods
     def view(self, **kwargs):
-        visualize.View(self, **kwargs)    
+        out = visualize.View(self, **kwargs)   
+        return out 
     def plot(self, **kwargs):
         import matplotlib.pyplot as plt
 

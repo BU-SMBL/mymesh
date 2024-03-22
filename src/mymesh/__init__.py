@@ -11,12 +11,12 @@ Objects
 .. autosummary::
     :toctree: generated/
 
-    .. currentmodule:: Mesh.mesh
+    .. currentmodule:: mymesh.mesh
 
     mesh
 
 
-.. currentmodule:: Mesh
+.. currentmodule:: mymesh
 
 Submodules
 ===============

@@ -6,7 +6,7 @@ Created on Sun Aug  1 17:48:50 2021
 
 @author: toj
 
-.. currentmodule:: Mesh.converter
+.. currentmodule:: mymesh.converter
 
 
 Mesh type conversion
@@ -169,6 +169,12 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
 
         'auto' or 'mixed' - Will detect element type by the number of nodes present in each element. 
 
+        'surf' - Will detect element type by the number of nodes present in each 
+        element, assuming four node elements are quads
+
+        'vol' - Will detect element type by the number of nodes present in each 
+        element, assuming four node elements are tets (functionally the ame as 'auto')
+
         'tri' - All elements treated as 3-node triangular elements.
 
         'quad' - All elements treated as 4-node quadrilateral elements.
@@ -205,7 +211,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
         The element index that each edge is taken from. Ex. [E0,E0,E0,E0,E0,E0,E1,E1,E1,...]
     """     
     
-    if ElemType=='auto' or ElemType=='mixed':
+    if ElemType in ('auto','mixed','surf','vol'):
         Ls = np.array([len(elem) for elem in NodeConn])
         edgIdx = np.where(Ls == 2)[0]
         triIdx = np.where(Ls == 3)[0]
@@ -223,18 +229,24 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
         wdgs = [NodeConn[i] for i in wdgIdx]
         hexs = [NodeConn[i] for i in hexIdx]
         
+        if ElemType == 'surf':
+            fournodefunc = quad2edges
+            fournodeedgenum = 4
+        else:
+            fournodefunc = tet2edges
+            fournodeedgenum = 6
         Edges = np.concatenate((edgs,tri2edges([],tris,ReturnType=np.ndarray), 
-                                tet2edges([],tets,ReturnType=np.ndarray), 
+                                fournodefunc([],tets,ReturnType=np.ndarray), 
                                 pyramid2edges([],pyrs,ReturnType=np.ndarray), 
                                 wedge2edges([],wdgs,ReturnType=np.ndarray), 
                                 hex2edges([],hexs,ReturnType=np.ndarray)))
         if return_EdgeElem or return_EdgeConn:
-            EdgeElem = np.concatenate((np.repeat(edgIdx,1),np.repeat(triIdx,3),np.repeat(tetIdx,6),np.repeat(pyrIdx,8),np.repeat(wdgIdx,9),np.repeat(hexIdx,12)))
+            EdgeElem = np.concatenate((np.repeat(edgIdx,1),np.repeat(triIdx,3),np.repeat(tetIdx,fournodeedgenum),np.repeat(pyrIdx,8),np.repeat(wdgIdx,9),np.repeat(hexIdx,12)))
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
                 np.repeat([[0]],len(edgIdx),axis=0).reshape(len(edgIdx)*1),
                 np.repeat([[0,1,2]],len(triIdx),axis=0).reshape(len(triIdx)*3), 
-                np.repeat([[0,1,2,3,4,5]],len(tetIdx),axis=0).reshape(len(tetIdx)*6),  
+                np.repeat([np.arange(fournodeedgenum)],len(tetIdx),axis=0).reshape(len(tetIdx)*6),  
                 np.repeat([[0,1,2,3,4,5,6,7]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*8),                   
                 np.repeat([[0,1,2,3,4,5,6,7,8]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*9),   
                 np.repeat([[0,1,2,3,4,5,6,7,8,9,10,11]],len(hexIdx),axis=0).reshape(len(hexIdx)*12),                    
@@ -432,7 +444,18 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
         If return_ids = True, a list of the element ids of the new tetrahedra for each 
         of the original elements.
     """    
-    Ls = np.array([len(elem) for elem in NodeConn])
+    if type(NodeConn) is np.ndarray:
+        Ls = np.repeat(NodeConn.shape[0], NodeConn.shape[1])
+    else:
+        Ls = np.array([len(elem) for elem in NodeConn])
+
+    if np.all(Ls == 4):
+        if return_ids:
+            ElemIds = np.arange(len(NodeConn)).reshape(len(NodeConn),1)
+            return NodeCoords, NodeConn, ElemIds
+        else:
+            return NodeCoords, NodeConn
+            
     tetIdx = np.where(Ls == 4)[0]
     pyrIdx = np.where(Ls == 5)[0]
     wdgIdx = np.where(Ls == 6)[0]
@@ -448,7 +471,7 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
         hexn = 24
     else:
         hexmethod = '1to6'
-        hexn=6
+        hexn = 6
     TetCoords,fromhex = hex2tet(NodeCoords,hexs,method=hexmethod)
     TetCoords,fromwdg = wedge2tet(TetCoords,wdgs,method='1to14')
     TetCoords,frompyr = pyramid2tet(TetCoords,pyrs,method='1to4')

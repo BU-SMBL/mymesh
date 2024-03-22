@@ -6,7 +6,7 @@ Created on Wed Sep 29 14:10:08 2021
 
 @author: toj
 
-.. currentmodule:: Mesh.curvature
+.. currentmodule:: mymesh.curvature
 
 Curvature Calculation
 =====================
@@ -183,7 +183,7 @@ def QuadFit(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
             angle = 0
         elif n == [-1*i for i in k]:
             rotAxis = [1,0,0]
-            ange = np.pi
+            angle = np.pi
         else:
             rotAxis = np.cross(k,n)/np.linalg.norm(np.cross(k,n))
             angle = np.arccos(np.dot(k,n))
@@ -350,7 +350,7 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
             MinPrincipal[idx] = min(v)
     return MaxPrincipal,MinPrincipal
 
-def AnalyticalCurvature(F,NodeCoords):
+def AnalyticalCurvature(func,NodeCoords):
     """
     Calculate curvature of an implicit function. Curvature is sampled at the provided list of node coordinates, which should lie on the surface of an isosurface of the function.
     Based on Curvature formulas for implicit curves and surfaces, Ron Goldman (2005). 
@@ -358,7 +358,7 @@ def AnalyticalCurvature(F,NodeCoords):
 
     Parameters
     ----------
-    F : function
+    func : function
         Sympy symbolic function of three arguments (x,y,z)
     NodeCoords : list, np.ndarray
         List of node coordinates for evaluating the curvature.
@@ -378,8 +378,19 @@ def AnalyticalCurvature(F,NodeCoords):
         import sympy as sp
     except:
         raise ImportError('AnalyticalCurvature requires sympy. Install with: pip install sympy.')
+
     x, y, z = sp.symbols('x y z', real=True)
     if type(NodeCoords) is list: NodeCoords = np.asarray(NodeCoords)
+
+    if callable(func):
+        try: 
+            F = func(x,y,z)
+        except:
+            raise TypeError('func must accept three arguments (x,y,z) and be a \n sympy symbolic function or convertible to one. Functions that \n utilize  numpy functions like np.sin, np.max, or similar may \n not be compatible. Consider replacing with sympy equivalents. \n Test by running: `x, y, z = sp.symbols("x y z", real=True); func(x,y,z)`')
+    elif isinstance(func, sp.Basic):
+        F = func
+    else:
+        raise TypeError('func must be a sympy function or callable function of three arguments (x,y,z).')
 
     def DiracDelta(x):
         if type(x) is np.ndarray:
@@ -424,7 +435,17 @@ def AnalyticalCurvature(F,NodeCoords):
         g = np.array([grad(NodeCoords[i,0],NodeCoords[i,1],NodeCoords[i,2]) for i in range(len(NodeCoords))]).swapaxes(1,2)
 
     if all([any([h.has(var) for h in Hess]) for var in [x,y,z]]):
-        h = hess(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).tolist()
+        if Hess.is_diagonal():
+            xcomp = sp.lambdify((x,y,z),Hess[0,0],['numpy',{'DiracDelta':DiracDelta}])(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2])
+            ycomp = sp.lambdify((x,y,z),Hess[1,1],['numpy',{'DiracDelta':DiracDelta}])(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2])
+            zcomp = sp.lambdify((x,y,z),Hess[2,2],['numpy',{'DiracDelta':DiracDelta}])(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2])
+
+            h = np.zeros((3,3,len(NodeCoords)))
+            h[0,0,:] = xcomp
+            h[1,1,:] = ycomp
+            h[2,2,:] = zcomp
+        else:
+            h = hess(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).tolist()
     else:
         h = np.array([hess(NodeCoords[i,0],NodeCoords[i,1],NodeCoords[i,2]) for i in range(len(NodeCoords))]).T
     if not hasattr(h[0][0], "__len__"):
@@ -448,7 +469,17 @@ def AnalyticalCurvature(F,NodeCoords):
     h = np.array(h).swapaxes(0,2)
 
     if all([any([c.has(var) for c in Cof]) for var in [x,y,z]]):
-        c = cof(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).tolist()
+        if Cof.is_diagonal():
+            xcomp = sp.lambdify((x,y,z),Cof[0,0],['numpy',{'DiracDelta':DiracDelta}])(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2])
+            ycomp = sp.lambdify((x,y,z),Cof[1,1],['numpy',{'DiracDelta':DiracDelta}])(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2])
+            zcomp = sp.lambdify((x,y,z),Cof[2,2],['numpy',{'DiracDelta':DiracDelta}])(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2])
+
+            c = np.zeros((3,3,len(NodeCoords)))
+            c[0,0,:] = xcomp
+            c[1,1,:] = ycomp
+            c[2,2,:] = zcomp
+        else:
+            c = cof(NodeCoords[:,0],NodeCoords[:,1],NodeCoords[:,2]).tolist()
     else:
         c = np.array([cof(NodeCoords[i,0],NodeCoords[i,1],NodeCoords[i,2]) for i in range(len(NodeCoords))]).T
     
