@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mymesh"
+dynamic = ["version"]
+authors = [
+    {name = "Timothy O. Josephson", email = "toj@bu.edu"},
+]
+description = "Python code for generating and working with meshes."
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE.md"}
+keywords = [
+    "mesh",
+    "scientific",
+    "engineering",
+    "mechanics",
+    "fem",
+    "fvm",
+    "finite elements",
+    "3D model"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    'importlib-metadata; python_version<"3.8"',
+    "numpy>=1.20.0",
+    "scipy>=1.10.0",
+    "sympy>=1.11",
+]
+
+
+[project.optional-dependencies]
+io = [
+    "meshio>=5.1.0",
+    "pydicom>=2.4.4",
+    "opencv-python>=4.9.0.0",
+    "pillow>=10.0.0"
+    ]
