@@ -1,7 +1,7 @@
 """
 Mesh visualization and plotting
 
-:mod:`Mesh.visualize` is in the early stages of development. For more 
+:mod:`mymesh.visualize` is in the early stages of development. For more 
 full-featured mesh visualization, a mesh (``M``) can be converted to a PyVista
 mesh:
 
@@ -19,14 +19,12 @@ Created on Sun Feb 25 14:07:16 2024
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from PIL import Image
-import io, re
-import IPython
+import io, re, warnings
 
-from . import converter
+from . import converter, utils
 
-def View(M, interactive=False,  
-    shading='flat', viewmode='arcball', bgcolor=None,
+def View(M, interactive=True,  
+    shading='flat', bgcolor=None,
     color=None, face_alpha=1, color_convert=None, 
     clim=None, theme='default', scalar_preference='nodes',
     view=None, scalars=None,
@@ -48,11 +46,30 @@ def View(M, interactive=False,
         from vispy.visuals.filters import ShadingFilter, WireframeFilter, FacePickingFilter
     except:
         raise ImportError('vispy is needed for visualization. Install with: pip install vispy')
+
+    # determine execution environment
     try:
-        vispy.use(app='PyQt6')
+        import IPython
+        ip = IPython.get_ipython()
+        if ip is None:
+            # IPython is installed, but not active
+            ipython = False
+        else:
+            ipython = True
     except:
-        raise ImportError('pyglet is needed for visualization. Install with: pip install pyglet')
-    
+        ipython = False
+
+    # set backend
+    if hide:
+        interactive = False
+    if ipython and interactive:
+        chosen = set_vispy_backend('jupyter_rfb')
+        if chosen != 'jupyter_rfb':
+            warnings.warn(f'jupyter_rfb is needed for interactive visualization in IPython. \nInstall with: pip install jupyter_rfb. \nFalling back to {chosen:s} backend.')
+    else:
+        chosen = set_vispy_backend()
+
+
     # Set Theme (Need to handle this better)
     if bgcolor is None:
         _, bgcolor = GetTheme(theme, scalars)
@@ -86,7 +103,7 @@ def View(M, interactive=False,
                 raise ValueError('scalar_preference must be "nodes" or "elements"')
 
         if clim is None:
-            clim = (np.min(scalars), np.max(scalars))
+            clim = (np.nanmin(scalars), np.nanmax(scalars))
         # TODO: Might want a clipping option
         color_scalars = matplotlib.colors.Normalize(clim[0], clim[1], clip=False)(scalars)
 
@@ -106,18 +123,22 @@ def View(M, interactive=False,
     vsmesh = vispymesh(np.asarray(vertices), np.asarray(faces), face_colors=face_colors, vertex_colors=vertex_colors)
 
     # Create canvas
-    canvas = scene.SceneCanvas(keys='interactive', bgcolor=ParseColor(bgcolor), title='MyMesh Viewer',show=interactive)
+    canvas = scene.SceneCanvas(keys='interactive', bgcolor=ParseColor(bgcolor), title='MyMesh Viewer',show=interactive,resizable=False)
 
     # Set view mode
+    viewmode='arcball'
     canvasview = canvas.central_widget.add_view()
     canvasview.camera = viewmode
+    # Set initial position
+    # canvasview.camera.transform = transforms.MatrixTransform()
+    # print(canvasview.camera.transform)
+    # canvasview.camera.transform.rotate(90, (0, 1, 1))
     canvasview.camera.depth_value = 1e3
 
-    # Set initial position
     vsmesh.transform = transforms.MatrixTransform()
     if view is None:
-        vsmesh.transform.rotate(90, (1, 0, 0))
-        vsmesh.transform.rotate(-45, (0, 0, 1))
+        vsmesh.transform.rotate(120, (1, 0, 0))
+        vsmesh.transform.rotate(-30, (0, 0, 1))
     elif view == 'xy':
         vsmesh.transform.rotate(90, (1, 0, 0))
     canvasview.add(vsmesh)
@@ -161,7 +182,7 @@ def View(M, interactive=False,
         # viewbox.add(colorbar)
         # canvasview.add(viewbox)
     
-    # Set shading
+    # Set shading/lighting
     shading_filter = ShadingFilter()
     vsmesh.attach(shading_filter)
     shading_filter.shading = shading
@@ -177,14 +198,29 @@ def View(M, interactive=False,
             shading_filter.light_dir = transform.map(initial_light_dir)[:3]
 
     attach_headlight(canvasview)
-    if hide:
-        interactive = False
-    if interactive:
-            app.run()
-    else:
+    
+    AABB = utils.AABB(vertices)
+    aabb =  np.matmul(np.linalg.inv(vsmesh.transform.matrix), np.hstack([AABB, np.zeros((8, 1))]).T).T
+    mins = np.min(aabb, axis=0)
+    maxs = np.max(aabb, axis=0)
+    canvasview.camera.set_range((mins[0], maxs[0]), (mins[1], maxs[1]), (mins[2], maxs[2]))
+    
+    # Render
+    if ipython and interactive:
+        return canvas
+    elif interactive:
+        app.run()
+
+    if return_image:
+        try:
+            from PIL import Image
+        except:
+            raise ImportError('PIL needed. Install with: pip install pillow')
+
         img_data = canvas.render().copy(order='C')
         image = Image.fromarray(img_data)
-    if not hide and not interactive:
+
+    if ipython and not hide:
         IPython.display.display(image)
 
     if return_image:
@@ -271,3 +307,38 @@ def GetTheme(theme, scalars):
         else:
             color = 'cividis'
     return color, bgcolor
+
+def set_vispy_backend(preference='PyQt6'):
+    try:
+        import vispy
+    except:
+        raise ImportError('vispy is needed for visualization. Install with: pip install vispy')
+
+    options = ['PyGlet', 'PyQt6', 'PyQt5', 'PyQt4', 'PySide', 'PySide2', 
+                'PySide6', 'Glfw', 'SDL2', 'osmesa', 'jupyter_rfb']
+
+    if preference in options:
+        options.remove(preference)
+        options.insert(0, preference)
+
+    success = False
+    chosen = None
+    for backend in options:
+        try:
+            vispy.use(app=backend)
+            success = True
+            chosen = backend
+            break
+        except Exception as e:
+            if 'Can only select a backend once, already using' in str(e):
+                success = True
+                chosen = str(e).split('[')[1][1:-3]
+                break
+
+    if not success:
+        raise ImportError('A valid vispy backend must be installed. PyQt6 is recommended: pip install pyqt6')
+
+    return chosen
+    
+
+    
