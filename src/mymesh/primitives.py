@@ -7,7 +7,7 @@ Created Sept 2022
 @author: toj
 
 
-.. currentmodule:: Mesh.primitives
+.. currentmodule:: mymesh.primitives
 
 
 Shapes
@@ -50,7 +50,7 @@ def Box(bounds, h, ElemType='quad'):
 
     Returns
     -------
-    box : Mesh.mesh
+    box : mymesh.mesh
         Mesh object containing the box mesh. 
 
     .. note:: 
@@ -99,7 +99,7 @@ def Grid(bounds, h, exact_h=False, ElemType='hex'):
 
     Returns
     -------
-    Grid : Mesh.mesh
+    Grid : mymesh.mesh
         Mesh object containing the grid mesh.
         
 
@@ -182,7 +182,7 @@ def Grid2D(bounds, h, z=0, exact_h=False, ElemType='quad'):
 
     Returns
     -------
-    Grid : Mesh.mesh
+    Grid : mymesh.mesh
         Mesh object containing the grid mesh.
         
 
@@ -216,7 +216,7 @@ def Grid2D(bounds, h, z=0, exact_h=False, ElemType='quad'):
     GridCoords = np.hstack([
         np.repeat(xs,len(ys))[:,None],
         np.tile(ys,len(xs)).flatten()[:,None],
-        np.zeros((nX*nY,1))
+        z*np.ones((nX*nY,1))
     ])
 
     Ids = np.reshape(np.arange(len(GridCoords)),(nX,nY))
@@ -262,7 +262,7 @@ def Plane(pt, normal, bounds, h, exact_h=False, ElemType='quad'):
 
     Returns
     -------
-    plane : Mesh.mesh
+    plane : mymesh.mesh
         Mesh object containing the plane mesh.
         
 
@@ -379,7 +379,7 @@ def Cylinder(bounds, resolution, axis=2, axis_step=None, ElemType='tri', cap=Tru
 
     Returns
     -------
-    cyl : Mesh.mesh
+    cyl : mymesh.mesh
         Mesh object containing the cylinder mesh.
         
 
@@ -474,7 +474,7 @@ def Sphere(center, radius, theta_resolution=10, phi_resolution=10, ElemType='tri
 
     Returns
     -------
-    sphere, Mesh.mesh
+    sphere, mymesh.mesh
         Mesh object containing the cylinder mesh.
         
 
@@ -548,7 +548,7 @@ def Extrude(line, distance, step, axis=2, ElemType='quad'):
 
     Returns
     -------
-    extruded : Mesh.mesh
+    extruded : mymesh.mesh
         Mesh object containing the extruded mesh.
         
 
@@ -580,7 +580,7 @@ def Revolve(line, angle, anglestep, center=[0,0,0], axis=2, ElemType='quad'):
 
     Parameters
     ----------
-    line : Mesh.mesh
+    line : mymesh.mesh
         Mesh object of 2d line mesh
     angle : scalar
         Angle (in radians) to revolve the line by. For a full rotation, angle=2*np.pi
@@ -599,7 +599,7 @@ def Revolve(line, angle, anglestep, center=[0,0,0], axis=2, ElemType='quad'):
 
     Returns
     -------
-    revolve : Mesh.mesh
+    revolve : mymesh.mesh
         Mesh object containing the revolved mesh.
         
 
