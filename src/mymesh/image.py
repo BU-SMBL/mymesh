@@ -26,7 +26,7 @@ def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scal
     threshold : scalar
         Isovalue threshold to use for keeping/removing elements, by default 0.
     threshold_direction : signed integer
-        If threshold_direction is negative (default), values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_direction is positive, by default 1.
+        If threshold_direction is negative, values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_direction is positive, by default 1.
     scalefactor : float, optional
         Scale factor for resampling the image. If greater than 1, there will be more than
         1 elements per voxel. If less than 1, will coarsen the image, by default 1.
