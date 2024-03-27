@@ -1732,6 +1732,14 @@ def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, ep
         TriIds = np.array([x for y in TriIds for x in y]) # flattening
         RayIds = np.array([x for y in RayIds for x in y]) # flattening
         
+        if len(TriIds) == 0:
+            # No intersections with the octree
+            intersections = [np.array([],dtype=np.int32) for i in range(len(rays))]
+            distances = [np.array([],dtype=np.float64) for i in range(len(rays))]
+            intersectionPts = [np.empty((0,3)) for i in range(len(rays))]
+
+            return intersections, distances, intersectionPts
+
         Tris = ArrayCoords[np.asarray(SurfConn)[TriIds]]
         inpts = pts[RayIds]
         inrays = rays[RayIds]
