@@ -152,7 +152,7 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
     else:
         return Faces
 
-def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeConn=False,return_EdgeElem=False,):
+def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return_EdgeElem=False,):
     """
     Convert solid mesh to edges. The will be one edge for each edge of each element,
     i.e. there will be multiple entries for shared edges. Solid2Edges is also suitable for use 
@@ -235,11 +235,11 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
         else:
             fournodefunc = tet2edges
             fournodeedgenum = 6
-        Edges = np.concatenate((edgs,tri2edges([],tris,ReturnType=np.ndarray), 
-                                fournodefunc([],tets,ReturnType=np.ndarray), 
-                                pyramid2edges([],pyrs,ReturnType=np.ndarray), 
-                                wedge2edges([],wdgs,ReturnType=np.ndarray), 
-                                hex2edges([],hexs,ReturnType=np.ndarray)))
+        Edges = np.concatenate((edgs,tri2edges([],tris), 
+                                fournodefunc([],tets), 
+                                pyramid2edges([],pyrs), 
+                                wedge2edges([],wdgs), 
+                                hex2edges([],hexs)))
         if return_EdgeElem or return_EdgeConn:
             EdgeElem = np.concatenate((np.repeat(edgIdx,1),np.repeat(triIdx,3),np.repeat(tetIdx,fournodeedgenum),np.repeat(pyrIdx,8),np.repeat(wdgIdx,9),np.repeat(hexIdx,12)))
         if return_EdgeConn:
@@ -254,76 +254,53 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
             EdgeConn = -1*np.ones((len(NodeConn),12))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
             EdgeConn = utils.ExtractRagged(EdgeConn,dtype=int)
-        if ReturnType is list:
-            Edges = Edges.tolist()
-            if return_EdgeElem or return_EdgeConn:
-                EdgeElem = EdgeElem.tolist()
 
     elif ElemType=='tri':
-        Edges = tri2edges(NodeCoords,NodeConn,ReturnType=ReturnType)
+        Edges = tri2edges(NodeCoords,NodeConn)
         if return_EdgeElem or return_EdgeConn:
             triIdx = np.arange(len(NodeConn))
             EdgeElem = np.repeat(triIdx,3)
-            if ReturnType is list:
-                EdgeElem = EdgeElem.tolist()
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2]],len(tetIdx),axis=0).reshape(len(tetIdx)*3), 
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),3))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            if ReturnType is list:
-                EdgeElem = EdgeElem.tolist()
-                EdgeConn = EdgeConn.tolist()
     elif ElemType=='quad':
-        Edges = quad2edges(NodeCoords,NodeConn,ReturnType=ReturnType)
+        Edges = quad2edges(NodeCoords,NodeConn)
         if return_EdgeElem or return_EdgeConn:
             quadIdx = np.arange(len(NodeConn))
             EdgeElem = np.repeat(quadIdx,4)
-            if ReturnType is list:
-                EdgeElem = EdgeElem.tolist()
-                EdgeConn = EdgeConn.tolist()
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2]],len(tetIdx),axis=0).reshape(len(tetIdx)*3), 
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),4))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            if ReturnType is list:
-                EdgeElem = EdgeElem.tolist()
-                EdgeConn = EdgeConn.tolist()
     elif ElemType=='tet':
-        Edges = tet2edges(NodeCoords,NodeConn,ReturnType=ReturnType)
+        Edges = tet2edges(NodeCoords,NodeConn)
         if return_EdgeElem or return_EdgeConn:
             tetIdx = np.arange(len(NodeConn))
             EdgeElem = np.repeat(tetIdx,6)
-            if ReturnType is list:
-                EdgeElem = EdgeElem.tolist()
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2,3,4,5]],len(tetIdx),axis=0).reshape(len(tetIdx)*6),  
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),6))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            if ReturnType is list:
-                EdgeElem = EdgeElem.tolist()
     elif ElemType=='pyramid':
-        Edges = pyramid2edges(NodeCoords,NodeConn,ReturnType=ReturnType)
+        Edges = pyramid2edges(NodeCoords,NodeConn)
         if return_EdgeElem or return_EdgeConn:
             pyrIdx = np.arange(len(NodeConn))
             EdgeElem = np.repeat(pyrIdx,8)
-            if ReturnType is list:
-                EdgeElem = EdgeElem.tolist()
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2,3,4,5,6,7]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*8),                   
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),8))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            if ReturnType is list:
-                EdgeElem = EdgeElem.tolist()
     elif ElemType=='wedge':
-        Edges = wedge2edges(NodeCoords,NodeConn,ReturnType=ReturnType)
+        Edges = wedge2edges(NodeCoords,NodeConn)
         if return_EdgeElem or return_EdgeConn:
             wdgIdx = np.arange(len(NodeConn))
             EdgeElem = np.repeat(wdgIdx,9)
@@ -333,23 +310,17 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',ReturnType=list,return_EdgeC
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),9))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            if ReturnType is list:
-                EdgeElem = EdgeElem.tolist()
     elif ElemType=='hex':
-        Edges = hex2edges(NodeCoords,NodeConn,ReturnType=ReturnType)
+        Edges = hex2edges(NodeCoords,NodeConn)
         if return_EdgeElem or return_EdgeConn:
             hexIdx = np.arange(len(NodeConn))
             EdgeElem = np.repeat(hexIdx,12)
-            if ReturnType is list:
-                EdgeElem = EdgeElem.tolist()
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2,3,4,5,6,7,8,9,10,11]],len(hexIdx),axis=0).reshape(len(hexIdx)*12),                    
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),12))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-            if ReturnType is list:
-                EdgeConn = EdgeConn.astype(int).tolist()
     elif ElemType=='polygon':
         Edges = polygon2edges(NodeCoords,NodeConn)
         if return_EdgeElem or return_EdgeConn:
@@ -1238,7 +1209,7 @@ def wedge2faces(NodeCoords,NodeConn):
         Faces = []
     return Faces
 
-def tri2edges(NodeCoords,NodeConn,ReturnType=list):
+def tri2edges(NodeCoords,NodeConn):
     """
     Extract edges from all elements of a purely 3-Node triangular mesh.
     Best practice is to use solid2edges, rather than using tri2edges directly.
@@ -1249,9 +1220,6 @@ def tri2edges(NodeCoords,NodeConn,ReturnType=list):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
-    ReturnType : type, optional.
-        Specifies the format of the returned list-like object.
-        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -1268,17 +1236,12 @@ def tri2edges(NodeCoords,NodeConn,ReturnType=list):
         Edges[1::3] = ArrayConn[:,[1,2]]
         Edges[2::3] = ArrayConn[:,[2,0]]
         Edges = Edges.astype(int)
-        if ReturnType is list:
-            Edges = Edges.tolist()
     else:
-        if ReturnType is list:
-            Edges = []
-        else:
-            Edges = np.empty((0,2),dtype=int)
+        Edges = np.empty((0,2),dtype=int)
     
     return Edges
 
-def quad2edges(NodeCoords,NodeConn,ReturnType=list):
+def quad2edges(NodeCoords,NodeConn):
     """
     Extract edges from all elements of a purely 4-Node quadrilateral mesh.
     Best practice is to use solid2edges, rather than using quad2edges directly.
@@ -1289,9 +1252,6 @@ def quad2edges(NodeCoords,NodeConn,ReturnType=list):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
-    ReturnType : type, optional.
-        Specifies the format of the returned list-like object.
-        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -1307,17 +1267,12 @@ def quad2edges(NodeCoords,NodeConn,ReturnType=list):
         Edges[3::4] = ArrayConn[:,[3,0]]
 
         Edges = Edges.astype(int)
-        if ReturnType is list:
-            Edges = Edges.tolist()
     else:
-        if ReturnType is list:
-            Edges = []
-        else:
-            Edges = np.empty((0,2),dtype=int)
+        Edges = np.empty((0,2),dtype=int)
     
     return Edges
 
-def polygon2edges(NodeCoords,NodeConn,ReturnType=list):
+def polygon2edges(NodeCoords,NodeConn):
     """
     Extract edges from all elements of a polygonal mesh.
     Best practice is to use solid2edges, rather than using polygon2edges directly.
@@ -1328,9 +1283,6 @@ def polygon2edges(NodeCoords,NodeConn,ReturnType=list):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
-    ReturnType : type, optional.
-        Specifies the format of the returned list-like object.
-        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -1343,7 +1295,7 @@ def polygon2edges(NodeCoords,NodeConn,ReturnType=list):
             edges.append([elem[j-1],n])
     return edges   
 
-def tet2edges(NodeCoords,NodeConn,ReturnType=list):
+def tet2edges(NodeCoords,NodeConn):
     """
     Extract edges from all elements of a purely 4-Node tetrahedral mesh.
     Best practice is to use solid2edges, rather than using tet2edges directly.
@@ -1354,9 +1306,6 @@ def tet2edges(NodeCoords,NodeConn,ReturnType=list):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
-    ReturnType : type, optional.
-        Specifies the format of the returned list-like object.
-        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -1366,24 +1315,18 @@ def tet2edges(NodeCoords,NodeConn,ReturnType=list):
 
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
-        Edges = -1*np.ones((len(NodeConn)*6,2))
-        Edges[0::6] = ArrayConn[:,[0,1]]
-        Edges[1::6] = ArrayConn[:,[1,2]]
-        Edges[2::6] = ArrayConn[:,[2,0]]
-        Edges[3::6] = ArrayConn[:,[0,3]]
-        Edges[4::6] = ArrayConn[:,[1,3]]
-        Edges[5::6] = ArrayConn[:,[2,3]]
-        Edges = Edges.astype(int)
-        if ReturnType is list:
-            Edges = Edges.tolist()
+        Edges = -1*np.ones((len(NodeConn)*6,2),dtype=np.int64)
+        Edges[0::6] = ArrayConn[:,np.array([0,1])]
+        Edges[1::6] = ArrayConn[:,np.array([1,2])]
+        Edges[2::6] = ArrayConn[:,np.array([2,0])]
+        Edges[3::6] = ArrayConn[:,np.array([0,3])]
+        Edges[4::6] = ArrayConn[:,np.array([1,3])]
+        Edges[5::6] = ArrayConn[:,np.array([2,3])]
     else:
-        if ReturnType is list:
-            Edges = []
-        else:
-            Edges = np.empty((0,2),dtype=int)
+        Edges = np.empty((0,2),dtype=np.int64)
     return Edges
 
-def pyramid2edges(NodeCoords,NodeConn,ReturnType=list):
+def pyramid2edges(NodeCoords,NodeConn):
     """
     Extract edges from all elements of a purely 5-Node pyramidal mesh.
     Best practice is to use solid2edges, rather than using pyramid2edges directly.
@@ -1394,9 +1337,6 @@ def pyramid2edges(NodeCoords,NodeConn,ReturnType=list):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
-    ReturnType : type, optional.
-        Specifies the format of the returned list-like object.
-        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -1415,16 +1355,12 @@ def pyramid2edges(NodeCoords,NodeConn,ReturnType=list):
         Edges[6::8] = ArrayConn[:,[2,4]]
         Edges[7::8] = ArrayConn[:,[3,4]]
         Edges = Edges.astype(int)
-        if ReturnType is list:
-            Edges = Edges.tolist()
+        Edges = Edges.tolist()
     else:
-        if ReturnType is list:
-            Edges = []
-        else:
-            Edges = np.empty((0,2),dtype=int)
+        Edges = np.empty((0,2),dtype=int)
     return Edges
 
-def wedge2edges(NodeCoords,NodeConn,ReturnType=list):
+def wedge2edges(NodeCoords,NodeConn):
     """
     Extract edges from all elements of a purely 6-Node wedge element mesh.
     Best practice is to use solid2edges, rather than using wedge2edges directly.
@@ -1435,9 +1371,6 @@ def wedge2edges(NodeCoords,NodeConn,ReturnType=list):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
-    ReturnType : type, optional.
-        Specifies the format of the returned list-like object.
-        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -1457,16 +1390,11 @@ def wedge2edges(NodeCoords,NodeConn,ReturnType=list):
         Edges[7::9] = ArrayConn[:,[4,5]]
         Edges[8::9] = ArrayConn[:,[5,3]]
         Edges = Edges.astype(int)
-        if ReturnType is list:
-            Edges = Edges.tolist()
     else:
-        if ReturnType is list:
-            Edges = []
-        else:
-            Edges = np.empty((0,2),dtype=int)
+        Edges = np.empty((0,2),dtype=int)
     return Edges
 
-def hex2edges(NodeCoords,NodeConn,ReturnType=list):
+def hex2edges(NodeCoords,NodeConn):
     """
     Extract edges from all elements of a purely 8-Node hexahedral mesh.
     Best practice is to use solid2edges, rather than using hex2edges directly.
@@ -1477,9 +1405,6 @@ def hex2edges(NodeCoords,NodeConn,ReturnType=list):
         List of nodal coordinates.
     NodeConn : list
         List of nodal connectivity.
-    ReturnType : type, optional.
-        Specifies the format of the returned list-like object.
-        Can be list or np.ndarray. Default is list.
 
     Returns
     -------
@@ -1502,13 +1427,8 @@ def hex2edges(NodeCoords,NodeConn,ReturnType=list):
         Edges[10::12] = ArrayConn[:,[6,7]]
         Edges[11::12] = ArrayConn[:,[7,4]]
         Edges = Edges.astype(int)
-        if ReturnType is list:
-            Edges = Edges.tolist()
     else:
-        if ReturnType is list:
-            Edges = []
-        else:
-            Edges = np.empty((0,2),dtype=int)
+        Edges = np.empty((0,2),dtype=int)
     return Edges
 
 def quad2tri(QuadNodeConn):
