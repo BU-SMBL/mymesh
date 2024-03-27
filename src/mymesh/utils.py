@@ -896,7 +896,7 @@ def Project2Surface(Points,Normals,NodeCoords,SurfConn,tol=np.inf,Octree='genera
 
     return MappingMatrix
 
-def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verbose=False, Octree='generate', return_octree=False):
+def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verbose=False, Octree='generate', return_octree=False, npts=np.inf):
     """
     Generate a mapping matrix from surface 1 (NodeCoords1, SurfConn1) to surface 2 (NodeCoords2, SurfConn2)
     Each row of the mapping matrix contains an element ID followed by barycentric coordinates alpha, beta, gamma
@@ -926,11 +926,14 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
         octree.OctreeNode - Provide a precompute octree structure corresponding to surface 2. Should be created by octree.Surf2Octree(NodeCoords2,SurfConn2)
     return_octree : bool, optional
         If true, will return the generated or provided octree, by default False.
+    npts : int, optional
+        Number of points to map. A random sample of min(npts, len(NodeCoords1)) from Surface 1
+        will be mapped , by default np.inf (all points).
 
     Returns
     -------
     MappingMatrix : list
-        len(NodeCoords1)x4 matrix of of barycentric coordinates, defining NodeCoords1 in terms
+        min(npts, len(NodeCoords1))x4 matrix of of barycentric coordinates, defining NodeCoords1 in terms
         of the triangular surface elements of Surface 2.
     Octree : octree.OctreeNode, optional
         The generated or provided octree structure corresponding to Surface 2.
@@ -941,27 +944,35 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     if type(SurfConn1) is list: SurfConn1 = np.array(SurfConn1)
     if type(SurfConn2) is list: SurfConn2 = np.array(SurfConn2)
 
+    Surf1Nodes = np.unique(SurfConn1.flatten())
+    if npts >= len(Surf1Nodes):
+        N = len(NodeCoords1)
+        NodeIds = Surf1Nodes
+    else:
+        N = npts
+        idx = np.random.choice(range(len(Surf1Nodes)), size=N, replace=False)
+        NodeIds = Surf1Nodes[idx]
+
     assert SurfConn1.shape[1] == SurfConn2.shape[1] == 3, 'Currently only triangular surfaces are supported.'
 
     ElemConn1 = getElemConnectivity(NodeCoords1, SurfConn1)
     ElemNormals1 = CalcFaceNormal(NodeCoords1, SurfConn1)
     NodeNormals1 = Face2NodeNormal(NodeCoords1, SurfConn1, ElemConn1, ElemNormals1, method='angle')
 
-    Surf1Nodes = np.unique(SurfConn1.flatten())
-
     
     if Octree == 'generate': Octree = octree.Surf2Octree(NodeCoords2,SurfConn2)
+    
     MappingMatrix = -1*np.ones((len(NodeCoords1),4))
-    MappingMatrix[Surf1Nodes,:] = Project2Surface(NodeCoords1[Surf1Nodes,:], NodeNormals1[Surf1Nodes,:], NodeCoords2, SurfConn2, tol=tol, Octree=Octree)
+    MappingMatrix[NodeIds,:] = Project2Surface(NodeCoords1[NodeIds,:], NodeNormals1[NodeIds,:], NodeCoords2, SurfConn2, tol=tol, Octree=Octree)
     
     if verbose: 
-        failcount = np.sum(MappingMatrix[list(Surf1Nodes),0] == -1)
-        print('{:.3f}% of nodes mapped'.format((len(Surf1Nodes)-failcount)/len(Surf1Nodes)*100))
+        failcount = np.sum(MappingMatrix[NodeIds,0] == -1)
+        print('{:.3f}% of nodes mapped'.format((len(NodeIds)-failcount)/len(NodeIds)*100))
     if return_octree:
         return MappingMatrix, Octree
     return MappingMatrix
 
-def ValueMapping(NodeCoords1, SurfConn1, NodeVals1, NodeCoords2, SurfConn2, tol=np.inf, Octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False, return_octree=False):
+def ValueMapping(NodeCoords1, SurfConn1, NodeVals1, NodeCoords2, SurfConn2, tol=np.inf, Octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False, return_octree=False, npts=np.inf):
     """
     Maps nodal values <NodeVals1> from surface 1 to surface 2
     - Currently only supports triangluar surface meshes
@@ -999,6 +1010,9 @@ def ValueMapping(NodeCoords1, SurfConn1, NodeVals1, NodeCoords2, SurfConn2, tol=
         NOTE if MappingMatrix is provided, the octree structure won't be generated.
         In this cases, if Octree='generate' and return_octree=True, the returned value
         for octree will simply be the string 'generate'.
+    npts : int, optional
+        Number of points to map. Values from Surface 1 will be mapped to random sample of 
+        min(npts, len(NodeCoords2) in Surface 2, by default np.inf (all points).
 
     Returns
     -------
@@ -1015,7 +1029,7 @@ def ValueMapping(NodeCoords1, SurfConn1, NodeVals1, NodeCoords2, SurfConn2, tol=
         # NodeVals2 = [0 for i in range(len(NodeCoords2))]
     # Map the coordinates from surface 2 to surface 1
     if MappingMatrix is None:
-        MappingMatrix,Octree = SurfMapping(NodeCoords2, SurfConn2,  NodeCoords1, SurfConn1, Octree=Octree, tol=tol, verbose=verbose, return_octree=True)
+        MappingMatrix,Octree = SurfMapping(NodeCoords2, SurfConn2, NodeCoords1, SurfConn1, Octree=Octree, tol=tol, verbose=verbose, return_octree=True, npts=npts)
 
     # if singleVal:
     if len(np.shape(NodeVals1)) == 1:
