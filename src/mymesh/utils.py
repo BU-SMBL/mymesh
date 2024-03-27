@@ -117,7 +117,7 @@ def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     
     """
 
-    Edges,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True, ElemType=ElemType, ReturnType=np.ndarray)
+    Edges,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True, ElemType=ElemType)
     
     UEdges,idx,inv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
     NotInMesh = set(range(len(NodeCoords))).difference(np.unique(UEdges))
@@ -130,7 +130,7 @@ def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
 
     return NodeNeighbors             
 
-def getElemConnectivity(NodeCoords,NodeConn,ElemType='auto'):
+def getElemConnectivity(NodeCoords,NodeConn):
     """
     Determines the elements connected to each node in the mesh
 
@@ -140,25 +140,19 @@ def getElemConnectivity(NodeCoords,NodeConn,ElemType='auto'):
         List of nodal coordinates.
     NodeConn : array_like
         Nodal connectivity list.
-    ElemType : str, optional
-        Type of element contained in the mesh, by default 'auto'.
-        See converter.solid2edges() for details.
-        'auto' is suitable for most element types and mixed-element meshes,
-        4-node elements are assumed to be tets, not quads, unless ElemType is 
-        set to 'quad' or 'surf'.
 
     Returns
     -------
     ElemConn : list
         List of elements connected to each node.
     """    
-    Edges,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True, ElemType=ElemType, ReturnType=np.ndarray)
-    NodeNeighbors = [set() for i in range(len(NodeCoords))] 
-    ElemConn = [set() for i in range(len(NodeCoords))]         # Connected elements for each vertex 
-    for i in range(len(Edges)):
-        ElemConn[Edges[i][0]].add(EdgeElem[i])
-        ElemConn[Edges[i][1]].add(EdgeElem[i])
-    ElemConn = [list(s) for s in ElemConn] 
+    nodes,elems = zip(*[(n, i) for i, elem in enumerate(NodeConn) for n in elem])
+    NotInMesh = set(range(len(NodeCoords))).difference(nodes)
+    nodes += tuple(NotInMesh)
+    elems += tuple(itertools.repeat(-1,len(nodes)))
+
+    ElemConn2 = [list(set(elem for _, elem in group if elem != -1)) for node, group in itertools.groupby(sorted(zip(nodes,elems), key=lambda x: x[0]), key=lambda x: x[0])] 
+
     return ElemConn
 
 def getNodeNeighborhood(NodeCoords,NodeConn,nRings):
@@ -274,7 +268,7 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
         ElemNeighbors = [list(s) for s in ElemNeighbors] 
     elif mode=='edge':
         
-        Edges,EdgeConn,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True,return_EdgeConn=True,ReturnType=np.ndarray)
+        Edges,EdgeConn,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True,return_EdgeConn=True)
 
         UEdges,idx,inv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
         inv = np.append(inv,-1)
