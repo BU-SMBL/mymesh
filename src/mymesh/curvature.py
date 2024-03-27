@@ -511,7 +511,7 @@ def AnalyticalCurvature(func,NodeCoords):
 
     return MaxPrincipal, MinPrincipal, mean, gaussian
 
-def ImageCurvature(I,NodeCoords=None,gaussian_sigma=1,voxelsize=1,brightobject=True):
+def ImageCurvature(I,NodeCoords=None,gaussian_sigma=1,voxelsize=1,brightobject=True, mode='wrap'):
     """
     Calculate curvatures based on a 3D image. Curvature values are calculated for all voxels in the image,
     however, these curvature values are only meaningful at the surface of the imaged object(s). This can be used with 
@@ -520,7 +520,8 @@ def ImageCurvature(I,NodeCoords=None,gaussian_sigma=1,voxelsize=1,brightobject=T
     Based on Curvature formulas for implicit curves and surfaces, Ron Goldman (2005).
     :cite:p:`Goldman2005`
 
-    NOTE: This can lead to errors if surface is too close to the boundary of the image, consider building in padding based on gaussian_sigma
+    .. note:: 
+        Errors can occur if surface is too close to the boundary of the image. Consider building in padding based on gaussian_sigma.
 
     Parameters
     ----------
@@ -542,6 +543,8 @@ def ImageCurvature(I,NodeCoords=None,gaussian_sigma=1,voxelsize=1,brightobject=T
         Specifies whether the foreground of the image is bright or dark, by default True.
         If the imaged object is darker than the background, set brightobject=False. This 
         is important for determining the directionality of curvatures.
+    mode : str, optional
+        Method used for handling edges of the image. See scipy.ndimage.gaussian_filter
 
     Returns
     -------
@@ -557,6 +560,7 @@ def ImageCurvature(I,NodeCoords=None,gaussian_sigma=1,voxelsize=1,brightobject=T
     mean : np.ndarray
         Mean curvatures for either each voxel or each node
         (if NodeCoords is provided)
+
     """ 
     
     I = I.astype(float)
@@ -564,21 +568,21 @@ def ImageCurvature(I,NodeCoords=None,gaussian_sigma=1,voxelsize=1,brightobject=T
     if not brightobject:
         I = -np.array(I)
     
-    Fx = ndimage.gaussian_filter(I,gaussian_sigma,order=(1,0,0))
-    Fy = ndimage.gaussian_filter(I,gaussian_sigma,order=(0,1,0))
-    Fz = ndimage.gaussian_filter(I,gaussian_sigma,order=(0,0,1))
+    Fx = ndimage.gaussian_filter(I,gaussian_sigma,order=(1,0,0), mode=mode)
+    Fy = ndimage.gaussian_filter(I,gaussian_sigma,order=(0,1,0), mode=mode)
+    Fz = ndimage.gaussian_filter(I,gaussian_sigma,order=(0,0,1), mode=mode)
 
-    Fxx = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(1,0,0))
-    Fxy = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(0,1,0))
-    Fxz = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(0,0,1))
+    Fxx = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(1,0,0), mode=mode)
+    Fxy = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(0,1,0), mode=mode)
+    Fxz = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(0,0,1), mode=mode)
     
-    Fyx = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(1,0,0))
-    Fyy = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(0,1,0))
-    Fyz = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(0,0,1))
+    Fyx = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(1,0,0), mode=mode)
+    Fyy = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(0,1,0), mode=mode)
+    Fyz = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(0,0,1), mode=mode)
     
-    Fzx = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(1,0,0))
-    Fzy = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(0,1,0))
-    Fzz = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(0,0,1))
+    Fzx = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(1,0,0), mode=mode)
+    Fzy = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(0,1,0), mode=mode)
+    Fzz = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(0,0,1), mode=mode)
 
 
     Grad = np.transpose(np.array([Fx, Fy, Fz])[None,:,:,:,:],(2,3,4,0,1))
