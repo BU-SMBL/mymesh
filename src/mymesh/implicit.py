@@ -522,8 +522,8 @@ def sphere(center, radius):
     return func
 
 # Implicit Function Operators
-def offset(fval,offset):
-    return fval-offset
+def offset(fval,value):
+    return fval-value
 
 def union(fval1,fval2):
     return rMin(fval1,fval2)
@@ -538,6 +538,9 @@ def diff_old(fval1, fval2):
     
 def intersection(fval1,fval2):
     return rMax(fval1,fval2)
+
+def offsetf(f,value):
+    return lambda x,y,z : offset(f(x,y,z), value)
 
 def unionf(f1,f2):
     return lambda x,y,z : rMin(f1(x,y,z),f2(x,y,z))
