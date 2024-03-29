@@ -498,7 +498,7 @@ def diamond(x,y,z):
     return sp.sin(2*np.pi*x)*sp.sin(2*np.pi*y)*sp.sin(2*np.pi*z) + sp.sin(2*np.pi*x)*sp.cos(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.cos(2*np.pi*x)*sp.sin(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.cos(2*np.pi*x)*sp.cos(2*np.pi*y)*sp.sin(2*np.pi*z)
 
 def cylinder(center, radius):
-    func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 - r**2
+    func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 - radius**2
     return func
 
 def cube(x1,x2,y1,y2,z1,z2):    
