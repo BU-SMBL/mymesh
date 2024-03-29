@@ -499,7 +499,7 @@ def diamond(x,y,z):
 
 def cylinder(center, radius):
     func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 - r**2
-    return center
+    return func
 
 def cube(x1,x2,y1,y2,z1,z2):    
     func = lambda x, y, z : intersection(intersection(intersection(x1-x,x-x2),intersection(y1-y,y-y2)),intersection(z1-z,z-z2))
