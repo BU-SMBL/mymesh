@@ -216,7 +216,7 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
         from mymesh import implicit
 
         surface = implicit.SurfaceMesh(implicit.gyroid, [0,1,0,1,0,1], 0.05)
-        surface.plot()
+        surface.view()
     
     .. plot::
 
@@ -497,23 +497,29 @@ def neovius(x,y,z):
 def diamond(x,y,z):
     return sp.sin(2*np.pi*x)*sp.sin(2*np.pi*y)*sp.sin(2*np.pi*z) + sp.sin(2*np.pi*x)*sp.cos(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.cos(2*np.pi*x)*sp.sin(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.cos(2*np.pi*x)*sp.cos(2*np.pi*y)*sp.sin(2*np.pi*z)
 
-def cylinder(x,y,r):
-    return (x**2 + y**2) - r**2
+def cylinder(center, radius):
+    func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 - r**2
+    return center
 
-def cube(x,y,z,x1,x2,y1,y2,z1,z2):    
-    return intersection(intersection(intersection(x1-x,x-x2),intersection(y1-y,y-y2)),intersection(z1-z,z-z2))
+def cube(x1,x2,y1,y2,z1,z2):    
+    func = lambda x, y, z : intersection(intersection(intersection(x1-x,x-x2),intersection(y1-y,y-y2)),intersection(z1-z,z-z2))
+    return func
 
-def xplane(x,y,z,x0):
-    return x0-x
+def xplane(x0):
+    func = lambda x, y, z : x0 - x
+    return func
 
-def yplane(x,y,z,y0):
-    return y0-y
+def yplane(y0):
+    func = lambda x, y, z : y0 - y
+    return func
 
-def zplane(x,y,z,z0):
-    return z0-z
+def zplane(z0):
+    func = lambda x, y, z : z0 - z
+    return func
 
-def sphere(x,y,z,r,c):
-    return (x-c[0])**2 + (y-c[1])**2 + (z-c[2])**2 - r**2
+def sphere(center, radius):
+    func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 + (z-center[2])**2 - radius**2
+    return func
 
 # Implicit Function Operators
 def offset(fval,offset):
