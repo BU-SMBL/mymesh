@@ -505,16 +505,16 @@ def cube(x1,x2,y1,y2,z1,z2):
     func = lambda x, y, z : intersection(intersection(intersection(x1-x,x-x2),intersection(y1-y,y-y2)),intersection(z1-z,z-z2))
     return func
 
-def xplane(x0):
-    func = lambda x, y, z : x0 - x
+def xplane(x0, n=1):
+    func = lambda x, y, z : n*(x0 - x)
     return func
 
-def yplane(y0):
-    func = lambda x, y, z : y0 - y
+def yplane(y0, n=1):
+    func = lambda x, y, z : n*(y0 - y)
     return func
 
-def zplane(z0):
-    func = lambda x, y, z : z0 - z
+def zplane(z0, n=1):
+    func = lambda x, y, z : n*(z0 - z)
     return func
 
 def sphere(center, radius):
