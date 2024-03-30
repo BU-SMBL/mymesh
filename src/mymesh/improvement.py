@@ -8,8 +8,9 @@ Created on Wed Jan 26 09:27:53 2022
 """
 
 import numpy as np
-import sys, warnings, time, random, copy, tqdm
-from . import converter, utils, quality, rays, octree
+import sys, warnings, time, random, copy, tqdm, heapq
+from collections import deque
+from . import converter, utils, quality, rays, octree, mesh
 from scipy import sparse, spatial
 from scipy.sparse.linalg import spsolve
 from scipy.optimize import minimize
@@ -426,7 +427,6 @@ def LocalLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,ElemC
     return NewCoords, NodeConn
 
 def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,ElemConn=None,FixedNodes=set(),FixFeatures=False):
-        
     """
     TangentialLaplacianSmoothing Performs iterative Laplacian smoothing, repositioning each node to the center of its adjacent nodes. Primarily for use on surface meshes, not well defined for volume meshes.
     Ohtake, Y., Belyaev, A., & Pasko, A. (2003). Dynamic mesh optimization for polygonized implicit surfaces with sharp features. Visual Computer, 19(2-3), 115-126. https://doi.org/10.1007/s00371-002-0181-z
@@ -486,7 +486,7 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,
 
     return NewCoords, NodeConn
 
-def GlobalLaplacianSmoothing(NodeCoords,NodeConn,FeatureNodes=[],FixedNodes=set(),FeatureWeight=1,BaryWeight=1/3):
+def GlobalLaplacianSmoothing(NodeCoords, NodeConn,FeatureNodes=[],FixedNodes=set(),FeatureWeight=1,BaryWeight=1/3):
     # Ji, Z., Liu, L. and Wang, G., 2005, December. A global laplacian 
     # smoothing approach with feature preservation. In Ninth International 
     # Conference on Computer Aided Design and Computer Graphics
@@ -575,6 +575,397 @@ def GlobalLaplacianSmoothing(NodeCoords,NodeConn,FeatureNodes=[],FixedNodes=set(
     NewCoords = NewCoords.tolist()
     NewCoords = [NodeCoords[i] if i in FixedNodes else coord for i,coord in enumerate(NewCoords)]
     return NewCoords
+
+def SmartLaplacianSmoothing(NodeCoords, NodeConn, NodeNeighbors=None, ElemConn=None, target='mean', options=dict()):
+
+    # Process inputs
+    SmoothOptions = dict(method='sequential',
+                        iterate = 'converge',
+                        tolerance = 1e-6,
+                        maxIter = 100,
+                        FixedNodes = set(),
+                        FixFeatures = False,
+                        FixSurf = True,
+                        qualityFunc = quality.MeanRatio
+                    )
+
+    if NodeNeighbors is None:
+        NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
+    if ElemConn is None:
+        ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
+
+    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(NodeCoords, NodeConn, SmoothOptions, options)
+    FreeNodes = SmoothOptions['FreeNodes']
+    FixedNodes = SmoothOptions['FixedNodes']
+    tolerance = SmoothOptions['tolerance']
+    iterate = SmoothOptions['iterate']
+    qualityFunc = SmoothOptions['qualityFunc']
+    maxIter = SmoothOptions['maxIter']
+    method = SmoothOptions['method']
+
+    # Initialize
+    lens = np.array([len(n) for n in NodeNeighbors])
+    NodeConn = np.asarray(NodeConn)
+    if method == 'simultaneous':
+        r = utils.PadRagged(NodeNeighbors,fillval=-1)
+        RCoords = np.append(NodeCoords, [[np.nan, np.nan, np.nan]],axis=0)
+        RElemConn = utils.PadRagged(ElemConn)
+
+    q = qualityFunc(NodeCoords, NodeConn)
+    qmin = np.nanmin(q)
+    qmean = np.nanmean(q)
+
+    # Smoothing Functions
+    def SequentialSmoother(NodeCoords, q):
+        
+        for inode in FreeNodes:
+            oldnode = np.copy(NodeCoords[inode])
+            oldq = q[ElemConn[inode]]
+            NodeCoords[inode] = np.mean(NodeCoords[NodeNeighbors[inode]], axis=0)
+
+            q[ElemConn[inode]] = qualityFunc(NodeCoords, NodeConn[ElemConn[inode]])
+
+            newqmin = np.min(q[ElemConn[inode]])
+            oldqmin = np.min(oldq)
+            if target == 'mean':
+                oldqmean = np.mean(oldq)
+                newqmean = np.mean(q[ElemConn[inode]])
+
+                if (newqmean < oldqmean) | ((newqmin < oldqmin) & (newqmin < 0)):
+                    # If mean gets worse or a negative min gets worse
+                    NodeCoords[inode] = oldnode
+                    q[ElemConn[inode]] = oldq
+            elif target == 'min':
+                # if min gets worse
+                if (oldqmin < newqmin):
+                    NodeCoords[inode] = oldnode
+                    q[ElemConn[inode]] = oldq
+
+        return NodeCoords, q
+
+    def SimultaneousSmoother(NodeCoords, q):
+        
+        Q = RCoords[r]
+        U = (1/lens[FreeNodes])[:,None] * np.nansum(Q[FreeNodes] - RCoords[FreeNodes,None,:], axis=1)
+
+        NewCoords = np.copy(NodeCoords)
+        NewCoords[FreeNodes] += U
+
+        # Reset any degraded elements 
+        qnew = qualityFunc(NewCoords, NodeConn)
+        if np.any(qnew < q):
+            qnew = np.append(qnew, np.nan)
+            q = np.append(q, np.nan)
+            while np.any(qnew < q):
+                # print(sum(V <= 0))
+                affected = np.where(np.any(qnew[RElemConn] < q[RElemConn], axis=1))[0]
+                NewCoords[affected] = NodeCoords[affected]
+                affected_elems = np.unique([e for a in affected for e in ElemConn[a]])
+                qnew[affected_elems] = qualityFunc(NewCoords, NodeConn[affected_elems])
+            qnew = q[:-1]
+
+        return NewCoords, qnew
+    
+    if method == 'simultaneous':
+        smoother = SimultaneousSmoother
+    elif method == 'sequential':
+        smoother = SequentialSmoother
+    else:
+        raise ValueError(f'Invalid method "{str(method):s}", must be "simultaneous" or "sequential".')
+
+    # Iterate
+    qmin_hist = [qmin]
+    qmean_hist = [qmean]
+    
+    if SmoothOptions['iterate'] == 'converge':
+        condition = lambda i, q, qmin, qmean : (i == 0) | (i < maxIter) & ((np.sum(np.abs(np.min(q) - qmin)) > tolerance) | (np.sum(np.abs(np.mean(q) - qmean)) > tolerance))
+    elif isinstance(SmoothOptions['iterate'], (int, np.integer)):
+        condition = lambda i, q, qmin, qmean : i < SmoothOptions['iterate']
+    else:
+        raise ValueError('options["iterate"] must be "converge" or an integer.')
+    
+    i = 0
+    while condition(i, q, qmin, qmean):
+        i += 1
+
+        qmin = np.min(q)
+        qmean = np.mean(q)
+        qmin_hist.append(qmin)
+        qmean_hist.append(qmean)
+        # print(f'{qmin:.6f}, {qmean:.6f}')
+
+
+        NodeCoords, q = smoother(NodeCoords, q)
+
+
+    return NodeCoords, NodeConn
+
+def GeoTransformSmoothing(NodeCoords, NodeConn, sigma_min=None, sigma_max=None, eta=None, rho=None, qualityThreshold=.2, NodeNeighbors=None, ElemConn=None, options=dict()):
+
+    # For method=sequential only, elements with quality less than qualityThreshold will be considered
+    NodeCoords = np.copy(NodeCoords)
+    # Process inputs
+    convergence_lookback = 10
+    SmoothOptions = dict(method='simultaneous',
+                        iterate = 'converge',
+                        tolerance = 1e-6,
+                        maxIter = 200,
+                        FixedNodes = set(),
+                        FixFeatures = False,
+                        FixSurf = True,
+                        qualityFunc = quality.MeanRatio
+                    )
+
+    if NodeNeighbors is None:
+        NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
+    if ElemConn is None:
+        ElemConn = utils.getElemConnectivity(NodeCoords,NodeConn)
+
+    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(NodeCoords, NodeConn, SmoothOptions, options)
+    FreeNodes = SmoothOptions['FreeNodes']
+    FixedNodes = SmoothOptions['FixedNodes']
+    tolerance = SmoothOptions['tolerance']
+    iterate = SmoothOptions['iterate']
+    qualityFunc = SmoothOptions['qualityFunc']
+    method = SmoothOptions['method']
+    if 'maxIter' not in options.keys() and method=='sequential':
+        maxIter = len(NodeConn)
+    else:
+        maxIter = SmoothOptions['maxIter']
+    
+
+    # Initialize
+    
+    ElemConn = utils.getElemConnectivity(NodeCoords, NodeConn)
+    
+    if method == 'simultaneous':
+        RElemConn = utils.PadRagged(ElemConn)
+        
+        if sigma_min is None: sigma_min = 0
+        if sigma_max is None: sigma_max = 2
+        if eta is None: eta = 0
+        if rho is None: rho = 0.1
+        q = qualityFunc(NodeCoords, NodeConn)
+        qmin = np.min(q)
+        qmean = np.mean(q)
+        args = ()
+        
+    elif method == 'sequential':
+        ElemNeighbors = utils.getElemNeighbors(NodeCoords, NodeConn, mode='node')
+        FixedNodes = set(FixedNodes)
+        if sigma_min is None: sigma_min = 1e-2
+        if sigma_max is None: sigma_max = 1e-2
+        if eta is None: eta = 0
+        if rho is None: rho = 0.75
+        qual = qualityFunc(NodeCoords, NodeConn)
+
+        # Heapq structure stores quality and a pointer to the elemid
+        q = list(zip(qual, range(len(NodeConn)), range(len(NodeConn))))
+        heapq.heapify(q)
+        qmin = q[0][0]
+        qmean = 0 # mean is ignored for sequential
+
+        lookup = {i:i for i in range(len(NodeConn))}            # Lookup table relating element ids to heap ids
+        lookup_nextid = len(lookup)                             # counter to ensure identifiers stay unique
+        visit_counts = np.zeros(len(NodeConn))                  # Tracker of the number of times an element has been visited
+
+        args = (lookup, visit_counts, lookup_nextid)
+    else:
+        raise ValueError(f'Invalid method "{str(method):s}", must be "simultaneous" or "sequential".')
+
+    # Smoothing functions
+    def SimultaneousSmoother(NodeCoords, q):
+        
+        points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
+
+        D = np.stack([
+            points[:,1] - points[:,0], 
+            points[:,2] - points[:,0],
+            points[:,3] - points[:,0]
+            ]).swapaxes(0,1)
+
+        n1 = np.cross(points[:,3,:] - points[:,1,:], points[:,2,:] - points[:,1,:])
+        n2 = np.cross(points[:,3,:] - points[:,2,:], points[:,0,:] - points[:,2,:])
+        n3 = np.cross(points[:,1,:] - points[:,3,:], points[:,0,:] - points[:,3,:])
+        n4 = np.cross(points[:,1,:] - points[:,0,:], points[:,2,:] - points[:,0,:])
+
+        N1 = n1/np.sqrt(np.linalg.norm(n1, axis=1))[:,None]
+        N2 = n2/np.sqrt(np.linalg.norm(n2, axis=1))[:,None]
+        N3 = n3/np.sqrt(np.linalg.norm(n3, axis=1))[:,None]
+        N4 = n4/np.sqrt(np.linalg.norm(n4, axis=1))[:,None]
+        N = np.stack([N1, N2, N3, N4]).swapaxes(0,1)
+
+        # Calculate transformation factor sigma
+        sigma = sigma_min + (sigma_max - sigma_min)*(1 - q)
+
+        # Transform
+        p_trans = points + sigma[:,None,None] * N
+
+        # Scale
+        D_trans = np.stack([
+            p_trans[:,1] - p_trans[:,0], 
+            p_trans[:,2] - p_trans[:,0],
+            p_trans[:,3] - p_trans[:,0]
+            ]).swapaxes(0,1)
+
+        c_trans = np.mean(p_trans,axis=1) # element centroids of transformed tets
+
+        xi = (np.linalg.det(D)/np.linalg.det(D_trans))**(1/3) # Volume preservation scaling
+
+        p_scal = c_trans[:,None,:] + xi[:,None,None]*(p_trans - c_trans[:,None,:])
+
+        # Relax
+        p_relax = rho*p_scal + (1 - rho)*points
+
+        # Weighted averaging
+        weights = ((1 - q)**eta)[:,None,None] * np.ones(points.shape)
+        NewCoords = np.zeros_like(NodeCoords)
+        w = np.zeros_like(NodeCoords)
+        np.add.at(NewCoords, NodeConn.flatten(), weights.reshape(-1,3)*p_relax.reshape(-1,3))
+        np.add.at(w, NodeConn.flatten(), weights.reshape(-1,3))
+        NewCoords = NewCoords/w
+
+        # Reset fixed nodes
+        NewCoords[FixedNodes] = NodeCoords[FixedNodes]
+
+        # Reset any inverted elements inversions
+        V = quality.tet_volume(NewCoords, NodeConn)
+        if np.any(V <= 0):
+            V = np.append(V, np.inf)
+            while np.any(V <= 0):
+                affected = np.where(np.any(V[RElemConn] <= 0,axis=1))[0]
+                NewCoords[affected] = NodeCoords[affected]
+                affected_elems = np.unique([e for a in affected for e in ElemConn[a]])
+                V[affected_elems] = quality.tet_volume(NewCoords, NodeConn[affected_elems])
+
+        # Update quality
+        qnew = qualityFunc(NewCoords, NodeConn)
+        qmin = np.min(np.array(q))   # This is the old min
+        qmean = np.mean(np.array(q)) # This is the old mean
+        return NewCoords, qnew, qmin, qmean, ()
+
+    def SequentialSmoother(NodeCoords, q, lookup, visit_counts, lookup_nextid):
+        
+        qual, lookup_key, elemid = heapq.heappop(q)
+        while lookup_key != lookup[elemid]:
+            # Skip inactive entries
+            qual, lookup_key, elemid = heapq.heappop(q)
+            
+            
+        visit_counts[elemid] += 1
+        repeat_factor = .01*np.sqrt(visit_counts[elemid])
+
+        points = NodeCoords[NodeConn[elemid]]
+
+        D = np.array([
+            points[1] - points[0], 
+            points[2] - points[0],
+            points[3] - points[0]
+        ])
+        
+        n1 = np.cross(points[3] - points[1], points[2] - points[1])
+        n2 = np.cross(points[3] - points[2], points[0] - points[2])
+        n3 = np.cross(points[1] - points[3], points[0] - points[3])
+        n4 = np.cross(points[1] - points[0], points[2] - points[0])
+
+        N1 = n1/np.sqrt(np.linalg.norm(n1))
+        N2 = n2/np.sqrt(np.linalg.norm(n2))
+        N3 = n3/np.sqrt(np.linalg.norm(n3))
+        N4 = n4/np.sqrt(np.linalg.norm(n4))
+        N = np.vstack([N1, N2, N3, N4])
+
+        # Calculate transformation factor sigma
+        sigma = sigma_min + (sigma_max - sigma_min)*(1 - qual)
+
+        # Transform
+        p_trans = points + sigma * N
+
+        # Scale
+        D_trans = np.array([
+            p_trans[1] - p_trans[0], 
+            p_trans[2] - p_trans[0],
+            p_trans[3] - p_trans[0]
+            ])
+
+        c_trans = np.mean(p_trans, axis=0) # element centroids of transformed tets
+
+        xi = (np.linalg.det(D)/np.linalg.det(D_trans))**(1/3) # Volume preservation scaling
+
+        p_scal = c_trans + xi*(p_trans - c_trans)
+
+        # Relax
+        p_relax = rho*p_scal + (1 - rho)*points
+
+        NodeCoords[NodeConn[elemid]] = p_relax
+        for i,node in enumerate(NodeConn[elemid]):
+            if node not in FixedNodes:
+                NodeCoords[node] = p_relax[i]
+        # Update data structures
+        if any(quality.tet_volume(NodeCoords, NodeConn[ElemNeighbors[elemid]]) < 0):
+            # If any inversions occured, don't modify nodes
+            key = (qual+repeat_factor, lookup_key, elemid)
+            heapq.heappush(q, key) # Return this element to the heap
+            NodeCoords[NodeConn[elemid]] = points
+            
+        else:
+            # Calculate new quality for the element and neighbors
+            newquals = qualityFunc(NodeCoords, NodeConn[[elemid, *ElemNeighbors[elemid]]])
+
+            if newquals[0] < qualityThreshold:
+                # Update this element's entry
+                key = (newquals[0]+repeat_factor, lookup_key, elemid)
+                heapq.heappush(q,key)
+
+            # Update neighboring element entries
+            for i,neighbor in enumerate(ElemNeighbors[elemid]):
+                # If the neighbor entries fall below the quality threshold, add new entries to heap
+                repeat_factor = .01*np.sqrt(visit_counts[neighbor])
+                if newquals[i+1] < qualityThreshold:
+                    # Define new heap entry
+                    key = (newquals[i+1]+repeat_factor, lookup_nextid, neighbor) 
+
+                    # Update the lookup id in the neighbors lookup entry
+                    lookup[neighbor] = lookup_nextid
+
+                    heapq.heappush(q, key)
+                    lookup_nextid += 1
+
+        qmin = qual
+        qmean = 0
+        args = (lookup, visit_counts, lookup_nextid)
+        return NodeCoords, q, qmin, qmean, args
+
+    if method == 'simultaneous':
+        smoother = SimultaneousSmoother
+        if SmoothOptions['iterate'] == 'converge':
+            condition = lambda i, q, qmin_hist, qmean_hist : (i == 0) | (i < maxIter) & ((np.sum(np.abs(np.min(q) - qmin_hist[-convergence_lookback:])) > tolerance) | (np.sum(np.abs(np.mean(q) - qmean_hist[-convergence_lookback:])) > tolerance))
+        elif isinstance(SmoothOptions['iterate'], (int, np.integer)):
+            condition = lambda i, q, qmin_hist, qmean_hist : i < SmoothOptions['iterate']
+
+    elif method == 'sequential':
+        smoother = SequentialSmoother
+        condition = lambda i, q, qmin_hist, qmean_hist : (i < convergence_lookback) | (i < maxIter) & (np.sum(np.abs(q[0][0] - qmin_hist[-convergence_lookback:])) > tolerance)
+
+
+    else:
+        raise ValueError(f'Invalid method "{str(method):s}", must be "simultaneous" or "sequential".')
+    
+    
+    qmin_hist = [qmin]
+    qmean_hist = [qmean]
+    
+    i = 0
+    # Iterate
+    while condition(i, q, qmin_hist, qmean_hist):
+        i += 1
+
+        # print(f'{qmin:.6f}, {qmean:.6f}')
+        
+        NodeCoords, q, qmin, qmean, args = smoother(NodeCoords, q, *args)
+        qmin_hist.append(qmin)
+        qmean_hist.append(qmean)
+
+    return NodeCoords, NodeConn
 
 def ResolveSurfSelfIntersections(NodeCoords,SurfConn,FixedNodes=set(),octree='generate',maxIter=10):
 
@@ -963,7 +1354,7 @@ def Contract(NodeCoords, NodeConn, h, iterate='converge', FixedNodes=set(), FixF
         iter += 1
         NodeNeighbors = utils.getNodeNeighbors(NewCoords,NewConn)
         ElemConn = utils.getElemConnectivity(NewCoords,NewConn)
-        Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True,ReturnType=np.ndarray)
+        Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True)
         UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
         UEdgeElem = np.asarray(EdgeElem)[UIdx]
         UEdgeConn = UInv[utils.PadRagged(EdgeConn)]
@@ -1218,7 +1609,7 @@ def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='invert
         NewCoords[nodeid] = x
         LocalConn = NewConn[ElemConn[nodeid]]
         f, jac = func(NewCoords,NewConn, nodeid)
-        print(np.nanmean(q(NewCoords, NewConn)))
+        # print(np.nanmean(q(NewCoords, NewConn)))
 
         return f, jac
     
@@ -1235,154 +1626,746 @@ def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='invert
         else:
             iterable = nodeids
         for nodeid in iterable:
-            print(nodeid)
+            # print(nodeid)
             x0 = NewCoords[nodeid]
             out = minimize(obj, x0, jac=True, args=(nodeid), method='L-BFGS-B', options=dict(maxiter=10))
             NewCoords[nodeid] = out.x
 
     return NewCoords, NodeConn
 
-def Tet23Flip(NodeCoords,NodeConn,Faces,FaceElemConn,FaceConn,FaceID,quality,QualityMetric='Skewness',Validate=True):
-    
-    # NodeConn should be an array for the input to avoid a lot of overhead
-    
-    if np.any(np.isnan(FaceElemConn[FaceID])):
-        return NodeConn,Faces,FaceElemConn,FaceConn,quality
-    
-    NewConn = np.asarray(NodeConn)
-    FaceNodes = Faces[FaceID]
-    NonFaceNodes = [np.setdiff1d(NodeConn[FaceElemConn[FaceID][0]],FaceNodes)[0],np.setdiff1d(NodeConn[FaceElemConn[FaceID][1]],FaceNodes)[0]]
-    # Elem1 = np.append(FaceNodes,NonFaceNodes[0])
-    # Elem2 = np.append(np.flip(FaceNodes),NonFaceNodes[1])
-    a = NonFaceNodes[1]
-    e = NonFaceNodes[0]
-    b,c,d = FaceNodes
-    
-    # Make New Elements
-    NewElem1 = [a,e,d,b]
-    NewElem2 = [a,b,c,e]
-    NewElem3 = [a,e,c,d]
-    
-    # Check New Elements
+def TetFlipping(M, iterate='converge', QualityMetric='Skewness', target='min'):
+
+    NodeCoords = M.NodeCoords
+    NodeConn = M.NodeConn
+    Faces = M.Faces
+    FaceConn = M.FaceConn
+    FaceElemConn = M.FaceElemConn
+    Edges = M.Edges
+    EdgeConn = M.EdgeConn
+    EdgeElemConn = M.EdgeElemConn
+
     if QualityMetric == 'Skewness':
-        OldWorstQuality = np.max([quality[FaceElemConn[FaceID][0]], quality[FaceElemConn[FaceID][1]]])
-        NewQuality = quality.Skewness(NodeCoords,[NewElem1,NewElem2,NewElem3])
-        NewWorstQuality = np.max(NewQuality)
-        
-        Improved = NewWorstQuality < OldWorstQuality
+        qualfunc = lambda NodeCoords, NodeConn, V : 1 - quality.tet_vol_skewness(NodeCoords,NodeConn, V)
 
+    # Sort and prep hash table ids/dictionary keys
+    SortElem = [tuple(elem) for elem in np.sort(NodeConn, axis=1).tolist()]
+    SortFace = [tuple(face) for face in np.sort(Faces, axis=1).tolist()]
+    SortFaceNormals = utils.CalcFaceNormal(NodeCoords, SortFace)
+    SortEdge = [tuple(edge) for edge in np.sort(Edges, axis=1).tolist()]
+
+    volume = quality.Volume(NodeCoords, NodeConn, ElemType='tet')
+    qual = qualfunc(NodeCoords, NodeConn, volume)
+
+    # Construct element, face, and edge tables
+    ElemTable = {SortElem[i] : {'status'  : True, # Status indicates whether this element is currently in the mesh
+                                'elem'    : elem, # elem gives the properly oriented element connectivity (may not be necessary)
+                                'volume'  : volume[i], # Element volume, helps ensure flips are valid
+                                'quality' : qual[i],
+                                'faces'   : tuple([SortFace[j] for j in FaceConn[i]]), # faces gives the dict keys to the face table
+                                'edges'   : tuple([SortEdge[j] for j in EdgeConn[i]])  # edges gives the dict keys to the edge table
+                                } for i,elem in enumerate(NodeConn)}
+    FaceTable = {SortFace[i] : {'elems'   : tuple([SortElem[j] for j in FaceElemConn[i] if not np.isnan(j)]),
+                                'normal'  : SortFaceNormals[i]
+                                } for i,face in enumerate(Faces)}
+    EdgeTable = {SortEdge[i] : {'elems'   : tuple([SortElem[j] for j in EdgeElemConn[i]])} for i,edge in enumerate(Edges)}
+
+    n44 = 0
+    n32 = 0
+    n23 = 0
+    # Visit all tets
+    ElemTableKeys = list(ElemTable.keys())
+
+    if iterate == 'converge':
+        condition = lambda i, n44, n32, n23 : ((n44 + n32 + n23) > 0) | (i == 0)
     else:
-        raise Exception('quality metric {:s} unknown or not yet implemented.'.format(QualityMetric))
-    if Validate:
-        if not Improved:
-            # Flip didn't improve quality or created invalid elements, keep old mesh
-            return NodeConn,Faces,FaceElemConn,FaceConn,quality
-        
-        NewVolume = quality.Volume(NodeCoords,[NewElem1,NewElem2,NewElem3])
-        Valid = np.min(NewVolume) >= 0 and min(NewQuality) >= 0 and max(NewQuality) <= 1
-        if not Valid:
-            # Flip didn't improve quality or created invalid elements, keep old mesh
-            return NodeConn,Faces,FaceElemConn,FaceConn,quality
-    
-    # Flip validly improves quality, modify mesh
-    print('flip')
-    # Delete old elements
-    maxelem = max(FaceElemConn[FaceID])
-    minelem = min(FaceElemConn[FaceID])
-    
-    AdjacentFaces = np.unique([FaceConn[maxelem],FaceConn[minelem]])
-    AdjacentFaces = AdjacentFaces[AdjacentFaces!=FaceID]    
-    OldFaceSets = [set(Faces[fid]) for fid in AdjacentFaces]
-    
-    NewConn = np.delete(NewConn,[maxelem,minelem],axis=0)
-    quality = np.delete(quality, [maxelem,minelem])
-    del FaceConn[maxelem], FaceConn[minelem]
-    
-    # Add new elems
-    NewElemIds = [len(NewConn),len(NewConn)+1,len(NewConn)+2]
-    NewConn = np.append(NewConn, [NewElem1, NewElem2, NewElem3],axis=0)
-    quality = np.append(quality, [NewQuality[0], NewQuality[1], NewQuality[2]])
-    
-    
-    # Delete old face
-    del Faces[FaceID]
-    del FaceElemConn[FaceID]
-    
-    # Add new faces
-    NewFaceIds = [len(Faces),len(Faces)+1,len(Faces)+2]
-    Faces += [[a,e,d],[a,b,e],[a,c,e]]
-    FaceElemConn += [[1,3],[2,1],[3,2]]
-    
-    # Adjust FaceElemConn
-    NewFaceSets = [{a,d,c},{c,d,e},{a,b,d},{b,e,d},{a,c,b},{b,c,e}] 
-    NewFaceElemConnID = [0,0,1,1,2,2]
-    MatchedFaces = [AdjacentFaces[i] for FaceSet in NewFaceSets for i,OldSet in enumerate(OldFaceSets) if FaceSet==OldSet]
-    for i,fid in enumerate(MatchedFaces):
-        FaceElemConn[fid] = [NewElemIds[NewFaceElemConnID[i]] if (x == maxelem or x == minelem) else x for x in FaceElemConn[fid]]
-    
-    FaceConn += [[MatchedFaces[0],MatchedFaces[1],NewFaceIds[0],NewFaceIds[1]],
-                [MatchedFaces[2],MatchedFaces[3],NewFaceIds[1],NewFaceIds[2]],
-                [MatchedFaces[3],MatchedFaces[4],NewFaceIds[2],NewFaceIds[0]]]
-    
-    return NewConn,Faces,FaceElemConn,FaceConn,quality
-    
-def Tet32Flip(NodeCoords, NodeConn, Edges, EdgeElemConn, EdgeConn, EdgeID, quality, QualityMetric='Skewness',Validate=True):
-    
-    # NodeConn should be an array for the input to avoid a lot of overhead
-    
-    if len(EdgeElemConn[EdgeID]) != 3:
-        # Not valid for a 3-2 flip
-        return NodeConn, Edges, EdgeElemConn, EdgeConn, quality
-    
-    NewConn = np.asarray(NodeConn)
-    EdgeNodes = Edges[EdgeID]
-    Elements = EdgeElemConn[EdgeID]
-    Face = np.setdiff1d(np.unique(NewConn[Elements]),EdgeNodes)
-    
-    if len(Face) != 3:
-        # Not valid for a 3-2 flip
-        return NodeConn, Edges, EdgeElemConn, EdgeConn, quality
-    
-    # Elem1 = np.append(FaceNodes,NonFaceNodes[0])
-    # Elem2 = np.append(np.flip(FaceNodes),NonFaceNodes[1])
-    a = EdgeNodes[1]
-    e = EdgeNodes[0]
-    b,c,d = Face
+        condition = lambda i, n44, n32, n23 : i < iterate
+    i = 0
+    while condition(i, n44, n32, n23):
+        i += 1
+        n44 = 0; n32 = 0; n23 = 0
+        for key in ElemTableKeys:
+            if not ElemTable[key]['status']:
+                # skip if the element isn't active in the mesh
+                continue
+                
+            keyset = set(key)
+            ### Attempt edge removal ###
+            # 4-4 flip
+            success = _Tet44Flip(key, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc,target=target)
+            if success: 
+                n44 += 1
+                continue
 
-    Normal = np.cross(np.subtract(NodeCoords[b],NodeCoords[c]),np.subtract(NodeCoords[d],NodeCoords[c]))
-    if np.dot(Normal,NodeCoords[a])-np.dot(Normal,NodeCoords[c]) < 0:
-        # Reorder a, e for consistent tet formation
-        a,e = e,a
-    
-    # Make New Elements
-    NewElem1 = [b,c,d,e]
-    NewElem2 = [b,d,c,a]
-    
-    # Check New Elements
-    if QualityMetric == 'Skewness':
-        OldWorstQuality = np.max([quality[Elements[0]], quality[Elements[1]], quality[Elements[2]]])
-        NewQuality = quality.Skewness(NodeCoords,[NewElem1,NewElem2])
-        NewWorstQuality = np.max(NewQuality)
-        
-        Improved = NewWorstQuality < OldWorstQuality
+            # 3-2 flip
+            success = _Tet32Flip(key, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, target=target)
+            if success: 
+                n32 += 1
+                continue
+            
+            ###########################
 
+            ## Attempt face removal ###
+            # 2-3 flip
+            success = _Tet23Flip(key, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, target=target)
+            if success: 
+                n23 += 1
+                continue
+            
+            ############################
+
+        print(f'3-2 Flips: {n32:d}\n2-3 Flips: {n23:d}\n4-4 Flips: {n44:d}')
+    # Extract updated mesh
+
+    NewConn = [ElemTable[key]['elem'] for key in ElemTable.keys() if ElemTable[key]['status']]
+
+    if 'mesh' in dir(mesh):
+        tet = mesh.mesh(NodeCoords, NewConn)
     else:
-        raise Exception('quality metric {:s} unknown or not yet implemented.'.format(QualityMetric))
-    if Validate:
-        if not Improved:
-            # Flip didn't improve quality or created invalid elements, keep old mesh
-            return NodeConn, Edges, EdgeElemConn, EdgeConn, quality
+        tet = mesh(NodeCoords, NewConn)
+    return tet
+ 
+def _SmoothingInputParser(NodeCoords, NodeConn, SmoothOptions, UserOptions):
+
+    NodeCoords = np.asarray(NodeCoords)
+    NodeConn = np.asarray(NodeConn)
+
+    for key in UserOptions.keys(): SmoothOptions[key] = UserOptions[key]
+
+    # Process input options
+    FixedNodes = SmoothOptions['FixedNodes']
+    if SmoothOptions['FixFeatures']:
+        if type(FixedNodes) is not set: 
+            FixedNodes = set(FixedNodes)
+        edges, corners = utils.DetectFeatures(NodeCoords,NodeConn)
+        FixedNodes.update(edges)
+        FixedNodes.update(corners)
+
+    if SmoothOptions['FixSurf']:
+        SmoothOptions['FixedNodes'].update(np.asarray(converter.solid2surface(NodeCoords, NodeConn)).flatten())
+    idx = np.unique(NodeConn)
+    
+
+    SmoothOptions['FreeNodes'] = np.array(list(set(idx).difference(FixedNodes)))
+    SmoothOptions['FixedNodes'] = np.array(list(FixedNodes))
+
+    SmoothOptions['method'] = SmoothOptions['method'].lower()
+
+    return NodeCoords, NodeConn, SmoothOptions
+    
+def _Tet32Flip(elemkey, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, target='min'):
+
+    success = False
+
+    key = elemkey 
+    keyset = set(key)
+    for i,edge in enumerate(ElemTable[key]['edges']):
+        valid = True
+        adjacent_tets = EdgeTable[edge]['elems']
         
-        NewVolume = quality.Volume(NodeCoords,[NewElem1,NewElem2])
-        Valid = np.min(NewVolume) >= 0 and min(NewQuality) >= 0 and max(NewQuality) <= 1
-        if not Valid:
-            # Flip didn't improve quality or created invalid elements, keep old mesh
-            return NodeConn, Edges, EdgeElemConn, EdgeConn, quality
-    
-    # Delete old elements
-    NewConn = np.delete(NewConn, Elements,axis=0)
-    quality = np.delete(quality, Elements)
-    
-    
-    # Remove edge and adjust EdgeConn, EdgeElemConn
-    
+        if len(adjacent_tets) != 3:
+            # Not flippable
+            continue
+        
+        tet1, tet2 = [tet for tet in adjacent_tets if tet != key]
+
+        pts = keyset.union(tet1).union(tet2)
+        if len(pts) != 5:
+            # the three tets must form a hull of 5 points
+            continue
+
+        current_quality = [ElemTable[key]['quality'], ElemTable[tet1]['quality'], ElemTable[tet2]['quality']]
+
+        a, e = edge # Nodes of shared edge
+        b, c, d = pts.difference(edge) # b, c, d should be sorted automatically from the set
+
+        # Outer faces
+        face1key = tuple(sorted((a,c,d)))
+        face2key = tuple(sorted((c,d,e)))
+        face3key = tuple(sorted((a,b,c)))
+        face4key = tuple(sorted((b,c,e)))
+        face5key = tuple(sorted((a,b,d)))
+        face6key = tuple(sorted((b,d,e)))
+
+        # Convexity test
+        normals = np.repeat([FaceTable[face1key]['normal'],
+                            FaceTable[face2key]['normal'],
+                            FaceTable[face3key]['normal'],
+                            FaceTable[face4key]['normal'],
+                            FaceTable[face5key]['normal'],
+                            FaceTable[face6key]['normal'],
+                        ], 2, axis=0)
+
+        pts = NodeCoords[np.array([b, e,
+                                    a, b,
+                                    d, e,
+                                    a, d,
+                                    c, e,
+                                    a, c
+                                    ])]
+        ds = -np.sum(normals * NodeCoords[np.array([a, a, c, c, a, a, b, b, a, a, b, b])], axis=1)
+        dist_signs = np.sign(np.sum(normals * pts, axis=1) + ds).reshape(6,2)
+        if not np.all(np.all((dist_signs < 0),axis=1) | np.all((dist_signs > 0), axis=1)):
+            # Not convex (includes coplanar faces as nonconvex as such a flip would produce 0 volume elements)
+            break
+        
+
+        newface = tuple(sorted((b,c,d)))
+        if newface in FaceTable.keys():
+            normal = FaceTable[newface]['normal']
+        else:
+            normal = utils.CalcFaceNormal(NodeCoords, [newface])[0]
+
+
+        # Test which way the face is facing to allow for appropriate tet construction
+        if (np.dot(NodeCoords[a], normal) - np.dot(NodeCoords[b], normal)) > 0:
+            # face is facing `a`
+            elem1 = (*newface, a)
+            elem2 = (*newface[::-1], e)
+        else:
+            # face is facing `e`
+            elem1 = (*newface[::-1], a)
+            elem2 = (*newface, e)
+
+        elem1key = tuple(sorted(elem1)) 
+        elem2key = tuple(sorted(elem2)) 
+        
+        elems = (elem1, elem2)
+        elemkeys = (elem1key, elem2key)
+
+        for elem,elemkey in zip(elems, elemkeys):
+            if elemkey not in ElemTable.keys():
+                vol = quality.Volume(NodeCoords, [elem], ElemType='tet')[0]
+                ElemTable[elemkey] = {
+                    'status'  : False,
+                    'elem'    : elem,
+                    'volume'  : vol
+                    }
+                if vol > 0:
+                    ElemTable[elemkey]['quality'] = qualfunc(NodeCoords, [elem], [vol])[0]
+                    ElemTable[elemkey]['faces'] = [
+                        (elemkey[0], elemkey[1], elemkey[2]), 
+                        (elemkey[0], elemkey[1], elemkey[3]), 
+                        (elemkey[1], elemkey[2], elemkey[3]), 
+                        (elemkey[0], elemkey[2], elemkey[3])
+                        ]
+                    ElemTable[elemkey]['edges'] = [
+                        (elemkey[0], elemkey[1]), 
+                        (elemkey[1], elemkey[2]), 
+                        (elemkey[0], elemkey[2]), 
+                        (elemkey[0], elemkey[3]), 
+                        (elemkey[1], elemkey[3]), 
+                        (elemkey[2], elemkey[3])
+                        ]
+                else:
+                    # Invalid flip, no need to keep processing this configuration
+                    valid = False
+                    break
+            elif ElemTable[elemkey]['volume'] <= 0:
+                valid = False
+                break
+
+
+        if valid:
+            proposed_quality = [ElemTable[elemkey]['quality'] for elemkey in elemkeys]
+
+            if ((target == 'min') & (min(proposed_quality) > min(current_quality))) | ((target == 'mean') & (np.mean(proposed_quality) > np.mean(current_quality))):
+                oldset = {key, tet1, tet2}
+                # Flip leads to a quality improvement - accept the flip and update edges/faces
+                # a, b, c, d, e are still defined from checking step
+                # key is still the reference to the current element and other_tet is the reference to its flipping neighbor
+                ElemTable[elem1key]['status']  = True
+                ElemTable[elem2key]['status']  = True
+                ElemTable[key]['status']       = False
+                ElemTable[tet1]['status']      = False
+                ElemTable[tet2]['status']      = False
+
+                ### Update Face Table ###
+                # New face
+                if newface not in FaceTable.keys():
+                    FaceTable[newface] = {'elems'  : (elem1key, elem2key),
+                                          'normal' : normal
+                                        }
+                else:
+                    FaceTable[newface]['elems'] = (elem1key, elem2key)
+
+                # Outer faces
+                FaceTable[face1key]['elems'] = tuple((elem for elem in FaceTable[face1key]['elems'] if elem not in oldset)) + tuple([elem1key])
+                FaceTable[face2key]['elems'] = tuple((elem for elem in FaceTable[face2key]['elems'] if elem not in oldset)) + tuple([elem2key])
+                FaceTable[face3key]['elems'] = tuple((elem for elem in FaceTable[face3key]['elems'] if elem not in oldset)) + tuple([elem1key])
+                FaceTable[face4key]['elems'] = tuple((elem for elem in FaceTable[face4key]['elems'] if elem not in oldset)) + tuple([elem2key])
+                FaceTable[face5key]['elems'] = tuple((elem for elem in FaceTable[face5key]['elems'] if elem not in oldset)) + tuple([elem1key])
+                FaceTable[face6key]['elems'] = tuple((elem for elem in FaceTable[face6key]['elems'] if elem not in oldset)) + tuple([elem2key])
+
+                ### Update Edge Table ###
+                edge1key = tuple(sorted((a,b)))
+                edge2key = tuple(sorted((a,c)))
+                edge3key = tuple(sorted((a,d)))
+                edge4key = tuple(sorted((e,b)))
+                edge5key = tuple(sorted((e,c)))
+                edge6key = tuple(sorted((e,d)))
+                edge7key = tuple(sorted((b,c)))
+                edge8key = tuple(sorted((c,d)))
+                edge9key = tuple(sorted((d,c)))
+
+                # All edges already exist
+                
+                EdgeTable[edge1key]['elems'] = tuple((elem for elem in EdgeTable[edge1key]['elems'] if elem not in oldset)) + tuple([elem1key])
+                EdgeTable[edge2key]['elems'] = tuple((elem for elem in EdgeTable[edge2key]['elems'] if elem not in oldset)) + tuple([elem1key])
+                EdgeTable[edge3key]['elems'] = tuple((elem for elem in EdgeTable[edge3key]['elems'] if elem not in oldset)) + tuple([elem1key])
+
+                EdgeTable[edge4key]['elems'] = tuple((elem for elem in EdgeTable[edge4key]['elems'] if elem not in oldset)) + tuple([elem2key])
+                EdgeTable[edge5key]['elems'] = tuple((elem for elem in EdgeTable[edge5key]['elems'] if elem not in oldset)) + tuple([elem2key])
+                EdgeTable[edge6key]['elems'] = tuple((elem for elem in EdgeTable[edge6key]['elems'] if elem not in oldset)) + tuple([elem2key])
+
+                EdgeTable[edge7key]['elems'] = tuple((elem for elem in EdgeTable[edge7key]['elems'] if elem not in oldset)) + (elem1key,elem2key)
+                EdgeTable[edge8key]['elems'] = tuple((elem for elem in EdgeTable[edge8key]['elems'] if elem not in oldset)) + (elem1key,elem2key)
+                EdgeTable[edge9key]['elems'] = tuple((elem for elem in EdgeTable[edge9key]['elems'] if elem not in oldset)) + (elem1key,elem2key)
+
+                success = True
+                break
+
+    return success
+
+def _Tet23Flip(elemkey, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, target='min'):
+
+    success = False
+
+    key = elemkey 
+    keyset = set(key)
+    for i,face in enumerate(ElemTable[key]['faces']):
+        valid = True
+        adjacent_tets = FaceTable[face]['elems']
+        
+        if len(adjacent_tets) == 1:
+            # Surface face, not flippable
+            continue
+        other_tet = adjacent_tets[0] if key is adjacent_tets[1] else adjacent_tets[1]
+        otherset = set(other_tet)
+
+        current_quality = [ElemTable[key]['quality'], ElemTable[other_tet]['quality']]
+
+        a = keyset.difference(otherset).pop()   # Node from key element
+        b,c,d = face                            # Nodes of shared face
+        e = otherset.difference(keyset).pop()   # Node from neighboring element
+
+        # Outer faces
+        face1key = tuple(sorted((a,c,d)))
+        face2key = tuple(sorted((c,d,e)))
+        face3key = tuple(sorted((a,b,c)))
+        face4key = tuple(sorted((b,c,e)))
+        face5key = tuple(sorted((a,b,d)))
+        face6key = tuple(sorted((b,d,e)))
+
+        # Convexity test
+        normals = np.array([FaceTable[face1key]['normal'],
+                            FaceTable[face1key]['normal'],
+                            FaceTable[face2key]['normal'],
+                            FaceTable[face2key]['normal'],
+                            FaceTable[face3key]['normal'],
+                            FaceTable[face3key]['normal'],
+                            FaceTable[face4key]['normal'],
+                            FaceTable[face4key]['normal'],
+                            FaceTable[face5key]['normal'],
+                            FaceTable[face5key]['normal'],
+                            FaceTable[face6key]['normal'],
+                            FaceTable[face6key]['normal']
+                        ])
+        pts = NodeCoords[np.array([b, e,
+                                    a, b,
+                                    d, e,
+                                    a, d,
+                                    c, e,
+                                    a, c
+                                    ])]
+        ds = -np.sum(normals * NodeCoords[np.array([a, a, c, c, a, a, b, b, a, a, b, b])], axis=1)
+        dist_signs = np.sign(np.sum(normals * pts, axis=1) + ds).reshape(6,2)
+        if not np.all(np.all((dist_signs < 0),axis=1) | np.all((dist_signs > 0), axis=1)):
+            # Not convex (includes coplanar faces as nonconvex as such a flip would produce 0 volume elements)
+            break
+
+        # Test which way the face is facing to allow for appropriate tet construction
+        if (np.dot(NodeCoords[a], FaceTable[face]['normal']) - np.dot(NodeCoords[b], FaceTable[face]['normal'])) > 0:
+            # face is facing `a`
+            elem1 = (e, c, d, a)
+            elem2 = (e, b, c, a)
+            elem3 = (e, d, b, a)
+        else:
+            # face is facing `e`
+            elem1 = (a, c, d, e)
+            elem2 = (a, b, c, e)
+            elem3 = (a, d, b, e)
+
+        elem1key = tuple(sorted(elem1)) 
+        elem2key = tuple(sorted(elem2)) 
+        elem3key = tuple(sorted(elem3))
+        
+        elems = (elem1, elem2, elem3)
+        elemkeys = (elem1key, elem2key, elem3key)
+
+        for elem,elemkey in zip(elems, elemkeys):
+            if elemkey not in ElemTable.keys():
+                vol = quality.Volume(NodeCoords, [elem], ElemType='tet')[0]
+                ElemTable[elemkey] = {
+                    'status'  : False,
+                    'elem'    : elem,
+                    'volume'  : vol
+                    }
+                if vol > 0:
+                    ElemTable[elemkey]['quality'] = qualfunc(NodeCoords, [elem], [vol])[0]
+                    ElemTable[elemkey]['faces'] = [
+                        (elemkey[0], elemkey[1], elemkey[2]), 
+                        (elemkey[0], elemkey[1], elemkey[3]), 
+                        (elemkey[1], elemkey[2], elemkey[3]), 
+                        (elemkey[0], elemkey[2], elemkey[3])
+                        ]
+                    ElemTable[elemkey]['edges'] = [
+                        (elemkey[0], elemkey[1]), 
+                        (elemkey[1], elemkey[2]), 
+                        (elemkey[0], elemkey[2]), 
+                        (elemkey[0], elemkey[3]), 
+                        (elemkey[1], elemkey[3]), 
+                        (elemkey[2], elemkey[3])
+                        ]
+                else:
+                    # Invalid flip, no need to keep processing this configuration
+                    valid = False
+                    break
+            elif ElemTable[elemkey]['volume'] <= 0:
+                valid = False
+                break
+
+        if valid:
+            proposed_quality = [ElemTable[elemkey]['quality'] for elemkey in elemkeys]
+
+            if ((target == 'min') & (min(proposed_quality) > min(current_quality))) | ((target == 'mean') & (np.mean(proposed_quality) > np.mean(current_quality))):
+                # Flip leads to a quality improvement - accept the flip and update edges/faces
+                # a, b, c, d, e are still defined from checking step
+                # key is still the reference to the current element and other_tet is the reference to its flipping neighbor
+                ElemTable[elem1key]['status']  = True
+                ElemTable[elem2key]['status']  = True
+                ElemTable[elem3key]['status']  = True
+                ElemTable[key]['status']       = False
+                ElemTable[other_tet]['status'] = False
+
+                oldset = {key, other_tet}
+
+                ### Update Face Table ###
+                # Inner faces
+                face7key = tuple(sorted((a,c,e)))
+                face8key = tuple(sorted((a,d,e)))
+                face9key = tuple(sorted((a,b,e)))
+
+                newfacekeys = (face7key, face8key, face9key)
+                for facekey in newfacekeys:
+                    if facekey not in FaceTable.keys():
+                        FaceTable[facekey] = {'elems'  : (None, None),
+                                                'normal' : utils.CalcFaceNormal(NodeCoords, [facekey])[0]
+                                            }
+
+                FaceTable[face1key]['elems'] = tuple((elem for elem in FaceTable[face1key]['elems'] if elem not in oldset)) + tuple([elem1key])
+                FaceTable[face2key]['elems'] = tuple((elem for elem in FaceTable[face2key]['elems'] if elem not in oldset)) + tuple([elem1key])
+                FaceTable[face3key]['elems'] = tuple((elem for elem in FaceTable[face3key]['elems'] if elem not in oldset)) + tuple([elem2key])
+                FaceTable[face4key]['elems'] = tuple((elem for elem in FaceTable[face4key]['elems'] if elem not in oldset)) + tuple([elem2key])
+                FaceTable[face5key]['elems'] = tuple((elem for elem in FaceTable[face5key]['elems'] if elem not in oldset)) + tuple([elem3key])
+                FaceTable[face6key]['elems'] = tuple((elem for elem in FaceTable[face6key]['elems'] if elem not in oldset)) + tuple([elem3key])
+                FaceTable[face7key]['elems'] = (elem1key, elem2key)
+                FaceTable[face8key]['elems'] = (elem1key, elem3key)
+                FaceTable[face9key]['elems'] = (elem2key, elem3key)
+
+                ### Update Edge Table ###
+                edge1key = tuple(sorted((a,b)))
+                edge2key = tuple(sorted((a,c)))
+                edge3key = tuple(sorted((a,d)))
+                edge4key = tuple(sorted((e,b)))
+                edge5key = tuple(sorted((e,c)))
+                edge6key = tuple(sorted((e,d)))
+                edge7key = tuple(sorted((b,c)))
+                edge8key = tuple(sorted((c,d)))
+                edge9key = tuple(sorted((d,b)))
+                edge10key = tuple(sorted((a,e)))
+
+                # All edges already guaranteed to exist except edge 10
+                EdgeTable[edge1key]['elems'] = tuple((elem for elem in EdgeTable[edge1key]['elems'] if elem not in oldset)) + (elem2key,elem3key)
+                EdgeTable[edge2key]['elems'] = tuple((elem for elem in EdgeTable[edge2key]['elems'] if elem not in oldset)) + (elem1key,elem2key)
+                EdgeTable[edge3key]['elems'] = tuple((elem for elem in EdgeTable[edge3key]['elems'] if elem not in oldset)) + (elem1key,elem3key)
+
+                EdgeTable[edge4key]['elems'] = tuple((elem for elem in EdgeTable[edge4key]['elems'] if elem not in oldset)) + (elem2key,elem3key)
+                EdgeTable[edge5key]['elems'] = tuple((elem for elem in EdgeTable[edge5key]['elems'] if elem not in oldset)) + (elem1key,elem2key)
+                EdgeTable[edge6key]['elems'] = tuple((elem for elem in EdgeTable[edge6key]['elems'] if elem not in oldset)) + (elem1key,elem3key)
+
+                EdgeTable[edge7key]['elems'] = tuple((elem for elem in EdgeTable[edge7key]['elems'] if elem not in oldset)) + tuple([elem2key])
+                EdgeTable[edge8key]['elems'] = tuple((elem for elem in EdgeTable[edge8key]['elems'] if elem not in oldset)) + tuple([elem1key])
+                EdgeTable[edge9key]['elems'] = tuple((elem for elem in EdgeTable[edge9key]['elems'] if elem not in oldset)) + tuple([elem3key])
+
+                EdgeTable[edge10key] = {'elems' : (elem1key, elem2key, elem3key)}
+
+                success = True
+                break
+
+    return success
+
+def _Tet44Flip(elemkey, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, target='min'):
+    success = False
+
+    key = elemkey 
+    keyset = set(key)
+    for i,edge in enumerate(ElemTable[key]['edges']):
+        
+        adjacent_tets = EdgeTable[edge]['elems']
+        
+        if len(adjacent_tets) != 4:
+            # Not flippable
+            continue
+
+        tet1, tet2, tet3 = (tet for tet in adjacent_tets if tet != key)
+
+        pts = keyset.union(tet1).union(tet2).union(tet3)
+        if len(pts) != 6:
+            # the four tets must form a hull of 6 points
+            continue
+
+        current_quality = [ElemTable[key]['quality'], ElemTable[tet1]['quality'], ElemTable[tet2]['quality'], ElemTable[tet3]['quality']]
+
+        c, e = edge # Nodes of shared edge
+        # This could probably be more elegant
+        pts.difference_update(edge)
+        a = pts.pop() # 
+        connected_to_a = set()
+        for tet in adjacent_tets:
+            if a in tet:
+                connected_to_a.update(tet)
+        f = pts.difference(connected_to_a).pop()
+        b, d = pts.difference({f})
+
+        # Outer faces (sorting might not be needed?)
+        face1key = tuple(sorted((a,b,c)))
+        face2key = tuple(sorted((a,c,d)))
+        face3key = tuple(sorted((a,d,e)))
+        face4key = tuple(sorted((a,b,e)))
+        face5key = tuple(sorted((b,c,f)))
+        face6key = tuple(sorted((b,e,f)))
+        face7key = tuple(sorted((c,d,f)))
+        face8key = tuple(sorted((d,e,f)))
+
+        # Convexity test
+        normals = np.repeat([FaceTable[face1key]['normal'],
+                            FaceTable[face2key]['normal'],
+                            FaceTable[face3key]['normal'],
+                            FaceTable[face4key]['normal'],
+                            FaceTable[face5key]['normal'],
+                            FaceTable[face6key]['normal'],
+                            FaceTable[face7key]['normal'],
+                            FaceTable[face8key]['normal']
+                        ], 3, axis=0)
+
+        pts = NodeCoords[np.array([
+                                    d, e, f,    # Other nodes for face 1
+                                    b, e, f,    # Other nodes for face 2
+                                    b, c, f,    # Other nodes for face 3
+                                    c, d, f,    # Other nodes for face 4
+                                    a, e, d,    # Other nodes for face 5
+                                    a, c, d,    # Other nodes for face 6
+                                    a, b, e,    # Other nodes for face 7
+                                    a, b, c     # Other nodes for face 8
+                                    ])]
+        ds = -np.sum(normals * NodeCoords[np.array([a, a, a, a, a, a, a, a, a, a, a, a, b, b, b, b, b, b, c, c, c, d, d, d])], axis=1) 
+        dist_signs = np.sign(np.sum(normals * pts, axis=1) + ds).reshape(12,2)
+        if not np.all(np.all((dist_signs < 0),axis=1) | np.all((dist_signs > 0), axis=1)):
+            # Not convex (includes coplanar faces as nonconvex as such a flip would produce 0 volume elements)
+            break
+        
+        # Config 1
+        newface1_1 = tuple(sorted((b,c,d)))
+        newface1_2 = tuple(sorted((b,e,d)))
+        newface1_3 = tuple(sorted((b,a,d)))
+        newface1_4 = tuple(sorted((b,d,f)))
+        # Config 2
+        newface2_1 = tuple(sorted((a,c,f)))
+        newface2_2 = tuple(sorted((a,e,f)))
+        newface2_3 = tuple(sorted((b,a,f)))
+        newface2_4 = tuple(sorted((d,a,f)))
+
+        normals = [FaceTable[newface]['normal'] if newface in FaceTable.keys() else utils.CalcFaceNormal(NodeCoords, [newface])[0] for newface in (newface1_1, newface1_2, newface2_1, newface2_2)]
+
+
+        # Test which way the face is facing to allow for appropriate tet construction
+        if (np.dot(NodeCoords[a], normals[0]) - np.dot(NodeCoords[b], normals[0])) > 0:
+            # face1 is facing `a`
+            elem1_1 = (*newface1_1, a)
+            elem1_2 = (*newface1_1[::-1], f)
+        else:
+            # face1 is facing `f`
+            elem1_1 = (*newface1_1[::-1], a)
+            elem1_2 = (*newface1_1, f)
+
+        if (np.dot(NodeCoords[a], normals[1]) - np.dot(NodeCoords[d], normals[1])) > 0:
+            # face2 is facing `a`
+            elem1_3 = (*newface1_2, a)
+            elem1_4 = (*newface1_2[::-1], f)
+        else:
+            # face2 is facing `f`
+            elem1_3 = (*newface1_2[::-1], a)
+            elem1_4 = (*newface1_2, f)
+
+        if (np.dot(NodeCoords[b], normals[2]) - np.dot(NodeCoords[a], normals[2])) > 0:
+            # face2_1 is facing `b`
+            elem2_1 = (*newface2_1, b)
+            elem2_2 = (*newface2_1[::-1], d)
+        else:
+            # face2_1 is facing `d`
+            elem2_1 = (*newface2_1[::-1], b)
+            elem2_2 = (*newface2_1, d)
+
+        if (np.dot(NodeCoords[b], normals[3]) - np.dot(NodeCoords[f], normals[3])) > 0:
+            # face2_2 is facing `b`
+            elem2_3 = (*newface2_2, b)
+            elem2_4 = (*newface2_2[::-1], d)
+        else:
+            # face2_2 is facing `d`
+            elem2_3 = (*newface2_2[::-1], b)
+            elem2_4 = (*newface2_2, d)
+
+        elem1_1key = tuple(sorted(elem1_1)) 
+        elem1_2key = tuple(sorted(elem1_2)) 
+        elem1_3key = tuple(sorted(elem1_3)) 
+        elem1_4key = tuple(sorted(elem1_4)) 
+        elem2_1key = tuple(sorted(elem2_1)) 
+        elem2_2key = tuple(sorted(elem2_2)) 
+        elem2_3key = tuple(sorted(elem2_3)) 
+        elem2_4key = tuple(sorted(elem2_4)) 
+        
+        elems = (elem1_1, elem1_2, elem1_3, elem1_4, elem2_1, elem2_2, elem2_3, elem2_4)
+        elemkeys = (elem1_1key, elem1_2key, elem1_3key, elem1_4key, elem2_1key, elem2_2key, elem2_3key, elem2_4key)
+
+        # Check validity of constructed elements and fill out their table entries (regardless of whether or not they will be activated)
+        valid = np.repeat(True, 8)
+        for i,(elem,elemkey) in enumerate(zip(elems, elemkeys)):
+            if elemkey not in ElemTable.keys():
+                vol = quality.Volume(NodeCoords, [elem], ElemType='tet')[0]
+                ElemTable[elemkey] = {
+                    'status'  : False,
+                    'elem'    : elem,
+                    'volume'  : vol
+                    }
+                if vol > 0:
+                    ElemTable[elemkey]['quality'] = qualfunc(NodeCoords, [elem], [vol])[0]
+                    ElemTable[elemkey]['faces'] = [
+                        (elemkey[0], elemkey[1], elemkey[2]), 
+                        (elemkey[0], elemkey[1], elemkey[3]), 
+                        (elemkey[1], elemkey[2], elemkey[3]), 
+                        (elemkey[0], elemkey[2], elemkey[3])
+                        ]
+                    ElemTable[elemkey]['edges'] = [
+                        (elemkey[0], elemkey[1]), 
+                        (elemkey[1], elemkey[2]), 
+                        (elemkey[0], elemkey[2]), 
+                        (elemkey[0], elemkey[3]), 
+                        (elemkey[1], elemkey[3]), 
+                        (elemkey[2], elemkey[3])
+                        ]
+                else:
+                    # Invalid flip, no need to keep processing this configuration
+                    valid[i] = False
+            elif ElemTable[elemkey]['volume'] <= 0:
+                valid[i] = False
+
+        q1 = [ElemTable[elemkey]['quality'] if valid[i] else -1 for i,elemkey in enumerate(elemkeys[:4])]
+        q2 = [ElemTable[elemkey]['quality'] if valid[i+4] else -1 for i,elemkey in enumerate(elemkeys[4:])]
+
+        if np.all(valid[:4]) and (min(q1) > min(q2)):
+            # Use configuration 1
+            elem1key, elem2key, elem3key, elem4key = elemkeys[:4]
+            proposed_quality = q1
+            normal1, normal2 = normals[:2]
+            newedge = tuple(sorted((b,d)))
+            newface1, newface2, newface3, newface4 = newface1_1, newface1_2, newface1_3, newface1_4
+        elif np.all(valid[4:]):
+            # Use configuration 2
+            elem1key, elem2key, elem3key, elem4key = elemkeys[4:]
+            proposed_quality = q2
+            normal1, normal2 = normals[2:]
+            newedge = tuple(sorted((a,f)))
+            newface1, newface2, newface3, newface4 = newface2_1, newface2_2, newface2_3, newface2_4
+        else:
+            # Neither configuration is valid
+            success = False
+            return success
+
+        # Modify tables with new tets
+        if ((target == 'min') & (min(proposed_quality) > min(current_quality))) | ((target == 'mean') & (np.mean(proposed_quality) > np.mean(current_quality))):
+            elemkeys = (elem1key, elem2key, elem3key, elem4key)
+            oldset = {key, tet1, tet2, tet3}
+            # Flip leads to a quality improvement - accept the flip and update edges/faces
+            # a, b, c, d, e, f are still defined from checking step
+            # key is still the reference to the current element and other_tet is the reference to its flipping neighbor
+            ElemTable[elem1key]['status']  = True
+            ElemTable[elem2key]['status']  = True
+            ElemTable[elem3key]['status']  = True
+            ElemTable[elem4key]['status']  = True
+            ElemTable[key]['status']       = False
+            ElemTable[tet1]['status']      = False
+            ElemTable[tet2]['status']      = False
+            ElemTable[tet3]['status']      = False
+
+            ### Update Face Table ###
+            # New face
+            if newface1 not in FaceTable.keys():
+                FaceTable[newface1] = {'elems'  : (elem1key, elem2key),
+                                        'normal' : normal1
+                                    }
+            else:
+                FaceTable[newface1]['elems'] = (elem1key, elem2key)
+
+            if newface2 not in FaceTable.keys():
+                FaceTable[newface2] = {'elems'  : (elem3key, elem4key),
+                                        'normal' : normal2
+                                    }
+            else:
+                FaceTable[newface2]['elems']  = (elem3key, elem4key)
+
+            if newface3 not in FaceTable.keys():
+                FaceTable[newface3] = {'elems'  : (elem1key, elem3key),
+                                        'normal' : utils.CalcFaceNormal(NodeCoords, [newface3])[0]
+                                    }
+            else:
+                FaceTable[newface3]['elems']  = (elem1key, elem3key)
+
+            if newface4 not in FaceTable.keys():
+                FaceTable[newface4] = {'elems'  : (elem2key, elem4key),
+                                        'normal' : utils.CalcFaceNormal(NodeCoords, [newface4])[0]
+                                    }
+            else:
+                FaceTable[newface4]['elems']  = (elem2key, elem4key)
+
+            
+            for facekey in (face1key, face2key, face3key, face4key, face5key, face6key, face7key, face8key):
+                FaceTable[facekey]['elems'] = tuple((elem for elem in FaceTable[facekey]['elems'] if elem not in oldset)) + tuple(elemkey for elemkey in elemkeys if np.all(np.isin(facekey, elemkey)))
+
+            ### Update Edge Table ###
+            edge1key = tuple(sorted((a,b)))
+            edge2key = tuple(sorted((a,c)))
+            edge3key = tuple(sorted((a,d)))
+            edge4key = tuple(sorted((a,e)))
+
+            edge5key = tuple(sorted((b,f)))
+            edge6key = tuple(sorted((c,f)))
+            edge7key = tuple(sorted((d,f)))
+            edge8key = tuple(sorted((e,f)))
+
+            edge9key = tuple(sorted((b,c)))
+            edge10key = tuple(sorted((c,d)))
+            edge11key = tuple(sorted((d,e)))
+            edge12key = tuple(sorted((e,b)))
+
+            edge13key = newedge
+
+            # All outer edges already exist
+            for edgekey in (edge1key, edge2key, edge3key, edge4key, edge5key, edge6key, edge7key, edge8key, edge9key, edge10key, edge11key, edge12key):
+                EdgeTable[edgekey]['elems'] = tuple((elem for elem in EdgeTable[edgekey]['elems'] if elem not in oldset)) + tuple(elemkey for elemkey in elemkeys if np.all(np.isin(edgekey, elemkey)))
+
+            EdgeTable[edge13key] = {'elems' : (elem1key,elem2key,elem3key,elem4key)}
+
+            success = True
+            break
+
+    return success
