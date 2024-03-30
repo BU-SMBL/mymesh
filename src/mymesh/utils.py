@@ -151,7 +151,7 @@ def getElemConnectivity(NodeCoords,NodeConn):
     nodes += tuple(NotInMesh)
     elems += tuple(itertools.repeat(-1,len(nodes)))
 
-    ElemConn2 = [list(set(elem for _, elem in group if elem != -1)) for node, group in itertools.groupby(sorted(zip(nodes,elems), key=lambda x: x[0]), key=lambda x: x[0])] 
+    ElemConn = [list(set(elem for _, elem in group if elem != -1)) for node, group in itertools.groupby(sorted(zip(nodes,elems), key=lambda x: x[0]), key=lambda x: x[0])] 
 
     return ElemConn
 
@@ -465,11 +465,21 @@ def CalcFaceNormal(NodeCoords,SurfConn):
         List of element surface normals .
 
     """
-    ArrayCoords = np.append(NodeCoords,[[np.nan,np.nan,np.nan]],axis=0)
-    points = ArrayCoords[PadRagged(SurfConn)]
+    #TODO: Need to make this function handle tris/quads/mixed tris&quads and average for quads 
+    # (similar structure to quality.Area and qualtiy.tri_area)
+    # ArrayCoords = np.append(NodeCoords,[[np.nan,np.nan,np.nan]],axis=0)
+    ArrayCoords = np.asarray(NodeCoords)
+    TriConn = SurfConn
+    # points = ArrayCoords[PadRagged(SurfConn)]
+    points = ArrayCoords[SurfConn]
+    ElemNormals = tri_normals(points)
 
-    U = points[:,1,:]-points[:,0,:]
-    V = points[:,2,:]-points[:,0,:]
+    return ElemNormals
+
+def tri_normals(Tris):
+    
+    U = Tris[:,1,:]-Tris[:,0,:]
+    V = Tris[:,2,:]-Tris[:,0,:]
     Nx = U[:,1]*V[:,2] - U[:,2]*V[:,1]
     Ny = U[:,2]*V[:,0] - U[:,0]*V[:,2]
     Nz = U[:,0]*V[:,1] - U[:,1]*V[:,0]
@@ -477,7 +487,7 @@ def CalcFaceNormal(NodeCoords,SurfConn):
     d = np.linalg.norm(N,axis=1)
     with np.errstate(divide='ignore', invalid='ignore'):
         ElemNormals = (N/d[:,None])
-
+    
     return ElemNormals
 
 def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
