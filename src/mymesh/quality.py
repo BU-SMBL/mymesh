@@ -433,6 +433,44 @@ def MaxDihedral(NodeCoords,NodeConn,verbose=False):
         print('------------------------------------------')
     return MaxAngles
 
+def MeanRatio(NodeCoords,NodeConn,verbose=False):
+
+    NodeConn = np.asarray(NodeConn)
+    D = np.empty((len(NodeConn),3,3))
+    D[:,0,:] = NodeCoords[NodeConn[:,1]] - NodeCoords[NodeConn[:,0]]
+    D[:,1,:] = NodeCoords[NodeConn[:,2]] - NodeCoords[NodeConn[:,0]]
+    D[:,2,:] = NodeCoords[NodeConn[:,3]] - NodeCoords[NodeConn[:,0]]
+
+    W = np.array([
+        [1, 1/2, 1/2],
+        [0, np.sqrt(3)/2, np.sqrt(3)/6],
+        [0, 0, np.sqrt(2/3)]
+    ])            
+    
+    # Matrix multiplication in a numba-friendly style
+    S = np.dot(D.reshape(-1,3), np.linalg.inv(W)).reshape(D.shape)
+
+    Sfrob = np.linalg.norm(S, ord='fro', axis=(1,2))
+    # Sfrob = np.sqrt(np.sum(np.sum(S ** 2, axis=1),axis=1))
+    det = np.linalg.det(S)
+    inv = det < 0
+    q = 3*np.abs(det)**(2/3) / Sfrob**2
+    q[inv] = -1*q[inv]
+    if np.any(np.isnan(q)):
+        a = 2
+
+    if verbose:
+        minq = min(q)
+        maxq = max(q)
+        meanq = np.mean(q)
+        print('------------------------------------------')
+        print(f'Minimum Mean Ratio: {minq:.3f} on Element {np.where(q==minq)[0][0]:.0f}')
+        print(f'Maximum Mean Ratio: {maxq:.3f} on Element {np.where(q==maxq)[0][0]:.0f}')
+        print(f'Mean Mean Ratio: {meanq:.3f}')
+        print('------------------------------------------')
+
+    return q
+
 def Area(NodeCoords,NodeConn,Type=None):
     """
     Calculates element areas for each element in the mesh. For volume elements,
@@ -462,8 +500,7 @@ def Area(NodeCoords,NodeConn,Type=None):
         ArrayCoords,TriConn,ElemIds = converter.surf2tris(NodeCoords,NodeConn,return_ids=True)     
         ArrayCoords = np.asarray(ArrayCoords)
 
-        Points = np.asarray(NodeCoords)[np.asarray(TriConn)]
-        area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2 
+        area = tri_area(ArrayCoords, TriConn)
         area = np.append(area,0)
         A = np.sum(area[utils.PadRagged(ElemIds)],axis=1)
     else:
@@ -504,15 +541,11 @@ def Volume(NodeCoords,NodeConn,verbose=False,ElemType='auto'):
     if ElemType != 'tet':
         ArrayCoords,TetConn,ElemIds = converter.solid2tets(NodeCoords,NodeConn,return_ids=True)     
         ArrayCoords = np.asarray(ArrayCoords)   
-        ArrayConn = np.asarray(TetConn)
+        ArrayConn = np.asarray(TetConn, dtype=int)
     else:
         ArrayCoords = np.asarray(NodeCoords)
-        ArrayConn = np.asarray(NodeConn)
-    pt0 = ArrayCoords[ArrayConn][:,0]
-    pt1 = ArrayCoords[ArrayConn][:,1]
-    pt2 = ArrayCoords[ArrayConn][:,2]
-    pt3 = ArrayCoords[ArrayConn][:,3]
-    vol = -np.sum((pt0-pt1)*np.cross((pt1-pt3),(pt2-pt3)),axis=1)/6
+        ArrayConn = np.asarray(NodeConn, dtype=int)
+    vol = tet_volume(ArrayCoords, ArrayConn)
     if ElemType != 'tet':
         vol = np.append(vol,0)
         V = np.sum(vol[utils.PadRagged(ElemIds)],axis=1)
@@ -524,11 +557,28 @@ def Volume(NodeCoords,NodeConn,verbose=False,ElemType='auto'):
         maxVol = max(V)
         meanVol = np.mean(V)
         print('------------------------------------------')
-        print(f'Minimum Volume: {minVol:.2e} on Element {np.where(V==minVol)[0][0]:.0f}')
-        print(f'Maximum Volume: {maxVol:.2e} on Element {np.where(V==maxVol)[0][0]:.0f}')
-        print(f'Mean Volume: {meanVol:.2e}')
+        print('Minimum Volume: {:.2e} on Element {:.0f}'.format(minVol,np.where(V==minVol)[0][0]))
+        print('Maximum Volume: {:.2e} on Element {:.0f}'.format(maxVol,np.where(V==maxVol)[0][0]))
+        print('Mean Volume: {:.2e}'.format(meanVol))
         print('------------------------------------------')
     return V
+
+def tri_area(NodeCoords, NodeConn):
+
+    Points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
+    area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2 
+
+    return area
+    
+def tet_volume(NodeCoords, NodeConn):
+
+    pt0 = NodeCoords[NodeConn][:,0]
+    pt1 = NodeCoords[NodeConn][:,1]
+    pt2 = NodeCoords[NodeConn][:,2]
+    pt3 = NodeCoords[NodeConn][:,3]
+    vol = -np.sum((pt0-pt1)*np.cross((pt1-pt3),(pt2-pt3)),axis=1)/6
+
+    return vol
 
 def tri_skewness(NodeCoords,NodeConn):
     """
