@@ -416,7 +416,7 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
         of the original elements.
     """    
     if type(NodeConn) is np.ndarray:
-        Ls = np.repeat(NodeConn.shape[0], NodeConn.shape[1])
+        Ls = np.repeat(NodeConn.shape[1], NodeConn.shape[0])
     else:
         Ls = np.array([len(elem) for elem in NodeConn])
 
@@ -431,10 +431,14 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
     pyrIdx = np.where(Ls == 5)[0]
     wdgIdx = np.where(Ls == 6)[0]
     hexIdx = np.where(Ls == 8)[0]
+    tet10Idx = np.where(Ls == 10)[0]
+
     tets = [NodeConn[i] for i in tetIdx]
     pyrs = [NodeConn[i] for i in pyrIdx]
     wdgs = [NodeConn[i] for i in wdgIdx]
     hexs = [NodeConn[i] for i in hexIdx]
+    tet10 = [NodeConn[i] for i in tet10Idx]
+
 
 
     if len(pyrIdx) > 0 or len(wdgIdx) > 0:
@@ -446,14 +450,16 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
     TetCoords,fromhex = hex2tet(NodeCoords,hexs,method=hexmethod)
     TetCoords,fromwdg = wedge2tet(TetCoords,wdgs,method='1to14')
     TetCoords,frompyr = pyramid2tet(TetCoords,pyrs,method='1to4')
-    TetConn = tets + frompyr + fromwdg + fromhex
+    TetCoords,fromtet10 = tet102tet4(TetCoords,tet10)
+    TetConn = tets + frompyr + fromwdg + fromhex + fromtet10.tolist()
     if return_ids:
         # Element ids of the tets connected to the original elements
-        ElemIds_i = np.concatenate((tetIdx,np.repeat(pyrIdx,4),np.repeat(wdgIdx,14),np.repeat(hexIdx,hexn)))
+        ElemIds_i = np.concatenate((tetIdx,np.repeat(pyrIdx,4),np.repeat(wdgIdx,14),np.repeat(hexIdx,hexn),tet10Idx))
         ElemIds_j = np.concatenate((np.repeat(0,len(tetIdx)), 
                 np.repeat([np.arange(4)],len(pyrIdx),axis=0).reshape(len(pyrIdx)*4),                   
                 np.repeat([np.arange(14)],len(wdgIdx),axis=0).reshape(len(wdgIdx)*14),   
-                np.repeat([np.arange(hexn)],len(hexIdx),axis=0).reshape(len(hexIdx)*hexn),                    
+                np.repeat([np.arange(hexn)],len(hexIdx),axis=0).reshape(len(hexIdx)*hexn),
+                np.repeat(0,len(tet10Idx)),                 
                 ))
         ElemIds = -1*np.ones((len(NodeConn),np.maximum(14,hexn)))
         ElemIds[ElemIds_i,ElemIds_j] = np.arange(len(TetConn))
@@ -557,7 +563,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
         return NodeCoords, NodeConn
 
     if method == '1to5':
-        ArrayConn = np.asarray(NodeConn)
+        ArrayConn = np.asarray(NodeConn, dtype=int)
         TetConn = -1*np.ones((len(NodeConn)*5,4))
         TetConn[0::5] = ArrayConn[:,[0,1,3,4]]
         TetConn[1::5] = ArrayConn[:,[1,2,3,6]]
@@ -567,7 +573,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
         TetConn = TetConn.astype(int).tolist()
         NewCoords = NodeCoords
     elif method == '1to6':
-        ArrayConn = np.asarray(NodeConn)
+        ArrayConn = np.asarray(NodeConn, dtype=int)
         TetConn = -1*np.ones((len(NodeConn)*6,4))
         TetConn[0::6] = ArrayConn[:,[0,1,3,5]]
         TetConn[1::6] = ArrayConn[:,[5,2,3,6]]
@@ -580,7 +586,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
         NewCoords = NodeCoords
     elif method == '1to24':
         ArrayCoords = np.asarray(NodeCoords)
-        ArrayConn = np.asarray(NodeConn)
+        ArrayConn = np.asarray(NodeConn, dtype=int)
 
         Centroids = utils.Centroids(ArrayCoords,NodeConn)
         Face0Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1,2,3]]],axis=1)
@@ -1451,11 +1457,11 @@ def quad2tri(QuadNodeConn):
         TriNodeConn[2*i+1] = [QuadNodeConn[i][1], QuadNodeConn[i][2], QuadNodeConn[i][3]]
     return TriNodeConn
         
-def tet102tet4(Tet10NodeConn):
+def tet102tet4(NodeCoords, Tet10NodeConn):
     """
     Converts a 10 node tetradehdral mesh to a 4 node tetradehedral mesh.
-    Assumes a 10 node tetrahedral numbering scheme where the first 4 nodes define the
-    tetrahedral vertices, the remaining nodes are thus neglected.
+    Assumes a 10 node tetrahedral numbering scheme where the first 4 nodes define
+    the tetrahedral vertices, the remaining nodes are thus neglected.
 
     Parameters
     ----------
@@ -1467,12 +1473,47 @@ def tet102tet4(Tet10NodeConn):
     Tet4NodeConn
         Nodal connectivities for the equivalent 4-Node tetrahedral mesh
     """
-    # 
-    # Assumes the 10 node tetrahedral element scheme used by Abaqus
-    Tet4NodeConn = [[Tet10NodeConn[i][0],Tet10NodeConn[i][1],Tet10NodeConn[i][2],Tet10NodeConn[i][3]] for i in range(len(Tet10NodeConn))]
+    if len(Tet10NodeConn) == 0:
+        return NodeCoords, np.asarray(Tet10NodeConn)
+    Tet4NodeConn = np.asarray(Tet10NodeConn)[:, :4]
     
-    return Tet4NodeConn
-     
+    return NodeCoords, Tet4NodeConn
+
+def tet42tet10(NodeCoords, Tet4NodeConn):
+
+    NodeCoords = np.asarray(NodeCoords)
+    Tet4NodeConn = np.asarray(Tet4NodeConn)
+    Nodes01 = (NodeCoords[Tet4NodeConn[:,0]] + NodeCoords[Tet4NodeConn[:,1]])/2
+    Nodes12 = (NodeCoords[Tet4NodeConn[:,1]] + NodeCoords[Tet4NodeConn[:,2]])/2
+    Nodes20 = (NodeCoords[Tet4NodeConn[:,2]] + NodeCoords[Tet4NodeConn[:,0]])/2
+    Nodes03 = (NodeCoords[Tet4NodeConn[:,0]] + NodeCoords[Tet4NodeConn[:,3]])/2
+    Nodes13 = (NodeCoords[Tet4NodeConn[:,1]] + NodeCoords[Tet4NodeConn[:,3]])/2
+    Nodes23 = (NodeCoords[Tet4NodeConn[:,2]] + NodeCoords[Tet4NodeConn[:,3]])/2
+
+    n = len(NodeCoords)
+    m = len(Tet4NodeConn)
+    ids01 = np.arange(    n, n+m)
+    ids12 = np.arange(  n+m, n+2*m)
+    ids20 = np.arange(n+2*m, n+3*m)
+    ids03 = np.arange(n+3*m, n+4*m)
+    ids13 = np.arange(n+4*m, n+5*m)
+    ids23 = np.arange(n+5*m, n+6*m)
+
+    Tet10NodeConn = np.empty((m, 10),dtype=int)
+    Tet10NodeConn[:, :4] = Tet4NodeConn
+    Tet10NodeConn[:, 4] = ids01
+    Tet10NodeConn[:, 5] = ids12
+    Tet10NodeConn[:, 6] = ids20
+    Tet10NodeConn[:, 7] = ids03
+    Tet10NodeConn[:, 8] = ids13
+    Tet10NodeConn[:, 9] = ids23
+
+    NewCoords = np.vstack([NodeCoords, Nodes01, Nodes12, Nodes20, Nodes03, Nodes13, Nodes23])
+
+    NewCoords, Tet10NodeConn = utils.DeleteDuplicateNodes(NewCoords, Tet10NodeConn)
+
+    return NewCoords, Tet10NodeConn
+ 
 def surf2edges(NodeCoords,NodeConn,ElemType='auto'):
     """
     Extract the edges of an unclosed surface mesh.
