@@ -4419,7 +4419,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         
         for i in [0,1,2]:
             # Loop over axes
-            notconstant = coords1[:,i] != coords3[:,i] # identifies points where there is variation in position along this axis
+            notconstant = ~np.isclose(coords1[:,i], coords3[:,i]) # identifies points where there is variation in position along this axis
 
             # Build coefficients for quadratic polynomials
             mat = np.empty((np.sum(notconstant), 3, 3))
