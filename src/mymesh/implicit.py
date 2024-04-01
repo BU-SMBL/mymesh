@@ -124,10 +124,10 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_direction=-1, mode='any', 
 
     # If func is a sympy-based function, convert it to numpy
     if isinstance(func, sp.Basic):
-        x, y, z = sp.symbols('x y z')
+        x, y, z = sp.symbols('x y z', real=True)
         vector_func = sp.lambdify((x, y, z), func, 'numpy')
     elif isinstance(func(bounds[0],bounds[2],bounds[4]), sp.Basic):
-        x, y, z = sp.symbols('x y z')
+        x, y, z = sp.symbols('x y z', real=True)
         vector_func = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
     else:
         vector_func = func
@@ -228,10 +228,10 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
         h = (h,h,h)
 
     if isinstance(func, sp.Basic):
-        x, y, z = sp.symbols('x y z')
+        x, y, z = sp.symbols('x y z', real=True)
         vector_func = sp.lambdify((x, y, z), func, 'numpy')
     elif isinstance(func(bounds[0],bounds[2],bounds[4]), sp.Basic):
-        x, y, z = sp.symbols('x y z')
+        x, y, z = sp.symbols('x y z', real=True)
         vector_func = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
     else:
         vector_func = func
@@ -316,10 +316,10 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
         h = (h,h,h)
 
     if isinstance(func, sp.Basic):
-        x, y, z = sp.symbols('x y z')
+        x, y, z = sp.symbols('x y z', real=True)
         vector_func = sp.lambdify((x, y, z), func, 'numpy')
     elif isinstance(func(bounds[0],bounds[2],bounds[4]), sp.Basic):
-        x, y, z = sp.symbols('x y z')
+        x, y, z = sp.symbols('x y z', real=True)
         vector_func = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
     else:
         vector_func = func
