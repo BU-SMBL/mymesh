@@ -287,7 +287,9 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
     threshold_direction : signed integer
         If threshold_direction is negative (default), values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_direction is positive, by default -1.
     interpolation : str, optional
-        Method of interpolation used for placing the vertices on the approximated isosurface. This can be 'midpoint', 'linear', by default 'linear'. 
+        Method of interpolation used for placing the vertices on the approximated 
+        isosurface. This can be 'midpoint', 'linear', or 'quadratic', by default
+        'linear'. 
     args : tuple, optional
         Tuple of additional positional arguments for func, by default ().
     kwargs : dict, optional
@@ -332,7 +334,11 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
     if background is None:
         voxel = VoxelMesh(vector_func, bounds, h, threshold=threshold, threshold_direction=threshold, mode='any', args=args, kwargs=kwargs)
         NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
-        NodeVals = voxel.NodeData['func']
+        if interpolation == 'quadratic':
+            NodeCoords, NodeConn = converter.tet42tet10(NodeCoords, NodeConn)
+            NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
+        else:
+            NodeVals = voxel.NodeData['func']
     else:
         NodeCoords, NodeConn = background
         NodeCoords = np.asarray(NodeCoords)
