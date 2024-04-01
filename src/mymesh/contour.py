@@ -4187,7 +4187,7 @@ def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method=
             
     return TriCoords, TriConn, root, DualCoords, DualConn, NodeValues
 
-def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False, cleanup_tol=1e-12):
+def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False, cleanup_tol=1e-10):
     """
     Marching tetrahedra algorithm for extracting an isosurface from a tetrahedral mesh. This can be used to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).
 
@@ -4246,6 +4246,9 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
 
 
     """    
+    TetNodeCoords = np.asarray(TetNodeCoords)
+    TetNodeConn = np.asarray(TetNodeConn)
+
     MT_Lookup = np.array([
             [],                     # 0-0000
             [[3, 5, 4]],            # 1-0001
@@ -4303,20 +4306,40 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
             [[6, 7, 8, 9]]          # 15-1111
         ],dtype=object)
     
-    edgeLookup = np.array([
-        [0, 1],  # (0) Edge 0 - Between nodes 0 and 1
-        [1, 2],  # (1) Edge 1
-        [2, 0],  # (2) Edge 2
-        [1, 3],  # (3) Edge 3
-        [2, 3],  # (4) Edge 4
-        [0, 3],  # (5) Edge 5
-        [0, 0],  # (6) Node 0
-        [1, 1],  # (7) Node 1
-        [2, 2],  # (8) Node 2
-        [3, 3],  # (9) Node 3
-        ])
-    TetNodeCoords = np.asarray(TetNodeCoords)
-    TetNodeConn = np.asarray(TetNodeConn)
+    if interpolation.lower() == 'midpoint' or interpolation.lower() == 'linear':
+        edgeLookup = np.array([
+            [0, 1],  # (0) Edge 0 - Between nodes 0 and 1
+            [1, 2],  # (1) Edge 1
+            [2, 0],  # (2) Edge 2
+            [1, 3],  # (3) Edge 3
+            [2, 3],  # (4) Edge 4
+            [0, 3],  # (5) Edge 5
+            [0, 0],  # (6) Node 0
+            [1, 1],  # (7) Node 1
+            [2, 2],  # (8) Node 2
+            [3, 3],  # (9) Node 3
+            ])
+        PadEdgeLookup = np.vstack([edgeLookup, [-1,-1]])
+        ninterppts = 2
+    elif interpolation.lower() == 'quadratic':
+        assert np.shape(TetNodeConn)[1] == 10, '10 Node tetrahedra are needed for quadratic interpolation.'
+        edgeLookup = np.array([
+            [0, 4, 1],  # (0) Edge 0 - Between nodes 0 and 1
+            [1, 5, 2],  # (1) Edge 1
+            [2, 6, 0],  # (2) Edge 2
+            [1, 8, 3],  # (3) Edge 3
+            [2, 9, 3],  # (4) Edge 4
+            [0, 7, 3],  # (5) Edge 5
+            [0, 0, 0],  # (6) Node 0
+            [1, 1, 1],  # (7) Node 1
+            [2, 2, 2],  # (8) Node 2
+            [3, 3, 3],  # (9) Node 3
+            ])
+        PadEdgeLookup = np.vstack([edgeLookup, [-1,-1, -1]])
+        ninterppts = 3
+    else:
+        raise ValueError(f'Interpolation must be one of "midpoint", "linear", or "quadratic", not "{interpolation:s}"')
+    
     if return_NodeValues: 
         if (method.lower() == 'volume') and (not mixed_elements):
             raise Exception('Returning node values for purely tetrahedral meshes (method="lower", mixed_elements=False) is currently unsupported.')
@@ -4328,7 +4351,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     # Determine configuration of nodes
     TetVals = NodeValues[TetNodeConn]
     inside = TetVals <= 0
-    ints = np.sum(inside * 2**np.arange(0,4)[::-1], axis=1)
+    ints = np.sum(inside[:,:4] * 2**np.arange(0,4)[::-1], axis=1)
 
     # Query lookup tables
     if method.lower() == 'surface':
@@ -4349,11 +4372,10 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     relevant_tets = TetNodeConn[tetnum]
     
     PadElem = utils.PadRagged(elem)
-    PadEdgeLookup = np.vstack([edgeLookup, [-1,-1]])
     pad_relevant_tets = np.hstack([relevant_tets, -1*np.ones((len(elem),1))])
     
     lookup_indices = pad_relevant_tets[:, PadEdgeLookup]
-    interpolation_pairs = (lookup_indices[np.arange(len(elem))[:, None], PadElem]).reshape((np.prod(PadElem.shape),2))
+    interpolation_pairs = (lookup_indices[np.arange(len(elem))[:, None], PadElem]).reshape((np.prod(PadElem.shape),ninterppts))
     interpolation_pairs = (interpolation_pairs[np.any(interpolation_pairs!=-1,axis=1)]).astype(int)
     
     uinterpolation_pairs,inv = np.unique(interpolation_pairs,axis=0,return_inverse=True)
@@ -4380,7 +4402,59 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         if return_NodeValues: 
             NewValues = np.zeros(len(NodeCoords))
             NewValues[~check] = NodeValues[uinterpolation_pairs[~check,0]]
-         
+    
+    elif interpolation.lower() == 'quadratic':
+        
+        check = uinterpolation_pairs[:,0] != uinterpolation_pairs[:,1]
+        coords1 = TetNodeCoords[uinterpolation_pairs[check,0]]
+        coords2 = TetNodeCoords[uinterpolation_pairs[check,1]]
+        coords3 = TetNodeCoords[uinterpolation_pairs[check,2]]
+
+        vals1 = NodeValues[uinterpolation_pairs[check,0]][:,None]
+        vals2 = NodeValues[uinterpolation_pairs[check,1]][:,None]
+        vals3 = NodeValues[uinterpolation_pairs[check,2]][:,None]
+
+
+        NodeCoords = np.copy(TetNodeCoords[uinterpolation_pairs[:,0]])
+        
+        for i in [0,1,2]:
+            # Loop over axes
+            notconstant = coords1[:,i] != coords3[:,i] # identifies points where there is variation in position along this axis
+
+            # Build coefficients for quadratic polynomials
+            mat = np.empty((np.sum(notconstant), 3, 3))
+            mat[:,0,0] = coords1[notconstant,i]**2
+            mat[:,0,1] = coords1[notconstant,i]
+
+            mat[:,1,0] = coords2[notconstant,i]**2
+            mat[:,1,1] = coords2[notconstant,i]
+
+            mat[:,2,0] = coords3[notconstant,i]**2
+            mat[:,2,1] = coords3[notconstant,i]
+
+            mat[:,:,2] = 1
+
+            a, b, c = np.linalg.solve(mat, np.hstack([vals1[notconstant], vals2[notconstant], vals3[notconstant]])).T
+
+            # Solve for roots
+            root1 = (-b + np.sqrt(b**2 - 4*a*c))/(2*a)
+            root2 = (-b - np.sqrt(b**2 - 4*a*c))/(2*a)
+
+            position = np.copy(coords1[:,i])
+            roots = np.copy(root1)
+            # Select the appropriate root that falls between
+            root2idx = (((root1 < coords1[notconstant,i]) & (root1 < coords3[notconstant,i])) | 
+                ((root1 > coords1[notconstant,i]) & (root1 > coords3[notconstant,i])))
+            roots[root2idx] = root2[root2idx]
+
+            position[notconstant] = roots
+
+            NodeCoords[check,i] = position
+
+        if return_NodeValues: 
+            NewValues = np.zeros(len(NodeCoords))
+            NewValues[~check] = NodeValues[uinterpolation_pairs[~check,0]]
+
     else:
         raise ValueError('interpolation must be either "midpoint" or "linear"')
 
