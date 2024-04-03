@@ -4443,9 +4443,18 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
             position = np.copy(coords1[:,i])
             roots = np.copy(root1)
             # Select the appropriate root that falls between
-            root2idx = (((root1 < coords1[notconstant,i]) & (root1 < coords3[notconstant,i])) | 
-                ((root1 > coords1[notconstant,i]) & (root1 > coords3[notconstant,i])))
+            root1idx = (((root1 <= coords1[notconstant,i]) & (root1 >= coords3[notconstant,i])) | 
+                ((root1 >= coords1[notconstant,i]) & (root1 <= coords3[notconstant,i])))
+            root2idx = (((root2 <= coords1[notconstant,i]) & (root2 >= coords3[notconstant,i])) | 
+                ((root2 >= coords1[notconstant,i]) & (root2 <= coords3[notconstant,i])))
+
             roots[root2idx] = root2[root2idx]
+
+            # For instances when neither root is in between the bounds of edge being interpolated,
+            # fall back on linear
+            linear = ~(root1idx|root2idx)
+            roots[linear] = coords1[notconstant,i][linear] + ((0 - vals1[notconstant][linear])/(vals3[notconstant][linear]-vals1[notconstant][linear]))[:,0]*(
+                    coords3[notconstant,i][linear] - coords1[notconstant,i][linear])
 
             position[notconstant] = roots
 
