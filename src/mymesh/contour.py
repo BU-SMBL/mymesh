@@ -4210,6 +4210,9 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         'midpoint' - No interpolation is performed, new nodes are placed at the midpoint of edges
 
         'linear' - Linear interpolation is performed between adjacent nodes on the input mesh.
+
+        'quadratic' - Quadratic interpolation is performed. This requires that the provided
+        tetrahedral mesh has quadratic elements (10 node tetrahedra).
     method : str, optional
         Determines whether to generate a surface mesh ('surface') or volume mesh ('volume'), 
         by default 'surface'
