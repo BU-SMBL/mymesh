@@ -1449,6 +1449,169 @@ def Contract(NodeCoords, NodeConn, h, iterate='converge', FixedNodes=set(), FixF
     if type(NewCoords) is np.ndarray: NewCoords = NewCoords.tolist()
     return NewCoords, NewConn
 
+def TetContract(M, h, FixedNodes={}, maxIter=5):
+
+    # Recommended that h = 4/5*desired element size
+
+    cutoff = h # contraction will be attempted on edges below this length
+    NewCoords = np.array(M.NodeCoords)
+    NewConn = np.array(M.NodeConn, dtype=int)
+    SurfConn = np.array(M.SurfConn, dtype=int)
+    Edges = np.sort(M.Edges,axis=1)
+    EdgeConn = M.EdgeConn
+    EdgeElemConn = M.EdgeElemConn
+    SurfEdges = np.sort(M.Surface.Edges)
+
+    # Detect Features
+    # TODO: Some redundant calculation (edges) occurs in DetectFeatures
+    surface_nodes = np.unique(SurfEdges)
+    fixed_nodes = np.array(list(FixedNodes),dtype=int)
+    feat_edges, feat_corners = utils.DetectFeatures(NewCoords,SurfConn) 
+
+    # 0 : interior; 1 : surface; 2 : feature edge; 3 : feature corner; 4 : fixed node
+    FeatureRank = np.zeros(len(NewCoords))
+    FeatureRank[surface_nodes] = 1
+    FeatureRank[feat_edges]    = 2
+    FeatureRank[feat_corners]  = 3
+    FeatureRank[fixed_nodes]   = 4
+
+    def do_collapse(targetnode, collapsesnode, NewCoords, NewConn, ElemConn, redirect, coupled, V):
+        # redirect, V, q, and coupled are updated in place, don't need to return
+        old_redirect = redirect[collapsenode]
+        redirect[collapsenode] = targetnode
+        # Relevant connected elements:
+        EC = [e for i in coupled[collapsenode] for e in ElemConn[i] if V[e] > 0] + ElemConn[collapsenode]
+        AffectedConn = redirect[NewConn[EC]]
+        new_vol = quality.tet_volume(NewCoords, AffectedConn)
+
+        # NOTE: Collapsed volumes might not always go to exactly 0, so may need to set that explicitly
+        if any(new_vol < 0):
+            # Invalid collapse
+            redirect[collapsenode] = old_redirect
+            success = False
+            return success
+
+        
+        # Couple the collapsed node (and any nodes coupled to it) to the new target
+        coupled[targetnode].append(collapsenode)
+        coupled[targetnode] += coupled[collapsenode]
+        redirect[coupled[targetnode]] = targetnode
+        
+        V[EC] = new_vol
+
+        success = True
+        return success
+
+    loop = 0
+    valid = 1
+    valid_collapses = []
+    while loop < maxIter and valid > 0 or (loop > 2 and valid_collapses[-1]==valid_collapses[-2]):
+        loop += 1
+        print(loop, valid)
+
+        # TODO: Recreation of data structures shouldn't be necessary, but need more careful book keeping
+        # Create node data structures
+        ElemConn = utils.getElemConnectivity(NewCoords, NewConn)
+        redirect = np.arange(len(NewCoords))
+        coupled = [[] for i in range(len(NewCoords))]
+        
+        # Create surface edge table - True indicates edge is an edge on the surface
+        SurfEdgeTable = {tuple(edge) : True for edge in SurfEdges}
+        for edge in Edges:
+            e = tuple(edge)
+            if e not in SurfEdgeTable.keys():
+                SurfEdgeTable[e] = False
+
+        # Create Element quality arrays
+        V = quality.tet_volume(NewCoords, NewConn)
+
+        # Get edge lengths
+        EdgeDiff = NewCoords[redirect[Edges[:,0]]] - NewCoords[redirect[Edges[:,1]]]
+        EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
+
+        # Create edge heap
+        heap = [(EdgeLengths[i],tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0)]
+        heapq.heapify(heap)
+
+        valid = 0
+        invalid = 0
+        touched = set()
+        while len(heap) > 0:
+            l, edge = heapq.heappop(heap)
+
+            node1 = redirect[edge[0]]
+            node2 = redirect[edge[1]]
+
+            # Validity checks
+            if edge[0] in touched or edge[1] in touched:
+                # One of the nodes in the edge as already been modified in this pass
+                continue
+            elif FeatureRank[node1] == FeatureRank[node2] == 4:
+                # Both nodes are fixed, can't collapse this edge
+                continue
+            elif FeatureRank[node1] > 0 and FeatureRank[node2] > 0 and not SurfEdgeTable[edge]:
+                # Both nodes are on the surface, but they're not connected by a
+                # surface edge -> connected through the body -> invalid
+                continue
+            elif FeatureRank[node1] > 1 and FeatureRank[node2] > 1:
+                # This holds all edges and corners fixed
+                # TODO: I'd prefer not to have this test, but another one that 
+                # prevents that inconsistencies that this prevents
+                continue
+
+            # Determine which node to collapse
+            if FeatureRank[node1] < FeatureRank[node2]:
+                collapsenode = node1
+                targetnode = node2
+                equal_rank = False
+            elif FeatureRank[node1] > FeatureRank[node2]:
+                collapsenode = node2
+                targetnode = node1
+                equal_rank = False
+            else:
+                # if ranks are equal, try node1, but if fails, can retry with node 2
+                collapsenode = node1
+                targetnode = node2
+                equal_rank = True 
+
+            # Check if collapse is valid:
+            success = do_collapse(targetnode, collapsenode, NewCoords, NewConn, ElemConn, redirect, coupled, V)
+            if success:
+                touched.add(collapsenode)
+            # If rank is equal, try the other node of the edge
+            if equal_rank and not success:
+                success = do_collapse(collapsenode, targetnode, NewCoords, NewConn, ElemConn, redirect, coupled, V)
+                if success:
+                    touched.add(targetnode)
+            
+            # v = quality.tet_volume(NewCoords, NewConn)
+            # if any(v < 0):
+            #     a = 2
+            if success:
+                # touched.update(edge)
+                valid += 1
+            else:
+                invalid += 1
+            
+        NewConn = redirect[NewConn]
+        Edges = redirect[Edges]
+        SurfEdges = redirect[SurfEdges]
+
+        NewCoords, NewConn = utils.CleanupDegenerateElements(NewCoords, NewConn, Type='vol')
+        NewConn = np.array(NewConn, dtype=int)
+        valid_collapses.append(valid)
+    
+    NewCoords, NewConn,_ = utils.RemoveNodes(NewCoords, NewConn)
+     
+    if 'mesh' in dir(mesh):
+        tet = mesh.mesh(NewCoords, NewConn)
+    else:
+        tet = mesh(NewCoords, NewConn)
+
+    return tet
+
+
+
 def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='inverted', FixedNodes=set(), iterate=1, verbose=True):
     """
     Simultaneous untangling and smoothing for tetrahedral mehses. Optimization-based smoothing for untangling inverted elements.
@@ -2368,4 +2531,4 @@ def _Tet44Flip(elemkey, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, t
             success = True
             break
 
-    return success
+    return  success
