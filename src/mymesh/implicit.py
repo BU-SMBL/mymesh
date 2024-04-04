@@ -545,6 +545,12 @@ def diff_old(fval1, fval2):
 def intersection(fval1,fval2):
     return rMax(fval1,fval2)
 
+def thicken(f, t):
+    offp = offset(f, t/2)
+    offn = offset(f, -t/2)
+    thick = diff(offp, offn)
+    return thick
+
 def offsetf(f,value):
     return lambda x,y,z : offset(f(x,y,z), value)
 
@@ -557,6 +563,12 @@ def difff(f1,f2):
 def intersectionf(f1,f2):
     return lambda x,y,z : rMax(f1(x,y,z),f2(x,y,z))
 
+def thickenf(f, t):
+    offp = offsetf(f, t/2)
+    offn = offsetf(f, -t/2)
+    thick = difff(offp, offn)
+    return thick
+
 def unions(symfun1,symfun2):
     return rMins(symfun1,symfun2)
 
@@ -565,6 +577,12 @@ def diffs(symfun1,symfun2):
 
 def intersections(symfun1,symfun2):
     return rMaxs(symfun1,symfun2)
+
+def thickens(symfun, t):
+    offp = offsets(symfun, t/2)
+    offn = offsetss(symfun, -t/2)
+    thick = diffs(offp, offn)
+    return thick
 
 def rMax(a,b,alpha=0,m=0,p=2):
     # R-Function version of max(a,b) to yield a smoothly differentiable max - R0
