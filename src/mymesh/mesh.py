@@ -355,7 +355,7 @@ class mesh:
         """
         if self._ElemConn == []:
             if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying volume node element connectivity...',end='')
-            self._ElemConn = utils.getElemConnectivity(*self, ElemType=self.Type)
+            self._ElemConn = utils.getElemConnectivity(*self)
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
         return self._ElemConn
     @property
@@ -1236,13 +1236,13 @@ class mesh:
             for key in keys:
                 celldata = [[],[],[],[],[],[],[]]
                 data = np.array(self.ElemData[key])
-                celldata[0] = data[elemlengths==2]
-                celldata[1] = data[elemlengths==3]
-                celldata[2] = data[elemlengths==4]
-                celldata[3] = data[elemlengths==5]
-                celldata[4] = data[elemlengths==6]
-                celldata[5] = data[elemlengths==8]
-                celldata[6] = data[elemlengths==10]
+                celldata[0] = data[elemlengths==2]  # line
+                celldata[1] = data[elemlengths==3]  # tri
+                celldata[2] = data[elemlengths==4]  # quad/tet
+                celldata[3] = data[elemlengths==5]  # pyr
+                celldata[4] = data[elemlengths==6]  # wdg
+                celldata[5] = data[elemlengths==8]  # hex
+                celldata[6] = data[elemlengths==10] # tet10
                 celldata = [c for c in celldata if len(c) > 0]
                 celldict[key] = celldata
                 
