@@ -1,10 +1,38 @@
 # -*- coding: utf-8 -*-
+# Created on Wed Jan 26 09:27:53 2022
+# @author: toj
 """
-Mesh quality improvement.
+Mesh quality improvement
 
-Created on Wed Jan 26 09:27:53 2022
+Many of these functions are still being improved for both efficiency and 
+robustness.
 
-@author: toj
+
+.. currentmodule:: mymesh.improvement
+
+
+Mesh smoothing/node repositioning
+=================================
+.. autosummary::
+    :toctree: submodules/
+
+    LocalLaplacianSmoothing
+    TangentialLaplacianSmoothing
+    SmartLaplacianSmoothing
+    GlobalLaplacianSmoothing
+    GeoTransformSmoothing
+    NodeSpringSmoothing
+    SegmentSpringSmoothing
+
+Local mesh topology
+===================
+.. autosummary::
+    :toctree: submodules/
+
+    TetContract
+    TetFlipping
+
+
 """
 
 import numpy as np
@@ -15,7 +43,7 @@ from scipy import sparse, spatial
 from scipy.sparse.linalg import spsolve
 from scipy.optimize import minimize
 
-## Smoothing/Vertex Repositioning
+## Mesh smoothing/node repositioning
 def LocalLaplacianSmoothing(M, options=dict()):
     """
     Performs iterative Laplacian smoothing, repositioning each node to the 
@@ -25,8 +53,6 @@ def LocalLaplacianSmoothing(M, options=dict()):
     ----------
     M : mymesh.mesh
         Mesh object to smooth
-    iterate : int
-        Number of iterations to perform.
     options : dict
         Smoothing options. Available options are:
 
@@ -50,7 +76,7 @@ def LocalLaplacianSmoothing(M, options=dict()):
             are fixed.
         FixFeatures : bool
             If true, feature nodes on edges or corners (identified by
-            :func:`utils.DetectFeatures`) will be held in place, by default False.
+            :func:`~mymesh.utils.DetectFeatures`) will be held in place, by default False.
         FixSurf : bool
             If true, all nodes on the surface will be held in place and only 
             interior nodes will be smoothed, by default False.
@@ -104,6 +130,7 @@ def LocalLaplacianSmoothing(M, options=dict()):
         raise ValueError('options["iterate"] must be "converge" or an integer.')
     
     i = 0
+    U = np.zeros(len(NodeCoords))
     while condition(i, U[FreeNodes]):
         i += 1
         Q = ArrayCoords[r]
@@ -111,24 +138,25 @@ def LocalLaplacianSmoothing(M, options=dict()):
         ArrayCoords[FreeNodes] += U[FreeNodes]
 
     NewCoords = ArrayCoords[:-1]
-    
-    return NewCoords, NodeConn
 
-def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,ElemConn=None,FixedNodes=set(),FixFeatures=False):
+    if 'mesh' in dir(mesh):
+        Mnew = mesh.mesh(NewCoords, NodeConn)
+    else:
+        Mnew = mesh(NewCoords, NodeConn)
+
+    return Mnew
+
+def TangentialLaplacianSmoothing(M, options=dict()):
     """
     Performs tangential Laplacian smoothing :cite:p:`Ohtake2003`, repositioning 
     each node to the center of its adjacent nodes in the plane tangent to the 
     surface. Primarily for use on surface meshes, interior nodes of a volume 
     mesh will be fixed.
 
-    Ohtake, Y., Belyaev, A., & Pasko, A. (2003). Dynamic mesh optimization for polygonized implicit surfaces with sharp features. Visual Computer, 19(2-3), 115-126. https://doi.org/10.1007/s00371-002-0181-z
-
     Parameters
     ----------
     M : mymesh.mesh
         Mesh object to smooth
-    iterate : int
-        Number of iterations to perform.
     options : dict
         Smoothing options. Available options are:
 
@@ -152,7 +180,7 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,
             are fixed.
         FixFeatures : bool
             If true, feature nodes on edges or corners (identified by
-            :func:`utils.DetectFeatures`) will be held in place, by default False.
+            :func:`~mymesh.utils.DetectFeatures`) will be held in place, by default False.
         FixSurf : bool
             If true, all nodes on the surface will be held in place and only 
             interior nodes will be smoothed, by default False.
@@ -207,6 +235,7 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,
         raise ValueError('options["iterate"] must be "converge" or an integer.')
     
     i = 0
+    U = np.zeros(len(NodeCoords))
     while condition(i, U[FreeNodes]):
         i += 1
 
@@ -226,6 +255,60 @@ def TangentialLaplacianSmoothing(NodeCoords,NodeConn,iterate,NodeNeighbors=None,
     return Mnew
 
 def SmartLaplacianSmoothing(M, target='mean', options=dict()):
+    """
+    Performs smart Laplacian smoothing :cite:p:`Freitag1997a`, repositioning 
+    each node to the center of its adjacent nodes only if doing so doesn't
+    reduce the element quality.
+
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Mesh object to smooth
+    target : str
+        Determines whether criteria for repositioning a node, by default 'mean'. 
+
+        'mean' - repositioning is allowed if the average quality of the connected
+        elements doesn't decrease.
+
+        'min' - repositioning is allowed if the minimum quality of the connected
+        elements doesn't decrease.
+    options : dict
+        Smoothing options. Available options are:
+
+        method : str
+            'simultaneous' or 'sequential'. Specifies if smoothing is performed
+            on all nodes at the same time, or one after another. Simultaneous
+            laplacian smoothing will move nodes to the center of their neighbors'
+            initial positions, while sequential will use the current positions of
+            previously smoothed nodes, by default 'simultaneous'.
+        iterate : int or str
+            Fixed number of iterations to perform, or 'converge' to iterate until
+            convergence, by default 'converge'.
+        tolerance : float
+            Convergence tolerance. For local Laplacian smoothing, iteration
+            will terminate if the largest movement of a node is less than the
+            specified tolerance, by default 1e-6.
+        maxIter : int
+            Maximum number of iterations when iterate='converge', By default 100.
+        FixedNodes : set or array_like
+            Set of nodes that are held fixed during iteration, by default none
+            are fixed.
+        FixFeatures : bool
+            If true, feature nodes on edges or corners (identified by
+            :func:`~mymesh.utils.DetectFeatures`) will be held in place, by default False.
+        FixSurf : bool
+            If true, all nodes on the surface will be held in place and only 
+            interior nodes will be smoothed, by default False.
+        qualityFunc : function
+            Function used for computing quality. It is assumed that a larger
+            number corresponds to higher quality, be default quality.MeanRatio
+        
+
+    Returns
+    -------
+    Mnew : mymesh.mesh
+        Mesh object with the new node locations.
+    """    
 
     NodeCoords, NodeConn = M
     NodeCoords = np.copy(NodeCoords)
@@ -353,6 +436,97 @@ def SmartLaplacianSmoothing(M, target='mean', options=dict()):
         Mnew = mesh(NodeCoords, NodeConn)
 
     return Mnew
+
+# Needs update:   
+def GlobalLaplacianSmoothing(NodeCoords, NodeConn,FeatureNodes=[],FixedNodes=set(),FeatureWeight=1,BaryWeight=1/3):
+    # Ji, Z., Liu, L. and Wang, G., 2005, December. A global laplacian 
+    # smoothing approach with feature preservation. In Ninth International 
+    # Conference on Computer Aided Design and Computer Graphics
+    
+    NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
+    
+    NNode = len(NodeCoords)
+    NFeature = len(FeatureNodes)
+    NElem = len(NodeConn)
+    
+    # Vertex Weights (NNode x NNode)
+
+    Lrows = []
+    Lcols = []
+    Lvals = []
+    for row in range(NNode):
+        Lrows.append(row)
+        Lcols.append(row)
+        Lvals.append(1)
+        for col in NodeNeighbors[row]:
+            Lrows.append(row)
+            Lcols.append(col)
+            Lvals.append(-1/len(NodeNeighbors[row]))
+    L = sparse.coo_matrix((Lvals,(Lrows,Lcols)))
+    # L = np.zeros([NNode,NNode])
+    # for row in range(NNode):
+    #     # Vertex Weights
+    #     L[row,row] = 1
+    #     for col in NodeNeighbors[row]:
+    #         L[row,col] = -1/len(NodeNeighbors[row]) 
+            
+    # Feature Weights (NFeature x NNode)
+    if NFeature > 0:
+        Frows = [row for row in FeatureNodes]
+        Fcols = [col for col in FeatureNodes]
+        Fvals = [FeatureWeight for i in range(NFeature)]
+        F = sparse.coo_matrix((Fvals,(Frows,Fcols)))    
+    else:
+        F = sparse.coo_matrix(np.zeros([0,NNode]))
+    # F = np.zeros([NFeature,NNode])
+    # for row in FeatureNodes:
+    #     F[row,row] = FeatureWeight
+    
+    # Barycenter Weights (NElem x NNode)
+    Zrows = [e for e in range(NElem) for i in range(len(NodeConn[0]))]
+    Zcols = [n for elem in NodeConn for n in elem]
+    Zvals = [BaryWeight for e in range(NElem) for i in range(len(NodeConn[0]))]
+    Z = sparse.coo_matrix((Zvals,(Zrows,Zcols)))
+    # Z = np.zeros([NElem,NNode])
+    # for row in range(len(NodeConn)):
+    #     for col in NodeConn[row]:
+    #         Z[row,col] = BaryWeight
+    A = sparse.vstack((L,F,Z)).tocsc()
+    At = A.transpose()
+    AtA = At*A
+    # Vertex b Matrix (NNode x 1)
+    # bL = np.zeros([NNode,1])
+    bL = sparse.coo_matrix(np.zeros([NNode,1]))
+
+    NewCoords = np.zeros(np.shape(NodeCoords))
+    # For each dimension:
+    for d in range(len(NodeCoords[0])):        
+            
+        # Feature b Matrix (NFeature x 1)
+        # bF = np.zeros([NFeature,1])
+        if NFeature > 0:
+            bFcols = np.zeros(NFeature,dtype=int)
+            bFrows = list(FeatureNodes)
+            bFvals = [FeatureWeight*NodeCoords[i][d] for i in bFrows]
+            # for i,f in enumerate(FeatureNodes):
+                # bF[i] = FeatureWeight*NodeCoords[f][d]
+            bF = sparse.coo_matrix((bFvals,(bFrows,bFcols)))
+        else:
+            bF = sparse.coo_matrix(np.zeros([0,1]))
+        # Bary b Matrix (NElem x 1)
+        bZcols = np.zeros(NElem,dtype=int)
+        bZrows = np.arange(len(NodeConn),dtype=int)
+        bZvals = [BaryWeight*sum([NodeCoords[node][d] for node in elem]) for elem in NodeConn]
+        bZ = sparse.coo_matrix((bZvals,(bZrows,bZcols)))
+        # bZ = np.zeros([NElem,1])
+        # for i,elem in enumerate(NodeConn):
+        #     bZ[i] = BaryWeight*sum([NodeCoords[node][d] for node in elem])
+            
+        b = sparse.vstack([bL,bF,bZ])
+        NewCoords[:,d] = spsolve(AtA, sparse.csc_matrix(At*b))
+    NewCoords = NewCoords.tolist()
+    NewCoords = [NodeCoords[i] if i in FixedNodes else coord for i,coord in enumerate(NewCoords)]
+    return NewCoords
 
 def GeoTransformSmoothing(M, sigma_min=None, sigma_max=None, eta=None, rho=None, qualityThreshold=.2, options=dict()):
 
@@ -783,130 +957,188 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
         return Xnew.tolist(), dXnew.tolist(), (K,F)
     return Xnew.tolist(), dXnew.tolist()
 
-# Needs update:
-def NodeSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors,Stiffness=1,FixedNodes=[],Forces=None,maxIter=np.inf,converge=1e-4):
+def NodeSpringSmoothing(M, Stiffness=1, Forces=None, Displacements=None, options=dict()):
+    """
+    Perform node spring smoothing, with or without mesh deformation. Uses the
+    node spring analogy :cite:p:`Blom2000` to redistribute nodes and achieve
+    equilibrium. If Forces and/or Displacements are prescribed, this an be used
+    to deform a mesh while keeping nodes spread apart. 
+    
+    .. note::
+        Element inversions aren't strictly prevented and may result from
+        large deformations.
+
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Mesh object to smooth
+    Stiffness : float, optional
+        Spring stiffness, by default 1. If no forces are applied, the choice
+        of stiffness is irrelevant.
+    Forces : np.ndarray or NoneType, optional
+        nx3 array of applied forces, where n is the number of nodes in the mesh.
+        If provided, there must be forces assigned to all nodes, by default None.
+    Displacments : np.ndarray or NoneType, optional
+        nx3 array of applied forces, where n is the number of nodes in the mesh.
+        If provided, there must be forces assigned to all nodes, by default None.
+        Nodes with non-zero displacements will be held fixed at their displaced
+        position, while nodes with zero displacement in x, y, and z will be 
+        free to move (to prescribe a displacement of 0 to hold a node in place,
+        add that node to options['FixedNodes'].)
+    options : dict
+        Smoothing options. Available options are:
+
+        iterate : int or str
+            Fixed number of iterations to perform, or 'converge' to iterate until
+            convergence, by default 'converge'.
+        tolerance : float
+            Convergence tolerance. For local Laplacian smoothing, iteration
+            will terminate if the largest movement of a node is less than the
+            specified tolerance, by default 1e-3.
+        maxIter : int
+            Maximum number of iterations when iterate='converge', By default 20.
+        FixedNodes : set or array_like
+            Set of nodes that are held fixed during iteration, by default none
+            are fixed.
+        FixFeatures : bool
+            If true, feature nodes on edges or corners (identified by
+            :func:`~mymesh.utils.DetectFeatures`) will be held in place, by default False.
+        FixSurf : bool
+            If true, all nodes on the surface will be held in place and only 
+            interior nodes will be smoothed, by default True.
+
+    Returns
+    -------
+    Mnew : mymesh.mesh
+        Mesh object with the new node locations.
+    """    
     # Blom, F.J., 2000. Considerations on the spring analogy. International journal for numerical methods in fluids, 32(6), pp.647-668.
     
-    if Forces == None or len(Forces) == 0:
-        Forces = np.zeros(len(NodeCoords))
+    NodeCoords, NodeConn = M
+    NodeCoords = np.copy(NodeCoords)
+    NodeNeighbors = M.NodeNeighbors
+    SurfConn = M.SurfConn
+    
+    # Process inputs
+    SmoothOptions = dict(method='simultaneous',
+                        iterate = 'converge',
+                        tolerance = 1e-3,
+                        maxIter = 20,
+                        FixedNodes = set(),
+                        FixFeatures = False,
+                        FixSurf = True,
+                        qualityFunc = quality.MeanRatio
+                    )
+
+    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, options)
+    FreeNodes = SmoothOptions['FreeNodes']
+    FixedNodes = SmoothOptions['FixedNodes']
+    tolerance = SmoothOptions['tolerance']
+    iterate = SmoothOptions['iterate']
+    qualityFunc = SmoothOptions['qualityFunc']
+    maxIter = SmoothOptions['maxIter']
+    method = SmoothOptions['method']
+
+    if Forces is None or len(Forces) == 0:
+        Forces = np.zeros((len(NodeCoords),3))
     else:
         assert len(Forces) == len(NodeCoords), 'Forces must be assigned for every node'
+
+    if Displacements is None or len(Displacements) == 0:
+        Displacements = np.zeros((len(NodeCoords),3))
+    else:
+        assert len(Displacements) == len(NodeCoords), 'Displacements must be assigned for every node'
     
-    if type(FixedNodes) == list:
-        FixedNodes = set(FixedNodes)
-    
-    # k = [[Stiffness for n in NodeNeighbors[i]] for i in range(len(NodeCoords))]   
+    NodeCoords += Displacements
+    FixedNodes = np.unique(np.append(FixedNodes, np.where(np.all(Displacements != 0, axis=0))))
+
     k = Stiffness
-    
-    X = np.array(NodeCoords)
+
+    RNeighbors = utils.PadRagged(NodeNeighbors, fillval=-1)
+    RNeighbors = np.append(RNeighbors, [np.repeat(-1, RNeighbors.shape[1])], axis=0)
+
+    X = np.append(NodeCoords, [[np.nan, np.nan, np.nan]], axis=0)
+    Forces = np.append(Forces, [[0, 0, 0]], axis=0)
+    unattached = np.all(RNeighbors == -1, axis=1)
+
     thinking = True
     iteration = 0
     while thinking:
-        Xnew = np.zeros(X.shape)
-        # print(iteration)
-        for i in range(len(X)):
-            if i in FixedNodes:
-                Xnew[i,:] = X[i,:]
-                continue
-            Xnew[i,:] = (np.sum([k*X[n,:] for j,n in enumerate(NodeNeighbors[i])],axis=0) + Forces[i])/sum(k for j,n in enumerate(NodeNeighbors[i]))
+        
+        with np.errstate(divide='ignore', invalid='ignore'):
+            Xnew = (np.nansum(k*X[RNeighbors],axis=1) + Forces)/(np.sum(k*(RNeighbors != -1),axis=1))[:,None]
+            Xnew[unattached] = X[unattached]
+            Xnew[FixedNodes] = X[FixedNodes]
+
         iteration += 1
-        print(np.linalg.norm(X-Xnew))
-        if iteration > maxIter or np.linalg.norm(X-Xnew) < converge:
+        print(np.linalg.norm(X[FreeNodes]-Xnew[FreeNodes]))
+        if iteration > maxIter or np.linalg.norm(X[FreeNodes]-Xnew[FreeNodes]) < tolerance:
             thinking = False
         else:
             X = copy.copy(Xnew)
-                   
-    return Xnew.tolist()
-
-# Needs update:   
-def GlobalLaplacianSmoothing(NodeCoords, NodeConn,FeatureNodes=[],FixedNodes=set(),FeatureWeight=1,BaryWeight=1/3):
-    # Ji, Z., Liu, L. and Wang, G., 2005, December. A global laplacian 
-    # smoothing approach with feature preservation. In Ninth International 
-    # Conference on Computer Aided Design and Computer Graphics
     
-    NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
-    
-    NNode = len(NodeCoords)
-    NFeature = len(FeatureNodes)
-    NElem = len(NodeConn)
-    
-    # Vertex Weights (NNode x NNode)
-
-    Lrows = []
-    Lcols = []
-    Lvals = []
-    for row in range(NNode):
-        Lrows.append(row)
-        Lcols.append(row)
-        Lvals.append(1)
-        for col in NodeNeighbors[row]:
-            Lrows.append(row)
-            Lcols.append(col)
-            Lvals.append(-1/len(NodeNeighbors[row]))
-    L = sparse.coo_matrix((Lvals,(Lrows,Lcols)))
-    # L = np.zeros([NNode,NNode])
-    # for row in range(NNode):
-    #     # Vertex Weights
-    #     L[row,row] = 1
-    #     for col in NodeNeighbors[row]:
-    #         L[row,col] = -1/len(NodeNeighbors[row]) 
-            
-    # Feature Weights (NFeature x NNode)
-    if NFeature > 0:
-        Frows = [row for row in FeatureNodes]
-        Fcols = [col for col in FeatureNodes]
-        Fvals = [FeatureWeight for i in range(NFeature)]
-        F = sparse.coo_matrix((Fvals,(Frows,Fcols)))    
+    if 'mesh' in dir(mesh):
+        Mnew = mesh.mesh(X, NodeConn)
     else:
-        F = sparse.coo_matrix(np.zeros([0,NNode]))
-    # F = np.zeros([NFeature,NNode])
-    # for row in FeatureNodes:
-    #     F[row,row] = FeatureWeight
-    
-    # Barycenter Weights (NElem x NNode)
-    Zrows = [e for e in range(NElem) for i in range(len(NodeConn[0]))]
-    Zcols = [n for elem in NodeConn for n in elem]
-    Zvals = [BaryWeight for e in range(NElem) for i in range(len(NodeConn[0]))]
-    Z = sparse.coo_matrix((Zvals,(Zrows,Zcols)))
-    # Z = np.zeros([NElem,NNode])
-    # for row in range(len(NodeConn)):
-    #     for col in NodeConn[row]:
-    #         Z[row,col] = BaryWeight
-    A = sparse.vstack((L,F,Z)).tocsc()
-    At = A.transpose()
-    AtA = At*A
-    # Vertex b Matrix (NNode x 1)
-    # bL = np.zeros([NNode,1])
-    bL = sparse.coo_matrix(np.zeros([NNode,1]))
+        Mnew = mesh(X, NodeConn)
 
-    NewCoords = np.zeros(np.shape(NodeCoords))
-    # For each dimension:
-    for d in range(len(NodeCoords[0])):        
-            
-        # Feature b Matrix (NFeature x 1)
-        # bF = np.zeros([NFeature,1])
-        if NFeature > 0:
-            bFcols = np.zeros(NFeature,dtype=int)
-            bFrows = list(FeatureNodes)
-            bFvals = [FeatureWeight*NodeCoords[i][d] for i in bFrows]
-            # for i,f in enumerate(FeatureNodes):
-                # bF[i] = FeatureWeight*NodeCoords[f][d]
-            bF = sparse.coo_matrix((bFvals,(bFrows,bFcols)))
-        else:
-            bF = sparse.coo_matrix(np.zeros([0,1]))
-        # Bary b Matrix (NElem x 1)
-        bZcols = np.zeros(NElem,dtype=int)
-        bZrows = np.arange(len(NodeConn),dtype=int)
-        bZvals = [BaryWeight*sum([NodeCoords[node][d] for node in elem]) for elem in NodeConn]
-        bZ = sparse.coo_matrix((bZvals,(bZrows,bZcols)))
-        # bZ = np.zeros([NElem,1])
-        # for i,elem in enumerate(NodeConn):
-        #     bZ[i] = BaryWeight*sum([NodeCoords[node][d] for node in elem])
-            
-        b = sparse.vstack([bL,bF,bZ])
-        NewCoords[:,d] = spsolve(AtA, sparse.csc_matrix(At*b))
-    NewCoords = NewCoords.tolist()
-    NewCoords = [NodeCoords[i] if i in FixedNodes else coord for i,coord in enumerate(NewCoords)]
+    return Mnew
+
+
+# Needs update: 
+def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
+    """
+    FixInversions Mesh optimization to reposition nodes in order to maximize the minimal area
+    of elements connected to each node, with the aim of eliminating any inverted elements
+    TODO: Need better convergence criteria to ensure no more inversions but not iterate more than necessary
+    
+    Parameters
+    ----------
+    NodeCoords : list
+        List of nodal coordinates.
+    NodeConn : list
+        List of nodal connectivities.
+    FixedNodes : set (or list), optional
+        Set of nodes to hold fixed, by default set()
+    maxfev : int, optional
+        _description_, by default 1000
+
+    Returns
+    -------
+    NewCoords : list
+        Updated list of nodal coordinates.
+    """
+    V = quality.Volume(NodeCoords, NodeConn)
+    if min(V) > 0:
+        return NodeCoords
+    
+    InversionElems = np.where(np.asarray(V) < 0)[0]
+    InversionConn = [NodeConn[i] for i in InversionElems]
+    InversionNodes = np.unique([n for elem in InversionConn for n in elem])
+    ProblemNodes = list(set(InversionNodes).difference(FixedNodes))
+    if len(ProblemNodes) == 0:
+        warnings.warn('Fixed nodes prevent any repositioning.')
+        return NodeCoords
+    ElemConn = utils.getElemConnectivity(NodeCoords, NodeConn)
+    NeighborhoodElems = np.unique([e for i in ProblemNodes for e in ElemConn[i]])
+    NeighborhoodConn = [NodeConn[i] for i in NeighborhoodElems]
+
+    ArrayCoords = np.array(NodeCoords)
+
+    def fun(x):
+        ArrayCoords[ProblemNodes] = x.reshape((int(len(x)/3),3))
+        v = quality.Volume(ArrayCoords,NeighborhoodConn)
+        # print(sum(v<0))
+        return -min(v)
+
+    x0 = ArrayCoords[ProblemNodes].flatten()
+
+    out = minimize(fun,x0,method='Nelder-Mead',options=dict(adaptive=True,xatol=.01,fatol=.01))#,maxfev=maxfev))
+    if not out.success:
+        warnings.warn('Unable to eliminate all element inversions.')
+    ArrayCoords[ProblemNodes] = out.x.reshape((int(len(out.x)/3),3))
+
+    NewCoords = ArrayCoords.tolist()
     return NewCoords
 
 ## Local Mesh Topology Operations
@@ -1272,60 +1504,6 @@ def SliverPeel(NodeCoords, NodeConn, skewThreshold=0.95, FixedNodes=set()):
     NewConn = np.array(NodeConn,dtype=object)[~(Skew01 & Face01 & Feature01)].tolist()
     return NewConn
 
-def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
-    """
-    FixInversions Mesh optimization to reposition nodes in order to maximize the minimal area
-    of elements connected to each node, with the aim of eliminating any inverted elements
-    TODO: Need better convergence criteria to ensure no more inversions but not iterate more than necessary
-    
-    Parameters
-    ----------
-    NodeCoords : list
-        List of nodal coordinates.
-    NodeConn : list
-        List of nodal connectivities.
-    FixedNodes : set (or list), optional
-        Set of nodes to hold fixed, by default set()
-    maxfev : int, optional
-        _description_, by default 1000
-
-    Returns
-    -------
-    NewCoords : list
-        Updated list of nodal coordinates.
-    """
-    V = quality.Volume(NodeCoords, NodeConn)
-    if min(V) > 0:
-        return NodeCoords
-    
-    InversionElems = np.where(np.asarray(V) < 0)[0]
-    InversionConn = [NodeConn[i] for i in InversionElems]
-    InversionNodes = np.unique([n for elem in InversionConn for n in elem])
-    ProblemNodes = list(set(InversionNodes).difference(FixedNodes))
-    if len(ProblemNodes) == 0:
-        warnings.warn('Fixed nodes prevent any repositioning.')
-        return NodeCoords
-    ElemConn = utils.getElemConnectivity(NodeCoords, NodeConn)
-    NeighborhoodElems = np.unique([e for i in ProblemNodes for e in ElemConn[i]])
-    NeighborhoodConn = [NodeConn[i] for i in NeighborhoodElems]
-
-    ArrayCoords = np.array(NodeCoords)
-
-    def fun(x):
-        ArrayCoords[ProblemNodes] = x.reshape((int(len(x)/3),3))
-        v = quality.Volume(ArrayCoords,NeighborhoodConn)
-        # print(sum(v<0))
-        return -min(v)
-
-    x0 = ArrayCoords[ProblemNodes].flatten()
-
-    out = minimize(fun,x0,method='Nelder-Mead',options=dict(adaptive=True,xatol=.01,fatol=.01))#,maxfev=maxfev))
-    if not out.success:
-        warnings.warn('Unable to eliminate all element inversions.')
-    ArrayCoords[ProblemNodes] = out.x.reshape((int(len(out.x)/3),3))
-
-    NewCoords = ArrayCoords.tolist()
-    return NewCoords
     
 def ResolveSurfSelfIntersections(NodeCoords,SurfConn,FixedNodes=set(),octree='generate',maxIter=10):
 
@@ -1968,7 +2146,7 @@ def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='invert
         
         NewCoords[nodeid] = x
         LocalConn = NewConn[ElemConn[nodeid]]
-        f, jac = func(NewCoords,NewConn, nodeid)
+        f, jac = func(NewCoords, LocalConn, nodeid)
         # print(np.nanmean(q(NewCoords, NewConn)))
 
         return f, jac
@@ -2003,21 +2181,20 @@ def _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, UserOpt
     for key in UserOptions.keys(): SmoothOptions[key] = UserOptions[key]
 
     # Process input options
-    FixedNodes = SmoothOptions['FixedNodes']
+    if type(SmoothOptions['FixedNodes']) is not set: 
+            SmoothOptions['FixedNodes'] = set(SmoothOptions['FixedNodes'])
     if SmoothOptions['FixFeatures']:
-        if type(FixedNodes) is not set: 
-            FixedNodes = set(FixedNodes)
         edges, corners = utils.DetectFeatures(NodeCoords,NodeConn)
-        FixedNodes.update(edges)
-        FixedNodes.update(corners)
+        SmoothOptions['FixedNodes'].update(edges)
+        SmoothOptions['FixedNodes'].update(corners)
 
     if SmoothOptions['FixSurf']:
         SmoothOptions['FixedNodes'].update(SurfConn.flatten())
     idx = np.unique(NodeConn)
     
 
-    SmoothOptions['FreeNodes'] = np.array(list(set(idx).difference(FixedNodes)))
-    SmoothOptions['FixedNodes'] = np.array(list(FixedNodes))
+    SmoothOptions['FreeNodes'] = np.array(list(set(idx).difference(SmoothOptions['FixedNodes'])),dtype=int)
+    SmoothOptions['FixedNodes'] = np.array(list(SmoothOptions['FixedNodes']),dtype=int)
 
     SmoothOptions['method'] = SmoothOptions['method'].lower()
 
