@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+# Created on Fri Jan 14 17:43:57 2022
+# @author: toj
 """
-Implicit meshing tools
+Implicit function meshing tools
 
-Created on Fri Jan 14 17:43:57 2022
+An implicit function f(x,y,z) describes a surface in 3D where the surface is
+located on the f(x,y,z) = 0 isosurface. The default convention used in this
+module is that values less than zero are considered "inside" the surface,
+and values above zero are considered "outside". 
 
-@author: toj
 
 .. currentmodule:: mymesh.implicit
 
@@ -30,7 +34,7 @@ Implicit Functions
     neovius
     diamond
     cylinder
-    cube
+    box
     xplane
     yplane
     zplane
@@ -44,10 +48,16 @@ Implicit Function Operators
     offset
     union
     diff
+    thicken
     intersection
     unionf
     difff
     intersectionf
+    thickenf
+    unions
+    diffs
+    intersections
+    thickens
     rMax
     rMin
 
@@ -381,8 +391,13 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
         Small number used to calculate finite difference approximations to the 
         gradient. Only used if the function is not convertible to a 
         sympy-differentiable function, by default 1e-5.
-    smooth : bool, optional
-        Option to perform tangential Laplacian smoothing, by default True
+    smooth : str, optional
+        Option to perform smoothing. This can be either 'local' for local 
+        Laplacian smoothing or 'tangential' for tangential Laplacian smoothing, 
+        by default 'tangential'. For any other option, smoothing will not be 
+        performed. Tangential smoothing differs from local in that nodes 
+        are only repositioned in the tangent plane (based on the normal vector
+        obtain from the gradient). 
     copy : bool, optional
         If true, will create a copy of the mesh, rather than altering node 
         positions of the original mesh object "in-place", by default True
@@ -463,11 +478,15 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
 
         Zflow = -2*tau*fg
 
-        if smooth:
+        if smooth == 'tangential':
             Q = NodeCoords[r]
             U = (1/lengths)[:,None] * np.nansum(Q - points[:,None,:],axis=1)
             NodeNormals = (g/np.linalg.norm(g,axis=0)).T
             Rflow = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
+        elif smooth == 'local':
+            Q = NodeCoords[r]
+            U = (1/lengths)[:,None] * np.nansum(Q - points[:,None,:],axis=1)
+            Rflow = U
         else:
             Rflow = 0
 
@@ -480,50 +499,276 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
 
 # implicit function primitives
 def gyroid(x,y,z):
+    """
+    Implicit function approximation of the gyroid triply periodic minimal 
+    surface (TPMS). This function uses sympy functions (sp.cos, sp.sin) to 
+    enable symbolic differentiation. 
+    
+    For efficient vectorized evaluation, use:
+    x, y, z = sp.symbols('x y z', real=True)
+    vector_func = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
+
+    Parameters
+    ----------
+    x : scalar or np.ndarray
+        x coordinate(s)
+    y : scalar or np.ndarray
+        y coordinate(s)
+    z : scalar or np.ndarray
+        z coordinate(s)
+
+    Returns
+    -------
+    f : sympy expression
+        implicit function evaluated with sympy
+    """
     return sp.sin(2*np.pi*x)*sp.cos(2*np.pi*y) + sp.sin(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.sin(2*np.pi*z)*sp.cos(2*np.pi*x)
 
 def lidinoid(x,y,z):
+    """
+    Implicit function approximation of the lidinoid triply periodic minimal 
+    surface (TPMS). This function uses sympy functions (sp.cos, sp.sin) to 
+    enable symbolic differentiation. 
+    
+    For efficient vectorized evaluation, use:
+    x, y, z = sp.symbols('x y z', real=True)
+    vector_func = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
+
+    Parameters
+    ----------
+    x : scalar or np.ndarray
+        x coordinate(s)
+    y : scalar or np.ndarray
+        y coordinate(s)
+    z : scalar or np.ndarray
+        z coordinate(s)
+
+    Returns
+    -------
+    f : sympy expression
+        implicit function evaluated with sympy
+    """
     X = 2*np.pi*x
     Y = 2*np.pi*y
     Z = 2*np.pi*z
-    return 0.5*(sp.sin(2*X)*sp.cos(Y)*sp.sin(Z) + sp.sin(2*Y)*sp.cos(Z)*sp.sin(X) + sp.sin(2*Z)*sp.cos(X)*sp.sin(Y)) - 0.5*(sp.cos(2*X)*sp.cos(2*Y) + sp.cos(2*Y)*sp.cos(2*Z) + sp.cos(2*Z)*sp.cos(2*X)) + 0.15
+    f = 0.5*(sp.sin(2*X)*sp.cos(Y)*sp.sin(Z) + sp.sin(2*Y)*sp.cos(Z)*sp.sin(X) + sp.sin(2*Z)*sp.cos(X)*sp.sin(Y)) - 0.5*(sp.cos(2*X)*sp.cos(2*Y) + sp.cos(2*Y)*sp.cos(2*Z) + sp.cos(2*Z)*sp.cos(2*X)) + 0.15
+    return f
 
 def primitive(x,y,z):
+    """
+    Implicit function approximation of the primitive (Schwarz P) triply periodic 
+    minimal surface (TPMS). This function uses sympy functions (sp.cos, sp.sin) 
+    to enable symbolic differentiation. 
+    
+    For efficient vectorized evaluation, use:
+    x, y, z = sp.symbols('x y z', real=True)
+    vector_func = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
+
+    Parameters
+    ----------
+    x : scalar or np.ndarray
+        x coordinate(s)
+    y : scalar or np.ndarray
+        y coordinate(s)
+    z : scalar or np.ndarray
+        z coordinate(s)
+
+    Returns
+    -------
+    f : sympy expression
+        implicit function evaluated with sympy
+    """
     X = 2*np.pi*x
     Y = 2*np.pi*y
     Z = 2*np.pi*z
     return sp.cos(X) + sp.cos(Y) + sp.cos(Z)
 
 def neovius(x,y,z):
+    """
+    Implicit function approximation of the neovius triply periodic minimal 
+    surface (TPMS). This function uses sympy functions (sp.cos, sp.sin) to 
+    enable symbolic differentiation. 
+    
+    For efficient vectorized evaluation, use:
+    x, y, z = sp.symbols('x y z', real=True)
+    vector_func = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
+
+    Parameters
+    ----------
+    x : scalar or np.ndarray
+        x coordinate(s)
+    y : scalar or np.ndarray
+        y coordinate(s)
+    z : scalar or np.ndarray
+        z coordinate(s)
+
+    Returns
+    -------
+    f : sympy expression
+        implicit function evaluated with sympy
+    """
+
     X = 2*np.pi*x
     Y = 2*np.pi*y
     Z = 2*np.pi*z
     return 3*(sp.cos(X) + sp.cos(Y) + sp.cos(Z)) + 4*sp.cos(X)*sp.cos(Y)*sp.cos(Z)
 
 def diamond(x,y,z):
+    """
+    Implicit function approximation of the diamond (Schwarz D) triply periodic 
+    minimal surface (TPMS). This function uses sympy functions (sp.cos, sp.sin) 
+    to enable symbolic differentiation. 
+    
+    For efficient vectorized evaluation, use:
+    x, y, z = sp.symbols('x y z', real=True)
+    vector_func = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
+
+    Parameters
+    ----------
+    x : scalar or np.ndarray
+        x coordinate(s)
+    y : scalar or np.ndarray
+        y coordinate(s)
+    z : scalar or np.ndarray
+        z coordinate(s)
+
+    Returns
+    -------
+    f : sympy expression
+        implicit function evaluated with sympy
+    """
     return sp.sin(2*np.pi*x)*sp.sin(2*np.pi*y)*sp.sin(2*np.pi*z) + sp.sin(2*np.pi*x)*sp.cos(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.cos(2*np.pi*x)*sp.sin(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.cos(2*np.pi*x)*sp.cos(2*np.pi*y)*sp.sin(2*np.pi*z)
 
 def cylinder(center, radius):
+    """
+    Implicit function of a cylinder.
+
+    Parameters
+    ----------
+    center : array_like
+        2D vector specifying the x and y coordinates of the center of the 
+        cylindrical cross section
+    radius : float
+        Radius of the cylinder
+
+    Returns
+    -------
+    func : function
+        Implicit function of three parameters (x, y, z)
+    """    
     func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 - radius**2
     return func
 
-def cube(x1,x2,y1,y2,z1,z2):    
+def box(x1,x2,y1,y2,z1,z2):    
+    """
+    Implicit function of a box.
+
+    Parameters
+    ----------
+    x1 : float
+        x coordinate lower bound
+    x2 : float
+        x coordinate upper bound
+    y1 : float
+        y coordinate lower bound
+    y2 : float
+        y coordinate upper bound
+    z1 : float
+        z coordinate lower bound
+    z2 : float
+        z coordinate upper bound
+
+    Returns
+    -------
+    func : function
+        Implicit function of three parameters (x, y, z)
+    """
     func = lambda x, y, z : intersection(intersection(intersection(x1-x,x-x2),intersection(y1-y,y-y2)),intersection(z1-z,z-z2))
     return func
 
 def xplane(x0, n=1):
+    """
+    Implicit function of a plane whose normal direction is along the x axis.
+
+    Parameters
+    ----------
+    x0 : float
+        Coordinate along the x axis of the plane. x0 = 0 corresponds to the 
+        yz plane.
+    n : int, optional
+        Direction (1 or -1), or a scaling factor, by default 1. If n > 0, the 
+        function will be negative when evaluated above x0.
+        
+
+    Returns
+    -------
+    func : function
+        Implicit function of three parameters (x, y, z)
+    """
     func = lambda x, y, z : n*(x0 - x)
     return func
 
 def yplane(y0, n=1):
+    """
+    Implicit function of a plane whose normal direction is along the y axis.
+
+    Parameters
+    ----------
+    y0 : float
+        Coordinate along the y axis of the plane. y0 = 0 corresponds to the 
+        xz plane.
+    n : int, optional
+        Direction (1 or -1), or a scaling factor, by default 1. If n > 0, the 
+        function will be negative when evaluated above y0.
+        
+
+    Returns
+    -------
+    func : function
+        Implicit function of three parameters (x, y, z).
+    """
     func = lambda x, y, z : n*(y0 - y)
     return func
 
 def zplane(z0, n=1):
+    """
+    Implicit function of a plane whose normal direction is along the z axis.
+
+    Parameters
+    ----------
+    z0 : float
+        Coordinate along the x axis of the plane. z0 = 0 corresponds to the 
+        xy plane.
+    n : int, optional
+        Direction (1 or -1), or a scaling factor, by default 1. If n > 0, the 
+        function will be negative when evaluated above z0.
+        
+
+    Returns
+    -------
+    func : function
+        Implicit function of three parameters (x, y, z)
+    """
+
     func = lambda x, y, z : n*(z0 - z)
     return func
 
 def sphere(center, radius):
+    """
+    Implicit function of a sphere.
+
+    Parameters
+    ----------
+    center : array_like
+        3D coordinates ([x, y, z]) of the center of the sphere.
+    radius : float
+        radius of the sphere.
+
+    Returns
+    -------
+    func : function
+        Implicit function of three parameters (x, y, z).
+    """    
     func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 + (z-center[2])**2 - radius**2
     return func
 
