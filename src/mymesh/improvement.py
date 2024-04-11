@@ -254,7 +254,7 @@ def TangentialLaplacianSmoothing(M, options=dict()):
 
     return Mnew
 
-def SmartLaplacianSmoothing(M, target='mean', options=dict()):
+def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=False, options=dict()):
     """
     Performs smart Laplacian smoothing :cite:p:`Freitag1997a`, repositioning 
     each node to the center of its adjacent nodes only if doing so doesn't
@@ -280,7 +280,7 @@ def SmartLaplacianSmoothing(M, target='mean', options=dict()):
             on all nodes at the same time, or one after another. Simultaneous
             laplacian smoothing will move nodes to the center of their neighbors'
             initial positions, while sequential will use the current positions of
-            previously smoothed nodes, by default 'simultaneous'.
+            previously smoothed nodes, by default 'sequential'.
         iterate : int or str
             Fixed number of iterations to perform, or 'converge' to iterate until
             convergence, by default 'converge'.
@@ -312,7 +312,7 @@ def SmartLaplacianSmoothing(M, target='mean', options=dict()):
 
     NodeCoords, NodeConn = M
     NodeCoords = np.copy(NodeCoords)
-    NodeNeighbors = M.NodeNeighbors
+    NodeNeighbors = copy.copy(M.NodeNeighbors)
     ElemConn = M.ElemConn
     SurfConn = M.SurfConn
     
@@ -339,6 +339,13 @@ def SmartLaplacianSmoothing(M, target='mean', options=dict()):
     # Initialize
     lens = np.array([len(n) for n in NodeNeighbors])
     NodeConn = np.asarray(NodeConn)
+    if TangentialSurface:
+        SurfNodes = set([n for elem in SurfConn for n in elem])
+        NodeNormals = M.NodeNormals
+    #     for i in SurfNodes:
+    #         NodeNeighbors[i] = M.SurfNodeNeighbors[i]
+
+
     if method == 'simultaneous':
         r = utils.PadRagged(NodeNeighbors,fillval=-1)
         RCoords = np.append(NodeCoords, [[np.nan, np.nan, np.nan]],axis=0)
@@ -354,7 +361,15 @@ def SmartLaplacianSmoothing(M, target='mean', options=dict()):
         for inode in FreeNodes:
             oldnode = np.copy(NodeCoords[inode])
             oldq = q[ElemConn[inode]]
-            NodeCoords[inode] = np.mean(NodeCoords[NodeNeighbors[inode]], axis=0)
+            # NodeCoords[inode] = np.mean(NodeCoords[NodeNeighbors[inode]], axis=0)
+
+            Q = NodeCoords[NodeNeighbors[inode]]
+            if TangentialSurface and inode in SurfNodes:
+                u = (1/lens[inode]) * np.sum(Q - NodeCoords[inode],axis=0)
+                U = 1*(u - np.sum(u*NodeNormals[inode],axis=0)*NodeNormals[inode])
+            else:
+                U = (1/lens[inode]) * np.sum(Q - NodeCoords[inode],axis=0)
+            NodeCoords[inode] += U
 
             q[ElemConn[inode]] = qualityFunc(NodeCoords, NodeConn[ElemConn[inode]])
 
@@ -798,9 +813,7 @@ def GeoTransformSmoothing(M, sigma_min=None, sigma_max=None, eta=None, rho=None,
     return Mnew
 
 # Needs update:
-def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
-    StiffnessFactor=1,FixedNodes=set(),Forces=None,L0Override='min',
-    CellCentered=True,FaceCentered=True,return_KF=False):
+def SegmentSpringSmoothing(M, StiffnessFactor=1, Forces=None, Displacements=None, L0Override='min', CellCentered=True, FaceCentered=True, return_KF=False, options=dict()):
     
     """
     SegmentSpringSmoothing - 
@@ -853,18 +866,53 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
         If return_KF is true, the tuple of sparse matrice KF=(K,F) is returned.
     """
 
-    if NodeNeighbors is None or ElemConn is None:
-        NodeNeighbors,ElemConn = utils.getNodeNeighbors(NodeCoords,NodeConn)
+    
+    NodeCoords, NodeConn = M
+    if type(NodeConn) is np.ndarray: NodeConn = NodeConn.tolist()
+    NodeCoords = np.copy(NodeCoords)
+    NodeNeighbors = M.NodeNeighbors
+    ElemConn = M.ElemConn
+    SurfConn = M.SurfConn
+    
+    # Process inputs
+    SmoothOptions = dict(method='simultaneous',
+                        iterate = 'converge',
+                        tolerance = 1e-3,
+                        maxIter = 20,
+                        FixedNodes = set(),
+                        FixFeatures = False,
+                        FixSurf = True,
+                        qualityFunc = quality.MeanRatio
+                    )
+
+    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, options)
+    FreeNodes = SmoothOptions['FreeNodes']
+    FixedNodes = SmoothOptions['FixedNodes']
+    tolerance = SmoothOptions['tolerance']
+    iterate = SmoothOptions['iterate']
+    qualityFunc = SmoothOptions['qualityFunc']
+    maxIter = SmoothOptions['maxIter']
+    method = SmoothOptions['method']
+
+    # if NodeNeighbors is None or ElemConn is None:
+    #     NodeNeighbors,ElemConn = utils.getNodeNeighbors(NodeCoords,NodeConn)
     if Forces is None or len(Forces) == 0:
         Forces = np.zeros((len(NodeCoords),3))
     else:
         assert len(Forces) == len(NodeCoords), 'Forces must be assigned for every node'
     
-    TempCoords = np.array(NodeCoords+[[np.nan,np.nan,np.nan]])
-    NodeCoords = np.array(NodeCoords)
-    RNeighbors = utils.PadRagged(NodeNeighbors+[[-1,-1,-1]])
+    if Displacements is None or len(Displacements) == 0:
+        Displacements = np.zeros((len(NodeCoords),3))
+    else:
+        assert len(Displacements) == len(NodeCoords), 'Displacements must be assigned for every node'
+
+
+    TempCoords = np.append(NodeCoords, [[np.nan,np.nan,np.nan]], axis=0)
+    # NodeCoords = np.array(NodeCoords)
+    RNeighbors = utils.PadRagged(NodeNeighbors+[[-1]])
     Points = TempCoords[RNeighbors]
     lengths = np.sqrt((TempCoords[:,0,None]-Points[:,:,0])**2 + (TempCoords[:,1,None]-Points[:,:,1])**2 + (TempCoords[:,2,None]-Points[:,:,2])**2)
+
     if L0Override == 'min':
         minL = np.nanmin(lengths[lengths!=0])
         lengths[lengths==0] = minL
@@ -875,18 +923,21 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
         lengths[lengths==0] = L0Override
     else:
         raise Exception("Invalid L0Override value. Must be 'min', 'max', an int, or a float")
-
+    
     k = StiffnessFactor/lengths
 
-    FixedArray = np.array(list(FixedNodes))
-    Forces = np.array(Forces)
-    Forces[FixedArray] = [0,0,0]
+    # Set Right hand side of fixed or prescribed disp nodes
+    Forces = np.asarray(Forces)
+    Forces[FixedNodes] = [0,0,0]
+
+    DispNodes = np.where(np.any(Displacements != 0, axis=1))[0]
+    Forces[DispNodes] = Displacements[DispNodes]
     
     Krows_diag = np.arange(len(NodeCoords))
     Kcols_diag = np.arange(len(NodeCoords))
     Kvals_diag = np.nansum(k[:-1],axis=1) 
     if CellCentered:
-        centroids = utils.Centroids(NodeCoords,NodeConn)
+        centroids = M.Centroids
         centroids = np.append(centroids,[[np.nan,np.nan,np.nan]],axis=0)
         RElemConn = utils.PadRagged(ElemConn)
         ElemConnCentroids = centroids[RElemConn]
@@ -894,8 +945,7 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
         kcenters = StiffnessFactor/ElemConnCenterDist
         Kvals_diag += np.nansum(kcenters,axis=1)
     if FaceCentered:
-        faces = converter.solid2faces(NodeCoords,NodeConn)
-        Faces = converter.faces2unique(faces)
+        Faces = M.Faces
         fcentroids = utils.Centroids(NodeCoords,Faces)
         fcentroids = np.append(fcentroids,[[np.nan,np.nan,np.nan]],axis=0)
         FConn = utils.getElemConnectivity(NodeCoords,Faces)
@@ -905,9 +955,10 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
         fkcenters = StiffnessFactor/FConnCenterDist
         Kvals_diag += np.nansum(fkcenters,axis=1)
 
-
-    Kvals_diag[FixedArray] = 1
-    UnfixedNodes = np.array(list(set(range(len(NodeCoords))).difference(FixedNodes)))
+    # Set stiffness matrix for prescribed displacement nodes
+    Kvals_diag[FixedNodes] = 1
+    Kvals_diag[DispNodes] = 1
+    UnfixedNodes = np.array(list(set(range(len(NodeCoords))).difference(FixedNodes).difference(DispNodes)))
     
     template = (RNeighbors[:-1]>=0)[UnfixedNodes]
     flattemplate = template.flatten()
@@ -920,7 +971,8 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
     Kvals = np.concatenate((Kvals_diag,Kvals_off))
 
     if CellCentered:
-        RNodeConn = utils.PadRagged(NodeConn+[[-1,-1,-1]],fillval=-1)
+        RNodeConn = utils.PadRagged(NodeConn,fillval=-1)
+        RNodeConn = np.append(RNodeConn,-1*np.ones((1,RNodeConn.shape[1]),dtype=int),axis=0)
         pretemplate = RNodeConn[RElemConn]
         # template = ((pretemplate >= 0) & (pretemplate != np.arange(len(NodeCoords))[:,None,None]))[UnfixedNodes]
         template = (pretemplate >= 0)[UnfixedNodes]
@@ -934,7 +986,8 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
         Kvals = np.concatenate((Kvals,Kvals_Ccentered))
 
     if FaceCentered:
-        RFaces = utils.PadRagged(Faces+[[-1,-1,-1]],fillval=-1)
+        RFaces = utils.PadRagged(Faces,fillval=-1)
+        RFaces = np.append(RFaces,-1*np.ones((1,RFaces.shape[1]),dtype=int),axis=0)
         pretemplate = RFaces[RFConn]
         # template = ((pretemplate >= 0) & (pretemplate != np.arange(len(NodeCoords))[:,None,None]))[UnfixedNodes]
         template = (pretemplate >= 0)[UnfixedNodes]
@@ -951,11 +1004,17 @@ def SegmentSpringSmoothing(NodeCoords,NodeConn,NodeNeighbors=None,ElemConn=None,
     F = sparse.csc_matrix(Forces)
     dXnew = spsolve(K.tocsc(), F).toarray()
     
-    Xnew = np.array(NodeCoords) + dXnew
-    Xnew[list(FixedNodes)] = np.array(NodeCoords)[list(FixedNodes)] # Enforce fixed nodes
+    Xnew = NodeCoords + dXnew
+    Xnew[FixedNodes] = np.array(NodeCoords)[FixedNodes] # Enforce fixed nodes
+
+    if 'mesh' in dir(mesh):
+        Mnew = mesh.mesh(Xnew, NodeConn)
+    else:
+        Mnew = mesh(Xnew, NodeConn)
+
     if return_KF:
-        return Xnew.tolist(), dXnew.tolist(), (K,F)
-    return Xnew.tolist(), dXnew.tolist()
+        return Mnew, (K,F)
+    return Mnew
 
 def NodeSpringSmoothing(M, Stiffness=1, Forces=None, Displacements=None, options=dict()):
     """
@@ -1026,7 +1085,7 @@ def NodeSpringSmoothing(M, Stiffness=1, Forces=None, Displacements=None, options
                         maxIter = 20,
                         FixedNodes = set(),
                         FixFeatures = False,
-                        FixSurf = True,
+                        FixSurf = False,
                         qualityFunc = quality.MeanRatio
                     )
 
@@ -1050,7 +1109,7 @@ def NodeSpringSmoothing(M, Stiffness=1, Forces=None, Displacements=None, options
         assert len(Displacements) == len(NodeCoords), 'Displacements must be assigned for every node'
     
     NodeCoords += Displacements
-    FixedNodes = np.unique(np.append(FixedNodes, np.where(np.all(Displacements != 0, axis=0))))
+    FixedNodes = np.unique(np.append(FixedNodes, np.where(np.any(Displacements != 0, axis=1))))
 
     k = Stiffness
 
@@ -1078,12 +1137,11 @@ def NodeSpringSmoothing(M, Stiffness=1, Forces=None, Displacements=None, options
             X = copy.copy(Xnew)
     
     if 'mesh' in dir(mesh):
-        Mnew = mesh.mesh(X, NodeConn)
+        Mnew = mesh.mesh(Xnew, NodeConn)
     else:
-        Mnew = mesh(X, NodeConn)
+        Mnew = mesh(Xnew, NodeConn)
 
     return Mnew
-
 
 # Needs update: 
 def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
@@ -1225,7 +1283,7 @@ def TetContract(M, h, FixedNodes={}, maxIter=5):
         EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
 
         # Create edge heap
-        heap = [(EdgeLengths[i],tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0)]
+        heap = [(EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0)]
         heapq.heapify(heap)
 
         valid = 0
@@ -2008,7 +2066,7 @@ def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='invert
     FixedNodes : set/array_like, optional
         Nodes to hold fixed during the optimization. These will be removed from the set of free nodes, by default set().
     iterate : int, optional
-        Number of passes if the free nodes in the mesh, by default 1.
+        Number of passes over the free nodes in the mesh, by default 1.
     verbose : bool, optional
         If True, will use a tqdm progress bar to indicate the progress of each iteration.
 
