@@ -364,7 +364,7 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
     return tet
 
 #
-def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, finite_diff_step=1e-5,smooth=True,copy=True):
+def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, finite_diff_step=1e-5, smooth=True, copy=True, springs=True):
     """
     Optimize the placement of surface node to lie on the "true" surface. This
     This simultaneously moves nodes towards the isosurface and redistributes
@@ -490,8 +490,16 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
         else:
             Rflow = 0
 
-        points = points + Zflow + Rflow
-    
+        if springs and M.Type == 'vol':
+            Forces = np.zeros((M.NNode, 3))
+            Forces[FreeNodes] = Zflow + Rflow
+            M = improvement.SegmentSpringSmoothing(M, Forces=Forces, options=dict(FixSurf=False, FixedNodes=FixedNodes))
+            NodeCoords = M.NodeCoords
+            points = np.asarray(NodeCoords)[FreeNodes]
+        else:
+            points = points + Zflow + Rflow
+ 
+            
     M.NodeCoords[FreeNodes] = points
 
     return M
