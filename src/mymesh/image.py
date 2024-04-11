@@ -1,8 +1,26 @@
 # -*- coding: utf-8 -*-
+# Created on Tue Mar 12 13:26:02 2024
+# @author: toj
 """
-Created on Tue Mar 12 13:26:02 2024
+Image-based meshing tools
 
-@author: toj
+
+Image-based Mesh Generation
+===========================
+.. autosummary::
+    :toctree: submodules/
+
+    VoxelMesh
+    SurfaceMesh
+    TetMesh
+    SurfaceNodeOptimization
+
+File IO
+=======
+.. autosummary::
+    :toctree: submodules/
+
+    read
 """
 
 
@@ -15,12 +33,12 @@ from . import utils, converter, contour, quality, improvement, rays, octree, mes
 # Mesh generators
 def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, return_nodedata=False):
     """
-    Generate voxel mesh of an implicit function
+    Generate voxel mesh of an image function
 
     Parameters
     ----------
-    func : function
-        Implicit function that describes the geometry of the object to be meshed. The function should be of the form v = f(x,y,z,*args,**kwargs) where x, y, and z are 1D numpy arrays of x, y and z coordinates and v is a 1D numpy array of function values. Additional arguments and keyword arguments may be passed through args and kwargs.
+    img : str or np.ndarray
+        Image array or file path to an image
     h : scalar, tuple
         Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).
     threshold : scalar
@@ -81,20 +99,24 @@ def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scal
 
 def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, method='mc', interpolation='linear'):
     """
-    Generate a surface mesh of an implicit function 
+    Generate a surface mesh of an image function 
 
     Parameters
     ----------
-    func : function
-        Implicit function that describes the geometry of the object to be meshed. The function should be of the form v = f(x,y,z,*args,**kwargs) where x, y, and z are 1D numpy arrays of x, y and z coordinates and v is a 1D numpy array of function values. For method='mc', x, y, and z will be 3D coordinate arrays and v must be 3D as well. Additional arguments and keyword arguments may be passed through args and kwargs.
-    bounds : array_like
-        6 element array, list, or tuple with the minimum and maximum bounds in each direction that the function will be evaluated. This should be formatted as: [xmin, xmax, ymin, ymax, zmin, zmax]
+    img : str or np.ndarray
+        Image array or file path to an image
     h : scalar, tuple
         Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).
     threshold : scalar
         Isovalue threshold to use for keeping/removing elements, by default 0.
     threshold_dir : signed integer
-        If threshold_dir is negative (default), values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_dir is positive, by default -1.
+        If threshold_dir is negative (default), values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_dir is positive, by default 1.
+    scalefactor : float, optional
+        Scale factor for resampling the image. If greater than 1, there will be more than
+        1 elements per voxel. If less than 1, will coarsen the image, by default 1.
+    scaleorder : int, optional
+        Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
+        Must be 0-5.
     method : str, optional
         Surface triangulation method, by default 'mc'.
         'mc' : Marching cubes (see contour.MarchingCubesImage) (default)
@@ -104,10 +126,7 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
         'mt' : Marching tetrahedra (see contour.MarchingTetrahedra)
     interpolation : str, optional
         Method of interpolation used for placing the vertices on the approximated isosurface. This can be 'midpoint', 'linear', or 'cubic', by default 'linear'. If 'cubic' is selected, method is overridden to be 'mc'. 
-    args : tuple, optional
-        Tuple of additional positional arguments for func, by default ().
-    kwargs : dict, optional
-        Dictionary of additional keyword arguments for func, by default {}.
+    
 
     Returns
     -------
@@ -159,32 +178,22 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
         
     return surface
 
-def TetMesh(func, bounds, h, threshold=0, threshold_direction=1, interpolation='linear'):
+def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, interpolation='linear'):
     """
-    Generate a tetrahedral mesh of an implicit function 
+    Generate a tetrahedral mesh of an image  
 
     Parameters
     ----------
-    func : function
-        Implicit function that describes the geometry of the object to be meshed. The function should be of the form v = f(x,y,z,*args,**kwargs) where x, y, and z are 1D numpy arrays of x, y and z coordinates and v is a 1D numpy array of function values. For method='mc', x, y, and z will be 3D coordinate arrays and v must be 3D as well. Additional arguments and keyword arguments may be passed through args and kwargs.
-    bounds : array_like
-        6 element array, list, or tuple with the minimum and maximum bounds in each direction that the function will be evaluated. This should be formatted as: [xmin, xmax, ymin, ymax, zmin, zmax]
+    img : str or np.ndarray
+        Image array or file path to an image
     h : scalar, tuple
         Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).
     threshold : scalar
         Isovalue threshold to use for keeping/removing elements, by default 0.
     threshold_dir : signed integer
-        If threshold_dir is negative (default), values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_dir is positive, by default -1.
+        If threshold_dir is negative (default), values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_dir is positive, by default 1.
     interpolation : str, optional
         Method of interpolation used for placing the vertices on the approximated isosurface. This can be 'midpoint', 'linear', by default 'linear'. 
-    args : tuple, optional
-        Tuple of additional positional arguments for func, by default ().
-    kwargs : dict, optional
-        Dictionary of additional keyword arguments for func, by default {}.
-    background : None or mymesh.mesh, optional
-        Background tetrahedral mesh to use for evaluating the function and performing
-        marching tetrahedra. If a mesh is provide, bounds and h will be ignored. 
-        If None is provided, a uniform tetrahedral grid will be used, by default None.
 
     Returns
     -------
@@ -193,14 +202,7 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=1, interpolation='
 
         .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = implicit.TetMesh(...)``
 
-    Examples
-    --------
-    .. plot::
-
-        tet = implicit.TetMesh(implicit.gyroid, [0,1,0,1,0,1], 0.05)
-        tet.plot(bgcolor='w')
     """
-
     
     if not isinstance(h, (list, tuple, np.ndarray)):
         h = (h,h,h)
