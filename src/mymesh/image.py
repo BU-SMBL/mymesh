@@ -217,7 +217,7 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
 
     voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)
     NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
-    TetCoords, TetCon = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['Image Data'], method='volume', threshold=threshold, flip=flip)
+    TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['Image Data'], method='volume', threshold=threshold, flip=flip)
 
 
     if 'mesh' in dir(mesh):
