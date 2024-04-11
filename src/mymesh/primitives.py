@@ -1,10 +1,9 @@
+# -*- coding: utf-8 -*-
+# Created Sept 2022
+# @author: toj
 
 """
 Mesh generation for pre-defined shapes
-
-Created Sept 2022
-
-@author: toj
 
 
 .. currentmodule:: mymesh.primitives

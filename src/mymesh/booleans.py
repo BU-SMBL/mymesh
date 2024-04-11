@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
+# Created on Wed Feb 16 11:28:28 2022
+# @author: toj
 """
 Boolean operations for meshes
 
-Created on Wed Feb 16 11:28:28 2022
-
-@author: toj
 """
 
 import warnings, itertools, copy

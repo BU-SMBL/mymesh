@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
+# Created on Sat Jan 22 09:18:20 2022
+# @author: toj
 """
-Mesh contouring tools for extracting isosurfaces from images or implicit functions
-
-Created on Sat Jan 22 09:18:20 2022
+Tools for extracting isosurfaces from images or implicit functions
 
 
 .. currentmodule:: mymesh.contour
@@ -33,7 +33,6 @@ Helper Functions
     generateLookup33
     generateLookup
 
-@author: toj
 """
 #%%
 import time

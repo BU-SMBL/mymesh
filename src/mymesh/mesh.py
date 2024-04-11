@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
+# Created on Wed Sep  1 16:20:47 2021
+# @author: toj
 """
-Created on Wed Sep  1 16:20:47 2021
-
-@author: toj
 
 mesh class
 ==========

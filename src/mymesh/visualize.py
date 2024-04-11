@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# Created on Sun Feb 25 14:07:16 2024
+# @author: toj
 """
 Mesh visualization and plotting
 
@@ -10,9 +13,6 @@ mesh:
     import pyvista as pv
     pvmesh = pv.wrap(M.mymesh2meshio())
 
-Created on Sun Feb 25 14:07:16 2024
-
-@author: toj
 """
 
 #%%

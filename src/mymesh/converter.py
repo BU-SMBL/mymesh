@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
+# Created on Sun Aug  1 17:48:50 2021
+# @author: toj
 """
 Mesh conversion tools
 
-Created on Sun Aug  1 17:48:50 2021
-
-@author: toj
 
 .. currentmodule:: mymesh.converter
 
@@ -55,6 +54,7 @@ Element type conversion
     pyramid2tet
     quad2tri
     tet102tet4
+    tet42tet10
 
 
 """
@@ -653,7 +653,7 @@ def wedge2tet(NodeCoords, NodeConn, method='1to3'):
 
     Parameters
     ----------
-    NodeCoords : list
+    NodeCoords : array_like
         List of nodal coordinates.
     NodeConn : list
         Nodal connectivity list. All elements should be 6-Node wedge elements.
@@ -665,6 +665,9 @@ def wedge2tet(NodeCoords, NodeConn, method='1to3'):
 
     Returns
     -------
+    NewCoords : array_like
+        New list of nodal coordinates. For '1to3' this will be unchanged from
+        the input.
     TetConn, list
         Nodal connectivity list of generated tetrahedra
 
@@ -831,8 +834,8 @@ def pyramid2tet(NodeCoords,NodeConn, method='1to2'):
     NOTE the generated tetrahedra from 1 to 2 will not necessarily be continuously 
     oriented, i.e. edges of child tetrahedra may not be aligned between one 
     parent element and its neighbor, and thus the resulting mesh will typically be invalid.
-    1 to 4 splitting is guaranteed to be consistent with other pyramids as well as as hexs
-    split with 1to24 and wedges split with 1to20.
+    1 to 4 splitting is guaranteed to be consistent with other pyramids, hexs
+    split with 1to24, and wedges split with 1to20.
     
 
     Parameters
@@ -844,6 +847,9 @@ def pyramid2tet(NodeCoords,NodeConn, method='1to2'):
 
     Returns
     -------
+    NewCoords : array_like
+        New list of nodal coordinates. For '1to2' this will be unchanged from
+        the input.
     TetConn, list
         Nodal connectivity list of generated tetrahedra
 
@@ -1459,18 +1465,22 @@ def quad2tri(QuadNodeConn):
         
 def tet102tet4(NodeCoords, Tet10NodeConn):
     """
-    Converts a 10 node tetradehdral mesh to a 4 node tetradehedral mesh.
-    Assumes a 10 node tetrahedral numbering scheme where the first 4 nodes define
+    Converts a 10-node tetradehdral mesh to a 4-node tetradehedral mesh.
+    Assumes a 10-node tetrahedral numbering scheme where the first 4 nodes define
     the tetrahedral vertices, the remaining nodes are thus neglected.
 
     Parameters
     ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
     Tet10NodeConn : list
         Nodal connectivities for a 10-Node tetrahedral mesh
 
     Returns
     -------
-    Tet4NodeConn
+    NodeCoords : array_like
+        List of nodal coordinates (unchanged from input). 
+    Tet4NodeConn : np.ndarray
         Nodal connectivities for the equivalent 4-Node tetrahedral mesh
     """
     if len(Tet10NodeConn) == 0:
@@ -1480,7 +1490,25 @@ def tet102tet4(NodeCoords, Tet10NodeConn):
     return NodeCoords, Tet4NodeConn
 
 def tet42tet10(NodeCoords, Tet4NodeConn):
+    """
+    Converts a 4 node tetrahedral mesh to 10 node tetrahedral mesh. A new node 
+    is placed at the midpoint of each edge.
 
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    Tet4NodeConn : array_like
+        Nodal connectivities for a 4-node tetrahedral mesh
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        New list of nodal coordinates. 
+    Tet4NodeConn : np.ndarray
+        Nodal connectivities for the 10-Node tetrahedral mesh
+
+    """
     NodeCoords = np.asarray(NodeCoords)
     Tet4NodeConn = np.asarray(Tet4NodeConn)
     Nodes01 = (NodeCoords[Tet4NodeConn[:,0]] + NodeCoords[Tet4NodeConn[:,1]])/2

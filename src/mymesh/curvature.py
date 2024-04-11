@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
+# Created on Wed Sep 29 14:10:08 2021
+# @author: toj
 """
 Tools for calculating curvature
 
-Created on Wed Sep 29 14:10:08 2021
-
-@author: toj
 
 .. currentmodule:: mymesh.curvature
 

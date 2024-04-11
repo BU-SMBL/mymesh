@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
+# Created on Tue Feb  1 15:23:07 2022
+# @author: toj
 """
 Ray casting and intersection tests
 
-Created on Tue Feb  1 15:23:07 2022
-
-@author: toj
 
 .. currentmodule:: mymesh.rays
 
@@ -1268,7 +1267,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
         True if there is an intersection, otherwise False.
     """    
     # Akenine-Moller (2001) Fast 3D Triangle-Box Overlap Test
-    if not BoxCenter: BoxCenter = np.mean([xlim,ylim,zlim],axis=1)
+    if BoxCenter is None: BoxCenter = np.mean([xlim,ylim,zlim],axis=1)
     f0 = np.subtract(TriCoords[1],TriCoords[0])
     f1 = np.subtract(TriCoords[2],TriCoords[1])
     f2 = np.subtract(TriCoords[0],TriCoords[2])
@@ -1292,7 +1291,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     elif type(TriNormal) is list:
         TriNormal = np.array(TriNormal)
     dist = np.dot(TriNormal,v0)
-    r = hx*abs(TriNormal[0]) + hy*abs(TriNormal[1]) + hz*abs(TriNormal[2])
+    r = hx*np.abs(TriNormal[0]) + hy*np.abs(TriNormal[1]) + hz*np.abs(TriNormal[2])
     if dist > r:
         return False
     
@@ -1302,7 +1301,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     p0 = np.dot(v0,a00)
     # p1 = np.dot(v1,a00)
     p2 = np.dot(v2,a00)
-    r = hy*abs(a00[1]) + hz*abs(a00[2])
+    r = hy*np.abs(a00[1]) + hz*np.abs(a00[2])
     if min(p0,p2) > r or max(p0,p2) < -r:
         return False
     # a01
@@ -1310,7 +1309,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     p0 = np.dot(v0,a01)
     p1 = np.dot(v1,a01)
     # p2 = np.dot(v2,a01)
-    r = hy*abs(a01[1]) + hz*abs(a01[2])
+    r = hy*np.abs(a01[1]) + hz*np.abs(a01[2])
     if min(p0,p1) > r or max(p0,p1) < -r:
         return False
     # a02
@@ -1318,7 +1317,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     p0 = np.dot(v0,a02)
     p1 = np.dot(v1,a02)
     # p2 = np.dot(v2,a02)
-    r = hy*abs(a02[1]) + hz*abs(a02[2])
+    r = hy*np.abs(a02[1]) + hz*np.abs(a02[2])
     if min(p0,p1) > r or max(p0,p1) < -r:
         return False
     # a10
@@ -1326,7 +1325,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     p0 = np.dot(v0,a10)
     # p1 = np.dot(v1,a10)
     p2 = np.dot(v2,a10)
-    r = hx*abs(a10[0]) + hz*abs(a10[2])
+    r = hx*np.abs(a10[0]) + hz*np.abs(a10[2])
     if min(p0,p2) > r or max(p0,p2) < -r:
         return False
     # a11
@@ -1334,7 +1333,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     p0 = np.dot(v0,a11)
     p1 = np.dot(v1,a11)
     # p2 = np.dot(v2,a11)
-    r = hx*abs(a11[0]) + hz*abs(a11[2])
+    r = hx*np.abs(a11[0]) + hz*np.abs(a11[2])
     if min(p0,p1) > r or max(p0,p1) < -r:
         return False
     # a12
@@ -1342,7 +1341,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     p0 = np.dot(v0,a12)
     p1 = np.dot(v1,a12)
     # p2 = np.dot(v2,a10)
-    r = hx*abs(a12[0]) + hz*abs(a12[2])
+    r = hx*np.abs(a12[0]) + hz*np.abs(a12[2])
     if min(p0,p1) > r or max(p0,p1) < -r:
         return False
     # a20
@@ -1350,7 +1349,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     p0 = np.dot(v0,a20)
     # p1 = np.dot(v1,a20)
     p2 = np.dot(v2,a20)
-    r = hx*abs(a20[0]) + hy*abs(a20[1])
+    r = hx*np.abs(a20[0]) + hy*np.abs(a20[1])
     if min(p0,p2) > r or max(p0,p2) < -r:
         return False
     # a21
@@ -1358,7 +1357,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     p0 = np.dot(v0,a21)
     p1 = np.dot(v1,a21)
     # p2 = np.dot(v2,a21)
-    r = hx*abs(a21[0]) + hy*abs(a21[1])
+    r = hx*np.abs(a21[0]) + hy*np.abs(a21[1])
     if min(p0,p1) > r or max(p0,p1) < -r:
         return False
     # a22
@@ -1366,7 +1365,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     p0 = np.dot(v0,a22)
     p1 = np.dot(v1,a22)
     # p2 = np.dot(v2,a22)
-    r = hx*abs(a22[0]) + hy*abs(a22[1])
+    r = hx*np.abs(a22[0]) + hy*np.abs(a22[1])
     if min(p0,p1) > r or max(p0,p1) < -r:
         return False
     
@@ -1401,7 +1400,7 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
     intersection : bool
         True if there is an intersection, otherwise False.
     """    
-    if not BoxCenter: BoxCenter = np.mean([xlim,ylim,zlim],axis=1)
+    if BoxCenter is None: BoxCenter = np.mean([xlim,ylim,zlim],axis=1)
     
     if type(Tris) is list: Tris = np.array(Tris)
         

@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
+# Created on Sat Jan 15 12:02:26 2022
+# @author: toj
 """
 Delaunay triangulation
 
-Created on Sat Jan 15 12:02:26 2022
+Currently this module consists of several basic implementations of algorithms
+related to Delaunay triangulation, as well as interfaces to Delaunay 
+triangulation with SciPy (which uses QHull) and Jonathan Shewchuk's Triangle.
+Further development with improved Delaunay triangulation and tetrahedralization
+capabilities are planned for the future.
 
-@author: toj
 """
 #%%
 import numpy as np

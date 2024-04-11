@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
+# Created on Wed Sep 29 18:31:03 2021
+# @author: toj
 """
 Various mesh utilities 
-
-Created on Wed Sep 29 18:31:03 2021
-
-@author: toj
-
 
 .. currentmodule:: mymesh.utils
 
@@ -23,14 +20,19 @@ Mesh Connectivity
     getConnectedNodes
     getConnectedElements
 
-Node/Element Information
-========================
+Mesh Measurements
+=================
 .. autosummary::
     :toctree: submodules/
 
     Centroids
     CalcFaceNormal
     Face2NodeNormal
+    DetectFeatures
+    TriSurfVol
+    TetMeshVol
+    MVBB
+    AABB
 
 Mesh Manipulations
 ==================
@@ -53,17 +55,6 @@ Surface Projection
     BaryTri
     BaryTris
     BaryTet
-
-Mesh Measurements
-=================
-.. autosummary::
-    :toctree: submodules/
-
-    DetectFeatures
-    TriSurfVol
-    TetMeshVol
-    MVBB
-    AABB
 
 Mesh Clean Up
 =============
@@ -723,7 +714,7 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
 
 def BaryTri(Nodes, Pt):
     """
-    BaryTri returns the bary centric coordinates of a point (Pt) relative to 
+    Returns the bary centric coordinates of a point (Pt) relative to 
     a triangle (Nodes)
 
     Parameters
@@ -767,7 +758,7 @@ def BaryTri(Nodes, Pt):
 
 def BaryTris(Tris, Pt):
     """
-    BaryTri returns the bary centric coordinates of a point (Pt) relative to 
+    Returns the bary centric coordinates of a point (Pt) relative to 
     a triangle (Nodes)
 
     Parameters
@@ -810,7 +801,7 @@ def BaryTris(Tris, Pt):
 
 def BaryTet(Nodes, Pt):
     """
-    BaryTet returns the bary centric coordinates of a point (Pt) relative to 
+    Returns the bary centric coordinates of a point (Pt) relative to 
     a tetrahedron (Nodes)
 
     Parameters
@@ -849,7 +840,9 @@ def BaryTet(Nodes, Pt):
 
 def Project2Surface(Points,Normals,NodeCoords,SurfConn,tol=np.inf,Octree='generate'):
     """
-    Projects a node (NodeCoord) along its normal vector (NodeNormal) onto the surface defined by NodeCoord and SurfConn, returns the index of the element (elemID) that contains the projected node and the barycentric coordinates (alpha, beta, gamma) of that projection within that element
+    Projects a node along its normal vector onto a surface. Returns the index of 
+    the element (elemID) that contains the projected node and the barycentric 
+    coordinates (alpha, beta, gamma) of that projection within that element.
 
     Parameters
     ----------
@@ -902,10 +895,12 @@ def Project2Surface(Points,Normals,NodeCoords,SurfConn,tol=np.inf,Octree='genera
 
 def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verbose=False, Octree='generate', return_octree=False, npts=np.inf):
     """
-    Generate a mapping matrix from surface 1 (NodeCoords1, SurfConn1) to surface 2 (NodeCoords2, SurfConn2)
-    Each row of the mapping matrix contains an element ID followed by barycentric coordinates alpha, beta, gamma
-    that define the position of the nodes of surface 1 (NodeCoords1) relative to the specified surface element of 
-    surface 2 (SurfConn2). An element ID of -1 indicates a failed mapping.
+    Generate a mapping matrix from to map data from one surface to another using
+    barycentric interpolation.  Each row of the mapping matrix contains an 
+    element ID followed by barycentric coordinates alpha, beta, gamma  that 
+    define the position of the nodes of surface 1 (NodeCoords1) relative to the 
+    specified surface element of surface 2 (SurfConn2). An element ID of -1 
+    indicates a failed mapping.
     NOTE: Only triangular surface meshes are supported.
 
     Parameters
@@ -978,8 +973,8 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
 
 def ValueMapping(NodeCoords1, SurfConn1, NodeVals1, NodeCoords2, SurfConn2, tol=np.inf, Octree='generate', MappingMatrix=None, verbose=False, return_MappingMatrix=False, return_octree=False, npts=np.inf):
     """
-    Maps nodal values <NodeVals1> from surface 1 to surface 2
-    - Currently only supports triangluar surface meshes
+    Maps nodal values one surface to another. This currently only supports 
+    triangluar surface meshes
     TODO: Multi-value mapping may produce errors - need to better verify.
     
     Parameters
@@ -1613,8 +1608,8 @@ def PeelHex(NodeCoords,NodeConn,nLayers=1):
     
 def makePyramidLayer(VoxelCoords,VoxelConn,PyramidHeight=None):
     """
-    For a given voxel mesh, will generate a set of pyramid 
-    elements that cover the surface of the voxel mesh. To merge the pyramid layer with the voxel mesh, use MergeMesh
+    Generate a set of pyramid elements that cover the surface of the voxel mesh. 
+    To merge the pyramid layer with the voxel mesh, use :func:`MergeMesh`.
 
     Parameters
     ----------
@@ -1706,7 +1701,7 @@ def makeVoxelLayer(VoxelCoords,VoxelConn):
         
 def TriSurfVol(NodeCoords, SurfConn):
     """
-    Calculates the volume contained within a surface mesh
+    Calculates the volume contained within a surface mesh.
     Based on 'Efficient feature extraction for 2D/3D objects in mesh 
     representation.' - Zhang, C. and Chen, T., 2001
     

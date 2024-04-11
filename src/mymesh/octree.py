@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
+# Created on Mon Jan 31 22:52:03 2022
+# @author: toj
 """
 Octree data structure 
 
-Created on Mon Jan 31 22:52:03 2022
-
-@author: toj
 """
 import numpy as np
 import scipy
@@ -285,7 +284,7 @@ class OctreeNode():
         childSize = self.size/2
         self.children = []
         for xSign,ySign,zSign in [(-1,-1,-1),(1,-1,-1),(1,1,-1),(-1,1,-1),(-1,-1,1),(1,-1,1),(1,1,1),(-1,1,1)]:
-            centroid = [self.centroid[0]+xSign*self.size/4, self.centroid[1]+ySign*self.size/4, self.centroid[2]+zSign*self.size/4]
+            centroid = np.array([self.centroid[0]+xSign*self.size/4, self.centroid[1]+ySign*self.size/4, self.centroid[2]+zSign*self.size/4])
             self.children.append(OctreeNode(centroid,childSize,parent=self,data=[],level=self.level+1))
 
     def addTri(self,tri,triId=None,minsize=None):
@@ -396,7 +395,7 @@ def Voxel2Octree(VoxelCoords, VoxelConn):
     while size < minsize:
         size *= 2
     
-    centroid = [minx + size/2, miny+size/2, minz+size/2]
+    centroid = np.array([minx + size/2, miny+size/2, minz+size/2])
     
     Root = OctreeNode(centroid,size,data=[])
     Root.state = 'root'
@@ -454,7 +453,7 @@ def Surf2Octree(NodeCoords, SurfConn, minsize=None):
     maxz = np.arange(minz,maxz+minsize,minsize)[-1]
     
     size = max([maxx-minx,maxy-miny,maxz-minz])
-    centroid = [minx + size/2, miny+size/2, minz+size/2]
+    centroid = np.array([minx + size/2, miny+size/2, minz+size/2])
     ElemIds = list(range(len(SurfConn)))
     Root = OctreeNode(centroid,size,data=ElemIds)
     Root.state = 'root'
@@ -468,7 +467,7 @@ def Function2Octree(func, grad, bounds, minsize=None, maxsize=None, strategy='QE
     # func and grad should both accept 3 arguments (x,y,z), and handle both vectorized and scalar inputs
 
     size = max([bounds[1]-bounds[0],bounds[3]-bounds[2],bounds[5]-bounds[4]])
-    centroid = [bounds[0] + size/2, bounds[2]+size/2, bounds[4]+size/2]
+    centroid = np.array([bounds[0] + size/2, bounds[2]+size/2, bounds[4]+size/2])
 
     Root = OctreeNode(centroid, size)
     vertices = Root.getVertices()

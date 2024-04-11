@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
+# Created on Sun Jan 23 23:58:18 2022
+# @author: toj
 """
 Element quality measurements
 
-Created on Sun Jan 23 23:58:18 2022
-
-@author: toj
 
 .. currentmodule:: mymesh.quality
 
