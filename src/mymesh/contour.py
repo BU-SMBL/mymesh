@@ -4492,6 +4492,9 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         NodeCoords = NodeCoords3
         NodeConn = NodeConn3
     if return_NodeValues:
+        if flip:
+            NewValues = -1*NewValues
+        NewValues += threshold
         return NodeCoords, NodeConn, NewValues
 
     return NodeCoords, NodeConn
