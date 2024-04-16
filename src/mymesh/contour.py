@@ -4342,10 +4342,6 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     else:
         raise ValueError(f'Interpolation must be one of "midpoint", "linear", or "quadratic", not "{interpolation:s}"')
     
-    if return_NodeValues: 
-        if (method.lower() == 'volume') and (not mixed_elements):
-            raise Exception('Returning node values for purely tetrahedral meshes (method="lower", mixed_elements=False) is currently unsupported.')
-        orig_NodeValues = np.copy(NodeValues)
     NodeValues = np.asarray(NodeValues) - threshold
     if flip:
         NodeValues = -1*NodeValues
@@ -4479,13 +4475,23 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
 
     NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
     NodeCoords,NodeConn = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf')
-
-    if method.lower() == 'volume' and not mixed_elements:
-        NodeCoords, NodeConn = converter.solid2tets(NodeCoords, NodeConn)
-        NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
-        
     if return_NodeValues:
         NewValues = NewValues[Idx]
+
+    if method.lower() == 'volume' and not mixed_elements:
+        NodeCoords2, NodeConn2 = converter.solid2tets(NodeCoords, NodeConn)
+         
+        NodeCoords3,NodeConn3,Idx2 = utils.DeleteDuplicateNodes(NodeCoords2,NodeConn2,return_idx=True, tol=cleanup_tol)
+        if return_NodeValues:
+            # TODO: This is pretty clunky
+            NewValues = np.append(NewValues, np.repeat(np.nan, len(NodeCoords2)-len(NodeCoords)))
+            NewValues = NewValues[Idx2]
+            Neighbors = utils.PadRagged(utils.getNodeNeighbors(NodeCoords3, NodeConn3)+[])
+            NewValues = np.nanmean(np.append(NewValues,np.nan)[Neighbors],axis=1)
+            NewValues[np.unique(converter.solid2surface(NodeCoords3, NodeConn3))] = 0
+        NodeCoords = NodeCoords3
+        NodeConn = NodeConn3
+    if return_NodeValues:
         return NodeCoords, NodeConn, NewValues
 
     return NodeCoords, NodeConn
