@@ -228,7 +228,7 @@ def TangentialLaplacianSmoothing(M, options=dict()):
     NodeNormals = M.NodeNormals
     
     if SmoothOptions['iterate'] == 'converge':
-        condition = lambda i, U : (i == 0) | (i < maxIter) | np.max(U) < tolerance
+        condition = lambda i, U : (i == 0) | (i < maxIter) | (np.max(U) < tolerance)
     elif isinstance(SmoothOptions['iterate'], (int, np.integer)):
         condition = lambda i, U : i < SmoothOptions['iterate']
     else:
@@ -1200,7 +1200,7 @@ def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
     return NewCoords
 
 ## Local Mesh Topology Operations
-def TetContract(M, h, FixedNodes={}, maxIter=5):
+def TetContract(M, h, FixedNodes={}, verbose=True, cleanup=True, maxIter=10):
 
     # Recommended that h = 4/5*desired element size
 
@@ -1212,10 +1212,12 @@ def TetContract(M, h, FixedNodes={}, maxIter=5):
     EdgeConn = M.EdgeConn
     EdgeElemConn = M.EdgeElemConn
     SurfEdges = np.sort(M.Surface.Edges)
+    SurfEdgeSet = set(tuple(e) for e in SurfEdges)
 
     # Detect Features
     # TODO: Some redundant calculation (edges) occurs in DetectFeatures
     surface_nodes = np.unique(SurfEdges)
+    surfnodeset = set(surface_nodes)
     fixed_nodes = np.array(list(FixedNodes),dtype=int)
     feat_edges, feat_corners = utils.DetectFeatures(NewCoords,SurfConn) 
 
@@ -1226,78 +1228,97 @@ def TetContract(M, h, FixedNodes={}, maxIter=5):
     FeatureRank[feat_corners]  = 3
     FeatureRank[fixed_nodes]   = 4
 
-    def do_collapse(targetnode, collapsenode, NewCoords, NewConn, ElemConn, redirect, coupled, V):
-        # redirect, V, q, and coupled are updated in place, don't need to return
+    ElemConn = utils.getElemConnectivity(NewCoords, NewConn)
+    ElemConnTable = {i : set([tuple(NewConn[e]) for e in ElemConn[i]]) for i in range(len(ElemConn))}
+    SurfEdgeTable = {tuple(edge) : True if tuple(edge) in SurfEdgeSet else False for edge in Edges}
+
+    # Get edge lengths
+    EdgeDiff = NewCoords[Edges[:,0]] - NewCoords[Edges[:,1]]
+    EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
+
+    # Create edge heap
+    heap = [(EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0)]
+    inheap = {tuple(edge):True if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0) else False for i,edge in enumerate(Edges)}
+    inmesh = {tuple(edge):True for i,edge in enumerate(Edges)}
+    heapq.heapify(heap)
+
+    def do_collapse(targetnode, collapsenode):
+        # Get affected elements
+        AffectedConn = np.array(list(ElemConnTable[collapsenode]))
         
-        # Relevant connected elements:
-        EC = [e for i in coupled[collapsenode] for e in ElemConn[i] if V[e] > 0] + ElemConn[collapsenode]
-        if len(EC) == 0:
-            return False
-
-        old_redirect = redirect[collapsenode]
-        redirect[collapsenode] = targetnode
-        AffectedConn = redirect[NewConn[EC]]
-        new_vol = quality.tet_volume(NewCoords, AffectedConn)
-
-        if any(new_vol < 0) or any((new_vol == 0) & np.array([len(set(elem)) == 4 for elem in AffectedConn])):
-            # Invalid collapse
-            redirect[collapsenode] = old_redirect
+        # Update elements
+        collapsed = np.any(AffectedConn==targetnode, axis=1) & np.any(AffectedConn==collapsenode, axis=1)
+        UpdatedConn = AffectedConn[~collapsed]
+        UpdatedConn[UpdatedConn == collapsenode] = targetnode
+        if len(UpdatedConn) == 0:
             success = False
             return success
 
-        # Couple the collapsed node (and any nodes coupled to it) to the new target
-        coupled[targetnode].append(collapsenode)
-        coupled[targetnode] += coupled[collapsenode]
-        redirect[coupled[targetnode]] = targetnode
+        # Check volume
+        new_vol = quality.tet_volume(NewCoords, UpdatedConn)
+        old_qual = quality.MeanRatio(NewCoords, AffectedConn)
+        new_qual = quality.MeanRatio(NewCoords, UpdatedConn)
         
-        V[EC] = new_vol
+        if any(new_vol <= 0) or np.min(new_qual) < np.min(old_qual):
+            success = False
+            return success
+
+        # Flip is valid, update data structures
+        new_elems = [tuple(e) for e in UpdatedConn]
+        old_elems = [tuple(e) for e in AffectedConn]
+
+        for node in set([n for elem in old_elems for n in elem]):
+            # Remove old nodes from the table  
+            ElemConnTable[node].difference_update(old_elems)
+            ElemConnTable[node].update([elem for elem in new_elems if node in elem])
+            
+        # Add new elements to the target node
+        ElemConnTable[targetnode].update(new_elems)
+
+        # Remove all elements from the collapsed node
+        ElemConnTable[collapsenode] = set()
+        
+        # Add new edges to the heap
+        for edgenode in set(UpdatedConn[UpdatedConn != targetnode]):
+            newedge = tuple(sorted((edgenode, targetnode)))
+            inmesh[newedge] = True
+            if newedge in inheap.keys() and inheap[newedge]:
+                continue
+
+            # All nodes that are newly connected to the target node
+            L = np.linalg.norm(NewCoords[targetnode] - NewCoords[edgenode])
+            if SurfEdgeTable[tuple(sorted((edgenode, collapsenode)))]:
+                SurfEdgeTable[tuple(sorted((edgenode, targetnode)))] = True
+            else:
+                SurfEdgeTable[tuple(sorted((edgenode, targetnode)))] = False
+            if L < cutoff:
+                heapq.heappush(heap, (L, tuple(sorted((edgenode, targetnode)))))
+                inheap[newedge] = True
 
         success = True
         return success
 
-    loop = 0
-    valid = 1
-    valid_collapses = []
-    while loop < maxIter and valid > 0 or (loop > 2 and valid_collapses[-1]==valid_collapses[-2]):
+    loop = 0; valid = 1;
+    while valid > 0 and len(heap) > 0 and loop < maxIter:
         loop += 1
-        print(loop, valid)
-
-        # TODO: Recreation of data structures shouldn't be necessary, but need more careful book keeping
-        # Create node data structures
-        ElemConn = utils.getElemConnectivity(NewCoords, NewConn)
-        redirect = np.arange(len(NewCoords))
-        coupled = [[] for i in range(len(NewCoords))]
-        
-        # Create surface edge table - True indicates edge is an edge on the surface
-        SurfEdgeTable = {tuple(edge) : True for edge in SurfEdges}
-        for edge in Edges:
-            e = tuple(edge)
-            if e not in SurfEdgeTable.keys():
-                SurfEdgeTable[e] = False
-
-        # Create Element quality arrays
-        V = quality.tet_volume(NewCoords, NewConn)
-
-        # Get edge lengths
-        EdgeDiff = NewCoords[redirect[Edges[:,0]]] - NewCoords[redirect[Edges[:,1]]]
-        EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
-
-        # Create edge heap
-        heap = [(EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0)]
-        heapq.heapify(heap)
-
         valid = 0
         invalid = 0
-        touched = set()
+        if verbose:
+            progress = tqdm.tqdm(total=len(heap))
         while len(heap) > 0:
             l, edge = heapq.heappop(heap)
 
-            node1 = redirect[edge[0]]
-            node2 = redirect[edge[1]]
+            inheap[edge] = False
+            if verbose:
+                progress.update(1)
+                L1 = len(heap)
+
+            node1 = edge[0]
+            node2 = edge[1]
 
             # Validity checks
-            if edge[0] in touched or edge[1] in touched:
-                # One of the nodes in the edge as already been modified in this pass
+            if len(ElemConnTable[node1]) == 0 or len(ElemConnTable[node2]) == 0:
+                # Edge has already been removed
                 continue
             elif FeatureRank[node1] == FeatureRank[node2] == 4:
                 # Both nodes are fixed, can't collapse this edge
@@ -1328,30 +1349,34 @@ def TetContract(M, h, FixedNodes={}, maxIter=5):
                 equal_rank = True 
 
             # Check if collapse is valid:
-            success = do_collapse(targetnode, collapsenode, NewCoords, NewConn, ElemConn, redirect, coupled, V)
-            # if success:
-            #     touched.add(collapsenode)
+            success = do_collapse(targetnode, collapsenode)
             # If rank is equal, try the other node of the edge
             if equal_rank and not success:
-                success = do_collapse(collapsenode, targetnode, NewCoords, NewConn, ElemConn, redirect, coupled, V)
-                # if success:
-                #     touched.add(targetnode)
+                success = do_collapse(collapsenode, targetnode)
             
             if success:
-                touched.update(edge)
                 valid += 1
+                inmesh[edge] = False
             else:
                 invalid += 1
             
-        NewConn = redirect[NewConn]
-        Edges = redirect[Edges]
-        SurfEdges = redirect[SurfEdges]
+            if verbose:
+                L2 = len(heap)
+                progress.total += max(0, L2-L1)
+            
+        NewConn = np.array(list(set([elem for i in ElemConnTable.keys() for elem in ElemConnTable[i]])))
+        if valid > 0:
+            Edges = np.array([key for key in inmesh.keys() if inmesh[key]])
+            EdgeDiff = NewCoords[Edges[:,0]] - NewCoords[Edges[:,1]]
+            EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
 
-        NewCoords, NewConn = utils.CleanupDegenerateElements(NewCoords, NewConn, Type='vol')
-        NewConn = np.array(NewConn, dtype=int)
-        valid_collapses.append(valid)
-    
-    NewCoords, NewConn,_ = utils.RemoveNodes(NewCoords, NewConn)
+            # Create edge heap
+            heap = [(EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0)]
+            inheap = {tuple(edge):True if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0) else False for i,edge in enumerate(Edges)}
+            heapq.heapify(heap)
+
+    if cleanup:
+        NewCoords, NewConn,_ = utils.RemoveNodes(NewCoords, NewConn)
      
     if 'mesh' in dir(mesh):
         tet = mesh.mesh(NewCoords, NewConn)
@@ -1360,7 +1385,7 @@ def TetContract(M, h, FixedNodes={}, maxIter=5):
 
     return tet
 
-def TetFlipping(M, iterate='converge', QualityMetric='Skewness', target='min'):
+def TetFlipping(M, iterate='converge', QualityMetric='Skewness', target='min', flips=['4-4','3-2','2-3']):
 
     NodeCoords = M.NodeCoords
     NodeConn = M.NodeConn
@@ -1418,29 +1443,35 @@ def TetFlipping(M, iterate='converge', QualityMetric='Skewness', target='min'):
             keyset = set(key)
             ### Attempt edge removal ###
             # 4-4 flip
-            success = _Tet44Flip(key, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc,target=target)
-            if success: 
-                n44 += 1
-                continue
+            if '4-4' in flips:
+                success = _Tet44Flip(key, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc,target=target)
+                if success: 
+                    n44 += 1
+                    continue
 
             # 3-2 flip
-            success = _Tet32Flip(key, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, target=target)
-            if success: 
-                n32 += 1
-                continue
-            
+            if '3-2' in flips:
+                success = _Tet32Flip(key, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, target=target)
+                if success: 
+                    n32 += 1
+                    continue
+                    
             ###########################
 
             ## Attempt face removal ###
             # 2-3 flip
-            success = _Tet23Flip(key, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, target=target)
-            if success: 
-                n23 += 1
-                continue
+            if '2-3' in flips:
+                success = _Tet23Flip(key, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, target=target)
+                if success: 
+                    n23 += 1
+                    continue
             
             ############################
 
-        print(f'3-2 Flips: {n32:d}\n2-3 Flips: {n23:d}\n4-4 Flips: {n44:d}')
+        if verbose: 
+            if '3-2' in flips: print(f'3-2 Flips: {n32:d}')
+            if '2-3' in flips: print(f'2-3 Flips: {n23:d}')
+            if '4-4' in flips: print(f'4-4 Flips: {n44:d}')
     # Extract updated mesh
 
     NewConn = [ElemTable[key]['elem'] for key in ElemTable.keys() if ElemTable[key]['status']]
@@ -2242,7 +2273,7 @@ def _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, UserOpt
     if type(SmoothOptions['FixedNodes']) is not set: 
             SmoothOptions['FixedNodes'] = set(SmoothOptions['FixedNodes'])
     if SmoothOptions['FixFeatures']:
-        edges, corners = utils.DetectFeatures(NodeCoords,NodeConn)
+        edges, corners = utils.DetectFeatures(NodeCoords,SurfConn)
         SmoothOptions['FixedNodes'].update(edges)
         SmoothOptions['FixedNodes'].update(corners)
 
@@ -2445,7 +2476,7 @@ def _Tet23Flip(elemkey, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, t
         if len(adjacent_tets) == 1:
             # Surface face, not flippable
             continue
-        other_tet = adjacent_tets[0] if key is adjacent_tets[1] else adjacent_tets[1]
+        other_tet = adjacent_tets[0] if key == adjacent_tets[1] else adjacent_tets[1]
         otherset = set(other_tet)
 
         current_quality = [ElemTable[key]['quality'], ElemTable[other_tet]['quality']]
