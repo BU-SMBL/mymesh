@@ -497,7 +497,7 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
         if springs and M.Type == 'vol':
             Forces = np.zeros((M.NNode, 3))
             Forces[FreeNodes] = Zflow + Rflow
-            M = improvement.SegmentSpringSmoothing(M, Forces=Forces, options=dict(FixSurf=False, FixedNodes=FixedNodes))
+            M = improvement.NodeSpringSmoothing(M, Displacements=Forces, options=dict(FixSurf=False, FixedNodes=FixedNodes))
             NodeCoords = M.NodeCoords
             points = np.asarray(NodeCoords)[FreeNodes]
         else:
@@ -1074,7 +1074,7 @@ def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
     else:
         raise Exception('Invalid method - use "nodes", "centroids", or "nodes+centroids"')
     
-    tree = KDTree(Coords, leaf_size=2)  
+    tree = KDTree(Coords)  
     Out = tree.query(VoxelCoords,1)
     ds = Out[0].flatten()
     cs = Out[1].flatten()
