@@ -433,35 +433,41 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
     hexIdx = np.where(Ls == 8)[0]
     tet10Idx = np.where(Ls == 10)[0]
 
-    tets = [NodeConn[i] for i in tetIdx]
-    pyrs = [NodeConn[i] for i in pyrIdx]
-    wdgs = [NodeConn[i] for i in wdgIdx]
-    hexs = [NodeConn[i] for i in hexIdx]
-    tet10 = [NodeConn[i] for i in tet10Idx]
+    tets = np.array([NodeConn[i] for i in tetIdx])
+    pyrs = np.array([NodeConn[i] for i in pyrIdx])
+    wdgs = np.array([NodeConn[i] for i in wdgIdx])
+    hexs = np.array([NodeConn[i] for i in hexIdx])
+    tet10 = np.array([NodeConn[i] for i in tet10Idx])
 
-
-
-    if len(pyrIdx) > 0 or len(wdgIdx) > 0:
+    if int(len(hexIdx) > 0) + int(len(pyrIdx) > 0) + int(len(wdgIdx) > 0) == 2:
+        # if 2/3 of hexs, pyrs, and wdgs use decomposition guaranteed to produce
+        #aligned edges
         hexmethod = '1to24'
         hexn = 24
+        wdgmethod = '1to14'
+        wdgn = 14
     else:
         hexmethod = '1to6'
         hexn = 6
+        wdgmethod = '1to3c'
+        wdgn = 3
+
     TetCoords,fromhex = hex2tet(NodeCoords,hexs,method=hexmethod)
-    TetCoords,fromwdg = wedge2tet(TetCoords,wdgs,method='1to14')
+    TetCoords,fromwdg = wedge2tet(TetCoords,wdgs,method=wdgmethod)
     TetCoords,frompyr = pyramid2tet(TetCoords,pyrs,method='1to4')
     TetCoords,fromtet10 = tet102tet4(TetCoords,tet10)
-    TetConn = tets + frompyr + fromwdg + fromhex + fromtet10.tolist()
+    # TetConn = tets + frompyr + fromwdg + fromhex + fromtet10
+    TetConn = np.vstack([tets, frompyr, fromwdg, fromhex, fromtet10])
     if return_ids:
         # Element ids of the tets connected to the original elements
-        ElemIds_i = np.concatenate((tetIdx,np.repeat(pyrIdx,4),np.repeat(wdgIdx,14),np.repeat(hexIdx,hexn),tet10Idx))
+        ElemIds_i = np.concatenate((tetIdx,np.repeat(pyrIdx,4),np.repeat(wdgIdx,wdgn),np.repeat(hexIdx,hexn),tet10Idx))
         ElemIds_j = np.concatenate((np.repeat(0,len(tetIdx)), 
                 np.repeat([np.arange(4)],len(pyrIdx),axis=0).reshape(len(pyrIdx)*4),                   
-                np.repeat([np.arange(14)],len(wdgIdx),axis=0).reshape(len(wdgIdx)*14),   
+                np.repeat([np.arange(wdgn)],len(wdgIdx),axis=0).reshape(len(wdgIdx)*wdgn),   
                 np.repeat([np.arange(hexn)],len(hexIdx),axis=0).reshape(len(hexIdx)*hexn),
                 np.repeat(0,len(tet10Idx)),                 
                 ))
-        ElemIds = -1*np.ones((len(NodeConn),np.maximum(14,hexn)))
+        ElemIds = -1*np.ones((len(NodeConn),np.max([4,wdgn,hexn])))
         ElemIds[ElemIds_i,ElemIds_j] = np.arange(len(TetConn))
         ElemIds = utils.ExtractRagged(ElemIds,dtype=int)
     
@@ -546,7 +552,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
     NewCoords : list
         New list of nodal coordinates. For '1to5' or '1to6', this will be unchanged from
         the input.
-    TetConn, list
+    TetConn, np.ndarray
         Nodal connectivity list of generated tetrahedra
 
 
@@ -560,7 +566,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
 
     """
     if len(NodeConn) == 0:
-        return NodeCoords, NodeConn
+        return NodeCoords, np.empty((0,4))
 
     if method == '1to5':
         ArrayConn = np.asarray(NodeConn, dtype=int)
@@ -570,7 +576,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
         TetConn[2::5] = ArrayConn[:,[4,6,5,1]]
         TetConn[3::5] = ArrayConn[:,[4,7,6,3]]
         TetConn[4::5] = ArrayConn[:,[4,6,1,3]]
-        TetConn = TetConn.astype(int).tolist()
+        TetConn = TetConn.astype(int)
         NewCoords = NodeCoords
     elif method == '1to6':
         ArrayConn = np.asarray(NodeConn, dtype=int)
@@ -582,7 +588,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
         TetConn[4::6] = ArrayConn[:,[1,2,3,5]]
         TetConn[5::6] = ArrayConn[:,[5,7,6,3]]
 
-        TetConn = TetConn.astype(int).tolist()
+        TetConn = TetConn.astype(int)
         NewCoords = NodeCoords
     elif method == '1to24':
         ArrayCoords = np.asarray(NodeCoords)
@@ -640,7 +646,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
 
     return NewCoords, TetConn
 
-def wedge2tet(NodeCoords, NodeConn, method='1to3'):
+def wedge2tet(NodeCoords, NodeConn, method='1to3c'):
     """
     Decompose all elements of a 3D wedge-element mesh to tetrahedra.
     Generally solid2tets should be used rather than wedge2tet directly
@@ -649,7 +655,7 @@ def wedge2tet(NodeCoords, NodeConn, method='1to3'):
     and its neighbor, and thus the resulting mesh will typically be invalid.
     The primary use-case for this method is for methods like quality.Volume
     which utilize the geometric properties of tetrahedra to determine properties of 
-    the parent elements. '1to14' or '1to36' will generate continuously oriented tetrahedra.
+    the parent elements. '1to3c', '1to14' or '1to36' will generate continuously oriented tetrahedra.
 
     Parameters
     ----------
@@ -659,7 +665,8 @@ def wedge2tet(NodeCoords, NodeConn, method='1to3'):
         Nodal connectivity list. All elements should be 6-Node wedge elements.
     method : str, optional
         Method of decomposition to use for tetrahedralization.
-        '1to3'  - Not continuously oriented, no nodes added
+        '1to3'  - Not continuously oriented, no nodes added, all elements decomposed the same way
+        '1to3c'  - Continuously oriented, no nodes added (default)
         '1to14' - Continuously oriented, nodes added at center of element and element faces
         '1to36' - Continuously oriented, nodes added at center of element, element faces, and element edges
 
@@ -668,7 +675,7 @@ def wedge2tet(NodeCoords, NodeConn, method='1to3'):
     NewCoords : array_like
         New list of nodal coordinates. For '1to3' this will be unchanged from
         the input.
-    TetConn, list
+    TetConn, np.ndarray
         Nodal connectivity list of generated tetrahedra
 
     Examples
@@ -686,7 +693,7 @@ def wedge2tet(NodeCoords, NodeConn, method='1to3'):
     >>> TetCoords1to36, TetConn1to36 = converter.wedge2tet(WedgeCoords, WedgeConn, method='1to36')
     """
     if len(NodeConn) == 0:
-        return NodeCoords, NodeConn
+        return NodeCoords, np.empty((0,4))
 
     ArrayConn = np.asarray(NodeConn)
     if method == '1to3':
@@ -694,9 +701,87 @@ def wedge2tet(NodeCoords, NodeConn, method='1to3'):
         TetConn[0::3] = ArrayConn[:,[0,1,2,3]]
         TetConn[1::3] = ArrayConn[:,[1,2,3,4]]
         TetConn[2::3] = ArrayConn[:,[4,5,2,3]]
-        TetConn = TetConn.astype(int).tolist()
+        TetConn = TetConn.astype(int)
         NewCoords = NodeCoords
+    elif method == '1to3c':
+        # Get the three quadrilateral faces
+        face0 = ArrayConn[:,[0,1,4,3]]
+        face1 = ArrayConn[:,[1,2,5,4]]
+        face2 = ArrayConn[:,[0,3,5,2]]
 
+        # Choose the starting point for drawing the diagonal as the smallest 
+        # node index of each face
+        face0_pt0 = np.argmin(face0, axis=1)
+        face1_pt0 = np.argmin(face1, axis=1)
+        face2_pt0 = np.argmin(face2, axis=1)
+
+        # Determine which of the diagonals is being used
+        ## True if diagonal from node 0 to node 4
+        face0_case = ((face0_pt0 == 0) | (face0_pt0 == 2)).astype(int) 
+        ## True if diagonal from node 1 to node 5
+        face1_case = ((face1_pt0 == 0) | (face1_pt0 == 2)).astype(int) 
+        ## True if diagonal from node 0 to node 5
+        face2_case = ((face2_pt0 == 0) | (face2_pt0 == 2)).astype(int)
+
+        # Lookup table
+        a, b, c, d, e, f = 0, 1, 2, 3, 4, 5
+        lookup = np.array([
+            # Case 0
+            [
+                [a, b, c, d],
+                [b, c, d, e],
+                [c, f, d, e]
+            ],
+            # Case 1 - INVALID
+            [
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1]
+            ],
+            # Case 2 
+            [
+                [a, b, c, d],
+                [b, f, d, e],
+                [b, d, f, c]
+            ],
+            # Case 3
+            [
+                [a, b, f, d],
+                [b, f, d, e],
+                [a, b, c, f]
+            ],
+            # Case 4
+            [
+                [a, d, e, c],
+                [a, b, c, e],
+                [c, f, d, e]
+            ],
+            # Case 5
+            [
+                [a, e, f, d],
+                [a, b, c, e],
+                [a, e, c, f]
+            ],
+            # Case 6 - INVALID
+            [
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1]
+            ],
+            # Case 7 
+            [
+                [a, e, f, d],
+                [a, b, f, e],
+                [a, b, c, f]
+            ]
+        ])
+        
+        lookup_keys = np.sum(np.column_stack([face0_case, face1_case, face2_case]) * 2**np.array([2,1,0]), axis=1)
+        configs = lookup[lookup_keys]
+
+        TetConn = np.take_along_axis(ArrayConn[:, None, :], configs, axis=2).reshape(-1,4)
+        NewCoords = NodeCoords
+        
     elif method == '1to14':
         
         ArrayCoords = np.asarray(NodeCoords)
@@ -735,7 +820,7 @@ def wedge2tet(NodeCoords, NodeConn, method='1to3'):
         TetConn[13::14] = np.hstack([ArrayConn[:,[1,4]],CentroidIds[:,None],Face0CentroidIds[:,None]])
 
 
-        TetConn = TetConn.astype(int).tolist()
+        TetConn = TetConn.astype(int)
 
     elif method == '1to36':
         
@@ -823,7 +908,7 @@ def wedge2tet(NodeCoords, NodeConn, method='1to3'):
         TetConn[34::36] = np.hstack([CentroidIds[:,None],ArrayConn[:,[5]],Edge8CentroidIds[:,None],Face4CentroidIds[:,None]])
         TetConn[35::36] = np.hstack([CentroidIds[:,None],Edge7CentroidIds[:,None],ArrayConn[:,[5]],Face4CentroidIds[:,None]])
 
-        TetConn = TetConn.astype(int).tolist()
+        TetConn = TetConn.astype(int)
 
     return NewCoords, TetConn
 
@@ -850,7 +935,7 @@ def pyramid2tet(NodeCoords,NodeConn, method='1to2'):
     NewCoords : array_like
         New list of nodal coordinates. For '1to2' this will be unchanged from
         the input.
-    TetConn, list
+    TetConn, np.ndarray
         Nodal connectivity list of generated tetrahedra
 
     Examples
@@ -866,14 +951,14 @@ def pyramid2tet(NodeCoords,NodeConn, method='1to2'):
     >>> TetCoords1to4, TetConn1to4 = converter.pyramid2tet(PyramidCoords, PyramidConn, method='1to4')
     """
     if len(NodeConn) == 0:
-        return NodeCoords, NodeConn
+        return NodeCoords, np.empty((0,4))
     
     if method == '1to2':
         ArrayConn = np.asarray(NodeConn)
         TetConn = -1*np.ones((len(NodeConn)*2,4))
         TetConn[0::2] = ArrayConn[:,[0,1,2,4]]
         TetConn[1::2] = ArrayConn[:,[0,2,3,4]]
-        TetConn = TetConn.astype(int).tolist()
+        TetConn = TetConn.astype(int)
         NewCoords = NodeCoords
     
     elif method == '1to4':
@@ -892,7 +977,7 @@ def pyramid2tet(NodeCoords,NodeConn, method='1to2'):
         TetConn[2::4] = np.hstack([Face0CentroidIds[:,None],ArrayConn[:,[2,3,4]]])
         TetConn[3::4] = np.hstack([Face0CentroidIds[:,None],ArrayConn[:,[3,0,4]]])
 
-        TetConn = TetConn.astype(int).tolist()
+        TetConn = TetConn.astype(int)
 
     return NewCoords, TetConn
 
@@ -945,10 +1030,10 @@ def faces2unique(Faces,return_idx=False,return_inv=False):
         Nodal connectivity of unique mesh faces.
     idx : np.ndarray, optional
         The array of indices that relate the unique list of
-        faces to the list of original faces.
+        faces to the list of original faces (UFaces = Faces[idx]).
     inv : np.ndarray, optional
         The array of indices that relate the unique list of
-        faces to the list of original faces.
+        faces to the list of original faces (Faces = UFaces[inv]).
 
     """
     # Returns only the unique faces (not duplicated for each element)
@@ -1473,7 +1558,7 @@ def tet102tet4(NodeCoords, Tet10NodeConn):
     ----------
     NodeCoords : array_like
         List of nodal coordinates. 
-    Tet10NodeConn : list
+    Tet10NodeConn : array_like
         Nodal connectivities for a 10-Node tetrahedral mesh
 
     Returns
@@ -1484,7 +1569,7 @@ def tet102tet4(NodeCoords, Tet10NodeConn):
         Nodal connectivities for the equivalent 4-Node tetrahedral mesh
     """
     if len(Tet10NodeConn) == 0:
-        return NodeCoords, np.asarray(Tet10NodeConn)
+        return NodeCoords, np.empty((0,4))
     Tet4NodeConn = np.asarray(Tet10NodeConn)[:, :4]
     
     return NodeCoords, Tet4NodeConn

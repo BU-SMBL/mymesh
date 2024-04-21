@@ -4479,18 +4479,8 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         NewValues = NewValues[Idx]
 
     if method.lower() == 'volume' and not mixed_elements:
-        NodeCoords2, NodeConn2 = converter.solid2tets(NodeCoords, NodeConn)
+        NodeCoords, NodeConn = converter.solid2tets(NodeCoords, NodeConn)
          
-        NodeCoords3,NodeConn3,Idx2 = utils.DeleteDuplicateNodes(NodeCoords2,NodeConn2,return_idx=True, tol=cleanup_tol)
-        if return_NodeValues:
-            # TODO: This is pretty clunky
-            NewValues = np.append(NewValues, np.repeat(np.nan, len(NodeCoords2)-len(NodeCoords)))
-            NewValues = NewValues[Idx2]
-            Neighbors = utils.PadRagged(utils.getNodeNeighbors(NodeCoords3, NodeConn3)+[])
-            NewValues = np.nanmean(np.append(NewValues,np.nan)[Neighbors],axis=1)
-            NewValues[np.unique(converter.solid2surface(NodeCoords3, NodeConn3))] = 0
-        NodeCoords = NodeCoords3
-        NodeConn = NodeConn3
     if return_NodeValues:
         if flip:
             NewValues = -1*NewValues
