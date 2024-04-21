@@ -4349,6 +4349,11 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     # Determine configuration of nodes
     TetVals = NodeValues[TetNodeConn]
     inside = TetVals <= 0
+    if not np.any(inside):
+        if return_NodeValues:
+            return np.empty((0,3)), np.empty((0,4),dtype=int), np.empty((0))
+        return np.empty((0,3)), np.empty((0,4),dtype=int)
+
     ints = np.sum(inside[:,:4] * 2**np.arange(0,4)[::-1], axis=1)
 
     # Query lookup tables

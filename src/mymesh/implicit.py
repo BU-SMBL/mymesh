@@ -352,7 +352,11 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
     else:
         NodeCoords, NodeConn = background
         NodeCoords = np.asarray(NodeCoords)
-        NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
+        if interpolation == 'quadratic':
+            NodeCoords, NodeConn = converter.tet42tet10(NodeCoords, NodeConn)
+            NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
+        else:
+            NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
     TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, NodeVals, method='volume', threshold=threshold, flip=flip, interpolation=interpolation)
     
 

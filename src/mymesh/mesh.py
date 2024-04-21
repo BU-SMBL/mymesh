@@ -742,7 +742,7 @@ class mesh:
                     # 1D data
                     self.NodeData[key] = np.append(self.NodeData[key], M.NodeData[key])
                 else: 
-                    self.NodeData[key] = np.vstack(self.NodeData[key], M.NodeData[key])
+                    self.NodeData[key] = np.vstack([self.NodeData[key], M.NodeData[key]])
 
             for key in self.ElemData.keys():
                 if not key in M.ElemData.keys():
@@ -751,7 +751,7 @@ class mesh:
                     # 1D data
                     self.ElemData[key] = np.append(self.ElemData[key], M.ElemData[key])
                 else: 
-                    self.ElemData[key] = np.vstack(self.ElemData[key], M.ElemData[key])
+                    self.ElemData[key] = np.vstack([self.ElemData[key], M.ElemData[key]])
 
         # Cleanup
         if cleanup:

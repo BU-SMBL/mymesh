@@ -1532,7 +1532,7 @@ def DetectFeatures(NodeCoords,SurfConn,angle=25):
         List of nodal connectivities of a surface mesh.
     angle : float, optional
         Dihedral angle threshold (in degrees) used to determine whether an edge
-        exists between two adjacent faces, by default 140.
+        exists between two adjacent faces, by default 25.
 
     Returns
     -------

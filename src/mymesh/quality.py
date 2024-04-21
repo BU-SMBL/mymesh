@@ -455,8 +455,6 @@ def MeanRatio(NodeCoords,NodeConn,verbose=False):
     inv = det < 0
     q = 3*np.abs(det)**(2/3) / Sfrob**2
     q[inv] = -1*q[inv]
-    if np.any(np.isnan(q)):
-        a = 2
 
     if verbose:
         minq = min(q)
