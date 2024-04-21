@@ -566,7 +566,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
 
     """
     if len(NodeConn) == 0:
-        return NodeCoords, np.empty((0,4))
+        return NodeCoords, np.empty((0,4),dtype=int)
 
     if method == '1to5':
         ArrayConn = np.asarray(NodeConn, dtype=int)
@@ -693,7 +693,7 @@ def wedge2tet(NodeCoords, NodeConn, method='1to3c'):
     >>> TetCoords1to36, TetConn1to36 = converter.wedge2tet(WedgeCoords, WedgeConn, method='1to36')
     """
     if len(NodeConn) == 0:
-        return NodeCoords, np.empty((0,4))
+        return NodeCoords, np.empty((0,4),dtype=int)
 
     ArrayConn = np.asarray(NodeConn)
     if method == '1to3':
@@ -951,7 +951,7 @@ def pyramid2tet(NodeCoords,NodeConn, method='1to2'):
     >>> TetCoords1to4, TetConn1to4 = converter.pyramid2tet(PyramidCoords, PyramidConn, method='1to4')
     """
     if len(NodeConn) == 0:
-        return NodeCoords, np.empty((0,4))
+        return NodeCoords, np.empty((0,4),dtype=int)
     
     if method == '1to2':
         ArrayConn = np.asarray(NodeConn)
@@ -1569,7 +1569,7 @@ def tet102tet4(NodeCoords, Tet10NodeConn):
         Nodal connectivities for the equivalent 4-Node tetrahedral mesh
     """
     if len(Tet10NodeConn) == 0:
-        return NodeCoords, np.empty((0,4))
+        return NodeCoords, np.empty((0,4),dtype=int)
     Tet4NodeConn = np.asarray(Tet10NodeConn)[:, :4]
     
     return NodeCoords, Tet4NodeConn
