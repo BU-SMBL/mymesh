@@ -16,22 +16,9 @@ Contouring
     MarchingSquaresImage
     MarchingCubes
     MarchingCubesImage
-    DualMarchingCubes
     MarchingTetrahedra
+    DualMarchingCubes
 
-Helper Functions
-================
-.. autosummary::
-    :toctree: submodules/
-
-    MarchingSquaresLookup_Tri
-    MarchingSquaresLookup_Edge
-    MarchingCubesLookup
-    MarchingCubes33Lookup
-    isConnected
-    InternalConnection
-    generateLookup33
-    generateLookup
 
 """
 #%%
@@ -3698,7 +3685,56 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', metho
     return NewCoords, NewConn
 
 def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation='linear', method='triangle', flip=False, return_anchors=False, cleanup=True):
+    """
+    Marching squares algorithm for extracting an isocontour from a quadrilateral mesh.
 
+    For a two dimensional grid (NodeCoords, NodeConn) with values (NodeValues),
+    Marching Squares will extract the isovalue contour defined by threshold. 
+    This can either be used to obtain line segments along the isoline 
+    (method='edge') or triangles filling the region inside the isoline
+    (method='triangle'). 
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates of a two dimensional quadrilateral grid (e.g. from 
+        primitives.Grid2D)
+    NodeConn : array_like
+        Node connectivities of a two dimensional grid of rectilinear grid (e.g. 
+        from primitives.Grid2D) of quadrilaterals. 
+    NodeValues : array_like
+        Array of node values corresponding to each node in the mesh.
+    threshold : int, optional
+        Isosurface level that defines the boundary, by default 0
+    interpolation : str, optional
+        Interpolation to interpolate the position of the new nodes along the 
+        edges of the input mesh, by default 'linear'. 
+        
+        'midpoint' - No interpolation is performed, new nodes are placed at the 
+        midpoint of edges 
+        
+        'linear' - Bilinear interpolation is performed between adjacent nodes on 
+        the input mesh
+
+    method : str, optional
+        Mesh generation method, either 'edge' for a line mesh of the boundary or 
+        'triangle' for a filled triangular mesh, by default 'triangle'
+    flip : bool, optional
+        Flip the interior/exterior of the mesh, by default False. By default, 
+        values less than the threshold are assumed to be the “inside” of the 
+        mesh. If the inside is denoted by values greater than the threshold, set 
+        flip=True.
+    cleanup : bool, optional
+        Determines whether or not to perform mesh cleanup, removing degenerate elements and duplicate nodes, by default True
+
+    Returns
+    -------
+    NewCoords : np.ndarray
+        Numpy array of node coordinates for the contour mesh
+    NewConn : list
+        List of node connectivities 
+
+    """   
 
     NewCoords = []
     NewConn = []
@@ -3708,8 +3744,6 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
     NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
     if flip:
         NodeValues = -1*NodeValues
-    MarchingSquaresLookup_Edge.LookupTable = MSEdge_Lookup
-    MarchingSquaresLookup_Tri.LookupTable = MSTriangle_Lookup
     edgeLookup = [
         [0, 0],  # Corner 0
         [1, 1],  # Corner 1
@@ -3721,15 +3755,14 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
         [3, 0],  # Edge 3
         ]
     
-    # arrayCoords = np.array(NodeCoords)
     for e in range(len(NodeConn)):
         vals = np.array([NodeValues[node] for node in NodeConn[e]])
         inside = [1 if v <= 0 else 0 for v in vals]
         i = int("".join(str(j) for j in inside), 2)
         if method == 'triangle':
-            NewElems = MarchingSquaresLookup_Tri(i)
+            NewElems = MSTriangle_Lookup[i]
         elif method == 'edge':
-            NewElems = MarchingSquaresLookup_Edge(i)
+            NewElems = MSEdge_Lookup[i]
         else:
             raise Exception('Invalid method. Must be "triangle" or "edge".')
     
@@ -3768,13 +3801,6 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
                         anchor = [node1,node2][np.argmin([v1,v2])] # Pick the point in negative domain 
                         Anchors.append(anchor)
 
-                        # if (edgeLookup[n][0] == 0 and edgeLookup[n][1] == 1) or (edgeLookup[n][0] == 2 and edgeLookup[n][1] == 3):
-                        #     AnchorAxis.append(0)
-                        # elif (edgeLookup[n][0] == 1 and edgeLookup[n][1] == 2) or (edgeLookup[n][0] == 3 and edgeLookup[n][1] == 0):
-                        #     AnchorAxis.append(1)
-                        # else:
-                        #     AnchorAxis.append(-1)
-
                         if n == 4 or n == 6:
                             AnchorAxis.append(0)
                         elif n == 5 or n == 7: 
@@ -3809,9 +3835,47 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
     return NewCoords, NewConn
 
 def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='original', VertexValues=False, edgemode='constant', flip=False, cleanup=True):
-    # edgemode is for handling edges when interpolation is greater than linear (see np.pad for options)
-    # Image data is assumed to be voxel data and will be interpolated to vertices to get the corners of each 'square'
-    # if VertexValues, Image data is assumed to be vertices
+    """
+    Marching squares algorithm :cite:p:`Lorensen1987` applied to 3D image data.
+
+    Parameters
+    ----------
+    I : np.ndarray
+        Image array (3D) of grayscale data
+    h : float or tuple, optional
+        Element (pixel) size. Can be specified as a single value for isotropic pixel sizes or a tuple of three values, by default 1
+    threshold : int, optional
+        Isosurface level that defines the boundary, by default 0
+    interpolation : str, optional
+        Interpolation to interpolate the position of the new nodes along the edges of the input mesh, by default 'linear'. 
+        
+        'midpoint' - No interpolation is performed, new nodes are placed at the midpoint of edges 
+        
+        'linear' - Bilinear interpolation is performed between adjacent nodes on the input mesh
+
+        'cubic' - Bicubic interpolation is performed between adjacent nodes on the input mesh
+    method : str, optional
+        Mesh generation method, either 'original' for the original marching cubes
+        algorithm or '33' for the marching cubes 33 algorithm :cite:p:`Chernyaev1995`.
+    VertexValues : bool, optional
+        If True, the values in the image array are treated as the vertices of 
+        the cubes, otherwise, they are treated as voxel values and vertices
+        are obtained through interpolation, by default, False.
+    flip : bool, optional
+        Flip the interior/exterior of the mesh, by default False. By default, values less than the threshold are assumed to be the “inside” of the mesh. If the inside is denoted by values greater than the threshold, set flip=True.
+    edgemode : str, optional
+        For interpolation='cubic', edgemode specifies how to handle boundary nodes. The image matrix will be padded using ``np.pad(I, 1, mode=edgemode)``, by default 'constant'
+    cleanup : bool, optional
+        Determines whether or not to perform mesh cleanup, removing degenerate elements and duplicate nodes, by default True
+
+    Returns
+    -------
+    NewCoords : np.ndarray
+        Numpy array of node coordinates for the contour mesh
+    NewConn : list
+        List of node connectivities 
+
+    """  
     
     if np.issubdtype(I.dtype, np.unsignedinteger):
         I = I.astype(float)
@@ -4050,23 +4114,58 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     return NewCoords, NewConn
 
 def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',method='33',flip=False, return_anchors=False):
-    # method: 'original', '33'
+    """
+    Marching squares algorithm :cite:p:`Lorensen1987` for extracting an isosurface from a hexahedral mesh.
+
+    Parameters
+    ----------
+    
+    NodeCoords : array_like
+        Node coordinates of a two dimensional hexahedral grid (e.g. from 
+        primitives.Grid)
+    NodeConn : array_like
+        Node connectivities of a two dimensional grid of rectilinear grid (e.g. 
+        from primitives.Grid) of hexahedra. 
+    NodeValues : array_like
+        Array of node values corresponding to each node in the mesh.
+    threshold : int, optional
+        Isosurface level that defines the boundary, by default 0
+    interpolation : str, optional
+        Interpolation to interpolate the position of the new nodes along the edges of the input mesh, by default 'linear'. 
+        
+        'midpoint' - No interpolation is performed, new nodes are placed at the midpoint of edges 
+        
+        'linear' - Bilinear interpolation is performed between adjacent nodes on the input mesh
+    method : str, optional
+        Mesh generation method, either 'original' for the original marching cubes
+        algorithm or '33' for the marching cubes 33 algorithm :cite:p:`Chernyaev1995`.
+    flip : bool, optional
+        Flip the interior/exterior of the mesh, by default False. By default, values less than the threshold are assumed to be the “inside” of the mesh. If the inside is denoted by values greater than the threshold, set flip=True.
+
+    Returns
+    -------
+    NewCoords : np.ndarray
+        Numpy array of node coordinates for the contour mesh
+    NewConn : list
+        List of node connectivities 
+
+    """  
+    
     TriNodeCoords = []
     TriNodeConn = []
     Anchors = []
     AnchorAxis = []
     AnchorDir = []
-    # NodeValues = np.array([v-threshold for v in NodeValues]).astype('float64')
     NodeValues = np.asarray(NodeValues) - threshold
     if flip:
         NodeValues = -1*NodeValues
     if method == '33':
-        MarchingCubes33Lookup.LookupTable = MC33_Lookup
-        MarchingCubes33Lookup.FaceTests = MC33_FaceTest
-        MarchingCubes33Lookup.Cases = MC33_Cases
-        MarchingCubes33Lookup.Signs = MC33_Signs
+        _MarchingCubes33Lookup.LookupTable = MC33_Lookup
+        _MarchingCubes33Lookup.FaceTests = MC33_FaceTest
+        _MarchingCubes33Lookup.Cases = MC33_Cases
+        _MarchingCubes33Lookup.Signs = MC33_Signs
     elif method == 'original':
-        MarchingCubesLookup.LookupTable = MC_Lookup
+        _MarchingCubesLookup.LookupTable = MC_Lookup
     else:
         raise Exception('Unknown method "{:s}"'.format(method))
     edgeLookup = [
@@ -4090,9 +4189,9 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         inside = [1 if v <= 0 else 0 for v in vals]
         i = int("".join(str(j) for j in inside), 2)
         if method == 'original':
-            TriElems = MarchingCubesLookup(i)
+            TriElems = _MarchingCubesLookup(i)
         elif method == '33':
-            TriElems = MarchingCubes33Lookup(i,vals)
+            TriElems = _MarchingCubes33Lookup(i,vals)
         else:
             raise Exception('Invalid method')
     
@@ -4158,7 +4257,6 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
                             else:
                                 AnchorDir.append(-1)
 
-
                 if len(elem) > 0:
                     TriNodeConn.append(elem)  
                       
@@ -4172,25 +4270,9 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         return TriNodeCoords, TriNodeConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
     return TriNodeCoords, TriNodeConn
 
-def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method='33', octree_strategy='gradient', octree_eps=0.1, dualgrid_method='centroid'):
-    warnings.warn('DualMarchingCubes is still under development.')
-    # *NOTE: In below comments the terms bottom/top, left/right, front/back refer to z, x, and y directions respectively
-    # z(bottom) < z(top), x(left) < x(right), y(front) < y(back) 
-
-    # dualgrid_method could be centroid or qef_min
-
-    root = octree.Function2Octree(func, grad, bounds, maxsize=maxsize, minsize=minsize, strategy=octree_strategy, eps=octree_eps, npts=3)
-    DualCoords, DualConn = octree.Octree2Dual(root,method=dualgrid_method)
-    NodeValues = func(DualCoords[:,0],DualCoords[:,1],DualCoords[:,2])
-    TriCoords, TriConn = MarchingCubes(DualCoords, DualConn, NodeValues)
-            
-    return TriCoords, TriConn, root, DualCoords, DualConn, NodeValues
-
 def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False, cleanup_tol=1e-10):
     """
-    Marching tetrahedra algorithm for extracting an isosurface from a tetrahedral mesh. This can be used to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).
-
-    Bloomenthal, J. (1994). An Implicit Surface Polygonizer. Graphics Gems, 324-349. https://doi.org/10.1016/b978-0-12-336156-1.50040-9
+    Marching tetrahedra algorithm :cite:p:`Bloomenthal1994` for extracting an isosurface from a tetrahedral mesh. This can be used to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).
 
     Parameters
     ----------
@@ -4485,7 +4567,9 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
 
     if method.lower() == 'volume' and not mixed_elements:
         NodeCoords, NodeConn = converter.solid2tets(NodeCoords, NodeConn)
-         
+        NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
+        if return_NodeValues:
+            NewValues = NewValues[Idx]
     if return_NodeValues:
         if flip:
             NewValues = -1*NewValues
@@ -4494,47 +4578,45 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
 
     return NodeCoords, NodeConn
 
-def MarchingSquaresLookup_Tri(i):
-    assert i < 16, 'There are only 16 possible states of the square, i must be less than 16'
-    TriElems = MarchingSquaresLookup_Tri.LookupTable[i]
-    return TriElems
+def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method='33', octree_strategy='gradient', octree_eps=0.1, dualgrid_method='centroid'):
+    warnings.warn('DualMarchingCubes is still under development.')
+    # *NOTE: In below comments the terms bottom/top, left/right, front/back refer to z, x, and y directions respectively
+    # z(bottom) < z(top), x(left) < x(right), y(front) < y(back) 
 
-def MarchingSquaresLookup_Edge(i):
-    assert i < 16, 'There are only 16 possible states of the square, i must be less than 16'
-    TriElems = MarchingSquaresLookup_Edge.LookupTable[i]
-    return TriElems
+    # dualgrid_method could be centroid or qef_min
 
-def MarchingCubesLookup(i):
+    root = octree.Function2Octree(func, grad, bounds, maxsize=maxsize, minsize=minsize, strategy=octree_strategy, eps=octree_eps, npts=3)
+    DualCoords, DualConn = octree.Octree2Dual(root,method=dualgrid_method)
+    NodeValues = func(DualCoords[:,0],DualCoords[:,1],DualCoords[:,2])
+    TriCoords, TriConn = MarchingCubes(DualCoords, DualConn, NodeValues)
+            
+    return TriCoords, TriConn, root, DualCoords, DualConn, NodeValues
+
+def _MarchingCubesLookup(i):
     assert i < 256, 'There are only 256 possible states of the voxel, i must be less than 256'
     if i > 127:
         i = 128-(i-127)
         flip = True
     else:
         flip = False
-    MarchingCubesLookup.LookupTable[i]
+    _MarchingCubesLookup.LookupTable[i]
     # Flip
     if flip:
-        TriElems = [[n for n in reversed(tri)] for tri in MarchingCubesLookup.LookupTable[i]]
+        TriElems = [[n for n in reversed(tri)] for tri in _MarchingCubesLookup.LookupTable[i]]
     else:
-        TriElems = MarchingCubesLookup.LookupTable[i]
+        TriElems = _MarchingCubesLookup.LookupTable[i]
     return TriElems
 
-def MarchingCubes33Lookup(i,vals):
+def _MarchingCubes33Lookup(i,vals):
     
     assert i < 256, 'There are only 256 possible states of the voxel, i must be less than 256'
-    # if i > 127:
-    #     i = 128-(i-127)
-    #     flip = True
-    # else:
-    #     flip = False
-        
     
     # nodes :  [0 1 2 3 4 5 6 7]
     
-    configs = MarchingCubes33Lookup.LookupTable[i]
-    case = MarchingCubes33Lookup.Cases[i]
-    FaceTest = MarchingCubes33Lookup.FaceTests[i]
-    sign = MarchingCubes33Lookup.Signs[i]
+    configs = _MarchingCubes33Lookup.LookupTable[i]
+    case = _MarchingCubes33Lookup.Cases[i]
+    FaceTest = _MarchingCubes33Lookup.FaceTests[i]
+    sign = _MarchingCubes33Lookup.Signs[i]
     # Resolve Ambiguities
     vs = vals-1e-16
     if case == 0:
@@ -4548,7 +4630,7 @@ def MarchingCubes33Lookup(i,vals):
     
     elif case == 3:
         # Case 3 Ambiguity
-        if isConnected(FaceTest[0], sign*vs):
+        if _isConnected(FaceTest[0], sign*vs):
             # Nodes are not separated - Case 3.2
             config = configs[1]
         else:
@@ -4557,7 +4639,7 @@ def MarchingCubes33Lookup(i,vals):
             
     elif case == 4:
         # Case 4 Ambiguity
-        if InternalConnection(sign*vs):
+        if _InternalConnection(sign*vs):
             # Nodes are not separated - Case 4.2
             config = configs[1]
         else: 
@@ -4569,11 +4651,11 @@ def MarchingCubes33Lookup(i,vals):
         
     elif case == 6:
         # Case 6 Ambiguity
-        if isConnected(FaceTest[0], sign*vs):
+        if _isConnected(FaceTest[0], sign*vs):
             # Nodes are connected - Case 6.2
             config = configs[2]  
         else:
-            if InternalConnection(sign*vs):
+            if _InternalConnection(sign*vs):
                 # Nodes of ambiguous face are joined inside the cube - Case 6.1.2
                 config = configs[1]
             else:
@@ -4581,7 +4663,7 @@ def MarchingCubes33Lookup(i,vals):
                 config = configs[0]
     
     elif case == 7:
-        results = [isConnected(face,sign*vs) for face in FaceTest]
+        results = [_isConnected(face,sign*vs) for face in FaceTest]
         passes = np.where(results)[0]
         if len(passes) == 0:
             # Case 7.1
@@ -4614,7 +4696,7 @@ def MarchingCubes33Lookup(i,vals):
                 print('problem 7.3')
         elif len(passes == 3):
             # Case 7.4
-            if InternalConnection(-sign*vs):
+            if _InternalConnection(-sign*vs):
                 # Case 7.4.2
                 config = configs[8]
             else:
@@ -4630,12 +4712,12 @@ def MarchingCubes33Lookup(i,vals):
         config = configs[0]
         
     elif case == 10:
-        results = [isConnected(face,sign*vs) for face in FaceTest]
+        results = [_isConnected(face,sign*vs) for face in FaceTest]
         passes = np.where(results)[0]
         
         if len(passes) == 0:
             
-            if InternalConnection(-sign*vs):
+            if _InternalConnection(-sign*vs):
                 # Case 10.1.2
                 config = configs[2]
             else:
@@ -4660,11 +4742,11 @@ def MarchingCubes33Lookup(i,vals):
         config = configs[0]
     
     elif case == 12:
-        results = [isConnected(face,sign*vs) for face in FaceTest]
+        results = [_isConnected(face,sign*vs) for face in FaceTest]
         passes = np.where(results)[0]
         
         if len(passes) == 0:
-            if InternalConnection(-sign*vs):
+            if _InternalConnection(-sign*vs):
                 # Case 12.1.2
                 config = configs[2]
             else:
@@ -4688,7 +4770,7 @@ def MarchingCubes33Lookup(i,vals):
             warnings.warn('MC error - Case 12')
  
     elif case == 13:
-        results = [isConnected(face,sign*vs) for face in FaceTest]
+        results = [_isConnected(face,sign*vs) for face in FaceTest]
         passes = np.where(results)[0]
         if len(passes) == 0:
             # Case 13.1
@@ -4766,7 +4848,7 @@ def MarchingCubes33Lookup(i,vals):
             elif all([3,4,5] == passes):
                 # Case 13.4.4
                 config = configs[22]
-            elif not InternalConnection(-vs,case13=True):
+            elif not _InternalConnection(-vs,case13=True):
                 if all([0,1,2] == passes):
                     # Case 13.5.1.1
                     config = configs[23]
@@ -4806,20 +4888,11 @@ def MarchingCubes33Lookup(i,vals):
         print('problem 15')
         config = configs[0]
                 
-    # Flip if necessary
     TriElems = config
-    # if flip:
-    #     TriElems = [[n for n in reversed(tri)] for tri in config]
-    # else:
-    #     try:
-    #         TriElems = config
-    #     except:
-    #         print(i)
-    #         print(vs)
             
     return TriElems
 
-def isConnected(face, vals):
+def _isConnected(face, vals):
     facevals = vals[face].tolist()
     while facevals[0] < max(facevals):
         # Cycle the list until it starts with a positive (inside) value
@@ -4831,7 +4904,7 @@ def isConnected(face, vals):
     else:
         return True
 
-def InternalConnection(vals,case13=False):
+def _InternalConnection(vals,case13=False):
     faces = [[0,1,2,3],[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7],[4,5,6,7]]
     face0vals = vals[faces[0]]    # Bottom Face
     face1vals = vals[faces[5]]    # Top Face      
@@ -4880,8 +4953,8 @@ def InternalConnection(vals,case13=False):
                 
     return connected
 
-def generateLookup33():
-    # LookupTable, Cases, FaceTests = generateLookup33()
+def _generateLookup33():
+    # LookupTable, Cases, FaceTests = _generateLookup33()
     import random
     def R1x(bits, k, sign):
         # 90 deg x-axis rotation (ccw)
@@ -4924,10 +4997,6 @@ def generateLookup33():
         
     def lookup(bits, sign, k=0, primary=True):
         i = int(''.join([str(bit) for bit in bits]),2)
-        # if i > 127:
-        #     i = 128-(i-127)
-        #     TriElems, Case, bits, sign = Re(bits,k,sign)
-        # print(i)
         if i == 0 or i == 255:
             # Case 0
             Case = 0
@@ -4979,9 +5048,6 @@ def generateLookup33():
                 [[2, 7, 3], [5, 8, 6], [6, 8, 10]],                                                 # Case 6.1.1
                 [[6, 2, 7], [6, 7, 10], [10, 7, 8], [8, 7, 3], [8, 3, 5], [2, 5, 3], [2, 6, 5]],    # Case 6.1.2
                 [[3, 5, 8], [3, 8, 7], [7, 8, 10], [2, 5, 3], [5, 2, 6]]                            # Case 6.2   
-                # [[3, 2, 7], [8, 10, 5], [6, 5, 10]],
-                # [[10, 12, 8], [12, 7, 8], [3, 8, 7], [8, 3, 5], [2, 5, 3], [5, 2, 12], [12, 6, 5], [10, 6, 12], [12, 2, 7]],
-                # [[10, 7, 8], [3, 8, 7], [8, 3, 5], [2, 5, 3], [5, 2, 6]]
                 ]
             FaceTest = [
                 [2, 3, 7, 6]
@@ -4992,25 +5058,14 @@ def generateLookup33():
             TriElems = [
                 [[0, 5, 1], [6, 9, 10], [4, 11, 8]],                            # Case 7.1   (No Nodes Connected)
                 [[1, 0, 4], [1, 4, 11], [1, 11, 8], [1, 8, 5], [6, 9, 10]],     # Case 7.2.1 (Nodes 1 and 4 Connected)
-                # [[6, 9, 8], [6, 8, 4], [6, 4, 10], [4, 11, 10], [2, 7, 3]],     # Case 7.2.1 (Nodes 1 and 4 Connected)  
                 [[0, 6, 1], [0, 10, 6], [0, 9, 10], [0, 5, 9], [4, 11, 8]],     # Case 7.2.2 (Nodes 1 and 6 Connected)
                 [[4, 11, 10], [4, 10, 6], [4, 6, 8], [6, 9, 8], [0, 5, 1]],      # Case 7.2.3 (Nodes 4 and 6 Connected)
                 [[4, 12, 8], [8, 12, 9], [9, 12, 5], [5, 12, 0], [0, 12, 1], [1, 12, 6], [6, 12, 10], [10, 12, 11], [11, 12, 4]],    # Case 7.3.1 (Nodes 1, 6 and 6, 4 Connected)
                 [[8, 12, 9], [9, 12, 6], [6, 12, 10], [10, 12, 11], [11, 12, 4], [4, 12, 0], [0, 12, 1], [1, 12, 5], [5, 12, 8]],    # Case 7.3.2 (Nodes 1, 4 and 4, 6 Connected)
-                # [[12, 11, 8], [12, 8, 5], [12, 5, 9], [12, 9, 10], [12, 10, 6], [12, 6, 1], [12, 1, 0], [12, 0, 4], [12, 4, 8]],     # Case 7.3.3 (Nodes 4, 1 and 1, 6 Connected)      - Might be wrong        
                 [[10, 12, 9], [9, 12, 5], [5, 12, 8], [8, 12, 11], [11, 12, 4], [4, 12, 0], [0, 12, 1], [1, 12, 6], [6, 12, 10]],       # Case 7.3.3 (Nodes 4, 1 and 1, 6 Connected)
                 [[5, 9, 8], [0, 4, 11], [0, 11, 6], [0, 6, 1], [6, 11, 10]], # Case 7.4.1
                 [[8, 10, 9], [8, 11, 10], [4, 11, 8], [4, 8, 5], [4, 5, 0], [0, 5, 1], [5, 6, 1], [5, 9, 6], [9, 10, 6]]    # Case 7.4.2
                 
-                # [[5, 1, 0], [6, 9, 10], [4, 11, 8]], # Case 7.1
-                # [[6, 9, 10], [11, 0, 4], [0, 11, 1], [8, 1, 11], [1, 8, 5]], # Case 7.2.1
-                # [[11, 8, 4], [5, 9, 0], [10, 0, 9], [0, 10, 1], [6, 1, 10]], # Case 7.2.2
-                # [[5, 1, 0], [8, 6, 9], [6, 8, 4], [6, 4, 10], [11, 10, 4]],  # Case 7.2.3
-                # [[12, 10, 6], [12, 6, 1], [12, 1, 0], [12, 0, 4], [12, 4, 11], [12, 11, 8], [12, 8, 5], [12, 5, 9], [12, 9, 10]],
-                # [[12, 1, 0], [12, 0, 4], [12, 4, 11], [12, 11, 10], [12, 10, 6], [12, 6, 9], [12, 9, 8], [12, 8, 5], [12, 5, 1]],
-                # [[1, 0, 12], [6, 1, 12], [10, 6, 12], [11, 10, 12], [4, 11, 12], [8, 4, 12], [9, 8, 12], [5, 9, 12], [0, 5, 12]],
-                # [[11, 0, 4], [0, 11, 6], [10, 6, 11], [0, 6, 1], [5, 9, 8]],
-                # [[5, 0, 4], [0, 5, 1], [6, 1, 5], [9, 6, 5], [6, 9, 10], [8, 10, 9], [10, 8, 11], [4, 11, 8], [5, 4, 8]]               
                 ]
             FaceTest = [
                 [0, 1, 5, 4],
@@ -5138,19 +5193,6 @@ def generateLookup33():
                 else:
                     TriElems, Case, FaceTest, sign = random.choice([R1x, R1z])(bits, k, sign)  
             
-            # Perform a random transformation and try again
-            
-            # if canFail:
-            #     return [], False
-            # thinking = True
-            # k = 0
-            # while thinking:
-            #     k += 1
-            #     TriElems, Case, bits = random.choice([R1x, R1z, Mxy, Re])(bits)
-            #     if Case != False:
-            #         thinking = False
-            #     if k == 1000:
-            #         print('merp')
         return TriElems, Case, FaceTest, sign
         
     LookupTable = [[] for i in range(256)]
@@ -5158,17 +5200,12 @@ def generateLookup33():
     Cases = [0 for i in range(256)]
     Signs = [0 for i in range(256)]
     for i in range(256):
-        # print(i)
         bits = np.array([int(b) for b in list('{:08b}'.format(i))])
-        # print(bits)
         LookupTable[i], Cases[i], FaceTests[i], Signs[i] = lookup(bits,-1)
-    # i = 26
-    # bits = np.array([int(b) for b in list('{:08b}'.format(i))])
-    # lookuptable[i],Case[i] = lookup(bits)
     return LookupTable, Cases, FaceTests, Signs
 
-def generateLookup():
-    # LookupTable, Cases = generateLookup()
+def _generateLookup():
+    # LookupTable, Cases = _generateLookup()
     import random
     def R1x(bits, k):
         # 90 deg x-axis rotation (ccw)
