@@ -87,6 +87,7 @@ class mesh:
         # Properties:
         self._Surface = None
         self._SurfConn = []
+        self._SurfNodes = None
         self._NodeNeighbors = []
         self._ElemNeighbors = []
         self._ElemConn = []
@@ -320,6 +321,15 @@ class mesh:
                 if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
             SurfConn = self._SurfConn
         return SurfConn
+    @property
+    def SurfNodes(self):
+        if self._SurfNodes is None:
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying surface...',end='')
+            SurfNodes = np.array(list({i for elem in self.SurfConn for i in elem}))
+            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+        else:
+            SurfNodes = self._SurfNodes
+        return SurfNodes
     @property
     def NodeNeighbors(self):
         """
@@ -579,6 +589,8 @@ class mesh:
             keep = []
         if properties == None:
             if 'SurfConn' not in keep: self._SurfConn = []
+            if 'SurfNodes' not in keep: self._SurfNodes = None
+            if 'Surface' not in keep: self._Surface = None
             if 'NodeNeighbors' not in keep: self._NodeNeighbors = []
             if 'ElemConn' not in keep: self._ElemConn = []
             if 'SurfNodeNeighbors' not in keep: self._SurfNodeNeighbors = []
