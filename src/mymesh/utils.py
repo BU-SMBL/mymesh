@@ -1083,9 +1083,9 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False,return_i
     NewConn : list 
         Updated node connectivity without duplicate nodes.
     idx : np.ndarray
-        Array of indices that convert from from the original node coordinates to the new node coordinates (NewCoords = [NodeCoords[i] for i in idx])
+        Array of indices that convert from the original node coordinates to the new node coordinates (NewCoords = [NodeCoords[i] for i in idx])
     inv : np.ndarray
-        Array of indices that can reverse the operation to convert from from the new node coordinates to old node coordinates (NodeCoords = [NewCoords[i] for i in inv]).
+        Array of indices that can reverse the operation to convert from the new node coordinates to old node coordinates (NodeCoords = [NewCoords[i] for i in inv]).
     
 
     Examples
@@ -1326,7 +1326,7 @@ def DeleteDegenerateElements(NodeCoords,NodeConn,tol=1e-12,angletol=1e-3,strict=
                 
     return NewCoords,NewConn
 
-def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf'):
+def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf', return_idx=False):
     """
     Checks for elements with degenerate edges and either changes the element type or 
     removes the element depending on how degenerate it is. Elements
@@ -1354,6 +1354,9 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf'):
         Node coordinates (these are simply passed through from the input)
     NewConn : list, array_like
         Updated node connectivity 
+        idx : np.ndarray
+        Array of indices that convert from the original list of elements IDs to the new list 
+        of element IDs
     """
     def rowunique(NodeConn, min_node):
         # based on unutbu's answer to https://stackoverflow.com/questions/26958233/numpy-row-wise-unique-elements
@@ -1383,8 +1386,6 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf'):
             uConn[wedge2tet[tetints == 10], :6] = uConn[wedge2tet[tetints == 10]][:,[0,3,1,5,2,4]]    # node 2, 4 removed
             uConn[wedge2tet[tetints == 12], :6] = uConn[wedge2tet[tetints == 12]][:,[0,4,1,5,2,3]]    # node 2, 3 removed
 
-
-
             # Okay cases: 3, 5, 6, 17, 24
             if np.any(~np.isin(tetints, (3,5,6,9,10,12,17,18,24))):
                 warnings.warn(f'Unaccounted for wedge-to-tet case(s) in CleanupDegenerateElements: {str(np.unique(tetints[~np.isin(tetints, (3,5,6,9,10,12,17,18,24))])):s}. This is a bug, please report.')
@@ -1397,6 +1398,7 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf'):
             uConn[wedge2pyr[pyrints == 4], :6] = uConn[wedge2pyr[pyrints == 4]][:,[1,4,5,2,0,3]]    # node 3 removed
             uConn[wedge2pyr[pyrints == 8], :6] = uConn[wedge2pyr[pyrints == 8]][:,[0,3,4,1,5,2]]    # node 2 removed
             uConn[wedge2pyr[pyrints == 16], :6] = uConn[wedge2pyr[pyrints == 16]][:,[0,2,5,3,4,1]]  # node 1 removed
+            
             if np.any(~np.isin(pyrints, [1,2,4,8,16])):
                 warnings.warn(f'Unaccounted for wedge-to-pyr case(s) in CleanupDegenerateElements: {str(np.unique(pyrints[~np.isin(pyrints, [1,2,4,8,16])])):s}. This is a bug, please report.')
 
@@ -1405,15 +1407,16 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf'):
 
         uConn = uConn[~to_delete]
         NewConn = ExtractRagged(uConn)
-        return NewConn
+        return NewConn, np.where(~to_delete)[0]
 
     if Type=='surf':
-        NewConn = rowunique(NodeConn, 3)
+        NewConn, idx = rowunique(NodeConn, 3)
     elif Type=='vol':
-        NewConn = rowunique(NodeConn, 4)
+        NewConn, idx = rowunique(NodeConn, 4)
     else:
         raise ValueError(f'Type must be "surf" or "vol", not {Type:s}.')
-
+    if return_idx:
+        return NodeCoords, NewConn, idx
     return NodeCoords, NewConn
 
 def MirrorMesh(NodeCoords, NodeConn,x=None,y=None,z=None):
