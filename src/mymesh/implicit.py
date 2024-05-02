@@ -368,7 +368,7 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
     return tet
 
 #
-def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, finite_diff_step=1e-5, smooth=True, copy=True, springs=True):
+def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, finite_diff_step=1e-5, smooth=False, InPlace=False, springs=True):
     """
     Optimize the placement of surface node to lie on the "true" surface. This
     This simultaneously moves nodes towards the isosurface and redistributes
@@ -413,7 +413,7 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
 
     """    
 
-    if copy:
+    if not InPlace:
         M = M.copy()
         
     # Process nodes
@@ -466,7 +466,7 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
     NodeCoords = np.vstack([np.asarray(M.NodeCoords), [np.nan,np.nan,np.nan]])
     points = np.asarray(NodeCoords)[FreeNodes]
 
-    if smooth:
+    if smooth is not None and smooth is not False:
         X = points[:,0]; Y = points[:,1]; Z = points[:,2]
         g = np.squeeze(gradF(X,Y,Z))
         r = utils.PadRagged(np.array(M.SurfNodeNeighbors,dtype=object)[FreeNodes].tolist())
@@ -482,6 +482,7 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
 
         Zflow = -2*tau*fg
 
+        Rflow = np.zeros((len(NodeCoords),3))
         if smooth == 'tangential':
             Q = NodeCoords[r]
             U = (1/lengths)[:,None] * np.nansum(Q - points[:,None,:],axis=1)
@@ -497,7 +498,7 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
         if springs and M.Type == 'vol':
             Forces = np.zeros((M.NNode, 3))
             Forces[FreeNodes] = Zflow + Rflow
-            M = improvement.NodeSpringSmoothing(M, Displacements=Forces, options=dict(FixSurf=False, FixedNodes=FixedNodes))
+            M = improvement.NodeSpringSmoothing(M, Displacements=Forces, options=dict(FixSurf=False, FixedNodes=FixedNodes, InPlace=True))
             NodeCoords = M.NodeCoords
             points = np.asarray(NodeCoords)[FreeNodes]
         else:
@@ -836,8 +837,8 @@ def intersections(symfun1,symfun2):
     return rMaxs(symfun1,symfun2)
 
 def thickens(symfun, t):
-    offp = offsets(symfun, t/2)
-    offn = offsetss(symfun, -t/2)
+    offp = offset(symfun, t/2)
+    offn = offset(symfun, -t/2)
     thick = diffs(offp, offn)
     return thick
 
@@ -1032,7 +1033,7 @@ def FastMarchingMethod(VoxelCoords, VoxelConn, NodeVals):
     T = [-1*t if np.sign(t) != np.sign(NodeVals[i]) else t for i,t in enumerate(T)]
     return T
 
-def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
+def mesh2sdf(M, points, method='nodes+centroids'):
     """
     Generates a signed distance field for a mesh.
 
@@ -1040,12 +1041,8 @@ def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
     ----------
     M : mesh.mesh
         Mesh object that will be used to define the distance field.
-    VoxelCoords : list
-        List of nodal coordinates for the voxel mesh on which the distance
-        field will be evaluated.
-    VoxelConn : list
-        Nodal connectivity list for the voxel mesh on which the distance field
-        will be evaluated.
+    points : array_like
+        Points at which the signed distance field will be evaluated.
     method : str
         Method to be used 
         nodes 
@@ -1075,16 +1072,16 @@ def mesh2sdf(M,VoxelCoords,VoxelConn,method='nodes+centroids'):
         raise Exception('Invalid method - use "nodes", "centroids", or "nodes+centroids"')
     
     tree = KDTree(Coords)  
-    Out = tree.query(VoxelCoords,1)
+    Out = tree.query(points,1)
     ds = Out[0].flatten()
     cs = Out[1].flatten()
-    rs = VoxelCoords - Coords[cs]
+    rs = points - Coords[cs]
     signs = np.sign(np.sum(rs*Normals[cs,:],axis=1))# [np.sign(np.dot(rs[i],Normals[cs[i]])) for i in range(len(ds))]
     NodeVals = signs*ds
     
     return NodeVals
 
-def mesh2udf(M,VoxelCoords,VoxelConn):
+def mesh2udf(M, points):
     """
     Generates an unsigned distance field for a mesh.
 
@@ -1092,12 +1089,8 @@ def mesh2udf(M,VoxelCoords,VoxelConn):
     ----------
     M : mesh.mesh
         Mesh object that will be used to define the distance field.
-    VoxelCoords : list
-        List of nodal coordinates for the voxel mesh on which the distance
-        field will be evaluated.
-    VoxelConn : list
-        Nodal connectivity list for the voxel mesh on which the distance field
-        will be evaluated.
+    points : array_like
+        Points at which the signed distance field will be evaluated.
 
     Returns
     -------
@@ -1108,7 +1101,7 @@ def mesh2udf(M,VoxelCoords,VoxelConn):
     Coords = np.asarray(M.NodeCoords)
 
     tree = KDTree(Coords, leaf_size=2)  
-    Out = tree.query(VoxelCoords,1)
+    Out = tree.query(points,1)
     NodeVals = Out[0].flatten()
     
     return NodeVals
