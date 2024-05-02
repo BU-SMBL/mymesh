@@ -4270,7 +4270,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         return TriNodeCoords, TriNodeConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
     return TriNodeCoords, TriNodeConn
 
-def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False, cleanup_tol=1e-10):
+def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False, return_ParentIds=False, cleanup_tol=1e-10):
     """
     Marching tetrahedra algorithm :cite:p:`Bloomenthal1994` for extracting an isosurface from a tetrahedral mesh. This can be used to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).
 
@@ -4308,6 +4308,8 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         set flip=True.
     return_NodeValues : bool, optional
         Return the node values for each node in the tetrahedral mesh. If method='surface', these will all be `threshold`, if method='volume', these will be `threshold` for the surface nodes and the original grid values for the interior nodes
+    return_ParentIds : bool, optional
+        Return Ids that refer to the original tetrahedra that each of the new elements is connected to, by default False.
     cleanup_tol : float, optional
         Tolerance value used to classify whether two nodes are sufficiently close to be considered a single node (see :func:`mymesh.utils.DeleteDuplicateNodes`), by default 1e-12.
     Returns
@@ -4316,6 +4318,11 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         Node coordinates of the generated mesh
     NodeConn : list
         Node connetivity for the generated mesh
+    NewValues : np.ndarray, optional
+        Node values transfered to the generated mesh, returned if return_NodeValues=True 
+    ParentIds : np.ndarray, optional
+        Element ids that refer to the original tetrahedra that each of the new elements is connected to,
+        returned if return_ParentIds=True
 
 
     Examples
@@ -4432,9 +4439,17 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     TetVals = NodeValues[TetNodeConn]
     inside = TetVals <= 0
     if not np.any(inside):
+        NodeCoords = np.empty((0,3))
+        NodeConn = np.empty((0,4),dtype=int), 
+        NewValues = np.empty((0))
+        ParentIds = np.empty((0), dtype=int)
         if return_NodeValues:
-            return np.empty((0,3)), np.empty((0,4),dtype=int), np.empty((0))
-        return np.empty((0,3)), np.empty((0,4),dtype=int)
+            if return_ParentIds:
+                return NodeCoords, NodeConn, NewValues, ParentIds
+            return NodeCoords, NodeConn, NewValues
+        if return_ParentIds:
+            return NodeCoords, NodeConn, ParentIds
+        return NodeCoords, NodeConn
 
     ints = np.sum(inside[:,:4] * 2**np.arange(0,4)[::-1], axis=1)
 
@@ -4561,21 +4576,33 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         NodeConn = [[inv[n+sums[i]] for n in range(lengths[i])] for i in range(len(lengths))]
 
     NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
-    NodeCoords,NodeConn = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf')
+    NodeCoords,NodeConn,EIdx = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf', return_idx=True)
     if return_NodeValues:
         NewValues = NewValues[Idx]
+    if return_ParentIds:
+        tetnum = tetnum[EIdx]
 
     if method.lower() == 'volume' and not mixed_elements:
-        NodeCoords, NodeConn = converter.solid2tets(NodeCoords, NodeConn)
+        NodeCoords, NodeConn, ids = converter.solid2tets(NodeCoords, NodeConn, return_ids=True)
         NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
         if return_NodeValues:
             NewValues = NewValues[Idx]
+        if return_ParentIds:
+            ParentIds = np.zeros(len(NodeConn),dtype=int)
+            for i,Id in enumerate(ids):
+                ParentIds[Id] = tetnum[i]
+    elif return_ParentIds:
+        ParentIds = tetnum
+
     if return_NodeValues:
         if flip:
             NewValues = -1*NewValues
         NewValues += threshold
+        if return_ParentIds:
+            return NodeCoords, NodeConn, NewValues, ParentIds
         return NodeCoords, NodeConn, NewValues
-
+    if return_ParentIds:
+        return NodeCoords, NodeConn, ParentIds
     return NodeCoords, NodeConn
 
 def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method='33', octree_strategy='gradient', octree_eps=0.1, dualgrid_method='centroid'):
