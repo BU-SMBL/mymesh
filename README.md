@@ -1,4 +1,4 @@
-![](resources\mymesh_logo.svg)
+![](resources/mymesh_logo.svg)
 
 MyMesh is a general purpose toolbox for generating, manipulating, and analyzing 
 meshes for finite element, finite difference, or finite volume simulations. It 
