@@ -123,7 +123,7 @@ def LocalLaplacianSmoothing(M, options=dict()):
     ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
     
     if SmoothOptions['iterate'] == 'converge':
-        condition = lambda i, U : (i == 0) | (i < maxIter) | np.max(U) < tolerance
+        condition = lambda i, U : (i == 0) | (i < maxIter) | (np.max(U) < tolerance)
     elif isinstance(SmoothOptions['iterate'], (int, np.integer)):
         condition = lambda i, U : i < SmoothOptions['iterate']
     else:
@@ -1086,7 +1086,8 @@ def NodeSpringSmoothing(M, Stiffness=1, Forces=None, Displacements=None, options
                         FixedNodes = set(),
                         FixFeatures = False,
                         FixSurf = False,
-                        qualityFunc = quality.MeanRatio
+                        qualityFunc = quality.MeanRatio,
+                        InPlace = False
                     )
 
     NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, options)
@@ -1097,7 +1098,7 @@ def NodeSpringSmoothing(M, Stiffness=1, Forces=None, Displacements=None, options
     qualityFunc = SmoothOptions['qualityFunc']
     maxIter = SmoothOptions['maxIter']
     method = SmoothOptions['method']
-
+    InPlace = SmoothOptions['InPlace']
     if Forces is None or len(Forces) == 0:
         Forces = np.zeros((len(NodeCoords),3))
     else:
@@ -1130,16 +1131,20 @@ def NodeSpringSmoothing(M, Stiffness=1, Forces=None, Displacements=None, options
             Xnew[FixedNodes] = X[FixedNodes]
 
         iteration += 1
-        print(np.linalg.norm(X[FreeNodes]-Xnew[FreeNodes]))
+        # print(np.linalg.norm(X[FreeNodes]-Xnew[FreeNodes]))
         if iteration > maxIter or np.linalg.norm(X[FreeNodes]-Xnew[FreeNodes]) < tolerance:
             thinking = False
         else:
-            X = copy.copy(Xnew)
-    
-    if 'mesh' in dir(mesh):
-        Mnew = mesh.mesh(Xnew, NodeConn)
+            X = np.copy(Xnew)
+    if InPlace:
+        M.NodeCoords = Xnew[:-1]
+        Mnew = M
+        
     else:
-        Mnew = mesh(Xnew, NodeConn)
+        if 'mesh' in dir(mesh):
+            Mnew = mesh.mesh(Xnew[:-1], NodeConn)
+        else:
+            Mnew = mesh(Xnew[:-1], NodeConn)
 
     return Mnew
 
@@ -1200,26 +1205,57 @@ def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
     return NewCoords
 
 ## Local Mesh Topology Operations
-def TetContract(M, h, FixedNodes={}, verbose=True, cleanup=True, maxIter=10):
+def TetContract(M, h, FixedNodes={}, verbose=True, cleanup=True, maxIter=10, labels=None, FeatureAngle=25):
 
     # Recommended that h = 4/5*desired element size
 
     cutoff = h # contraction will be attempted on edges below this length
     NewCoords = np.array(M.NodeCoords)
     NewConn = np.array(M.NodeConn, dtype=int)
-    SurfConn = np.array(M.SurfConn, dtype=int)
+    
     Edges = np.sort(M.Edges,axis=1)
     EdgeConn = M.EdgeConn
     EdgeElemConn = M.EdgeElemConn
-    SurfEdges = np.sort(M.Surface.Edges)
-    SurfEdgeSet = set(tuple(e) for e in SurfEdges)
+    if labels is None:
+        SurfConn = np.array(M.SurfConn, dtype=int)
+        SurfEdges = np.sort(M.Surface.Edges)
+    else:
+        if isinstance(labels, str):
+            if labels in M.ElemData.keys():
+                label_str = labels
+                labels = M.ElemData[label_str]
+            else:
+                raise ValueError('If provided as a string, labels must correspond to an entry in M.ElemData')
+        else:
+            label_str = 'labels'
+        assert len(labels) == M.NElem, 'labels must correspond to the number of elements.'
+        if 'mesh' in dir(mesh):
+            MultiSurface = mesh.mesh(verbose=False)
+        else:
+            MultiSurface = mesh(verbose=False)
+        ulabels = np.unique(labels)
+        label_nodes = np.zeros((len(ulabels),M.NNode),dtype=int) # For each label, boolean indicator of whether each node is touching an element with that label
+        mesh_nodes = np.arange(M.NNode)
+        for i,label in enumerate(ulabels):
+            if 'mesh' in dir(mesh):
+                m = mesh.mesh(NewCoords, NewConn[labels == label], verbose=False)
+            else:
+                m = mesh(NewCoords, NewConn[labels == label], verbose=False)
+            
+            MultiSurface.addElems(m.SurfConn)
+            label_nodes[i,np.unique(m.NodeConn)] = 1
+        MultiSurface.NodeConn = MultiSurface.Faces  # This prevents doubling of surface elements at interfaces
+        SurfConn = MultiSurface.NodeConn
+        SurfEdges = np.sort(MultiSurface.Edges)
 
+    SurfEdgeSet = set(tuple(e) for e in SurfEdges)
+        
     # Detect Features
     # TODO: Some redundant calculation (edges) occurs in DetectFeatures
     surface_nodes = np.unique(SurfEdges)
     surfnodeset = set(surface_nodes)
     fixed_nodes = np.array(list(FixedNodes),dtype=int)
-    feat_edges, feat_corners = utils.DetectFeatures(NewCoords,SurfConn) 
+    feat_edges, feat_corners = utils.DetectFeatures(NewCoords,SurfConn,angle=FeatureAngle) 
 
     # 0 : interior; 1 : surface; 2 : feature edge; 3 : feature corner; 4 : fixed node
     FeatureRank = np.zeros(len(NewCoords))
@@ -1274,6 +1310,8 @@ def TetContract(M, h, FixedNodes={}, verbose=True, cleanup=True, maxIter=10):
             
         # Add new elements to the target node
         ElemConnTable[targetnode].update(new_elems)
+        if labels is not None:
+            label_nodes[:,targetnode] = label_nodes[:,collapsenode] | label_nodes[:,targetnode]
 
         # Remove all elements from the collapsed node
         ElemConnTable[collapsenode] = set()
@@ -1375,6 +1413,13 @@ def TetContract(M, h, FixedNodes={}, verbose=True, cleanup=True, maxIter=10):
             inheap = {tuple(edge):True if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0) else False for i,edge in enumerate(Edges)}
             heapq.heapify(heap)
 
+    if labels is not None:
+        # Apply labels to the coarsened mesh
+        filler = np.max(labels) + 1
+        new_labels = np.repeat(filler, len(NewConn))
+        for i,label in enumerate(ulabels):
+            new_labels[np.all(label_nodes[i][NewConn],axis=1)] = label
+
     if cleanup:
         NewCoords, NewConn,_ = utils.RemoveNodes(NewCoords, NewConn)
      
@@ -1382,6 +1427,8 @@ def TetContract(M, h, FixedNodes={}, verbose=True, cleanup=True, maxIter=10):
         tet = mesh.mesh(NewCoords, NewConn)
     else:
         tet = mesh(NewCoords, NewConn)
+    if labels is not None:
+        tet.ElemData[label_str] = new_labels
 
     return tet
 
