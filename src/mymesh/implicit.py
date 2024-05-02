@@ -509,8 +509,7 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
 
     return M
 
-
-# implicit function primitives
+# Implicit Function Primitives
 def gyroid(x,y,z):
     """
     Implicit function approximation of the gyroid triply periodic minimal 
@@ -787,54 +786,296 @@ def sphere(center, radius):
 
 # Implicit Function Operators
 def offset(fval,value):
-    return fval-value
+    """
+    Offset function values by a prescribed amount. For a signed 
+    distance function, this offsets the isosurface by a specified distance.
+
+    Parameters
+    ----------
+    fval : scalar or np.ndarray
+        Function value(s) to be offset
+    value : scalar
+        Offset value
+
+    Returns
+    -------
+    offset_val : scalar or np.ndarray
+        Offset value(s)
+    """    
+    offset_val = fval-value
+    return offset_val
 
 def union(fval1,fval2):
-    return rMin(fval1,fval2)
+    """
+    Boolean union of two values or sets of values. Negative values are assumed
+    to be "inside". An R-function :func:`rMin` minimum is used to obtain a 
+    continuously differentiable output.
+
+    Parameters
+    ----------
+    fval1 : scalar or np.ndarray
+        Value(s) of the first function
+    fval2 : scalar or np.ndarray
+        Value(s) of the second function
+
+    Returns
+    -------
+    union_val : scalar or np.ndarray
+        Union of the two sets of values
+    """ 
+    union_val = rMin(fval1,fval2)
+    return union_val
 
 def diff(fval1,fval2):
-    # This has maybe been wrong for a long time changing min to max
-    # return rMin(fval1,-fval2)
-    return rMax(fval1,-fval2)
+    """
+    Boolean difference of two values or sets of values. Negative values are assumed
+    to be "inside". An R-function :func:`rMax` maximum is used to obtain a 
+    continuously differentiable output. Note that this operation is not 
+    symmetric so the order of inputs matters.
+
+    Parameters
+    ----------
+    fval1 : scalar or np.ndarray
+        Value(s) of the first function
+    fval2 : scalar or np.ndarray
+        Value(s) of the second function
+
+    Returns
+    -------
+    diff_val : scalar or np.ndarray
+        Difference of the two sets of values
+    """ 
+    diff_val = rMax(fval1,-fval2)
+    return diff_val
 
 def diff_old(fval1, fval2):
+    warnings.warn('This function will be removed in the future.')
     return rMin(fval1,-fval2)
     
 def intersection(fval1,fval2):
-    return rMax(fval1,fval2)
+    """
+    Boolean intersection of two values or sets of values. Negative values are 
+    assumed to be "inside". An R-function :func:`rMax` maximum is used to 
+    obtain a continuously differentiable output. 
 
-def thicken(f, t):
+    Parameters
+    ----------
+    fval1 : scalar or np.ndarray
+        Value(s) of the first function
+    fval2 : scalar or np.ndarray
+        Value(s) of the second function
+
+    Returns
+    -------
+    intersection_val : scalar or np.ndarray
+        Intersection of the two sets of values
+    """
+    intersection_val = rMax(fval1,fval2)
+    return intersection_val
+
+def thicken(fval, t):
+    """
+    Thicken an isosurface by offsetting in both directions. The surface
+    is offset in both directions by t/2.
+
+    Parameters
+    ----------
+    fval : scalar or np.ndarray
+        Function value(s) to be offset
+    t : scalar
+        Thickness value. For a signed distance function, this will correspond
+        to an actual thickness, for other implicit functions, the offset distance
+        depends on the function.
+
+    Returns
+    -------
+    thick : scalar or np.ndarray
+        Thickened value(s)
+    """
     offp = offset(f, t/2)
     offn = offset(f, -t/2)
     thick = diff(offp, offn)
     return thick
 
 def offsetf(f,value):
-    return lambda x,y,z : offset(f(x,y,z), value)
+    """
+    Offset function by a prescribed amount. For a signed 
+    distance function, this offsets the isosurface by a specified distance.
+
+    Parameters
+    ----------
+    f : callable
+        Callable function of three variables (x, y, z). Function should be able
+        to handle either scalar or vector inputs.
+    value : scalar
+        Offset value
+
+    Returns
+    -------
+    offset_fun : callable
+        Offset funcion
+    """    
+    offset_fun = lambda x,y,z : offset(f(x,y,z), value)
+    return offset_fun
 
 def unionf(f1,f2):
-    return lambda x,y,z : rMin(f1(x,y,z),f2(x,y,z))
+    """
+    Boolean union of two functions. Negative values are assumed
+    to be "inside". An R-function :func:`rMin` minimum is used to obtain a 
+    continuously differentiable output.
+
+    Parameters
+    ----------
+    f1 : callable
+        Callable function of three variables (x, y, z). Function should be able
+        to handle either scalar or vector inputs.
+    f2 : callable
+        Callable function of three variables (x, y, z). Function should be able
+        to handle either scalar or vector inputs.
+
+    Returns
+    -------
+    union_fun : callable
+        Union function
+    """ 
+    union_fun = lambda x,y,z : rMin(f1(x,y,z),f2(x,y,z))
+    return union_fun
 
 def difff(f1,f2):
-    return lambda x,y,z : rMax(f1(x,y,z),-f2(x,y,z))
+    """
+    Boolean difference of two functions. Negative values are assumed
+    to be "inside". An R-function :func:`rMax` maximum is used to obtain a 
+    continuously differentiable output. Note that this operation is not 
+    symmetric so the order of inputs matters.
+
+    Parameters
+    ----------
+    f1 : callable
+        Callable function of three variables (x, y, z). Function should be able
+        to handle either scalar or vector inputs.
+    f2 : callable
+        Callable function of three variables (x, y, z). Function should be able
+        to handle either scalar or vector inputs.
+
+    Returns
+    -------
+    diff_fun : callable
+        Difference of the two functions
+    """ 
+    diff_fun = lambda x,y,z : rMax(f1(x,y,z),-f2(x,y,z))
+    return diff_fun
 
 def intersectionf(f1,f2):
-    return lambda x,y,z : rMax(f1(x,y,z),f2(x,y,z))
+    """
+    Boolean intersection of two functions. Negative values are assumed
+    to be "inside". An R-function :func:`rMax` maximum is used to obtain a 
+    continuously differentiable output. 
+
+    Parameters
+    ----------
+    f1 : callable
+        Callable function of three variables (x, y, z). Function should be able
+        to handle either scalar or vector inputs.
+    f2 : callable
+        Callable function of three variables (x, y, z). Function should be able
+        to handle either scalar or vector inputs.
+
+    Returns
+    -------
+    intersection_fun : callable
+        Intersection of the two functions
+    """ 
+    intersection_fun = lambda x,y,z : rMax(f1(x,y,z),f2(x,y,z))
+    return intersection_fun
 
 def thickenf(f, t):
+    """
+    Thicken an implicit function by offsetting in both directions. The surface
+    is offset in both directions by t/2.
+
+    Parameters
+    ----------
+    f : callable
+        Callable function of three variables (x, y, z). Function should be able
+        to handle either scalar or vector inputs.
+    t : scalar
+        Thickness value. For a signed distance function, this will correspond
+        to an actual thickness, for other implicit functions, the offset distance
+        depends on the function.
+
+    Returns
+    -------
+    thick_fun : callable
+        Thickened function
+    """    
     offp = offsetf(f, t/2)
     offn = offsetf(f, -t/2)
-    thick = difff(offp, offn)
-    return thick
+    thick_fun = difff(offp, offn)
+    return thick_fun
 
 def unions(symfun1,symfun2):
-    return rMins(symfun1,symfun2)
+    """
+    Boolean union of two symbolic functions. Negative values are assumed
+    to be "inside". An R-function :func:`rMins` minimum is used to obtain a 
+    continuously differentiable output.
+
+    Parameters
+    ----------
+    symfun1 : sympy function
+        Symbolic sympy function of three variables (x, y, z). 
+    symfun2 : sympy function
+        Symbolic sympy function of three variables (x, y, z). 
+
+    Returns
+    -------
+    union_sym : Scalar or np.ndarray
+        Symbolic union function
+    """ 
+    union_sym = rMins(symfun1,symfun2)
+    return union_sym
 
 def diffs(symfun1,symfun2):
-    return rMaxs(symfun1,-symfun2)
+    """
+    Boolean difference of two symbolic functions. Negative values are assumed
+    to be "inside". An R-function :func:`rMaxs` minimum is used to obtain a 
+    continuously differentiable output. Note that this operation is not 
+    symmetric so the order of inputs matters.
+
+    Parameters
+    ----------
+    symfun1 : sympy function
+        Symbolic sympy function of three variables (x, y, z). 
+    symfun2 : sympy function
+        Symbolic sympy function of three variables (x, y, z). 
+
+    Returns
+    -------
+    diff_sym : sympy function
+        Symbolic difference function
+    """ 
+    diff_sym = rMaxs(symfun1,-symfun2)
+    return diff_sym
 
 def intersections(symfun1,symfun2):
-    return rMaxs(symfun1,symfun2)
+    """
+    Boolean intersection of two symbolic functions. Negative values are assumed
+    to be "inside". An R-function :func:`rMaxs` minimum is used to obtain a 
+    continuously differentiable output. 
+
+    Parameters
+    ----------
+    symfun1 : sympy function
+        Symbolic sympy function of three variables (x, y, z). 
+    symfun2 : sympy function
+        Symbolic sympy function of three variables (x, y, z). 
+
+    Returns
+    -------
+    diff_sym : sympy function
+        Symbolic difference function
+    """ 
+    intersection_sym = rMaxs(symfun1,symfun2)
+    return intersection_sym
 
 def thickens(symfun, t):
     offp = offset(symfun, t/2)
@@ -843,12 +1084,12 @@ def thickens(symfun, t):
     return thick
 
 def rMax(a,b,alpha=0,m=0,p=2):
-    # R-Function version of max(a,b) to yield a smoothly differentiable max - R0
+    # R-Function :cite:p:`Shapiro1999` version of max(a,b) to yield a smoothly differentiable max - R0
     # Implicit Functions With Guaranteed Differential Properties - Shapiro & Tsukanov
     return 1/(1+alpha)*(a+b+(np.maximum(a**p+b**p - 2*alpha*a*b,0))**(1/p)) * (a**2 + b**2)**(m/2)
 
 def rMin(a,b,alpha=0,m=0,p=2):
-    # R-Function version of min(a,b) to yield a smoothly differentiable min - R0
+    # R-Function :cite:p:`Shapiro1999` version of min(a,b) to yield a smoothly differentiable min - R0
     # Implicit Functions With Guaranteed Differential Properties - Shapiro & Tsukanov
     return 1/(1+alpha)*(a+b-(np.maximum(a**p+b**p - 2*alpha*a*b,0))**(1/p)) * (a**2 + b**2)**(m/2)
 
