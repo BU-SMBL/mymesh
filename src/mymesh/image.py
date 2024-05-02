@@ -378,11 +378,10 @@ def SurfaceNodeOptimization(M, img, voxelsize, iterate=1, threshold=0, FixedNode
 
     Parameters
     ----------
-    M : mesh.mesh
+    M : mymesh.mesh
         Mesh object
-    func : function or sympy-type function
-        Implicit function describing the mesh surface. This should be the same
-        function used to create the mesh.
+    img : str or np.ndarray
+        Image array or file path to an image
     voxelsize : float
         Voxel size of the image
     iterate : int, optional
