@@ -1205,9 +1205,63 @@ def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
     return NewCoords
 
 ## Local Mesh Topology Operations
-def TetContract(M, h, FixedNodes={}, verbose=True, cleanup=True, maxIter=10, labels=None, FeatureAngle=25):
+def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=10, labels=None, FeatureAngle=25):
+    """
+    Edge contraction for tetrahedral mesh coarsening and quality improvement. 
+    Edges with edge length less than `h` will attempt to be contracted. Surfaces
+    and features are preserved by prioritizing surface/feature nodes over 
+    interior nodes when deciding which node to remove in the edge collapse
+    operation. Features (edges, corners), as determined by 
+    :func:`~mymesh.utils.DetectFeatures`, are held fixed. An edge is only 
+    contracted if doing so doesn't invert any elements or reduce the quality
+    by creating a new element with a lower quality than was present in the 
+    local edge neighborhood before the contraction. Edges are processed in a
+    heap sorted by edge length, with shorter edges being contracted first. New
+    edges created in the edge contraction process are added to the heap, thus 
+    most edges are contracted in the first iteration, however some non-viable
+    contractions may become viable after the first pass, thus multiple iterations
+    can be performed until all possible edges are contracted.
 
-    # Recommended that h = 4/5*desired element size
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Tetrahedral mesh to be contracted
+    h : float
+        Edge length below which wil be contracted. Using 4/5 of the target
+        edge length is often recommended.
+    FixedNodes : set or array_like, optional
+        Indices of nodes to be held fixed, by default {}
+    verbose : bool, optional
+        If true, will display progress, by default True
+    cleanup : bool, optional
+        If true, unused nodes will be removed from the mesh and nodes will be
+        renumbered, by default True. 
+    maxIter : int, optional
+        Maximum number of times to iterate through the mesh attempting to 
+        contract edges, by default 10. Most edges will be contracted in the 
+        first pass, however some contracts may not be permitted until other
+        nearby elements have been modified. 
+    labels : str or array_like, optional
+        Element labels used to identify separate regions (e.g. materials) within
+        a mesh, by default None. If provided as a string, the string must
+        refer to an entry in `M.ElemData`, otherwise must be an array_like with
+        the number of entries equal to the number of elements (`M.NElem`).
+        Providing labels will preserve the interface and interface features
+        between regions of differening labels. The labels of the new mesh will
+        be stored in the ElemData of the returned mesh, either in 
+        ElemData['labels'] (if labels were provided as an array), or the entry
+        matching the original ElemData entry (if labels were provided as a 
+        string).
+    FeatureAngle : int, optional
+        Angle (in degrees) used to identify features, by default 25. See
+        :func:`~mymesh.utils.DetectFeatures` for more information.
+
+    Returns
+    -------
+    Mnew : mymesh.mesh
+        Coarsened tetrahedral mesh
+
+    """
 
     cutoff = h # contraction will be attempted on edges below this length
     NewCoords = np.array(M.NodeCoords)
@@ -1337,17 +1391,22 @@ def TetContract(M, h, FixedNodes={}, verbose=True, cleanup=True, maxIter=10, lab
         return success
 
     loop = 0; valid = 1;
+    if verbose and 'tqdm' in sys.modules:
+        tqdm_loaded = True
+    else:
+        tqdm_loaded = False
     while valid > 0 and len(heap) > 0 and loop < maxIter:
         loop += 1
+        if verbose: print(f'TetContract Iteration {loop:d}:', end='')
         valid = 0
         invalid = 0
-        if verbose:
+        if verbose and tqdm_loaded:
             progress = tqdm.tqdm(total=len(heap))
         while len(heap) > 0:
             l, edge = heapq.heappop(heap)
 
             inheap[edge] = False
-            if verbose:
+            if verbose and tqdm_loaded:
                 progress.update(1)
                 L1 = len(heap)
 
@@ -1398,7 +1457,7 @@ def TetContract(M, h, FixedNodes={}, verbose=True, cleanup=True, maxIter=10, lab
             else:
                 invalid += 1
             
-            if verbose:
+            if verbose and tqdm_loaded:
                 L2 = len(heap)
                 progress.total += max(0, L2-L1)
             
@@ -1424,13 +1483,321 @@ def TetContract(M, h, FixedNodes={}, verbose=True, cleanup=True, maxIter=10, lab
         NewCoords, NewConn,_ = utils.RemoveNodes(NewCoords, NewConn)
      
     if 'mesh' in dir(mesh):
-        tet = mesh.mesh(NewCoords, NewConn)
+        Mnew = mesh.mesh(NewCoords, NewConn)
     else:
-        tet = mesh(NewCoords, NewConn)
+        Mnew = mesh(NewCoords, NewConn)
     if labels is not None:
-        tet.ElemData[label_str] = new_labels
+        Mnew.ElemData[label_str] = new_labels
 
-    return tet
+    return Mnew
+
+def TetSplit(M, h, verbose=True, labels=None):
+    """
+    Edge splitting of tetrahedral meshes. Edges with length greater than the 
+    specified edge length (`h`) will be split by placing a new node at the 
+    midpoint of the edge. Tetrahedral edge splitting is inherently interface
+    and feature preserving as nodes are only added, not removed or moved. 
+
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Tetrahedral mesh to be contracted
+    h : float
+        Edge length below which wil be contracted. Using 4/5 of the target
+        edge length is often recommended.
+    verbose : bool, optional
+        If true, will display progress, by default True
+    labels : str or array_like, optional
+        Element labels used to identify separate regions (e.g. materials) within
+        a mesh, by default None. If provided as a string, the string must
+        refer to an entry in `M.ElemData`, otherwise must be an array_like with
+        the number of entries equal to the number of elements (`M.NElem`).
+        Providing labels will preserve the interface and interface features
+        between regions of differening labels. The labels of the new mesh will
+        be stored in the ElemData of the returned mesh, either in 
+        ElemData['labels'] (if labels were provided as an array), or the entry
+        matching the original ElemData entry (if labels were provided as a 
+        string).
+    Returns
+    -------
+    Mnew : mymesh.mesh
+        Tetrahedral mesh after edge splitting
+
+    """
+    cutoff = h
+    # Setup Data Structures
+    NodeCoords = np.asarray(M.NodeCoords)
+    N = len(NodeCoords)
+    Edges = [tuple(edge) for edge in np.sort(M.Edges,axis=1)]
+    Elems = [tuple(elem) for elem in M.NodeConn]
+    EdgeTable = {edge:tuple(Elems[ielem] for ielem in M.EdgeElemConn[i]) for i,edge in enumerate(Edges)}
+    NodeTable = {i:coord for i,coord in enumerate(NodeCoords)}
+    if labels is not None:
+        if isinstance(labels, str):
+            if labels in M.ElemData.keys():
+                label_str = labels
+                labels = M.ElemData[label_str]
+            else:
+                raise ValueError('If provided as a string, labels must correspond to an entry in M.ElemData')
+        else:
+            label_str = 'labels'
+        assert len(labels) == M.NElem, 'labels must correspond to the number of elements.'
+        ElemLabels = {elem:labels[i] for i,elem in enumerate(Elems)}
+        
+    ## Get edge lengths
+    EdgeDiff = NodeCoords[M.Edges[:,0]] - NodeCoords[M.Edges[:,1]]
+    EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
+
+    # Create edge heap
+    heap = [(-EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] > cutoff) and (EdgeLengths[i] > 0)]
+    inmesh = {tuple(edge):True for i,edge in enumerate(Edges)}
+    heapq.heapify(heap)
+
+
+    def do_split(L, edge, N):
+        
+        inmesh[edge] = False
+        edge1 = (edge[0],N)
+        edge2 = (edge[1],N)
+        EdgeTable[edge1] = tuple()
+        EdgeTable[edge2] = tuple()
+        inmesh[edge1] = True
+        inmesh[edge2] = True
+        NewEdges = set()
+        
+        for elem in EdgeTable[edge]:
+            # for each connected element
+            a, b, c, d = elem
+            lookup_key = np.sum(np.isin(elem, edge) * 2**np.arange(0,4)[::-1])
+
+            if lookup_key == 3:
+                new_elems = ((a,b,c,N), (d,b,a,N))
+                # Split Edges - add one new element
+                EdgeTable[(c,N)] += (new_elems[0],)
+                EdgeTable[(d,N)] += (new_elems[1],)
+                
+                # Other New Edges - add both new elements
+                NewEdges.update({(a,N), (b,N)})
+                if (a,N) in EdgeTable.keys():
+                    EdgeTable[(a,N)] += new_elems
+                else:
+                    EdgeTable[(a,N)] = new_elems
+                if (b,N) in EdgeTable.keys():
+                    EdgeTable[(b,N)] += new_elems
+                else:
+                    EdgeTable[(b,N)] = new_elems
+                # Existing Edges - remove old element and add new element(s)
+                ab = tuple(sorted((a,b)))
+                ac = tuple(sorted((a,c)))
+                ad = tuple(sorted((a,d)))
+                bc = tuple(sorted((b,c)))
+                bd = tuple(sorted((b,d)))
+
+                EdgeTable[ab] = tuple(e for e in EdgeTable[ab] if e != elem) + new_elems
+                EdgeTable[bc] = tuple(e for e in EdgeTable[bc] if e != elem) + (new_elems[0],)
+                EdgeTable[ac] = tuple(e for e in EdgeTable[ac] if e != elem) + (new_elems[0],)
+                EdgeTable[bd] = tuple(e for e in EdgeTable[bd] if e != elem) + (new_elems[1],)
+                EdgeTable[ad] = tuple(e for e in EdgeTable[ad] if e != elem) + (new_elems[1],)
+            elif lookup_key == 5:
+                new_elems = ((a,b,c,N), (c,d,a,N))
+                # Split Edges - add one new element
+                EdgeTable[(b,N)] += (new_elems[0],)
+                EdgeTable[(d,N)] += (new_elems[1],)
+                
+                # Other New Edges - add both new elements
+                NewEdges.update({(a,N), (c,N)})
+                if (a,N) in EdgeTable.keys():
+                    EdgeTable[(a,N)] += new_elems
+                else:
+                    EdgeTable[(a,N)] = new_elems
+                if (c,N) in EdgeTable.keys():
+                    EdgeTable[(c,N)] += new_elems
+                else:
+                    EdgeTable[(c,N)] = new_elems
+                # Existing Edges - remove old element and add new element(s)
+                ab = tuple(sorted((a,b)))
+                ac = tuple(sorted((a,c)))
+                ad = tuple(sorted((a,d)))
+                bc = tuple(sorted((b,c)))
+                cd = tuple(sorted((c,d)))
+
+                EdgeTable[ac] = tuple(e for e in EdgeTable[ac] if e != elem) + new_elems
+                EdgeTable[ab] = tuple(e for e in EdgeTable[ab] if e != elem) + (new_elems[0],)
+                EdgeTable[bc] = tuple(e for e in EdgeTable[bc] if e != elem) + (new_elems[0],)
+                EdgeTable[cd] = tuple(e for e in EdgeTable[cd] if e != elem) + (new_elems[1],)
+                EdgeTable[ad] = tuple(e for e in EdgeTable[ad] if e != elem) + (new_elems[1],)
+            elif lookup_key == 9:
+                new_elems = ((a,b,c,N), (b,d,c,N))
+                # Split Edges - add one new element
+                EdgeTable[(a,N)] += (new_elems[0],)
+                EdgeTable[(d,N)] += (new_elems[1],)
+                
+                # Other New Edges - add both new elements
+                NewEdges.update({(b,N), (c,N)})
+                if (b,N) in EdgeTable.keys():
+                    EdgeTable[(b,N)] += new_elems
+                else:
+                    EdgeTable[(b,N)] = new_elems
+                if (c,N) in EdgeTable.keys():
+                    EdgeTable[(c,N)] += new_elems
+                else:
+                    EdgeTable[(c,N)] = new_elems
+                
+                # Existing Edges - remove old element and add new element(s)
+                ab = tuple(sorted((a,b)))
+                ac = tuple(sorted((a,c)))
+                ad = tuple(sorted((a,d)))
+                bc = tuple(sorted((b,c)))
+                bd = tuple(sorted((b,d)))
+                cd = tuple(sorted((c,d)))
+
+                EdgeTable[bc] = tuple(e for e in EdgeTable[bc] if e != elem) + new_elems
+                EdgeTable[ab] = tuple(e for e in EdgeTable[ab] if e != elem) + (new_elems[0],)
+                EdgeTable[ac] = tuple(e for e in EdgeTable[ac] if e != elem) + (new_elems[0],)
+                EdgeTable[bd] = tuple(e for e in EdgeTable[bd] if e != elem) + (new_elems[1],)
+                EdgeTable[cd] = tuple(e for e in EdgeTable[cd] if e != elem) + (new_elems[1],)
+            elif lookup_key == 6:
+                new_elems = ((a,d,b,N), (a,c,d,N))
+                
+                # Split Edges - add one new element
+                EdgeTable[(b,N)] += (new_elems[0],)
+                EdgeTable[(c,N)] += (new_elems[1],)
+                
+                # Other New Edges - add both new elements
+                NewEdges.update({(a,N), (d,N)})
+                if (a,N) in EdgeTable.keys():
+                    EdgeTable[(a,N)] += new_elems
+                else:
+                    EdgeTable[(a,N)] = new_elems
+                if (d,N) in EdgeTable.keys():
+                    EdgeTable[(d,N)] += new_elems
+                else:
+                    EdgeTable[(d,N)] = new_elems
+                
+                # Existing Edges - remove old element and add new element(s)
+                ab = tuple(sorted((a,b)))
+                ac = tuple(sorted((a,c)))
+                ad = tuple(sorted((a,d)))
+                bd = tuple(sorted((b,d)))
+                cd = tuple(sorted((c,d)))
+
+                EdgeTable[ad] = tuple(e for e in EdgeTable[ad] if e != elem) + new_elems
+                EdgeTable[ab] = tuple(e for e in EdgeTable[ab] if e != elem) + (new_elems[0],)
+                EdgeTable[bd] = tuple(e for e in EdgeTable[bd] if e != elem) + (new_elems[0],)
+                EdgeTable[ac] = tuple(e for e in EdgeTable[ac] if e != elem) + (new_elems[1],)
+                EdgeTable[cd] = tuple(e for e in EdgeTable[cd] if e != elem) + (new_elems[1],)
+            elif lookup_key == 10:
+                new_elems = ((a,d,b,N), (b,d,c,N))
+
+                # Split Edges - add one new element
+                EdgeTable[(a,N)] += (new_elems[0],)
+                EdgeTable[(c,N)] += (new_elems[1],)
+                
+                # Other New Edges - add both new elements
+                NewEdges.update({(b,N), (d,N)})
+                if (b,N) in EdgeTable.keys():
+                    EdgeTable[(b,N)] += new_elems
+                else:
+                    EdgeTable[(b,N)] = new_elems
+                if (d,N) in EdgeTable.keys():
+                    EdgeTable[(d,N)] += new_elems
+                else:
+                    EdgeTable[(d,N)] = new_elems
+                
+                # Existing Edges - remove old element and add new element(s)
+                ab = tuple(sorted((a,b)))
+                ad = tuple(sorted((a,d)))
+                bc = tuple(sorted((b,c)))
+                bd = tuple(sorted((b,d)))
+                cd = tuple(sorted((c,d)))
+
+                EdgeTable[bd] = tuple(e for e in EdgeTable[bd] if e != elem) + new_elems
+                EdgeTable[ab] = tuple(e for e in EdgeTable[ab] if e != elem) + (new_elems[0],)
+                EdgeTable[ad] = tuple(e for e in EdgeTable[ad] if e != elem) + (new_elems[0],)
+                EdgeTable[bc] = tuple(e for e in EdgeTable[bc] if e != elem) + (new_elems[1],)
+                EdgeTable[cd] = tuple(e for e in EdgeTable[cd] if e != elem) + (new_elems[1],)
+            elif lookup_key == 12:
+                new_elems = ((a,c,d,N), (b,d,c,N))
+                # Split Edges - add one new element
+                EdgeTable[(a,N)] += (new_elems[0],)
+                EdgeTable[(b,N)] += (new_elems[1],)
+                
+                # Other New Edges - add both new elements
+                NewEdges.update({(c,N), (d,N)})
+                if (c,N) in EdgeTable.keys():
+                    EdgeTable[(c,N)] += new_elems
+                else:
+                    EdgeTable[(c,N)] = new_elems
+                if (d,N) in EdgeTable.keys():
+                    EdgeTable[(d,N)] += new_elems
+                else:
+                    EdgeTable[(d,N)] = new_elems
+                
+                # Existing Edges - remove old element and add new element(s)
+                ac = tuple(sorted((a,c)))
+                ad = tuple(sorted((a,d)))
+                bc = tuple(sorted((b,c)))
+                bd = tuple(sorted((b,d)))
+                cd = tuple(sorted((c,d)))
+
+                EdgeTable[cd] = tuple(e for e in EdgeTable[cd] if e != elem) + new_elems
+                EdgeTable[ac] = tuple(e for e in EdgeTable[ac] if e != elem) + (new_elems[0],)
+                EdgeTable[ad] = tuple(e for e in EdgeTable[ad] if e != elem) + (new_elems[0],)
+                EdgeTable[bc] = tuple(e for e in EdgeTable[bc] if e != elem) + (new_elems[1],)
+                EdgeTable[bd] = tuple(e for e in EdgeTable[bd] if e != elem) + (new_elems[1],)
+        
+            # Update labels - new elements get the label of their parent element
+            if labels is not None:
+                for e in new_elems:
+                    ElemLabels[e] = ElemLabels[elem]
+        # Define new node coordinates
+        NodeTable[N] = (NodeTable[edge[0]] + NodeTable[edge[1]])/2
+        N += 1
+
+        # Add new edges to heap if they're above the threshold
+        # Note lengths are negative so longest edges get sorted first in the heap
+        if L/2 < -cutoff:
+            # Split edges
+            heapq.heappush(heap,(L/2, edge1))
+            heapq.heappush(heap,(L/2, edge2))
+        for e in NewEdges:
+            # other new edges
+            inmesh[e] = True
+            L = - np.linalg.norm(NodeTable[e[0]]-NodeTable[e[1]])
+            if L < -cutoff:
+                heapq.heappush(heap,(L, e))
+        return N
+    
+    if verbose:
+        if 'tqdm' in sys.modules:
+            tqdm_loaded = True
+            progress = tqdm.tqdm(total=len(heap))
+        else:
+            tqdm_loaded = False
+    
+    while len(heap) > 0:
+        
+        L, edge = heapq.heappop(heap)
+        if verbose and tqdm_loaded:
+            progress.update(1)
+            L1 = len(heap)
+        N = do_split(L, edge, N)
+        if verbose and tqdm_loaded:
+            L2 = len(heap)
+            progress.total += max(0, L2-L1)
+
+    NewConn = np.array(list(set(elem for edge in EdgeTable.keys() for elem in EdgeTable[edge] if inmesh[edge])))
+    NewCoords = np.array([NodeTable[key] for key in NodeTable.keys()])
+
+    
+    if 'mesh' in dir(mesh):
+        Mnew = mesh.mesh(NewCoords, NewConn)
+    else:
+        Mnew = mesh(NewCoords, NewConn)
+    if labels is not None:
+        Mnew.ElemData[label_str] = new_labels
+    
+    return Mnew
 
 def TetFlipping(M, iterate='converge', QualityMetric='Skewness', target='min', flips=['4-4','3-2','2-3']):
 
@@ -1532,8 +1899,8 @@ def TetFlipping(M, iterate='converge', QualityMetric='Skewness', target='min', f
 ## Need to be updated or removed
 def CollapseSlivers(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=set(), verbose=False):
     """
-    Collapse sliver elements above a skewness threshold (default 0.9)
-
+    Collapse sliver elements above a skewnessthreshold (default 0.9)
+ 
     Parameters
     ----------
     NodeCoords : array_like
