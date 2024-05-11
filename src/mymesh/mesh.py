@@ -9,7 +9,7 @@ mesh class
 
 """
 
-from . import utils, improvement, converter, quality, rays, curvature, visualize
+from . import utils, improvement, contour, converter, quality, rays, curvature, visualize
 from sys import getsizeof
 import scipy
 import numpy as np
@@ -702,7 +702,22 @@ class mesh:
             self.ElemSets[ElemSet] = list(self.ElemSets[ElemSet]) + list(range(nelem,self.NElem))
         elif ElemSet:
             self.ElemSets[ElemSet] = range(nelem,self.NElem) 
+    def removeElems(self, ElemIds):
         
+        KeepSet = set(range(self.NElem)).difference(ElemIds)
+        KeepIds = np.array(list(KeepSet))
+        if type(self.NodeConn) is np.ndarray:
+            self.NodeConn = self.NodeConn[KeepIds]
+        else:
+            self.NodeConn = [elem for i,elem in enumerate(self.NodeConn) if i in KeepSet]
+
+        for key in self.ElemData.keys():
+            self.ElemData[key] = np.asarray(self.ElemData[key])[KeepIds]
+
+        # TODO: remove from ElemSets
+
+        self.reset()
+
     def merge(self,Mesh2,cleanup=True,tol=1e-14):
         """
         Merge multiple meshes together into the current mesh.
@@ -1144,6 +1159,166 @@ class mesh:
             # NewCoords[NodeIds] = NewRelevantCoords
         self.reset()
     
+    def Contour(self, scalars, threshold, threshold_direction=1, method=None, Type='surf'):
+
+        if isinstance(scalars, str):
+            scalar_str = scalars
+            scalars = self.NodeData['scalars']
+        else:
+            scalar_str = 'scalars'
+
+        if threshold_direction < 0:
+            flip = False
+        else:
+            flip = True
+
+        if Type == 'surf':
+            NewCoords, NewConn = contour.MarchingTetrahedra(*converter.solid2tets(*self), scalars, threshold=threshold, flip=flip, method='surface')
+        elif Type == 'vol':
+            NewCoords, NewConn = contour.MarchingTetrahedra(*converter.solid2tets(*self), scalars, threshold=threshold, flip=flip, method='volume')
+        M = mesh(NewCoords, NewConn)
+
+        return M
+
+    def Threshold(self, scalars, threshold, mode=None, scalar_preference='elements', all_nodes=True, InPlace=False):
+        """
+        Threshold the mesh by scalar values at either nodes or elements. 
+
+        Parameters
+        ----------
+        scalars : str or array_like
+            Values to be used for thresholding, either a string indicating an entry in NodeData or ElemData, or an array_like of values.
+        threshold : int, float, or tuple
+            Thresholding value(s) to use. If provided as a two element tuple, they're taken to be lower and upper bounds.
+        mode : str, optional
+            Thresholding condition to determine which elements to keep in the mesh
+            Single threshold options:
+                '>=' - Keeping condition is `value >= threshold`, default.
+                '>' - Keeping condition is `value > threshold`.
+                '<' - Keeping condition is `value < threshold`.
+                '<=' - Keeping condition is `value <= threshold`.
+            Double threshold options:
+                'in' - Inside bounds, inclusive of thresholds, default. 
+                'xin' - Inside bounds, exclusive of thresholds. 
+                'out' - Outside bounds, inclusive of thresholds.
+                'xout' - Outside bounds, exclusive of threhsolds.
+                '<=<=' - Keeping condition is `lower <= value <= upper`, equivalent to 'in'.
+                '<<' - Keeping condition is `lower < value < upper`, equivalent to 'xin'.
+                '>=>=' - Keeping condition is `(lower >= value) | (value >= upper)`, equivalent to 'out'.
+                '>>' - Keeping condition is `(lower > value) | (value > upper)`, equivalent to 'xout'
+        scalar_preference : str, optional
+            If scalars is provided as a string and that string exists as an entry in both NodeData and ElemData,
+            this determines which will be used. Must be either 'nodes' or 'elements', by default 'elements'.
+        all_nodes : bool, optional
+            If node data is being used, this determines whether to keep an element if all nodes pass the
+            thresholding condition or if any nodes pass the condition, by default True
+        InPlace : bool, optional
+            If true, this mesh will be modified, otherwise a copy of the mesh will be created and modified, by default False.
+
+        """        
+        # Process inputs
+        if isinstance(scalars, str):
+            scalar_str = scalars
+            if scalar_preference.lower() == 'elements':
+                if scalar_str in self.ElemData.keys():
+                    scalars = self.ElemData[scalar_str]
+                    scalar_type = 'elements'
+                elif scalar_str in self.NodeData.keys():
+                    scalars = self.NodeData[scalar_str]
+                    scalar_type = 'nodes'
+                else:
+                    raise ValueError(f'{scalar_str:s} not in ElemData or NodeData.')
+            elif scalar_preference.lower() == 'nodes':
+                if scalar_str in self.NodeData.keys():
+                    scalars = self.NodeData[scalar_str]
+                    scalar_type = 'nodes'
+                elif scalar_str in self.ElemData.keys():
+                    scalars = self.ElemData[scalar_str]
+                    scalar_type = 'elements'
+                else:
+                    raise ValueError(f'{scalar_str:s} not in ElemData or NodeData.')
+            else:
+                raise ValueError(f'scalar_preference must be specified as "elements" or "nodes", not "{scalar_preference:s}".')
+        else:
+            scalar_str = 'scalars'
+            if len(scalars) == self.NElem:
+                scalar_type = 'elements'
+            elif len(scalars) == self.NNode:
+                scalar_type = 'nodes'
+            else:
+                raise ValueError(f'Provided scalars must much either the number of nodes or number of elements in the mesh.')
+
+        
+        if isinstance(threshold, (list, tuple, np.ndarray)):
+            if mode is None:
+                # Default for upper/lower bound 
+                mode = 'in'
+            if mode == '<=<=':
+                mode = 'in'
+            elif mode == '<<':
+                mode = 'xin'
+            elif mode == '>=>=':
+                mode = 'out'
+            elif mode == '>>':
+                mode = 'xout'
+            lower = min(threshold)
+            upper = max(threshold)
+        else:
+            if mode is None:
+                mode = '>='
+            if mode == '>=':
+                lower = threshold
+                upper = np.inf
+                mode = 'in'
+            elif mode == '>':
+                lower = threshold
+                upper = np.inf
+                mode = 'xin'
+            elif mode == '<=':
+                lower = -np.inf
+                upper = threshold
+                mode = 'in'
+            elif mode == '<':
+                lower = -np.inf
+                upper = threshold
+                mode = 'xin'
+            else:
+                raise ValueError('For single-threshold inputs, mode must be ">=", ">", "<=", or "<".')
+        
+        # Determine which elements to keep
+        if mode == 'in':
+            keep = (lower <= scalars) & (scalars <= upper)
+        elif mode == 'xin':
+            keep = (lower < scalars) & (scalars < upper)
+        elif mode == 'out':
+            keep = (lower >= scalars) | (scalars >= upper)
+        elif mode == 'xout':
+            keep = (lower > scalars) | (scalars > upper)
+        else:
+            raise ValueError('Invalid thresholding mode.')
+
+        if scalar_type == 'nodes':
+            if type(self.NodeConn) is np.ndarray:
+                if all_nodes:
+                    keep = np.all(keep[self.NodeConn],axis=1)
+                else:
+                    keep = np.any(keep[self.NodeConn],axis=1)
+            else:
+                if all_nodes:
+                    keep = np.array(np.all(keep[elem] for elem in self.NodeConn))
+                else:
+                    keep = np.array(np.any(keep[elem] for elem in self.NodeConn))
+
+        RemoveElems = np.where(~keep)[0]
+
+        if InPlace:
+            M = self
+        else:
+            M = self.copy()
+
+        M.removeElems(RemoveElems)
+        return M
+
     ## Mesh Measurements Methods
     def getQuality(self,metrics=['Skewness','Aspect Ratio','Inverse Orthogonal quality','Inverse Orthogonality','Min Dihedral(deg)','Max Dihedral(deg)','Volume'], verbose=None):
         
