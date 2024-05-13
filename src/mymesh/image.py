@@ -217,14 +217,14 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
 
     voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)
     NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
-    TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['Image Data'], method='volume', threshold=threshold, flip=flip)
+    TetCoords, TetConn, Values = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['Image Data'], method='volume', threshold=threshold, flip=flip, return_NodeValues=True)
 
 
     if 'mesh' in dir(mesh):
         tet = mesh.mesh(TetCoords, TetConn)
     else:
         tet = mesh(TetCoords, TetConn)
-        
+    tet.NodeData['Image Data'] = Values
     return tet
 
 def read(img, scalefactor=1, scaleorder=1):
@@ -367,7 +367,7 @@ def read(img, scalefactor=1, scaleorder=1):
     print(' done.')
     return imgs
 
-def SurfaceNodeOptimization(M, img, voxelsize, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, gaussian_sigma=1, smooth=True, copy=True, interpolation='linear'):
+def SurfaceNodeOptimization(M, img, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, gaussian_sigma=1, smooth=True, copy=True, interpolation='linear'):
     """
     Optimize the placement of surface node to lie on the "true" surface. This
     This simultaneously moves nodes towards the isosurface and redistributes
@@ -410,9 +410,11 @@ def SurfaceNodeOptimization(M, img, voxelsize, iterate=1, threshold=0, FixedNode
         Mesh with repositioned surface vertices
 
     """    
-
+    if not isinstance(h, (list, tuple, np.ndarray)):
+        h = (h,h,h)
     if copy:
         M = M.copy()
+    M.NodeCoords = np.asarray(M.NodeCoords)
     # Process nodes
     SurfNodes = set([n for elem in M.SurfConn for n in elem])
     if FixEdges:
@@ -426,9 +428,9 @@ def SurfaceNodeOptimization(M, img, voxelsize, iterate=1, threshold=0, FixedNode
     Fy = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,1,0))
     Fz = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,0,1))
     
-    X = np.arange(img.shape[2])*voxelsize 
-    Y = np.arange(img.shape[1])*voxelsize
-    Z = np.arange(img.shape[0])*voxelsize
+    X = np.arange(img.shape[2])*h[2] 
+    Y = np.arange(img.shape[1])*h[1]
+    Z = np.arange(img.shape[0])*h[0]
 
     F = lambda x,y,z : interpolate.RegularGridInterpolator((X,Y,Z),img.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
     gradFx = lambda x,y,z : interpolate.RegularGridInterpolator((X,Y,Z),Fx.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
@@ -437,8 +439,8 @@ def SurfaceNodeOptimization(M, img, voxelsize, iterate=1, threshold=0, FixedNode
 
     gradF = lambda x,y,z : np.column_stack([gradFx(x,y,z), gradFy(x,y,z), gradFz(x,y,z)])
 
-    NodeCoords = np.vstack([np.asarray(M.NodeCoords), [np.nan,np.nan,np.nan]])
-    points = np.asarray(NodeCoords)[FreeNodes]
+    NodeCoords = np.vstack([M.NodeCoords, [np.nan,np.nan,np.nan]])
+    points = NodeCoords[FreeNodes]
 
     if smooth:
         x = points[:,0]; y = points[:,1]; z = points[:,2]
@@ -451,7 +453,7 @@ def SurfaceNodeOptimization(M, img, voxelsize, iterate=1, threshold=0, FixedNode
         f = F(x,y,z) - threshold
         g = gradF(x,y,z)
         fg = f[:,None]*g
-        tau = voxelsize/(100*np.max(np.linalg.norm(fg,axis=1)))
+        tau = np.mean(h)/(100*np.max(np.linalg.norm(fg,axis=1)))
 
         Zflow = -2*tau*fg
 
