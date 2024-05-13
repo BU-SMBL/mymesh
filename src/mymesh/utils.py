@@ -1107,9 +1107,11 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False,return_i
     """
 
     if len(NodeCoords) == 0:
-        if return_idx:
-            return NodeCoords,NodeConn,[],[]
-        return NodeCoords, NodeConn, []
+        if return_idx and return_inv:
+            return NodeCoords,NodeConn,np.array([]),np.array([])
+        elif return_idx or return_inv:
+            return NodeCoords,NodeConn,np.array([])
+        return NodeCoords, NodeConn
 
     if tol > 0:
         arrayCoords = np.round(np.array(NodeCoords)/tol)*tol
