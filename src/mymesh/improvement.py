@@ -30,6 +30,7 @@ Local mesh topology
     :toctree: submodules/
 
     TetContract
+    TetSplit
     TetFlipping
 
 
@@ -254,7 +255,7 @@ def TangentialLaplacianSmoothing(M, options=dict()):
 
     return Mnew
 
-def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=False, options=dict()):
+def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=None, options=dict()):
     """
     Performs smart Laplacian smoothing :cite:p:`Freitag1997a`, repositioning 
     each node to the center of its adjacent nodes only if doing so doesn't
@@ -272,7 +273,10 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=False, options=d
 
         'min' - repositioning is allowed if the minimum quality of the connected
         elements doesn't decrease.
-    options : dict
+    TangentialSurface : bool, optional
+        Option to use tangential laplacian smoothing on the surface (and interfaces, 
+        if labels are provided), by default True.
+    options : dict, optional
         Smoothing options. Available options are:
 
         method : str
@@ -302,7 +306,9 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=False, options=d
         qualityFunc : function
             Function used for computing quality. It is assumed that a larger
             number corresponds to higher quality, be default quality.MeanRatio
-        
+        InPlace : bool
+            If True, the input mesh is modified directly, otherwise a new copy of the mesh
+            is created, by default False.
 
     Returns
     -------
@@ -312,10 +318,46 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=False, options=d
 
     NodeCoords, NodeConn = M
     NodeCoords = np.copy(NodeCoords)
+    NodeConn = np.asarray(NodeConn)
     NodeNeighbors = copy.copy(M.NodeNeighbors)
     ElemConn = M.ElemConn
-    SurfConn = M.SurfConn
-    
+    # SurfConn = M.SurfConn
+
+    if labels is None:
+        SurfConn = np.array(M.SurfConn, dtype=int)
+        JunctionNodes = np.array([],dtype=int)
+        EdgeNodeNeighbors = []
+    else:
+        if isinstance(labels, str):
+            if labels in M.ElemData.keys():
+                label_str = labels
+                labels = M.ElemData[label_str]
+            else:
+                raise ValueError('If provided as a string, labels must correspond to an entry in M.ElemData')
+        else:
+            label_str = 'labels'
+        assert len(labels) == M.NElem, 'labels must correspond to the number of elements.'
+        if 'mesh' in dir(mesh):
+            MultiSurface = mesh.mesh(NodeCoords,verbose=False)
+        else:
+            MultiSurface = mesh(NodeCoords,verbose=False)
+        ulabels = np.unique(labels)
+        label_nodes = np.zeros((len(ulabels),M.NNode),dtype=int) # For each label, boolean indicator of whether each node is touching an element with that label
+        mesh_nodes = np.arange(M.NNode)
+        for i,label in enumerate(ulabels):
+            if 'mesh' in dir(mesh):
+                m = mesh.mesh(NodeCoords, NodeConn[labels == label], verbose=False)
+            else:
+                m = mesh(NodeCoords, NodeConn[labels == label], verbose=False)
+            
+            MultiSurface.addElems(m.SurfConn)
+            label_nodes[i,np.unique(m.NodeConn)] = 1
+        MultiSurface.NodeConn = MultiSurface.Faces  # This prevents doubling of surface elements at interfaces
+        SurfConn = MultiSurface.NodeConn
+        # Identify nodes on edges shared by more than two triangles
+        JunctionEdges = MultiSurface.Edges[np.array([len(conn) > 2 for conn in MultiSurface.EdgeElemConn])]
+        JunctionNodes = np.unique(JunctionEdges)
+        EdgeNodeNeighbors = utils.getNodeNeighbors(MultiSurface.NodeCoords, JunctionEdges)
     # Process inputs
     SmoothOptions = dict(method='sequential',
                         iterate = 'converge',
@@ -324,7 +366,8 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=False, options=d
                         FixedNodes = set(),
                         FixFeatures = False,
                         FixSurf = False,
-                        qualityFunc = quality.MeanRatio
+                        qualityFunc = quality.MeanRatio,
+                        InPlace = False
                     )
 
     NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, options)
@@ -335,21 +378,22 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=False, options=d
     qualityFunc = SmoothOptions['qualityFunc']
     maxIter = SmoothOptions['maxIter']
     method = SmoothOptions['method']
+    InPlace = SmoothOptions['InPlace']
 
     # Initialize
     lens = np.array([len(n) for n in NodeNeighbors])
     NodeConn = np.asarray(NodeConn)
     if TangentialSurface:
         SurfNodes = set([n for elem in SurfConn for n in elem])
-        NodeNormals = M.NodeNormals
-    #     for i in SurfNodes:
-    #         NodeNeighbors[i] = M.SurfNodeNeighbors[i]
-
-
-    if method == 'simultaneous':
-        r = utils.PadRagged(NodeNeighbors,fillval=-1)
-        RCoords = np.append(NodeCoords, [[np.nan, np.nan, np.nan]],axis=0)
-        RElemConn = utils.PadRagged(ElemConn)
+        if labels is None:
+            NodeNormals = M.NodeNormals
+        else:
+            NodeNormals = MultiSurface.NodeNormals
+        SurfNodeNeighbors = utils.getNodeNeighbors(NodeCoords, SurfConn)
+        for i in SurfNodes:
+            NodeNeighbors[i] = SurfNodeNeighbors[i]
+        for i in JunctionNodes:
+            NodeNeighbors[i] = EdgeNodeNeighbors[i]
 
     q = qualityFunc(NodeCoords, NodeConn)
     qmin = np.nanmin(q)
@@ -391,29 +435,6 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=False, options=d
 
         return NodeCoords, q
 
-    def SimultaneousSmoother(NodeCoords, q):
-        
-        Q = RCoords[r]
-        U = (1/lens[FreeNodes])[:,None] * np.nansum(Q[FreeNodes] - RCoords[FreeNodes,None,:], axis=1)
-
-        NewCoords = np.copy(NodeCoords)
-        NewCoords[FreeNodes] += U
-
-        # Reset any degraded elements 
-        qnew = qualityFunc(NewCoords, NodeConn)
-        if np.any(qnew < q):
-            qnew = np.append(qnew, np.nan)
-            q = np.append(q, np.nan)
-            while np.any(qnew < q):
-                # print(sum(V <= 0))
-                affected = np.where(np.any(qnew[RElemConn] < q[RElemConn], axis=1))[0]
-                NewCoords[affected] = NodeCoords[affected]
-                affected_elems = np.unique([e for a in affected for e in ElemConn[a]])
-                qnew[affected_elems] = qualityFunc(NewCoords, NodeConn[affected_elems])
-            qnew = q[:-1]
-
-        return NewCoords, qnew
-    
     if method == 'simultaneous':
         smoother = SimultaneousSmoother
     elif method == 'sequential':
@@ -440,15 +461,13 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=False, options=d
         qmean = np.mean(q)
         qmin_hist.append(qmin)
         qmean_hist.append(qmean)
-        # print(f'{qmin:.6f}, {qmean:.6f}')
-
-
         NodeCoords, q = smoother(NodeCoords, q)
 
-    if 'mesh' in dir(mesh):
-        Mnew = mesh.mesh(NodeCoords, NodeConn)
+    if InPlace:
+        Mnew = M
     else:
-        Mnew = mesh(NodeCoords, NodeConn)
+        Mnew = M.copy()
+    Mnew.NodeCoords = NodeCoords
 
     return Mnew
 
@@ -1205,7 +1224,7 @@ def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
     return NewCoords
 
 ## Local Mesh Topology Operations
-def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=10, labels=None, FeatureAngle=25):
+def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=5, labels=None, FeatureAngle=25):
     """
     Edge contraction for tetrahedral mesh coarsening and quality improvement. 
     Edges with edge length less than `h` will attempt to be contracted. Surfaces
@@ -1273,6 +1292,7 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=10, 
     if labels is None:
         SurfConn = np.array(M.SurfConn, dtype=int)
         SurfEdges = np.sort(M.Surface.Edges)
+        JunctionNodes = np.array([],dtype=int)
     else:
         if isinstance(labels, str):
             if labels in M.ElemData.keys():
@@ -1301,6 +1321,8 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=10, 
         MultiSurface.NodeConn = MultiSurface.Faces  # This prevents doubling of surface elements at interfaces
         SurfConn = MultiSurface.NodeConn
         SurfEdges = np.sort(MultiSurface.Edges)
+        JunctionEdges = MultiSurface.Edges[np.array([len(conn) > 2 for conn in MultiSurface.EdgeElemConn])]
+        JunctionNodes = np.unique(JunctionEdges)
 
     SurfEdgeSet = set(tuple(e) for e in SurfEdges)
         
@@ -1309,15 +1331,15 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=10, 
     surface_nodes = np.unique(SurfEdges)
     surfnodeset = set(surface_nodes)
     fixed_nodes = np.array(list(FixedNodes),dtype=int)
-    feat_edges, feat_corners = utils.DetectFeatures(NewCoords,SurfConn,angle=FeatureAngle) 
+    feat_edges, feat_corners = utils.DetectFeatures(NewCoords,SurfConn,angle=FeatureAngle)
 
     # 0 : interior; 1 : surface; 2 : feature edge; 3 : feature corner; 4 : fixed node
     FeatureRank = np.zeros(len(NewCoords))
     FeatureRank[surface_nodes] = 1
     FeatureRank[feat_edges]    = 2
+    FeatureRank[JunctionNodes] = 2
     FeatureRank[feat_corners]  = 3
     FeatureRank[fixed_nodes]   = 4
-
     ElemConn = utils.getElemConnectivity(NewCoords, NewConn)
     ElemConnTable = {i : set([tuple(NewConn[e]) for e in ElemConn[i]]) for i in range(len(ElemConn))}
     SurfEdgeTable = {tuple(edge) : True if tuple(edge) in SurfEdgeSet else False for edge in Edges}
@@ -1483,27 +1505,29 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=10, 
         NewCoords, NewConn,_ = utils.RemoveNodes(NewCoords, NewConn)
      
     if 'mesh' in dir(mesh):
-        Mnew = mesh.mesh(NewCoords, NewConn)
+        Mnew = mesh.mesh(NewCoords, NewConn, verbose=M.verbose)
     else:
-        Mnew = mesh(NewCoords, NewConn)
+        Mnew = mesh(NewCoords, NewConn, verbose=M.verbose)
     if labels is not None:
         Mnew.ElemData[label_str] = new_labels
 
     return Mnew
 
-def TetSplit(M, h, verbose=True, labels=None):
+def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
     """
     Edge splitting of tetrahedral meshes. Edges with length greater than the 
     specified edge length (`h`) will be split by placing a new node at the 
     midpoint of the edge. Tetrahedral edge splitting is inherently interface
     and feature preserving as nodes are only added, not removed or moved. 
 
+    This method is inspired by :cite:`Faraj2016` and :cite:`Hu2018`.
+
     Parameters
     ----------
     M : mymesh.mesh
         Tetrahedral mesh to be contracted
     h : float
-        Edge length below which wil be contracted. Using 4/5 of the target
+        Edge length above which will be split. Using 4/3 of the target
         edge length is often recommended.
     verbose : bool, optional
         If true, will display progress, by default True
@@ -1518,6 +1542,9 @@ def TetSplit(M, h, verbose=True, labels=None):
         ElemData['labels'] (if labels were provided as an array), or the entry
         matching the original ElemData entry (if labels were provided as a 
         string).
+    sizing : str, callable, or None
+
+
     Returns
     -------
     Mnew : mymesh.mesh
@@ -1769,6 +1796,7 @@ def TetSplit(M, h, verbose=True, labels=None):
         return N
     
     if verbose:
+        print('TetSplit:', end='')
         if 'tqdm' in sys.modules:
             tqdm_loaded = True
             progress = tqdm.tqdm(total=len(heap))
@@ -1791,15 +1819,16 @@ def TetSplit(M, h, verbose=True, labels=None):
 
     
     if 'mesh' in dir(mesh):
-        Mnew = mesh.mesh(NewCoords, NewConn)
+        Mnew = mesh.mesh(NewCoords, NewConn, verbose=M.verbose)
     else:
-        Mnew = mesh(NewCoords, NewConn)
+        Mnew = mesh(NewCoords, NewConn, verbose=M.verbose)
     if labels is not None:
+        new_labels = np.array([ElemLabels[tuple(elem)] for elem in NewConn])
         Mnew.ElemData[label_str] = new_labels
     
     return Mnew
 
-def TetFlipping(M, iterate='converge', QualityMetric='Skewness', target='min', flips=['4-4','3-2','2-3']):
+def TetFlipping(M, iterate='converge', QualityMetric='Skewness', target='min', flips=['4-4','3-2','2-3'], verbose=False):
 
     NodeCoords = M.NodeCoords
     NodeConn = M.NodeConn
@@ -1895,6 +1924,30 @@ def TetFlipping(M, iterate='converge', QualityMetric='Skewness', target='min', f
     else:
         tet = mesh(NodeCoords, NewConn)
     return tet
+
+
+def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLaplacianSmoothing', smooth_kwargs={}, verbose=True):
+    M.verbose=False
+    for loop in range(repeat):
+        for operation in schedule:
+
+            if operation == 's':
+                # Split
+                M = TetSplit(M, 4/3*h, verbose=verbose, labels=labels, sizing=None, QualitySizing=False)
+                M.verbose=False
+            elif operation == 'c':
+                # Contract
+                M = TetContract(M, 4/5*h, verbose=verbose, labels=labels)
+                M.verbose=False
+            # elif operation == 'f':
+            #     # Flip
+            #     M = TetFlipping(M, flips=['3-2','2-3'], verbose=verbose)
+            #     M.verbose=False
+            elif operation == 'S':
+                if smoother == 'SmartLaplacianSmoothing':
+                    M = SmartLaplacianSmoothing(M, TangentialSurface=True, labels=labels)
+                    M.verbose=False
+    return M
 
 ## Need to be updated or removed
 def CollapseSlivers(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=set(), verbose=False):
