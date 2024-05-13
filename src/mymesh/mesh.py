@@ -88,6 +88,8 @@ class mesh:
         self._Surface = None
         self._SurfConn = []
         self._SurfNodes = None
+        self._BoundaryConn = None
+        self._BoundaryNodes = None
         self._NodeNeighbors = []
         self._ElemNeighbors = []
         self._ElemConn = []
@@ -324,12 +326,30 @@ class mesh:
     @property
     def SurfNodes(self):
         if self._SurfNodes is None:
-            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying surface...',end='')
-            SurfNodes = np.array(list({i for elem in self.SurfConn for i in elem}))
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying surface nodes...',end='')
+            self._SurfNodes = np.array(list({i for elem in self.SurfConn for i in elem}))
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
-        else:
-            SurfNodes = self._SurfNodes
+        SurfNodes = self._SurfNodes
         return SurfNodes
+    @property
+    def BoundaryConn(self):
+        """
+        Node connectivity for the boundary mesh of a surface.
+        """        
+        if self._BoundaryConn is None:
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying boundary...',end='')
+            self._BoundaryConn = converter.surf2edges(*self, ElemType=self.Type)
+            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+        BoundaryConn = self._BoundaryConn
+        return BoundaryConn
+    @property
+    def BoundaryNodes(self):
+        if self._BoundaryNodes is None:
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying boundary nodes...',end='')
+            self._BoundaryNodes = np.array(list({i for elem in self.BoundaryConn for i in elem}))
+            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+        BoundaryNodes = self._BoundaryNodes
+        return BoundaryNodes
     @property
     def NodeNeighbors(self):
         """
@@ -468,11 +488,11 @@ class mesh:
         """
         if self.Type == 'vol':
             E = self.Surface.NEdge
-            V = len(np.unique(self.Surface.Edges))
+            V = len(self.SurfNodes)
             F = self.Surface.NFace
         else:
             E = self.NEdge
-            V = len(np.unique(self.Edges))
+            V = len(self.SurfNodes)
             F = self.NFace
 
         return V - E + F
@@ -485,7 +505,13 @@ class mesh:
         .. math:: g = -(\\chi - 2)/2
 
         """
-        return -(self.EulerCharacteristic - 2)/2
+        # Check for boundary edges
+        if len(self.Surface.BoundaryConn) != 0:
+            b = len(utils.getConnectedNodes(self.NodeCoords, self.Surface.BoundaryConn))
+        else:
+            b = 0
+
+        return -(self.EulerCharacteristic - 2 + b)/2
     @property
     def Surface(self):
         """
@@ -591,6 +617,8 @@ class mesh:
             if 'SurfConn' not in keep: self._SurfConn = []
             if 'SurfNodes' not in keep: self._SurfNodes = None
             if 'Surface' not in keep: self._Surface = None
+            if 'BoundaryConn' not in keep: self._BoundaryConn = None
+            if 'BoundaryNodes' not in keep: self._BoundaryNodes = None
             if 'NodeNeighbors' not in keep: self._NodeNeighbors = []
             if 'ElemConn' not in keep: self._ElemConn = []
             if 'SurfNodeNeighbors' not in keep: self._SurfNodeNeighbors = []
@@ -1163,7 +1191,7 @@ class mesh:
 
         if isinstance(scalars, str):
             scalar_str = scalars
-            scalars = self.NodeData['scalars']
+            scalars = self.NodeData[scalars]
         else:
             scalar_str = 'scalars'
 
@@ -1174,9 +1202,11 @@ class mesh:
 
         if Type == 'surf':
             NewCoords, NewConn = contour.MarchingTetrahedra(*converter.solid2tets(*self), scalars, threshold=threshold, flip=flip, method='surface')
+            M = mesh(NewCoords, NewConn)
         elif Type == 'vol':
-            NewCoords, NewConn = contour.MarchingTetrahedra(*converter.solid2tets(*self), scalars, threshold=threshold, flip=flip, method='volume')
-        M = mesh(NewCoords, NewConn)
+            NewCoords, NewConn, Values = contour.MarchingTetrahedra(*converter.solid2tets(*self), scalars, threshold=threshold, flip=flip, method='volume', return_NodeValues=True)
+            M = mesh(NewCoords, NewConn)
+            M.NodeData[scalar_str] = Values
 
         return M
 
