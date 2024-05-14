@@ -1341,7 +1341,7 @@ def mesh2udf(M, points):
     """
     Coords = np.asarray(M.NodeCoords)
 
-    tree = KDTree(Coords, leaf_size=2)  
+    tree = KDTree(Coords)  
     Out = tree.query(points,1)
     NodeVals = Out[0].flatten()
     
