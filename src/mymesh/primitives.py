@@ -527,6 +527,79 @@ def Sphere(center, radius, theta_resolution=10, phi_resolution=10, ElemType='tri
 
     return sphere
 
+def Torus(center, R, r, axis=2, theta_resolution=20, phi_resolution=20, ElemType='tri'):
+    """
+    Generate a sphere (or ellipsoid)
+    The total number of points will be phi_resolution*(theta_resolution-2) + 2
+
+    Parameters
+    ----------
+    center : array_like
+        Three element array of the coordinates of the center of the sphere.
+    R : scalar
+        The major axis of the torus. This is the distance from the center of the 
+        torus to the center of the circular tube. 
+    r : scalar
+        The minor axis of the torus. This is the radius of the circular tube. 
+    axis : int
+        Axis of revolution of the torus. 0, 1, or 2 for x, y, z, respectively, by
+        default 2
+    theta_resolution : int, optional
+        Number of circular cross sections rotated about the axis, by default 20.
+    phi_resolution : int, optional
+        Number of circumferential points for each circle section, by default 20.
+    ElemType : str, optional
+        Specify the element type of the mesh. This can either be 'quad' for 
+        a quadrilateral mesh or 'tri' for a triangular mesh, by default 'tri'.
+        If 'quad' is specified, there will still be some triangles at z axis "poles".
+
+    Returns
+    -------
+    sphere, mymesh.mesh
+        Mesh object containing the cylinder mesh.
+        
+
+    .. note:: 
+        Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Sphere(...)``
+
+
+    Examples
+    ________
+    .. plot::
+
+        torus = primitives.Sphere([0,0,0], 1)
+        torus.plot(bgcolor='w', show_edges=True)
+
+    """
+
+    # Create circle section
+    t = np.linspace(0, 2*np.pi, theta_resolution)
+
+    if axis == 2:
+        x = np.repeat(center[0], len(t))
+        y = center[1]+R + r*np.sin(t)
+        z = center[2] + r*np.cos(t)
+    elif axis == 1:
+        x = center[0]+R + r*np.sin(t)
+        y = center[1] + r*np.cos(t)
+        z = np.repeat(center[2], len(t))
+    elif axis == 0:
+        x = center[0] + r*np.cos(t)
+        y = np.repeat(center[1], len(t))
+        z = center[2]+R + r*np.sin(t)
+    xyz = [x,y,z]
+
+    coords = np.column_stack(xyz)
+    conn = np.column_stack([np.arange(0,len(t)-1), np.arange(1,len(t))])
+
+    if 'mesh' in dir(mesh):
+        circle = mesh.mesh(coords, conn)
+    else:
+        circle = mesh(coords, conn)
+    torus = Revolve(circle, 2*np.pi, 2*np.pi/(phi_resolution), center=center, axis=axis, ElemType=ElemType)
+    torus.cleanup()
+    return torus
+
 def Extrude(line, distance, step, axis=2, ElemType='quad'):
     """
     Extrude a 2D line mesh to a 3D surface
