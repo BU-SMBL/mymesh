@@ -39,7 +39,7 @@ Local mesh topology
 import numpy as np
 import sys, warnings, time, random, copy, tqdm, heapq
 from collections import deque
-from . import converter, utils, quality, rays, octree, mesh
+from . import converter, utils, quality, rays, octree, mesh, implicit
 from scipy import sparse, spatial
 from scipy.sparse.linalg import spsolve
 from scipy.optimize import minimize
@@ -325,7 +325,7 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
 
     if labels is None:
         SurfConn = np.array(M.SurfConn, dtype=int)
-        JunctionNodes = np.array([],dtype=int)
+        EdgeNodes = np.array([],dtype=int)
         EdgeNodeNeighbors = []
     else:
         if isinstance(labels, str):
@@ -356,7 +356,7 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
         SurfConn = MultiSurface.NodeConn
         # Identify nodes on edges shared by more than two triangles
         JunctionEdges = MultiSurface.Edges[np.array([len(conn) > 2 for conn in MultiSurface.EdgeElemConn])]
-        JunctionNodes = np.unique(JunctionEdges)
+        EdgeNodes = np.unique(JunctionEdges)
         EdgeNodeNeighbors = utils.getNodeNeighbors(MultiSurface.NodeCoords, JunctionEdges)
     # Process inputs
     SmoothOptions = dict(method='sequential',
@@ -392,7 +392,7 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
         SurfNodeNeighbors = utils.getNodeNeighbors(NodeCoords, SurfConn)
         for i in SurfNodes:
             NodeNeighbors[i] = SurfNodeNeighbors[i]
-        for i in JunctionNodes:
+        for i in EdgeNodes:
             NodeNeighbors[i] = EdgeNodeNeighbors[i]
 
     q = qualityFunc(NodeCoords, NodeConn)
@@ -1224,7 +1224,7 @@ def FixInversions(NodeCoords, NodeConn, FixedNodes=set(), maxfev=1000):
     return NewCoords
 
 ## Local Mesh Topology Operations
-def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=5, labels=None, FeatureAngle=25):
+def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=5, labels=None, FeatureAngle=25, sizing=None):
     """
     Edge contraction for tetrahedral mesh coarsening and quality improvement. 
     Edges with edge length less than `h` will attempt to be contracted. Surfaces
@@ -1348,9 +1348,25 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=5, l
     EdgeDiff = NewCoords[Edges[:,0]] - NewCoords[Edges[:,1]]
     EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
 
+    if type(sizing) is str and sizing == 'auto':
+        sizing = 2*h
+
+    if sizing is None:
+        node_cutoff = None
+        cutoff = np.repeat(h, M.NEdge)
+    elif isinstance(sizing, (float, int)):
+        if labels is None:
+            Surface = M.Surface
+        else:
+            Surface = MultiSurface
+
+        udf = implicit.mesh2udf(Surface, M.NodeCoords)
+        node_cutoff = (sizing - h)*udf + h
+        cutoff = np.mean(node_cutoff[Edges], axis=1)
+
     # Create edge heap
-    heap = [(EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0)]
-    inheap = {tuple(edge):True if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0) else False for i,edge in enumerate(Edges)}
+    heap = [(EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] < cutoff[i]) and (EdgeLengths[i] > 0)]
+    inheap = {tuple(edge):True if (EdgeLengths[i] < cutoff[i]) and (EdgeLengths[i] > 0) else False for i,edge in enumerate(Edges)}
     inmesh = {tuple(edge):True for i,edge in enumerate(Edges)}
     heapq.heapify(heap)
 
@@ -1402,11 +1418,12 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=5, l
             # All nodes that are newly connected to the target node
             L = np.linalg.norm(NewCoords[targetnode] - NewCoords[edgenode])
             if SurfEdgeTable[tuple(sorted((edgenode, collapsenode)))]:
-                SurfEdgeTable[tuple(sorted((edgenode, targetnode)))] = True
+                SurfEdgeTable[newedge] = True
             else:
-                SurfEdgeTable[tuple(sorted((edgenode, targetnode)))] = False
-            if L < cutoff:
-                heapq.heappush(heap, (L, tuple(sorted((edgenode, targetnode)))))
+                SurfEdgeTable[newedge] = False
+            # if L < cutoff:
+            if (sizing is None and L < h) or (sizing is not None and L < (node_cutoff[newedge[0]]+node_cutoff[newedge[1]])/2):
+                heapq.heappush(heap, (L, newedge))
                 inheap[newedge] = True
 
         success = True
@@ -1490,8 +1507,15 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=5, l
             EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
 
             # Create edge heap
-            heap = [(EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0)]
-            inheap = {tuple(edge):True if (EdgeLengths[i] < cutoff) and (EdgeLengths[i] > 0) else False for i,edge in enumerate(Edges)}
+            if sizing is None:
+                heap = [(EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] < h) and (EdgeLengths[i] > 0)]
+                inheap = {tuple(edge):True if (EdgeLengths[i] < h) and (EdgeLengths[i] > 0) else False for i,edge in enumerate(Edges)}
+            else:
+                cutoff = np.mean(node_cutoff[Edges], axis=1)
+                # Create edge heap
+                heap = [(EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] < cutoff[i]) and (EdgeLengths[i] > 0)]
+                inheap = {tuple(edge):True if (EdgeLengths[i] < cutoff[i]) and (EdgeLengths[i] > 0) else False for i,edge in enumerate(Edges)}
+           
             heapq.heapify(heap)
 
     if labels is not None:
@@ -1542,8 +1566,24 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
         ElemData['labels'] (if labels were provided as an array), or the entry
         matching the original ElemData entry (if labels were provided as a 
         string).
-    sizing : str, callable, or None
+    sizing : str, float, callable, or None
+        Option for non-uniform element sizing. 
 
+        float - Specify a second target edge length (hi) to be used for edges 
+        far from the boundary. This will be used following :cite:t:`Faraj2016`
+        to generate an adaptive sizing field h_node = (hi-h)*D(node)+h, where 
+        D is a distance field from boundaries/interface evaluated at each
+        node. The target edge length is then taken as the average of it's 
+        two nodes
+
+        'auto' - Uses hi = 2*h as the second target edge length and is used
+        as described above for floats.
+
+        callable - Uses a callable, vectorized function of three inputs (f(x,y,z))
+        where x, y, z can be either scalar or vector coordinates and specifies the 
+        target edge length for each node and takes the average for an edge
+
+        None - Uniform sizing
 
     Returns
     -------
@@ -1551,9 +1591,10 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
         Tetrahedral mesh after edge splitting
 
     """
-    cutoff = h
+    
     # Setup Data Structures
     NodeCoords = np.asarray(M.NodeCoords)
+    NodeConn = np.asarray(M.NodeConn)
     N = len(NodeCoords)
     Edges = [tuple(edge) for edge in np.sort(M.Edges,axis=1)]
     Elems = [tuple(elem) for elem in M.NodeConn]
@@ -1575,8 +1616,41 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
     EdgeDiff = NodeCoords[M.Edges[:,0]] - NodeCoords[M.Edges[:,1]]
     EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
 
+    if type(sizing) is str and sizing == 'auto':
+        sizing = 2*h
+
+    if sizing is None:
+        node_cutoff = None
+        cutoff = np.repeat(h, M.NEdge)
+    elif isinstance(sizing, (float, int)):
+        if labels is None:
+            Surface = M.Surface
+        else:
+            if 'mesh' in dir(mesh):
+                MultiSurface = mesh.mesh(verbose=False)
+            else:
+                MultiSurface = mesh(verbose=False)
+
+            ulabels = np.unique(labels)
+            label_nodes = np.zeros((len(ulabels),M.NNode),dtype=int) # For each label, boolean indicator of whether each node is touching an element with that label
+            mesh_nodes = np.arange(M.NNode)
+            for i,label in enumerate(ulabels):
+                if 'mesh' in dir(mesh):
+                    m = mesh.mesh(NodeCoords, NodeConn[labels == label], verbose=False)
+                else:
+                    m = mesh(NodeCoords, NodeConn[labels == label], verbose=False)
+                
+                MultiSurface.addElems(m.SurfConn)
+                label_nodes[i,np.unique(m.NodeConn)] = 1
+            Surface = MultiSurface
+
+        udf = implicit.mesh2udf(Surface, M.NodeCoords)
+        node_cutoff = (sizing - h)*udf + h
+        cutoff = np.mean(node_cutoff[Edges], axis=1)
+
+
     # Create edge heap
-    heap = [(-EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] > cutoff) and (EdgeLengths[i] > 0)]
+    heap = [(-EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] > cutoff[i]) and (EdgeLengths[i] > 0)]
     inmesh = {tuple(edge):True for i,edge in enumerate(Edges)}
     heapq.heapify(heap)
 
@@ -1783,7 +1857,7 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
 
         # Add new edges to heap if they're above the threshold
         # Note lengths are negative so longest edges get sorted first in the heap
-        if L/2 < -cutoff:
+        if (sizing is None and L/2 < -h) or (sizing is not None and L/2 < -(node_cutoff[edge[0]]+node_cutoff[edge[1]])/2):
             # Split edges
             heapq.heappush(heap,(L/2, edge1))
             heapq.heappush(heap,(L/2, edge2))
@@ -1791,7 +1865,7 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
             # other new edges
             inmesh[e] = True
             L = - np.linalg.norm(NodeTable[e[0]]-NodeTable[e[1]])
-            if L < -cutoff:
+            if (sizing is None and L < -h) or (sizing is not None and L < - (node_cutoff[e[0]]+node_cutoff[e[1]])/2):
                 heapq.heappush(heap,(L, e))
         return N
     
@@ -1925,8 +1999,7 @@ def TetFlipping(M, iterate='converge', QualityMetric='Skewness', target='min', f
         tet = mesh(NodeCoords, NewConn)
     return tet
 
-
-def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLaplacianSmoothing', smooth_kwargs={}, verbose=True):
+def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLaplacianSmoothing', smooth_kwargs={}, verbose=True, FeatureAngle=25, ContractIter=5):
     M.verbose=False
     for loop in range(repeat):
         for operation in schedule:
@@ -1937,7 +2010,7 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
                 M.verbose=False
             elif operation == 'c':
                 # Contract
-                M = TetContract(M, 4/5*h, verbose=verbose, labels=labels)
+                M = TetContract(M, 4/5*h, verbose=verbose, labels=labels, FeatureAngle=FeatureAngle, maxIter=ContractIter)
                 M.verbose=False
             # elif operation == 'f':
             #     # Flip
@@ -1945,7 +2018,7 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
             #     M.verbose=False
             elif operation == 'S':
                 if smoother == 'SmartLaplacianSmoothing':
-                    M = SmartLaplacianSmoothing(M, TangentialSurface=True, labels=labels)
+                    M = SmartLaplacianSmoothing(M, TangentialSurface=True, labels=labels, options=dict(FixFeatures=True))
                     M.verbose=False
     return M
 
