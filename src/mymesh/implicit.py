@@ -353,7 +353,8 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
         NodeCoords, NodeConn = background
         NodeCoords = np.asarray(NodeCoords)
         if interpolation == 'quadratic':
-            NodeCoords, NodeConn = converter.tet42tet10(NodeCoords, NodeConn)
+            if np.shape(NodeConn)[1] == 4:
+                NodeCoords, NodeConn = converter.tet42tet10(NodeCoords, NodeConn)
             NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
         else:
             NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
@@ -1298,7 +1299,7 @@ def mesh2sdf(M, points, method='nodes+centroids'):
     """
     if method == 'nodes':
         Normals = np.asarray(M.NodeNormals)
-        SurfNodes = set(np.unique(M.SurfConn))
+        SurfNodes = set(M.SurfNodes)
         Coords = np.array([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)])
     elif method == 'centroids':
         Normals = np.asarray(M.ElemNormals)
@@ -1307,7 +1308,7 @@ def mesh2sdf(M, points, method='nodes+centroids'):
     elif method == 'nodes+centroids':
         Normals = np.array(list(M.NodeNormals) + list(M.ElemNormals))
         NodeCoords = np.array(M.NodeCoords)
-        SurfNodes = set(np.unique(M.SurfConn))
+        SurfNodes = set(M.SurfNodes)
         Coords = np.append([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)], utils.Centroids(M.NodeCoords,M.SurfConn),axis=0).astype(float)
     else:
         raise Exception('Invalid method - use "nodes", "centroids", or "nodes+centroids"')

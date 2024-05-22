@@ -4440,7 +4440,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     inside = TetVals <= 0
     if not np.any(inside):
         NodeCoords = np.empty((0,3))
-        NodeConn = np.empty((0,4),dtype=int), 
+        NodeConn = np.empty((0,4),dtype=int)
         NewValues = np.empty((0))
         ParentIds = np.empty((0), dtype=int)
         if return_NodeValues:
