@@ -126,7 +126,6 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_direction=-1, mode='any', 
         voxel = implicit.VoxelMesh(implicit.gyroid, [0,1,0,1,0,1], 0.05)
         voxel.plot(bgcolor='w', scalars=voxel.NodeData['func'])
 
-
     """        
     
     if not isinstance(h, (list, tuple, np.ndarray)):
@@ -368,8 +367,7 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
         
     return tet
 
-#
-def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, finite_diff_step=1e-5, smooth=False, InPlace=False, springs=True):
+def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, finite_diff_step=1e-5, smooth=True, InPlace=False, springs=True):
     """
     Optimize the placement of surface node to lie on the "true" surface. This
     This simultaneously moves nodes towards the isosurface and redistributes
@@ -403,9 +401,13 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
         performed. Tangential smoothing differs from local in that nodes 
         are only repositioned in the tangent plane (based on the normal vector
         obtain from the gradient). 
-    copy : bool, optional
-        If true, will create a copy of the mesh, rather than altering node 
-        positions of the original mesh object "in-place", by default True
+    InPlace : bool, optional
+        If False, will create a copy of the mesh, rather than altering node 
+        positions of the original mesh object "in-place", by default False
+    springs : bool, optional
+        If True and the mesh is a volume mesh, internal nodes will be treated as 
+        if they are connected by springs (see :func:`~mymesh.improvement.NodeSpringSmoothing`)
+        to reduce risk of element distortion or inversion, by default True.
 
     Returns
     -------
@@ -416,6 +418,8 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
 
     if not InPlace:
         M = M.copy()
+    if smooth == True:
+        smooth = 'tangential'
         
     # Process nodes
     SurfNodes = set([n for elem in M.SurfConn for n in elem])
@@ -464,8 +468,8 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
     else:
         raise TypeError('func must be a sympy function or callable function of three arguments (x,y,z).')
 
-    NodeCoords = np.vstack([np.asarray(M.NodeCoords), [np.nan,np.nan,np.nan]])
-    points = np.asarray(NodeCoords)[FreeNodes]
+    M.NodeCoords = np.vstack([np.asarray(M.NodeCoords), [np.nan,np.nan,np.nan]])
+    points = np.asarray(M.NodeCoords)[FreeNodes]
 
     if smooth is not None and smooth is not False:
         X = points[:,0]; Y = points[:,1]; Z = points[:,2]
@@ -483,9 +487,9 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
 
         Zflow = -2*tau*fg
 
-        Rflow = np.zeros((len(NodeCoords),3))
+        # Rflow = np.zeros((len(NodeCoords),3))
         if smooth == 'tangential':
-            Q = NodeCoords[r]
+            Q = M.NodeCoords[r]
             U = (1/lengths)[:,None] * np.nansum(Q - points[:,None,:],axis=1)
             NodeNormals = (g/np.linalg.norm(g,axis=0)).T
             Rflow = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
@@ -501,13 +505,11 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
             Forces[FreeNodes] = Zflow + Rflow
             M = improvement.NodeSpringSmoothing(M, Displacements=Forces, options=dict(FixSurf=False, FixedNodes=FixedNodes, InPlace=True))
             NodeCoords = M.NodeCoords
-            points = np.asarray(NodeCoords)[FreeNodes]
+            points = np.asarray(M.NodeCoords)[FreeNodes]
         else:
             points = points + Zflow + Rflow
- 
-            
-    M.NodeCoords[FreeNodes] = points
-
+            M.NodeCoords[FreeNodes] = points
+    M.NodeCoords = M.NodeCoords[:-1]
     return M
 
 # Implicit Function Primitives
