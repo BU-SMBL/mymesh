@@ -1188,7 +1188,28 @@ class mesh:
         self.reset()
     
     def Contour(self, scalars, threshold, threshold_direction=1, method=None, Type='surf'):
+        """
+        Contour the mesh to extract an isosurface based on nodal scalar values.
 
+        Parameters
+        ----------
+        scalars : str or array_like
+            Values to be used for thresholding, either a string indicating an entry in NodeData or ElemData, or an array_like of values.
+        threshold : int, float
+            Isosurface level that defines the boundary
+        threshold_direction : signed int
+            If threshold_direction is negative (default), values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_direction is positive, by default 1.
+        method : str, optional
+            Method to be used for contouring. This option not currently implemented.
+        Type : str, optional
+            Specfies the mesh type ('surf' or 'vol') to produce by contouring, 
+            by default 'surf'.
+
+        Returns
+        -------
+        M : mymesh.mesh
+            Contoured mesh
+        """
         if isinstance(scalars, str):
             scalar_str = scalars
             scalars = self.NodeData[scalars]
@@ -1221,21 +1242,36 @@ class mesh:
         threshold : int, float, or tuple
             Thresholding value(s) to use. If provided as a two element tuple, they're taken to be lower and upper bounds.
         mode : str, optional
-            Thresholding condition to determine which elements to keep in the mesh
+            Thresholding condition to determine which elements to keep in the mesh.
+
             Single threshold options:
                 '>=' - Keeping condition is `value >= threshold`, default.
+
                 '>' - Keeping condition is `value > threshold`.
+
                 '<' - Keeping condition is `value < threshold`.
+
                 '<=' - Keeping condition is `value <= threshold`.
+
+                '==' - Keeping condition is `value == threshold`.
+
             Double threshold options:
                 'in' - Inside bounds, inclusive of thresholds, default. 
+
                 'xin' - Inside bounds, exclusive of thresholds. 
+
                 'out' - Outside bounds, inclusive of thresholds.
+
                 'xout' - Outside bounds, exclusive of threhsolds.
+
                 '<=<=' - Keeping condition is `lower <= value <= upper`, equivalent to 'in'.
+
                 '<<' - Keeping condition is `lower < value < upper`, equivalent to 'xin'.
+
                 '>=>=' - Keeping condition is `(lower >= value) | (value >= upper)`, equivalent to 'out'.
+
                 '>>' - Keeping condition is `(lower > value) | (value > upper)`, equivalent to 'xout'
+
         scalar_preference : str, optional
             If scalars is provided as a string and that string exists as an entry in both NodeData and ElemData,
             this determines which will be used. Must be either 'nodes' or 'elements', by default 'elements'.
@@ -1244,8 +1280,8 @@ class mesh:
             thresholding condition or if any nodes pass the condition, by default True
         InPlace : bool, optional
             If true, this mesh will be modified, otherwise a copy of the mesh will be created and modified, by default False.
-
         """        
+
         # Process inputs
         if isinstance(scalars, str):
             scalar_str = scalars
@@ -1312,6 +1348,10 @@ class mesh:
                 lower = -np.inf
                 upper = threshold
                 mode = 'xin'
+            elif mode == '==':
+                lower = threshold
+                upper = threshold
+                mode = 'in'
             else:
                 raise ValueError('For single-threshold inputs, mode must be ">=", ">", "<=", or "<".')
         
@@ -1536,7 +1576,7 @@ class mesh:
         return M          
     def imread(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
         """
-        Load an into a voxel mesh. :func:``~mymesh.converter.im2voxel`` is
+        Load an image into a voxel mesh. :func:``~mymesh.converter.im2voxel`` is
         used to perform the conversion.
 
         Parameters
