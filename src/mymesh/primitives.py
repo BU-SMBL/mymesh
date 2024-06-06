@@ -85,8 +85,8 @@ def Grid(bounds, h, exact_h=False, ElemType='hex'):
     ----------
     bounds : list
         Six element list, of bounds [xmin,xmax,ymin,ymax,zmin,zmax].
-    h : float
-        Element size.
+    h : float, tuple
+        Element size. If provided as a three element tuple, indicates anisotropic element sizes in each direction.
     exact_h : bool, optional
         If true, will make a mesh where the element size is exactly
         equal to what is specified, but the upper bounds may vary slightly.

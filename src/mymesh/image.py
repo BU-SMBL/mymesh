@@ -367,7 +367,8 @@ def read(img, scalefactor=1, scaleorder=1):
     print(' done.')
     return imgs
 
-def SurfaceNodeOptimization(M, img, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, gaussian_sigma=1, smooth=True, copy=True, interpolation='linear'):
+def SurfaceNodeOptimization(M, img, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, gaussian_sigma=1, smooth=True, copy=True, interpolation='linear', 
+springs=True):
     """
     Optimize the placement of surface node to lie on the "true" surface. This
     This simultaneously moves nodes towards the isosurface and redistributes
@@ -394,15 +395,25 @@ def SurfaceNodeOptimization(M, img, h, iterate=1, threshold=0, FixedNodes=set(),
         Standard deviation used for getting the gradient via convolution with
         a Gaussian kernel in units of voxels (see scipy.ndimage.gaussian_filter), 
         by default 1 voxel.
-    smooth : bool, optional
-        Option to perform tangential Laplacian smoothing, by default True
-    copy : bool, optional
-        If true, will create a copy of the mesh, rather than altering node 
-        positions of the original mesh object "in-place", by default True
+    smooth : str, optional
+        Option to perform smoothing. This can be either 'local' for local 
+        Laplacian smoothing or 'tangential' for tangential Laplacian smoothing, 
+        by default 'tangential'. For any other option, smoothing will not be 
+        performed. Tangential smoothing differs from local in that nodes 
+        are only repositioned in the tangent plane (based on the normal vector
+        obtain from the gradient). 
+    InPlace : bool, optional
+        If False, will create a copy of the mesh, rather than altering node 
+        positions of the original mesh object "in-place", by default False
     interpolation : str, optional
         Interpolation method used for evaluating surface points inside the image
         using scipy.interpolate.RegularGridInterpolator (input must be one of the
         allowable "method" inputs), by default 'linear'.
+    springs : bool, optional
+        If True and the mesh is a volume mesh, internal nodes will be treated as 
+        if they are connected by springs (see :func:`~mymesh.improvements.NodeSpringSmoothing`)
+        to reduce risk of element distortion or inversion, by default True.
+    
 
     Returns
     -------
@@ -441,31 +452,45 @@ def SurfaceNodeOptimization(M, img, h, iterate=1, threshold=0, FixedNodes=set(),
 
     NodeCoords = np.vstack([M.NodeCoords, [np.nan,np.nan,np.nan]])
     points = NodeCoords[FreeNodes]
-
-    if smooth:
+    if smooth == True:
+        smooth = 'tangential'
+    if smooth is not None and smooth is not False:
         x = points[:,0]; y = points[:,1]; z = points[:,2]
         g = gradF(x,y,z)
         r = utils.PadRagged(np.array(M.SurfNodeNeighbors,dtype=object)[FreeNodes].tolist())
         lengths = np.array([len(M.SurfNodeNeighbors[i]) for i in FreeNodes])
 
     for i in range(iterate):
-        x = points[:,0]; y = points[:,1]; z = points[:,2]
-        f = F(x,y,z) - threshold
-        g = gradF(x,y,z)
-        fg = f[:,None]*g
-        tau = np.mean(h)/(100*np.max(np.linalg.norm(fg,axis=1)))
+        X = points[:,0]; Y = points[:,1]; Z = points[:,2]
+        f = F(X,Y,Z) - threshold
+        g = np.squeeze(gradF(X,Y,Z))
+        fg = (f*g).T
+        tau = h/(100*np.max(np.linalg.norm(fg,axis=1)))
 
         Zflow = -2*tau*fg
 
-        if smooth:
+        # Rflow = np.zeros((len(NodeCoords),3))
+        if smooth == 'tangential':
+            Q = M.NodeCoords[r]
+            U = (1/lengths)[:,None] * np.nansum(Q - points[:,None,:],axis=1)
+            NodeNormals = (g/np.linalg.norm(g,axis=0)).T
+            Rflow = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
+        elif smooth == 'local':
             Q = NodeCoords[r]
             U = (1/lengths)[:,None] * np.nansum(Q - points[:,None,:],axis=1)
-            NodeNormals = (g/np.linalg.norm(g,axis=0))
-            Rflow = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
+            Rflow = U
         else:
             Rflow = 0
 
-        points = points + Zflow + Rflow
+        if springs and M.Type == 'vol':
+            Forces = np.zeros((M.NNode, 3))
+            Forces[FreeNodes] = Zflow + Rflow
+            M = improvement.NodeSpringSmoothing(M, Displacements=Forces, options=dict(FixSurf=False, FixedNodes=FixedNodes, InPlace=True))
+            NodeCoords = M.NodeCoords
+            points = np.asarray(M.NodeCoords)[FreeNodes]
+        else:
+            points = points + Zflow + Rflow
+            M.NodeCoords[FreeNodes] = points
     
     M.NodeCoords[FreeNodes] = points
 

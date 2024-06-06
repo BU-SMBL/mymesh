@@ -31,7 +31,8 @@ Local mesh topology
 
     TetContract
     TetSplit
-    TetFlipping
+    TetFlip
+    TetImprove
 
 
 """
@@ -1902,7 +1903,7 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
     
     return Mnew
 
-def TetFlipping(M, iterate='converge', QualityMetric='Skewness', target='min', flips=['4-4','3-2','2-3'], verbose=False):
+def TetFlip(M, iterate='converge', QualityMetric='Skewness', target='min', flips=['4-4','3-2','2-3'], verbose=False):
 
     NodeCoords = M.NodeCoords
     NodeConn = M.NodeConn
@@ -2000,6 +2001,50 @@ def TetFlipping(M, iterate='converge', QualityMetric='Skewness', target='min', f
     return tet
 
 def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLaplacianSmoothing', smooth_kwargs={}, verbose=True, FeatureAngle=25, ContractIter=5):
+    """
+    Tetrahedral mesh quality improvement using multiple local operations. 
+
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Tetrahedral mesh to be improved
+    h : float
+        Target element size/edge length
+    schedule : str, optional
+        Order of operations to perform, specified as a string with each 
+        character indicating an operation, by default 'scfS'.
+
+        Possible operations:
+            's' - Splitting (:func:`TetSplit`)
+            'c' - Contraction (:func:`TetContract`)
+            'f' - Flipping (:func:`TetFlip`)
+            'S' - Smoothing 
+
+    repeat : int, optional
+        Number of times to repeat the schedule, by default 1
+    labels : str, array_like, or NoneType, optional
+        Element labels indicating different regions. If specified,
+        region interfaces will be preserved. This can be specified as 
+        an array_like with M.NElem entries or a string corresponding to
+        an entry in M.ElemData, by default None.
+    smoother : str, optional
+        Specify which smoothing operation to use, by default 'SmartLaplacianSmoothing'
+    smooth_kwargs : dict, optional
+        Key word arguments to be passed to the smoother, by default {}
+    verbose : bool, optional
+        If True, will display progress, by default True
+    FeatureAngle : int, optional
+        FeatureAngle : int, optional
+        Angle (in degrees) used to identify features, by default 25. See
+        :func:`~mymesh.utils.DetectFeatures` for more information., by default 25
+    ContractIter : int, optional
+        Maximum number of iterations to perform in the contraction step, by default 5
+
+    Returns
+    -------
+    _type_
+        _description_
+    """    
     M.verbose=False
     for loop in range(repeat):
         for operation in schedule:
@@ -2014,7 +2059,7 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
                 M.verbose=False
             # elif operation == 'f':
             #     # Flip
-            #     M = TetFlipping(M, flips=['3-2','2-3'], verbose=verbose)
+            #     M = TetFlip(M, flips=['3-2','2-3'], verbose=verbose)
             #     M.verbose=False
             elif operation == 'S':
                 if smoother == 'SmartLaplacianSmoothing':

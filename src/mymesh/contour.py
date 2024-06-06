@@ -4272,7 +4272,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         AnchorAxis = np.array(AnchorAxis)
         AnchorDir = np.array(AnchorDir)
         return TriNodeCoords, TriNodeConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
-    return TriNodeCoords, TriNodeConn
+    return np.asarray(TriNodeCoords), TriNodeConn
 
 def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False, return_ParentIds=False, cleanup_tol=1e-10):
     """
