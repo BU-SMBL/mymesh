@@ -143,13 +143,20 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_direction=-1, mode='any', 
         vector_func = func
 
     NodeCoords, GridConn = primitives.Grid(bounds, h, exact_h=False)
-    NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2], *args, **kwargs)
+    Values = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2], *args, **kwargs)
     if np.sign(threshold_direction) == 1:
-        NodeVals = -1*NodeVals
+        NodeVals = -1*Values
         threshold = -1*threshold
+    else:
+        NodeVals = Values
 
     if np.min(NodeVals) >= threshold:
-        return [], []
+        if 'mesh' in dir(mesh):
+            voxel = mesh.mesh()
+        else:
+            voxel = mesh()
+        voxel.NodeData['func'] = np.array([])
+        return voxel
     if mode != 'notrim':
         if mode.lower() == 'centroid':
             centroids = utils.Centroids(NodeCoords, GridConn)
@@ -169,7 +176,7 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_direction=-1, mode='any', 
                 raise Exception('mode must be "any", "all", "centroid", "boundary", or "notrim".')
 
         NodeCoords, NodeConn, OriginalIds = utils.RemoveNodes(NodeCoords,VoxelConn)
-        NodeVals = NodeVals[OriginalIds]
+        Values = Values[OriginalIds]
     else:   
         NodeConn = GridConn
     
@@ -177,7 +184,7 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_direction=-1, mode='any', 
         voxel = mesh.mesh(NodeCoords, NodeConn)
     else:
         voxel = mesh(NodeCoords, NodeConn)
-    voxel.NodeData['func'] = NodeVals
+    voxel.NodeData['func'] = Values
 
     return voxel
 
@@ -265,7 +272,7 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
         SurfCoords[:,1] += bounds[2]
         SurfCoords[:,2] += bounds[4]
     elif method == 'mc33':
-        voxel = VoxelMesh(vector_func, bounds, h, threshold=threshold, threshold_direction=1, mode='boundary',*args,**kwargs)
+        voxel = VoxelMesh(vector_func, bounds, h, threshold=threshold, threshold_direction=threshold_direction, mode='boundary',*args,**kwargs)
         SurfCoords, SurfConn = contour.MarchingCubes(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['func'], method='33', threshold=threshold,flip=flip)
     elif method == 'mt':
         voxel = VoxelMesh(vector_func, bounds, h, threshold=threshold, threshold_direction=threshold, mode='boundary',*args,**kwargs)
@@ -850,7 +857,7 @@ def diff(fval1,fval2):
     return diff_val
 
 def diff_old(fval1, fval2):
-    warnings.warn('This function will be removed in the future.')
+    # warnings.warn('This function will be removed in the future.')
     return rMin(fval1,-fval2)
     
 def intersection(fval1,fval2):
