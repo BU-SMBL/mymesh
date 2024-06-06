@@ -3890,6 +3890,8 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         raise Exception('Invalid method. Must be "original" or "33".')
     if flip: 
         I = -I
+    if (not np.any(I <= 0)) or np.all(I > 0):
+        return np.empty((0,3)), []
     if isinstance(h, (int, float, np.number)):
         h = (h,h,h)
     
@@ -3958,7 +3960,8 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     elif method == '33':
         ##### TODO ####
         pass
-    
+    if not len(numbering) == 0:
+        return np.empty((0,3)), np.empty((0,3))
     i_indices = icubes[numbering][np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]]
     j_indices = jcubes[numbering][np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]]
     k_indices = kcubes[numbering][np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]]
@@ -4263,6 +4266,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
     TriNodeCoords,TriNodeConn,Idx = utils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,return_idx=True)
     if interpolation=='linear':
         TriNodeCoords,TriNodeConn = utils.DeleteDegenerateElements(TriNodeCoords,TriNodeConn,strict=True)
+    TriNodeCoords = np.asarray(TriNodeCoords)
     if return_anchors: 
         Anchors = np.array(Anchors)
         AnchorAxis = np.array(AnchorAxis)
