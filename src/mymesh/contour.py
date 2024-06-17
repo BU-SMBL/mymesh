@@ -4274,7 +4274,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         return TriNodeCoords, TriNodeConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
     return np.asarray(TriNodeCoords), TriNodeConn
 
-def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False, return_ParentIds=False, cleanup_tol=1e-10):
+def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False, return_ParentIds=False, cleanup_tol=1e-14, cleanup=True):
     """
     Marching tetrahedra algorithm :cite:p:`Bloomenthal1994` for extracting an isosurface from a tetrahedral mesh. This can be used to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).
 
@@ -4440,7 +4440,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         NodeValues = -1*NodeValues
 
     # Determine configuration of nodes
-    TetVals = NodeValues[TetNodeConn]
+    TetVals = NodeValues[TetNodeConn[:,:4]]
     inside = TetVals <= 0
     if not np.any(inside):
         NodeCoords = np.empty((0,3))
@@ -4482,7 +4482,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     interpolation_pairs = (lookup_indices[np.arange(len(elem))[:, None], PadElem]).reshape((np.prod(PadElem.shape),ninterppts))
     interpolation_pairs = (interpolation_pairs[np.any(interpolation_pairs!=-1,axis=1)]).astype(int)
     
-    uinterpolation_pairs,inv = np.unique(interpolation_pairs,axis=0,return_inverse=True)
+    uinterpolation_pairs,inv = np.unique(np.sort(interpolation_pairs,axis=1),axis=0,return_inverse=True)
 
     # Interpolation
     if interpolation.lower() == 'midpoint':
@@ -4555,10 +4555,22 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
             roots[root2idx] = root2[root2idx]
 
             # For instances when neither root is in between the bounds of edge being interpolated,
-            # fall back on linear
+            # fall back on linear interpolation between two edge nodes with a sign change
             linear = ~(root1idx|root2idx)
-            roots[linear] = coords1[notconstant,i][linear] + ((0 - vals1[notconstant][linear])/(vals3[notconstant][linear]-vals1[notconstant][linear]))[:,0]*(
-                    coords3[notconstant,i][linear] - coords1[notconstant,i][linear])
+            v1 = vals1[notconstant][linear][:,0]
+            c1 = coords1[notconstant,i][linear]
+            sgnchk1 = np.sign(v1) == np.sign(vals2[notconstant][linear])[:,0]
+            v1[sgnchk1] = vals2[notconstant][linear][sgnchk1,0]
+            c1[sgnchk1] = coords2[notconstant,i][linear][sgnchk1]
+                                        
+            v2 = vals3[notconstant][linear][:,0]
+            c2 = coords3[notconstant,i][linear]
+            sgnchk2 = np.sign(v1) == np.sign(v2)
+            v2[sgnchk2] = vals2[notconstant][linear][sgnchk2,0]
+            c2[sgnchk2] = coords2[notconstant,i][linear][sgnchk2]
+            
+            coefficient = (0 - v1)/(v2-v1)
+            roots[linear] = c1 + coefficient*(c2 - c1)
 
             position[notconstant] = roots
 
@@ -4579,24 +4591,30 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         sums = np.append([0],np.cumsum(lengths))
         NodeConn = [[inv[n+sums[i]] for n in range(lengths[i])] for i in range(len(lengths))]
 
-    NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
-    NodeCoords,NodeConn,EIdx = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf', return_idx=True)
-    if return_NodeValues:
-        NewValues = NewValues[Idx]
-    if return_ParentIds:
-        tetnum = tetnum[EIdx]
+    # if cleanup:
+    #     NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
+    #     NodeCoords,NodeConn,EIdx = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf', return_idx=True)
+    #     if return_NodeValues:
+    #         NewValues = NewValues[Idx]
+    #     if return_ParentIds:
+    #         tetnum = tetnum[EIdx]
 
     if method.lower() == 'volume' and not mixed_elements:
         NodeCoords, NodeConn, ids = converter.solid2tets(NodeCoords, NodeConn, return_ids=True)
-        NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
-        if return_NodeValues:
-            NewValues = NewValues[Idx]
         if return_ParentIds:
             ParentIds = np.zeros(len(NodeConn),dtype=int)
             for i,Id in enumerate(ids):
                 ParentIds[Id] = tetnum[i]
-    elif return_ParentIds:
+    else:
         ParentIds = tetnum
+
+    if cleanup: 
+        NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
+        if return_NodeValues:
+            NewValues = NewValues[Idx]
+        NodeCoords,NodeConn,EIdx = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf', return_idx=True)
+        if return_ParentIds:
+            ParentIds = ParentIds[EIdx]
 
     if return_NodeValues:
         if flip:
