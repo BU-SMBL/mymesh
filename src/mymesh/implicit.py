@@ -498,10 +498,12 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
         if smooth == 'tangential':
             Q = M.NodeCoords[r]
             U = (1/lengths)[:,None] * np.nansum(Q - points[:,None,:],axis=1)
-            NodeNormals = (g/np.linalg.norm(g,axis=0)).T
+            gnorm = np.linalg.norm(g,axis=0)
+            gnorm[gnorm == 0] = 1
+            NodeNormals = (g/gnorm).T
             Rflow = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
         elif smooth == 'local':
-            Q = NodeCoords[r]
+            Q = M.NodeCoords[r]
             U = (1/lengths)[:,None] * np.nansum(Q - points[:,None,:],axis=1)
             Rflow = U
         else:
@@ -902,8 +904,8 @@ def thicken(fval, t):
     thick : scalar or np.ndarray
         Thickened value(s)
     """
-    offp = offset(f, t/2)
-    offn = offset(f, -t/2)
+    offp = offset(fval, t/2)
+    offn = offset(fval, -t/2)
     thick = diff(offp, offn)
     return thick
 
