@@ -120,8 +120,6 @@ def LocalLaplacianSmoothing(M, options=dict()):
 
     lens = np.array([len(n) for n in NodeNeighbors])
     r = utils.PadRagged(NodeNeighbors,fillval=-1)
-    idx = np.unique(NodeConn)
-    FreeNodes = list(set(idx).difference(FixedNodes))
     ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
     
     if SmoothOptions['iterate'] == 'converge':
@@ -2864,7 +2862,7 @@ def _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, UserOpt
 
     if SmoothOptions['FixSurf']:
         SmoothOptions['FixedNodes'].update(SurfConn.flatten())
-    idx = np.unique(NodeConn)
+    idx = set([n for elem in NodeConn for n in elem])
     
 
     SmoothOptions['FreeNodes'] = np.array(list(set(idx).difference(SmoothOptions['FixedNodes'])),dtype=int)
