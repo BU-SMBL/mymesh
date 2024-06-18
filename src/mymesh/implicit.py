@@ -286,7 +286,7 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
         
     return surface
 
-def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation='linear', args=(), kwargs={}, background=None):
+def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation='linear', args=(), kwargs={}, background=None, snap2surf=True):
     """
     Generate a tetrahedral mesh of an implicit function 
 
@@ -350,6 +350,8 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
     if background is None:
         voxel = VoxelMesh(vector_func, bounds, h, threshold=threshold, threshold_direction=threshold, mode='any', args=args, kwargs=kwargs)
         NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
+        if snap2surf:
+            NodeCoords, NodeConn, voxel.NodeData['func'] = contour.SnapGrid2Surf(NodeCoords, NodeConn, voxel.NodeData['func'])
         if interpolation == 'quadratic':
             NodeCoords, NodeConn = converter.tet42tet10(NodeCoords, NodeConn)
             NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
@@ -358,11 +360,13 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
     else:
         NodeCoords, NodeConn = background
         NodeCoords = np.asarray(NodeCoords)
+        NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
+        if snap2surf:
+            NodeCoords, NodeConn, voxel.NodeData['func'] = contour.SnapGrid2Surf(NodeCoords, NodeConn, voxel.NodeData['func'])
+
         if interpolation == 'quadratic':
             if np.shape(NodeConn)[1] == 4:
                 NodeCoords, NodeConn = converter.tet42tet10(NodeCoords, NodeConn)
-            NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
-        else:
             NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
     TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, NodeVals, method='volume', threshold=threshold, flip=flip, interpolation=interpolation)
     
@@ -435,7 +439,9 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
     else:
         EdgeNodes = set()
     FreeNodes = np.array(list(SurfNodes.difference(EdgeNodes).difference(FixedNodes)))
-    
+    if len(FreeNodes) == 0:
+        raise Exception('No free movable nodes.')
+
     # Process function
     def DiracDelta(x):
         if type(x) is np.ndarray:

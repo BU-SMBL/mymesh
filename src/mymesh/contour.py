@@ -4641,6 +4641,34 @@ def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method=
             
     return TriCoords, TriConn, root, DualCoords, DualConn, NodeValues
 
+def SnapGrid2Surf(NodeCoords,NodeConn,NodeValues,threshold=0,interpolation='linear', edges=None):
+
+    
+    NodeCoords = np.copy(NodeCoords)
+    NodeValues = np.copy(NodeValues)
+    if edges is None:
+        e = converter.solid2edges(NodeCoords,NodeConn)
+        edges = np.array(converter.edges2unique(e))
+
+    EdgeVals = NodeValues[edges]
+    if interpolation == 'linear':
+        SignChangeEdges = np.where(np.sign(EdgeVals[:,0]) != np.sign(EdgeVals[:,1]))[0]
+        closest = np.argmin(np.abs(EdgeVals),axis=1)[SignChangeEdges]
+
+        coords1 = NodeCoords[edges[SignChangeEdges,0]]
+        coords2 = NodeCoords[edges[SignChangeEdges,1]]
+        vals1 = NodeValues[edges[SignChangeEdges,0]]
+        vals2 = NodeValues[edges[SignChangeEdges,1]]
+        coefficient = (threshold - vals1)/(vals2-vals1)
+        position = coords1 + coefficient[:,None]*(coords2 - coords1)
+
+        NodeCoords[edges[SignChangeEdges,closest]] = position
+        NodeValues[edges[SignChangeEdges,closest]] = threshold
+    else:
+        raise ValueError('Currently only interpolation="linear" is implemented.')
+    
+    return NodeCoords, NodeConn, NodeValues
+
 def _MarchingCubesLookup(i):
     assert i < 256, 'There are only 256 possible states of the voxel, i must be less than 256'
     if i > 127:
