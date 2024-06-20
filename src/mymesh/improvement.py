@@ -434,12 +434,10 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
 
         return NodeCoords, q
 
-    if method == 'simultaneous':
-        smoother = SimultaneousSmoother
-    elif method == 'sequential':
+    if method == 'sequential':
         smoother = SequentialSmoother
     else:
-        raise ValueError(f'Invalid method "{str(method):s}", must be "simultaneous" or "sequential".')
+        raise ValueError(f'Invalid method "{str(method):s}", must be "sequential".')
 
     # Iterate
     qmin_hist = [qmin]
