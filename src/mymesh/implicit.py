@@ -346,12 +346,20 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
         flip = True
     else:
         flip = False
+        
+    if snap2surf is True:
+        snap = 0.1
+    elif isinstance(snap2surf, (int, float)):
+        snap = snap2surf
+        snap2surf = True
+    
 
     if background is None:
         voxel = VoxelMesh(vector_func, bounds, h, threshold=threshold, threshold_direction=threshold, mode='any', args=args, kwargs=kwargs)
-        NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
         if snap2surf:
-            NodeCoords, NodeConn, voxel.NodeData['func'] = contour.SnapGrid2Surf(NodeCoords, NodeConn, voxel.NodeData['func'])
+            voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['func'] = contour.SnapGrid2Surf(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['func'], snap=snap)#, FixedNodes = voxel.SurfNodes)
+        NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
+        
         if interpolation == 'quadratic':
             NodeCoords, NodeConn = converter.tet42tet10(NodeCoords, NodeConn)
             NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
@@ -362,13 +370,13 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
         NodeCoords = np.asarray(NodeCoords)
         NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
         if snap2surf:
-            NodeCoords, NodeConn, voxel.NodeData['func'] = contour.SnapGrid2Surf(NodeCoords, NodeConn, voxel.NodeData['func'])
+            NodeCoords, NodeConn, NodeVals = contour.SnapGrid2Surf(NodeCoords, NodeConn, NodeVals, snap=snap, FixedNodes=background.SurfNodes)
 
         if interpolation == 'quadratic':
             if np.shape(NodeConn)[1] == 4:
                 NodeCoords, NodeConn = converter.tet42tet10(NodeCoords, NodeConn)
             NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
-    TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, NodeVals, method='volume', threshold=threshold, flip=flip, interpolation=interpolation)
+    TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, NodeVals, method='volume', threshold=threshold, flip=flip, interpolation=interpolation, cleanup=True)
     
 
     if 'mesh' in dir(mesh):

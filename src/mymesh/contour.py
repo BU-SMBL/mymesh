@@ -4274,7 +4274,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         return TriNodeCoords, TriNodeConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
     return np.asarray(TriNodeCoords), TriNodeConn
 
-def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False, return_ParentIds=False, cleanup_tol=1e-14, cleanup=True):
+def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False, return_ParentIds=False, cleanup_tol=1e-10, cleanup=True):
     """
     Marching tetrahedra algorithm :cite:p:`Bloomenthal1994` for extracting an isosurface from a tetrahedral mesh. This can be used to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).
 
@@ -4591,14 +4591,6 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         sums = np.append([0],np.cumsum(lengths))
         NodeConn = [[inv[n+sums[i]] for n in range(lengths[i])] for i in range(len(lengths))]
 
-    # if cleanup:
-    #     NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
-    #     NodeCoords,NodeConn,EIdx = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf', return_idx=True)
-    #     if return_NodeValues:
-    #         NewValues = NewValues[Idx]
-    #     if return_ParentIds:
-    #         tetnum = tetnum[EIdx]
-
     if method.lower() == 'volume' and not mixed_elements:
         NodeCoords, NodeConn, ids = converter.solid2tets(NodeCoords, NodeConn, return_ids=True)
         if return_ParentIds:
@@ -4641,29 +4633,121 @@ def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method=
             
     return TriCoords, TriConn, root, DualCoords, DualConn, NodeValues
 
-def SnapGrid2Surf(NodeCoords,NodeConn,NodeValues,threshold=0,interpolation='linear', edges=None):
-
+def SnapGrid2Surf(NodeCoords,NodeConn,NodeValues,threshold=0, snap=0.1, edges=None, FixedNodes=set()):
+    # Based on ideas from isosurface stuffing, dual marching cubes, snapMC
     
+    assert (snap <= 0.5) and (snap >= 0), 'The snap parameter must be in the range [0, 0.5].'
     NodeCoords = np.copy(NodeCoords)
     NodeValues = np.copy(NodeValues)
     if edges is None:
         e = converter.solid2edges(NodeCoords,NodeConn)
-        edges = np.array(converter.edges2unique(e))
-
+        edges = converter.edges2unique(e)
+    if type(FixedNodes) is set:
+        FixedNodes = list(FixedNodes)
     EdgeVals = NodeValues[edges]
+    edgeshape = np.shape(edges)
+    if len(edgeshape) == 1:
+        raise ValueError('Input mesh appears to contain both linear and quadratic elements.')
+    elif edgeshape[1] == 2:
+        interpolation = 'linear'
+    elif edgeshape[2] == 3:
+        interpolation = 'quadratic'
+    else:
+        raise Exception('Unexpected shape of edge list.')
+        
+    
     if interpolation == 'linear':
-        SignChangeEdges = np.where(np.sign(EdgeVals[:,0]) != np.sign(EdgeVals[:,1]))[0]
-        closest = np.argmin(np.abs(EdgeVals),axis=1)[SignChangeEdges]
-
-        coords1 = NodeCoords[edges[SignChangeEdges,0]]
-        coords2 = NodeCoords[edges[SignChangeEdges,1]]
-        vals1 = NodeValues[edges[SignChangeEdges,0]]
-        vals2 = NodeValues[edges[SignChangeEdges,1]]
+        SignChangeEdges = np.where(np.sign(EdgeVals[:,0]-threshold) != np.sign(EdgeVals[:,1]-threshold))[0]
+        
+        # get set of sign change edges with no repeated nodes
+        # seen = set()
+        # rows = set()
+        # for row in SignChangeEdges:
+        #     if edges[row][0] not in seen and edges[row][1] not in seen:
+        #         seen.update(edges[row])
+        #         rows.add(row)
+        # EdgeIds = np.array(list(rows))
+        
+        EdgeIds = SignChangeEdges
+        closest = np.argmin(np.abs(EdgeVals-threshold),axis=1)[EdgeIds]
+        furthest = ~(closest.astype(bool)).astype(int)
+        
+        coords1 = NodeCoords[edges[EdgeIds,closest]]
+        coords2 = NodeCoords[edges[EdgeIds,furthest]]
+        vals1 = NodeValues[edges[EdgeIds,closest]]
+        vals2 = NodeValues[edges[EdgeIds,furthest]]
+        
         coefficient = (threshold - vals1)/(vals2-vals1)
+        
         position = coords1 + coefficient[:,None]*(coords2 - coords1)
+        
+        nodes = edges[EdgeIds,closest][coefficient <= snap]
+        free = ~np.isin(nodes, FixedNodes)
+        NodeCoords[nodes[free]] = position[coefficient <= snap][free]
+        NodeValues[nodes[free]] = threshold
+    elif interpolation == 'quadratic':
+        raise Exception('Quadratic elements not supported yet')
+        SignChangeEdges = np.where((np.sign(EdgeVals[:,0]-threshold) != np.sign(EdgeVals[:,1]-threshold))|(np.sign(EdgeVals[:,0]-threshold) != np.sign(EdgeVals[:,2]-threshold)))[0]
+        
+        coords1 = NodeCoords[edges[EdgeIds,closest]]
+        coords2 = NodeCoords[edges[EdgeIds,furthest]]
+        coords3 = NodeCoords[edges[EdgeIds,furthest]]
+        
+        vals1 = NodeValues[edges[EdgeIds,closest]]
+        vals2 = NodeValues[edges[EdgeIds,furthest]]
+        vals2 = NodeValues[edges[EdgeIds,furthest]]
+        
+        for i in [0,1,2]:
+            # Loop over axes
+            
+            # Build coefficients for quadratic polynomials
+            mat = np.empty((np.sum(SignChangeEdges), 3, 3))
+            mat[:,0,0] = coords1[SignChangeEdges,i]**2
+            mat[:,0,1] = coords1[SignChangeEdges,i]
 
-        NodeCoords[edges[SignChangeEdges,closest]] = position
-        NodeValues[edges[SignChangeEdges,closest]] = threshold
+            mat[:,1,0] = coords2[SignChangeEdges,i]**2
+            mat[:,1,1] = coords2[SignChangeEdges,i]
+
+            mat[:,2,0] = coords3[SignChangeEdges,i]**2
+            mat[:,2,1] = coords3[SignChangeEdges,i]
+
+            mat[:,:,2] = 1
+
+            a, b, c = np.linalg.solve(mat, np.hstack([vals1[notconstant], vals2[notconstant], vals3[notconstant]])).T
+
+            # Solve for roots
+            root1 = (-b + np.sqrt(b**2 - 4*a*c))/(2*a)
+            root2 = (-b - np.sqrt(b**2 - 4*a*c))/(2*a)
+
+            position = np.copy(coords1[:,i])
+            roots = np.copy(root1)
+            # Select the appropriate root that falls between
+            root1idx = (((root1 <= coords1[notconstant,i]) & (root1 >= coords3[notconstant,i])) | 
+                ((root1 >= coords1[notconstant,i]) & (root1 <= coords3[notconstant,i])))
+            root2idx = (((root2 <= coords1[notconstant,i]) & (root2 >= coords3[notconstant,i])) | 
+                ((root2 >= coords1[notconstant,i]) & (root2 <= coords3[notconstant,i])))
+
+            roots[root2idx] = root2[root2idx]
+
+            # For instances when neither root is in between the bounds of edge being interpolated,
+            # fall back on linear interpolation between two edge nodes with a sign change
+            linear = ~(root1idx|root2idx)
+            v1 = vals1[notconstant][linear][:,0]
+            c1 = coords1[notconstant,i][linear]
+            sgnchk1 = np.sign(v1) == np.sign(vals2[notconstant][linear])[:,0]
+            v1[sgnchk1] = vals2[notconstant][linear][sgnchk1,0]
+            c1[sgnchk1] = coords2[notconstant,i][linear][sgnchk1]
+                                        
+            v2 = vals3[notconstant][linear][:,0]
+            c2 = coords3[notconstant,i][linear]
+            sgnchk2 = np.sign(v1) == np.sign(v2)
+            v2[sgnchk2] = vals2[notconstant][linear][sgnchk2,0]
+            c2[sgnchk2] = coords2[notconstant,i][linear][sgnchk2]
+            
+            coefficient = (0 - v1)/(v2-v1)
+            roots[linear] = c1 + coefficient*(c2 - c1)
+
+            position[notconstant] = roots
     else:
         raise ValueError('Currently only interpolation="linear" is implemented.')
     
