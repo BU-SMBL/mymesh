@@ -326,9 +326,13 @@ class mesh:
     @property
     def SurfNodes(self):
         if self._SurfNodes is None:
-            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying surface nodes...',end='')
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying surface nodes...',end='')
+                self._printlevel += 1
             self._SurfNodes = np.array(list({i for elem in self.SurfConn for i in elem}))
-            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+            if self.verbose: 
+                print('Done', end='\n'+'\t'*self._printlevel)
+                self._printlevel -= 1
         SurfNodes = self._SurfNodes
         return SurfNodes
     @property
@@ -345,9 +349,13 @@ class mesh:
     @property
     def BoundaryNodes(self):
         if self._BoundaryNodes is None:
-            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying boundary nodes...',end='')
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying boundary nodes...',end='')
+                self._printlevel += 1
             self._BoundaryNodes = np.array(list({i for elem in self.BoundaryConn for i in elem}))
-            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+            if self.verbose: 
+                print('Done', end='\n'+'\t'*self._printlevel)
+                self._printlevel -= 1
         BoundaryNodes = self._BoundaryNodes
         return BoundaryNodes
     @property
