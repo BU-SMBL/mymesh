@@ -219,6 +219,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
         pyrIdx = np.where(Ls == 5)[0]
         wdgIdx = np.where(Ls == 6)[0]
         hexIdx = np.where(Ls == 8)[0]
+        tet10Idx = np.where(Ls == 10)[0]
         if len(edgIdx) > 0:
             edgs = np.array([NodeConn[i] for i in edgIdx]).astype(int)
         else:
@@ -228,6 +229,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
         pyrs = [NodeConn[i] for i in pyrIdx]
         wdgs = [NodeConn[i] for i in wdgIdx]
         hexs = [NodeConn[i] for i in hexIdx]
+        tet10s = [NodeConn[i] for i in tet10Idx]
         
         if ElemType == 'surf':
             fournodefunc = quad2edges
@@ -240,8 +242,15 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
                                 pyramid2edges([],pyrs), 
                                 wedge2edges([],wdgs), 
                                 hex2edges([],hexs)))
+        QuadEdges = np.concatenate((tet102edges([],tet10s),))
+        if len(QuadEdges) > 0:
+            if len(Edges) > 0:
+                Edges = Edges.tolist() + QuadEdges.tolist()
+            else:
+                Edges = QuadEdges
+    
         if return_EdgeElem or return_EdgeConn:
-            EdgeElem = np.concatenate((np.repeat(edgIdx,1),np.repeat(triIdx,3),np.repeat(tetIdx,fournodeedgenum),np.repeat(pyrIdx,8),np.repeat(wdgIdx,9),np.repeat(hexIdx,12)))
+            EdgeElem = np.concatenate((np.repeat(edgIdx,1),np.repeat(triIdx,3),np.repeat(tetIdx,fournodeedgenum),np.repeat(pyrIdx,8),np.repeat(wdgIdx,9),np.repeat(hexIdx,12),np.repeat(tet10Idx,6)))
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
                 np.repeat([[0]],len(edgIdx),axis=0).reshape(len(edgIdx)*1),
@@ -249,7 +258,8 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
                 np.repeat([np.arange(fournodeedgenum)],len(tetIdx),axis=0).reshape(len(tetIdx)*6),  
                 np.repeat([[0,1,2,3,4,5,6,7]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*8),                   
                 np.repeat([[0,1,2,3,4,5,6,7,8]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*9),   
-                np.repeat([[0,1,2,3,4,5,6,7,8,9,10,11]],len(hexIdx),axis=0).reshape(len(hexIdx)*12),                    
+                np.repeat([[0,1,2,3,4,5,6,7,8,9,10,11]],len(hexIdx),axis=0).reshape(len(hexIdx)*12),   
+                np.repeat([[0,1,2,3,4,5]],len(tet10Idx),axis=0).reshape(len(tet10Idx)*6)                 
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),12))
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
@@ -1188,7 +1198,8 @@ def edges2unique(Edges,return_idx=False,return_inv=False,return_counts=False):
 
     check = [True,return_idx,return_inv,return_counts]
     out = [o for i,o in enumerate([UEdges, idx, inv, counts]) if check[i]]
-
+    if len(out) == 1:
+        out = out[0]
     return out
 
 def tet2faces(NodeCoords,NodeConn):
@@ -1454,6 +1465,36 @@ def tet2edges(NodeCoords,NodeConn):
         Edges[5::6] = ArrayConn[:,np.array([2,3])]
     else:
         Edges = np.empty((0,2),dtype=np.int64)
+    return Edges
+
+def tet102edges(NodeCoords,NodeConn):
+    """
+    Extract edges from all elements of a purely 10-Node tetrahedral mesh.
+
+    Parameters
+    ----------
+    NodeCoords : list
+        List of nodal coordinates.
+    NodeConn : list
+        List of nodal connectivity.
+
+    Returns
+    -------
+    Edges : list
+        List of nodal connectivity of the mesh edges.
+    """
+
+    if len(NodeConn) > 0:
+        ArrayConn = np.asarray(NodeConn)
+        Edges = -1*np.ones((len(NodeConn)*6,3),dtype=np.int64)
+        Edges[0::6] = ArrayConn[:,np.array([0,4,1])]
+        Edges[1::6] = ArrayConn[:,np.array([1,5,2])]
+        Edges[2::6] = ArrayConn[:,np.array([2,6,0])]
+        Edges[3::6] = ArrayConn[:,np.array([0,7,3])]
+        Edges[4::6] = ArrayConn[:,np.array([1,8,3])]
+        Edges[5::6] = ArrayConn[:,np.array([2,9,3])]
+    else:
+        Edges = np.empty((0,3),dtype=np.int64)
     return Edges
 
 def pyramid2edges(NodeCoords,NodeConn):
