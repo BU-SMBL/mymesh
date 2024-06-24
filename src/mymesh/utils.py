@@ -1889,7 +1889,7 @@ def SortRaggedByLength(In, return_idx=False, return_inv=False, return_separators
     >>> [In[i] for i in idx] == Out
     >>> [Out[i] for i in inv] == In
     """
-    lengths = np.array([len(row) for row in In])
+    lengths = np.array(list(map(len, In)))
     idx = lengths.argsort()
     Out = [In[i] for i in idx]
 
