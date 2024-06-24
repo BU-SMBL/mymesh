@@ -677,8 +677,8 @@ class mesh:
         M.FaceSets = copy.copy(self.FaceSets)
         M.ElemSets = copy.copy(self.ElemSets)
 
-        M.NodeData = copy.copy(self.NodeData)
-        M.ElemData = copy.copy(self.ElemData)
+        M.NodeData = copy.deepcopy(self.NodeData)
+        M.ElemData = copy.deepcopy(self.ElemData)
         
         M._SurfConn = copy.copy(self._SurfConn)
         M._NodeNeighbors = copy.copy(self._NodeNeighbors)
