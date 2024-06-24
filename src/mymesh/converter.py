@@ -116,7 +116,7 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
         The element index that each face is taken from.
     """     
        
-    Ls = np.array([len(elem) for elem in NodeConn])
+    Ls = np.array(list(map(len, NodeConn)))
     edgIdx = np.where(Ls == 2)[0]
     triIdx = np.where(Ls == 3)[0]
     tetIdx = np.where((Ls == 4) | (Ls == 10))[0]
@@ -129,19 +129,20 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
     pyrs = [NodeConn[i] for i in pyrIdx]
     wdgs = [NodeConn[i] for i in wdgIdx]
     hexs = [NodeConn[i] for i in hexIdx]
-
-    Faces = edgs + tris + tet2faces([],tets) + pyramid2faces([],pyrs) + wedge2faces([],wdgs) + hex2faces([],hexs)
-    ElemIds_i = np.concatenate((edgIdx,triIdx,np.repeat(tetIdx,4),np.repeat(pyrIdx,5),np.repeat(wdgIdx,5),np.repeat(hexIdx,6)))
-    FaceElem = ElemIds_i
-    ElemIds_j = np.concatenate((np.repeat(0,len(edgIdx)),np.repeat(0,len(triIdx)), 
-            np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
-            np.repeat([[0,1,2,3,4]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*5),                   
-            np.repeat([[0,1,2,3,4]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*5),   
-            np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6),                    
-            ))
-    FaceConn = -1*np.ones((len(NodeConn),6))
-    FaceConn[ElemIds_i,ElemIds_j] = np.arange(len(Faces))
-    FaceConn = utils.ExtractRagged(FaceConn,dtype=int)
+    
+    Faces = edgs + tris + tet2faces([],tets).tolist() + pyramid2faces([],pyrs) + wedge2faces([],wdgs) + hex2faces([],hexs).tolist()
+    if return_FaceConn or return_FaceElem:
+        ElemIds_i = np.concatenate((edgIdx,triIdx,np.repeat(tetIdx,4),np.repeat(pyrIdx,5),np.repeat(wdgIdx,5),np.repeat(hexIdx,6)))
+        FaceElem = ElemIds_i
+        ElemIds_j = np.concatenate((np.repeat(0,len(edgIdx)),np.repeat(0,len(triIdx)), 
+                np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
+                np.repeat([[0,1,2,3,4]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*5),                   
+                np.repeat([[0,1,2,3,4]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*5),   
+                np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6),                    
+                ))
+        FaceConn = -1*np.ones((len(NodeConn),6))
+        FaceConn[ElemIds_i,ElemIds_j] = np.arange(len(Faces))
+        FaceConn = utils.ExtractRagged(FaceConn,dtype=int)
     
     if return_FaceConn and return_FaceElem:
         return Faces,FaceConn,FaceElem
@@ -1039,12 +1040,15 @@ def faces2surface(Faces):
         Nodal connectivity of the surface mesh.
     """    
     
-    sortedConn = [sorted(face) for face in Faces]
-    arr = np.empty(len(sortedConn),dtype=object)
-    arr[:] = sortedConn
-    unique,indices,counts = np.unique(arr,return_counts=True,return_index=True)
-    SurfIdx = indices[np.where(counts==1)]
-    SurfConn = np.array(Faces,dtype=object)[SurfIdx].tolist()
+    table = dict()
+    for i,face in enumerate(Faces):
+        f = tuple(sorted(face))
+        if f in table:
+            table[f] = -1
+        else:
+            table[f] = i
+           
+    SurfConn = [Faces[i] for key, i in table.items() if i != -1]
     if len(Faces) == len(SurfConn):
         SurfConn=Faces
     return SurfConn
@@ -1229,24 +1233,23 @@ def tet2faces(NodeCoords,NodeConn):
     if len(NodeConn) > 0:
         if len(NodeConn[0]) == 4:
             ArrayConn = np.asarray(NodeConn)
-            Faces = -1*np.ones((len(NodeConn)*4,3))
+            Faces = -1*np.ones((len(NodeConn)*4,3),dtype=int)
+            # Faces = [None]*len(NodeConn)*4
             Faces[0::4] = ArrayConn[:,[0,2,1]]
             Faces[1::4] = ArrayConn[:,[0,1,3]]
             Faces[2::4] = ArrayConn[:,[1,2,3]]
             Faces[3::4] = ArrayConn[:,[0,3,2]]
-            Faces = Faces.astype(int).tolist()
         elif len(NodeConn[0]) == 10:
             ArrayConn = np.asarray(NodeConn)
-            Faces = -1*np.ones((len(NodeConn)*4,6))
+            Faces = -1*np.ones((len(NodeConn)*4,6),dtype=int)
             Faces[0::4] = ArrayConn[:,[0,2,1,6,5,4]]
             Faces[1::4] = ArrayConn[:,[0,1,3,4,8,7]]
             Faces[2::4] = ArrayConn[:,[1,2,3,5,9,8]]
             Faces[3::4] = ArrayConn[:,[0,3,2,7,9,6]]
-            Faces = Faces.astype(int).tolist()
         else:
             raise Exception('Must be 4 or 10 node tetrahedral mesh.')
     else:
-        Faces = []
+        Faces = np.empty((0,3))
 
     return Faces
 
@@ -1281,9 +1284,9 @@ def hex2faces(NodeCoords,NodeConn):
         Faces[3::6] = ArrayConn[:,[2,3,7,6]]
         Faces[4::6] = ArrayConn[:,[3,0,4,7]]
         Faces[5::6] = ArrayConn[:,[4,5,6,7]]
-        Faces = Faces.astype(int).tolist()
+        Faces = Faces.astype(int)
     else:
-        Faces = []
+        Faces = np.empty((0,4))
     return Faces
 
 def pyramid2faces(NodeCoords,NodeConn):
