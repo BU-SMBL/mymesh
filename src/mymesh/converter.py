@@ -256,7 +256,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
             ElemIds_j = np.concatenate((
                 np.repeat([[0]],len(edgIdx),axis=0).reshape(len(edgIdx)*1),
                 np.repeat([[0,1,2]],len(triIdx),axis=0).reshape(len(triIdx)*3), 
-                np.repeat([np.arange(fournodeedgenum)],len(tetIdx),axis=0).reshape(len(tetIdx)*6),  
+                np.repeat([np.arange(fournodeedgenum)],len(tetIdx),axis=0).reshape(len(tetIdx)*fournodeedgenum),  
                 np.repeat([[0,1,2,3,4,5,6,7]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*8),                   
                 np.repeat([[0,1,2,3,4,5,6,7,8]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*9),   
                 np.repeat([[0,1,2,3,4,5,6,7,8,9,10,11]],len(hexIdx),axis=0).reshape(len(hexIdx)*12),   
