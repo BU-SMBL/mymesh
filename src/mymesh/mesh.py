@@ -1671,7 +1671,7 @@ class mesh:
         # TODO: This might not work properly with mixed element types - but I think it shoud
         if self.NElem > 0:
             # Get all element edges
-            edges, edgeconn, edgeelem = converter.solid2edges(self.NodeCoords,self.NodeConn,return_EdgeConn=True,return_EdgeElem=True)
+            edges, edgeconn, edgeelem = converter.solid2edges(self.NodeCoords,self.NodeConn,return_EdgeConn=True,return_EdgeElem=True,ElemType=self.Type)
             # Convert to unique edges
             Edges, UIdx, UInv = converter.edges2unique(edges,return_idx=True,return_inv=True)
             EdgeElem = np.asarray(edgeelem)[UIdx]
