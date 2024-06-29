@@ -1398,7 +1398,44 @@ class mesh:
         return M
 
     ## Mesh Measurements Methods
-    def getQuality(self,metrics=['Skewness','Aspect Ratio','Inverse Orthogonal quality','Inverse Orthogonality','Min Dihedral(deg)','Max Dihedral(deg)','Volume'], verbose=None):
+    def getQuality(self,metrics=['Skewness','Aspect Ratio'], verbose=None):
+        """
+        Evaluate mesh quality. This will create a dict with entries corresponding
+        to the specified quality metrics. This dict can be stored in 
+        mesh.ElemData by performing `m.ElemData.update(m.getQuality())` 
+        or `m.ElemData |= m.getQuality()`
+
+        Parameters
+        ----------
+        metrics : str or list, optional
+            Quality metric, or list of quality metrics, to evaluate, by default 
+            ['Skewness','Aspect Ratio']. 
+            Available options are:
+                - 'Skewness' : :func:`~mymesh.quality.Skewness`
+                - 'Aspect Ratio' : :func:`~mymesh.quality.AspectRatio`
+                - 'Inverse Orthogonal Quality' : :func:`~mymesh.quality.InverseOrthogonalQuality`
+                - 'Orthogonal Quality' : :func:`~mymesh.quality.OrthogonalQuality`
+                - 'Inverse Orthogonality' : :func:`~mymesh.quality.InverseOrthogonality`
+                - 'Orthogonality' : :func:`~mymesh.quality.Orthogonality`
+                - 'Min Dihedral' : :func:`~mymesh.quality.MinDihedral` - Reported in radians
+                - 'Min Dihedral(deg)' : :func:`~mymesh.quality.MinDihedral` - Reported in degrees
+                - 'Max Dihedral' : :func:`~mymesh.quality.MaxDihedral` - Reported in radians
+                - 'Max Dihedral(deg)' : :func:`~mymesh.quality.MaxDihedral` - Reported in degrees
+                - 'Mean Ratio' : :func:`~mymesh.quality.MeanRatio`
+                - 'Volume' : :func:`~mymesh.quality.Volume`
+            Note that not all metrics are suited to all element types.
+
+        verbose : bool or NoneType, optional
+            If True, quality reports will be printed. If None, this will be 
+            determined by the verbosity state (mesh.verbose) of the mesh object, 
+            by default None.
+
+        Returns
+        -------
+        qual : dict
+            Dictionary of element qualities
+
+        """        
         
         if verbose is None:
             verbose = self.verbose
@@ -1416,7 +1453,7 @@ class mesh:
             elif m == 'orthogonal quality':
                 qual[metric] = quality.OrthogonalQuality(*self,verbose=verbose)
             elif m == 'inverse orthogonality':
-                qual[metric] = quality.InverseOrthogonality(*self,verbose.verbose)
+                qual[metric] = quality.InverseOrthogonality(*self,verbose=verbose)
             elif m == 'orthogonality':
                 qual[metric] = quality.Orthogonality(*self,verbose=verbose)
             elif m == 'min dihedral':
@@ -1427,6 +1464,8 @@ class mesh:
                 qual[metric] = quality.MaxDihedral(*self,verbose=verbose)
             elif m == 'max dihedral(deg)':
                 qual[metric] = quality.MaxDihedral(*self,verbose=verbose)*180/np.pi
+            elif m == 'mean ratio':
+                qual[metric] = quality.MeanRatio(*self,verbose=verbose)
             elif m == 'volume':
                 qual[metric] = quality.Volume(*self,verbose=verbose)
             else:
