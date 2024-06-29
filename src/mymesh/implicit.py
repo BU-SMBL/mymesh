@@ -187,7 +187,7 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_direction=-1, mode='any', 
 
     return voxel
 
-def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc', interpolation='linear', args=(), kwargs={}):
+def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc', interpolation='linear', mixed_elements=False, args=(), kwargs={}):
     """
     Generate a surface mesh of an implicit function 
 
@@ -212,6 +212,9 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
         'mt' : Marching tetrahedra (see contour.MarchingTetrahedra)
     interpolation : str, optional
         Method of interpolation used for placing the vertices on the approximated isosurface. This can be 'midpoint', 'linear', or 'cubic', by default 'linear'. If 'cubic' is selected, method is overridden to be 'mc'. 
+    mixed_elements : bool, optional
+        If marching tetrahedra is used, setting mixed_elements to True will allow
+        for a surface mesh with a combination of quads and tris, by default False.
     args : tuple, optional
         Tuple of additional positional arguments for func, by default ().
     kwargs : dict, optional
@@ -276,7 +279,7 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
     elif method == 'mt':
         voxel = VoxelMesh(vector_func, bounds, h, threshold=threshold, threshold_direction=threshold, mode='boundary',*args,**kwargs)
         NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
-        SurfCoords, SurfConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['func'], method='surface', threshold=threshold,flip=flip)
+        SurfCoords, SurfConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['func'], method='surface', threshold=threshold, flip=flip, mixed_elements=mixed_elements)
 
     
     if 'mesh' in dir(mesh):
