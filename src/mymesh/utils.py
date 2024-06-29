@@ -861,7 +861,7 @@ def Project2Surface(Points,Normals,NodeCoords,SurfConn,tol=np.inf,Octree='genera
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by octree.Surf2Octree(NodeCoords,SurfConn)
+        octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by octree.Surface2Octree(NodeCoords,SurfConn)
     Returns
     -------
     MappingMatrix : np.ndarray
@@ -922,7 +922,7 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        octree.OctreeNode - Provide a precompute octree structure corresponding to surface 2. Should be created by octree.Surf2Octree(NodeCoords2,SurfConn2)
+        octree.OctreeNode - Provide a precompute octree structure corresponding to surface 2. Should be created by octree.Surface2Octree(NodeCoords2,SurfConn2)
     return_octree : bool, optional
         If true, will return the generated or provided octree, by default False.
     npts : int, optional
@@ -959,7 +959,7 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     NodeNormals1 = Face2NodeNormal(NodeCoords1, SurfConn1, ElemConn1, ElemNormals1, method='angle')
 
     
-    if Octree == 'generate': Octree = octree.Surf2Octree(NodeCoords2,SurfConn2)
+    if Octree == 'generate': Octree = octree.Surface2Octree(NodeCoords2,SurfConn2)
     
     MappingMatrix = -1*np.ones((len(NodeCoords1),4))
     MappingMatrix[NodeIds,:] = Project2Surface(NodeCoords1[NodeIds,:], NodeNormals1[NodeIds,:], NodeCoords2, SurfConn2, tol=tol, Octree=Octree)
@@ -996,7 +996,7 @@ def ValueMapping(NodeCoords1, SurfConn1, NodeVals1, NodeCoords2, SurfConn2, tol=
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        octree.OctreeNode - Provide a precompute octree structure corresponding to surface 1. Should be created by octree.Surf2Octree(NodeCoords1,SurfConn1)
+        octree.OctreeNode - Provide a precompute octree structure corresponding to surface 1. Should be created by octree.Surface2Octree(NodeCoords1,SurfConn1)
     MappingMatrix : list
         len(NodeCoords2)x4 matrix of of barycentric coordinates, defining NodeCoords2 in terms
         of the triangular surface elements of Surface 1.

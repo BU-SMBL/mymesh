@@ -12,7 +12,7 @@ Octree Creation
 
     Points2Octree
     Function2Octree
-    Surf2Octree
+    Surface2Octree
     Voxel2Octree
 
 Conversion From Octree
@@ -516,7 +516,7 @@ def Voxel2Octree(VoxelCoords, VoxelConn):
     
     return Root
 
-def Surf2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=5):
+def Surface2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=5):
     """
     Generate an octree representation of a triangular surface mesh. The octree
     will be refined until each node contains only one triangle or the maximum

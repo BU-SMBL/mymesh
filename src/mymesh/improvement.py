@@ -2183,7 +2183,7 @@ def ResolveSurfSelfIntersections(NodeCoords,SurfConn,FixedNodes=set(),octree='ge
     NewCoords = np.array(NodeCoords)
     SurfConn = np.asarray(SurfConn)
     if octree == 'generate':
-        octree = octree.Surf2Octree(NewCoords,SurfConn)
+        octree = octree.Surface2Octree(NewCoords,SurfConn)
     IntersectionPairs = rays.SurfSelfIntersection(NewCoords,SurfConn,octree=octree)
     Intersected = np.unique(IntersectionPairs).tolist()
     
