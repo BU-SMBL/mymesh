@@ -68,7 +68,7 @@ def Box(bounds, h, ElemType='quad'):
     BoxConn = converter.solid2surface(GridCoords,GridConn)
     BoxCoords,BoxConn,_ = utils.RemoveNodes(GridCoords,BoxConn)
     if ElemType == 'tri':
-        BoxConn = converter.quad2tri(BoxConn)
+        _,BoxConn = converter.quad2tri([],BoxConn)
 
     if 'mesh' in dir(mesh):
         box = mesh.mesh(BoxCoords,BoxConn)
@@ -238,7 +238,7 @@ def Grid2D(bounds, h, z=0, exact_h=False, ElemType='quad'):
     GridConn[:,3] = Ids[:-1,1:].flatten()
 
     if ElemType == 'tri':
-        GridConn = converter.quad2tri(GridConn)
+        _,GridConn = converter.quad2tri([],GridConn)
     
     if 'mesh' in dir(mesh):
         Grid = mesh.mesh(GridCoords,GridConn,'surf')
@@ -661,7 +661,7 @@ def Extrude(line, distance, step, axis=2, ElemType='quad'):
         NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
     NodeConn = NodeConn.astype(int)
     if ElemType == 'tri':
-        NodeConn = converter.quad2tri(NodeConn)
+        _,NodeConn = converter.quad2tri([],NodeConn)
     if 'mesh' in dir(mesh):
         extruded = mesh.mesh(NodeCoords,NodeConn,'surf')
     else:
@@ -749,7 +749,7 @@ def Revolve(line, angle, anglestep, center=[0,0,0], axis=2, ElemType='quad'):
     NodeConn = NodeConn.astype(int)
 
     if ElemType == 'tri':
-        NodeConn = converter.quad2tri(NodeConn)
+        _,NodeConn = converter.quad2tri([],NodeConn)
     NodeCoords, NodeConn = utils.DeleteDuplicateNodes(NodeCoords, NodeConn)
     NodeCoords, NodeConn = utils.CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf')
 
