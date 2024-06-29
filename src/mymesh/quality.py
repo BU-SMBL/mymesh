@@ -20,6 +20,7 @@ Quality Metrics
     Skewness
     MinDihedral
     MaxDihedral
+    MeanRatio
     Area
     Volume
 
@@ -347,7 +348,7 @@ def Skewness(NodeCoords,NodeConn,verbose=False,simplexmethod='size'):
         print(f'Minimum Skewness: {minSkew:.3f} on Element {np.where(skew==minSkew)[0][0]:.0f}')
         print(f'Maximum Skewness: {maxSkew:.3f} on Element {np.where(skew==maxSkew)[0][0]:.0f}')
         print(f'Mean Skewness: {meanSkew:.3f}')
-        print(f'{nSliver:d} Slivers with Skewness > 0.9')
+        print(f'{nSliver:d} Elements with Skewness > 0.9')
         print('------------------------------------------')
 
     return skew
