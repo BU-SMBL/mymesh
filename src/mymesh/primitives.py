@@ -20,6 +20,7 @@ Shapes
     Plane
     Cylinder
     Sphere
+    Torus
 
 2D to 3D Constructions
 ======================
@@ -107,6 +108,10 @@ def Grid(bounds, h, exact_h=False, ElemType='hex'):
         the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
         by running: ``NodeCoords, NodeConn = primitives.Grid(...)``
 
+    .. plot::
+
+        box = primitives.Grid([0,1,0,1,0,1], 0.05)
+        box.plot(bgcolor='w', show_edges=True)
 
     """    
     if type(h) is tuple or type(h) is list:
@@ -189,6 +194,11 @@ def Grid2D(bounds, h, z=0, exact_h=False, ElemType='quad'):
         Due to the ability to unpack the mesh object to NodeCoords and NodeConn,
         the NodeCoords and NodeConn array can be returned directly (instead of the mesh object)
         by running: ``NodeCoords, NodeConn = primitives.Grid2D(...)``
+
+    .. plot::
+
+        box = primitives.Grid2D([0,1,0,1,], 0.05)
+        box.plot(bgcolor='w', show_edges=True)
 
     """    
     if type(h) is tuple or type(h) is list or type(h) is np.ndarray:
@@ -567,7 +577,7 @@ def Torus(center, R, r, axis=2, theta_resolution=20, phi_resolution=20, ElemType
     ________
     .. plot::
 
-        torus = primitives.Sphere([0,0,0], 1)
+        torus = primitives.Torus([0,0,0], 1, .25, phi_resolution=50, ElemType='quad')
         torus.plot(bgcolor='w', show_edges=True)
 
     """
@@ -626,6 +636,18 @@ def Extrude(line, distance, step, axis=2, ElemType='quad'):
 
     .. note:: 
         Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Extrude(...)``
+
+    Examples
+    ________
+    .. plot::
+
+        x = np.linspace(0,1,100)
+        y = np.sin(2*np.pi*x)
+        coordinates = np.column_stack([x, y, np.zeros(len(x))])
+        connectivity = np.column_stack([np.arange(len(x)-1), np.arange(len(x)-1)+1])
+        line = mesh(coordinates, connectivity)
+        extruded = primitives.Extrude(line, 1, 0.2)
+        extruded.plot(bgcolor='w', show_edges=True)
 
     """    
     NodeCoords = np.array(line.NodeCoords)

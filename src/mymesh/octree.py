@@ -4,6 +4,42 @@
 """
 Octree data structure and related methods.
 
+
+Octree Creation
+===============
+.. autosummary::
+    :toctree: submodules/
+
+    Points2Octree
+    Function2Octree
+    Surf2Octree
+    Voxel2Octree
+
+Conversion From Octree
+======================
+.. autosummary::
+    :toctree: submodules/
+
+    Octree2Voxel
+    Octree2Dual
+
+Octree Querying
+===============
+.. autosummary::
+    :toctree: submodules/
+
+    getAllLeaf
+    SearchOctree
+    SearchOctreeTri
+
+Octree Utilities
+================
+.. autosummary::
+    :toctree: submodules/
+
+    Print
+
+
 """
 import numpy as np
 import scipy
@@ -12,38 +48,38 @@ from . import rays, utils
 import sympy as sp
 
 class OctreeNode:
-    """
-    The OctreeNode is the basic unit of the octree data structure. The structure
-    consists of a series of nodes that reference their parent and child nodes, 
-    allowing for traversal of the tree structure.
-
-    Parameters
-    ----------
-    centroid : array_like
-        Location of the center of the octree node
-    size : float
-        Side length of the cube associated with the octree node
-    parent : octree.OctreeNode, optional
-        The octree node that contains this node, by default None
-    data : list or dict, optional
-        Data associated with the octree node. The type of data depends on 
-        the how the octree was created, by default [].
-    level : int, optional
-        Depth within the tree structure, by default 0.
-        The root node is at level 0, the root's children are at level 1, etc.
-    state : str, optional
-        Specifies whether the node's place in the tree structure, by default
-        'unknown'.
-
-        Possible states are:
-        - 'root': This node is the root of the octree
-        - 'branch': This is node is an intermediate node between the root and leaves
-        - 'leaf': This is node is a terminal end and has no children.
-        - 'empty': No data is contained within this node, and it has no children
-        - 'unknown': State hasn't been specified.
-    """        
+          
     def __init__(self,centroid,size,parent=None,data=[],level=0,state='unknown'):
-           
+        """
+        The OctreeNode is the basic unit of the octree data structure. The structure
+        consists of a series of nodes that reference their parent and child nodes, 
+        allowing for traversal of the tree structure.
+
+        Parameters
+        ----------
+        centroid : array_like
+            Location of the center of the octree node
+        size : float
+            Side length of the cube associated with the octree node
+        parent : octree.OctreeNode, optional
+            The octree node that contains this node, by default None
+        data : list or dict, optional
+            Data associated with the octree node. The type of data depends on 
+            the how the octree was created, by default [].
+        level : int, optional
+            Depth within the tree structure, by default 0.
+            The root node is at level 0, the root's children are at level 1, etc.
+        state : str, optional
+            Specifies whether the node's place in the tree structure, by default
+            'unknown'.
+
+            Possible states are:
+            - 'root': This node is the root of the octree
+            - 'branch': This is node is an intermediate node between the root and leaves
+            - 'leaf': This is node is a terminal end and has no children.
+            - 'empty': No data is contained within this node, and it has no children
+            - 'unknown': State hasn't been specified.
+        """  
         self.centroid = centroid
         self.size = size
         self.children = []
@@ -59,6 +95,18 @@ class OctreeNode:
         return out
     
     def getMaxDepth(self):
+        """
+        Get the maximum depth of the octree. The depth is the highest level
+        reachable from the current node. The depth is given as the absolute level, 
+        rather than relative to the current node, i.e., the max depth of an octree will
+        be the same regardless of whether use search using the root node 
+        or some other node 
+
+        Returns
+        -------
+        depth : int
+            Depth of the octree
+        """        
         depth = self.level
         def recur(node, depth):
             if node.level > depth:
@@ -93,11 +141,32 @@ class OctreeNode:
         return recur(self,nodes)
 
     def getLimits(self):
+        """
+        Get the spatial bounds of the current octree node. Limits are formatted
+        as [[xmin, xmax], [ymin, ymax], [zmin, zmax]]. These are equivalent 
+        to node.centroid +/- (node.size/2).
+
+        Returns
+        -------
+        limits : list
+            list of x, y and z bounds of the octree node
+        """        
         if self.limits is None:
             self.limits = [[self.centroid[d]-self.size/2,self.centroid[d]+self.size/2] for d in range(3)]
         return self.limits
     
     def getVertices(self):
+        """
+        Get the coordinates of the 8 vertices of the cube that correspond to the
+        octree node. These are ordered following the hexahedral element node 
+        numbering scheme, with the 4 minimum z vertices ordered counter clockwise
+        followed by the 4 maximum z vertices.
+
+        Returns
+        -------
+        vertices : np.ndarray
+            Array of vertex coordinates
+        """        
         if self.vertices is None:
             [x0,x1],[y0,y1],[z0,z1] = self.getLimits()
             self.vertices = np.array([[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0],
@@ -105,18 +174,52 @@ class OctreeNode:
         return self.vertices
 
     def PointInNode(self,point,inclusive=True):
+        """
+        Check if a point is within the bounds of the current node.
+
+        Parameters
+        ----------
+        point : array_like
+            Three element coordinate array
+        inclusive : bool, optional
+            Specify whether a point exactly on the boundary is include as in
+            the node, by default True.
+
+        Returns
+        -------
+        inside : bool
+            True if the point is inside the node, otherwise False.
+        """        
         if inclusive:
             return all([(self.centroid[d]-self.size/2) <= point[d] and (self.centroid[d]+self.size/2) >= point[d] for d in range(3)])
         else:
             return all([(self.centroid[d]-self.size/2) < point[d] and (self.centroid[d]+self.size/2) > point[d] for d in range(3)])
     
     def PointsInNode(self,points,inclusive=True):
+        """
+        Check if a set of points is within the bounds of the current node.
+
+        Parameters
+        ----------
+        points : array_like
+            nx3 coordinate array
+        inclusive : bool, optional
+            Specify whether a point exactly on the boundary is include as in
+            the node, by default True.
+
+        Returns
+        -------
+        inside : np.ndarray
+            Array of bools for each point in points. True if the point is inside 
+            the node, otherwise False.
+        """
         if inclusive:
             return np.all([((self.centroid[d]-self.size/2) <= points[:,d]) & ((self.centroid[d]+self.size/2) >= points[:,d]) for d in range(3)], axis=0)
         else:
             return np.all([(self.centroid[d]-self.size/2) < points[:,d] and (self.centroid[d]+self.size/2) > points[:,d] for d in range(3)], axis=0)
 
     def TriInNode(self,tri,TriNormal,inclusive=True):
+        
         lims = self.getLimits()
         return rays.TriangleBoxIntersection(tri, lims[0], lims[1], lims[2], BoxCenter=self.centroid,TriNormal=TriNormal)
         
@@ -248,35 +351,81 @@ def isInsideOctree(pt,node,inclusive=True):
     else:
         return False
             
-def SearchOctree(pt,node,inclusive=True):
-    if node.PointInNode(pt,inclusive=inclusive):
-        if node.state == 'leaf':
+def SearchOctree(pt,root):
+    """
+    Retrieve the octree leaf node that contains the given point.
+
+    Parameters
+    ----------
+    pt : array_like
+        3D coordinate ([x,y,z])
+    root : octree.OctreeNode
+        Root of the octree to be searched
+
+    Returns
+    -------
+    node : octree.OctreeNode or NoneType
+        Octree node containing the point. If the no node can be found to contain the point, None will be returned.
+    """    
+    if root.PointInNode(pt,inclusive=True):
+        if root.state == 'leaf' or len(root.children) == 0:
             return node
         else:
-            for child in node.children:
-                if child.state == 'empty':
-                    continue
+            for child in root.children:
                 check = SearchOctree(pt,child)
                 if check:
                     return check
-            return False
+            return None
                     
     else:
-        return False
+        return None
     
-def SearchOctreeTri(tri,node,nodes=[],inclusive=True):
-    # print(nodes)
-    if node.TriInNode(tri,inclusive=inclusive):
-        if node.state == 'leaf':
-            nodes.append(node)
-        else:
-            for i,child in enumerate(node.children):
-                if child.state == 'empty':
-                    continue
-                nodes = SearchOctreeTri(tri,child,nodes=nodes,inclusive=inclusive)
+def SearchOctreeTri(tri,root,inclusive=True):
+    """
+    Retrieve the octree leaf node(s) that contain the triangle
+
+    Parameters
+    ----------
+    tri : array_like
+        3x3 list or np.ndarray containing the coordinates of the three vertices
+        of a triangle.
+    root : octree.OctreeNode
+        Root node of the octree to be searched
+    inclusive : bool, optional
+        Specifies whether to include leaf nodes that the triangle is exactly
+        on the boundary of, by default True.
+
+    Returns
+    -------
+    nodes : list
+        List of octree nodes.
+    """    
+    def recur(tri, node, nodes, inclusive):
+        if node.TriInNode(tri,inclusive=inclusive):
+            if root.state == 'leaf':
+                nodes.append(node)
+            else:
+                for i,child in enumerate(node.children):
+                    if child.state == 'empty':
+                        continue
+                    nodes = SearchOctreeTri(tri,child,nodes=nodes,inclusive=inclusive)
+    nodes = recur(tri, root, [], inclusive)
     return nodes
     
 def getAllLeaf(root):
+    """
+    Retrieve a list of all leaf nodes of the octree
+
+    Parameters
+    ----------
+    root : octree.OctreeNode
+        Root node of the octree of which the leaf nodes will be retrieved.
+
+    Returns
+    -------
+    leaves : list
+        List of octree leaf nodes.
+    """    
     # Return a list of all terminal(leaf) nodes in the octree
     def recur(node,leaves):
         if node.state == 'leaf':
@@ -456,13 +605,13 @@ def Function2Octree(func, bounds, grad=None, mindepth=2, maxdepth=5, strategy='E
         Strategy to guide subdivision, by default 'EDerror'.
         
         - 'EDerror': Uses the Euclidian distance error function proposed by 
-        :cite:`Zhang2003` to assess the error between linear interpolation within
-        an octree node and with the evaluation of the function at vertices at 
-        the next level of refinement. If the error is less than the threshold
-        specified by `eps` or if there are no sign changes detected, subdivision
-        is halted.
+            :cite:`Zhang2003` to assess the error between linear interpolation within
+            an octree node and with the evaluation of the function at vertices at 
+            the next level of refinement. If the error is less than the threshold
+            specified by `eps` or if there are no sign changes detected, subdivision
+            is halted.
         - 'QEF': Uses the quadratic error function proposed by 
-        :cite:`Schaefer2005`. This approach is not fully implemented yet.
+            :cite:`Schaefer2005`. This approach is not fully implemented yet.
     eps : float, optional
         Error threshold value used to determine whether further subdivision is
         necessary, by default 0.01
