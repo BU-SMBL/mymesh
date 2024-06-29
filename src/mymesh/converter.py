@@ -65,7 +65,7 @@ from scipy import ndimage, sparse
 import sys, os, warnings, glob, gc, tempfile
 from . import utils, rays, primitives, image
 
-def solid2surface(NodeCoords,NodeConn):
+def solid2surface(NodeCoords,NodeConn,return_SurfElem=False):
     """
     Extract the 2D surface elements from a 3D volume mesh
 
@@ -81,10 +81,16 @@ def solid2surface(NodeCoords,NodeConn):
     SurfConn : list
         Nodal connectivity list of the extracted surface. Node IDs correspond to the original node list NodeCoords
     """    
-    Faces = solid2faces(NodeCoords,NodeConn,return_FaceConn=False)
-    SurfConn = faces2surface(Faces)
-    
-    return SurfConn
+    if return_SurfElem:
+        Faces, FaceElem = solid2faces(NodeCoords,NodeConn,return_FaceElem=True)
+        SurfConn, SurfIds = faces2surface(Faces, return_ids=True)
+        ids = FaceElem[SurfIds]
+        return SurfConn, ids
+    else:
+        Faces = solid2faces(NodeCoords,NodeConn)
+        SurfConn = faces2surface(Faces)
+        
+        return SurfConn
 
 def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False):
     """
@@ -149,7 +155,7 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
     elif return_FaceConn:
         return Faces,FaceConn
     elif return_FaceElem:
-        return Faces,FaceConn,FaceElem
+        return Faces,FaceElem
     else:
         return Faces
 
@@ -492,7 +498,7 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
         return TetCoords, TetConn, ElemIds
     return TetCoords, TetConn
 
-def surf2tris(NodeCoords,NodeConn,return_ids=False):
+def surf2tris(NodeCoords,NodeConn,return_ids=False,return_inv=False):
     """
     Decompose all elements of a surface mesh to triangles.
     
@@ -505,6 +511,9 @@ def surf2tris(NodeCoords,NodeConn,return_ids=False):
         Nodal connectivity list.
     return_ids : bool, optional
         Element IDs of the tris connected to the original elements, by default False
+    return_inv : bool, optional
+        If True, return element IDs of the original elements that correspond to 
+        the triangular elements, by default False
 
     Returns
     -------
@@ -515,28 +524,39 @@ def surf2tris(NodeCoords,NodeConn,return_ids=False):
     ElemIds : list, optional
         If return_ids = True, a list of the element ids of the new triangles for each 
         of the original elements.
+    inv : np.ndarray, optional
+        Array of indices that point from the triangular mesh back to the original
+        mesh
     """    
     Ls = np.array([len(elem) for elem in NodeConn])
     triIdx = np.where(Ls == 3)[0]
     quadIdx = np.where(Ls == 4)[0]
     tris = [NodeConn[i] for i in triIdx]
     quads = [NodeConn[i] for i in quadIdx]
+    if len(tris) == 0:
+        tris = np.empty((0,3),dtype=int)
 
     TriCoords = NodeCoords
-    fromquad = quad2tri(quads)
-    TriConn = tris + fromquad
+    _,fromquad = quad2tri(NodeCoords, quads)
+    TriConn = np.vstack([tris, fromquad])
+    if return_ids or return_inv:
+        inv = np.concatenate((triIdx,np.repeat(quadIdx,2)))
     if return_ids:
         # Element ids of the tris connected to the original elements
-        ElemIds_i = np.concatenate((triIdx,np.repeat(quadIdx,2)))
+        ElemIds_i = inv
         ElemIds_j = np.concatenate((np.repeat(0,len(triIdx)), 
                 np.repeat([[0,1]],len(quadIdx),axis=0).reshape(len(quadIdx)*2),                   
                 ))
         ElemIds = -1*np.ones((len(NodeConn),6))
         ElemIds[ElemIds_i,ElemIds_j] = np.arange(len(TriConn))
         ElemIds = utils.ExtractRagged(ElemIds,dtype=int)
-    
+
     if return_ids:
+        if return_inv:
+            return TriCoords, TriConn, ElemIds, inv
         return TriCoords, TriConn, ElemIds
+    elif return_inv:
+        return TriCoords, TriConn, inv
     return TriCoords, TriConn
 
 def hex2tet(NodeCoords,NodeConn,method='1to6'):
@@ -1025,7 +1045,7 @@ def pyramid2tet(NodeCoords,NodeConn, method='1to2c'):
 
     return NewCoords, TetConn
 
-def faces2surface(Faces):
+def faces2surface(Faces, return_ids=False):
     """
     Identify surface elements, i.e. faces that aren't shared between two elements
 
@@ -1033,11 +1053,15 @@ def faces2surface(Faces):
     ----------
     Faces : list
         Nodal connectivity of mesh faces (as obtained by solid2faces)
+    return_ids : bool, optional
+        If True, will return the face ids that correspond to each surface,
+        i.e. `SurfConn = Faces[ids]`. By default, False.
 
     Returns
     -------
     SurfConn
         Nodal connectivity of the surface mesh.
+    
     """    
     
     table = dict()
@@ -1051,6 +1075,10 @@ def faces2surface(Faces):
     SurfConn = [Faces[i] for key, i in table.items() if i != -1]
     if len(Faces) == len(SurfConn):
         SurfConn=Faces
+    if return_ids:
+        vals = np.array(list(table.values()))
+        ids = vals[vals != -1]
+        return SurfConn, ids
     return SurfConn
 
 def faces2unique(Faces,return_idx=False,return_inv=False):
@@ -1605,25 +1633,36 @@ def hex2edges(NodeCoords,NodeConn):
         Edges = np.empty((0,2),dtype=int)
     return Edges
 
-def quad2tri(QuadNodeConn):
+def quad2tri(NodeCoords,NodeConn):
     """
     Converts a quadrilateral mesh to a triangular mesh by splitting each quad into 2 tris  
 
     Parameters
     ----------
-    QuadNodeConn : list
-        list of nodal connectivities for a strictly quadrilateral mesh.
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        Nodal connectivity list. All elements should be 4-Node quadrilateral elements.
 
     Returns
     -------
-    TriNodeConn : list
+    TriConn : list
         list of nodal connectivities for the new triangular mesh.
     """
-    TriNodeConn = [[] for i in range(2*len(QuadNodeConn))]
-    for i in range(len(QuadNodeConn)):
-        TriNodeConn[2*i] = [QuadNodeConn[i][0], QuadNodeConn[i][1], QuadNodeConn[i][3]]
-        TriNodeConn[2*i+1] = [QuadNodeConn[i][1], QuadNodeConn[i][2], QuadNodeConn[i][3]]
-    return TriNodeConn
+    # TriNodeConn = [[] for i in range(2*len(QuadNodeConn))]
+    # for i in range(len(QuadNodeConn)):
+    #     TriNodeConn[2*i] = [QuadNodeConn[i][0], QuadNodeConn[i][1], QuadNodeConn[i][3]]
+    #     TriNodeConn[2*i+1] = [QuadNodeConn[i][1], QuadNodeConn[i][2], QuadNodeConn[i][3]]
+
+    if len(NodeConn) == 0:
+        return NodeCoords, np.empty((0,3),dtype=int)
+
+    ArrayConn = np.asarray(NodeConn, dtype=int)
+    TriConn = -1*np.ones((len(NodeConn)*2,3),dtype=int)
+    TriConn[0::2] = ArrayConn[:,[0,1,3,]]
+    TriConn[1::2] = ArrayConn[:,[1,2,3,]]
+    
+    return NodeCoords, TriConn
         
 def tet102tet4(NodeCoords, Tet10NodeConn):
     """

@@ -21,15 +21,78 @@ import matplotlib
 import matplotlib.pyplot as plt
 import io, re, warnings
 
-from . import converter, utils
+from . import converter, utils, mesh
 
-def View(M, interactive=True,  
-    shading='flat', bgcolor=None,
+def View(M, interactive=True, bgcolor=None,
     color=None, face_alpha=1, color_convert=None, 
     clim=None, theme='default', scalar_preference='nodes',
     view=None, scalars=None,
-    show_edges=False, show_faces=True, line_width=1,
-    show_colorbar=None, colorbar_args={}, return_image=False, hide=False):
+    show_edges=False, show_faces=True, line_width=1, line_color=None,
+    show_colorbar=None, colorbar_args={}, return_image=False, hide=False,  
+    shading='flat'):
+    """
+    Visualize a mesh.
+    View uses vispy for visualization.
+
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Mesh object to be viewed
+    interactive : bool, optional
+        View mesh in an interactive window, allowing for panning, rotation, etc.
+        By default True.
+    bgcolor : _type_, optional
+        _description_, by default None
+    color : str, array_like, or NoneType, optional
+        Color of the surface, specified as a named color (see :func:`ParseColor`,
+        hex color code, or RGBA list/tuple/array). If None, the color will
+        be chosen based on the `theme`, by default None.
+    face_alpha : Float, optional
+        Alpha value controlling face opacity - 0 = transparent, 1 = opaque, by 
+        default 1.
+    color_convert : str or NoneType, optional
+        Convert the colors to simulate different types of color vision. Available 
+        options are "deuteranomaly", "protanomaly", "tritanomaly", or "grayscale",
+        by default None. Color conversion is performed using 
+        `Colorspacious <https://github.com/njsmith/colorspacious>`_
+    clim : tuple or NoneType, optional
+        Color range bounds if displaying scalar data, by default None.
+    theme : str, optional
+        Select a theme (see :func:`GetTheme`), by default 'default'.
+    scalar_preference : str, optional
+        In the even that `scalars` is specified by a string that references
+        an entry in both M.NodeData and M.ElemData, this will decide which 
+        is chosen. Specified as either 'nodes' or 'elements', by default 'nodes'.
+    view : _type_, optional
+        _description_, by default None
+    scalars : _type_, optional
+        _description_, by default None
+    show_edges : bool, optional
+        _description_, by default False
+    show_faces : bool, optional
+        _description_, by default True
+    line_width : int, optional
+        _description_, by default 1
+    line_color : _type_, optional
+        _description_, by default None
+    show_colorbar : _type_, optional
+        _description_, by default None
+    colorbar_args : dict, optional
+        _description_, by default {}
+    return_image : bool, optional
+        _description_, by default False
+    hide : bool, optional
+        _description_, by default False
+    shading : str, optional
+        _description_, by default 'flat'
+        Options are 'flat', 'smooth', None
+
+    Returns
+    -------
+    _type_
+        _description_
+
+    """    
     ###
     # Shading: 'flat', 'smooth', None
     # viewmode: 'arcball', 'fly', 'turntable'
@@ -42,6 +105,7 @@ def View(M, interactive=True,
         from vispy import app, scene
         from vispy.io import read_mesh, load_data_file
         from vispy.scene.visuals import Mesh as vispymesh
+        from vispy.scene.visuals import Line
         from vispy.scene import transforms
         from vispy.visuals.filters import ShadingFilter, WireframeFilter, FacePickingFilter
     except:
@@ -62,23 +126,39 @@ def View(M, interactive=True,
     # set backend
     if hide:
         interactive = False
-    if ipython and interactive:
-        chosen = set_vispy_backend('jupyter_rfb')
-        if chosen != 'jupyter_rfb':
-            warnings.warn(f'jupyter_rfb is needed for interactive visualization in IPython. \nInstall with: pip install jupyter_rfb. \nFalling back to {chosen:s} backend.')
-    else:
-        chosen = set_vispy_backend()
-
-
+    # if ipython and interactive:
+    #     chosen = set_vispy_backend('jupyter_rfb')
+    #     if chosen != 'jupyter_rfb':
+    #         warnings.warn(f'jupyter_rfb is needed for interactive visualization in IPython. \nInstall with: pip install jupyter_rfb. \nFalling back to {chosen:s} backend.')
+    # else:
+    #     chosen = set_vispy_backend()
+    chosen = set_vispy_backend('jupyter_rfb')
+    
     # Set Theme (Need to handle this better)
-    if bgcolor is None:
-        _, bgcolor = GetTheme(theme, scalars)
+    theme = GetTheme(theme, scalars)
     if color is None:
-        color, _ = GetTheme(theme, scalars)
+        color = theme[0]
+    if bgcolor is None:
+        bgcolor = theme[1]
+    if line_color is None:
+        line_color = theme[2]
+    
+    # Create canvas
+    canvas = scene.SceneCanvas(keys='interactive', bgcolor=ParseColor(bgcolor), title='MyMesh Viewer',show=interactive,resizable=False)
 
+    # Set view mode
+    viewmode='arcball'
+    canvasview = canvas.central_widget.add_view()
+    canvasview.camera = viewmode
+    
     # Set up mesh
     vertices = np.asarray(M.NodeCoords)# - np.mean(M.NodeCoords,axis=0) # Centering mesh in window
-    _,faces = converter.surf2tris(M.NodeCoords, M.SurfConn)
+    if M.Type == 'vol':
+        SurfConn, ids = converter.solid2surface(*M, return_SurfElem=True)
+        _,faces, inv = converter.surf2tris(M.NodeCoords, SurfConn, return_inv=True)
+        # TODO: Need to properly use ids and tri_ids to transfer element data to the surface
+    else:
+        _,faces, inv = converter.surf2tris(M.NodeCoords, M.SurfConn, return_inv=True)
 
     # Process scalars
     if scalars is not None: 
@@ -107,7 +187,13 @@ def View(M, interactive=True,
         # TODO: Might want a clipping option
         color_scalars = matplotlib.colors.Normalize(clim[0], clim[1], clip=False)(scalars)
 
-        if len(scalars) == len(faces):
+        if len(scalars) == M.NElem:
+            if M.Type == 'vol':
+                scalars = np.asarray(scalars)[ids[inv]]
+                color_scalars = color_scalars[ids[inv]]
+            else:
+                scalars = np.asarray(scalars)[inv]
+                color_scalars = color_scalars[inv]
             face_colors = FaceColor(len(faces), color, face_alpha, scalars=color_scalars, color_convert=color_convert)
 
             vertex_colors = None
@@ -121,28 +207,7 @@ def View(M, interactive=True,
         vertex_colors = None
 
     vsmesh = vispymesh(np.asarray(vertices), np.asarray(faces), face_colors=face_colors, vertex_colors=vertex_colors)
-
-    # Create canvas
-    canvas = scene.SceneCanvas(keys='interactive', bgcolor=ParseColor(bgcolor), title='MyMesh Viewer',show=interactive,resizable=False)
-
-    # Set view mode
-    viewmode='arcball'
-    canvasview = canvas.central_widget.add_view()
-    canvasview.camera = viewmode
-    # Set initial position
-    # canvasview.camera.transform = transforms.MatrixTransform()
-    # print(canvasview.camera.transform)
-    # canvasview.camera.transform.rotate(90, (0, 1, 1))
-    canvasview.camera.depth_value = 1e3
-
-    vsmesh.transform = transforms.MatrixTransform()
-    if view is None:
-        vsmesh.transform.rotate(120, (1, 0, 0))
-        vsmesh.transform.rotate(-30, (0, 0, 1))
-    elif view == 'xy':
-        vsmesh.transform.rotate(90, (1, 0, 0))
-    canvasview.add(vsmesh)
-
+    
     # Set edges
     if show_edges and show_faces:
         wireframe_enabled = True
@@ -162,25 +227,30 @@ def View(M, interactive=True,
         wireframe_only = True
         faces_only = False
         line_width = 0
-    wireframe_filter = WireframeFilter(enabled=wireframe_enabled, wireframe_only=wireframe_only, faces_only=faces_only,width=line_width)
-    vsmesh.attach(wireframe_filter)
+    
 
-    # Add colorbar
-    if show_colorbar:
-        pass
-        # viewbox = vispy.scene.ViewBox(camera=vispy.scene.cameras.BaseCamera())
-        # if 'cmap' not in colorbar_args.keys():
-        #     colorbar_args['cmap'] = color
-        # if 'orientation' not in colorbar_args.keys():
-        #     colorbar_args['orientation'] = 'right'
+    if wireframe_enabled:
+        wireframe = Line(pos=M.NodeCoords, connect=M.Surface.Edges, width=line_width, color=ParseColor(line_color))
 
-        # colorbar = vispy.scene.ColorBarWidget(**colorbar_args)
-        # colorbar.transform = transforms.MatrixTransform()
-        # colorbar.transform.rotate(90, (1, 0, 0))
-        # colorbar.transform.rotate(-45, (0, 0, 1))
+    # Set initial position
+    canvasview.camera.depth_value = 1e3
 
-        # viewbox.add(colorbar)
-        # canvasview.add(viewbox)
+    vsmesh.transform = transforms.MatrixTransform()
+    if view is None:
+        vsmesh.transform.rotate(120, (1, 0, 0))
+        vsmesh.transform.rotate(-30, (0, 0, 1))
+    elif view == 'xy':
+        vsmesh.transform.rotate(90, (1, 0, 0))
+    
+    if wireframe_enabled:
+        vsmesh.set_gl_state(polygon_offset_fill=True,
+                               polygon_offset=(1, 1), depth_test=True)
+        wireframe.transform = vsmesh.transform
+        # wireframe.set_gl_state(depth_test=True)
+        canvasview.add(wireframe)
+    if not wireframe_only:
+        canvasview.add(vsmesh)
+    
     
     # Set shading/lighting
     shading_filter = ShadingFilter()
@@ -306,7 +376,8 @@ def GetTheme(theme, scalars):
             color = 'white'
         else:
             color = 'cividis'
-    return color, bgcolor
+        linecolor = 'black'
+    return color, bgcolor, linecolor
 
 def set_vispy_backend(preference='PyQt6'):
     try:
