@@ -39,8 +39,8 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
     # Split Mesh
     Split1, Split2 = SplitMesh(Surf1, Surf2, eps=eps)
 
-    Split1.cleanup(tol=eps,strict=True)
-    Split2.cleanup(tol=eps,strict=True)
+    Split1.cleanup(tol=eps)
+    Split2.cleanup(tol=eps)
 
     # Get Shared Nodes
     Shared1,Shared2 = GetSharedNodes(Split1.NodeCoords, Split2.NodeCoords, eps=tol)
@@ -78,9 +78,9 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
         Intersection = mesh(MergedICoords,MergedIConn)
         Difference = mesh(MergedDCoords,MergedDConn)
 
-    Union.cleanup(tol=eps_final,angletol=5e-3)
-    Intersection.cleanup(tol=eps_final,angletol=5e-3)
-    Difference.cleanup(tol=eps_final,angletol=5e-3)
+    Union.cleanup(tol=eps_final)
+    Intersection.cleanup(tol=eps_final)
+    Difference.cleanup(tol=eps_final)
 
     return Union, Intersection, Difference
 
@@ -114,7 +114,7 @@ def PlaneClip(pt, normal, Surf, fill=False, fill_h=None, tol=1e-8, flip=True, re
     # if fill:
     #     # TODO: Efficiency and Robustness
     #     Shared1,Shared2 = GetSharedNodes(SplitSurf.NodeCoords, SplitPlane.NodeCoords, eps=tol)
-    #     root = octree.Surf2Octree(*Surf)
+    #     root = octree.Surface2Octree(*Surf)
     #     if np.any(np.abs(normal) != [0,0,1]):
     #         ray = np.cross(normal, [0,0,1])
     #     else:
@@ -284,8 +284,8 @@ def GetSharedNodes(NodeCoordsA, NodeCoordsB, eps=1e-10):
 def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     # Classifies each Triangle in A as inside, outside, or on the surface facing the same or opposite direction as surface B
     
-    octA = None# octree.Surf2Octree(*SplitA)
-    octB = None# octree.Surf2Octree(*SplitB)
+    octA = None# octree.Surface2Octree(*SplitA)
+    octB = None# octree.Surface2Octree(*SplitB)
     AllBoundaryA = np.array([i for i,elem in enumerate(SplitA.NodeConn) if all([n in SharedA for n in elem])])
     AllBoundaryB = np.array([i for i,elem in enumerate(SplitB.NodeConn) if all([n in SharedB for n in elem])])  
     NotSharedConnA = [elem for i,elem in enumerate(SplitA.NodeConn) if not any([n in SharedA for n in elem]) and i not in AllBoundaryA]  
@@ -323,10 +323,10 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     if len(AllBoundaryB) > 0:
         AllBoundaryBCentroids = utils.Centroids(SplitB.NodeCoords,[elem for i,elem in enumerate(SplitB.NodeConn) if i in AllBoundaryB])
         check = rays.isInsidesSurf(AllBoundaryBCentroids,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,rays=ElemNormalsB[AllBoundaryB],eps=eps)
-        BinA.update(AllBoundaryA[check == True])
-        BoutA.update(AllBoundaryA[check == False])
-        BsameA.update(AllBoundaryA[check > 0])
-        BflipA.update(AllBoundaryA[check <= 0])
+        BinA.update(AllBoundaryB[check == True])
+        BoutA.update(AllBoundaryB[check == False])
+        BsameA.update(AllBoundaryB[check > 0])
+        BflipA.update(AllBoundaryB[check <= 0])
 
     for r in range(len(RegionsA)):
         RegionElems = [e for e in range(len(SplitA.NodeConn)) if all([n in RegionsA[r] for n in SplitA.NodeConn[e]])] # Elem Set
