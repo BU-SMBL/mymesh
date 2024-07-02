@@ -351,6 +351,8 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
             
             MultiSurface.addElems(m.SurfConn)
             label_nodes[i,np.unique(m.NodeConn)] = 1
+        MultiSurface.NodeCoords = NodeCoords    
+        MultiSurface.Type = 'surf'
         MultiSurface.NodeConn = MultiSurface.Faces  # This prevents doubling of surface elements at interfaces
         SurfConn = MultiSurface.NodeConn
         # Identify nodes on edges shared by more than two triangles
@@ -1315,6 +1317,8 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=5, l
             
             MultiSurface.addElems(m.SurfConn)
             label_nodes[i,np.unique(m.NodeConn)] = 1
+        MultiSurface.NodeCoords = NewCoords    
+        MultiSurface.Type = 'surf'
         MultiSurface.NodeConn = MultiSurface.Faces  # This prevents doubling of surface elements at interfaces
         SurfConn = MultiSurface.NodeConn
         SurfEdges = np.sort(MultiSurface.Edges)
