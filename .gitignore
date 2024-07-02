@@ -1,6 +1,7 @@
 # Ignore Directories:
 .vscode/
 .pylint.d/
+.pytest_cache/
 __pycache__/
 *.vtu
 Usurped/
@@ -8,3 +9,4 @@ docs/make.bat
 docs/Makefile
 docs/source/generated/
 docs/build/
+src/mymesh.egg-info/
