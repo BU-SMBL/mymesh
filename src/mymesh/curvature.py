@@ -4,6 +4,8 @@
 """
 Tools for calculating curvature
 
+See also :ref:`Curvature` in the :ref:`Theory Guide`.
+
 
 .. currentmodule:: mymesh.curvature
 
@@ -275,14 +277,14 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
     RotAxes = np.repeat([[0,0,1]],len(SurfCoords),axis=0)
     
     Bool = ((SurfNormals[:,0]!=0) | (SurfNormals[:,1]!=0)) & ~np.any(np.isnan(SurfNormals),axis=1)
-    Cross = np.cross([0,0,1],-SurfNormals)
+    Cross = np.cross([0,0,1],SurfNormals) #np.cross([0,0,1],-SurfNormals)
     RotAxes = Cross/np.linalg.norm(Cross,axis=1)[:,None]
     RotAxes[np.all(SurfNormals == [0,0,-1],axis=1)] = [1,0,0]
     RotAxes[np.all(SurfNormals == [0,0,1],axis=1)] = [0,0,1]
     # Rotation Angles
     Angles = np.zeros(len(SurfCoords))
     Angles[np.all(SurfNormals == [0,0,-1],axis=1)] = np.pi
-    Angles = np.arccos(-1*np.sum([0,0,1]*SurfNormals,axis=1))
+    Angles = np.arccos(np.sum([0,0,1]*SurfNormals,axis=1)) # np.arccos(-1*np.sum([0,0,1]*SurfNormals,axis=1))
 
     # Quaternions
     Q = np.hstack([np.transpose([np.cos(Angles/2)]), RotAxes*np.sin(Angles/2)[:,None]])
@@ -313,19 +315,19 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
     bjs = RNormals[:,:,1]
     cjs = RNormals[:,:,2]
 
-    scales = 2/(xjs**2+yjs**2) 
+    # scales = np.ones(xjs.shape)#2/(xjs**2+yjs**2) 
 
     nNeighbors = RHoods.shape[1]
 
     Amat = np.zeros((len(SurfNodes),nNeighbors*3,7))
-    Amat[:,:nNeighbors] = np.array([scales/2*xjs**2, scales*xjs*yjs, scales/2*yjs**2, scales*xjs**3, scales*xjs**2*yjs, scales*xjs*yjs**2, scales*yjs**3]).T.swapaxes(0,1)
-    Amat[:,nNeighbors:2*nNeighbors] = np.array([scales*xjs, scales*yjs, np.zeros(scales.shape), scales*3*xjs**2, scales*2*xjs*yjs, scales*yjs**2, np.zeros(scales.shape)]).T.swapaxes(0,1)
-    Amat[:,2*nNeighbors:3*nNeighbors] = np.array([np.zeros(scales.shape), scales*xjs, scales*yjs, np.zeros(scales.shape), scales*xjs**2, scales*2*xjs*yjs, scales*3*yjs**2]).T.swapaxes(0,1)
+    Amat[:,:nNeighbors] = np.array([1/2*xjs**2, xjs*yjs, 1/2*yjs**2, xjs**3, xjs**2*yjs, xjs*yjs**2, yjs**3]).T.swapaxes(0,1)
+    Amat[:,nNeighbors:2*nNeighbors] = np.array([xjs, yjs, np.zeros(xjs.shape), 3*xjs**2, 2*xjs*yjs, yjs**2, np.zeros(xjs.shape)]).T.swapaxes(0,1)
+    Amat[:,2*nNeighbors:3*nNeighbors] = np.array([np.zeros(xjs.shape), xjs, yjs, np.zeros(xjs.shape), xjs**2, 2*xjs*yjs, 3*yjs**2]).T.swapaxes(0,1)
 
     Bmat = np.zeros((len(SurfNodes),nNeighbors*3,1))
-    Bmat[:,:nNeighbors,0] = scales*zjs
-    Bmat[:,nNeighbors:2*nNeighbors,0] = -scales*ajs/cjs
-    Bmat[:,2*nNeighbors:3*nNeighbors,0] = -scales*bjs/cjs
+    Bmat[:,:nNeighbors,0] = zjs
+    Bmat[:,nNeighbors:2*nNeighbors,0] = ajs/cjs # -ajs/cjs
+    Bmat[:,2*nNeighbors:3*nNeighbors,0] = bjs/cjs # -bjs/cjs
 
     MaxPrincipal = np.repeat(np.nan,len(NodeCoords))
     MinPrincipal = np.repeat(np.nan,len(NodeCoords))
