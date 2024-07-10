@@ -17,7 +17,7 @@ Contouring
     MarchingCubes
     MarchingCubesImage
     MarchingTetrahedra
-    DualMarchingCubes
+    Adaptive
 
 
 """
@@ -3836,7 +3836,7 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
 
 def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='original', VertexValues=False, edgemode='constant', flip=False, cleanup=True):
     """
-    Marching squares algorithm :cite:p:`Lorensen1987` applied to 3D image data.
+    Marching cubes algorithm :cite:p:`Lorensen1987` applied to 3D image data.
 
     Parameters
     ----------
@@ -3960,7 +3960,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     elif method == '33':
         ##### TODO ####
         pass
-    if not len(numbering) == 0:
+    if len(numbering) == 0:
         return np.empty((0,3)), np.empty((0,3))
     i_indices = icubes[numbering][np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]]
     j_indices = jcubes[numbering][np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]]
@@ -4108,7 +4108,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         raise Exception('Invalid input "{:s}" for interpolation. Must be one of "midpoint", "linear", or "cubic".'.format(interpolation))
     
     NewCoords = np.fliplr(NewCoords) # Flipping so that index 0 for the image -> z axis
-    NewConn = np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F')
+    NewConn = np.fliplr(np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F'))
     if cleanup:
         NewCoords,NewConn,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
         if (interpolation=='linear' or interpolation=='cubic') and method=='triangle':
@@ -4118,7 +4118,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
 
 def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',method='33',flip=False, return_anchors=False):
     """
-    Marching squares algorithm :cite:p:`Lorensen1987` for extracting an isosurface from a hexahedral mesh.
+    Marching cubes algorithm :cite:p:`Lorensen1987` for extracting an isosurface from a hexahedral mesh.
 
     Parameters
     ----------
@@ -4274,7 +4274,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         return TriNodeCoords, TriNodeConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
     return np.asarray(TriNodeCoords), TriNodeConn
 
-def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', method='surface', mixed_elements=False, flip=False, return_NodeValues=False, return_ParentIds=False, cleanup_tol=1e-10, cleanup=True):
+def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', Type='surf', mixed_elements=False, flip=False, return_NodeValues=False, return_ParentIds=False, cleanup_tol=1e-10, cleanup=True):
     """
     Marching tetrahedra algorithm :cite:p:`Bloomenthal1994` for extracting an isosurface from a tetrahedral mesh. This can be used to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).
 
@@ -4298,9 +4298,9 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
 
         'quadratic' - Quadratic interpolation is performed. This requires that the provided
         tetrahedral mesh has quadratic elements (10 node tetrahedra).
-    method : str, optional
-        Determines whether to generate a surface mesh ('surface') or volume mesh ('volume'), 
-        by default 'surface'
+    Type : str, optional
+        Determines whether to generate a surface mesh ('surf') or volume mesh ('vol'), 
+        by default 'surf'
     mixed_elements : bool, optional
         If True, the generated mesh will have mixed element types (triangles/quadrilaterals, tetrahedra/wedges), otherwise a single element type (triangles, tetrahedra), by default False. For surface
         meshes, either version is generated directly. For a volume mesh, a mixed mesh is generated initially and then converted to tetrahedra using converter.solid2tets()
@@ -4458,15 +4458,15 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     ints = np.sum(inside[:,:4] * 2**np.arange(0,4)[::-1], axis=1)
 
     # Query lookup tables
-    if method.lower() == 'surface':
+    if Type.lower() == 'surf':
         if mixed_elements:
             element_lists = MTMixed_Lookup[ints]
         else:
             element_lists = MT_Lookup[ints]
-    elif method.lower() == 'volume':
+    elif Type.lower() == 'vol':
         element_lists = MTVMixed_Lookup[ints]
     else:
-        raise ValueError('Invalid method, method must be "surface" or "volume".')
+        raise ValueError('Invalid Type, Type must be "surf" or "vol".')
 
     # Process lookup results
     tetnum, elem = zip(*[(i,e) for i,lst in enumerate(element_lists) for e in lst if len(lst) > 0])
@@ -4584,14 +4584,14 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         raise ValueError('interpolation must be either "midpoint" or "linear"')
 
     # Format points into NodeCoords, NodeConn
-    if method.lower() == 'surface' and not mixed_elements:
+    if Type.lower() == 'surf' and not mixed_elements:
         NodeConn = inv[np.reshape(np.arange(nelem*3), (nelem, 3))]
     else:
         lengths = [len(e) for e in elem]
         sums = np.append([0],np.cumsum(lengths))
         NodeConn = [[inv[n+sums[i]] for n in range(lengths[i])] for i in range(len(lengths))]
 
-    if method.lower() == 'volume' and not mixed_elements:
+    if Type.lower() == 'vol' and not mixed_elements:
         NodeCoords, NodeConn, ids = converter.solid2tets(NodeCoords, NodeConn, return_ids=True)
         if return_ParentIds:
             ParentIds = np.zeros(len(NodeConn),dtype=int)
@@ -4604,7 +4604,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
         if return_NodeValues:
             NewValues = NewValues[Idx]
-        NodeCoords,NodeConn,EIdx = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type='vol' if method == 'volume' else 'surf', return_idx=True)
+        NodeCoords,NodeConn,EIdx = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type=Type, return_idx=True)
         if return_ParentIds:
             ParentIds = ParentIds[EIdx]
 
@@ -4619,19 +4619,97 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         return NodeCoords, NodeConn, ParentIds
     return NodeCoords, NodeConn
 
-def DualMarchingCubes(func, grad, bounds, minsize, maxsize, threshold=0, method='33', octree_strategy='gradient', octree_eps=0.1, dualgrid_method='centroid'):
-    warnings.warn('DualMarchingCubes is still under development.')
-    # *NOTE: In below comments the terms bottom/top, left/right, front/back refer to z, x, and y directions respectively
-    # z(bottom) < z(top), x(left) < x(right), y(front) < y(back) 
+def Adaptive(func, bounds, threshold=0, method=None, grad=None, mindepth=2, maxdepth=5, octree_strategy='EDerror', octree_eps=0.1, dualgrid_method='centroid', Type='surf'):
+    """
+    Adaptively contour an implicit function. Uses an octree 
+    (:func:`~mymesh.octree.Function2Octree`) to adaptively sample the function,
+    then uses the chosen method to contour the dual grid 
+    (:func:`~mymesh.octree.Octree2Dual`) of the octree.
+    
+    Based on, but not an exact implementation of, Dual Marching Cubes
+    :cite:p:`Schaefer2005`.
 
-    # dualgrid_method could be centroid or qef_min
+    Parameters
+    ----------
+    func : function
+        Implicit function that describes the geometry of the object to be meshed. 
+        The function should be of the form v = f(x,y,z) and capable of handling
+        vectorized inputs.
+    bounds : array_like
+        6 element array, list, or tuple with the minimum and maximum bounds in each direction that the function will be evaluated. This should be formatted as: [xmin, xmax, ymin, ymax, zmin, zmax]
+    threshold : scalar
+        Isovalue threshold to use for keeping/removing elements, by default 0.
+    method : str, optional
+        Contouring method to be used
 
-    root = octree.Function2Octree(func, grad, bounds, maxsize=maxsize, minsize=minsize, strategy=octree_strategy, eps=octree_eps, npts=3)
+            - "mc": Marching Cubes
+            - "mc33": Marching Cubes 33
+            - "mt": Marching Tetrahedra
+        
+        By default, "mc33" will be chosen if Type='surf' and "mt" if Type='vol'.
+
+    grad : function, optional
+        Gradient of the function. By default, the gradient will be obtained 
+        through either symbolic differentiation or finite difference 
+        approximation.
+    mindepth : int, optional
+        Minimum octree depth, by default 2
+    maxdepth : int, optional
+        Maximum octree depth, by default 5
+    octree_strategy : str, optional
+        Octree subdivision strategy (see :func:`~mymesh.octree.Function2Octree`), 
+        by default 'EDerror'.
+    octree_eps : float, optional
+        Error tolerance for octree subdivision 
+        (see :func:`~mymesh.octree.Function2Octree`), by default 0.1
+    dualgrid_method : str, optional
+        Method for placing dual grid vertices (see 
+        :func:`~mymesh.octree.Octree2Dual`), by default 'centroid'.
+    Type : str, optional
+        Specifies whether to generate a surface mesh ("surf") or a volume
+        mesh ("vol"), by default 'surf'
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        Node Coordinates of the contour mesh.
+    NodeConn : list
+        Node connectivity list.
+
+    Examples
+    --------
+    .. plot::
+
+        func = implicit.unionf(implicit.box(-1.5,0,-1.5,0,-1.5,1.5),implicit.sphere([0,0,0], 1))
+        bounds = [-2,2,-2,2,-2,2]
+
+        S = mesh(*contour.Adaptive(func, bounds, mindepth=2, maxdepth=7))
+        S.plot(bgcolor='w', show_edges=True)
+    """    
+
+
+    if Type == 'vol':
+        if method is None:
+            method = 'mt'
+        elif method != 'mt':
+            warnings.warn('Invalid method for Type=vol, switching to marching tetrahedra ("mt").')
+    elif Type == 'surf' and method is None:
+        method = 'mc33'
+
+    root = octree.Function2Octree(func, bounds, threshold=threshold, grad=grad, mindepth=mindepth, maxdepth=maxdepth, strategy=octree_strategy, eps=octree_eps)
     DualCoords, DualConn = octree.Octree2Dual(root,method=dualgrid_method)
     NodeValues = func(DualCoords[:,0],DualCoords[:,1],DualCoords[:,2])
-    TriCoords, TriConn = MarchingCubes(DualCoords, DualConn, NodeValues)
+    
+    if method == 'mc':
+        NodeCoords, NodeConn = MarchingCubes(DualCoords, DualConn, NodeValues, threshold=threshold)
+    elif method == 'mc33':
+        NodeCoords, NodeConn = MarchingCubes(DualCoords, DualConn, NodeValues, threshold=threshold, method='33')
+    elif method == 'mt':
+        TetCoords, TetConn = converter.hex2tet(DualCords, DualConn)
+        NodeCoords, NodeConn = MarchingTetrahedra(TetCoords, TetConn, NodeValues, threshold=threshold, method='33', Type=Type)
+    
             
-    return TriCoords, TriConn, root, DualCoords, DualConn, NodeValues
+    return NodeCoords, NodeConn
 
 def SnapGrid2Surf(NodeCoords,NodeConn,NodeValues,threshold=0, snap=0.1, edges=None, FixedNodes=set()):
     # Based on ideas from isosurface stuffing, dual marching cubes, snapMC
@@ -4644,18 +4722,20 @@ def SnapGrid2Surf(NodeCoords,NodeConn,NodeValues,threshold=0, snap=0.1, edges=No
         edges = converter.edges2unique(e)
     if type(FixedNodes) is set:
         FixedNodes = list(FixedNodes)
-    EdgeVals = NodeValues[edges]
+    
     edgeshape = np.shape(edges)
     if len(edgeshape) == 1:
         raise ValueError('Input mesh appears to contain both linear and quadratic elements.')
     elif edgeshape[1] == 2:
         interpolation = 'linear'
-    elif edgeshape[2] == 3:
-        interpolation = 'quadratic'
+    elif edgeshape[1] == 3:
+        # interpolation = 'quadratic'
+        interpolation = 'linear'
+        edges = edges[:,[0,2]]
     else:
         raise Exception('Unexpected shape of edge list.')
         
-    
+    EdgeVals = NodeValues[edges]
     if interpolation == 'linear':
         SignChangeEdges = np.where(np.sign(EdgeVals[:,0]-threshold) != np.sign(EdgeVals[:,1]-threshold))[0]
         
@@ -5507,3 +5587,4 @@ def _generateLookup():
     # bits = np.array([int(b) for b in list('{:08b}'.format(i))])
     # lookuptab
  
+# %%
