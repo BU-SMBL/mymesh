@@ -362,7 +362,7 @@ def Plane(pt, normal, bounds, h, exact_h=False, ElemType='quad'):
         plane = mesh(PlaneCoords,PlaneConn,'surf')
     return plane
 
-def Cylinder(bounds, resolution, axis=2, axis_step=None, ElemType='tri', cap=True):
+def Cylinder(bounds, resolution=20, axis=2, axis_step=None, ElemType='tri', cap=True):
     """
     Generate an axis-aligned cylindrical surface mesh
 
@@ -371,8 +371,8 @@ def Cylinder(bounds, resolution, axis=2, axis_step=None, ElemType='tri', cap=Tru
     bounds : list
         Six element list of bounds [xmin,xmax,ymin,ymax,zmin,zmax].
         NodeCoords and NodeConn. By default False.
-    resolution : int
-        Number of points in the circumference of the cylinder
+    resolution : int, optional
+        Number of points in the circumference of the cylinder, by default 20.
     axis : int, optional
         Long axis of the cylinder (i.e. the circular ends will lie in the plane of the other two axes).
         Must be 0, 1, or 2 (x, y, z), by default 2
@@ -456,11 +456,11 @@ def Cylinder(bounds, resolution, axis=2, axis_step=None, ElemType='tri', cap=Tru
 
         cyl.merge(cap1)
         cyl.merge(cap2)
-        cyl.cleanup()
+    cyl.cleanup()
 
     return cyl
                
-def Sphere(center, radius, theta_resolution=10, phi_resolution=10, ElemType='tri'):
+def Sphere(center, radius, theta_resolution=20, phi_resolution=20, ElemType='tri'):
     """
     Generate a sphere (or ellipsoid)
     The total number of points will be phi_resolution*(theta_resolution-2) + 2
@@ -473,9 +473,9 @@ def Sphere(center, radius, theta_resolution=10, phi_resolution=10, ElemType='tri
         The radius of the sphere. Radius can be specified as a scalar radius of the sphere 
         or three element array of half-axes for an ellipsoid. 
     theta_resolution : int, optional
-        Number of circular (or elliptical) cross sections sampled along the z axis, by default 10.
+        Number of circular (or elliptical) cross sections sampled along the z axis, by default 20.
     phi_resolution : int, optional
-        Number of circumferential points for each cross section, by default 10.
+        Number of circumferential points for each cross section, by default 20.
     ElemType : str, optional
         Specify the element type of the mesh. This can either be 'quad' for 
         a quadrilateral mesh or 'tri' for a triangular mesh, by default 'tri'.
