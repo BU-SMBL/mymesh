@@ -41,7 +41,8 @@ Mesh Manipulations
 
     MirrorMesh
     MergeMesh
-    PeelHex
+    DilateVoxel
+    ErodeVoxel
     makePyramidLayer
 
 Surface Projection
@@ -1567,50 +1568,6 @@ def DetectFeatures(NodeCoords,SurfConn,angle=25):
 
     return edges,corners
 
-def PeelHex(NodeCoords,NodeConn,nLayers=1):
-    """
-    Removes the specified number of layers from a hexahedral mesh
-
-    Parameters
-    ----------
-    NodeCoords : list of lists
-        Contains coordinates for each node in a voxel mesh. Ex. [[x1,y1,z1],...].
-        The mesh is assumed to consist of only hexahedral elements.
-    NodeConn : List of lists
-        Nodal connectivity list.
-    nLayers : int, optional
-        Number of layers to peel. The default is 1.
-
-    Returns
-    -------
-    PeeledCoords : List
-        Node coordinates for each node in the peeled mesh.
-    PeeledConn : list
-        Nodal connectivity for each element in the peeled mesh.
-    PeelCoords : list
-        Node coordinates for each node in the layers of the mesh that have
-        been removed.
-    PeelConn : list
-        Nodal connectivity for each element in the layers of the mesh that have
-        been removed.
-
-    """
-
-    NewCoords = copy.copy(NodeCoords)
-    NewConn = copy.copy(NodeConn)   
-    PeelConn = []
-    for i in range(nLayers):
-        HexSurfConn = converter.solid2surface(NewCoords,NewConn)
-        SurfNodes = np.unique(HexSurfConn)
-        SurfNodeSet = set(SurfNodes)
-        PeelConn += [NewConn[i] for i in range(len(NewConn)) if (set(NewConn[i])&SurfNodeSet)]
-        NewConn = [NewConn[i] for i in range(len(NewConn)) if not (set(NewConn[i])&SurfNodeSet)]
-    
-    PeelCoords,PeelConn,_ = RemoveNodes(NewCoords,PeelConn)
-    PeeledCoords,PeeledConn,_ = RemoveNodes(NewCoords,NewConn)
-    
-    return PeeledCoords, PeeledConn, PeelCoords, PeelConn
-    
 def makePyramidLayer(VoxelCoords,VoxelConn,PyramidHeight=None):
     """
     Generate a set of pyramid elements that cover the surface of the voxel mesh. 
@@ -1657,7 +1614,51 @@ def makePyramidLayer(VoxelCoords,VoxelConn,PyramidHeight=None):
     
     return PyramidCoords, PyramidConn
 
-def makeVoxelLayer(VoxelCoords,VoxelConn):
+def ErodeVoxel(NodeCoords,NodeConn,nLayers=1):
+    """
+    Removes the specified number of layers from a hexahedral mesh
+
+    Parameters
+    ----------
+    NodeCoords : list of lists
+        Contains coordinates for each node in a voxel mesh. Ex. [[x1,y1,z1],...].
+        The mesh is assumed to consist of only hexahedral elements.
+    NodeConn : List of lists
+        Nodal connectivity list.
+    nLayers : int, optional
+        Number of layers to peel. The default is 1.
+
+    Returns
+    -------
+    PeeledCoords : List
+        Node coordinates for each node in the peeled mesh.
+    PeeledConn : list
+        Nodal connectivity for each element in the peeled mesh.
+    PeelCoords : list
+        Node coordinates for each node in the layers of the mesh that have
+        been removed.
+    PeelConn : list
+        Nodal connectivity for each element in the layers of the mesh that have
+        been removed.
+
+    """
+
+    NewCoords = copy.copy(NodeCoords)
+    NewConn = copy.copy(NodeConn)   
+    PeelConn = []
+    for i in range(nLayers):
+        HexSurfConn = converter.solid2surface(NewCoords,NewConn)
+        SurfNodes = np.unique(HexSurfConn)
+        SurfNodeSet = set(SurfNodes)
+        PeelConn += [NewConn[i] for i in range(len(NewConn)) if (set(NewConn[i])&SurfNodeSet)]
+        NewConn = [NewConn[i] for i in range(len(NewConn)) if not (set(NewConn[i])&SurfNodeSet)]
+    
+    PeelCoords,PeelConn,_ = RemoveNodes(NewCoords,PeelConn)
+    PeeledCoords,PeeledConn,_ = RemoveNodes(NewCoords,NewConn)
+    
+    return PeeledCoords, PeeledConn, PeelCoords, PeelConn
+
+def DilateVoxel(VoxelCoords,VoxelConn):
     """
     For a given voxel mesh, will generate a layer of voxels that
     wrap around the current voxel mesh. 
