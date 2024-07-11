@@ -187,7 +187,7 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_direction=-1, mode='any', 
 
     return voxel
 
-def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc', interpolation='linear', mixed_elements=False, args=(), kwargs={}):
+def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc', interpolation='linear', mixed_elements=False, args=(), kwargs={}, snap2surf=None):
     """
     Generate a surface mesh of an implicit function 
 
@@ -219,6 +219,16 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
         Tuple of additional positional arguments for func, by default ().
     kwargs : dict, optional
         Dictionary of additional keyword arguments for func, by default {}.
+    snap2surf : bool or float, optional
+        Option to use :func:`~mymesh.contour.SnapGrid2Surf` which moves points
+        of the background mesh to lie on the surface. If specified as a float 
+        in the range [0, 0.5], sets the snapping parameter which indicates
+        the relative distance within which a point is snapped (0 = no snapping,
+        0.5 = all possible points are snapped). If True, default snapping
+        parameter of 0.2 is used. Snapping isn't compatible with method == 'mc' 
+        or interpolation=='cubic', if either of these options are selected,
+        no snapping will occur, regardless of the snap2surf input. By default, 
+        True.
 
     Returns
     -------
@@ -259,6 +269,12 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
         flip = True
     else:
         flip = False
+    if snap2surf is True:
+        snap = 0.1
+    elif isinstance(snap2surf, (int, float)):
+        assert snap2surf <= 0.5 and snap2surf >= 0, 'Snapping parameter must be in the range [0,0.5]'
+        snap = snap2surf
+        snap2surf = True
 
     if method == 'mc' or interpolation=='cubic':
         if method != 'mc':
@@ -274,12 +290,16 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
         SurfCoords[:,1] += bounds[2]
         SurfCoords[:,2] += bounds[4]
     elif method == 'mc33':
-        voxel = VoxelMesh(vector_func, bounds, h, threshold=threshold, threshold_direction=threshold_direction, mode='boundary',*args,**kwargs)
+        voxel = VoxelMesh(vector_func, bounds, h, threshold=threshold, threshold_direction=threshold_direction, mode='notrim',*args,**kwargs)
+        if snap2surf:
+            voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['func'] = contour.SnapGrid2Surf(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['func'], snap=snap)
         SurfCoords, SurfConn = contour.MarchingCubes(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['func'], method='33', threshold=threshold,flip=flip)
     elif method == 'mt':
-        voxel = VoxelMesh(vector_func, bounds, h, threshold=threshold, threshold_direction=threshold, mode='boundary',*args,**kwargs)
+        voxel = VoxelMesh(vector_func, bounds, h, threshold=threshold, threshold_direction=threshold, mode='notrim',*args,**kwargs)
+        if snap2surf:
+            voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['func'] = contour.SnapGrid2Surf(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['func'], snap=snap)
         NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
-        SurfCoords, SurfConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['func'], method='surface', threshold=threshold, flip=flip, mixed_elements=mixed_elements)
+        SurfCoords, SurfConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['func'], Type='surf', threshold=threshold, flip=flip, mixed_elements=mixed_elements)
 
     
     if 'mesh' in dir(mesh):
@@ -317,6 +337,13 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
         Background tetrahedral mesh to use for evaluating the function and performing
         marching tetrahedra. If a mesh is provide, bounds and h will be ignored. 
         If None is provided, a uniform tetrahedral grid will be used, by default None.
+    snap2surf : bool or float, optional
+        Option to use :func:`~mymesh.contour.SnapGrid2Surf` which moves points
+        of the background mesh to lie on the surface. If specified as a float 
+        in the range [0, 0.5], sets the snapping parameter which indicates
+        the relative distance within which a point is snapped (0 = no snapping,
+        0.5 = all possible points are snapped). If True, default snapping
+        parameter of 0.2 is used. By default, True.
 
     Returns
     -------
@@ -353,6 +380,7 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
     if snap2surf is True:
         snap = 0.1
     elif isinstance(snap2surf, (int, float)):
+        assert snap2surf <= 0.5 and snap2surf >= 0, 'Snapping parameter must be in the range [0,0.5]'
         snap = snap2surf
         snap2surf = True
     
@@ -379,7 +407,7 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
             if np.shape(NodeConn)[1] == 4:
                 NodeCoords, NodeConn = converter.tet42tet10(NodeCoords, NodeConn)
             NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
-    TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, NodeVals, method='volume', threshold=threshold, flip=flip, interpolation=interpolation, cleanup=True)
+    TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, NodeVals, Type='vol', threshold=threshold, flip=flip, interpolation=interpolation, cleanup=True)
     
 
     if 'mesh' in dir(mesh):
@@ -394,8 +422,8 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
     Optimize the placement of surface node to lie on the "true" surface. This
     This simultaneously moves nodes towards the isosurface and redistributes
     nodes more evenly, thus smoothing the mesh without shrinkage or destruction
-    of features. This method is consistes of using the Z-flow (and R-flow if 
-    smooth=True) from :cite:p:`Ohtake2001a`.
+    of features. This method is consists of using the Z-flow (and R-flow if 
+    smooth=True) from :cite:t:`Ohtake2001a`.
 
     Parameters
     ----------
@@ -811,6 +839,28 @@ def sphere(center, radius):
         Implicit function of three parameters (x, y, z).
     """    
     func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 + (z-center[2])**2 - radius**2
+    return func
+
+def torus(center, R, r):
+    """
+    Implicit function of a torus oriented about the z-axis.
+
+    Parameters
+    ----------
+    center : array_like
+        3D coordinates ([x, y, z]) of the center of the torus.
+    R : float
+        The major axis of the torus. This is the distance from the center of the 
+        torus to the center of the circular tube. 
+    r : float
+        The minor axis of the torus. This is the radius of the circular tube. 
+
+    Returns
+    -------
+    func : function
+        Implicit function of three parameters (x, y, z).
+    """    
+    func = lambda x,y,z : (((x-center[0])**2 + (y-center[1])**2)**(1/2) - R)**2 + z**2 - r**2
     return func
 
 # Implicit Function Operators
