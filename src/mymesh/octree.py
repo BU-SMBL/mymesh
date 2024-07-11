@@ -574,7 +574,7 @@ def Surface2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=5):
 
     return root
 
-def Function2Octree(func, bounds, grad=None, mindepth=2, maxdepth=5, strategy='EDerror', eps=0.01):
+def Function2Octree(func, bounds, threshold=0, grad=None, mindepth=2, maxdepth=5, strategy='EDerror', eps=0.1):
     """
     Generate an octree structure adapted to an implicit function.
     Based on octree generation approaches used by :cite:`Schaefer2005`, 
@@ -591,6 +591,8 @@ def Function2Octree(func, bounds, grad=None, mindepth=2, maxdepth=5, strategy='E
         6 element array, list, or tuple with the minimum and maximum bounds in 
         each direction that the function will be evaluated. This should be 
         formatted as: [xmin, xmax, ymin, ymax, zmin, zmax]
+    threshold : int, optional
+        Isosurface level, by default 0
     grad : _type_, optional
         _description_, by default None
     mindepth : int, optional
@@ -629,41 +631,42 @@ def Function2Octree(func, bounds, grad=None, mindepth=2, maxdepth=5, strategy='E
     size = max([bounds[1]-bounds[0],bounds[3]-bounds[2],bounds[5]-bounds[4]])
     centroid = np.array([bounds[0] + size/2, bounds[2]+size/2, bounds[4]+size/2])
 
-    x, y, z = sp.symbols('x y z', real=True)
-    if callable(func):
-        if isinstance(func(centroid[0], centroid[1], centroid[2]), sp.Basic):
-            def DiracDelta(x):
-                if type(x) is np.ndarray:
-                    return (x == 0).astype(float)
-                else:
-                    return float(x==0)
-            F = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
-            
-            Fx = sp.diff(func(x, y, z),x)
-            Fy = sp.diff(func(x, y, z),y)
-            Fz = sp.diff(func(x, y, z),z)
+    if grad is None:
+        x, y, z = sp.symbols('x y z', real=True)
+        if callable(func):
+            if isinstance(func(centroid[0], centroid[1], centroid[2]), sp.Basic):
+                def DiracDelta(x):
+                    if type(x) is np.ndarray:
+                        return (x == 0).astype(float)
+                    else:
+                        return float(x==0)
+                F = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
+                
+                Fx = sp.diff(func(x, y, z),x)
+                Fy = sp.diff(func(x, y, z),y)
+                Fz = sp.diff(func(x, y, z),z)
+                Grad = sp.Matrix([Fx, Fy, Fz]).T
+                grad = sp.lambdify((x,y,z),Grad,['numpy',{'DiracDelta':DiracDelta}])
+
+            else:
+                F = func
+                finite_diff_step = 1e-5
+                def grad(X,Y,Z):
+                    gradx = (F(X+finite_diff_step/2,Y,Z) - F(X-finite_diff_step/2,Y,Z))/finite_diff_step
+                    grady = (F(X,Y+finite_diff_step/2,Z) - F(X,Y-finite_diff_step/2,Z))/finite_diff_step
+                    gradz = (F(X,Y,Z+finite_diff_step/2) - F(X,Y,Z-finite_diff_step/2))/finite_diff_step
+                    gradf = np.vstack((gradx,grady,gradz))
+                    return gradf
+        elif isinstance(func, sp.Basic):
+            F = sp.lambdify((x, y, z), func, 'numpy')
+
+            Fx = sp.diff(func,x)
+            Fy = sp.diff(func,y)
+            Fz = sp.diff(func,z)
             Grad = sp.Matrix([Fx, Fy, Fz]).T
             grad = sp.lambdify((x,y,z),Grad,['numpy',{'DiracDelta':DiracDelta}])
-
         else:
-            F = func
-            finite_diff_step = 1e-5
-            def grad(X,Y,Z):
-                gradx = (F(X+finite_diff_step/2,Y,Z) - F(X-finite_diff_step/2,Y,Z))/finite_diff_step
-                grady = (F(X,Y+finite_diff_step/2,Z) - F(X,Y-finite_diff_step/2,Z))/finite_diff_step
-                gradz = (F(X,Y,Z+finite_diff_step/2) - F(X,Y,Z-finite_diff_step/2))/finite_diff_step
-                gradf = np.vstack((gradx,grady,gradz))
-                return gradf
-    elif isinstance(func, sp.Basic):
-        F = sp.lambdify((x, y, z), func, 'numpy')
-
-        Fx = sp.diff(func,x)
-        Fy = sp.diff(func,y)
-        Fz = sp.diff(func,z)
-        Grad = sp.Matrix([Fx, Fy, Fz]).T
-        grad = sp.lambdify((x,y,z),Grad,['numpy',{'DiracDelta':DiracDelta}])
-    else:
-        raise TypeError('func must be a sympy function or callable function of three arguments (x,y,z).')
+            raise TypeError('func must be a sympy function or callable function of three arguments (x,y,z).')
 
     root = OctreeNode(centroid, size)
     root.state = 'root'
@@ -768,7 +771,7 @@ def Function2Octree(func, bounds, grad=None, mindepth=2, maxdepth=5, strategy='E
                     node.makeChildren(childstate='branch')
             
             vertices = np.array([node.getVertices() for node in nodes])
-            f = F(vertices[:,:,0].flatten(), vertices[:,:,1].flatten(), vertices[:,:,2].flatten()).reshape((vertices.shape[0],vertices.shape[1]))
+            f = F(vertices[:,:,0].flatten(), vertices[:,:,1].flatten(), vertices[:,:,2].flatten()).reshape((vertices.shape[0],vertices.shape[1])) - threshold
 
             # else:
             #     # Copy calculations from previous iteration
@@ -786,7 +789,7 @@ def Function2Octree(func, bounds, grad=None, mindepth=2, maxdepth=5, strategy='E
             z = vertices_plus[:,NodeIdx,VertIdx,2]
 
             # Function values for the next level 
-            f_plus = F(x, y, z)
+            f_plus = F(x, y, z) - threshold
 
             # Vertex coordinates normalized to unit cube.
             # Every octree node has the same set of normalized coordinates, these 
