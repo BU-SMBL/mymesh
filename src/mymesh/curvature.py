@@ -79,10 +79,10 @@ def NormCurve(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
         n = NodeNormals[i]  # Unit normal vector of the current node
         
         # Rotation matrix from global z (k=[0,0,1]) to local z(n)
-        if n == k:
+        if np.array_equal(n,k):
             rotAxis = k
             angle = 0
-        elif n == [-1*i for i in k]:
+        elif np.array_equal(n, [-1*i for i in k]):
             rotAxis = [1,0,0]
             angle = np.pi
         else:
@@ -167,68 +167,82 @@ def QuadFit(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
         List of minimum principal curvatures for each node.
     """  
     
-    
+    # Get nodes to evaluate curvature
     SurfNodes = np.unique(SurfConn)
     
-    MaxPrincipal = [0 for i in range(len(NodeCoords))]
-    MinPrincipal = [0 for i in range(len(NodeCoords))]
+    # Pad node neighborhoods to be a rectangular array
+    RHoods = utils.PadRagged(NodeNeighbors, fillval=-1)[SurfNodes]
     
-    k = [0,0,1]
-    for i in SurfNodes:
-        p = NodeCoords[i]   # Coordinates of the current node
-        n = np.multiply(-1,NodeNormals[i]).tolist()  # Unit normal vector of the current node
-        
-        # Rotation matrix from global z (k=[0,0,1]) to local z(n)
-        if n == k:
-            rotAxis = k
-            angle = 0
-        elif n == [-1*i for i in k]:
-            rotAxis = [1,0,0]
-            angle = np.pi
-        else:
-            rotAxis = np.cross(k,n)/np.linalg.norm(np.cross(k,n))
-            angle = np.arccos(np.dot(k,n))
-        q = [np.cos(angle/2),               # Quaternion Rotation
-             rotAxis[0]*np.sin(angle/2),
-             rotAxis[1]*np.sin(angle/2),
-             rotAxis[2]*np.sin(angle/2)]
+    # Pad arrays for indexing with padded ragged node neighbors array
+    ArrayCoords = np.append(NodeCoords,[[np.nan,np.nan,np.nan]],axis=0)
+    N = np.append(NodeNormals,[[np.nan,np.nan,np.nan]],axis=0)
+    SurfCoords = np.append(ArrayCoords[SurfNodes],[[np.nan,np.nan,np.nan]],axis=0)
+    SurfNormals = np.append(N[SurfNodes],[[np.nan,np.nan,np.nan]],axis=0)
     
-        R = [[2*(q[0]**2+q[1]**2)-1,   2*(q[1]*q[2]-q[0]*q[3]), 2*(q[1]*q[3]+q[0]*q[2]), 0],
-             [2*(q[1]*q[2]+q[0]*q[3]), 2*(q[0]**2+q[2]**2)-1,   2*(q[2]*q[3]-q[0]*q[1]), 0],
-             [2*(q[1]*q[3]-q[0]*q[2]), 2*(q[2]*q[3]+q[0]*q[1]), 2*(q[0]**2+q[3]**2)-1,   0],
-             [0,                       0,                       0,                       1]
-             ]
-        # Translation to map p to (0,0,0)
-        T = [[1,0,0,-p[0]],
-             [0,1,0,-p[1]],
-             [0,0,1,-p[2]],
-             [0,0,0,1]]
-        
-        Amat = [[] for j in range(len(NodeNeighbors[i]))]
-        Bmat = [0 for j in range(len(NodeNeighbors[i]))]
-        for j in range(len(NodeNeighbors[i])):
-            # Get adjacent nodes
-            q = [x for x in NodeCoords[NodeNeighbors[i][j]]]
-            q.append(1)
-            # Transform to local coordinate system
-            [xj,yj,zj,one] = np.matmul(np.matmul(T,q),R)
-            # Scale z by 2/k^2, where k=sqrt(x^2+y^2)
-            scale = 2/(xj**2+yj**2)   
-            # Assemble matrices for least squares
-            Amat[j] = [scale/2*xj**2, scale*xj*yj, scale/2*yj**2]
-            Bmat[j] = scale*zj
-        try:
-            X = np.linalg.solve(np.matmul(np.transpose(Amat),Amat),np.matmul(np.transpose(Amat),Bmat))
-        
-            # Weingarten Matrix
-            W = [[X[0],X[1]],
-                 [X[1],X[2]]]
-            [v,x] = np.linalg.eig(W)
-        except:
-            a = 'merp'
-            v = [np.nan,np.nan]
-        MaxPrincipal[i] = max(v)    # Max Principal Curvature
-        MinPrincipal[i] = min(v)    # Min Principal Curvature
+    SurfNeighborCoords = np.append(ArrayCoords,np.transpose([np.ones(len(ArrayCoords))]),axis=1)[RHoods]
+
+    # Rotate to align the surface normals to [0,0,1]
+    TargetAxis = np.array([0,0,-1])
+    Bool = ((SurfNormals[:,0]!=0) | (SurfNormals[:,1]!=0)) & ~np.any(np.isnan(SurfNormals),axis=1)
+    Cross = np.cross(TargetAxis,SurfNormals) 
+    RotAxes = Cross/np.linalg.norm(Cross,axis=1)[:,None]
+    RotAxes[np.all(SurfNormals == -TargetAxis,axis=1)] = [1,0,0]
+    RotAxes[np.all(SurfNormals == TargetAxis,axis=1)] = TargetAxis
+    # Rotation Angles
+    Angles = np.zeros(len(SurfCoords))
+    Angles[np.all(SurfNormals == -TargetAxis,axis=1)] = np.pi
+    Angles = np.arccos(np.sum(TargetAxis*SurfNormals,axis=1))
+
+    # Quaternion
+    Q = np.hstack([np.transpose([np.cos(Angles/2)]), RotAxes*np.sin(Angles/2)[:,None]])[:-1]
+    # Quaternion to rotation matrix
+    R = np.zeros((len(SurfNodes),4,4))
+    R[:,0,0] = 2*(Q[:,0]**2+Q[:,1]**2)-1
+    R[:,0,1] = 2*(Q[:,1]*Q[:,2]-Q[:,0]*Q[:,3])
+    R[:,0,2] = 2*(Q[:,1]*Q[:,3]+Q[:,0]*Q[:,2])
+    R[:,1,0] = 2*(Q[:,1]*Q[:,2]+Q[:,0]*Q[:,3])
+    R[:,1,1] = 2*(Q[:,0]**2+Q[:,2]**2)-1
+    R[:,1,2] = 2*(Q[:,2]*Q[:,3]-Q[:,0]*Q[:,1])
+    R[:,2,0] = 2*(Q[:,1]*Q[:,3]-Q[:,0]*Q[:,2])
+    R[:,2,1] = 2*(Q[:,2]*Q[:,3]+Q[:,0]*Q[:,1])
+    R[:,2,2] = 2*(Q[:,0]**2+Q[:,3]**2)-1
+    R[:,3,3] = 1
+
+    # Translation matrix
+    T = np.repeat([np.eye(4)], len(SurfNodes), axis=0)
+    T[:,0,3] = -SurfCoords[:-1,0]
+    T[:,1,3] = -SurfCoords[:-1,1]
+    T[:,2,3] = -SurfCoords[:-1,2]
+
+    TRCoords = np.matmul(np.matmul(T,SurfNeighborCoords.swapaxes(1,2)).swapaxes(1,2),R)
+
+    xjs = TRCoords[:,:,0]
+    yjs = TRCoords[:,:,1]
+    zjs = TRCoords[:,:,2]
+
+    nNeighbors = RHoods.shape[1]
+    
+    Amat = np.array([1/2*xjs**2, xjs*yjs, 1/2*yjs**2]).transpose(1,2,0)
+    Bmat = zjs[:,:,None]
+
+    MaxPrincipal = np.repeat(np.nan,len(NodeCoords))
+    MinPrincipal = np.repeat(np.nan,len(NodeCoords))
+    for i,idx in enumerate(SurfNodes):
+        amat = Amat[i,~np.any(np.isnan(Amat[i]),axis=1) & ~np.any(np.isnan(Bmat[i]),axis=1)]
+        bmat = Bmat[i,~np.any(np.isnan(Amat[i]),axis=1) & ~np.any(np.isnan(Bmat[i]),axis=1)]
+        A = np.matmul(amat.T,amat)
+        if np.linalg.det(A) != 0:
+            B = np.matmul(amat.T,bmat)
+            X = np.linalg.solve(A,B).T[0]
+            W = np.array([[X[0],X[1]],
+                            [X[1],X[2]]])
+            if np.any(np.isnan(W)):
+                MaxPrincipal[idx] = np.nan
+                MinPrincipal[idx] = np.nan
+            else:
+                [v,x] = np.linalg.eig(W)
+                MaxPrincipal[idx] = max(v)
+                MinPrincipal[idx] = min(v)
     return MaxPrincipal,MinPrincipal
 
 def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
@@ -259,53 +273,60 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
     MinPrincipal : list
         List of minimum principal curvatures for each node.
     """    
+    # Initialize solution vectors
+    MaxPrincipal = np.repeat(np.nan,len(NodeCoords))
+    MinPrincipal = np.repeat(np.nan,len(NodeCoords))
 
+    # Get nodes to evaluate curvature
     SurfNodes = np.unique(SurfConn)
     
-    MaxPrincipal = [np.nan for i in range(len(NodeCoords))]
-    MinPrincipal = [np.nan for i in range(len(NodeCoords))]
-    ### 
+    # Pad node neighborhoods to be a rectangular array
+    RHoods = utils.PadRagged(NodeNeighborhoods, fillval=-1)[SurfNodes]
+    
+    # Pad arrays for indexing with padded ragged node neighbors array
     ArrayCoords = np.append(NodeCoords,[[np.nan,np.nan,np.nan]],axis=0)
     N = np.append(NodeNormals,[[np.nan,np.nan,np.nan]],axis=0)
-
-    RHoods = utils.PadRagged(NodeNeighborhoods)[SurfNodes]
-
     SurfCoords = np.append(ArrayCoords[SurfNodes],[[np.nan,np.nan,np.nan]],axis=0)
     SurfNormals = np.append(N[SurfNodes],[[np.nan,np.nan,np.nan]],axis=0)
-
-    # Rotation Axes
-    RotAxes = np.repeat([[0,0,1]],len(SurfCoords),axis=0)
     
-    Bool = ((SurfNormals[:,0]!=0) | (SurfNormals[:,1]!=0)) & ~np.any(np.isnan(SurfNormals),axis=1)
-    Cross = np.cross([0,0,1],SurfNormals) #np.cross([0,0,1],-SurfNormals)
-    RotAxes = Cross/np.linalg.norm(Cross,axis=1)[:,None]
-    RotAxes[np.all(SurfNormals == [0,0,-1],axis=1)] = [1,0,0]
-    RotAxes[np.all(SurfNormals == [0,0,1],axis=1)] = [0,0,1]
-    # Rotation Angles
-    Angles = np.zeros(len(SurfCoords))
-    Angles[np.all(SurfNormals == [0,0,-1],axis=1)] = np.pi
-    Angles = np.arccos(np.sum([0,0,1]*SurfNormals,axis=1)) # np.arccos(-1*np.sum([0,0,1]*SurfNormals,axis=1))
-
-    # Quaternions
-    Q = np.hstack([np.transpose([np.cos(Angles/2)]), RotAxes*np.sin(Angles/2)[:,None]])
-    Zs = np.zeros(len(SurfCoords))
-    Os = np.ones(len(SurfCoords))
-    R = np.array([[2*(Q[:,0]**2+Q[:,1]**2)-1,   2*(Q[:,1]*Q[:,2]-Q[:,0]*Q[:,3]), 2*(Q[:,1]*Q[:,3]+Q[:,0]*Q[:,2]), Zs],
-             [2*(Q[:,1]*Q[:,2]+Q[:,0]*Q[:,3]), 2*(Q[:,0]**2+Q[:,2]**2)-1,   2*(Q[:,2]*Q[:,3]-Q[:,0]*Q[:,1]), Zs],
-             [2*(Q[:,1]*Q[:,3]-Q[:,0]*Q[:,2]), 2*(Q[:,2]*Q[:,3]+Q[:,0]*Q[:,1]), 2*(Q[:,0]**2+Q[:,3]**2)-1,   Zs],
-             [Zs,                       Zs,                       Zs,                       Os]
-             ])
-
-    T = np.array([[Os,Zs,Zs,-SurfCoords[:,0]],
-                [Zs,Os,Zs,-SurfCoords[:,1]],
-                [Zs,Zs,Os,-SurfCoords[:,2]],
-                [Zs,Zs,Zs,Os]])
-
     SurfNeighborCoords = np.append(ArrayCoords,np.transpose([np.ones(len(ArrayCoords))]),axis=1)[RHoods]
     SurfNeighborNormals = np.append(N,np.transpose([np.ones(len(ArrayCoords))]),axis=1)[RHoods]
 
-    TRCoords = np.matmul(np.matmul(T[:,:,:-1].swapaxes(0,2).swapaxes(1,2),SurfNeighborCoords.swapaxes(1,2)).swapaxes(1,2),R[:,:,:-1].swapaxes(0,2).swapaxes(1,2))
-    RNormals = np.matmul(SurfNeighborNormals,R[:,:,:-1].swapaxes(0,2).swapaxes(1,2))
+    # Rotate to align the surface normals to [0,0,1]
+    TargetAxis = np.array([0,0,-1])
+    Bool = ((SurfNormals[:,0]!=0) | (SurfNormals[:,1]!=0)) & ~np.any(np.isnan(SurfNormals),axis=1)
+    Cross = np.cross(TargetAxis,SurfNormals) 
+    RotAxes = Cross/np.linalg.norm(Cross,axis=1)[:,None]
+    RotAxes[np.all(SurfNormals == -TargetAxis,axis=1)] = [1,0,0]
+    RotAxes[np.all(SurfNormals == TargetAxis,axis=1)] = TargetAxis
+    # Rotation Angles
+    Angles = np.zeros(len(SurfCoords))
+    Angles[np.all(SurfNormals == -TargetAxis,axis=1)] = np.pi
+    Angles = np.arccos(np.sum(TargetAxis*SurfNormals,axis=1))
+
+    # Quaternion
+    Q = np.hstack([np.transpose([np.cos(Angles/2)]), RotAxes*np.sin(Angles/2)[:,None]])[:-1]
+    # Quaternion to rotation matrix
+    R = np.zeros((len(SurfNodes),4,4))
+    R[:,0,0] = 2*(Q[:,0]**2+Q[:,1]**2)-1
+    R[:,0,1] = 2*(Q[:,1]*Q[:,2]-Q[:,0]*Q[:,3])
+    R[:,0,2] = 2*(Q[:,1]*Q[:,3]+Q[:,0]*Q[:,2])
+    R[:,1,0] = 2*(Q[:,1]*Q[:,2]+Q[:,0]*Q[:,3])
+    R[:,1,1] = 2*(Q[:,0]**2+Q[:,2]**2)-1
+    R[:,1,2] = 2*(Q[:,2]*Q[:,3]-Q[:,0]*Q[:,1])
+    R[:,2,0] = 2*(Q[:,1]*Q[:,3]-Q[:,0]*Q[:,2])
+    R[:,2,1] = 2*(Q[:,2]*Q[:,3]+Q[:,0]*Q[:,1])
+    R[:,2,2] = 2*(Q[:,0]**2+Q[:,3]**2)-1
+    R[:,3,3] = 1
+
+    # Translation matrix
+    T = np.repeat([np.eye(4)], len(SurfNodes), axis=0)
+    T[:,0,3] = -SurfCoords[:-1,0]
+    T[:,1,3] = -SurfCoords[:-1,1]
+    T[:,2,3] = -SurfCoords[:-1,2]
+
+    TRCoords = np.matmul(np.matmul(T,SurfNeighborCoords.swapaxes(1,2)).swapaxes(1,2),R)
+    RNormals = np.matmul(SurfNeighborNormals,R)
 
     xjs = TRCoords[:,:,0]
     yjs = TRCoords[:,:,1]
@@ -315,19 +336,17 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
     bjs = RNormals[:,:,1]
     cjs = RNormals[:,:,2]
 
-    # scales = np.ones(xjs.shape)#2/(xjs**2+yjs**2) 
-
     nNeighbors = RHoods.shape[1]
 
     Amat = np.zeros((len(SurfNodes),nNeighbors*3,7))
-    Amat[:,:nNeighbors] = np.array([1/2*xjs**2, xjs*yjs, 1/2*yjs**2, xjs**3, xjs**2*yjs, xjs*yjs**2, yjs**3]).T.swapaxes(0,1)
-    Amat[:,nNeighbors:2*nNeighbors] = np.array([xjs, yjs, np.zeros(xjs.shape), 3*xjs**2, 2*xjs*yjs, yjs**2, np.zeros(xjs.shape)]).T.swapaxes(0,1)
-    Amat[:,2*nNeighbors:3*nNeighbors] = np.array([np.zeros(xjs.shape), xjs, yjs, np.zeros(xjs.shape), xjs**2, 2*xjs*yjs, 3*yjs**2]).T.swapaxes(0,1)
+    Amat[:,:nNeighbors] = np.array([1/2*xjs**2, xjs*yjs, 1/2*yjs**2, xjs**3, xjs**2*yjs, xjs*yjs**2, yjs**3]).transpose(1,2,0)
+    Amat[:,nNeighbors:2*nNeighbors] = np.array([xjs, yjs, np.zeros(xjs.shape), 3*xjs**2, 2*xjs*yjs, yjs**2, np.zeros(xjs.shape)]).transpose(1,2,0)
+    Amat[:,2*nNeighbors:3*nNeighbors] = np.array([np.zeros(xjs.shape), xjs, yjs, np.zeros(xjs.shape), xjs**2, 2*xjs*yjs, 3*yjs**2]).transpose(1,2,0)
 
     Bmat = np.zeros((len(SurfNodes),nNeighbors*3,1))
     Bmat[:,:nNeighbors,0] = zjs
-    Bmat[:,nNeighbors:2*nNeighbors,0] = ajs/cjs # -ajs/cjs
-    Bmat[:,2*nNeighbors:3*nNeighbors,0] = bjs/cjs # -bjs/cjs
+    Bmat[:,nNeighbors:2*nNeighbors,0] = -ajs/cjs
+    Bmat[:,2*nNeighbors:3*nNeighbors,0] = -bjs/cjs
 
     MaxPrincipal = np.repeat(np.nan,len(NodeCoords))
     MinPrincipal = np.repeat(np.nan,len(NodeCoords))
@@ -335,20 +354,18 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
         amat = Amat[i,~np.any(np.isnan(Amat[i]),axis=1) & ~np.any(np.isnan(Bmat[i]),axis=1)]
         bmat = Bmat[i,~np.any(np.isnan(Amat[i]),axis=1) & ~np.any(np.isnan(Bmat[i]),axis=1)]
         A = np.matmul(amat.T,amat)
-        if np.linalg.det(A) == 0:
-            MaxPrincipal[idx] = np.nan
-            MinPrincipal[idx] = np.nan
-        else:
+        if np.linalg.det(A) != 0:
             B = np.matmul(amat.T,bmat)
             X = np.linalg.solve(A,B).T[0]
             W = np.array([[X[0],X[1]],
                             [X[1],X[2]]])
             if np.any(np.isnan(W)):
-                v = [np.nan, np.nan]
+                MaxPrincipal[idx] = np.nan
+                MinPrincipal[idx] = np.nan
             else:
                 [v,x] = np.linalg.eig(W)
-            MaxPrincipal[idx] = max(v)
-            MinPrincipal[idx] = min(v)
+                MaxPrincipal[idx] = max(v)
+                MinPrincipal[idx] = min(v)
     return MaxPrincipal,MinPrincipal
 
 def AnalyticalCurvature(func,NodeCoords):
