@@ -1951,10 +1951,10 @@ def surf2voxel(SurfCoords,SurfConn,h,Octree='generate',mode='any'):
     
     if mode.lower() == 'centroid':
         centroids = utils.Centroids(GridCoords, GridConn)
-        Inside = rays.isInsidesSurf(centroids, SurfCoords, SurfConn, Octree=Octree)
+        Inside = rays.PointsInSurf(centroids, SurfCoords, SurfConn, Octree=Octree)
         VoxelConn = GridConn[Inside]
     else:
-        Inside = rays.isInsidesSurf(GridCoords, SurfCoords, SurfConn, Octree=Octree)
+        Inside = rays.PointsInSurf(GridCoords, SurfCoords, SurfConn, Octree=Octree)
         ElemInsides = Inside[GridConn]
 
         if mode.lower() == 'any':

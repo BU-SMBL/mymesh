@@ -297,7 +297,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     
     if len(AllBoundaryA) > 0:
         AllBoundaryACentroids = utils.Centroids(SplitA.NodeCoords,[elem for i,elem in enumerate(SplitA.NodeConn) if i in AllBoundaryA])
-        check = rays.isInsidesSurf(AllBoundaryACentroids,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,rays=ElemNormalsA[AllBoundaryA],eps=eps)
+        check = rays.PointsInSurf(AllBoundaryACentroids,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,rays=ElemNormalsA[AllBoundaryA],eps=eps)
         AinB.update(AllBoundaryA[check == True])
         AoutB.update(AllBoundaryA[check == False])
         AsameB.update(AllBoundaryA[check > 0])
@@ -305,7 +305,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     
     if len(AllBoundaryB) > 0:
         AllBoundaryBCentroids = utils.Centroids(SplitB.NodeCoords,[elem for i,elem in enumerate(SplitB.NodeConn) if i in AllBoundaryB])
-        check = rays.isInsidesSurf(AllBoundaryBCentroids,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,rays=ElemNormalsB[AllBoundaryB],eps=eps)
+        check = rays.PointsInSurf(AllBoundaryBCentroids,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,rays=ElemNormalsB[AllBoundaryB],eps=eps)
         BinA.update(AllBoundaryB[check == True])
         BoutA.update(AllBoundaryB[check == False])
         BsameA.update(AllBoundaryB[check > 0])
@@ -314,7 +314,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     for r in range(len(RegionsA)):
         RegionElems = [e for e in range(len(SplitA.NodeConn)) if all([n in RegionsA[r] for n in SplitA.NodeConn[e]])] # Elem Set
         pt = SplitA.NodeCoords[RegionsA[r].pop()]
-        if rays.isInsideSurf(pt,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,eps=eps):
+        if rays.PointInSurf(pt,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,eps=eps):
             AinB.update(RegionElems)
         else:
             AoutB.update(RegionElems)
@@ -323,7 +323,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     for r in range(len(RegionsB)):
         RegionElems = [e for e in range(len(SplitB.NodeConn)) if all([n in RegionsB[r] for n in SplitB.NodeConn[e]])] # Elem Set
         pt = SplitB.NodeCoords[RegionsB[r].pop()]
-        if rays.isInsideSurf(pt,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,eps=eps):
+        if rays.PointInSurf(pt,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,eps=eps):
             BinA.update(RegionElems)
         else:
             BoutA.update(RegionElems)
@@ -340,7 +340,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
     UnknownNodesA = set(elem for e in UnknownA for elem in SplitA.NodeConn[e]).difference(AinNodes).difference(AoutNodes).difference(SharedA)
     UnknownNodesB = set(elem for e in UnknownB for elem in SplitB.NodeConn[e]).difference(BinNodes).difference(BoutNodes).difference(SharedB)
     for node in UnknownNodesA:
-        check = rays.isInsideSurf(SplitA.NodeCoords[node],SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,ray=SplitA.NodeNormals[node],eps=eps)
+        check = rays.PointInSurf(SplitA.NodeCoords[node],SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,ray=SplitA.NodeNormals[node],eps=eps)
         if check is True:
             AinNodes.add(node)
         elif check is False:
@@ -350,7 +350,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
         else:
             AflipNodes.add(node)
     for node in UnknownNodesB:
-        check = rays.isInsideSurf(SplitB.NodeCoords[node],SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,ray=SplitB.NodeNormals[node],eps=eps)
+        check = rays.PointInSurf(SplitB.NodeCoords[node],SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,ray=SplitB.NodeNormals[node],eps=eps)
         if check is True:
             BinNodes.add(node)
         elif check is False:
