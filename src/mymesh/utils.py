@@ -1999,6 +1999,10 @@ def ExtractRagged(In,delval=-1,dtype=None):
         if type(In) is list: In = np.array(In)
         In = In.astype(dtype)
         delval = np.array([delval]).astype(dtype)[0]
+    if np.isnan(delval):
+        delval = np.nanmax(In) + 1
+        In = np.copy(In)
+        In[np.isnan(In)] = delval
     where = In != delval
     if not np.all(where):
         if len(In.shape) == 2:
