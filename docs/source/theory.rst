@@ -5,6 +5,7 @@ Theory Guide
     :maxdepth: 2
     :hidden:
     
+    theory/contour
     theory/curvature
     theory/improvement
     theory/octree

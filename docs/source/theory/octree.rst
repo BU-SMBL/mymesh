@@ -105,8 +105,8 @@ the need for thousands of ray-triangle intersection tests.
 
     }
 
-Octree Creation
----------------
+Generating Octrees
+------------------
 Octrees can be used to represent various types of data, including point clouds,
 voxel meshes, surface meshes, and implicit functions.
 

@@ -188,3 +188,9 @@ Triangle-Box Intersection
 
 Segment-Segment Intersection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Point Inclusion Tests
+---------------------
+
+Point in Surface
+^^^^^^^^^^^^^^^^

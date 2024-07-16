@@ -16,7 +16,7 @@ The principal curvatures can be calculated from the mean (:math:`H`) and
 Gaussian (:math:`K`) curvatures as 
 
 .. math::
-    \kappa_{1,2} = H \pm \sqrt(H^2 - K)
+    \kappa_{1,2} = H \pm \sqrt{(H^2 - K)}
 
 Mean Curvature
 ^^^^^^^^^^^^^^
@@ -105,6 +105,18 @@ For function- and image-based curvatures, the inside of a surface is considered
 to be less than and greater than the threshold isosurface value, respectively.
 For implicit functions, this follows from the convention that the inside of an implicit function, while for images this is based on the assumption that foreground 
 objects are bright (as is the case in CT scans of bone).
+
+Interpretation
+^^^^^^^^^^^^^^
++---------------------+--------------------------------------+-----------------------------------------+-----------------------+
+| Classification      | Principal Curvatures                 | Gaussian (:math:`K`) & Mean (:math:`H`) | Shape Index           |
++=====================+======================================+=========================================+=======================+
+| Convex, Elliptical  | :math:`\kappa_{1,2} > 0`             | :math:`K > 0, H > 0`                    |:math:`s > 0.5`        |
++---------------------+--------------------------------------+-----------------------------------------+-----------------------+
+| Concave, Elliptical | :math:`\kappa_{1,2} < 0`             | :math:`K > 0, H < 0`                    |:math:`s < -0.5`       |
++---------------------+--------------------------------------+-----------------------------------------+-----------------------+
+| Hyperbolic (Saddle) | :math:`\kappa_1 > 0, \kappa_2 < 0`   | :math:`K < 0`                           |:math:`-0.5 < s < 0.5` |
++---------------------+--------------------------------------+-----------------------------------------+-----------------------+
 
 Calculating Curvature
 ---------------------
@@ -201,25 +213,25 @@ written as
 
     n(x,y) = 
     \begin{bmatrix}
-        \frac{\partial z_i}{\partial x} \\ 
-        \frac{\partial z_i}{\partial y} \\ 
+        -\frac{\partial z_i}{\partial x} \\ 
+        -\frac{\partial z_i}{\partial y} \\ 
         1
     \end{bmatrix} =
     \begin{bmatrix}
-        Ax + By + 3Dx^2 + 2Exy + Fy^2 \\
-        Bx + Cy + Ex^2 + 2Fxy + 3Gy^2 \\
+        -(Ax + By + 3Dx^2 + 2Exy + Fy^2) \\
+        -(Bx + Cy + Ex^2 + 2Fxy + 3Gy^2) \\
         1
     \end{bmatrix}
 
 A unit normal :math:`\hat{n}(x,y) = \begin{bmatrix} a_i & b_i & c_i \end{bmatrix}^T`
-can be divided by :math:`c_i` such that :math:`n(x,y) = \hat{n}(x,y)/c_i`, which
+can be divided by :math:`-c_i` such that :math:`n(x,y) = -\hat{n}(x,y)/c_i`, which
 gives
 
 .. math::
 
     \begin{align}
-    Ax + By + 3Dx^2 + 2Exy + Fy^2 = a_i/c_i, \\
-    Bx + Cy + Ex^2 + 2Fxy + 3Gy^2 = b_i/c_i.
+    Ax + By + 3Dx^2 + 2Exy + Fy^2 = -a_i/c_i, \\
+    Bx + Cy + Ex^2 + 2Fxy + 3Gy^2 = -b_i/c_i.
     \end{align}
 
 Now using each of the three equations for each point, a linear system can be 

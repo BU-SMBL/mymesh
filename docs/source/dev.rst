@@ -12,6 +12,8 @@ Roadmap & Planned features
 --------------------------
 
 - Expansion of the :doc:`theory` 
+- Create `interpolate` module for interpolation within meshes and mapping between meshes
+- Create `register` module for mesh and image registration
 - 
     Explore and possibly provide options for substituting CuPy for NumPy to 
     enable Nvidia CUDA-based GPU computation. Since MyMesh is heavily dependent

@@ -49,6 +49,7 @@ plot_pre_code = '''
 import numpy as np
 from matplotlib import pyplot as plt
 from mymesh import *
+visualize.set_vispy_backend(preference='PyQt6')
 '''
 
 graphviz_dot = r"C:\Program Files\Graphviz\bin\neato.exe"
