@@ -39,6 +39,7 @@ Implicit Functions
     yplane
     zplane
     sphere
+    torus
 
 Implicit Function Operators
 ===========================
@@ -240,13 +241,6 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
     Examples
     --------
 
-    .. jupyter-execute::
-
-        from mymesh import implicit
-
-        surface = implicit.SurfaceMesh(implicit.gyroid, [0,1,0,1,0,1], 0.05)
-        surface.view()
-    
     .. plot::
 
         surface = implicit.SurfaceMesh(implicit.gyroid, [0,1,0,1,0,1], 0.05)
@@ -284,7 +278,7 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
         zs = np.arange(bounds[4],bounds[5]+h[2],h[2])
 
         X,Y,Z = np.meshgrid(xs,ys,zs,indexing='ij')
-        F = vector_func(X,Y,Z,*args,**kwargs)
+        F = vector_func(X,Y,Z,*args,**kwargs).T
         SurfCoords, SurfConn = contour.MarchingCubesImage(F, h=h, threshold=threshold, flip=flip, method='original', interpolation=interpolation,VertexValues=True)
         SurfCoords[:,0] += bounds[0]
         SurfCoords[:,1] += bounds[2]
@@ -590,6 +584,13 @@ def gyroid(x,y,z):
     -------
     f : sympy expression
         implicit function evaluated with sympy
+
+    Examples
+    --------
+    .. plot::
+
+        surface = implicit.SurfaceMesh(implicit.gyroid, [0,1,0,1,0,1], 0.05)
+        surface.plot(bgcolor='w')
     """
     return sp.sin(2*np.pi*x)*sp.cos(2*np.pi*y) + sp.sin(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.sin(2*np.pi*z)*sp.cos(2*np.pi*x)
 
@@ -616,6 +617,13 @@ def lidinoid(x,y,z):
     -------
     f : sympy expression
         implicit function evaluated with sympy
+    
+    Examples
+    --------
+    .. plot::
+
+        surface = implicit.SurfaceMesh(implicit.lidinoid, [0,1,0,1,0,1], 0.05)
+        surface.plot(bgcolor='w')
     """
     X = 2*np.pi*x
     Y = 2*np.pi*y
@@ -646,6 +654,13 @@ def primitive(x,y,z):
     -------
     f : sympy expression
         implicit function evaluated with sympy
+    
+    Examples
+    --------
+    .. plot::
+
+        surface = implicit.SurfaceMesh(implicit.primitive, [0,1,0,1,0,1], 0.05)
+        surface.plot(bgcolor='w')
     """
     X = 2*np.pi*x
     Y = 2*np.pi*y
@@ -675,6 +690,13 @@ def neovius(x,y,z):
     -------
     f : sympy expression
         implicit function evaluated with sympy
+
+    Examples
+    --------
+    .. plot::
+
+        surface = implicit.SurfaceMesh(implicit.neovius, [0,1,0,1,0,1], 0.05)
+        surface.plot(bgcolor='w')
     """
 
     X = 2*np.pi*x
@@ -705,6 +727,13 @@ def diamond(x,y,z):
     -------
     f : sympy expression
         implicit function evaluated with sympy
+    
+    Examples
+    --------
+    .. plot::
+
+        surface = implicit.SurfaceMesh(implicit.diamond, [0,1,0,1,0,1], 0.05)
+        surface.plot(bgcolor='w')
     """
     return sp.sin(2*np.pi*x)*sp.sin(2*np.pi*y)*sp.sin(2*np.pi*z) + sp.sin(2*np.pi*x)*sp.cos(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.cos(2*np.pi*x)*sp.sin(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.cos(2*np.pi*x)*sp.cos(2*np.pi*y)*sp.sin(2*np.pi*z)
 
@@ -724,6 +753,13 @@ def cylinder(center, radius):
     -------
     func : function
         Implicit function of three parameters (x, y, z)
+    
+    Examples
+    --------
+    .. plot::
+
+        surface = implicit.SurfaceMesh(implicit.cylinder([0,0,0], 1), [-1,1,-1,1,-1,1], 0.1)
+        surface.plot(bgcolor='w')
     """    
     func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 - radius**2
     return func
@@ -751,6 +787,13 @@ def box(x1,x2,y1,y2,z1,z2):
     -------
     func : function
         Implicit function of three parameters (x, y, z)
+    
+    Examples
+    --------
+    .. plot::
+
+        surface = implicit.SurfaceMesh(implicit.box(.1,.9,.1,.9,.1,.9), [0,1,0,1,0,1], 0.05)
+        surface.plot(bgcolor='w')
     """
     func = lambda x, y, z : intersection(intersection(intersection(x1-x,x-x2),intersection(y1-y,y-y2)),intersection(z1-z,z-z2))
     return func
@@ -837,6 +880,13 @@ def sphere(center, radius):
     -------
     func : function
         Implicit function of three parameters (x, y, z).
+    
+    Examples
+    --------
+    .. plot::
+
+        surface = implicit.SurfaceMesh(implicit.sphere([0,0,0],1), [-1,1,-1,1,-1,1], 0.1)
+        surface.plot(bgcolor='w')
     """    
     func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 + (z-center[2])**2 - radius**2
     return func
@@ -859,6 +909,13 @@ def torus(center, R, r):
     -------
     func : function
         Implicit function of three parameters (x, y, z).
+    
+    Examples
+    --------
+    .. plot::
+
+        surface = implicit.SurfaceMesh(implicit.torus([0,0,0], 1, .25), [-1.25,1.25,-1.25,1.25,-.3,.3], 0.1)
+        surface.plot(bgcolor='w')
     """    
     func = lambda x,y,z : (((x-center[0])**2 + (y-center[1])**2)**(1/2) - R)**2 + z**2 - r**2
     return func

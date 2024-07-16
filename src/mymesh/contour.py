@@ -3841,7 +3841,8 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     Parameters
     ----------
     I : np.ndarray
-        Image array (3D) of grayscale data
+        Image array (3D) of grayscale data. The (0,1,2) axes of the image should
+        correspond to the (z,y,x) axes, respectively.
     h : float or tuple, optional
         Element (pixel) size. Can be specified as a single value for isotropic pixel sizes or a tuple of three values, by default 1
     threshold : int, optional

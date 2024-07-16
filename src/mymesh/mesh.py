@@ -1411,6 +1411,7 @@ class mesh:
             Quality metric, or list of quality metrics, to evaluate, by default 
             ['Skewness','Aspect Ratio']. 
             Available options are:
+            
                 - 'Skewness' : :func:`~mymesh.quality.Skewness`
                 - 'Aspect Ratio' : :func:`~mymesh.quality.AspectRatio`
                 - 'Inverse Orthogonal Quality' : :func:`~mymesh.quality.InverseOrthogonalQuality`
@@ -1423,6 +1424,7 @@ class mesh:
                 - 'Max Dihedral(deg)' : :func:`~mymesh.quality.MaxDihedral` - Reported in degrees
                 - 'Mean Ratio' : :func:`~mymesh.quality.MeanRatio`
                 - 'Volume' : :func:`~mymesh.quality.Volume`
+
             Note that not all metrics are suited to all element types.
 
         verbose : bool or NoneType, optional
