@@ -279,9 +279,9 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
             EdgeElem = np.repeat(triIdx,3)
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
-                np.repeat([[0,1,2]],len(tetIdx),axis=0).reshape(len(tetIdx)*3), 
+                np.repeat([[0,1,2]],len(triIdx),axis=0).reshape(len(triIdx)*3), 
                 ))
-            EdgeConn = -1*np.ones((len(NodeConn),3))
+            EdgeConn = -1*np.ones((len(NodeConn),3), dtype=int)
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
     elif ElemType=='quad':
         Edges = quad2edges(NodeCoords,NodeConn)
@@ -292,7 +292,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2]],len(tetIdx),axis=0).reshape(len(tetIdx)*3), 
                 ))
-            EdgeConn = -1*np.ones((len(NodeConn),4))
+            EdgeConn = -1*np.ones((len(NodeConn),4), dtype=int)
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
     elif ElemType=='tet':
         Edges = tet2edges(NodeCoords,NodeConn)
@@ -303,7 +303,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2,3,4,5]],len(tetIdx),axis=0).reshape(len(tetIdx)*6),  
                 ))
-            EdgeConn = -1*np.ones((len(NodeConn),6))
+            EdgeConn = -1*np.ones((len(NodeConn),6), dtype=int)
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
     elif ElemType=='pyramid':
         Edges = pyramid2edges(NodeCoords,NodeConn)
@@ -314,7 +314,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2,3,4,5,6,7]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*8),                   
                 ))
-            EdgeConn = -1*np.ones((len(NodeConn),8))
+            EdgeConn = -1*np.ones((len(NodeConn),8), dtype=int)
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
     elif ElemType=='wedge':
         Edges = wedge2edges(NodeCoords,NodeConn)
@@ -325,7 +325,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2,3,4,5,6,7,8]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*9),   
                 ))
-            EdgeConn = -1*np.ones((len(NodeConn),9))
+            EdgeConn = -1*np.ones((len(NodeConn),9), dtype=int)
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
     elif ElemType=='hex':
         Edges = hex2edges(NodeCoords,NodeConn)
@@ -336,7 +336,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
             ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2,3,4,5,6,7,8,9,10,11]],len(hexIdx),axis=0).reshape(len(hexIdx)*12),                    
                 ))
-            EdgeConn = -1*np.ones((len(NodeConn),12))
+            EdgeConn = -1*np.ones((len(NodeConn),12), dtype=int)
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
     elif ElemType=='polygon':
         Edges = polygon2edges(NodeCoords,NodeConn)
