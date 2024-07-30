@@ -237,10 +237,22 @@ def View(M, interactive=True, bgcolor=None,
 
     vsmesh.transform = transforms.MatrixTransform()
     if view is None:
-        vsmesh.transform.rotate(120, (1, 0, 0))
-        vsmesh.transform.rotate(-30, (0, 0, 1))
+        pass
+        # vsmesh.transform.rotate(120, (1, 0, 0))
+        # vsmesh.transform.rotate(-30, (0, 0, 1))
+    elif view == 'iso' or view == 'isometric':
+        vsmesh.transform.rotate(45, (0, 0, 1))     
+        vsmesh.transform.rotate(35.264, (1, 0, 0))
+    elif view == 'dimetric':
+        vsmesh.transform.rotate(45, (0, 0, 1))      # 45 degrees around X-axis
+        vsmesh.transform.rotate(20.705, (1, 0, 0))
+    elif view == 'trimetric':
+        vsmesh.transform.rotate(60, (0, 0, 1))      # 60 degrees around X-axis
+        vsmesh.transform.rotate(30, (1, 0, 0))
     elif view == 'xy':
         vsmesh.transform.rotate(90, (1, 0, 0))
+    elif view == 'xz':
+        pass
     
     if wireframe_enabled:
         vsmesh.set_gl_state(polygon_offset_fill=True,
