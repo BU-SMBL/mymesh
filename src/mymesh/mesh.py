@@ -9,7 +9,7 @@ mesh class
 
 """
 
-from . import utils, improvement, contour, converter, quality, rays, curvature, visualize
+from . import utils, implicit, improvement, contour, converter, quality, rays, curvature, visualize
 from sys import getsizeof
 import scipy
 import numpy as np
@@ -1230,10 +1230,10 @@ class mesh:
             flip = True
 
         if Type == 'surf':
-            NewCoords, NewConn = contour.MarchingTetrahedra(*converter.solid2tets(*self), scalars, threshold=threshold, flip=flip, method='surface')
+            NewCoords, NewConn = contour.MarchingTetrahedra(*converter.solid2tets(*self), scalars, threshold=threshold, flip=flip, Type='surf')
             M = mesh(NewCoords, NewConn)
         elif Type == 'vol':
-            NewCoords, NewConn, Values = contour.MarchingTetrahedra(*converter.solid2tets(*self), scalars, threshold=threshold, flip=flip, method='volume', return_NodeValues=True)
+            NewCoords, NewConn, Values = contour.MarchingTetrahedra(*converter.solid2tets(*self), scalars, threshold=threshold, flip=flip, Type='vol', return_NodeValues=True)
             M = mesh(NewCoords, NewConn)
             M.NodeData[scalar_str] = Values
 
@@ -1397,6 +1397,18 @@ class mesh:
         M.removeElems(RemoveElems)
         return M
 
+    def Clip(self, pt=None, normal=[1,0,0], flip=False):
+        
+        if pt is None:
+            xmax, ymax, zmax = np.max(self.NodeCoords, axis=0)
+            xmin, ymin, zmin = np.min(self.NodeCoords, axis=0)
+            pt = np.array([(xmax+xmin)/2, (ymax+ymin)/2, (zmax+zmin)/2])
+        vals = implicit.plane(pt, normal)(*self.Centroids.T)
+
+        clipped = self.Threshold(vals, 0)
+
+        return clipped
+    
     ## Mesh Measurements Methods
     def getQuality(self,metrics=['Skewness','Aspect Ratio'], verbose=None):
         """
@@ -1667,7 +1679,7 @@ class mesh:
     def view(self, **kwargs):
         out = visualize.View(self, **kwargs)   
         return out 
-    def plot(self, **kwargs):
+    def plot(self, show=True, return_fig=False, **kwargs):
         import matplotlib.pyplot as plt
 
         kwargs['return_image'] = True
@@ -1678,7 +1690,10 @@ class mesh:
         fig, ax = plt.subplots()
         ax.imshow(img)
         ax.set_axis_off()
-        plt.show()
+        if show:
+            plt.show()
+        if return_fig:
+            return fig, ax
 
     ## Helper Functions
     def _get_faces(self):
