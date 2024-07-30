@@ -82,8 +82,10 @@ Miscellaneous
 
 import numpy as np
 import scipy
+import numba
 import sys, warnings, copy, time, itertools
 from . import converter, rays, octree, improvement, quality, mesh
+from . import try_njit
 
 def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     """
@@ -713,6 +715,7 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
                 NodeNormals[i] = Np.tolist()
     return NodeNormals
 
+@numba.njit(cache=True)
 def BaryTri(Nodes, Pt):
     """
     Returns the bary centric coordinates of a point (Pt) relative to 
@@ -720,9 +723,9 @@ def BaryTri(Nodes, Pt):
 
     Parameters
     ----------
-    Nodes : list
+    Nodes : np.ndarray
         List of coordinates of the triangle vertices.
-    Pt : list
+    Pt : np.ndarray
         Coordinates of the point.
 
     Returns
@@ -735,8 +738,8 @@ def BaryTri(Nodes, Pt):
         Third barycentric coordinate.
 
     """
-    
-    assert (np.shape(Nodes)[0] == 3) & (np.shape(Nodes)[1] in (2,3)), 'Nodes must be a 3x3 or 3x2 array_like'
+    Nodes = np.asarray(Nodes, dtype=np.float64)
+    Pt = np.asarray(Pt, dtype=np.float64)
 
     A = Nodes[0]
     B = Nodes[1]
@@ -800,6 +803,7 @@ def BaryTris(Tris, Pt):
     
     return alpha, beta, gamma
 
+# @numba.njit(cache=True)
 def BaryTet(Nodes, Pt):
     """
     Returns the bary centric coordinates of a point (Pt) relative to 
@@ -1146,28 +1150,29 @@ def RemoveNodes(NodeCoords,NodeConn):
 
     Returns
     -------
-    NewNodeCoords : list
+    NewNodeCoords : array_like
         New set of node coordinates where unused nodes have been removed
-    NewNodeConn : list
+    NewNodeConn : array_like
         Renumbered set of node connectivities to be consistent with NewNodeCoords
     OriginalIds : np.ndarray
         The indices the original IDs of the nodes still in the mesh. This can be used
         to remove entries in associated node data (ex. new_data = old_data[OriginalIds]).
     """    
-    # removeNodes 
-    OriginalIds, inverse = np.unique([n for elem in NodeConn for n in elem],return_inverse=True)
+    if type(NodeConn) is np.ndarray:
+        F = NodeConn.flatten()
+    else:
+        F = np.array([n for elem in NodeConn for n in elem])
+    OriginalIds, idx, inverse = np.unique(F, return_index=True, return_inverse=True)
+    replace = dict(zip(OriginalIds, np.arange(len(OriginalIds))))
     NewNodeCoords = np.asarray(NodeCoords)[OriginalIds]
-    
-    NewNodeConn = [[] for elem in NodeConn]
-    k = 0
-    for i,elem in enumerate(NodeConn):
-        temp = []
-        for e in elem:
-            temp.append(inverse[k])
-            k += 1
-        NewNodeConn[i] = temp
-    
-    
+    New = np.array([replace.get(x, x) for x in F])
+
+    if type(NodeConn) is np.ndarray:
+        NewNodeConn = New.reshape(NodeConn.shape)
+    else:
+        Newiter = iter(New)
+        NewNodeConn = [list(itertools.islice(Newiter, len(elem))) for elem in NodeConn]
+
     return NewNodeCoords, NewNodeConn, OriginalIds
 
 def RelabelNodes(NodeCoords,NodeConn,newIds,faces=None):
