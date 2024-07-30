@@ -798,6 +798,25 @@ def box(x1,x2,y1,y2,z1,z2):
     func = lambda x, y, z : intersection(intersection(intersection(x1-x,x-x2),intersection(y1-y,y-y2)),intersection(z1-z,z-z2))
     return func
 
+def plane(pt, normal):
+    """
+    Implicit function of an arbitrary plane.
+
+    Parameters
+    ----------
+    pt : array_like
+        Three element array_like, coordinates of a point on the plane.
+    normal : array_like
+        Three element array_like, normal vector of plane.
+
+    Returns
+    -------
+    func : function
+        Implicit function of three parameters (x, y, z)
+    """
+    func = lambda x,y,z: np.tensordot(np.array([x,y,z]).T, normal, axes=1) - np.dot(normal,pt) 
+    return func
+
 def xplane(x0, n=1):
     """
     Implicit function of a plane whose normal direction is along the x axis.
