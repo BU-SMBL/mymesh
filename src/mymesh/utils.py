@@ -83,7 +83,7 @@ Miscellaneous
 import numpy as np
 import scipy
 import numba
-import sys, warnings, copy, time, itertools
+import sys, warnings, copy, time, itertools, collections
 from . import converter, rays, octree, improvement, quality, mesh
 from . import try_njit
 
@@ -225,7 +225,7 @@ def getNodeNeighborhoodByRadius(NodeCoords,NodeConn,Radius):
                             NodeNeighborhoods[i].append(NodeNeighbors[j][k])
     return NodeNeighborhoods   
 
-def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
+def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None, v=1):
     """
     Get list of neighboring elements for each element in the mesh.
 
@@ -253,15 +253,16 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
         indices of the neighboring elements.
     """
     # Get Element neighbors 
-    ElemNeighbors = [set() for i in range(len(NodeConn))]
+    
     if mode=='node':
+        ElemNeighbors = [set() for i in range(len(NodeConn))]
         ElemConn = getElemConnectivity(NodeCoords,NodeConn)
         for i,elem in enumerate(NodeConn):
             for n in elem:
                 ElemNeighbors[i].update(ElemConn[n])
         ElemNeighbors = [list(s) for s in ElemNeighbors] 
     elif mode=='edge':
-        
+        ElemNeighbors = [set() for i in range(len(NodeConn))]
         Edges,EdgeConn,EdgeElem = converter.solid2edges(NodeCoords,NodeConn,return_EdgeElem=True,return_EdgeConn=True)
 
         UEdges,idx,inv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
@@ -283,28 +284,45 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
     elif mode=='face':
         #TODO: This needs to updated, can be made faster, should use converter.faces2unique
         faces,faceconn,faceelem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
-        # Pad Ragged arrays in case of mixed-element meshes
-        Rfaces = PadRagged(faces)
-        Rfaceconn = PadRagged(faceconn)
-        # Get all unique element faces (accounting for flipped versions of faces)
-        _,idx,inv = np.unique(np.sort(Rfaces,axis=1),axis=0,return_index=True,return_inverse=True)
-        RFaces = Rfaces[idx]
-        FaceElem = faceelem[idx]
-        RFaces = np.append(RFaces, np.repeat(-1,RFaces.shape[1])[None,:],axis=0)
-        inv = np.append(inv,-1)
-        RFaceConn = inv[Rfaceconn] # Faces attached to each element
-        # Face-Element Connectivity
-        FaceElemConn = np.nan*(np.ones((len(RFaces),2)))
-
-        FECidx = (FaceElem[RFaceConn] == np.repeat(np.arange(len(NodeConn))[:,None],RFaceConn.shape[1],axis=1)).astype(int)
-        FaceElemConn[RFaceConn,FECidx] = np.repeat(np.arange(len(NodeConn))[:,None],RFaceConn.shape[1],axis=1)
-        FaceElemConn = [[int(x) if not np.isnan(x) else x for x in y] for y in FaceElemConn[:-1]]
-
-        for i in range(len(FaceElemConn)):
-            if np.any(np.isnan(FaceElemConn[i])): continue
-            ElemNeighbors[FaceElemConn[i][0]].add(FaceElemConn[i][1])
-            ElemNeighbors[FaceElemConn[i][1]].add(FaceElemConn[i][0])
-        ElemNeighbors = [list(s) for s in ElemNeighbors] 
+        ######
+        if v == 1:
+            sortface = [tuple(sorted(face)) for face in faces]
+            FaceElem = collections.defaultdict(set)
+            for i,facekey in enumerate(sortface):
+                FaceElem[facekey].add(faceelem[i])
+            
+            ElemNeighborDict = dict()
+            for i,fs in enumerate(faceconn):
+                neighbors = {elem for f in fs for elem in FaceElem[sortface[f]]}
+                neighbors.discard(i)
+                ElemNeighborDict[i] = neighbors
+            ElemNeighbors = [list(ElemNeighborDict[i]) for i in range(len(faceconn))]
+        
+        #####
+        elif v == 0:
+            ElemNeighbors = [set() for i in range(len(NodeConn))]
+            # Pad Ragged arrays in case of mixed-element meshes
+            Rfaces = PadRagged(faces)
+            Rfaceconn = PadRagged(faceconn)
+            # Get all unique element faces (accounting for flipped versions of faces)
+            _,idx,inv = np.unique(np.sort(Rfaces,axis=1),axis=0,return_index=True,return_inverse=True)
+            RFaces = Rfaces[idx]
+            FaceElem = faceelem[idx]
+            RFaces = np.append(RFaces, np.repeat(-1,RFaces.shape[1])[None,:],axis=0)
+            inv = np.append(inv,-1)
+            RFaceConn = inv[Rfaceconn] # Faces attached to each element
+            # Face-Element Connectivity
+            FaceElemConn = np.nan*(np.ones((len(RFaces),2)))
+    
+            FECidx = (FaceElem[RFaceConn] == np.repeat(np.arange(len(NodeConn))[:,None],RFaceConn.shape[1],axis=1)).astype(int)
+            FaceElemConn[RFaceConn,FECidx] = np.repeat(np.arange(len(NodeConn))[:,None],RFaceConn.shape[1],axis=1)
+            FaceElemConn = [[int(x) if not np.isnan(x) else x for x in y] for y in FaceElemConn[:-1]]
+    
+            for i in range(len(FaceElemConn)):
+                if np.any(np.isnan(FaceElemConn[i])): continue
+                ElemNeighbors[FaceElemConn[i][0]].add(FaceElemConn[i][1])
+                ElemNeighbors[FaceElemConn[i][1]].add(FaceElemConn[i][0])
+            ElemNeighbors = [list(s) for s in ElemNeighbors] 
     else:
         raise Exception('Invalid mode. Must be "edge" or "face".')
 
@@ -330,7 +348,9 @@ def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,BarrierNodes=set())
     Returns
     -------
     NodeRegions : list of sets
-        Each set in the list contains a region of connected nodes.
+        Each set in the list contains a region of connected nodes. Sorted by 
+        size of region such that the region with the most nodes is first in 
+        the list.
     """
     
     NodeRegions = []
@@ -360,7 +380,7 @@ def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,BarrierNodes=set())
             nCurrent = len(region)
         todo.difference_update(region)
         NodeRegions.append(region)
-        
+    NodeRegions = [NodeRegions[i] for i in np.argsort([len(region) for region in NodeRegions])[::-2]]
     return NodeRegions  
 
 def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge',BarrierElems=set()):
@@ -386,7 +406,9 @@ def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge',Barr
     Returns
     -------
     ElemRegions : list of sets
-        Each set in the list contains a region of connected nodes.
+        Each set in the list contains a region of connected nodes. Sorted by 
+        size of region such that the region with the most nodes is first in 
+        the list.
     """
     ElemRegions = []
     if not ElemNeighbors: ElemNeighbors = getElemNeighbors(NodeCoords,NodeConn,mode=mode)
@@ -414,7 +436,7 @@ def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge',Barr
             nCurrent = len(region)
         todo.difference_update(region)
         ElemRegions.append(region)
-    
+    ElemRegions = [ElemRegions[i] for i in np.argsort([len(region) for region in ElemRegions])[::-2]]
     return ElemRegions  
 
 def Centroids(NodeCoords,NodeConn):
@@ -1162,11 +1184,18 @@ def RemoveNodes(NodeCoords,NodeConn):
         F = NodeConn.flatten()
     else:
         F = np.array([n for elem in NodeConn for n in elem])
-    OriginalIds, idx, inverse = np.unique(F, return_index=True, return_inverse=True)
-    replace = dict(zip(OriginalIds, np.arange(len(OriginalIds))))
-    NewNodeCoords = np.asarray(NodeCoords)[OriginalIds]
-    New = np.array([replace.get(x, x) for x in F])
-
+        
+    node_mask = np.zeros(len(NodeCoords), dtype=np.uint8)
+    node_mask[F] = 1
+    
+    OriginalIds = np.where(node_mask)[0]
+    
+    replace = np.zeros(len(NodeCoords),dtype=int)
+    replace[OriginalIds] = np.arange(len(OriginalIds))
+    
+    NewNodeCoords = NodeCoords[OriginalIds]
+    New = replace[F]
+    
     if type(NodeConn) is np.ndarray:
         NewNodeConn = New.reshape(NodeConn.shape)
     else:
