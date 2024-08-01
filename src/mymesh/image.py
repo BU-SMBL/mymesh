@@ -41,6 +41,7 @@ def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scal
         Image array or file path to an image
     h : scalar, tuple
         Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).
+        If a tuple, entries should correspond to (hx, hy, hz).
     threshold : scalar
         Isovalue threshold to use for keeping/removing elements, by default 0.
     threshold_direction : signed integer
@@ -107,6 +108,7 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
         Image array or file path to an image
     h : scalar, tuple
         Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).
+        If a tuple, entries should correspond to (hx, hy, hz).
     threshold : scalar
         Isovalue threshold to use for keeping/removing elements, by default 0.
     threshold_dir : signed integer
@@ -168,7 +170,7 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
 
         elif method == 'mt':
             NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
-            SurfCoords, SurfConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['Image Data'], method='surface', threshold=threshold, flip=flip)
+            SurfCoords, SurfConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['Image Data'], Type='surf', threshold=threshold, flip=flip)
 
     
     if 'mesh' in dir(mesh):
@@ -217,7 +219,7 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
 
     voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)
     NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
-    TetCoords, TetConn, Values = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['Image Data'], method='volume', threshold=threshold, flip=flip, return_NodeValues=True)
+    TetCoords, TetConn, Values = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['Image Data'], Type='vol', threshold=threshold, flip=flip, return_NodeValues=True)
 
 
     if 'mesh' in dir(mesh):
@@ -343,14 +345,25 @@ def read(img, scalefactor=1, scaleorder=1):
     # Load data
     print('Loading image data from {:s} ...'.format(img), end='')
     if ftype == 'tiff':
+        try:
+            import tifffile
+        except:
+            if len(files) == 1:
+                warnings.warn('tifffile recommended for reading single-file 3D tiff images. Install with: pip install tifffile')
+                tifffile is None
         
-        temp = cv2.imread(files[0])
-        if len(temp.shape) > 2:
-            multichannel = True
-            multiimgs = tuple([np.array([cv2.imread(file)[:,:,i] for file in files]) for i in range(temp.shape[2])])
+        if len(files) == 1 and tifffile is not None:
+            imgs = tifffile.imread(files[0])
+            
         else:
-            multichannel = False
-            imgs = np.array([cv2.imread(file) for file in files])
+            temp = cv2.imread(files[0])
+            
+            if len(temp.shape) > 2:
+                multichannel = True
+                multiimgs = tuple([np.array([cv2.imread(file)[:,:,i] for file in files]) for i in range(temp.shape[2])])
+            else:
+                multichannel = False
+                imgs = np.array([cv2.imread(file) for file in files])
     else:
         # temp = pydicom.dcmread(files[0]).pixel_array
         imgs = np.array([pydicom.dcmread(file).pixel_array for file in files])
