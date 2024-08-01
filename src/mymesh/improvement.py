@@ -1500,7 +1500,7 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, maxIter=5, l
             if verbose and tqdm_loaded:
                 L2 = len(heap)
                 progress.total += max(0, L2-L1)
-            
+        if verbose and tqdm_loaded: print('\n')
         NewConn = np.array(list(set([elem for i in ElemConnTable.keys() for elem in ElemConnTable[i]])))
         if valid > 0:
             Edges = np.array([key for key in inmesh.keys() if inmesh[key]])
