@@ -649,7 +649,7 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
         
         NewCoords = np.vstack([ArrayCoords,Centroids,Face0Centroids,Face1Centroids,Face2Centroids,Face3Centroids,Face4Centroids,Face5Centroids])        
         
-        TetConn = -1*np.ones((len(NodeConn)*24,4))
+        TetConn = -1*np.ones((len(NodeConn)*24,4), dtype=int)
         TetConn[0::24] = np.hstack([ArrayConn[:,[0,1]],Face0CentroidIds[:,None],CentroidIds[:,None]])
         TetConn[1::24] = np.hstack([ArrayConn[:,[1,2]],Face0CentroidIds[:,None],CentroidIds[:,None]])
         TetConn[2::24] = np.hstack([ArrayConn[:,[2,3]],Face0CentroidIds[:,None],CentroidIds[:,None]])
