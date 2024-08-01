@@ -3844,7 +3844,8 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         Image array (3D) of grayscale data. The (0,1,2) axes of the image should
         correspond to the (z,y,x) axes, respectively.
     h : float or tuple, optional
-        Element (pixel) size. Can be specified as a single value for isotropic pixel sizes or a tuple of three values, by default 1
+        Element (pixel) size. Can be specified as a single value for isotropic pixel sizes or a tuple of three values, by default 1.
+        If a tuple, entries should correspond to (hx, hy, hz).
     threshold : int, optional
         Isosurface level that defines the boundary, by default 0
     interpolation : str, optional
@@ -3895,6 +3896,9 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         return np.empty((0,3)), []
     if isinstance(h, (int, float, np.number)):
         h = (h,h,h)
+    elif isinstance(h, tuple):
+        # Flipping so that element sizes match image axes
+        h = h[::-1]
     
     Padding = 0
     if interpolation == "cubic":
