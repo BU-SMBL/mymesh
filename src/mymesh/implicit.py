@@ -411,7 +411,7 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
         
     return tet
 
-def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, finite_diff_step=1e-5, smooth=True, InPlace=False, springs=True):
+def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set(), FreeNodes=None, FixEdges=False, finite_diff_step=1e-5, smooth=True, InPlace=False, springs=True):
     """
     Optimize the placement of surface node to lie on the "true" surface. This
     This simultaneously moves nodes towards the isosurface and redistributes
@@ -432,6 +432,9 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
         Number of iterations to perform, by default 1
     FixedNodes : set, optional
         Nodes to hold in place during repositioning, by default set()
+    FreeNodes : NoneType, set, or array_like
+        Movable nodes, if None these will be the surface nodes. The any nodes in both 
+        FreeNodes and FixedNodes will be removed from FreeNodes. By default None.
     FixEdges : bool, optional
         Option to detect and hold in place exposed surface edges, by default False
     finite_diff_step : float, optional
@@ -466,12 +469,19 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
         smooth = 'tangential'
         
     # Process nodes
-    SurfNodes = set([n for elem in M.SurfConn for n in elem])
     if FixEdges:
         EdgeNodes = set(converter.surf2edges(M.NodeCoords, M.SurfConn).flatten())
     else:
         EdgeNodes = set()
-    FreeNodes = np.array(list(SurfNodes.difference(EdgeNodes).difference(FixedNodes)))
+    if FreeNodes is None:
+        FreeNodes = M.SurfNodes
+    if type(FreeNodes) is np.ndarray:
+        FreeNodes = set(FreeNodes.tolist())
+    elif isinstance(FreeNodes, (list, tuple)):
+        FreeNodes = set(FreeNodes)
+    else:
+        raise ValueError('Invalid input for FreeNodes.')
+    FreeNodes = np.array(list(FreeNodes.difference(EdgeNodes).difference(FixedNodes)))
     if len(FreeNodes) == 0:
         raise Exception('No free movable nodes.')
 
