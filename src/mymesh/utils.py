@@ -1193,7 +1193,7 @@ def RemoveNodes(NodeCoords,NodeConn):
     replace = np.zeros(len(NodeCoords),dtype=int)
     replace[OriginalIds] = np.arange(len(OriginalIds))
     
-    NewNodeCoords = NodeCoords[OriginalIds]
+    NewNodeCoords = np.asarray(NodeCoords)[OriginalIds]
     New = replace[F]
     
     if type(NodeConn) is np.ndarray:
