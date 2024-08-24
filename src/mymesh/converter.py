@@ -968,6 +968,11 @@ def pyramid2tet(NodeCoords,NodeConn, method='1to2c'):
         List of nodal coordinates.
     NodeConn : list
         Nodal connectivity list. All elements should be 5-Node pyramidal elements.
+    method : str, optional
+        Method of decomposition to use for tetrahedralization.
+        '1to2'  - Not continuously oriented, no nodes added, all elements decomposed the same way
+        '1to2c'  - Continuously oriented, no nodes added (default)
+        '1to4' - Continuously oriented, nodes added at center of the quad faces
 
     Returns
     -------

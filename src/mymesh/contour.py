@@ -4716,8 +4716,43 @@ def Adaptive(func, bounds, threshold=0, method=None, grad=None, mindepth=2, maxd
             
     return NodeCoords, NodeConn
 
-def SnapGrid2Surf(NodeCoords,NodeConn,NodeValues,threshold=0, snap=0.1, edges=None, FixedNodes=set()):
-    # Based on ideas from isosurface stuffing, dual marching cubes, snapMC
+def SnapGrid2Surf(NodeCoords,NodeConn,NodeValues,threshold=0,snap=0.1, edges=None,FixedNodes=set()):
+    """
+    Deform a mesh before contouring to move near-surface nodes onto the surface. 
+    Based on ideas from cite:t:`Schaefer2005`, cite:t:`Labelle2007`, cite:t:`Raman2008`.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates
+    NodeConn : list, array_like
+        Node connectivity
+    NodeValues : array_like
+        Values at each node to be used for contouring
+    threshold : int, optional
+        Isosurface value that defines the surface, by default 0
+    snap : float, optional
+        Snapping parameter - relative distance along edge within which
+        nodes will be snapped to the surface. Along an edge, the nearest
+        of the two nodes will be snapped to the surface, so the snapping
+        parameter ranges from [0, 0.5], by default 0.1. 
+    edges : array_like, optional
+        Node connectivity of the edges of the mesh (e.g. mesh.Edges). These
+        should be the unique edges (not half-edges), by default None. If None 
+        are provided, these will be calculated.
+    FixedNodes : set, optional
+        Set of nodes to be held fixed, by default set()
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        Modified node coordinates
+    NodeConn : list, array_like
+        Node connectivity
+    NodeValues : np.ndarray
+        Modified node values where snapped values have been set to <threshold>.
+
+    """    
     
     assert (snap <= 0.5) and (snap >= 0), 'The snap parameter must be in the range [0, 0.5].'
     NodeCoords = np.copy(NodeCoords)
@@ -4743,15 +4778,6 @@ def SnapGrid2Surf(NodeCoords,NodeConn,NodeValues,threshold=0, snap=0.1, edges=No
     EdgeVals = NodeValues[edges]
     if interpolation == 'linear':
         SignChangeEdges = np.where(np.sign(EdgeVals[:,0]-threshold) != np.sign(EdgeVals[:,1]-threshold))[0]
-        
-        # get set of sign change edges with no repeated nodes
-        # seen = set()
-        # rows = set()
-        # for row in SignChangeEdges:
-        #     if edges[row][0] not in seen and edges[row][1] not in seen:
-        #         seen.update(edges[row])
-        #         rows.add(row)
-        # EdgeIds = np.array(list(rows))
         
         EdgeIds = SignChangeEdges
         closest = np.argmin(np.abs(EdgeVals-threshold),axis=1)[EdgeIds]
