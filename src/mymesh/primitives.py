@@ -610,14 +610,15 @@ def Torus(center, R, r, axis=2, theta_resolution=20, phi_resolution=20, ElemType
     torus.cleanup()
     return torus
 
-def Extrude(line, distance, step, axis=2, ElemType='quad'):
+def Extrude(m, distance, step, axis=2, ElemType=None):
     """
-    Extrude a 2D line mesh to a 3D surface
+    Extrude a 2D mesh to a 3D surface or volume
 
     Parameters
     ----------
-    line : mesh
-        mesh object of 2D line mesh
+    m : mymesh.mesh
+        mesh object of 2D line mesh (m.Type='line') or 2D surface mesh 
+        (m.Type='surf')
     distance : scalar
         Extrusion distance
     step : scalar
@@ -625,8 +626,12 @@ def Extrude(line, distance, step, axis=2, ElemType='quad'):
     axis : int, optional
         Extrusion axis, either 0 (x), 1 (y), or 2 (z), by default 2
     ElemType : str, optional
-        Specify the element type of the grid mesh. This can either be 'quad' for 
-        a quadrilateral mesh or 'tri' for a triangular mesh, by default 'quad'.
+        Specify the element type of the extruded mesh. If m.Type='line', this
+        can be None or 'tri' or if m.Type='surf', this can be None or 'tet'. 
+        If 'tri' or 'tet', the mesh will be converted to a purely triangular/
+        tetrahedral mesh, otherwise it will follow from the input mesh (input 
+        line meshes will get quadrilateral elements, input surf meshes
+        could get hexahedral, or wedge meshes). By default, None.
 
     Returns
     -------
@@ -650,32 +655,52 @@ def Extrude(line, distance, step, axis=2, ElemType='quad'):
         extruded.plot(bgcolor='w', show_edges=True)
 
     """    
-    NodeCoords = np.array(line.NodeCoords)
-    OriginalConn = np.asarray(line.NodeConn)
-    NodeConn = np.empty((0,4))
-    for i,s in enumerate(np.arange(step,distance+step,step)):
-        temp = np.array(line.NodeCoords)
-        temp[:,axis] += s
-        NodeCoords = np.append(NodeCoords, temp, axis=0)
+    NodeCoords = np.array(m.NodeCoords)
+    OriginalConn = np.asarray(m.NodeConn)
+    if m.Type == 'line':
+        if ElemType is None:
+            ElemType = 'quad'
+        
+        NodeConn = np.empty((0,4))
+        for i,s in enumerate(np.arange(step,distance+step,step)):
+            temp = np.array(m.NodeCoords)
+            temp[:,axis] += s
+            NodeCoords = np.append(NodeCoords, temp, axis=0)
 
-        NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
-    NodeConn = NodeConn.astype(int)
-    if ElemType == 'tri':
-        _,NodeConn = converter.quad2tri([],NodeConn)
+            NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
+        NodeConn = NodeConn.astype(int)
+        if ElemType == 'tri':
+            _,NodeConn = converter.quad2tri([],NodeConn)
+        Type = 'surf'
+
+    elif m.Type == 'surf':
+        OriginalConn = OriginalConn.tolist()
+        NodeConn = []
+        for i,s in enumerate(np.arange(step,distance+step,step)):
+            temp = np.array(m.NodeCoords)
+            temp[:,axis] += s
+            NodeCoords = np.append(NodeCoords, temp, axis=0)
+            L = len(temp)
+            NodeConn += [[n+((i)*L) for n in elem] + [n+((i+1)*L) for n in elem] for elem in OriginalConn]
+        if ElemType == 'tet':
+            _,NodeConn = converter.solid2tets([],NodeConn)
+        Type = 'vol'
+    
     if 'mesh' in dir(mesh):
-        extruded = mesh.mesh(NodeCoords,NodeConn,'surf')
+        extruded = mesh.mesh(NodeCoords,NodeConn,Type)
     else:
-        extruded = mesh(NodeCoords,NodeConn,'surf')
+        extruded = mesh(NodeCoords,NodeConn,Type)
+
     return extruded
 
-def Revolve(line, angle, anglestep, center=[0,0,0], axis=2, ElemType='quad'):
+def Revolve(m, angle, anglestep, center=[0,0,0], axis=2, ElemType=None):
     """
-    Revolve a 2D line mesh to a 3D surface
+    Revolve a 2D mesh to a 3D surface or volume
 
     Parameters
     ----------
-    line : mymesh.mesh
-        Mesh object of 2d line mesh
+    m : mymesh.mesh
+        Mesh object of 2d line mesh or 2d surface mesh
     angle : scalar
         Angle (in radians) to revolve the line by. For a full rotation, angle=2*np.pi
     anglestep : scalar
@@ -687,9 +712,13 @@ def Revolve(line, angle, anglestep, center=[0,0,0], axis=2, ElemType='quad'):
         Axis of revolution. This can be specified as either 0 (x), 1 (y), or 2 (z) or a 
         three element vector denoting the axis, by default 2.
     ElemType : str, optional
-        Specify the element type of the grid mesh. This can either be 'quad' for 
-        a quadrilateral mesh or 'tri' for a triangular mesh, by default 'quad'. 
-        If 'quad', some degenerate quads may be converted to tris.
+        Specify the element type of the revolved mesh. If m.Type='line', this
+        can be None or 'tri' or if m.Type='surf', this can be None or 'tet'. 
+        If 'tri' or 'tet', the mesh will be converted to a purely triangular/
+        tetrahedral mesh, otherwise it will follow from the input mesh (input 
+        line meshes will get quad or quad-dominant meshes, input surf meshes
+        could get hexahedral, or wedge-dominant meshes and may also contain
+        pyramids or tetrahedra). By default, None.
 
     Returns
     -------
@@ -728,9 +757,9 @@ def Revolve(line, angle, anglestep, center=[0,0,0], axis=2, ElemType='quad'):
     R = np.repeat([np.eye(4)],len(thetas),axis=0)
     R[:,:3,:3] = rot_matrices
 
-    NodeCoords = np.array(line.NodeCoords)
-    OriginalConn = np.asarray(line.NodeConn)
-    NodeConn = np.empty((0,4))
+    NodeCoords = np.array(m.NodeCoords)
+    OriginalConn = np.asarray(m.NodeConn)
+    
 
     padded = np.hstack([NodeCoords, np.ones((len(NodeCoords),1))])
     T = np.array([
@@ -740,21 +769,41 @@ def Revolve(line, angle, anglestep, center=[0,0,0], axis=2, ElemType='quad'):
                 [0, 0, 0, 1],
                 ])
     Tinv = np.linalg.inv(T)
-    for i,r in enumerate(R[1:]):
-        temp = np.linalg.multi_dot([Tinv,r,T,padded.T]).T[:,:3]
-        NodeCoords = np.append(NodeCoords, temp, axis=0)
+    if m.Type == 'line':
+        NodeConn = np.empty((0,4))
+        for i,r in enumerate(R[1:]):
+            temp = np.linalg.multi_dot([Tinv,r,T,padded.T]).T[:,:3]
+            NodeCoords = np.append(NodeCoords, temp, axis=0)
 
-        NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
+            NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
 
-    NodeConn = NodeConn.astype(int)
+        NodeConn = NodeConn.astype(int)
 
-    if ElemType == 'tri':
-        _,NodeConn = converter.quad2tri([],NodeConn)
-    NodeCoords, NodeConn = utils.DeleteDuplicateNodes(NodeCoords, NodeConn)
-    NodeCoords, NodeConn = utils.CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf')
+        if ElemType == 'tri':
+            _,NodeConn = converter.quad2tri([],NodeConn)
+
+        NodeCoords, NodeConn = utils.DeleteDuplicateNodes(NodeCoords, NodeConn)
+        NodeCoords, NodeConn = utils.CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf')
+        Type='surf'
+    elif m.Type == 'surf':
+        NodeConn = []
+        OriginalConn = OriginalConn.tolist()
+        for i,r in enumerate(R[1:]):
+            temp = np.linalg.multi_dot([Tinv,r,T,padded.T]).T[:,:3]
+            NodeCoords = np.append(NodeCoords, temp, axis=0)
+
+            L = len(temp)
+            NodeConn += [[n+((i)*L) for n in elem] + [n+((i+1)*L) for n in elem] for elem in OriginalConn]
+
+        if ElemType == 'tet':
+            _,NodeConn = converter.solid2tets([],NodeConn)
+
+        NodeCoords, NodeConn = utils.DeleteDuplicateNodes(NodeCoords, NodeConn)
+        NodeCoords, NodeConn = utils.CleanupDegenerateElements(NodeCoords, NodeConn, Type='vol')
+        Type='vol'
 
     if 'mesh' in dir(mesh):
-        revolve = mesh.mesh(NodeCoords,NodeConn,'surf')
+        revolve = mesh.mesh(NodeCoords,NodeConn,Type)
     else:
-        revolve = mesh(NodeCoords,NodeConn,'surf')
+        revolve = mesh(NodeCoords,NodeConn,Type)
     return revolve
