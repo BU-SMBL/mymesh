@@ -39,6 +39,7 @@ Submodules
 
 """
 from functools import wraps
+import warnings
 
 try: 
     from numba import njit
@@ -77,6 +78,6 @@ def try_njit(func=None, *njit_args, **njit_kwargs):
 
 from .mesh import mesh
 from . import booleans, contour, curvature, delaunay, image, implicit, improvement, octree, primitives, quality, utils, visualize
-__all__ = ["use_numba", "try_njit", "mesh", "booleans", "contour", "curvature",
-"delaunay", "image", "implicit", "improvement", "octree", "primitives", 
-"quality", "utils", "visualize", "_MYMESH_USE_NUMBA"]
+__all__ = ["use_numba", "try_njit", "mesh", "booleans", "contour", "converter",
+"curvature", "delaunay", "image", "implicit", "improvement", "octree", 
+"primitives", "quality", "utils", "visualize", "_MYMESH_USE_NUMBA"]
