@@ -793,7 +793,7 @@ def Revolve(m, angle, anglestep, center=[0,0,0], axis=2, ElemType=None):
             NodeCoords = np.append(NodeCoords, temp, axis=0)
 
             L = len(temp)
-            NodeConn += [[n+((i)*L) for n in elem] + [n+((i+1)*L) for n in elem] for elem in OriginalConn]
+            NodeConn += [[n+((i)*L) for n in elem[::-1]] + [n+((i+1)*L) for n in elem[::-1]] for elem in OriginalConn]
 
         if ElemType == 'tet':
             _,NodeConn = converter.solid2tets([],NodeConn)
