@@ -479,7 +479,7 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
         FreeNodes = set(FreeNodes.tolist())
     elif isinstance(FreeNodes, (list, tuple)):
         FreeNodes = set(FreeNodes)
-    else:
+    elif type(FreeNodes) is not set:
         raise ValueError('Invalid input for FreeNodes.')
     FreeNodes = np.array(list(FreeNodes.difference(EdgeNodes).difference(FixedNodes)))
     if len(FreeNodes) == 0:
