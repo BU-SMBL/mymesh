@@ -588,7 +588,7 @@ class mesh:
 
         assert isinstance(self.NodeCoords, (list,np.ndarray,tuple)), f'Invalid type:{str(type(self.NodeCoords)):s} for mesh.NodeCoords.'
         assert len(self.NodeCoords) > 0, 'Undefined Node Coordinates'
-        assert isinstance(NodeCoords, (list,np.ndarray,tuple)), f'Invalid type:{str(type(self.NodeCoords)):s} for mesh.NodeConn.'
+        assert isinstance(self.NodeCoords, (list,np.ndarray,tuple)), f'Invalid type:{str(type(self.NodeCoords)):s} for mesh.NodeConn.'
         assert len(self.NodeConn), 'Undefined Node Connectivity'
         assert max([max(elem) for elem in self.NodeConn]) <= len(self.NodeCoords), 'NodeConn references undefined nodes'
         
@@ -1239,7 +1239,7 @@ class mesh:
 
         return M
 
-    def Threshold(self, scalars, threshold, mode=None, scalar_preference='elements', all_nodes=True, InPlace=False):
+    def Threshold(self, scalars, threshold, mode=None, scalar_preference='elements', all_nodes=True, InPlace=False, cleanup=False):
         """
         Threshold the mesh by scalar values at either nodes or elements. 
 
@@ -1395,6 +1395,8 @@ class mesh:
             M = self.copy()
 
         M.removeElems(RemoveElems)
+        if cleanup:
+            M.cleanup()
         return M
 
     def Clip(self, pt=None, normal=[1,0,0], flip=False):
