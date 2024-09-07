@@ -65,10 +65,13 @@ def check_numba():
 def try_njit(func=None, *njit_args, **njit_kwargs):
 
     def decorator(func):
+        jit_func = None
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if _MYMESH_USE_NUMBA:
-                jit_func = njit(*njit_args, **njit_kwargs)(func)
+            nonlocal jit_func
+            if check_numba():
+                if jit_func is None:
+                    jit_func = njit(*njit_args, **njit_kwargs)(func)
                 return jit_func(*args, **kwargs)
             else:
                 return func(*args, **kwargs)
@@ -78,6 +81,6 @@ def try_njit(func=None, *njit_args, **njit_kwargs):
 
 from .mesh import mesh
 from . import booleans, contour, curvature, delaunay, image, implicit, improvement, octree, primitives, quality, utils, visualize
-__all__ = ["use_numba", "try_njit", "mesh", "booleans", "contour", "converter",
+__all__ = ["check_numba", "use_numba", "try_njit", "mesh", "booleans", "contour", "converter",
 "curvature", "delaunay", "image", "implicit", "improvement", "octree", 
-"primitives", "quality", "utils", "visualize", "_MYMESH_USE_NUMBA"]
+"primitives", "quality", "rays", "utils", "visualize"]
