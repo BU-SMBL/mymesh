@@ -380,7 +380,7 @@ def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,BarrierNodes=set())
             nCurrent = len(region)
         todo.difference_update(region)
         NodeRegions.append(region)
-    NodeRegions = [NodeRegions[i] for i in np.argsort([len(region) for region in NodeRegions])[::-2]]
+    NodeRegions = [NodeRegions[i] for i in np.argsort([len(region) for region in NodeRegions])[::-1]]
     return NodeRegions  
 
 def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge',BarrierElems=set()):
@@ -436,7 +436,7 @@ def getConnectedElements(NodeCoords,NodeConn,ElemNeighbors=None,mode='edge',Barr
             nCurrent = len(region)
         todo.difference_update(region)
         ElemRegions.append(region)
-    ElemRegions = [ElemRegions[i] for i in np.argsort([len(region) for region in ElemRegions])[::-2]]
+    ElemRegions = [ElemRegions[i] for i in np.argsort([len(region) for region in ElemRegions])[::-1]]
     return ElemRegions  
 
 def Centroids(NodeCoords,NodeConn):
@@ -488,11 +488,11 @@ def CalcFaceNormal(NodeCoords,SurfConn):
     TriConn = SurfConn
     # points = ArrayCoords[PadRagged(SurfConn)]
     points = ArrayCoords[SurfConn]
-    ElemNormals = tri_normals(points)
+    ElemNormals = _tri_normals(points)
 
     return ElemNormals
 
-def tri_normals(Tris):
+def _tri_normals(Tris):
     
     U = Tris[:,1,:]-Tris[:,0,:]
     V = Tris[:,2,:]-Tris[:,0,:]
@@ -737,7 +737,7 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
                 NodeNormals[i] = Np.tolist()
     return NodeNormals
 
-@numba.njit(cache=True)
+@try_njit
 def BaryTri(Nodes, Pt):
     """
     Returns the bary centric coordinates of a point (Pt) relative to 
@@ -775,7 +775,10 @@ def BaryTri(Nodes, Pt):
     CACA = np.dot(CA, CA)
     PABA = np.dot(np.subtract(Pt,A), BA)
     PACA = np.dot(np.subtract(Pt,A), CA)
-    denom = 1/(BABA * CACA - BACA * BACA)
+    d = (BABA * CACA - BACA * BACA)
+    if d == 0:
+        a = 2
+    denom = 1/d
     beta = (CACA * PABA - BACA * PACA) * denom
     gamma = (BABA * PACA - BACA * PABA) * denom
     alpha = 1 - gamma - beta
@@ -825,7 +828,7 @@ def BaryTris(Tris, Pt):
     
     return alpha, beta, gamma
 
-# @numba.njit(cache=True)
+@try_njit
 def BaryTet(Nodes, Pt):
     """
     Returns the bary centric coordinates of a point (Pt) relative to 
@@ -2081,7 +2084,7 @@ def identify_type(NodeCoords, NodeConn):
         Returns
         -------
         Type : str
-            Mesh type, either 'surf', 'vol', or 'empty'.
+            Mesh type, either 'line', 'surf', 'vol', or 'empty'.
         """        
 
         # Check if the mesh is empty
@@ -2091,9 +2094,12 @@ def identify_type(NodeCoords, NodeConn):
             Type = 'empty'
             return Type
         
-        # Check node dimensions, if it's 2D, then it must be a surface
+        # Check node dimensions, if it's 2D, then it must be a surface or line
         if len(NodeCoords[0]) == 2:
-            Type = 'surf'
+            if len(NodeConn[0]) == 2:
+                Type = 'line'
+            else:
+                Type = 'surf'
             return Type
 
         # Check element lengths
@@ -2102,8 +2108,13 @@ def identify_type(NodeCoords, NodeConn):
         for l in lengths:
             # NOTE: any mesh containing triangle and volume elements will be 
             # arbitrarily classified by whichever comes first.
-            if l <= 3:
-                # The presence of any triangular (or line) elements triggers 'surf'
+            if l == 2:
+                # The presence of any edge elements triggers 'line'
+                Type = 'line'
+                return Type
+
+            elif l == 3:
+                # The presence of any triangular elements triggers 'surf'
                 Type = 'surf'
                 return Type
         

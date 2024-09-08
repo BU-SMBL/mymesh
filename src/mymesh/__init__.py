@@ -65,17 +65,12 @@ def check_numba():
 def try_njit(func=None, *njit_args, **njit_kwargs):
 
     def decorator(func):
-        jit_func = None
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            nonlocal jit_func
-            if check_numba():
-                if jit_func is None:
-                    jit_func = njit(*njit_args, **njit_kwargs)(func)
-                return jit_func(*args, **kwargs)
-            else:
-                return func(*args, **kwargs)
-        return wrapper
+        if check_numba():
+            jit_func = njit(*njit_args, **njit_kwargs)(func)
+        else:
+            jit_func = func
+        
+        return jit_func
     
     return decorator(func) if func else decorator
 
