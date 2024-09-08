@@ -218,7 +218,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
         The element index that each edge is taken from. Ex. [E0,E0,E0,E0,E0,E0,E1,E1,E1,...]
     """     
     
-    if ElemType in ('auto','mixed','surf','vol'):
+    if ElemType in ('auto','mixed','line','surf','vol'):
         Ls = np.array([len(elem) for elem in NodeConn])
         edgIdx = np.where(Ls == 2)[0]
         triIdx = np.where(Ls == 3)[0]
