@@ -858,12 +858,12 @@ def BaryTet(Nodes, Pt):
     C = Nodes[2]
     D = Nodes[3]
     
-    T = [[A[0]-D[0], B[0]-D[0], C[0]-D[0]],
+    T = np.array([[A[0]-D[0], B[0]-D[0], C[0]-D[0]],
          [A[1]-D[1], B[1]-D[1], C[1]-D[1]],
          [A[2]-D[2], B[2]-D[2], C[2]-D[2]]
-         ]
+         ])
     
-    [alpha,beta,gamma] = np.linalg.solve(T,np.subtract(Pt,D))
+    alpha,beta,gamma = np.linalg.solve(T,np.subtract(Pt,D))
     delta = 1 - (alpha + beta + gamma)
     
     return alpha, beta, gamma, delta
@@ -2011,7 +2011,12 @@ def PadRagged(In,fillval=-1):
     Out : np.ndarray
         Padded array.
     """
-    Out = np.array(list(itertools.zip_longest(*In,fillvalue=fillval))).T
+    # Out = np.array(list(itertools.zip_longest(*In,fillvalue=fillval))).T
+    maxL = max(len(row) for row in In)
+    Out = np.full((len(In), maxL), fillval)
+    for i, row in enumerate(In):
+        Out[i, :len(row)] = row
+
     return Out
 
 def ExtractRagged(In,delval=-1,dtype=None):
