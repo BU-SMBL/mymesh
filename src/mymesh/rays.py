@@ -49,7 +49,7 @@ Inside/Outside Tests
     PointsInTris
 """
 #%%
-from . import utils, octree, delaunay
+from . import utils, octree, delaunay, try_njit
 import numpy as np
 import itertools, random, sys, warnings
 import scipy
@@ -1470,7 +1470,21 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
     
     Intersections[checks] = False
     return Intersections
-    
+
+@try_njit    
+def BoxBoxIntersection(box1, box2):
+
+    x1lim, y1lim, z1lim = box1
+    x2lim, y2lim, z2lim = box2
+
+    xIx = ((x1lim[0] < x2lim[0]) and (x1lim[1] > x2lim[0])) or ((x1lim[0] < x2lim[1]) and (x1lim[1] > x2lim[1])) or ((x2lim[0] < x1lim[0]) and (x2lim[1] > x1lim[0])) or ((x2lim[0] < x1lim[1]) and (x2lim[1] > x1lim[1]))
+    yIx = ((y1lim[0] < y2lim[0]) and (y1lim[1] > y2lim[0])) or ((y1lim[0] < y2lim[1]) and (y1lim[1] > y2lim[1])) or ((y2lim[0] < y1lim[0]) and (y2lim[1] > y1lim[0])) or ((y2lim[0] < y1lim[1]) and (y2lim[1] > y1lim[1]))
+    zIx = ((z1lim[0] < z2lim[0]) and (z1lim[1] > z2lim[0])) or ((z1lim[0] < z2lim[1]) and (z1lim[1] > z2lim[1])) or ((z2lim[0] < z1lim[0]) and (z2lim[1] > z1lim[0])) or ((z2lim[0] < z1lim[1]) and (z2lim[1] > z1lim[1]))
+
+    Ix = xIx and yIx and zIx
+
+    return Ix
+
 def SegmentSegmentIntersection(s1,s2,return_intersection=False,endpt_inclusive=True,eps=0):
     # https://mathworld.wolfram.com/Line-LineIntersection.html
     # Goldman (1990)
@@ -2076,7 +2090,8 @@ def PointsInSurf(pts, NodeCoords, SurfConn, ElemNormals=None, Octree='generate',
                 Insides[i] = True
     return Insides
 
-def PointInBox(pt, xlim, ylim, zlim):
+@try_njit
+def PointInBox(pt, xlim, ylim, zlim, inclusive=True):
     """
     Test whether a point is inside a box
 
@@ -2097,7 +2112,16 @@ def PointInBox(pt, xlim, ylim, zlim):
         True if the point is in the box.
     """    
     lims = [xlim,ylim,zlim]
-    inside = all([lims[d][0] < pt[d] and lims[d][1] > pt[d] for d in range(3)])
+    inside = True
+    for d in range(3):
+        if inclusive:
+            if not lims[d][0] <= pt[d] <= lims[d][1]:
+                inside = False
+                break
+        else:
+            if not lims[d][0] < pt[d] < lims[d][1]:
+                inside = False
+                break
     return inside
 
 def PointsInVoxel(pts, VoxelCoords, VoxelConn, inclusive=True):    
@@ -2189,6 +2213,22 @@ def PointsInTris(Tris,pts,method='BaryArea',eps=1e-12,inclusive=True):
             In = np.all([alpha>=0,beta>=0,gamma>=0],axis=0) & (np.abs(alpha+beta+gamma-1) <= eps)
         else:
             In = np.all([alpha>=eps,beta>=eps,gamma>=eps],axis=0) & (np.abs(alpha+beta+gamma-1) <= eps)
+    return In
+
+@try_njit
+def PointInTet(pt,Tet):
+
+    alpha,beta,gamma,delta = utils.BaryTet(Tet,pt)
+    In = True
+    if alpha < 0:
+        In = False
+    elif beta < 0:
+        In = False
+    elif gamma < 0:
+        In = False
+    elif delta < 0:
+        In = False
+
     return In
 
 def OctreeInputProcessor(NodeCoords, SurfConn, Octree):
