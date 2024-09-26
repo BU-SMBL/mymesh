@@ -14,10 +14,13 @@ Shapes
 .. autosummary::
     :toctree: submodules/
     
+    Line
     Box
     Grid
     Grid2D
     Plane
+    Circle
+    CirclePt
     Cylinder
     Sphere
     Torus
@@ -32,8 +35,66 @@ Shapes
 
 """
 import numpy as np
-import gc
+import gc, copy
 from . import utils, converter, implicit, mesh, delaunay
+
+def Line(pt1, pt2, h=None, n=None):
+    """
+    Generate a surface mesh of a rectangular box. 
+
+    Parameters
+    ----------
+    pt1 : array_like
+        Coordinates (x,y,z) of the first point of the line
+    pt2 : array_like
+        Coordinates (x,y,z) of the second point of the line
+    h : float, optional
+        Approximate element size. Only used if n is not provided. If neither h
+        nor n are provided, element size is norm(pt2-pt1). By default, None.
+    n : int, optional
+        Number of segments of the line. If h is also provided, n takes
+        precedence. If neither h nor n are provided, number of segments is 1. 
+        By default, None.
+
+    Returns
+    -------
+    line : mymesh.mesh
+        Mesh object containing the line mesh. 
+
+    .. note:: 
+        Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Line(...)``
+
+    Examples
+    --------
+    .. plot::
+
+        line = primitives.Line([0, 0, 0], [0.5, 0.5, 0])
+        line.plot(bgcolor='w', show_edges=True)
+
+    """    
+    
+    if n is None and h is not None:
+        n = int(np.round((np.linalg.norm(pt2-pt1))/h))
+    elif n is None and h is None:
+        n = 1
+
+    xs = np.linspace(pt1[0],pt2[0],n+1)
+    ys = np.linspace(pt1[1],pt2[1],n+1)
+    if len(pt1) > 2 and len(pt2) > 2:
+        zs = np.linspace(pt1[2],pt2[2],n+1)
+    else:
+        zs = np.zeros(len(xs))
+
+    LineCoords = np.column_stack([xs, ys, zs])
+    LineConn = np.column_stack([np.arange(0,n), np.arange(1,n+1)])
+
+    if 'mesh' in dir(mesh):
+        line = mesh.mesh(LineCoords,LineConn)
+    else:
+        line = mesh(LineCoords,LineConn)
+    line.Type = 'line'
+    line.cleanup()
+    return line
 
 def Box(bounds, h, ElemType='quad'):
     """
@@ -362,6 +423,95 @@ def Plane(pt, normal, bounds, h, exact_h=False, ElemType='quad'):
         plane = mesh(PlaneCoords,PlaneConn,'surf')
     return plane
 
+def Circle(center, radius, theta_resolution=20, radial_resolution=10, axis=2, ElemType=None):
+    """
+    Construct a circle from a center and radius.
+
+    Parameters
+    ----------
+    center : array_like
+        Center of the circle
+    radius : float
+        Radius of the circle
+    theta_resolution : int, optional
+        Number of circumferential points, by default 20
+    radial_resolution : int, optional
+        Number of radial points from center to edge, by default 10
+    axis : int, optional
+        Axis perpendicular to the plane of the circle, specified as by integers
+        (0=x, 1=y, 2=z), by default 2.
+    ElemType : None, str, optional
+        Element type of final mesh. If None, the result will contain predominantly
+        quadrilateral elements with triangular elements at the center. If 'tri', 
+        the result will be a purely triangular mesh, by default None.
+
+    Returns
+    -------
+    circle : mymesh.mesh
+        Mesh object containing the circle mesh.
+
+    Examples
+    --------
+    .. plot::
+
+        circle = primitives.Circle([0, 0, 0], 1)
+        circle.plot(bgcolor='w', show_edges=True)
+    """    
+    pt2 = np.copy(center)
+    pt2[list({0,1,2}.difference({axis,}))[0]] += radius
+    L = Line(center, pt2, n=radial_resolution-1)
+
+    circle = Revolve(L, 2*np.pi, 2*np.pi/theta_resolution, center=center, axis=axis, ElemType=ElemType)
+
+    return circle
+
+def CirclePt(center, point, theta_resolution=20, radial_resolution=10, axis=2, ElemType=None, Type='surf'):
+    """
+    Construct a circle from a center and point.
+
+    Parameters
+    ----------
+    center : array_like
+        Center of the circle
+    point : array_like
+        Coordinates of a point on the circle. 
+
+        .. note:: 
+            If the point is not coplanar with the center in the plane specified by
+            `axis`, the result will not be a flat circle.
+
+    theta_resolution : int, optional
+        Number of circumferential points, by default 20
+    radial_resolution : int, optional
+        Number of radial points from center to edge, by default 10
+    axis : int, optional
+        Axis perpendicular to the plane of the circle, specified as by integers
+        (0=x, 1=y, 2=z), by default 2.
+    ElemType : None, str, optional
+        Element type of final mesh. If None, the result will contain predominantly
+        quadrilateral elements with triangular elements at the center. If 'tri', 
+        the result will be a purely triangular mesh, by default None.
+    Type : str, optional
+        Mesh type of the final mesh. This could be 'surf' for a surface mesh or
+        'line' for a line mesh of just the circumference of the circle, by 
+        default 'surf'.
+    Returns
+    -------
+    circle : mymesh.mesh
+        Mesh object containing the circle mesh.
+    """   
+    if Type.lower() == 'line':
+        radial_resolution = 2 
+    L = Line(center, point, n=radial_resolution-1)
+
+    circle = Revolve(L, 2*np.pi, 2*np.pi/theta_resolution, center=center, axis=axis, ElemType=ElemType)
+
+    if Type.lower() == 'line':
+        circle = mesh(circle.NodeCoords, converter.surf2edges(*circle), Type='line')
+        circle.cleanup()
+
+    return circle
+
 def Cylinder(bounds, resolution=20, axis=2, axis_step=None, ElemType='tri', cap=True):
     """
     Generate an axis-aligned cylindrical surface mesh
@@ -610,7 +760,7 @@ def Torus(center, R, r, axis=2, theta_resolution=20, phi_resolution=20, ElemType
     torus.cleanup()
     return torus
 
-def Extrude(m, distance, step, axis=2, ElemType=None):
+def Extrude(m, distance, step, axis=2, twist=0, twist_center=None, ElemType=None):
     """
     Extrude a 2D mesh to a 3D surface or volume
 
@@ -625,6 +775,12 @@ def Extrude(m, distance, step, axis=2, ElemType=None):
         Step size in the extrusion direction
     axis : int, optional
         Extrusion axis, either 0 (x), 1 (y), or 2 (z), by default 2
+    twist : float, optional
+        Amount to twist the initial geometry (in radians) over the course of the 
+        extrusion, by default 0.
+    twist_center : array_like, optional
+        Center of rotation for twisting. If None is provided, the center of the
+        initial geometry will be used.
     ElemType : str, optional
         Specify the element type of the extruded mesh. If m.Type='line', this
         can be None or 'tri' or if m.Type='surf', this can be None or 'tet'. 
@@ -657,14 +813,30 @@ def Extrude(m, distance, step, axis=2, ElemType=None):
     """    
     NodeCoords = np.array(m.NodeCoords)
     OriginalConn = np.asarray(m.NodeConn)
+    if twist != 0 and twist_center is None:
+        twist_center = np.array([
+            (np.max(NodeCoords[:,0]) + np.min(NodeCoords[:,0]))/2,
+            (np.max(NodeCoords[:,1]) + np.min(NodeCoords[:,1]))/2,
+            (np.max(NodeCoords[:,2]) + np.min(NodeCoords[:,2]))/2
+        ])
+    elif isinstance(twist_center, (list, tuple)):
+        twist_center = np.array(twist_center)
+        
     if m.Type == 'line':
         if ElemType is None:
             ElemType = 'quad'
         
         NodeConn = np.empty((0,4))
-        for i,s in enumerate(np.arange(step,distance+step,step)):
+        steps = np.arange(step,distance+step,step)
+        for i,s in enumerate(steps):
             temp = np.array(m.NodeCoords)
             temp[:,axis] += s
+            if twist != 0:
+                theta = twist*(i+1)/len(steps)
+                rot = np.array([[np.cos(theta), -np.sin(theta)],
+                                [np.sin(theta),  np.cos(theta)]])
+                axes = list({0,1,2}.difference({axis,}))
+                temp[:,axes] = (rot@(temp-twist_center)[:,axes].T).T + twist_center[axes]
             NodeCoords = np.append(NodeCoords, temp, axis=0)
 
             NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
@@ -676,9 +848,16 @@ def Extrude(m, distance, step, axis=2, ElemType=None):
     elif m.Type == 'surf':
         OriginalConn = OriginalConn.tolist()
         NodeConn = []
-        for i,s in enumerate(np.arange(step,distance+step,step)):
+        steps = np.arange(step,distance+step,step)
+        for i,s in enumerate(steps):
             temp = np.array(m.NodeCoords)
             temp[:,axis] += s
+            if twist != 0:
+                theta = twist*(i+1)/len(steps)
+                rot = np.array([[np.cos(theta), -np.sin(theta)],
+                                [np.sin(theta),  np.cos(theta)]])
+                axes = list({0,1,2}.difference({axis,}))
+                temp[:,axes] = (rot@(temp-twist_center)[:,axes].T).T + twist_center[axes]
             NodeCoords = np.append(NodeCoords, temp, axis=0)
             L = len(temp)
             NodeConn += [[n+((i)*L) for n in elem] + [n+((i+1)*L) for n in elem] for elem in OriginalConn]
@@ -693,7 +872,7 @@ def Extrude(m, distance, step, axis=2, ElemType=None):
 
     return extruded
 
-def Revolve(m, angle, anglestep, center=[0,0,0], axis=2, ElemType=None):
+def Revolve(m, angle, anglestep, center=[0,0,0], shift=0, axis=2, ElemType=None):
     """
     Revolve a 2D mesh to a 3D surface or volume
 
@@ -711,6 +890,9 @@ def Revolve(m, angle, anglestep, center=[0,0,0], axis=2, ElemType=None):
     axis : int or array_like, optional
         Axis of revolution. This can be specified as either 0 (x), 1 (y), or 2 (z) or a 
         three element vector denoting the axis, by default 2.
+    shit : float, optional
+        Offset along `axis` between the initial and final steps of the rotation,
+        by default 0.
     ElemType : str, optional
         Specify the element type of the revolved mesh. If m.Type='line', this
         can be None or 'tri' or if m.Type='surf', this can be None or 'tet'. 
@@ -733,11 +915,11 @@ def Revolve(m, angle, anglestep, center=[0,0,0], axis=2, ElemType=None):
     if np.isscalar(axis):
         assert axis in (0, 1, 2), 'axis must be either 0, 1, or 2 (indicating x, y, z axes) or a 3 element vector.'
         if axis == 0:
-            axis = [1, 0, 0]
+            axis = np.array([1, 0, 0])
         elif axis == 1:
-            axis = [0, 1, 0]
+            axis = np.array([0, 1, 0])
         else:
-            axis = [0, 0, 1]
+            axis = np.array([0, 0, 1])
     else:
         assert isinstance(axis, (list, tuple, np.ndarray)), 'axis must be either 0, 1, or 2 (indicating x, y, z axes) or a 3 element vector.'
         axis = axis/np.linalg.norm(axis)
@@ -758,7 +940,6 @@ def Revolve(m, angle, anglestep, center=[0,0,0], axis=2, ElemType=None):
     R[:,:3,:3] = rot_matrices
 
     NodeCoords = np.array(m.NodeCoords)
-    OriginalConn = np.asarray(m.NodeConn)
     
 
     padded = np.hstack([NodeCoords, np.ones((len(NodeCoords),1))])
@@ -770,9 +951,13 @@ def Revolve(m, angle, anglestep, center=[0,0,0], axis=2, ElemType=None):
                 ])
     Tinv = np.linalg.inv(T)
     if m.Type == 'line':
+        OriginalConn = np.asarray(m.NodeConn)
         NodeConn = np.empty((0,4))
         for i,r in enumerate(R[1:]):
             temp = np.linalg.multi_dot([Tinv,r,T,padded.T]).T[:,:3]
+            if shift != 0:
+                temp += axis*shift*(i+1)/len(R[1:])
+
             NodeCoords = np.append(NodeCoords, temp, axis=0)
 
             NodeConn = np.append(NodeConn, np.hstack([OriginalConn+(i*len(temp)),np.fliplr(OriginalConn+((i+1)*len(temp)))]), axis=0)
@@ -787,9 +972,12 @@ def Revolve(m, angle, anglestep, center=[0,0,0], axis=2, ElemType=None):
         Type='surf'
     elif m.Type == 'surf':
         NodeConn = []
-        OriginalConn = OriginalConn.tolist()
+        OriginalConn = copy.copy(m.NodeConn)
         for i,r in enumerate(R[1:]):
             temp = np.linalg.multi_dot([Tinv,r,T,padded.T]).T[:,:3]
+            if shift != 0:
+                temp += axis*shift*(i+1)/len(R[1:])
+
             NodeCoords = np.append(NodeCoords, temp, axis=0)
 
             L = len(temp)
