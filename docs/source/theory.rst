@@ -7,9 +7,9 @@ Theory Guide
     
     theory/contour
     theory/curvature
+    theory/delaunay
     theory/improvement
     theory/octree
-    theory/quality
     theory/rays
 
 .. note:: 

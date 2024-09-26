@@ -7,7 +7,10 @@ User Guide
     
     guide/what_mesh
     guide/mesh_class
+    guide/elem_types
     guide/connectivity
+    guide/implicit_meshing
+    guide/image_meshing
     guide/csg
     guide/io
     guide/ref
@@ -24,11 +27,12 @@ MyMesh can be installed from the python package index (PyPI):
 Installing from source:
 ^^^^^^^^^^^^^^^^^^^^^^^
 Download/clone the repository, then run:
+
 .. code-block::
 
     pip install -e <path>/mymesh
 
-with `<path>`` replaced with the file path to the mymesh root directory.
+with :code:`<path>` replaced with the file path to the mymesh root directory.
 
 MyMesh depends primarily on built-in or well established python packages like numpy and scipy. The following are optional dependencies required only for specific functions:
 

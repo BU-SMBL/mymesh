@@ -14,11 +14,17 @@ standard conventions.
 
 Mesh Types
 ----------
-MyMesh considers two main :func:`Type <mymesh.utils.identify_type>`s of mesh and
+MyMesh considers three main :func:`Type <mymesh.utils.identify_type>`s of mesh and
 several sub-types.
 
-Surface Meshes (`Type=surf`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Surface Meshes (`Type='line'`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Line meshes are made up of edge elements. These meshes could represent a 1D 
+mesh (e.g. a series of springs), the outer boundary of an open surface mesh,
+or the wireframe of a volumetric mesh. 
+
+Surface Meshes (`Type='surf'`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Surface meshes are comprised of surface elements (namely `tri`s and `quad`s), 
 including both 2D planar meshes and 3D surfaces. 
 
@@ -29,8 +35,8 @@ including both 2D planar meshes and 3D surfaces.
 """""""""""
 
 
-Volume Meshes (`Type=vol`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Volume Meshes (`Type='vol'`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Voxel Meshes
 """"""""""""

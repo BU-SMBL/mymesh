@@ -12,6 +12,8 @@ Roadmap & Planned features
 --------------------------
 
 - Expansion of the :doc:`theory` 
+- Improved Delaunay triangulation/tetraheralization (and constrained Delaunay)
+- More sophisticated mesh2sdf/implicit surface reconstruction capabilities
 - Create `interpolate` module for interpolation within meshes and mapping between meshes
 - Create `register` module for mesh and image registration
 - 
