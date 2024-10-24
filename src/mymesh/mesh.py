@@ -748,7 +748,12 @@ class mesh:
             self.NodeConn = [self.NodeConn[i] for i in KeepIds]
 
         for key in self.ElemData.keys():
-            self.ElemData[key] = np.asarray(self.ElemData[key])[KeepIds]
+            if len(KeepIds) > 0:
+                self.ElemData[key] = np.asarray(self.ElemData[key])[KeepIds]
+            else:
+                shape = list(np.shape(self.ElemData[key]))
+                shape[0] = 0
+                self.ElemData[key] = np.empty(shape)
 
         # TODO: remove from ElemSets
 
