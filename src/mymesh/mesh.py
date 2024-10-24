@@ -1559,7 +1559,7 @@ class mesh:
             keys = self.ElemData.keys()
             for key in keys:
                 celldata = [[],[],[],[],[],[],[]]
-                data = np.array(self.ElemData[key])
+                data = np.asarray(self.ElemData[key])
                 celldata[0] = data[elemlengths==2]  # line
                 celldata[1] = data[elemlengths==3]  # tri
                 celldata[2] = data[elemlengths==4]  # quad/tet
@@ -1569,20 +1569,23 @@ class mesh:
                 celldata[6] = data[elemlengths==10] # tet10
                 celldata = [c for c in celldata if len(c) > 0]
                 celldict[key] = celldata
-                
-        ArrayConn = np.array(self.NodeConn,dtype=object)
-        edges = ArrayConn[elemlengths==2].tolist()
-        tris = ArrayConn[elemlengths==3].tolist()
+        
+        if np.all(elemlengths == elemlengths[0]):
+            ArrayConn = np.array(self.NodeConn,dtype=int)
+        else:
+            ArrayConn = np.array(self.NodeConn,dtype=object)
+        edges = ArrayConn[elemlengths==2].astype(int)
+        tris = ArrayConn[elemlengths==3].astype(int)
         if self.Type == 'surf':
-            quads = ArrayConn[elemlengths==4].tolist()
+            quads = ArrayConn[elemlengths==4].astype(int)
             tets = []
         else:
             quads = []
-            tets = ArrayConn[elemlengths==4].tolist()
-        pyrs = ArrayConn[elemlengths==5].tolist()
-        wdgs = ArrayConn[elemlengths==6].tolist()
-        hexs = ArrayConn[elemlengths==8].tolist()
-        tet10 = ArrayConn[elemlengths==10].tolist()
+            tets = ArrayConn[elemlengths==4].astype(int)
+        pyrs = ArrayConn[elemlengths==5].astype(int)
+        wdgs = ArrayConn[elemlengths==6].astype(int)
+        hexs = ArrayConn[elemlengths==8].astype(int)
+        tet10 = ArrayConn[elemlengths==10].astype(int)
         
         
         elems = [e for e in [('line',edges),('triangle',tris),('quad',quads),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10)] if len(e[1]) > 0]
