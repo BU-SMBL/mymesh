@@ -1820,8 +1820,11 @@ def MVBB(Points, return_matrix=False):
     # Calculate rotation matrices to align each hull facet with [0,0,-1] (so that it's rotated to the minimal z plane)
     normals = np.asarray(CalcFaceNormal(hull_points, hull_facets))
     rot_axes = np.cross(normals, [0,0,-1])
+    rot_axes[np.all(normals == [0,0,-1], axis=1)] = [0,0,-1]
+    rot_axes[np.all(normals == [0,0,1], axis=1)] = [1,0,0]
     rot_axes = rot_axes/np.linalg.norm(rot_axes,axis=1)[:,None]
     thetas = np.arccos(np.sum(normals*[0,0,-1],axis=1))
+    thetas[np.all(normals == [0,0,1], axis=1)] = np.pi
     outer_prod = rot_axes[:, np.newaxis, :] * rot_axes[:, :, np.newaxis]
     cross_prod_matrices = np.zeros((len(hull_facets), 3, 3))
     cross_prod_matrices[:,0,1] = -rot_axes[:,2]
