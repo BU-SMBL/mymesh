@@ -21,6 +21,7 @@ File IO
     :toctree: submodules/
 
     read
+    write
 """
 
 
@@ -380,6 +381,183 @@ def read(img, scalefactor=1, scaleorder=1):
     print(' done.')
     return imgs
 
+def write(impath, I, filetype=None,verbose=True, dtype=np.int16):
+    """
+    Write an image array to an image file or stack of image files
+    
+    Parameters
+    ----------
+    impath : str
+        File path to image directory or file name to save the images. If given
+        as a filename with an extension, writing of a single image file will be 
+        attempted. For certain data type and file types (e.g. 3D multichannel data), 
+        this may not be supported and a stack of images prefixed with the filename
+        will be written instead.
+    I : array_like or tuple
+        2D or 3D array_like containing image data, or 3 or 4 element tuple of 
+        2D or 3D array_like of image data for rgb or rgba multichannel image
+        data.
+    filetype : str, optional
+        file specification, by default None. If impath is a filename with an
+        extension, the extension will override the filetype input if given. 
+        If impath is a directory and no filetype is specified, tiff will
+        be used by default.
+        
+        Options are:
+            
+        - 'dicom'
+        
+        - 'tiff'
+        
+        - 'png'
+        
+        - 'jpeg'
+        
+    """    
+    
+    import datetime
+    import cv2
+    
+    
+    # initialize file specification variables
+    multichannel = False
+    singlefile = False
+    stack = False
+    filename_prefix = 'I'
+    
+    # Process impath and filetype to determine type of file being written
+    path, ext = os.path.splitext(impath)
+    if ext != '':
+        singlefile = True
+        imdir, filename_prefix = os.path.split(path)
+        if ext.lower() == '.tif' or ext.lower() == '.tiff':
+            filetype = 'tiff'
+        elif ext.lower() == '.jpg' or ext.lower() == '.jpeg':
+            filetype = 'jpeg'
+        elif ext.lower() == '.png':
+            filetype = 'png'
+        elif ext.lower() == '.dcm':
+            filetype = 'dicom'
+        else:
+            raise ValueError(f'Unknown or unsupported file extension: "{ext:s}"')
+    else:
+        singlefile = False
+        imdir = path
+        if filetype is None or filetype.lower() == 'tif' or filetype.lower() == 'tiff' or filetype.lower() == '.tif' or filetype.lower() == '.tiff':
+            filetype = 'tiff'
+            ext = '.tif'
+        elif filetype.lower() == 'jpeg' or filetype.lower() ==  'jpg' or filetype.lower() ==  '.jpeg' or filetype.lower() ==  '.jpg':
+            filetype = 'jpeg'
+            ext = '.jpg'
+        elif filetype.lower() == 'png' or filetype.lower() == '.png':
+            filetype = 'png'
+            ext = '.png'
+        elif filetype.lower() == 'dicom' or filetype.lower() == 'dcm' or filetype.lower() == '.dcm':
+            filetype = 'dicom'
+            ext = '.dcm'
+        else:
+            raise ValueError(f'Unknown or unsupported file type: "{filetype:s}"')
+    if not os.path.exists(imdir) and imdir != '':
+        os.mkdir(imdir)
+    # Assess type/shape of image data
+    if type(I) is tuple and (len(I) == 3 or len(I) == 4):
+        # multichannel rgb or rgba image
+        multichannel = True
+        if len(np.shape(I[0])) == 3:
+            singlefile = False 
+            stack = True
+        else:
+            singlefile = True
+            stack = False
+    elif len(np.shape(I)) == 3:
+        stack = True
+        if singlefile and filetype != 'tiff':
+            singlefile = False
+    elif len(np.shape(I)) == 2:
+        stack = False
+        singlefile = True
+            
+    # evaluate case
+    if singlefile:
+        if filetype == 'dicom':
+            if multichannel:
+                raise ValueError("Writing multichannel images to dicoms is not supported. Convert to grayscale or use a different filetype.")
+            _writedcm(imdir, filename_prefix+'.dcm', I, dtype)
+        else:
+            if stack:
+                # Should only ever be for tiffs
+                try:
+                    import tifffile
+                    tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), I)
+                except:
+                    warnings.warn('tifffile needed to write single file 3D tiffs. Install with `pip install tifffile`.')
+                    singlefile = False
+                    
+            if multichannel:
+                cv2.imwrite(os.path.join(imdir, filename_prefix+ext), np.stack(I,axis=-1))
+            else:
+                cv2.imwrite(os.path.join(imdir, filename_prefix+ext), I)
+    
+    if not singlefile:
+        if multichannel:
+            nfiles = len(I[0])
+        else:
+            nfiles = len(I)
+        
+        ndigits = max(int(np.floor(np.log10(nfiles))+1),4)
+        if filetype == 'dicom':
+            if multichannel:
+                raise ValueError("Writing multichannel images to dicoms is not supported. Convert to grayscale or use a different filetype.")
+            for i in range(len(I)):
+                _writedcm(imdir, filename_prefix+f'_{str(i).zfill(ndigits):s}.dcm', I, dtype)
+        else:
+            for i in range(len(I)):
+                if multichannel:
+                    img = np.stack([channel[i] for channel in I], axis=-1)
+                else:
+                    img = I[i]
+                if np.max(img) > 255:
+                    img = img*255/np.max(I).astype(dtype)
+                cv2.imwrite(os.path.join(imdir, filename_prefix+f'_{str(i).zfill(ndigits):s}{ext:s}'), img)
+
+                
+
+def _writedcm(imdir, filename, I, dtype):
+    # I should be a 2D image at this point
+    import datetime
+    try:
+        import pydicom
+    except:
+        raise ImportError('pydicom must be installed to write DICOM files. Install with: pip install pydicom')
+    file = filename
+    file_meta = pydicom.dataset.FileMetaDataset()
+    file_meta.MediaStorageSOPClassUID = pydicom.uid.UID('1.2.840.10008.5.1.4.1.1.2')
+    file_meta.MediaStorageSOPInstanceUID = pydicom.uid.UID("1.2.3")
+    file_meta.ImplementationClassUID = pydicom.uid.UID("1.2.3.4")
+    ds = pydicom.dataset.FileDataset(imdir, {},
+            file_meta=file_meta, preamble=b"\0" * 128)
+    dt = datetime.datetime.now()
+    ds.ContentDate = dt.strftime('%Y%m%d')
+    timeStr = dt.strftime('%H%M%S.%f')  # long format with micro seconds
+    ds.ContentTime = timeStr
+    ds.file_meta.TransferSyntaxUID = pydicom.uid.ImplicitVRLittleEndian
+    ds.is_little_endian = True
+    ds.is_implicit_VR = True
+    
+    ds.BitsAllocated = 16
+    ds.BitsStored = 16
+    ds.Rows = I.shape[0]
+    ds.Columns = I.shape[1]
+    ds.SamplesPerPixel = 1
+    ds.PhotometricInterpretation = "MONOCHROME2"
+    if np.min(I) >= 0:
+        ds.PixelRepresentation = 0
+    else:
+        ds.PixelRepresentation = 1
+    ds.PixelData = I.astype(dtype).tobytes()
+    ds.save_as(os.path.join(imdir,file))
+    
+    
 def SurfaceNodeOptimization(M, img, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, gaussian_sigma=1, smooth=True, copy=True, interpolation='linear', 
 springs=True):
     """
