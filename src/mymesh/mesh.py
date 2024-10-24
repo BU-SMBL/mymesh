@@ -745,10 +745,15 @@ class mesh:
         if type(self.NodeConn) is np.ndarray:
             self.NodeConn = self.NodeConn[KeepIds]
         else:
-            self.NodeConn = [elem for i,elem in enumerate(self.NodeConn) if i in KeepSet]
+            self.NodeConn = [self.NodeConn[i] for i in KeepIds]
 
         for key in self.ElemData.keys():
-            self.ElemData[key] = np.asarray(self.ElemData[key])[KeepIds]
+            if len(KeepIds) > 0:
+                self.ElemData[key] = np.asarray(self.ElemData[key])[KeepIds]
+            else:
+                shape = list(np.shape(self.ElemData[key]))
+                shape[0] = 0
+                self.ElemData[key] = np.empty(shape)
 
         # TODO: remove from ElemSets
 
@@ -1610,10 +1615,10 @@ class mesh:
         M = mesh(NodeCoords,NodeConn)
         if len(m.point_data) > 0 :
             for key in m.point_data.keys():
-                M.NodeData[key] = m.point_data[key]
+                M.NodeData[key] = np.asarray(m.point_data[key])
         if len(m.cell_data) > 0:
             for key in m.cell_data.keys():
-                M.ElemData[key] = [data for celldata in m.cell_data[key] for data in celldata]
+                M.ElemData[key] = np.asarray([data for celldata in m.cell_data[key] for data in celldata])
         M.NodeSets = m.point_sets
         M.ElemSets = m.cell_sets    # TODO: This might not give the expected result
 

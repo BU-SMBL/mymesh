@@ -858,12 +858,12 @@ def BaryTet(Nodes, Pt):
     C = Nodes[2]
     D = Nodes[3]
     
-    T = [[A[0]-D[0], B[0]-D[0], C[0]-D[0]],
+    T = np.array([[A[0]-D[0], B[0]-D[0], C[0]-D[0]],
          [A[1]-D[1], B[1]-D[1], C[1]-D[1]],
          [A[2]-D[2], B[2]-D[2], C[2]-D[2]]
-         ]
+         ])
     
-    [alpha,beta,gamma] = np.linalg.solve(T,np.subtract(Pt,D))
+    alpha,beta,gamma = np.linalg.solve(T,np.subtract(Pt,D))
     delta = 1 - (alpha + beta + gamma)
     
     return alpha, beta, gamma, delta
@@ -1820,8 +1820,11 @@ def MVBB(Points, return_matrix=False):
     # Calculate rotation matrices to align each hull facet with [0,0,-1] (so that it's rotated to the minimal z plane)
     normals = np.asarray(CalcFaceNormal(hull_points, hull_facets))
     rot_axes = np.cross(normals, [0,0,-1])
+    rot_axes[np.all(normals == [0,0,-1], axis=1)] = [0,0,-1]
+    rot_axes[np.all(normals == [0,0,1], axis=1)] = [1,0,0]
     rot_axes = rot_axes/np.linalg.norm(rot_axes,axis=1)[:,None]
     thetas = np.arccos(np.sum(normals*[0,0,-1],axis=1))
+    thetas[np.all(normals == [0,0,1], axis=1)] = np.pi
     outer_prod = rot_axes[:, np.newaxis, :] * rot_axes[:, :, np.newaxis]
     cross_prod_matrices = np.zeros((len(hull_facets), 3, 3))
     cross_prod_matrices[:,0,1] = -rot_axes[:,2]
@@ -2011,7 +2014,12 @@ def PadRagged(In,fillval=-1):
     Out : np.ndarray
         Padded array.
     """
-    Out = np.array(list(itertools.zip_longest(*In,fillvalue=fillval))).T
+    # Out = np.array(list(itertools.zip_longest(*In,fillvalue=fillval))).T
+    maxL = max(len(row) for row in In)
+    Out = np.full((len(In), maxL), fillval)
+    for i, row in enumerate(In):
+        Out[i, :len(row)] = row
+
     return Out
 
 def ExtractRagged(In,delval=-1,dtype=None):

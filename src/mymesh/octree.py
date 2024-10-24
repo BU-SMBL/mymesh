@@ -49,7 +49,7 @@ import sympy as sp
 
 class OctreeNode:
           
-    def __init__(self,centroid,size,parent=None,data=[],level=0,state='unknown'):
+    def __init__(self,centroid,size,parent=None,data=None,level=0,state='unknown'):
         """
         The OctreeNode is the basic unit of the octree data structure. The structure
         consists of a series of nodes that reference their parent and child nodes, 
@@ -65,7 +65,7 @@ class OctreeNode:
             The octree node that contains this node, by default None
         data : list or dict, optional
             Data associated with the octree node. The type of data depends on 
-            the how the octree was created, by default [].
+            the how the octree was created, by default None.
         level : int, optional
             Depth within the tree structure, by default 0.
             The root node is at level 0, the root's children are at level 1, etc.
@@ -152,7 +152,7 @@ class OctreeNode:
             list of x, y and z bounds of the octree node
         """        
         if self.limits is None:
-            self.limits = [[self.centroid[d]-self.size/2,self.centroid[d]+self.size/2] for d in range(3)]
+            self.limits = np.array([[self.centroid[d]-self.size/2,self.centroid[d]+self.size/2] for d in range(3)])
         return self.limits
     
     def getVertices(self):
@@ -179,7 +179,7 @@ class OctreeNode:
 
         Parameters
         ----------
-        point : array_like
+        point : np.ndarray
             Three element coordinate array
         inclusive : bool, optional
             Specify whether a point exactly on the boundary is include as in
@@ -190,10 +190,8 @@ class OctreeNode:
         inside : bool
             True if the point is inside the node, otherwise False.
         """        
-        if inclusive:
-            return all([(self.centroid[d]-self.size/2) <= point[d] and (self.centroid[d]+self.size/2) >= point[d] for d in range(3)])
-        else:
-            return all([(self.centroid[d]-self.size/2) < point[d] and (self.centroid[d]+self.size/2) > point[d] for d in range(3)])
+        inside = rays.PointInBox(point, *self.getLimits(), inclusive=inclusive)
+        return inside
     
     def PointsInNode(self,points,inclusive=True):
         """
@@ -234,6 +232,10 @@ class OctreeNode:
         
         lims = self.getLimits()
         Intersections = np.where(rays.BoxTrianglesIntersection(tris, lims[0], lims[1], lims[2], TriNormals=TriNormals, BoxCenter=self.centroid))[0]
+        return Intersections
+    
+    def ContainsBoxes(self, boxes):
+        Intersections = np.where([rays.BoxBoxIntersection(self.getLimits(), box) for box in boxes])[0]
         return Intersections
     
     def isEmpty(self,points):
@@ -278,7 +280,7 @@ class OctreeNode:
             triIds = child.ContainsTris(tris,TriNormals)
             trisInChild = tris[triIds]# [tris[idx] for idx in triIds]
             normalsInChild = TriNormals[triIds]#[TriNormals[idx] for idx in triIds]
-            if self.data:
+            if self.data is not None:
                 child.data = [self.data[idx] for idx in triIds]
             if len(trisInChild) > 1: 
                 if child.size/2 <= minsize or child.level >= maxdepth:
@@ -293,6 +295,30 @@ class OctreeNode:
                 else:
                     child.state = 'leaf'
             elif len(trisInChild) == 0:
+                child.state = 'empty'
+
+    def makeChildrenBoxes(self,boxes,minsize=0,maxsize=np.inf,maxdepth=np.inf):
+        
+        self.makeChildren()
+                    
+        for child in self.children:
+            boxIds = child.ContainsBoxes(boxes)
+            boxesInChild = boxes[boxIds]
+            if self.data is not None:
+                child.data = [self.data[idx] for idx in boxIds]
+            if len(boxesInChild) > 1: 
+                if child.size/2 <= minsize or child.level >= maxdepth:
+                    child.state = 'leaf'
+                else:
+                    child.makeChildrenBoxes(boxesInChild,minsize=minsize,maxsize=maxsize,maxdepth=maxdepth)
+                    child.state = 'branch'
+            elif len(boxesInChild) == 1:
+                if child.size > maxsize or child.level < maxdepth:
+                    child.makeChildrenBoxes(boxesInChild,minsize=minsize,maxsize=maxsize,maxdepth=maxdepth)
+                    child.state = 'branch'
+                else:
+                    child.state = 'leaf'
+            elif len(boxesInChild) == 0:
                 child.state = 'empty'
 
     def makeChildren(self, childstate='unknown'):
@@ -367,9 +393,9 @@ def SearchOctree(pt,root):
     node : octree.OctreeNode or NoneType
         Octree node containing the point. If the no node can be found to contain the point, None will be returned.
     """    
-    if root.PointInNode(pt,inclusive=True):
+    if rays.PointInBox(pt, *root.getLimits(), inclusive=True): #root.PointInNode(pt,inclusive=True):
         if root.state == 'leaf' or len(root.children) == 0:
-            return node
+            return root
         else:
             for child in root.children:
                 check = SearchOctree(pt,child)
@@ -571,6 +597,27 @@ def Surface2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=5):
 
     TriNormals = np.array(utils.CalcFaceNormal(NodeCoords,SurfConn))
     root.makeChildrenTris(NodeCoords[ArrayConn], TriNormals, maxsize=size, minsize=minsize,  maxdepth=maxdepth)
+
+    return root
+
+def Mesh2Octree(NodeCoords, NodeConn, minsize=None, mindepth=2, maxdepth=5):
+    
+    NodeCoords = np.asarray(NodeCoords)
+    # Bounds of each element (minx, maxx, miny, maxy, minz, maxz)
+    elembounds = np.array([[[NodeCoords[:,0][elem].min(), NodeCoords[:,0][elem].max()], [NodeCoords[:,1][elem].min(), NodeCoords[:,1][elem].max()], [NodeCoords[:,2][elem].min(), NodeCoords[:,2][elem].max()]] for elem in NodeConn])
+    # Bounds for the full mesh
+    bounds = np.array([np.min(elembounds[:,0,0]), np.max(elembounds[:,0,1]), np.min(elembounds[:,1,0]), np.max(elembounds[:,1,1]), np.min(elembounds[:,2,0]), np.max(elembounds[:,2,1])])
+
+    size = max([bounds[1]-bounds[0],bounds[3]-bounds[2],bounds[5]-bounds[4]])
+    centroid = np.array([bounds[0] + size/2, bounds[2]+size/2, bounds[4]+size/2])
+
+    if minsize is None:
+        minsize = 0
+
+    ElemIds = np.arange(len(NodeConn))
+    root = OctreeNode(centroid, size, data=ElemIds)
+    root.state = 'root'
+    root.makeChildrenBoxes(elembounds, maxsize=size, minsize=minsize,  maxdepth=maxdepth)
 
     return root
 
