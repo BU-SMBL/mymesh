@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from mymesh import utils, primitives, implicit
+from mymesh import utils, primitives, implicit, mesh, quality
 
 @pytest.mark.parametrize("NodeCoords, NodeConn, ElemType, expected", [
     # Case 1: Single triangle on the XY plane
@@ -73,6 +73,48 @@ def test_getElemNeighbors(NodeCoords,NodeConn,mode,expected):
     sorted_expected = [sorted(n) for n in expected]
     assert sorted_conn == sorted_expected, "Incorrect element neighbors"
 
+@pytest.mark.parametrize("M, expected", [
+    # Case 1: Single sphere
+    (primitives.Sphere([0,0,0],1), 1),
+    # Case 2: Two spheres
+    (mesh(*utils.MergeMesh(*primitives.Sphere([0,0,0],1),*primitives.Sphere([3,0,0],1))), 2),
+    # Case 3: Three spheres
+    (mesh(*utils.MergeMesh(*utils.MergeMesh(*primitives.Sphere([0,0,0],1),*primitives.Sphere([3,0,0],1)),*primitives.Sphere([3,0,3],1))), 3),
+])
+def test_getConnectedNodes(M, expected):
+    
+    R = utils.getConnectedNodes(*M)
+    assert len(R) == expected, 'Incorrect number of regions identified.'
+
+@pytest.mark.parametrize("M, mode, expected", [
+    # Case 1: Single sphere (surface)
+    (primitives.Sphere([0,0,0],1), 'edge', 1),
+    # Case 2: Two spheres (surface)
+    (mesh(*utils.MergeMesh(*primitives.Sphere([0,0,0],1),*primitives.Sphere([3,0,0],1))), 'edge', 2),
+    # Case 3: Three spheres (surface)
+    (mesh(*utils.MergeMesh(*utils.MergeMesh(*primitives.Sphere([0,0,0],1),*primitives.Sphere([3,0,0],1)),*primitives.Sphere([3,0,3],1))), 'node', 3),
+    # Case 4: Two spheres (volume)
+    (mesh(*utils.MergeMesh(*implicit.TetMesh(implicit.sphere([0,0,0],1),[-1,1,-1,1,-1,1],.1),*implicit.TetMesh(implicit.sphere([3,0,0],1),[2,4,-1,1,-1,1],.1))), 'face', 2),
+])
+def test_getConnectedElements(M, mode, expected):
+    
+    R = utils.getConnectedElements(*M, mode=mode)
+    assert len(R) == expected, 'Incorrect number of regions identified.'
+
+@pytest.mark.parametrize("NodeCoords, NodeConn", [
+    # Case 1: Two tets
+    (np.array([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 0, 1], [0, 0, -1], [0, 0, 0], [1, 0, 0], [1, 1, 0]]), 
+     [[0, 1, 2, 3],[4, 5, 6, 7]], 
+    )
+])
+def test_DeleteDuplicateNodes(NodeCoords, NodeConn):
+
+    NewCoords, NewConn = utils.DeleteDuplicateNodes(NodeCoords, NodeConn)
+    assert len(np.unique(NewCoords, axis=0)) == len(NewCoords), 'Duplicate nodes remain.'
+    assert np.min(quality.Volume(NewCoords, NewConn)) > 0, 'Elements inverted by deleting duplicate nodes.'
+
+
+
 @pytest.mark.parametrize("Surf, Vol", [
     # Case 1: unit sphere (primitive)
     (primitives.Sphere([0,0,0], 1, 100, 100),
@@ -116,7 +158,6 @@ def test_TetMeshVol(M, Vol):
     MeshVol = utils.TetMeshVol(*M)
 
     assert np.isclose(MeshVol, Vol, atol=1e-2), 'Incorrect volume'
-
 
 @pytest.mark.parametrize("Ragged, Expected", [
     # Case 1
