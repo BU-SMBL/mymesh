@@ -26,10 +26,9 @@ from . import converter, utils, mesh
 def View(M, interactive=True, bgcolor=None,
     color=None, face_alpha=1, color_convert=None, 
     clim=None, theme='default', scalar_preference='nodes',
-    view=None, scalars=None,
-    show_edges=False, show_faces=True, line_width=1, line_color=None,
-    show_colorbar=None, colorbar_args={}, return_image=False, hide=False,  
-    shading='flat'):
+    view='iso', scalars=None,
+    show_edges=False, show_faces=True, line_width=1, line_color=None, 
+    return_image=False, hide=False, shading='flat'):
     """
     Visualize a mesh.
     View uses vispy for visualization.
@@ -63,43 +62,51 @@ def View(M, interactive=True, bgcolor=None,
         In the even that `scalars` is specified by a string that references
         an entry in both M.NodeData and M.ElemData, this will decide which 
         is chosen. Specified as either 'nodes' or 'elements', by default 'nodes'.
-    view : _type_, optional
-        _description_, by default None
-    scalars : _type_, optional
-        _description_, by default None
+    view : str, optional
+        Named orientation for viewing the mesh, by default 'iso'
+
+        Options are:
+        
+        - "iso" or "isometric" : isometric view
+        - "dimetric" : dimetric view
+        - "trimetric" : trimetric view
+        - "xy" : View of the x-y plane with +x to the right and +y up
+        - "xz" : View of the x-z plane with +x to the right and +z ups
+
+    scalars : str, array_like, or None, optional
+        Scalar values to color the mesh by. If specified by a string, the string
+        should be an entry in either M.NodeData or M.ElemData. If the string is 
+        present in both, `scalar_preference` will be used determine whether node
+        or element data will be displayed (node by default). If specified by an
+        array_like (numpy ndarray or list), the length of the array_like most be
+        equal to either the number of nodes or the number of elements in the 
+        mesh. If None, the mesh will be given a solid color following `color`.  
+        By default None.
     show_edges : bool, optional
-        _description_, by default False
+        Show lines denoting element edges. For a wireframe view, set 
+        `show_edges=True`, `show_faces=False`, by default False.
     show_faces : bool, optional
-        _description_, by default True
+        Show element faces in the mesh. For a wireframe view, set 
+        `show_edges=True`, `show_faces=False`, by default True
     line_width : int, optional
-        _description_, by default 1
-    line_color : _type_, optional
-        _description_, by default None
-    show_colorbar : _type_, optional
-        _description_, by default None
-    colorbar_args : dict, optional
-        _description_, by default {}
+        Width of lines shown if show_edges=True, by default 1
+    line_color : None, optional
+        Color of edges shown if show_edges=True, by default None.
+        If None, color will be selected based on theme.
     return_image : bool, optional
-        _description_, by default False
+        If true, image array of the plot will be returned, by default False
     hide : bool, optional
-        _description_, by default False
+        If true, plot will not be shown, by default False
     shading : str, optional
-        _description_, by default 'flat'
+        Shading mode, by default 'flat'
         Options are 'flat', 'smooth', None
 
     Returns
     -------
-    _type_
-        _description_
+    img_data : np.ndarray, optional
+        Image array of the plot. Only returned if return_image=True.
 
     """    
-    ###
-    # Shading: 'flat', 'smooth', None
-    # viewmode: 'arcball', 'fly', 'turntable'
-    # color_convert: "deuteranomaly", "protanomaly", "tritanomaly"
-
-    ###
-
     try:
         import vispy
         from vispy import app, scene
@@ -110,7 +117,10 @@ def View(M, interactive=True, bgcolor=None,
         from vispy.visuals.filters import ShadingFilter, WireframeFilter, FacePickingFilter
     except:
         raise ImportError('vispy is needed for visualization. Install with: pip install vispy')
-
+    try:
+        from PIL import Image
+    except:
+        raise ImportError('PIL needed. Install with: pip install pillow')
     # determine execution environment
     try:
         import IPython
@@ -162,8 +172,6 @@ def View(M, interactive=True, bgcolor=None,
 
     # Process scalars
     if scalars is not None: 
-        if show_colorbar is None:
-            show_colorbar = True
         if type(scalars) is str:
             if scalar_preference.lower() == 'nodes':
                 if scalars in M.NodeData.keys():
@@ -202,7 +210,6 @@ def View(M, interactive=True, bgcolor=None,
             face_colors = None
         
     else:
-        show_colorbar = False
         face_colors = FaceColor(len(faces), color, face_alpha, color_convert=color_convert)
         vertex_colors = None
 
@@ -285,7 +292,10 @@ def View(M, interactive=True, bgcolor=None,
     aabb =  np.matmul(np.linalg.inv(vsmesh.transform.matrix), np.hstack([AABB, np.zeros((8, 1))]).T).T
     mins = np.min(aabb, axis=0)
     maxs = np.max(aabb, axis=0)
-    canvasview.camera.set_range((mins[0], maxs[0]), (mins[1], maxs[1]), (mins[2], maxs[2]))
+    diffs = maxs-mins
+    canvasview.camera.set_range((mins[0]+0.2*diffs[0], maxs[0]-0.2*diffs[0]), 
+                                (mins[1]+0.2*diffs[1], maxs[1]-0.2*diffs[1]), 
+                                (mins[2]+0.2*diffs[2], maxs[2]-0.2*diffs[2]))
     
     # Render
     if ipython and interactive:
@@ -293,14 +303,11 @@ def View(M, interactive=True, bgcolor=None,
     elif interactive:
         app.run()
 
-    if return_image:
-        try:
-            from PIL import Image
-        except:
-            raise ImportError('PIL needed. Install with: pip install pillow')
-
+    if chosen == 'jupyter_rfb':
+        img_data = canvas._backend.snapshot().data
+    else:
         img_data = canvas.render().copy(order='C')
-        image = Image.fromarray(img_data)
+    image = Image.fromarray(img_data)
 
     if ipython and not hide:
         IPython.display.display(image)
