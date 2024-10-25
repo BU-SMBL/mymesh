@@ -4046,6 +4046,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         
         NewCoords = np.nan*np.ones((v.shape[0],3))
         eps = 1e-10
+        warnings.filterwarnings('ignore', category=np.ComplexWarning)
         with np.errstate(divide='ignore', invalid='ignore'):
             xCheck = (x[xbool,1,None] <= xRoots) & (x[xbool,2,None] >= xRoots) & np.isreal(xRoots)
             xcubic = np.repeat(False,len(xbool)); xlinear = np.repeat(False,len(xbool))
