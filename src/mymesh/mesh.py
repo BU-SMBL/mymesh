@@ -1689,9 +1689,12 @@ class mesh:
     def view(self, **kwargs):
         out = visualize.View(self, **kwargs)   
         return out 
-    def plot(self, show=True, return_fig=False, **kwargs):
-        import matplotlib.pyplot as plt
-
+    def plot(self, show=True, return_fig=False, clim=None, **kwargs):
+        try:
+            import matplotlib
+            import matplotlib.pyplot as plt
+        except:
+            raise ImportError('Matplotlib required for plotting. Install with `pip install matplotlib`.')
         kwargs['return_image'] = True
         kwargs['interactive'] = False
         kwargs['hide'] = True
@@ -1700,6 +1703,36 @@ class mesh:
         fig, ax = plt.subplots()
         ax.imshow(img)
         ax.set_axis_off()
+        if 'scalars' in kwargs and kwargs['scalars'] is not None:
+            scalars = kwargs['scalars']
+            if 'scalar_preference' in kwargs:
+                scalar_preference = kwargs['scalar_preference']
+            else:
+                scalar_preference = 'nodes'
+
+            if type(scalars) is str:
+                if scalar_preference.lower() == 'nodes':
+                    if scalars in M.NodeData.keys():
+                        scalars = M.NodeData[scalars]
+                    elif scalars in M.ElemData.keys():
+                        scalars = M.ElemData[scalars]
+                    else:
+                        raise ValueError(f'Scalar {scalars:s} not present in mesh.')
+                elif scalar_preference.lower() == 'elements':
+                    if scalars in M.ElemData.keys():
+                        scalars = M.ElemData[scalars]
+                    elif scalars in M.NodeData.keys():
+                        scalars = M.NodeData[scalars]
+                    else:
+                        raise ValueError(f'Scalar {scalars:s} not present in mesh.')
+                else:
+                    raise ValueError('scalar_preference must be "nodes" or "elements"')
+            if clim is None:
+                cmin, cmax = np.min(scalars), np.max(scalars)
+
+            scale = matplotlib.cm.ScalarMappable(cmap='coolwarm')
+            scale.set_clim(cmin, cmax)
+            colorbar = matplotlib.pyplot.colorbar(scale, ax=ax)
         if show:
             plt.show()
         if return_fig:
