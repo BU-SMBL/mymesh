@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-import os, sys
+import os, sys, re
 import matplotlib
 import matplotlib.pyplot as plt
 import mymesh
@@ -25,9 +25,9 @@ autodoc_member_order = 'bysource'
 autosummary_generate = True
 
 templates_path = ['_templates']
-exclude_patterns = ['TetGen.py']
 
 sphinx_gallery_conf = {
+     'filename_pattern': re.escape(os.sep) + 'demo_',
      'examples_dirs': '../../examples',   # path to your example scripts
      'gallery_dirs': 'examples',  # path to where to save gallery generated output
      'download_all_examples': False,

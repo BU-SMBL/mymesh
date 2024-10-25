@@ -8,5 +8,7 @@ Usurped/
 docs/make.bat
 docs/Makefile
 docs/source/generated/
+docs/source/examples
+docs/source/sg_execution_times.rst
 docs/build/
 src/mymesh.egg-info/
