@@ -483,20 +483,17 @@ def write(impath, I, filetype=None,verbose=True, dtype=np.int16):
             if multichannel:
                 raise ValueError("Writing multichannel images to dicoms is not supported. Convert to grayscale or use a different filetype.")
             _writedcm(imdir, filename_prefix+'.dcm', I, dtype)
-        else:
-            if stack:
-                # Should only ever be for tiffs
-                try:
-                    import tifffile
-                    tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), I)
-                except:
-                    warnings.warn('tifffile needed to write single file 3D tiffs. Install with `pip install tifffile`.')
-                    singlefile = False
+        elif filetype == 'tiff':
+            try:
+                import tifffile
+                tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), I)
+            except:
+                raise ImportError('tifffile needed to write tiffs. Install with `pip install tifffile`.')
                     
-            if multichannel:
-                cv2.imwrite(os.path.join(imdir, filename_prefix+ext), np.stack(I,axis=-1))
-            else:
-                cv2.imwrite(os.path.join(imdir, filename_prefix+ext), I)
+            # if multichannel:
+            #     tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), np.stack(I,axis=-1))
+            # else:
+            tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), I)
     
     if not singlefile:
         if multichannel:
