@@ -1547,7 +1547,17 @@ class mesh:
 
     ## File I/O Methods
     def mymesh2meshio(self):
-        
+        """
+        Convert mesh object to a `meshio <https://github.com/nschloe/meshio>`_  
+        mesh object.
+
+        Returns
+        -------
+        m : meshio._mesh.mesh
+            meshio-type mesh object with nodes, elements (cells), and 
+            node/element data.
+
+        """        
         try:
             import meshio
         except:
@@ -1591,8 +1601,19 @@ class mesh:
         elems = [e for e in [('line',edges),('triangle',tris),('quad',quads),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10)] if len(e[1]) > 0]
         m = meshio.Mesh(self.NodeCoords, elems, point_data=self.NodeData, cell_data=celldict)
         return m
-    def write(self,filename,binary=None):
+    def write(self,filename,binary=True):
+        """
+        Write mesh to file. Utilizes `meshio <https://github.com/nschloe/meshio>`_ 
+        to access a variety of filetypes.
 
+        Parameters
+        ----------
+        filename : str
+            Name of file with appropriate extension
+        binary : bool, optional
+            If True, will write the a binary file (if applicable) rather than an
+            ASCII version of the file, by default True.
+        """        
         if self.NNode == 0:
             warnings.warn('Mesh empty - file not written.')
             return
@@ -1602,6 +1623,21 @@ class mesh:
         else:
             m.write(filename)
     def meshio2mymesh(m):
+        """
+        Convert a `meshio <https://github.com/nschloe/meshio>`_ mesh object to a 
+        MyMesh mesh object
+
+        Parameters
+        ----------
+        m : meshio._mesh.Mesh
+            Meshio mesh object
+
+        Returns
+        -------
+        M : mymesh.mesh
+            MyMesh mesh object
+
+        """        
         try:
             import meshio
         except:

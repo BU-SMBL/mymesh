@@ -140,10 +140,14 @@ was designed to allow for easy extraction of key mesh information that can be
 passed to other libraries' data structures in python or written to various file 
 types using meshio.
 
-.. While it's best not to reinvent the wheel, sometimes re-implementing the wheel
-.. can help to understand it, improve it, or make something new. 
+.. Note::
+    MyMesh is intended for research purposes. Any applications of MyMesh should
+    be should be validated and verified appropriately. 
 
 Acknowledgements
 ----------------
+MyMesh was initially developed to further the aims of research funded by the 
+National Institutes of Health (Grant #AG073671). 
+
 Colors used throughout this documentation are based on the 
 `Nord Theme <https://www.nordtheme.com/>`_

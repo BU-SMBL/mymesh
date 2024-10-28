@@ -5,7 +5,7 @@ Image-based Meshing
 Images in MyMesh
 ----------------
 MyMesh can read from a variety of image file types, including DICOMs, tiffs,
-jpgs, pngs, and more, utilizing image file readers 
+jpgs, and pngs, utilizing image file readers 
 `pydicom <https://pydicom.github.io/pydicom/stable/index.html>`_,
 `tifffile <https://www.cgohlke.com/>`_, and
 `opencv-python <https://github.com/opencv/opencv-python>`_. 
@@ -17,13 +17,17 @@ array of image data [#f1]_ (or tuple of arrays for multi-channel data), or passe
 directly to a mesh generator function (e.g. :func:`mymesh.image.VoxelMesh`). 
 Images loaded from a directory containing a stack of image slices will be read
 in lexicographical order by the image file names, and the files must have the 
-proper file extensions.
+proper file extensions. Image arrays can also be written to files using 
+:func:`mymesh.image.write`.
 
 Images stored in numpy arrays are assumed to be ordered such that their three
 dimensions (0,1,2) correspond to (z,y,x). For example, if 
 :func:`mymesh.image.read` is used to read a directory containing a stack of 
 images and produces and array :code:`I`, then :code:`I[0,:,:]` will correspond
 to the data contained by the first image in the stack. 
+
+Multichannel image data (RGB, RGBA) is stored in 3- or 4-element tuples, which
+can contain 2D or 3D image arrays for each channel. 
 
 .. [#f1]
     A numpy array passed to :func:`mymesh.image.read` will only be modified 
