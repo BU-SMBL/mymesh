@@ -26,7 +26,9 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('docs/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-
+    - name: Install Graphviz
+      run: |
+        winget install --id Graphviz.Graphviz -e --source winget
     - name: Install dependencies
       run: |
         pip install sphinx pydata-sphinx-theme matplotlib sphinx-gallery sphinxcontrib-bibtex sphinx-copybutton jupyter-sphinx setuptools sphinx-design
