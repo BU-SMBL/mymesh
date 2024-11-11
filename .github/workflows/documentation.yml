@@ -26,6 +26,10 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('docs/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
+    - name: Install Graphviz
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y graphviz
     - name: Install dependencies
       run: |
         pip install sphinx pydata-sphinx-theme matplotlib sphinx-gallery sphinxcontrib-bibtex sphinx-copybutton jupyter-sphinx setuptools sphinx-design
