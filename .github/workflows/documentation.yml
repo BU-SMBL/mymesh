@@ -14,10 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+      - name: Prereqs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          apt-get update
+          apt-get install -y git
+          git clone --depth 1 "https://token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" .
+      shell: bash
       - name: Install dependencies
         run: |
           pip install sphinx pydata-sphinx-theme matplotlib sphinx-gallery sphinxcontrib-bibtex sphinx-copybutton jupyter-sphinx setuptools sphinx-design
-          pip install ../mymesh
+          pip install .
       - name: Sphinx build
         run: |
           sphinx-build -M html docs/source/ docs/build/

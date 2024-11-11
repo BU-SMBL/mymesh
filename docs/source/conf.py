@@ -9,7 +9,7 @@
 import os, sys, re
 import matplotlib
 import matplotlib.pyplot as plt
-# import mymesh
+import mymesh
 
 project = 'MyMesh'
 copyright = '2023, Timothy O. Josephson'
