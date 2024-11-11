@@ -82,7 +82,6 @@ Miscellaneous
 
 import numpy as np
 import scipy
-import numba
 import sys, warnings, copy, time, itertools, collections
 from . import converter, rays, octree, improvement, quality, mesh
 from . import try_njit
