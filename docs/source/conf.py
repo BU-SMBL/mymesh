@@ -27,7 +27,7 @@ autosummary_generate = True
 templates_path = ['_templates']
 
 sphinx_gallery_conf = {
-     'filename_pattern': re.escape(os.sep) + 'demo_',
+   #   'filename_pattern': re.escape(os.sep) + 'demo_',
      'examples_dirs': '../../examples',   # path to your example scripts
      'gallery_dirs': 'examples',  # path to where to save gallery generated output
      'download_all_examples': False,
