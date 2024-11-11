@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Check out code
@@ -36,7 +36,7 @@ jobs:
 
     - name: Build documentation
       run: |
-        sphinx-build -M html ./docs/source ./docs/build
+        sphinx-build -b html ./docs/source ./docs/build
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
