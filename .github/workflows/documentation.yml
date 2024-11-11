@@ -30,7 +30,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install sphinx pydata-sphinx-theme matplotlib sphinx-gallery sphinxcontrib-bibtex sphinx-copybutton jupyter-sphinx setuptools sphinx-design
-        pip install vispy pillow
+        pip install vispy pillow pyqt6
         python -m pip install --upgrade pip
         pip install -e .  # Makes your package importable from the repo
 
