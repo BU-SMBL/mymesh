@@ -35,9 +35,8 @@ jobs:
         pip install -e .  # Makes your package importable from the repo
 
     - name: Build documentation
-      working-directory: ./docs
       run: |
-        sphinx-build -M html source build
+        sphinx-build -M html ./docs/source ./docs/build
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
