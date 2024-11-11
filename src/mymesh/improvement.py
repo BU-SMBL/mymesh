@@ -38,12 +38,16 @@ Local mesh topology
 """
 
 import numpy as np
-import sys, warnings, time, random, copy, tqdm, heapq
+import sys, warnings, time, random, copy, heapq
 from collections import deque
 from . import converter, utils, quality, rays, octree, mesh, implicit
 from scipy import sparse, spatial
 from scipy.sparse.linalg import spsolve
 from scipy.optimize import minimize
+try:
+    import tqdm
+except:
+    pass
 
 ## Mesh smoothing/node repositioning
 def LocalLaplacianSmoothing(M, options=dict()):
