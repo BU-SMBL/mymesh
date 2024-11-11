@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Check out code
@@ -26,11 +26,6 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('docs/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-    - name: Install Graphviz
-      run: |
-        Invoke-WebRequest -Uri https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.48.0.msi -OutFile graphviz-installer.msi
-        Start-Process msiexec.exe -ArgumentList '/i', 'graphviz-installer.msi', '/quiet', '/norestart' -NoNewWindow -Wait
-        Remove-Item -Force graphviz-installer.msi
     - name: Install dependencies
       run: |
         pip install sphinx pydata-sphinx-theme matplotlib sphinx-gallery sphinxcontrib-bibtex sphinx-copybutton jupyter-sphinx setuptools sphinx-design
