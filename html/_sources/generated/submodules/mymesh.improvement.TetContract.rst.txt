@@ -1,0 +1,6 @@
+mymesh.improvement.TetContract
+==============================
+
+.. currentmodule:: mymesh.improvement
+
+.. autofunction:: TetContract

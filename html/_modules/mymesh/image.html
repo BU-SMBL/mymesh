@@ -1,0 +1,1132 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mymesh.image &#8212; MyMesh v0.1.0 Manual</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+
+    <script src="../../_static/documentation_options.js?v=01f34227"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=4ea706d9"></script>
+    <script src="../../_static/thebelab-helper.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mymesh/image';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/mymesh_logo.svg" class="logo__image only-light" alt="MyMesh v0.1.0 Manual - Home"/>
+    <img src="../../_static/mymesh_logo.svg" class="logo__image only-dark pst-js-only" alt="MyMesh v0.1.0 Manual - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh.image</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for mymesh.image</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># Created on Tue Mar 12 13:26:02 2024</span>
+<span class="c1"># @author: toj</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Image-based meshing tools</span>
+
+
+<span class="sd">Image-based Mesh Generation</span>
+<span class="sd">===========================</span>
+<span class="sd">.. autosummary::</span>
+<span class="sd">    :toctree: submodules/</span>
+
+<span class="sd">    VoxelMesh</span>
+<span class="sd">    SurfaceMesh</span>
+<span class="sd">    TetMesh</span>
+<span class="sd">    SurfaceNodeOptimization</span>
+
+<span class="sd">File IO</span>
+<span class="sd">=======</span>
+<span class="sd">.. autosummary::</span>
+<span class="sd">    :toctree: submodules/</span>
+
+<span class="sd">    read</span>
+<span class="sd">    write</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">ndimage</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">warnings</span><span class="o">,</span> <span class="nn">glob</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">contour</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">octree</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">primitives</span>
+
+<span class="c1"># Mesh generators</span>
+<div class="viewcode-block" id="VoxelMesh">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.image.VoxelMesh.html#mymesh.image.VoxelMesh">[docs]</a>
+<span class="k">def</span> <span class="nf">VoxelMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate voxel mesh of an image function</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img : str or np.ndarray</span>
+<span class="sd">        Image array or file path to an image</span>
+<span class="sd">    h : scalar, tuple</span>
+<span class="sd">        Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).</span>
+<span class="sd">        If a tuple, entries should correspond to (hx, hy, hz).</span>
+<span class="sd">    threshold : scalar</span>
+<span class="sd">        Isovalue threshold to use for keeping/removing elements, by default 0.</span>
+<span class="sd">    threshold_direction : signed integer</span>
+<span class="sd">        If threshold_direction is negative, values less than or equal to the threshold will be considered &quot;inside&quot; the mesh and the opposite if threshold_direction is positive, by default 1.</span>
+<span class="sd">    scalefactor : float, optional</span>
+<span class="sd">        Scale factor for resampling the image. If greater than 1, there will be more than</span>
+<span class="sd">        1 elements per voxel. If less than 1, will coarsen the image, by default 1.</span>
+<span class="sd">    scaleorder : int, optional</span>
+<span class="sd">        Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.</span>
+<span class="sd">        Must be 0-5.</span>
+<span class="sd">    return_nodedata : bool, optional</span>
+<span class="sd">        Option to interpolate image data to the nodes rather than just the voxels, by default False.</span>
+<span class="sd">        This can add significant computational costs for large images.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    voxel : mymesh.mesh</span>
+<span class="sd">        Mesh object containing the voxel mesh. The image data are stored in voxel.ElemData[&#39;Image Data&#39;] and optional voxel.NodeData[&#39;Image Data&#39;]</span>
+
+<span class="sd">        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = implicit.VoxelMesh(...)``</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>        
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">return_nodedata</span><span class="p">:</span>
+        <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">VoxelData</span><span class="p">,</span> <span class="n">NodeData</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">im2voxel</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span><span class="n">scalefactor</span><span class="o">=</span><span class="n">scalefactor</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="n">scaleorder</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="n">threshold_direction</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+            <span class="n">voxel</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">voxel</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">)</span>
+
+        <span class="n">voxel</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeData</span>
+        <span class="n">voxel</span><span class="o">.</span><span class="n">ElemData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">VoxelData</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">VoxelData</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">im2voxel</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span><span class="n">scalefactor</span><span class="o">=</span><span class="n">scalefactor</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="n">scaleorder</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="n">threshold_direction</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+            <span class="n">voxel</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">voxel</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">)</span>
+
+        <span class="n">voxel</span><span class="o">.</span><span class="n">ElemData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">VoxelData</span>
+
+    
+    
+
+    <span class="k">return</span> <span class="n">voxel</span></div>
+
+
+<div class="viewcode-block" id="SurfaceMesh">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.image.SurfaceMesh.html#mymesh.image.SurfaceMesh">[docs]</a>
+<span class="k">def</span> <span class="nf">SurfaceMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mc&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a surface mesh of an image function </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img : str or np.ndarray</span>
+<span class="sd">        Image array or file path to an image</span>
+<span class="sd">    h : scalar, tuple</span>
+<span class="sd">        Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).</span>
+<span class="sd">        If a tuple, entries should correspond to (hx, hy, hz).</span>
+<span class="sd">    threshold : scalar</span>
+<span class="sd">        Isovalue threshold to use for keeping/removing elements, by default 0.</span>
+<span class="sd">    threshold_dir : signed integer</span>
+<span class="sd">        If threshold_dir is negative (default), values less than or equal to the threshold will be considered &quot;inside&quot; the mesh and the opposite if threshold_dir is positive, by default 1.</span>
+<span class="sd">    scalefactor : float, optional</span>
+<span class="sd">        Scale factor for resampling the image. If greater than 1, there will be more than</span>
+<span class="sd">        1 elements per voxel. If less than 1, will coarsen the image, by default 1.</span>
+<span class="sd">    scaleorder : int, optional</span>
+<span class="sd">        Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.</span>
+<span class="sd">        Must be 0-5.</span>
+<span class="sd">    method : str, optional</span>
+<span class="sd">        Surface triangulation method, by default &#39;mc&#39;.</span>
+<span class="sd">        &#39;mc&#39; : Marching cubes (see contour.MarchingCubesImage) (default)</span>
+
+<span class="sd">        &#39;mc33&#39; : Marching cubes 33 (see contour.MarchingCubes)</span>
+
+<span class="sd">        &#39;mt&#39; : Marching tetrahedra (see contour.MarchingTetrahedra)</span>
+<span class="sd">    interpolation : str, optional</span>
+<span class="sd">        Method of interpolation used for placing the vertices on the approximated isosurface. This can be &#39;midpoint&#39;, &#39;linear&#39;, or &#39;cubic&#39;, by default &#39;linear&#39;. If &#39;cubic&#39; is selected, method is overridden to be &#39;mc&#39;. </span>
+<span class="sd">    </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    surface : mymesh.mesh</span>
+<span class="sd">        Mesh object containing the surface mesh.</span>
+
+<span class="sd">        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = implicit.SurfaceMesh(...)``</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. plot::</span>
+
+<span class="sd">        surface = implicit.SurfaceMesh(implicit.gyroid, [0,1,0,1,0,1], 0.05)</span>
+<span class="sd">        surface.plot(bgcolor=&#39;w&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">threshold_direction</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">flip</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">flip</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">img</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="n">scalefactor</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="n">scaleorder</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">hi</span><span class="o">/</span><span class="n">scalefactor</span> <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">h</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;mc&#39;</span> <span class="ow">or</span> <span class="n">interpolation</span><span class="o">==</span><span class="s1">&#39;cubic&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">!=</span> <span class="s1">&#39;mc&#39;</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Using cubic interpolation overrides contour method to be marching cubes (&quot;mc&quot;).&#39;</span><span class="p">)</span>
+        
+        
+        <span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">MarchingCubesImage</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;original&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span><span class="n">VertexValues</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">voxel</span> <span class="o">=</span> <span class="n">VoxelMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;mc33&#39;</span><span class="p">:</span>
+            <span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">MarchingCubes</span><span class="p">(</span><span class="n">voxel</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;33&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;mt&#39;</span><span class="p">:</span>
+            <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">hex2tet</span><span class="p">(</span><span class="n">voxel</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;1to6&#39;</span><span class="p">)</span>
+            <span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">MarchingTetrahedra</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">],</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">)</span>
+
+    
+    <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+        <span class="n">surface</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">surface</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">surface</span></div>
+
+
+<div class="viewcode-block" id="TetMesh">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.image.TetMesh.html#mymesh.image.TetMesh">[docs]</a>
+<span class="k">def</span> <span class="nf">TetMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a tetrahedral mesh of an image  </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img : str or np.ndarray</span>
+<span class="sd">        Image array or file path to an image</span>
+<span class="sd">    h : scalar, tuple</span>
+<span class="sd">        Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).</span>
+<span class="sd">    threshold : scalar</span>
+<span class="sd">        Isovalue threshold to use for keeping/removing elements, by default 0.</span>
+<span class="sd">    threshold_dir : signed integer</span>
+<span class="sd">        If threshold_dir is negative (default), values less than or equal to the threshold will be considered &quot;inside&quot; the mesh and the opposite if threshold_dir is positive, by default 1.</span>
+<span class="sd">    interpolation : str, optional</span>
+<span class="sd">        Method of interpolation used for placing the vertices on the approximated isosurface. This can be &#39;midpoint&#39;, &#39;linear&#39;, by default &#39;linear&#39;. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tet : mymesh.mesh</span>
+<span class="sd">        Mesh object containing the tetrahedral mesh.</span>
+
+<span class="sd">        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = implicit.TetMesh(...)``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">threshold_direction</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">flip</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">flip</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">img</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="n">scalefactor</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="n">scaleorder</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">hi</span><span class="o">/</span><span class="n">scalefactor</span> <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">h</span><span class="p">])</span>
+
+    <span class="n">voxel</span> <span class="o">=</span> <span class="n">VoxelMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">hex2tet</span><span class="p">(</span><span class="n">voxel</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;1to6&#39;</span><span class="p">)</span>
+    <span class="n">TetCoords</span><span class="p">,</span> <span class="n">TetConn</span><span class="p">,</span> <span class="n">Values</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">MarchingTetrahedra</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">],</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="n">return_NodeValues</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+        <span class="n">tet</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">TetCoords</span><span class="p">,</span> <span class="n">TetConn</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tet</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">TetCoords</span><span class="p">,</span> <span class="n">TetConn</span><span class="p">)</span>
+    <span class="n">tet</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Values</span>
+    <span class="k">return</span> <span class="n">tet</span></div>
+
+
+<div class="viewcode-block" id="read">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.image.read.html#mymesh.image.read">[docs]</a>
+<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read image data into a numpy array format. Data can be input as an existing</span>
+<span class="sd">    image array (in which case the only operation will be scaling), a file path</span>
+<span class="sd">    to either a single image file or a directory of images, or a list of file</span>
+<span class="sd">    paths to image files.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img : str, list, or np.ndarray</span>
+<span class="sd">        If given as a string, file path to image directory or file. If given</span>
+<span class="sd">        as a list, treated as a list of file paths. If given a numpy array,</span>
+<span class="sd">        assumed to be an image data matrix and only scaling will be performed</span>
+<span class="sd">        (if scalefactor != 1). </span>
+<span class="sd">    scalefactor : float, optional</span>
+<span class="sd">        Scale factor for resampling the image. If greater than 1, there will be more than</span>
+<span class="sd">        1 elements per voxel. If less than 1, will coarsen the image, by default 1.</span>
+<span class="sd">    scaleorder : int, optional</span>
+<span class="sd">        Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.</span>
+<span class="sd">        Must be 0-5.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    I : np.ndarray or tuple of np.ndarray</span>
+<span class="sd">        Image data array. For images with multichannel (e.g. RGB) data, this</span>
+<span class="sd">        will be a tuple of arrays. For 3D image data separate files are assumed</span>
+<span class="sd">        to be &quot;z-slices&quot;, and are stored along the first axis of the image matrix</span>
+<span class="sd">        (i.e. slice0 = I[0,:,:]), so the 0, 1, 2 axes correspond with z, y, x.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="n">multichannel</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="c1"># If img is an array, only perform scaling</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Image data must be a 3D array.&#39;</span>
+        <span class="k">if</span> <span class="n">scalefactor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">I</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">scalefactor</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="n">scaleorder</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">I</span> <span class="o">=</span> <span class="n">img</span>
+        <span class="k">return</span> <span class="n">I</span>
+    
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="c1"># If img is a str, treat it as a file path</span>
+        <span class="c1"># Collect files</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">img</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;File path </span><span class="si">{</span><span class="n">path</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1"> does not exist.&#39;</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="c1"># Image directory</span>
+            <span class="n">tiffs</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s1">&#39;*.tiff&#39;</span><span class="p">))</span> <span class="o">+</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s1">&#39;*.tif&#39;</span><span class="p">))</span> <span class="o">+</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s1">&#39;*.jpg&#39;</span><span class="p">))</span> <span class="o">+</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s1">&#39;*.jpeg&#39;</span><span class="p">))</span> <span class="o">+</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s1">&#39;*.png&#39;</span><span class="p">))</span>
+            <span class="n">tiffs</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+            <span class="n">dicoms</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s1">&#39;*.dcm&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dicoms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">dicoms</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s1">&#39;*.DCM&#39;</span><span class="p">))</span>
+            <span class="n">dicoms</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tiffs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;</span> <span class="nb">len</span><span class="p">(</span><span class="n">dicoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Image directory: &quot;</span><span class="si">{:s}</span><span class="s1">&quot; contains .dcm files as well as other image file types - only loading dcm files.&#39;</span><span class="p">)</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="n">dicoms</span>
+                <span class="n">ftype</span> <span class="o">=</span> <span class="s1">&#39;dcm&#39;</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">tiffs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="n">tiffs</span>
+                <span class="n">ftype</span> <span class="o">=</span> <span class="s1">&#39;tiff&#39;</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">dicoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="n">dicoms</span>
+                <span class="n">ftype</span> <span class="o">=</span> <span class="s1">&#39;dcm&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Image directory empty.&#39;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Single file</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;.tiff&#39;</span><span class="p">,</span> <span class="s1">&#39;.tif&#39;</span><span class="p">,</span> <span class="s1">&#39;.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;.jpeg&#39;</span><span class="p">,</span> <span class="s1">&#39;.png&#39;</span><span class="p">):</span>
+                <span class="n">ftype</span> <span class="o">=</span> <span class="s1">&#39;tiff&#39;</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">path</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">ext</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;.dcm&#39;</span><span class="p">):</span>
+                <span class="n">ftype</span> <span class="o">=</span> <span class="s1">&#39;dcm&#39;</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">path</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Image file must have one of the following extensions: .tiff, .tif, .jpg, .jpeg, .png, .dcm&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="c1"># If img is a list, treat it as a list of file paths</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">img</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">img</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;.tiff&#39;</span><span class="p">,</span> <span class="s1">&#39;.tif&#39;</span><span class="p">,</span> <span class="s1">&#39;.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;.jpeg&#39;</span><span class="p">,</span> <span class="s1">&#39;.png&#39;</span><span class="p">):</span>
+                <span class="n">ftype</span> <span class="o">=</span> <span class="s1">&#39;tiff&#39;</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="n">img</span>
+            <span class="k">elif</span> <span class="n">ext</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;.dcm&#39;</span><span class="p">):</span>
+                <span class="n">ftype</span> <span class="o">=</span> <span class="s1">&#39;dcm&#39;</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="n">img</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Image file must have one of the following extensions: .tiff, .tif, .jpg, .jpeg, .png, .dcm&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;If provided as a list, img must be a list of file paths. For a list of numeric image data, first convert to a numpy array.&#39;</span><span class="p">)</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;img mut be an array, str, or list, not </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">img</span><span class="p">))</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Import appropriate image reader</span>
+    <span class="k">if</span> <span class="n">ftype</span> <span class="o">==</span> <span class="s1">&#39;dcm&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">pydicom</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;pydicom must be installed to load DICOM files. Install with: pip install pydicom&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">cv2</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;opencv-python (cv2) must be installed to load tiff, jpg, or png files. Install with: pip install opencv-python&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Load data</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading image data from </span><span class="si">{:s}</span><span class="s1"> ...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ftype</span> <span class="o">==</span> <span class="s1">&#39;tiff&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">tifffile</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;tifffile recommended for reading single-file 3D tiff images. Install with: pip install tifffile&#39;</span><span class="p">)</span>
+                <span class="n">tifffile</span> <span class="ow">is</span> <span class="kc">None</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">tifffile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">imgs</span> <span class="o">=</span> <span class="n">tifffile</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">multichannel</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">multiimgs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file</span><span class="p">)[:,:,</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">multichannel</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">imgs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># temp = pydicom.dcmread(files[0]).pixel_array</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">pydicom</span><span class="o">.</span><span class="n">dcmread</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">pixel_array</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">])</span>
+    
+    <span class="k">if</span> <span class="n">scalefactor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">multichannel</span><span class="p">:</span>
+            <span class="n">imgs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">scalefactor</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="n">scaleorder</span><span class="p">)</span> <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">multiimgs</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">imgs</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span><span class="n">scalefactor</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="n">scaleorder</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">multichannel</span><span class="p">:</span>
+            <span class="n">imgs</span> <span class="o">=</span> <span class="n">multiimgs</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; done.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">imgs</span></div>
+
+
+<div class="viewcode-block" id="write">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.image.write.html#mymesh.image.write">[docs]</a>
+<span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">impath</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">filetype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write an image array to an image file or stack of image files</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    impath : str</span>
+<span class="sd">        File path to image directory or file name to save the images. If given</span>
+<span class="sd">        as a filename with an extension, writing of a single image file will be </span>
+<span class="sd">        attempted. For certain data type and file types (e.g. 3D multichannel data), </span>
+<span class="sd">        this may not be supported and a stack of images prefixed with the filename</span>
+<span class="sd">        will be written instead.</span>
+<span class="sd">    I : array_like or tuple</span>
+<span class="sd">        2D or 3D array_like containing image data, or 3 or 4 element tuple of </span>
+<span class="sd">        2D or 3D array_like of image data for rgb or rgba multichannel image</span>
+<span class="sd">        data.</span>
+<span class="sd">    filetype : str, optional</span>
+<span class="sd">        file specification, by default None. If impath is a filename with an</span>
+<span class="sd">        extension, the extension will override the filetype input if given. </span>
+<span class="sd">        If impath is a directory and no filetype is specified, tiff will</span>
+<span class="sd">        be used by default.</span>
+<span class="sd">        </span>
+<span class="sd">        Options are:</span>
+<span class="sd">            </span>
+<span class="sd">        - &#39;dicom&#39;</span>
+<span class="sd">        </span>
+<span class="sd">        - &#39;tiff&#39;</span>
+<span class="sd">        </span>
+<span class="sd">        - &#39;png&#39;</span>
+<span class="sd">        </span>
+<span class="sd">        - &#39;jpeg&#39;</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    
+    <span class="kn">import</span> <span class="nn">datetime</span>
+    <span class="kn">import</span> <span class="nn">cv2</span>
+    
+    
+    <span class="c1"># initialize file specification variables</span>
+    <span class="n">multichannel</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">singlefile</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">filename_prefix</span> <span class="o">=</span> <span class="s1">&#39;I&#39;</span>
+    
+    <span class="c1"># Process impath and filetype to determine type of file being written</span>
+    <span class="n">path</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">impath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ext</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">singlefile</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">imdir</span><span class="p">,</span> <span class="n">filename_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.tif&#39;</span> <span class="ow">or</span> <span class="n">ext</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.tiff&#39;</span><span class="p">:</span>
+            <span class="n">filetype</span> <span class="o">=</span> <span class="s1">&#39;tiff&#39;</span>
+        <span class="k">elif</span> <span class="n">ext</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.jpg&#39;</span> <span class="ow">or</span> <span class="n">ext</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.jpeg&#39;</span><span class="p">:</span>
+            <span class="n">filetype</span> <span class="o">=</span> <span class="s1">&#39;jpeg&#39;</span>
+        <span class="k">elif</span> <span class="n">ext</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.png&#39;</span><span class="p">:</span>
+            <span class="n">filetype</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span>
+        <span class="k">elif</span> <span class="n">ext</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.dcm&#39;</span><span class="p">:</span>
+            <span class="n">filetype</span> <span class="o">=</span> <span class="s1">&#39;dicom&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown or unsupported file extension: &quot;</span><span class="si">{</span><span class="n">ext</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">singlefile</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">imdir</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="k">if</span> <span class="n">filetype</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;tif&#39;</span> <span class="ow">or</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;tiff&#39;</span> <span class="ow">or</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.tif&#39;</span> <span class="ow">or</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.tiff&#39;</span><span class="p">:</span>
+            <span class="n">filetype</span> <span class="o">=</span> <span class="s1">&#39;tiff&#39;</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="s1">&#39;.tif&#39;</span>
+        <span class="k">elif</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;jpeg&#39;</span> <span class="ow">or</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span>  <span class="s1">&#39;jpg&#39;</span> <span class="ow">or</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span>  <span class="s1">&#39;.jpeg&#39;</span> <span class="ow">or</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span>  <span class="s1">&#39;.jpg&#39;</span><span class="p">:</span>
+            <span class="n">filetype</span> <span class="o">=</span> <span class="s1">&#39;jpeg&#39;</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="s1">&#39;.jpg&#39;</span>
+        <span class="k">elif</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;png&#39;</span> <span class="ow">or</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.png&#39;</span><span class="p">:</span>
+            <span class="n">filetype</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="s1">&#39;.png&#39;</span>
+        <span class="k">elif</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;dicom&#39;</span> <span class="ow">or</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;dcm&#39;</span> <span class="ow">or</span> <span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.dcm&#39;</span><span class="p">:</span>
+            <span class="n">filetype</span> <span class="o">=</span> <span class="s1">&#39;dicom&#39;</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="s1">&#39;.dcm&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown or unsupported file type: &quot;</span><span class="si">{</span><span class="n">filetype</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">imdir</span><span class="p">)</span> <span class="ow">and</span> <span class="n">imdir</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">imdir</span><span class="p">)</span>
+    <span class="c1"># Assess type/shape of image data</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span>
+        <span class="c1"># multichannel rgb or rgba image</span>
+        <span class="n">multichannel</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">singlefile</span> <span class="o">=</span> <span class="kc">False</span> 
+            <span class="n">stack</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">singlefile</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">stack</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">I</span><span class="p">))</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">singlefile</span> <span class="ow">and</span> <span class="n">filetype</span> <span class="o">!=</span> <span class="s1">&#39;tiff&#39;</span><span class="p">:</span>
+            <span class="n">singlefile</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">I</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">singlefile</span> <span class="o">=</span> <span class="kc">True</span>
+            
+    <span class="c1"># evaluate case</span>
+    <span class="k">if</span> <span class="n">singlefile</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">filetype</span> <span class="o">==</span> <span class="s1">&#39;dicom&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">multichannel</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Writing multichannel images to dicoms is not supported. Convert to grayscale or use a different filetype.&quot;</span><span class="p">)</span>
+            <span class="n">_writedcm</span><span class="p">(</span><span class="n">imdir</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">+</span><span class="s1">&#39;.dcm&#39;</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">filetype</span> <span class="o">==</span> <span class="s1">&#39;tiff&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">import</span> <span class="nn">tifffile</span>
+                <span class="n">tifffile</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">imdir</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">+</span><span class="n">ext</span><span class="p">),</span> <span class="n">I</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;tifffile needed to write tiffs. Install with `pip install tifffile`.&#39;</span><span class="p">)</span>
+                    
+            <span class="c1"># if multichannel:</span>
+            <span class="c1">#     tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), np.stack(I,axis=-1))</span>
+            <span class="c1"># else:</span>
+            <span class="n">tifffile</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">imdir</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">+</span><span class="n">ext</span><span class="p">),</span> <span class="n">I</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">singlefile</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">multichannel</span><span class="p">:</span>
+            <span class="n">nfiles</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nfiles</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+        
+        <span class="n">ndigits</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">nfiles</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filetype</span> <span class="o">==</span> <span class="s1">&#39;dicom&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">multichannel</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Writing multichannel images to dicoms is not supported. Convert to grayscale or use a different filetype.&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)):</span>
+                <span class="n">_writedcm</span><span class="p">(</span><span class="n">imdir</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">ndigits</span><span class="p">)</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">.dcm&#39;</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">multichannel</span><span class="p">:</span>
+                    <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">channel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">I</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">img</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">:</span>
+                    <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">*</span><span class="mi">255</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">I</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">imdir</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">ndigits</span><span class="p">)</span><span class="si">:</span><span class="s1">s</span><span class="si">}{</span><span class="n">ext</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">img</span><span class="p">)</span></div>
+
+
+                
+
+<span class="k">def</span> <span class="nf">_writedcm</span><span class="p">(</span><span class="n">imdir</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+    <span class="c1"># I should be a 2D image at this point</span>
+    <span class="kn">import</span> <span class="nn">datetime</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">pydicom</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;pydicom must be installed to write DICOM files. Install with: pip install pydicom&#39;</span><span class="p">)</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">filename</span>
+    <span class="n">file_meta</span> <span class="o">=</span> <span class="n">pydicom</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">FileMetaDataset</span><span class="p">()</span>
+    <span class="n">file_meta</span><span class="o">.</span><span class="n">MediaStorageSOPClassUID</span> <span class="o">=</span> <span class="n">pydicom</span><span class="o">.</span><span class="n">uid</span><span class="o">.</span><span class="n">UID</span><span class="p">(</span><span class="s1">&#39;1.2.840.10008.5.1.4.1.1.2&#39;</span><span class="p">)</span>
+    <span class="n">file_meta</span><span class="o">.</span><span class="n">MediaStorageSOPInstanceUID</span> <span class="o">=</span> <span class="n">pydicom</span><span class="o">.</span><span class="n">uid</span><span class="o">.</span><span class="n">UID</span><span class="p">(</span><span class="s2">&quot;1.2.3&quot;</span><span class="p">)</span>
+    <span class="n">file_meta</span><span class="o">.</span><span class="n">ImplementationClassUID</span> <span class="o">=</span> <span class="n">pydicom</span><span class="o">.</span><span class="n">uid</span><span class="o">.</span><span class="n">UID</span><span class="p">(</span><span class="s2">&quot;1.2.3.4&quot;</span><span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">pydicom</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">FileDataset</span><span class="p">(</span><span class="n">imdir</span><span class="p">,</span> <span class="p">{},</span>
+            <span class="n">file_meta</span><span class="o">=</span><span class="n">file_meta</span><span class="p">,</span> <span class="n">preamble</span><span class="o">=</span><span class="sa">b</span><span class="s2">&quot;</span><span class="se">\0</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">128</span><span class="p">)</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">ContentDate</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">timeStr</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H%M%S.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># long format with micro seconds</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">ContentTime</span> <span class="o">=</span> <span class="n">timeStr</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">file_meta</span><span class="o">.</span><span class="n">TransferSyntaxUID</span> <span class="o">=</span> <span class="n">pydicom</span><span class="o">.</span><span class="n">uid</span><span class="o">.</span><span class="n">ImplicitVRLittleEndian</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">is_little_endian</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">is_implicit_VR</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="n">ds</span><span class="o">.</span><span class="n">BitsAllocated</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">BitsStored</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">Rows</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">Columns</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">SamplesPerPixel</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">PhotometricInterpretation</span> <span class="o">=</span> <span class="s2">&quot;MONOCHROME2&quot;</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">PixelRepresentation</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">PixelRepresentation</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">PixelData</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">save_as</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">imdir</span><span class="p">,</span><span class="n">file</span><span class="p">))</span>
+    
+    
+<div class="viewcode-block" id="SurfaceNodeOptimization">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.image.SurfaceNodeOptimization.html#mymesh.image.SurfaceNodeOptimization">[docs]</a>
+<span class="k">def</span> <span class="nf">SurfaceNodeOptimization</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">iterate</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">FixedNodes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span> <span class="n">FixEdges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gaussian_sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> 
+<span class="n">springs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Optimize the placement of surface node to lie on the &quot;true&quot; surface. This</span>
+<span class="sd">    This simultaneously moves nodes towards the isosurface and redistributes</span>
+<span class="sd">    nodes more evenly, thus smoothing the mesh without shrinkage or destruction</span>
+<span class="sd">    of features. This method is consistes of using the Z-flow (and R-flow if </span>
+<span class="sd">    smooth=True) from :cite:p:`Ohtake2001a`.</span>
+<span class="sd">    </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    M : mymesh.mesh</span>
+<span class="sd">        Mesh object</span>
+<span class="sd">    img : str or np.ndarray</span>
+<span class="sd">        Image array or file path to an image</span>
+<span class="sd">    voxelsize : float</span>
+<span class="sd">        Voxel size of the image</span>
+<span class="sd">    iterate : int, optional</span>
+<span class="sd">        Number of iterations to perform, by default 1</span>
+<span class="sd">    FixedNodes : set, optional</span>
+<span class="sd">        Nodes to hold in place during repositioning, by default set()</span>
+<span class="sd">    FixEdges : bool, optional</span>
+<span class="sd">        Option to detect and hold in place exposed surface edges, by default False</span>
+<span class="sd">    gaussian_sigma : float, optional</span>
+<span class="sd">        Standard deviation used for getting the gradient via convolution with</span>
+<span class="sd">        a Gaussian kernel in units of voxels (see scipy.ndimage.gaussian_filter), </span>
+<span class="sd">        by default 1 voxel.</span>
+<span class="sd">    smooth : str, optional</span>
+<span class="sd">        Option to perform smoothing. This can be either &#39;local&#39; for local </span>
+<span class="sd">        Laplacian smoothing or &#39;tangential&#39; for tangential Laplacian smoothing, </span>
+<span class="sd">        by default &#39;tangential&#39;. For any other option, smoothing will not be </span>
+<span class="sd">        performed. Tangential smoothing differs from local in that nodes </span>
+<span class="sd">        are only repositioned in the tangent plane (based on the normal vector</span>
+<span class="sd">        obtain from the gradient). </span>
+<span class="sd">    InPlace : bool, optional</span>
+<span class="sd">        If False, will create a copy of the mesh, rather than altering node </span>
+<span class="sd">        positions of the original mesh object &quot;in-place&quot;, by default False</span>
+<span class="sd">    interpolation : str, optional</span>
+<span class="sd">        Interpolation method used for evaluating surface points inside the image</span>
+<span class="sd">        using scipy.interpolate.RegularGridInterpolator (input must be one of the</span>
+<span class="sd">        allowable &quot;method&quot; inputs), by default &#39;linear&#39;.</span>
+<span class="sd">    springs : bool, optional</span>
+<span class="sd">        If True and the mesh is a volume mesh, internal nodes will be treated as </span>
+<span class="sd">        if they are connected by springs (see :func:`~mymesh.improvements.NodeSpringSmoothing`)</span>
+<span class="sd">        to reduce risk of element distortion or inversion, by default True.</span>
+<span class="sd">    </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    M : mesh.mesh</span>
+<span class="sd">        Mesh with repositioned surface vertices</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span>
+    <span class="c1"># Process nodes</span>
+    <span class="n">SurfNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">n</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">SurfConn</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">FixEdges</span><span class="p">:</span>
+        <span class="n">EdgeNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">converter</span><span class="o">.</span><span class="n">surf2edges</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">SurfConn</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">EdgeNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">FreeNodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">SurfNodes</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">EdgeNodes</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">FixedNodes</span><span class="p">)))</span>
+    
+    <span class="c1"># Get gradient</span>
+    <span class="n">Fx</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">gaussian_sigma</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">Fy</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">gaussian_sigma</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">Fz</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">gaussian_sigma</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="n">h</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> 
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">F</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="p">:</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">RegularGridInterpolator</span><span class="p">((</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">),</span><span class="n">img</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span><span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">fill_value</span><span class="o">=</span><span class="kc">None</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">gradFx</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="p">:</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">RegularGridInterpolator</span><span class="p">((</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">),</span><span class="n">Fx</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span><span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">fill_value</span><span class="o">=</span><span class="kc">None</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">gradFy</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="p">:</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">RegularGridInterpolator</span><span class="p">((</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">),</span><span class="n">Fy</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span><span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">fill_value</span><span class="o">=</span><span class="kc">None</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">gradFz</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="p">:</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">RegularGridInterpolator</span><span class="p">((</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">),</span><span class="n">Fx</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span><span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">fill_value</span><span class="o">=</span><span class="kc">None</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="n">gradF</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">gradFx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">),</span> <span class="n">gradFy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">),</span> <span class="n">gradFz</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)])</span>
+
+    <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]])</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">smooth</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">smooth</span> <span class="o">=</span> <span class="s1">&#39;tangential&#39;</span>
+    <span class="k">if</span> <span class="n">smooth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">smooth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">];</span> <span class="n">y</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">];</span> <span class="n">z</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">gradF</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">SurfNodeNeighbors</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)[</span><span class="n">FreeNodes</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="n">lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">SurfNodeNeighbors</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">FreeNodes</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterate</span><span class="p">):</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">];</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">];</span> <span class="n">Z</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">F</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">)</span> <span class="o">-</span> <span class="n">threshold</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">gradF</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">))</span>
+        <span class="n">fg</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="n">g</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">h</span><span class="o">/</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">fg</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+
+        <span class="n">Zflow</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">tau</span><span class="o">*</span><span class="n">fg</span>
+
+        <span class="c1"># Rflow = np.zeros((len(NodeCoords),3))</span>
+        <span class="k">if</span> <span class="n">smooth</span> <span class="o">==</span> <span class="s1">&#39;tangential&#39;</span><span class="p">:</span>
+            <span class="n">Q</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">lengths</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">points</span><span class="p">[:,</span><span class="kc">None</span><span class="p">,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">NodeNormals</span> <span class="o">=</span> <span class="p">(</span><span class="n">g</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">Rflow</span> <span class="o">=</span> <span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">U</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span><span class="o">*</span><span class="n">NodeNormals</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">NodeNormals</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">smooth</span> <span class="o">==</span> <span class="s1">&#39;local&#39;</span><span class="p">:</span>
+            <span class="n">Q</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">lengths</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">points</span><span class="p">[:,</span><span class="kc">None</span><span class="p">,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">Rflow</span> <span class="o">=</span> <span class="n">U</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Rflow</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">springs</span> <span class="ow">and</span> <span class="n">M</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+            <span class="n">Forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">M</span><span class="o">.</span><span class="n">NNode</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="n">Forces</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span> <span class="o">=</span> <span class="n">Zflow</span> <span class="o">+</span> <span class="n">Rflow</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="n">improvement</span><span class="o">.</span><span class="n">NodeSpringSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">Displacements</span><span class="o">=</span><span class="n">Forces</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">FixSurf</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">FixedNodes</span><span class="o">=</span><span class="n">FixedNodes</span><span class="p">,</span> <span class="n">InPlace</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="n">FreeNodes</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="n">points</span> <span class="o">+</span> <span class="n">Zflow</span> <span class="o">+</span> <span class="n">Rflow</span>
+            <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span> <span class="o">=</span> <span class="n">points</span>
+    
+    <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span> <span class="o">=</span> <span class="n">points</span>
+
+    <span class="k">return</span> <span class="n">M</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Timothy O. Josephson.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

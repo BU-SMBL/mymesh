@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.AxisAlign
+==========================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.AxisAlign

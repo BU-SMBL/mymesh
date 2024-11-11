@@ -1,0 +1,6 @@
+mymesh.implicit.torus
+=====================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: torus

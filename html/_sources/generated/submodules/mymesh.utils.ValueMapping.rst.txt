@@ -1,0 +1,6 @@
+mymesh.utils.ValueMapping
+=========================
+
+.. currentmodule:: mymesh.utils
+
+.. autofunction:: ValueMapping

@@ -1,0 +1,87 @@
+﻿mymesh.mesh
+===========
+
+.. currentmodule:: mymesh
+
+.. autoclass:: mesh
+    :no-members:
+    :no-inherited-members:
+    :no-special-members:
+
+Properties
+----------
+
+
+
+    .. autosummary::
+        :toctree:
+            
+    
+            ~mesh.mesh.BoundaryConn
+            ~mesh.mesh.BoundaryNodes
+            ~mesh.mesh.Centroids
+            ~mesh.mesh.EdgeConn
+            ~mesh.mesh.EdgeElemConn
+            ~mesh.mesh.Edges
+            ~mesh.mesh.ElemConn
+            ~mesh.mesh.ElemNeighbors
+            ~mesh.mesh.ElemNormals
+            ~mesh.mesh.EulerCharacteristic
+            ~mesh.mesh.FaceConn
+            ~mesh.mesh.FaceElemConn
+            ~mesh.mesh.Faces
+            ~mesh.mesh.Genus
+            ~mesh.mesh.ND
+            ~mesh.mesh.NEdge
+            ~mesh.mesh.NElem
+            ~mesh.mesh.NFace
+            ~mesh.mesh.NNode
+            ~mesh.mesh.NodeNeighbors
+            ~mesh.mesh.NodeNormals
+            ~mesh.mesh.NodeNormalsMethod
+            ~mesh.mesh.SurfConn
+            ~mesh.mesh.SurfElemConn
+            ~mesh.mesh.SurfNodeNeighbors
+            ~mesh.mesh.SurfNodes
+            ~mesh.mesh.Surface
+            ~mesh.mesh.cells
+            ~mesh.mesh.points
+
+
+
+Methods
+-------
+
+
+    .. autosummary::
+        :toctree:
+
+    
+            ~mesh.mesh.AxisAlign
+            ~mesh.mesh.Clip
+            ~mesh.mesh.Contour
+            ~mesh.mesh.CreateBoundaryLayer
+            ~mesh.mesh.RenumberFacesBySet
+            ~mesh.mesh.RenumberNodesBySet
+            ~mesh.mesh.Threshold
+            ~mesh.mesh.addEdges
+            ~mesh.mesh.addElems
+            ~mesh.mesh.addFaces
+            ~mesh.mesh.addNodes
+            ~mesh.mesh.cleanup
+            ~mesh.mesh.copy
+            ~mesh.mesh.getCurvature
+            ~mesh.mesh.getQuality
+            ~mesh.mesh.identify_type
+            ~mesh.mesh.imread
+            ~mesh.mesh.merge
+            ~mesh.mesh.meshio2mymesh
+            ~mesh.mesh.mymesh2meshio
+            ~mesh.mesh.plot
+            ~mesh.mesh.read
+            ~mesh.mesh.removeElems
+            ~mesh.mesh.reset
+            ~mesh.mesh.validate
+            ~mesh.mesh.view
+            ~mesh.mesh.write
+    
