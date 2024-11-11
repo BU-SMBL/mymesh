@@ -58,8 +58,8 @@ from mymesh import *
 visualize.set_vispy_backend(preference='PyQt6')
 '''
 
-graphviz_dot = r"C:\Program Files\Graphviz\bin\neato.exe"
-
+# graphviz_dot = r"C:\Program Files\Graphviz\bin\neato.exe"
+graphviz_dot = r"neato"
 copybutton_prompt_text = ">>> "
 
 bibtex_bibfiles = ['references.bib']
