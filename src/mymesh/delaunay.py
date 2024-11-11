@@ -2,7 +2,7 @@
 # Created on Sat Jan 15 12:02:26 2022
 # @author: toj
 """
-Delaunay triangulation
+Delaunay triangulation and related methods
 
 Currently this module consists of several basic implementations of algorithms
 related to Delaunay triangulation, as well as interfaces to Delaunay 
@@ -10,274 +10,99 @@ triangulation with SciPy (which uses QHull) and Jonathan Shewchuk's Triangle.
 Further development with improved Delaunay triangulation and tetrahedralization
 capabilities are planned for the future.
 
+Triangulation
+=============
+.. autosummary::
+    :toctree: submodules/
+    
+    Triangulate
+    BowyerWatson2d
+    TriangleSplittingTriangulation
+    SciPy
+    Triangle
+
+Tetrahedralization
+==================
+.. autosummary::
+    :toctree: submodules/
+
+    BowyerWatson3d
+
+Convex Hull
+===========
+.. autosummary::
+    :toctree: submodules/
+
+    ConvexHull
+    ConvexHull_GiftWrapping
+    ConvexHullFanTriangulation
+
+
+    
+
 """
 #%%
 import numpy as np
-import sys, copy, itertools, warnings
-from . import *
+import sys, copy, itertools, warnings, random
 from . import utils, rays, converter
+from . import try_njit, check_numba
 from scipy import spatial
+import numba 
 
-def Triangulate(NodeCoords,Constraints=None,method='Flips',tol=1e-8):
+def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8):
     """
-    Triangulate _summary_
+    Generic interface for two dimensional triangulation.
 
     Parameters
     ----------
-    NodeCoords : _type_
-        _description_
-    Constraints : _type_, optional
-        _description_, by default None
+    NodeCoords : array_like
+        Coordinates of nodes to be triangulated. This can be an (n,3) or (n,2)
+        array_like, however if given as an (n,3), the third dimension is ignored.
+    Constraints : array_like, optional
+        List of edge constraints that must be present in the final triangulation, 
+        by default None. Edge constraints should be specified by node indices,
+        for example [[0, 1], [1,2], ...]
     method : str, optional
-        _description_, by default 'Flips'
-        'Flips' - Generate a Delaunay triangulation by a flipping algorithm
-        'IncrementalFlips' - Generate a Delaunay triangulation by an incremental insertion flipping algorithm
+        Triangulation method, by default 'BowyerWatson' if no constraints are 
+        provided and 'Triangle' if constraints are provided.
+        'BowyerWatson' - Generate a Delaunay triangulation by the Bowyer-Watson algorithm
         'NonDelaunay' - Generate a non-Delaunay triangulation by triangle splitting
         'scipy' - Use scipy.spatial.delaunay
         'Triangle' - Use Jonathon Shewchuk's Delaunay triangulator
     """    
     
     Points = np.asarray(NodeCoords)
+    if method is None:
+        if (Constraints is None or len(Constraints) == 0):
+            method = 'BowyerWatson'
+        else:
+            method = 'Triangle'
 
-    if Constraints is None or len(Constraints) == 0:
-        Points,_,idx = utils.DeleteDuplicateNodes(Points,[],return_idx=True,tol=tol)
-        if method == 'NonDelauanay':
+    if (Constraints is None or len(Constraints) == 0):
+        Points,_,idx = utils.DeleteDuplicateNodes(Points,[],return_idx=True, tol=tol)
+        if method.lower() == 'nondelaunay':
             Hull = ConvexHull_GiftWrapping(Points,IncludeCollinear=True)
             NodeConn = idx[TriangleSplittingTriangulation(Points,Hull=Hull)]
-        
-        elif method == 'Flips':
-            Hull = ConvexHull_GiftWrapping(Points,IncludeCollinear=True)
-            InitialConn = TriangleSplittingTriangulation(Points,Hull=Hull)
-            NodeConn = idx[DelaunayFlips(Points,InitialConn)]
-        
-        elif method == 'IncrementalFlips':
-            Hull = ConvexHull_GiftWrapping(Points,IncludeCollinear=True)
-            NodeConn = ConvexHullFanTriangulation(Hull)
-            interior = np.setdiff1d(np.arange(len(Points)),Hull,assume_unique=True)
-            for i in interior:
-                alpha,beta,gamma = utils.BaryTris(Points[NodeConn],Points[i])
-            
-                # currently not using special treatment for nodes on boundaries
-                inside = (alpha >= 0-tol) & (beta >= 0-tol) & (gamma >= 0-tol)
-                TriId = np.where(inside)[0][0]
-                Elem = copy.copy(NodeConn[TriId])
-                NodeConn[TriId] = [Elem[0],Elem[1],i]
-                NodeConn = np.append(NodeConn,[[Elem[1],Elem[2],i],[Elem[2],Elem[0],i]],axis=0)
-                NodeConn = DelaunayFlips(Points,NodeConn)
-            NodeConn = idx[NodeConn]
-        elif method == 'scipy':
+        elif method.lower() == 'bowyerwatson':
+            NodeConn = idx[BowyerWatson2d(Points)]
+        elif method.lower() == 'scipy':
             NodeConn = idx[SciPy(Points)]
-        elif method == 'Triangle':
+        elif method.lower() == 'triangle':
             NodeConn = idx[Triangle(Points)]
         else:
             raise Exception('Invalid method.')
     else: 
-        # Points,Constraints = SplitConstraints_2d(Points,Constraints)#,tol=tol)
-        # Constrained Deluanay Traingulation - Sloan (1993)
+        # Constrained Delaunay Triangulation - Sloan (1993)
         # Generate initial triangulation
-        if method == 'Triangle':
-            Points, NodeConn = Triangle(Points,Constraints=Constraints)
-        ###
+        if method.lower() == 'triangle':
+            method = 'triangle'
         else:
-            bk = copy.copy(Constraints)
-            pbk = copy.copy(NodeCoords)
-            ###
-            # Check constraints for intersections (Shouldn't be necessary here):
-            # if len(Constraints) > 1:
-            #     combinations = np.array(list(itertools.combinations(range(len(Constraints)),2)))
-            #     e1 = NodeCoords[Constraints[combinations[:,0]]]
-            #     e2 = NodeCoords[Constraints[combinations[:,1]]]
-            #     eIntersections,eIntersectionPts = rays.SegmentsSegmentsIntersection(np.append(e1,np.zeros((e1.shape[0],e1.shape[1],1)),axis=2),np.append(e2,np.zeros((e2.shape[0],e2.shape[1],1)),axis=2),return_intersection=True, endpt_inclusive=False,eps=1e-14)
-            #     if np.any(eIntersections):
-            #         print('aaaa')
-                    # raise Exception('Invalid constraints - the following constraint pairs intersect each other: {}'.format(combinations[eIntersections]))
-
-            ###
-            NodeCoords3d = np.append(Points,np.zeros(len(Points))[None,:].T,axis=1)
-            NodeConn = Triangulate(Points,Constraints=None,method='Triangle')
-            # NodeConn = Triangle(Points,Constraints=NewConstraints)
-            ### This is to handle cases where scipy only returns a single triangle, possibly due to the way it handles 'collinear' triangles
-            # Not an ideal work around
-            if len(NodeConn) == 1:
-                return NodeConn
-            ###
-            # Get Edges
-            # Edges = converter.solid2edges(Points,NodeConn)
-            # Edges = np.asarray(Edges)
-
-            # Filter out degenerate triangles
-            # EdgePoints = NodeCoords3d[Edges]
-            # ElemPoints = NodeCoords3d[NodeConn]
-            # A2 = np.linalg.norm(np.cross(ElemPoints[:,1]-ElemPoints[:,0],ElemPoints[:,2]-ElemPoints[:,0]),axis=1)
-            # EdgeLen = np.max(np.linalg.norm(EdgePoints[:,0]-EdgePoints[:,1],axis=1).reshape((int(len(Edges)/3),3)),axis=1)
-            # deviation = A2/EdgeLen
-            # if sum(deviation>tol*10) > 1:
-            #     NodeConn = NodeConn[deviation>tol]
-
-            Edges = converter.solid2edges(Points,NodeConn)
-            UEdges = converter.edges2unique(Edges)
-            ElemConn = utils.getElemConnectivity(Points, NodeConn)
-            
-            if np.all([np.any(np.all(Constraint==UEdges,axis=1)) or np.any(np.all(Constraint[::-1]==UEdges,axis=1))for Constraint in NewConstraints]):
-                # All constraints are present
-                NodeConn = idx[NodeConn]
-                return NodeConn
-            for constraint in NewConstraints:
-                if np.any(np.all(constraint == UEdges,axis=1)) or np.any(np.all(constraint[::-1] == UEdges,axis=1)):
-                    # Constrained edge already exists, no need to do anything
-                    continue
-                # For each constraint edge, find intersecting edges
-                s1 = np.tile(NodeCoords3d[constraint],(len(UEdges),1,1))
-                s2 = NodeCoords3d[UEdges]
-
-                intersections = rays.SegmentsSegmentsIntersection(s1,s2,endpt_inclusive=True) # Having endpt_inclusive=True is important here
-
-                Iedges = set(np.where(intersections)[0])
-                ww = 0 # Not working sometimes for some reason;fuck
-                while len(Iedges) > 0 and ww < 100:
-                    ww += 1
-                    if ww == 99:
-                        a = 2
-                    k = Iedges.pop()
-                    if UEdges[k][0] in constraint or UEdges[k][1] in constraint:
-                        # Intersection is at an endpoint, no need to do anything
-                        continue
-                    elif np.any(np.all(UEdges[k] == NewConstraints,axis=1)) or np.any(np.all(UEdges[k][::-1] == NewConstraints,axis=1)):
-                        # Edge is a constraint, cant be flipped
-                        a = 2
-                        continue
-                    intersect = np.intersect1d(ElemConn[UEdges[k,0]],ElemConn[UEdges[k,1]])
-                    if len(intersect) < 2:
-                        # Boundary edge, skip
-                        continue
-
-                    # [i,j] = EdgeElemConn[k]
-                    [i,j] = intersect
-
-                    
-                    nodes = list(set(NodeConn[i]).union(NodeConn[j]))
-                    if len(ConvexHull_GiftWrapping(Points[nodes],IncludeCollinear=True)) != 4:
-                        # If the 4 nodes of the two triangles connected at the edge are non-convex, put the edge back in the queue
-                        # if len(Iedges) != 1:
-                        Iedges.add(k)
-                    else:
-                        # Flip edge
-                        Newi,Newj = FlipEdge(NodeConn,i,j)
-                        NodeConn[i] = Newi; NodeConn[j] = Newj
-                        NewEdge = np.setdiff1d(nodes,UEdges[k])
-                        if np.any(np.all(NewEdge==UEdges,axis=1)) or np.any(np.all(NewEdge[::-1]==UEdges,axis=1)):
-                            # If the new edge is already an edge, it needs to be flipped again
-                            Iedges.add(k)
-                        UEdges[k] = NewEdge
-                        ElemConn = utils.getElemConnectivity(Points, NodeConn)
-                        if rays.SegmentSegmentIntersection(NodeCoords3d[constraint],NodeCoords3d[NewEdge],endpt_inclusive=True):
-                            Iedges.add(k)
-                            if len(Iedges) == 1:
-                                a = 2
-                    ## This shouldn't be needed,
-                    brk = True
-                    for C in NewConstraints:
-                        if not (np.any(np.all(C == UEdges, axis=1)) or np.any(np.all(C[::-1] == UEdges, axis=1))):
-                            brk = False
-                        if brk: 
-                            break
-                    
-
-            
-            ### Double Checking
-            for constraint in NewConstraints:
-                if not (np.any(np.all(constraint == UEdges, axis=1)) or np.any(np.all(constraint[::-1] == UEdges, axis=1))):
-                    print('merp')
-
-            ###
-            # Reinforce delaunay
-            # try:
-            #     NodeConn = DelaunayFlips(Points,NodeConn,Constraints=NewConstraints)
-            # except:
+            raise ValueError('Currently only method="Triangle" is supported for constrained triangulation.')
         
+        NodeConn = Triangle(Points,Constraints=Constraints)
 
-    NodeCoords = Points
+    # NodeCoords = Points
     return NodeCoords, NodeConn
-
-def SplitConstraints_2d(NodeCoords,Constraints,tol=1e-12):
-    
-    # Check for intersections within the constraints
-    pbk = copy.copy(NodeCoords)
-    cbk = copy.copy(Constraints)
-    combinations = np.array(list(itertools.combinations(range(len(Constraints)),2)))
-    NodeCoords3 = np.append(NodeCoords,np.zeros((len(NodeCoords),1)),axis=1)
-    e1 = NodeCoords3[Constraints[combinations[:,0]]]
-    e2 = NodeCoords3[Constraints[combinations[:,1]]]
-    eIntersections,eIntersectionPts = rays.SegmentsSegmentsIntersection(e1,e2,return_intersection=True,endpt_inclusive=True,eps=tol)
-    eIntersectionPts = eIntersectionPts[:,:2]
-    NewConstraints = np.empty((0,2),dtype=int)
-    for ic,c in enumerate(Constraints):
-        # ids of other constraints that intersect with this constraint
-        ids = np.unique(np.array([combo for combo in combinations[eIntersections] if ic in combo]))
-        # Check collinear lines - currently rays.SegmentsSegmentsIntersection doesn't do this properly
-        coix = np.empty((0,2))
-        for combo in combinations[~eIntersections]:
-            if ic not in combo:
-                continue
-            segments = np.vstack(NodeCoords[Constraints[combo]])
-
-            # Check area of triangles formed by 3 of the 4 nodes of the segment to assess collinearity
-            if np.linalg.norm(NodeCoords[Constraints[combo[0]][0]] - 
-                                    NodeCoords[Constraints[combo[0]][1]]) > tol:
-                check1 = np.linalg.norm(np.cross(segments[1]-segments[0], segments[2]-segments[0])) < tol
-                check2 = np.linalg.norm(np.cross(segments[1]-segments[0], segments[3]-segments[0])) < tol
-            elif np.linalg.norm(NodeCoords[Constraints[combo[1]][0]] - 
-                                    NodeCoords[Constraints[combo[1]][1]]) > tol:
-                check1 = np.linalg.norm(np.cross(segments[3]-segments[2], segments[0]-segments[2])) < tol
-                check2 = np.linalg.norm(np.cross(segments[3]-segments[2], segments[1]-segments[2])) < tol
-            else:
-                continue
-            v1 = segments[1]-segments[0]
-            v2 = segments[3]-segments[2]
-            with np.errstate(divide='ignore', invalid='ignore'):
-                if np.abs(np.cross(v1/np.linalg.norm(v1),v2/np.linalg.norm(v2))) > 0.1:
-                    # vectors aren't parallel (cross product of parallel vectors is [0,0,0])
-                    # This is needed in addition to the previous area checks because a perpindicular segment
-                    # in line with the end point of the other segment could also give area ~ 0
-                    continue
-            if check1 and check2:
-                # For segments AB and CD if the (double) area of the triangles ABC and ABD are both (near) zero, the segments are collinear
-                # segsort = np.lexsort(segments.T) # Lexographic sort of the segments
-                segsort = np.lexsort((np.round(segments/tol)*tol).T) 
-                if (0 in segsort[:2] and 1 in segsort[:2]) or (2 in segsort[:2] and 3 in segsort[:2]):
-                    # if both points if a segment are on the same side of the other, they at most intersect at an endpt
-                    if np.linalg.norm(np.diff(segments[segsort[1:3]],axis=0)) < tol: # Norm of the difference between interior points
-                        # end point intersection
-                        coix = np.append(coix,[segments[segsort[1]]],axis=0)
-                else:
-                    # overlapping segments, get the two interior points
-                    coix = np.append(coix,segments[segsort[1:3]],axis=0)
-            elif check1:
-                segsort = np.lexsort(segments[[0,1,2]].T)
-                if segsort[1] == 2:
-                    coix = np.append(coix,[segments[2]],axis=0)
-            elif check2:
-                segsort = np.lexsort(segments[[0,1,3]].T)
-                if segsort[1] == 2:
-                    coix = np.append(coix,[segments[3]],axis=0)
-                    
-        ids = np.delete(ids,ids==ic)
-        if len(ids) == 0:
-            NewConstraints = np.append(NewConstraints,[c],axis=0)
-        else:
-            # corresponding intersection points
-            ixs = np.array([eIntersectionPts[eIntersections][x] for x,combo in enumerate(combinations[eIntersections]) if ic in combo])
-            ixs = np.append(ixs,coix,axis=0)
-            ixsort = ixs[np.lexsort((np.round(ixs/tol)*tol).T)]
-
-            NewConstraints = np.append(NewConstraints,np.vstack([np.arange(0,len(ixsort)-1),np.arange(1,len(ixsort))]).T+len(NodeCoords),axis=0)
-            NodeCoords = np.append(NodeCoords,ixsort,axis=0)
-
-    NodeCoords, Constraints = utils.DeleteDuplicateNodes(NodeCoords,NewConstraints,tol=10*tol)
-    Constraints = np.unique([c for c in Constraints if c[0] != c[1]],axis=0)
-    NodeCoords = np.asarray(NodeCoords)
-
-    return NodeCoords, Constraints
 
 def ConvexHull(NodeCoords,IncludeCollinear=True,method='GiftWrapping'):
     if method == 'GiftWrapping':
@@ -293,14 +118,21 @@ def SciPy(NodeCoords):
     Parameters
     ----------
     NodeCoords : array_like
-        Node coordinates for the triangulation
+        (n,2) or (n,3) node coordinates for the triangulation. Triangulation is 
+        only based on the coordinates in the first two dimensions, if an (n,3)
+        is provided, the coordinates of the third column is ignored.
 
     Returns
     -------
     NodeConn : np.ndarray
         mx3 array of node connectivity for the triangles
     """    
-    out = spatial.Delaunay(NodeCoords,qhull_options='Qbb Qc Qz Q12 Qt')
+    if NodeCoords.shape[1] == 2:
+        TempCoords = NodeCoords
+    else:
+        warnings.warn('SciPy Delaunay triangulation is only valid for points on a plane, the third dimension is ignored.')
+        TempCoords = NodeCoords[:,:2]
+    out = spatial.Delaunay(TempCoords,qhull_options='Qbb Qc Qz Q12 Qt')
     NodeConn = out.simplices
     return NodeConn
 
@@ -348,7 +180,7 @@ def Triangle(NodeCoords,Constraints=None):
     except:
         NodeConn = SciPy(NodeCoords)
 
-    return NodeCoords, NodeConn
+    return NodeConn
     
 def ConvexHull_GiftWrapping(NodeCoords,IncludeCollinear=True):
     """
@@ -367,8 +199,12 @@ def ConvexHull_GiftWrapping(NodeCoords,IncludeCollinear=True):
     """    
 
     assert len(NodeCoords) > 2, 'At least three points are required.'
-    assert len(NodeCoords[0]) == 2, 'The gift wrapping algorithm is only valid for points on a plane, coordinates must be two dimensional.'
-    Points = np.asarray(NodeCoords)
+    if NodeCoords.shape[1] == 2:
+        Points = np.asarray(NodeCoords)
+    else:
+        warnings.warn('ConvexHull_GiftWrapping is only valid for points on a plane, the third dimension is ignored.')
+        Points = np.asarray(NodeCoords)[:,:2]
+
     sortidx = Points[:,1].argsort()[::-1]
     Points = Points[sortidx,:] # sorting from max y to min y (TODO:for some reason if the first point comes before the second point, there are problems)
     
@@ -439,10 +275,14 @@ def ConvexHullFanTriangulation(Hull):
 def TriangleSplittingTriangulation(NodeCoords, Hull=None, return_Hull=False):
 
     assert len(NodeCoords) > 2, 'At least three points are required.'
-    assert len(NodeCoords[0]) == 2, 'Only supported for points on a plane, coordinates must be two dimensional.'
+    if NodeCoords.shape[1] == 2:
+        Points = np.asarray(NodeCoords)
+    else:
+        warnings.warn('TriangleSplittingTriangulation is only valid for points on a plane, the third dimension is ignored.')
+        Points = np.asarray(NodeCoords)[:,:2]
 
-    Points = np.asarray(NodeCoords)
-    if Hull is None: Hull = ConvexHull_GiftWrapping(NodeCoords)
+
+    if Hull is None: Hull = ConvexHull_GiftWrapping(Points)
     NodeConn = ConvexHullFanTriangulation(Hull)
 
     interior = np.setdiff1d(np.arange(len(NodeCoords)),Hull,assume_unique=True)
@@ -463,240 +303,343 @@ def TriangleSplittingTriangulation(NodeCoords, Hull=None, return_Hull=False):
         return NodeConn, Hull
     return NodeConn
         
-def DelaunayFlips(NodeCoords,NodeConn,Constraints=None):
-    """
-    Flipping algorithm for Delaunay triangulation.
-
-    Parameters
-    ----------
-    NodeCoords : array_like
-        nx2 set of points to be triangulated
-    NodeConn : array_like
-        mx3 array of node connectivities for an initial triangulation
-    Constraints : array_like, optional
-        Edge connectivity array of node indices that indicate edges to be ensured
-        by constrained Delaunay triangulation, by default None
-
-    Returns
-    -------
-    NodeConn : np.ndarray
-        mx3 array of node connectivities for the Delaunay triangulation
-    """
-    NewCoords = np.array(NodeCoords)
-    NewConn = np.array(NodeConn)
-
-    # Get Edges
-    Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True)
-    Edges = np.asarray(Edges); EdgeConn = np.asarray(EdgeConn)
-    UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
-    L = len(UEdges)
-    UEdgeElem = np.asarray(EdgeElem)[UIdx]
-    UEdgeConn = UInv[EdgeConn]
-    EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)).astype(int)
-    EdgeElemConn = -1*(np.ones((len(UEdges),2),dtype=int))
-    EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)
-    # Get Constraints
-    if Constraints is not None:
-        Constrained = []
-        for constraint in Constraints:
-            where = np.where(np.all(UEdges==constraint,axis=1) | np.all(UEdges==constraint[::-1],axis=1))[0]
-            if len(where) > 0:
-                Constrained.append(where[0])
-            else:
-                # TODO: Not sure why this happens
-                continue
-
-    # Get Opposite Angles
-    EdgeVectors = NewCoords[Edges[:,0]] - NewCoords[Edges[:,1]]
-    EdgeLengths = np.linalg.norm(EdgeVectors,axis=1)
-    ElemVectors = EdgeVectors[EdgeConn]
-    ElemLengths = EdgeLengths[EdgeConn]
-    with np.errstate(divide='ignore', invalid='ignore'):
-        OppositeAngles = np.zeros(ElemLengths.shape)
-        OppositeAngles[:,0] = np.arccos(np.sum(ElemVectors[:,2]*-ElemVectors[:,1],axis=1)/(ElemLengths[:,2]*ElemLengths[:,1]))
-        OppositeAngles[:,1] = np.arccos(np.sum(ElemVectors[:,0]*-ElemVectors[:,2],axis=1)/(ElemLengths[:,0]*ElemLengths[:,2]))
-        OppositeAngles[:,2] = np.arccos(np.sum(ElemVectors[:,1]*-ElemVectors[:,0],axis=1)/(ElemLengths[:,1]*ElemLengths[:,0]))
-    EdgeOppositeAngles = np.empty((len(UEdges),2))
-    EdgeOppositeAngles[UEdgeConn,EECidx] = OppositeAngles
-    EdgeOppositeAngles[EdgeElemConn==-1]=0
-    if Constraints is not None: EdgeOppositeAngles[Constrained] = 0
-    # Set of non-Delaunay triangles (i.e. ones that have at least one edge where the sum of the opposite angles is greater than pi)
-    NonDelaunay = list(EdgeElemConn[np.where((np.sum(EdgeOppositeAngles,axis=1) > np.pi))[0]].flatten())
-    iter = 0
-    while len(NonDelaunay) > 0:
-        
-        iter += 1
-        if iter > 100:
-            print('morp')
-        if -1 in NonDelaunay:
-            NonDelaunay = [x for x in NonDelaunay if x != -1]
-        # elem = random.choice(NonDelaunay)#.pop()
-        elem = NonDelaunay.pop()
-        flippable = []; angles = []
-        for k in UEdgeConn[elem]:
-            if -1 in EdgeElemConn[k]:
-                continue
-            [i,j] = EdgeElemConn[k]
-            nodes = list(set(NewConn[i]).union(NewConn[j]))
-            if len(ConvexHull_GiftWrapping(NewCoords[nodes],IncludeCollinear=True)) == 4:
-                angles.append(np.sum(EdgeOppositeAngles[k]))
-                flippable.append(k)
-        if len(flippable) == 0:
-            continue
-        else:
-            k = np.array(flippable)[np.argsort(angles)][-1]
-            [i,j] = EdgeElemConn[k]
-
-        if i == -1 or j == -1:
-            continue
-        Newi,Newj = FlipEdge(NewConn,i,j)
-        NewEdge = np.intersect1d(Newi,Newj)
-        if np.any(np.all(NewEdge==UEdges,axis=1)) or np.any(np.all(NewEdge[::-1]==UEdges,axis=1)):
-            # Invalid flip - edge already exists
-            continue
-        NewConn[i] = Newi; NewConn[j] = Newj; 
-
-        # Update EdgeConn
-        Edges[EdgeConn[i]] = [[NewConn[i,0],NewConn[i,1]], [NewConn[i,1],NewConn[i,2]], [NewConn[i,2],NewConn[i,0]]]
-        Edges[EdgeConn[j]] = [[NewConn[j,0],NewConn[j,1]], [NewConn[j,1],NewConn[j,2]], [NewConn[j,2],NewConn[j,0]]]
-
-        ###
-        UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
-        if len(UEdges) != L:
-            print('merp')
-        UEdgeElem = np.asarray(EdgeElem)[UIdx]
-        UEdgeConn = UInv[EdgeConn]
-        EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)).astype(int)
-        EdgeElemConn = -1*(np.ones((len(UEdges),2),dtype=int))
-        EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)
-        ###
-
-        v11 = NewCoords[NewConn[i,0]] - NewCoords[NewConn[i,1]]
-        v12 = NewCoords[NewConn[i,1]] - NewCoords[NewConn[i,2]]
-        v13 = NewCoords[NewConn[i,2]] - NewCoords[NewConn[i,0]]
-        v21 = NewCoords[NewConn[j,0]] - NewCoords[NewConn[j,1]]
-        v22 = NewCoords[NewConn[j,1]] - NewCoords[NewConn[j,2]]
-        v23 = NewCoords[NewConn[j,2]] - NewCoords[NewConn[j,0]]
-        
-        OppositeAngles[i] = [
-            np.arccos(np.sum(v12*-v13)/(np.linalg.norm(v12)*np.linalg.norm(v13))),
-            np.arccos(np.sum(v13*-v11)/(np.linalg.norm(v13)*np.linalg.norm(v11))),
-            np.arccos(np.sum(v11*-v12)/(np.linalg.norm(v11)*np.linalg.norm(v12)))
-            ]
-        OppositeAngles[j] = [
-            np.arccos(np.sum(v22*-v23)/(np.linalg.norm(v22)*np.linalg.norm(v23))),
-            np.arccos(np.sum(v23*-v21)/(np.linalg.norm(v23)*np.linalg.norm(v21))),
-            np.arccos(np.sum(v21*-v22)/(np.linalg.norm(v21)*np.linalg.norm(v22)))
-            ]
-        EdgeOppositeAngles[UEdgeConn,EECidx] = OppositeAngles
-        EdgeOppositeAngles[EdgeElemConn==-1] = 0
-        if Constraints is not None: EdgeOppositeAngles[Constrained] = 0 # Prevents flipping of constrained edges
-        NonDelaunay = list(EdgeElemConn[np.where((np.sum(EdgeOppositeAngles,axis=1) > np.pi))[0]].flatten())
-    return NewConn
-    
 def BowyerWatson2d(NodeCoords):
     """
     Bowyer-Watson algorithm for 2D Delaunay triangulation
 
+    :cite:p:`Bowyer1981`, :cite:p:`Watson1981`
+
     Parameters
     ----------
     NodeCoords : array_like
-        nx2 set of points to be triangulated
+        nx2 or nx3 set of points to be triangulated
 
     Returns
     -------
     NodeConn : np.ndarray
         mx3 array of node connectivities for the Delaunay triangulation
     """
-
+    if check_numba():
+        import numba
+        from numba.typed import Dict
+    else:
+        warnings.warn('Using numba is strongly recommended for efficiency of BowyerWatson2d. Activate with `mymesh.use_numba(True)`')
+        Dict = dict
 
     NodeCoords = np.asarray(NodeCoords)
     assert NodeCoords.shape[0] >= 3, 'At least three points are required.'
-    assert NodeCoords.shape[1] == 2, 'BowyerWatson2d is only valid for points on a plane, coordinates must be two dimensional.'
+    if NodeCoords.shape[1] == 2:
+        TempCoords = NodeCoords
+    else:
+        warnings.warn('BowyerWatson2d is only valid for points on a plane, the third dimension is ignored.')
+        TempCoords = NodeCoords[:,:2]
 
     nPts = len(NodeCoords)
 
     # Random insertion order for points
-    indices = np.arange(nPts)
+    indices = list(range(nPts))
     rng = np.random.default_rng()
     rng.shuffle(indices)
 
-    # Get super triangle
-    center = np.mean(NodeCoords, axis=0)
-    r = np.max(np.sqrt((NodeCoords[:,0]-center[0])**2 + (NodeCoords[:,1]-center[1])**2))
+    # Get super triangle - triangle with incircle that bounds the point set
+    center = np.mean(TempCoords, axis=0)
+    r = np.max(np.sqrt((TempCoords[:,0]-center[0])**2 + (TempCoords[:,1]-center[1])**2))
+    R = r + 1*r/10
 
     super_triangle_points = np.array([
-                                    [center[0], center[1]-2*r],
-                                    [center[0]+r*np.sqrt(3), center[1]+r],
-                                    [center[0]-r*np.sqrt(3), center[1]+r]
+                                    [center[0], center[1]-2*R],
+                                    [center[0]+R*np.sqrt(3), center[1]+R],
+                                    [center[0]-R*np.sqrt(3), center[1]+R]
                             ])    
-    TempCoords = np.hstack([np.vstack([NodeCoords, super_triangle_points]), np.repeat(0,nPts+3)[:,None]])
+    TempCoords = np.hstack([np.vstack([TempCoords, super_triangle_points]), np.repeat(0,nPts+3)[:,None]])
+    super_tri = (nPts, nPts+1, nPts+2)
 
-    # Upper bound for number of triangles comes from Euler characteristic
-    maxTri = 10*(nPts+3)-5
+    ElemTable = Dict()
+    # Elem table links elements to tuples of (oriented) edges
+    # e.g. ElemTable[(0,1,2)] = ((0,1),(1,2),(2,0))
+    ElemTable[super_tri] = ((nPts, nPts+1), (nPts+1, nPts+2), (nPts+2, nPts)) 
 
-    # Pre-allocate NodeConn and add super triangle connectivity
-    NodeConn = -1*np.ones((maxTri, 3), dtype=int)
-    Stored = np.repeat(False,maxTri)
-    NodeConn[0,:] = [nPts, nPts+1, nPts+2]
-    Stored[0] = True
-    TriIndices = np.arange(maxTri)
+    EdgeTable = Dict()
+    # Edge table links oriented (half) edges to their one connected element
+    # e.g. EdgeTable[(0,1)] = (0,1,2)
+    EdgeTable[(nPts, nPts+1)] = super_tri
+    EdgeTable[(nPts+1, nPts+2)] = super_tri
+    EdgeTable[(nPts+2, nPts)] = super_tri
 
-    
-    k = 0
     for i in indices:
-        k+=1
-        newPt = TempCoords[i,:2]
+        newPt = TempCoords[i]
 
-        # Check Circumcircles of all existing triangles
-        det_mats = np.ones((np.sum(Stored), 3, 3))
-        TriPoints = TempCoords[NodeConn[Stored],:2]
+        tri = _walk_2d(TempCoords, ElemTable, EdgeTable, newPt, nsample=1)
+        # Breadth first search of adjacent triangles to find all invalid triangles
+        # Initiate a queue of the edges
+        bad_triangles, cavity_edges = _build_cavity_2d(TempCoords, ElemTable, EdgeTable, tri, newPt)
+        # Remove triangles and edges
+        for t in bad_triangles:
+            for e in ElemTable[t]:
+                del EdgeTable[e]
+            del ElemTable[t]
 
-        det_mats[:, 0, [0,1]] = TriPoints[:, 0, :] - newPt
-        det_mats[:, 1, [0,1]] = TriPoints[:, 1, :] - newPt
-        det_mats[:, 2, [0,1]] = TriPoints[:, 2, :] - newPt
-        det_mats[:, [0,1,2], 2] = np.sum((TriPoints-newPt)**2,axis=2)
-        in_circle = np.linalg.det(det_mats) > 0
-        
-        # Get bad triangles, then remove
-        bad_triangles = NodeConn[Stored][in_circle]
-        Stored[TriIndices[Stored][in_circle]] = False
+        # Create new triangles and edges
+        for e in cavity_edges:
+            t = (e[0], e[1], i)
+            edges = (e, (e[1], i), (i, e[0]))
+            ElemTable[t] = edges
+            for edge in edges:
+                EdgeTable[edge] = t
 
-        # Identify edges of the cavity
-        # NOTE: This could be a bottleneck?
-        cavity_edges = converter.surf2edges(TempCoords, bad_triangles, ElemType='tri')
+    NodeConn = np.array(list(ElemTable.keys()))
+    Super = np.any(NodeConn == nPts, axis=1) | np.any(NodeConn == (nPts+1), axis=1) | np.any(NodeConn == (nPts+2), axis=1)
+    NodeConn = NodeConn[~Super]
+    
+    return NodeConn
 
-        # Connect edges to the new point
-        NewConn = np.hstack([cavity_edges, np.repeat(i,len(cavity_edges))[:,None]])
+def BowyerWatson3d(NodeCoords):
+    """
+    Bowyer-Watson algorithm for 3D Delaunay tetrahedralization
+    https://arxiv.org/pdf/1805.08831v2
 
-        # Ensure that the new triangles are all ordered counterclockwise
-        # NOTE: This could be a bottleneck
-        Normals = utils.CalcFaceNormal(TempCoords,NewConn)
-        NewConn[Normals[:,2]<0] = np.fliplr(NewConn[Normals[:,2]<0])
+    Parameters
+    ----------
+    NodeCoords : array_like
+        nx3 set of points to be tetrahedralized
 
-        # Add new triangles to available storage
-        NodeConn[TriIndices[~Stored][:len(NewConn)]] = NewConn
-        Stored[TriIndices[~Stored][:len(NewConn)]] = True
-        
-    # Remove any triangles containing the super triangle nodes
-    Stored[np.any(np.isin(NodeConn, [nPts, nPts+1, nPts+2]),axis=1)] = False
-    NodeConn = NodeConn[Stored]
+    Returns
+    -------
+    NodeConn : np.ndarray
+        mx3 array of node connectivities for the Delaunay triangulation
+    """
+    import numba
+    # from numba.typed import Dict as dict
+
+    NodeCoords = np.asarray(NodeCoords)
+    assert NodeCoords.shape[0] >= 3, 'At least three points are required.'
+    assert NodeCoords.shape[1] == 3, 'BowyerWatson3d is only valid for three dimensional points.'
+
+    nPts = len(NodeCoords)
+
+    # Random insertion order for points
+    indices = list(range(nPts))
+    rng = np.random.default_rng()
+    rng.shuffle(indices)
+
+    # Get super tetrahedron - tetrahedron with insphere that bounds the point set
+    center = np.mean(NodeCoords, axis=0)
+    r = np.max(np.sqrt((NodeCoords[:,0]-center[0])**2 + (NodeCoords[:,1]-center[1])**2 + (NodeCoords[:,2]-center[2])**2))
+    a = r*np.sqrt(24) # side length of tetrahedron
+
+    super_tet_points = np.array([
+                                [center[0]-a/2, center[1]-np.sqrt(3)*a/6, center[2]-r],
+                                [center[0]+a/2, center[1]-np.sqrt(3)*a/6, center[2]-r],
+                                [center[0],     center[1]+np.sqrt(3)*a/3, center[2]-r],
+                                [center[0],     center[1], center[2]+np.sqrt(6)*a/3-r]
+                            ])    
+    TempCoords = np.vstack([NodeCoords, super_tet_points])
+    super_tet = (nPts, nPts+1, nPts+2, nPts+3)
+
+    ElemTable = dict()
+    # Elem table links elements to tuples of (oriented) faces
+    # e.g. ElemTable[(0,1,2,3)] = ((2,0,1),(1,0,3),(3,0,2),(2,1,3)))
+    # Faces are stragically numbered s.t. the minimum node number is in the 
+    # center to allow for flipping to find the face's twin
+    ElemTable[super_tet] = (
+        (super_tet[2], super_tet[0], super_tet[1]), 
+        (super_tet[1], super_tet[0], super_tet[3]), 
+        (super_tet[3], super_tet[0], super_tet[2]), 
+        (super_tet[2], super_tet[1], super_tet[3])
+        )
+
+    EdgeTable = dict()
+    # Edge table links oriented (half) faces to their one connected element
+    # e.g. EdgeTable[(2,0,1)] = (0,1,2,3)
+    EdgeTable[(super_tet[2], super_tet[0], super_tet[1])] = super_tet
+    EdgeTable[(super_tet[1], super_tet[0], super_tet[3])] = super_tet
+    EdgeTable[(super_tet[3], super_tet[0], super_tet[2])] = super_tet
+    EdgeTable[(super_tet[2], super_tet[1], super_tet[3])] = super_tet
+ 
+    for i in indices:
+        newPt = TempCoords[i]
+        tet = _walk_3d(TempCoords, ElemTable, EdgeTable, newPt, nsample=1)
+        # Breadth first search of adjacent tets to find all invalid tets
+        # Initiate a queue of the faces
+        bad_tets, cavity_edges = _build_cavity_3d(TempCoords, ElemTable, EdgeTable, tet, newPt)
+        # Remove tets and faces
+        for t in bad_tets:
+            for e in ElemTable[t]:
+                del EdgeTable[e]
+            del ElemTable[t]
+
+        # Create new tets and faces
+        for e in cavity_edges:
+            t = (e[0], e[1], e[2], i)
+            e1 = (e[0], i, e[1])
+            e2 = (e[0], e[2], i)
+            e3 = (e[1], i, e[2])
+            min_e1_idx = e1.index(min(e1))
+            min_e2_idx = e2.index(min(e2))
+            min_e3_idx = e3.index(min(e3))
+
+            e1 = e1 if min_e1_idx == 1 else (e1[1], e1[2], e1[0]) if min_e1_idx == 2 else (e1[2], e1[0], e1[1])
+            e2 = e2 if min_e2_idx == 1 else (e2[1], e2[2], e2[0]) if min_e2_idx == 2 else (e2[2], e2[0], e2[1])
+            e3 = e3 if min_e3_idx == 1 else (e3[1], e3[2], e3[0]) if min_e3_idx == 2 else (e3[2], e3[0], e3[1])
+
+            edges = (e, e1, e2, e3)
+
+            ElemTable[t] = edges
+            for edge in edges:
+                EdgeTable[edge] = t
+
+    NodeConn = np.array(list(ElemTable.keys()))
+    Super = np.any(NodeConn == nPts, axis=1) | np.any(NodeConn == (nPts+1), axis=1) | np.any(NodeConn == (nPts+2), axis=1) | np.any(NodeConn == (nPts+3), axis=1)
+    NodeConn = NodeConn[~Super]
+    
 
     return NodeConn
 
-  
 ## Utils ##
-def FlipEdge(NodeConn,i,j):
-    Si = set(NodeConn[i])
-    Sj = set(NodeConn[j])
-    shared = list(Si.intersection(Sj))
-    assert len(shared)==2, 'Elements {:d} & {:d} are not properly connected for an edge flip.'.format(i,j)
-    Losti = Sj.difference(Si).pop()
-    Lostj = Si.difference(Sj).pop()
-    NewEdge = [Losti,Lostj]
-    Newi = [n if n != shared[0] else Losti for n in NodeConn[i]]
-    Newj = [n if n != shared[1] else Lostj for n in NodeConn[j]]
-    return Newi,Newj
-    
+@try_njit
+def _walk_2d(TempCoords, ElemTable, EdgeTable, newPt, nsample=1):
+    # Walking algorithm to find triangle containing the new point
+    tri = list(ElemTable.keys())[np.random.randint(0,len(ElemTable))]
+    minL = np.linalg.norm(TempCoords[tri[0]]-newPt)
+    for i in range(min(nsample-1,len(ElemTable)-1)):
+        t = list(ElemTable.keys())[np.random.randint(0,len(ElemTable))]
+        L = np.linalg.norm(TempCoords[t[0]]-newPt)
+        if L < minL:
+            tri = t
+    alpha, beta, gamma = utils.BaryTri(TempCoords[np.array(list(tri))], newPt)
+    while not (alpha >= 0 and beta >= 0 and gamma >= 0):
+        # find node with smallest (most negative) barycentric coordinate
+        bcoords = [alpha,beta,gamma]
+        nodeid = tri[bcoords.index(min(bcoords))]
+
+        # find edge opposite that node
+        if nodeid not in ElemTable[tri][0]:
+            edge = ElemTable[tri][0]
+        elif nodeid not in ElemTable[tri][1]:
+            edge = ElemTable[tri][1]
+        else:
+            edge = ElemTable[tri][2]
+
+        # step to the neighboring triangle across that edge
+        tri = EdgeTable[edge[::-1]]
+        alpha, beta, gamma = utils.BaryTri(TempCoords[np.array(list(tri))], newPt)
+    return tri
+
+@try_njit
+def _build_cavity_2d(TempCoords, ElemTable, EdgeTable, tri, newPt):
+    bad_triangles = [tri]
+    cavity_edges = []
+    queue = set(ElemTable[tri])
+    s1 = len(TempCoords) - 1; s2 = len(TempCoords) - 2; s3 = len(TempCoords) - 3;
+    while len(queue) > 0:
+        edge = queue.pop()
+        twin = edge[::-1]
+
+        if twin in EdgeTable:
+            t = EdgeTable[twin]
+            # Check if triangle is connected to the super triangle
+            if sum([s1 in t, s2 in t, s3 in t]) == 1 and sum([s1 in twin, s2 in twin, s3 in twin]) == 0:
+                # mark this edge as a cavity boundary
+                cavity_edges.append(edge)
+                continue
+            # test circumcircle
+            mat = np.array([
+                [TempCoords[t[0], 0] - newPt[0], TempCoords[t[0], 1] - newPt[1], (TempCoords[t[0], 0] - newPt[0])**2 + (TempCoords[t[0], 1] - newPt[1])**2],
+                [TempCoords[t[1], 0] - newPt[0], TempCoords[t[1], 1] - newPt[1], (TempCoords[t[1], 0] - newPt[0])**2 + (TempCoords[t[1], 1] - newPt[1])**2],
+                [TempCoords[t[2], 0] - newPt[0], TempCoords[t[2], 1] - newPt[1], (TempCoords[t[2], 0] - newPt[0])**2 + (TempCoords[t[2], 1] - newPt[1])**2]
+            ])
+            invalid = np.linalg.det(mat) > 0
+            if invalid:
+                # mark invalid triangles for deletion
+                bad_triangles.append(t)
+                # add adjacent neighbors to queue
+                queue.update([e for e in ElemTable[t] if e != twin])
+            else:
+                # mark this edge as a cavity boundary
+                cavity_edges.append(edge)
+
+        else:
+            # boundary edge, add to cavity
+            cavity_edges.append(edge)
+    return bad_triangles, cavity_edges
+
+
+# TODO: Traversals in 3d probably won't work right because half-face pairs can't 
+# necessarily be obtained just by reversing the order
+# @numba.njit(cache=True)
+def _walk_3d(TempCoords, ElemTable, EdgeTable, newPt, nsample=1):
+    # Walking algorithm to find tets containing the new point
+    tet = list(ElemTable.keys())[np.random.randint(0,len(ElemTable))]
+    minL = np.linalg.norm(TempCoords[tet[0]]-newPt)
+    for i in range(min(nsample-1,len(ElemTable)-1)):
+        t = list(ElemTable.keys())[np.random.randint(0,len(ElemTable))]
+        L = np.linalg.norm(TempCoords[t[0]]-newPt)
+        if L < minL:
+            tet = t
+    alpha, beta, gamma, delta = utils.BaryTet(TempCoords[np.array(list(tet))], newPt)
+    while not (alpha >= 0 and beta >= 0 and gamma >= 0 and delta >= 0):
+        # find node with smallest (most negative) barycentric coordinate
+        bcoords = [alpha,beta,gamma,delta]
+        nodeid = tet[bcoords.index(min(bcoords))]
+
+        # find edge opposite that node
+        edge = [e for e in ElemTable[tet] if nodeid not in e][0]
+
+        # step to the neighboring tet across that face
+        tet = EdgeTable[edge[::-1]]
+        alpha, beta, gamma, delta = utils.BaryTet(TempCoords[np.array(list(tet))], newPt)
+    return tet
+
+# @numba.njit(cache=True)
+def _build_cavity_3d(TempCoords, ElemTable, EdgeTable, tet, newPt):
+    # TODO: it seems like some of the tets get visited more than once
+    bad_tets = set((tet,)) #[tet]
+    cavity_edges = []
+    valid_set = set()
+    invalid_set = set()
+    queue = set(ElemTable[tet])
+    while len(queue) > 0:
+        edge = queue.pop()
+        twin = edge[::-1]
+
+        if twin in EdgeTable:
+            t = EdgeTable[twin]
+            if t in invalid_set:
+                continue
+            elif t in valid_set:
+                cavity_edges.append(edge)
+                continue
+
+            # test circumsphere
+            x0, y0, z0 = TempCoords[t[0]]
+            x1, y1, z1 = TempCoords[t[1]]
+            x2, y2, z2 = TempCoords[t[2]]
+            x3, y3, z3 = TempCoords[t[3]]
+            x, y, z = newPt
+
+            mat = np.array([
+                [x0, y0, z0, x0**2+y0**2+z0**2, 1],
+                [x1, y1, z1, x1**2+y1**2+z1**2, 1],
+                [x2, y2, z2, x2**2+y2**2+z2**2, 1],
+                [x3, y3, z3, x3**2+y3**2+z3**2, 1],
+                [x,  y,  z,  x**2+y**2+z**2,    1],
+            ])
+
+            invalid = np.linalg.det(mat) < 0
+            if invalid:
+                invalid_set.add(t)
+                # mark invalid tets for deletion
+                bad_tets.add(t)
+                # add adjacent neighbors to queue
+                queue.update([e for e in ElemTable[t] if e != twin])
+            else:
+                valid_set.add(t)
+                # mark this edge as a cavity boundary
+                cavity_edges.append(edge)
+
+        else:
+            # boundary edge, add to cavity
+            cavity_edges.append(edge)
+    return list(bad_tets), cavity_edges
 
 # %%
