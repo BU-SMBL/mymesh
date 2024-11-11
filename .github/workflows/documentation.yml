@@ -28,7 +28,9 @@ jobs:
           ${{ runner.os }}-pip-
     - name: Install Graphviz
       run: |
-        winget install --id Graphviz.Graphviz -e --source winget
+        Invoke-WebRequest -Uri https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.48.0.msi -OutFile graphviz-installer.msi
+        Start-Process msiexec.exe -ArgumentList '/i', 'graphviz-installer.msi', '/quiet', '/norestart' -NoNewWindow -Wait
+        Remove-Item -Force graphviz-installer.msi
     - name: Install dependencies
       run: |
         pip install sphinx pydata-sphinx-theme matplotlib sphinx-gallery sphinxcontrib-bibtex sphinx-copybutton jupyter-sphinx setuptools sphinx-design
