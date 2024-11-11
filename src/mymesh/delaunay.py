@@ -47,7 +47,6 @@ import sys, copy, itertools, warnings, random
 from . import utils, rays, converter
 from . import try_njit, check_numba
 from scipy import spatial
-import numba 
 
 def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8):
     """
