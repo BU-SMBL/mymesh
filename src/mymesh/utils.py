@@ -2063,14 +2063,15 @@ def ExtractRagged(In,delval=-1,dtype=None):
 def identify_type(NodeCoords, NodeConn):
         """
         Classify the mesh as either a surface or volume.
-        A mesh is classified as a volume mesh ('vol') if any elements are unambiguous 
+        A mesh is classified as a volume mesh (``vol``) if any elements are unambiguous 
         volume elements - pyramid (5 nodes), wedge (6), hexahedron (8), or if 
         any of a random sample of 10 elements (or all elements if NElem < 10) has
         a volume less than machine precision (``np.finfo(float).eps``). 
-        Alternatively, a surface mesh ('surf') is identified if any of the elements is 
+        Alternatively, a surface mesh (``surf``) is identified if any of the elements is 
         a triangle (3 nodes). In the case of a mesh containing both triangular
         and volume elements, the mesh will be classified arbitrarily by whichever
-        appears first in NodeConn. 
+        appears first in NodeConn. A ``line`` mesh is identified if any line (2
+         node) elements are present.
 
         This approach has a chance of mislabeling the mesh in some rare or 
         non-standard scenarios, but attempts to be as efficient as possible

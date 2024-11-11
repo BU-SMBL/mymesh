@@ -890,7 +890,7 @@ def Revolve(m, angle, anglestep, center=[0,0,0], shift=0, axis=2, ElemType=None)
     axis : int or array_like, optional
         Axis of revolution. This can be specified as either 0 (x), 1 (y), or 2 (z) or a 
         three element vector denoting the axis, by default 2.
-    shit : float, optional
+    shift : float, optional
         Offset along `axis` between the initial and final steps of the rotation,
         by default 0.
     ElemType : str, optional

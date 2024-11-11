@@ -38,8 +38,8 @@ Dependencies
 ^^^^^^^^^^^^
 
 MyMesh depends on a small number of built-in or well established python packages. 
-Additionally, there are several optional required only for specific functions or 
-use-cases.
+Additionally, there are several optional dependencies that are required only for 
+specific functions or use-cases.
 
 Core dependencies
 """""""""""""""""
