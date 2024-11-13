@@ -32,6 +32,8 @@ jobs:
         sudo apt-get -y install \
           libglu1-mesa-dev \
           libgl1-mesa-dev \
+          libgl1-mesa-dri \
+          libgl1-mesa-glx \
           libxi-dev \
           libglfw3-dev \
           libgles2-mesa-dev \
@@ -47,8 +49,11 @@ jobs:
           libxcb-icccm4-dev \
           libxcb-image0-dev \
           libxcb-keysyms1 \
+          libxcb-cursor0 \
           libegl1-mesa \
-          x11-utils 
+          x11-utils \
+          xvfb \
+          qt6-base-dev
         
         # Start xvfb daemon
         export DISPLAY=:99.0
