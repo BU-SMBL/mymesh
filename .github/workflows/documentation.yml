@@ -54,7 +54,7 @@ jobs:
           xvfb \
           qt6-base-dev \
           libstdc++6
-       
+        conda install -c anaconda libstdcxx-ng
         # Create symlinks for Mesa drivers if they're in a different location
         sudo mkdir -p /usr/lib/dri
         sudo ln -s /usr/lib/x86_64-linux-gnu/dri/swrast_dri.so /usr/lib/dri/swrast_dri.so
