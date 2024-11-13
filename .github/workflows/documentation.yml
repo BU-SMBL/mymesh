@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash --login -e {0}
     steps:
     - name: Check out code
       uses: actions/checkout@v3
@@ -21,18 +24,11 @@ jobs:
         environment-file: null
         auto-activate-base: false
 
-    - name: Cache pip dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('docs/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
-    - name: Install Qt and OpenGL dependencies
+    - name: Prepare System Environment
       run: |
+        # opengl system libraries
         sudo apt-get update
-        sudo apt-get install -y \
+        sudo apt-get -y install \
           libglu1-mesa-dev \
           libgl1-mesa-dev \
           libxi-dev \
@@ -42,40 +38,29 @@ jobs:
           mesa-utils \
           x11-utils \
           xvfb \
-          libxcb-cursor0 \
-          libxcb-xinerama0 \
-          libxcb-randr0 \
-          libxcb-xtest0 \
-          libxcb-shape0 \
-          libxcb-xkb1 \
-          libxkbcommon-x11-0 \
-          libdbus-1-3 \
-          '^libxcb.*-dev' \
-          libxkbcommon-dev \
-          libxcb-xinerama0-dev \
-          libxcb-icccm4-dev \
-          libxcb-image0-dev \
-          libxcb-keysyms1-dev \
-          libxcb-render-util0-dev
-
-    - name: Start Xvfb
-      run: |
-        Xvfb :99 -screen 0 1400x900x24 -ac +extension GLX +render &
-        echo "DISPLAY=:99" >> $GITHUB_ENV
-        echo "QT_DEBUG_PLUGINS=1" >> $GITHUB_ENV
-
-    - name: Install Graphviz
-      run: sudo apt-get install -y graphviz
+          libxcb* \
+          libxkbcommon* \
+          qt6-base-dev
+        
+        # Start xvfb daemon
+        export DISPLAY=:99.0
+        /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
+        sleep 5
+        
+        # Create XDG runtime dir
+        export XDG_RUNTIME_DIR=/tmp/runtime-runner
+        mkdir -p $XDG_RUNTIME_DIR
+        chmod 700 $XDG_RUNTIME_DIR
+        echo "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR" >> $GITHUB_ENV
+        echo "DISPLAY=:99.0" >> $GITHUB_ENV
 
     - name: Install Python dependencies
       shell: bash -l {0}
       run: |
         python -m pip install --upgrade pip
-        # Install Qt first
+        # Install PyQt6 first
         pip install PyQt6
-        # Then install vispy
-        conda install -c conda-forge vispy
-        # Then other dependencies
+        # Then install other dependencies
         pip install \
           sphinx \
           pydata-sphinx-theme \
@@ -89,29 +74,39 @@ jobs:
           pillow \
           jupyter_rfb \
           triangle
+        # Install vispy last
+        pip install vispy
 
     - name: Install package
       shell: bash -l {0}
       run: pip install -e .[all]
 
-    - name: Check Qt and Display
+    - name: Verify System Setup
       shell: bash -l {0}
       run: |
+        glxinfo
+        xdpyinfo
+        echo "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR"
         echo "DISPLAY=$DISPLAY"
-        echo "Qt plugins directory:"
-        python -c "from PyQt6.QtCore import QLibraryInfo; print(QLibraryInfo.path(QLibraryInfo.LibraryPath.PluginsPath))"
-        ls -l $(python -c "from PyQt6.QtCore import QLibraryInfo; print(QLibraryInfo.path(QLibraryInfo.LibraryPath.PluginsPath))")
 
     - name: Verify VisPy setup
       shell: bash -l {0}
       run: |
-        python -c "import vispy; print(vispy.sys_info())"
+        python -c "
+        import vispy
+        print('VisPy imported successfully')
+        print('Current backend:', vispy.app.use_app().backend_name)
+        print('Available backends:', vispy.app.backends())
+        print('\nSystem info:')
+        print(vispy.sys_info())
+        "
 
     - name: Build documentation
       shell: bash -l {0}
       run: sphinx-build -b html ./docs/source ./docs/build
 
     - name: Deploy to GitHub Pages
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
