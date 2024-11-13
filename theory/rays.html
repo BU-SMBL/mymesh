@@ -207,6 +207,22 @@
   <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
 </button></div>
       
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
     </div>
     
   </div>
@@ -305,6 +321,22 @@
   <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
 </button></div>
         
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
       </div>
     
   </div>
@@ -395,7 +427,7 @@ determining whether the barycentric coordinates <span class="math notranslate no
 of the ray onto the plane of the triangle (<span class="math notranslate nohighlight">\(T(u,v)\)</span>) fall within the
 triangle (<span class="math notranslate nohighlight">\(u,v \geq 0\)</span> and <span class="math notranslate nohighlight">\(u+v\leq 1\)</span>), with checks along the way
 to ensure that only as much computation as is necessary is performed.</p>
-<div class="graphviz"><img src="../_images/graphviz-ebfedb4a8bc2ee13efa9eb9a15a528f60119f0d5.png" alt="graph raytri {
+graph raytri {
 node [shape=point, fontname=&quot;source code pro&quot;];
 edge [style=solid];
 
@@ -417,8 +449,7 @@ labelv1 [label=&lt;V&lt;SUB&gt;1&lt;/SUB&gt;&gt;, pos=&quot;1.8,0.35!&quot;, sha
 labelv2 [label=&lt;V&lt;SUB&gt;2&lt;/SUB&gt;&gt;, pos=&quot;0.6,2.0!&quot;, shape=none, fontname=&quot;Times-Roman&quot;]
 label1 [label=&quot;O&quot;, pos=&quot;.4,.4!&quot;,  shape=none, fontname=&quot;Times-Roman&quot;]
 
-}" class="graphviz" /></div>
-<p>The intersection point (<span class="math notranslate nohighlight">\(T(u,v)\)</span>) between <span class="math notranslate nohighlight">\(R(t)\)</span> and the triangle is
+}<p>The intersection point (<span class="math notranslate nohighlight">\(T(u,v)\)</span>) between <span class="math notranslate nohighlight">\(R(t)\)</span> and the triangle is
 computed by solving <span class="math notranslate nohighlight">\(R(t) = T(u,v)\)</span> or</p>
 <div class="math notranslate nohighlight">
 \[O + tD = (1-u-v)V_0+uV_1 + vV_2\]</div>
@@ -460,7 +491,7 @@ correspond to the points where the ray crosses the lower and upper x axis bounds
 of the box. The order of these calculations is determined based on the sign of
 each component of the ray vector such that <span class="math notranslate nohighlight">\(t_{xmin} \leq t_{xmax}\)</span> (i.e.
 if <span class="math notranslate nohighlight">\(R_x&lt;0\)</span>, <span class="math notranslate nohighlight">\(t_{xmin}=(x_{max} - O_x)/R_x\)</span>).</p>
-<div class="graphviz"><img src="../_images/graphviz-5eb6842c50db25da29873817e4ce4ac8dec9e066.png" alt="graph raytri {
+graph raytri {
 node [shape=point, fontname=&quot;source code pro&quot;];
 edge [style=solid];
 
@@ -505,8 +536,7 @@ labelv7 [label=&lt;V&lt;SUB&gt;7&lt;/SUB&gt;&gt;, pos=&quot;0.65,2.0!&quot;, sha
 
 label1 [label=&quot;O&quot;, pos=&quot;.6,.2!&quot;,  shape=none, fontname=&quot;Times-Roman&quot;]
 
-}" class="graphviz" /></div>
-<p>For the ray to intersect the box, the limit-intersection parameters
+}<p>For the ray to intersect the box, the limit-intersection parameters
 (<span class="math notranslate nohighlight">\(t_{xmin}, t_{xmax}, t_{ymin},...\)</span>) for each axis must be consistent with
 each other. If, for example, <span class="math notranslate nohighlight">\(t_{ymin} &gt; t_{xmax}\)</span>, that means that ray
 intersects with the first <span class="math notranslate nohighlight">\(y\)</span> bound of the box <em>after</em> it has crossed both

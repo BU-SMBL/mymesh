@@ -61,7 +61,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/mymesh.visualize';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Theory Guide" href="../theory.html" />
+    <link rel="next" title="mymesh.visualize.View" href="submodules/mymesh.visualize.View.html" />
     <link rel="prev" title="mymesh.utils.identify_type" href="submodules/mymesh.utils.identify_type.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -206,6 +206,22 @@
   <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
 </button></div>
       
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
     </div>
     
   </div>
@@ -304,6 +320,22 @@
   <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
 </button></div>
         
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
       </div>
     
   </div>
@@ -389,13 +421,45 @@
   <section id="module-mymesh.visualize">
 <span id="mymesh-visualize"></span><h1>mymesh.visualize<a class="headerlink" href="#module-mymesh.visualize" title="Link to this heading">#</a></h1>
 <p>Mesh visualization and plotting</p>
-<p><a class="reference internal" href="#module-mymesh.visualize" title="mymesh.visualize"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mymesh.visualize</span></code></a> is in the early stages of development. For more
+<p><a class="reference internal" href="#module-mymesh.visualize" title="mymesh.visualize"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mymesh.visualize</span></code></a> is still experimental and may not work as expected
+on all systems or in all development environments. For more stable and
 full-featured mesh visualization, a mesh (<code class="docutils literal notranslate"><span class="pre">M</span></code>) can be converted to a PyVista
 mesh:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyvista</span> <span class="k">as</span> <span class="nn">pv</span>
 <span class="n">pvmesh</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">mymesh2meshio</span><span class="p">())</span>
 </pre></div>
 </div>
+<section id="visualization">
+<h2>Visualization<a class="headerlink" href="#visualization" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.visualize.View.html#mymesh.visualize.View" title="mymesh.visualize.View"><code class="xref py py-obj docutils literal notranslate"><span class="pre">View</span></code></a>(M[, interactive, bgcolor, color, ...])</p></td>
+<td><p>Visualize a mesh.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="visualization-utilities">
+<h2>Visualization Utilities<a class="headerlink" href="#visualization-utilities" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.visualize.FaceColor.html#mymesh.visualize.FaceColor" title="mymesh.visualize.FaceColor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FaceColor</span></code></a>(NFaces, color, face_alpha[, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.visualize.ParseColor.html#mymesh.visualize.ParseColor" title="mymesh.visualize.ParseColor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ParseColor</span></code></a>(color[, alpha])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.visualize.GetTheme.html#mymesh.visualize.GetTheme" title="mymesh.visualize.GetTheme"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GetTheme</span></code></a>(theme, scalars)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.visualize.set_vispy_backend.html#mymesh.visualize.set_vispy_backend" title="mymesh.visualize.set_vispy_backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_vispy_backend</span></code></a>([preference])</p></td>
+<td><p>Set the backend for VisPy.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 </section>
 
 
@@ -418,11 +482,11 @@ mesh:</p>
       </div>
     </a>
     <a class="right-next"
-       href="../theory.html"
+       href="submodules/mymesh.visualize.View.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Theory Guide</p>
+        <p class="prev-next-title">mymesh.visualize.View</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -436,6 +500,19 @@ mesh:</p>
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization">Visualization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-utilities">Visualization Utilities</a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
 

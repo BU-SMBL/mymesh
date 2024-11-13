@@ -207,6 +207,22 @@
   <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
 </button></div>
       
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
     </div>
     
   </div>
@@ -304,6 +320,22 @@
   <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
   <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
 </button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
         
       </div>
     
@@ -405,7 +437,7 @@ treated as infinitely far away without, which is discussed (ADD LINK).</p>
 <p>The choice of super-triangle is non-unique, but to ensure it bounds all points,
 it can be defined such that its incircle is centered on the average of the set
 of points with radius being the largest distance from the center to a point</p>
-<div class="graphviz"><img src="../_images/graphviz-ea93005d2c59ed54c5ab4c8b12195cba518225d7.png" alt="graph supertriangle {
+graph supertriangle {
     node [shape=point, fontname=&quot;source code pro&quot;];
     edge [style=solid];
 
@@ -425,8 +457,7 @@ of points with radius being the largest distance from the center to a point</p>
     s1 -- s2 [penwidth=1, color=&quot;#d08770&quot;];
     s2 -- s3 [penwidth=1, color=&quot;#d08770&quot;];
     s3 -- s1 [penwidth=1, color=&quot;#d08770&quot;];
-}" class="graphviz" /></div>
-<p>The data structure for constructing the triangulation consists of two tables
+}<p>The data structure for constructing the triangulation consists of two tables
 (<code class="code docutils literal notranslate"><span class="pre">dict</span></code>) - an element table and an edge table. The element table, keyed by
 the node numbers that define the element, contain the oriented “half-edges”
 connected to each element and the edge table is keyed by edges and contains
@@ -473,7 +504,7 @@ element, providing a structure allowing for efficient mesh traversal.</p>
 <div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
 <div class="sd-row sd-row-cols-6 sd-row-cols-xs-6 sd-row-cols-sm-6 sd-row-cols-md-6 sd-row-cols-lg-6 docutils">
 <div class="sd-col sd-d-flex-column docutils">
-<div class="graphviz"><img src="../_images/graphviz-abd7d6aafde2177415e1dd39ae3e74123f5b4735.png" alt="graph supertriangle {
+graph supertriangle {
     node [shape=point, fontname=&quot;source code pro&quot;];
     edge [style=solid];
 
@@ -490,10 +521,9 @@ element, providing a structure allowing for efficient mesh traversal.</p>
     s1 -- a  [style=&quot;dotted&quot;]
     s2 -- a  [style=&quot;dotted&quot;]
     s3 -- a  [style=&quot;dotted&quot;]
-}" class="graphviz" /></div>
-</div>
+}</div>
 <div class="sd-col sd-d-flex-column docutils">
-<div class="graphviz"><img src="../_images/graphviz-fab36bf70ef9065fec82b71b19b63babcbe0e31c.png" alt="graph supertriangle {
+graph supertriangle {
     node [shape=point, fontname=&quot;source code pro&quot;];
     edge [style=solid];
 
@@ -514,10 +544,9 @@ element, providing a structure allowing for efficient mesh traversal.</p>
     s2 -- b [style=&quot;dotted&quot;]
     s3 -- b [style=&quot;dotted&quot;]
     a -- b
-}" class="graphviz" /></div>
-</div>
+}</div>
 <div class="sd-col sd-d-flex-column docutils">
-<div class="graphviz"><img src="../_images/graphviz-17c51bacfe7d811bcdba3f4a0bdd3fa255fad421.png" alt="graph supertriangle {
+graph supertriangle {
     node [shape=point, fontname=&quot;source code pro&quot;];
     edge [style=solid];
 
@@ -542,10 +571,9 @@ element, providing a structure allowing for efficient mesh traversal.</p>
     a -- b
     b -- c
     c -- a
-}" class="graphviz" /></div>
-</div>
+}</div>
 <div class="sd-col sd-d-flex-column docutils">
-<div class="graphviz"><img src="../_images/graphviz-8b81daedad7146bd298334575ecce3568e01fbc7.png" alt="graph supertriangle {
+graph supertriangle {
     node [shape=point, fontname=&quot;source code pro&quot;];
     edge [style=solid];
 
@@ -574,10 +602,9 @@ element, providing a structure allowing for efficient mesh traversal.</p>
     c -- a
     d -- c
     d -- a
-}" class="graphviz" /></div>
-</div>
+}</div>
 <div class="sd-col sd-d-flex-column docutils">
-<div class="graphviz"><img src="../_images/graphviz-e077b9e30b683f159b75b913cd4b3a2be5890345.png" alt="graph supertriangle {
+graph supertriangle {
     node [shape=point, fontname=&quot;source code pro&quot;];
     edge [style=solid];
 
@@ -611,10 +638,9 @@ element, providing a structure allowing for efficient mesh traversal.</p>
     e -- b
     e -- c
 
-}" class="graphviz" /></div>
-</div>
+}</div>
 <div class="sd-col sd-d-flex-column docutils">
-<div class="graphviz"><img src="../_images/graphviz-264108a26901b8cf77ad3d24e22c2d15a3b61e0b.png" alt="graph supertriangle {
+graph supertriangle {
     node [shape=point, fontname=&quot;source code pro&quot;];
     edge [style=solid];
 
@@ -652,8 +678,7 @@ element, providing a structure allowing for efficient mesh traversal.</p>
     d -- f
     e -- f
 
-}" class="graphviz" /></div>
-</div>
+}</div>
 </div>
 </div>
 <p>The basic point insertion procedure is for adding point <span class="math notranslate nohighlight">\(p_i\)</span> is as
@@ -690,7 +715,7 @@ barycentric coordinate indicates the vertex of <span class="math notranslate noh
 edge opposite that vertex will be a step towards <span class="math notranslate nohighlight">\(p_i\)</span>. Repeating this
 process will create a path that leads directly to identifying the triangle
 <span class="math notranslate nohighlight">\(t_p\)</span> tha contains <span class="math notranslate nohighlight">\(p_i\)</span></p>
-<div class="graphviz"><img src="../_images/graphviz-61038e71b96c71ee97b2cb4ae08dbdab8c90b37d.png" alt="graph supertriangle {
+graph supertriangle {
     node [shape=point, fontname=&quot;source code pro&quot;];
     edge [style=solid];
 
@@ -730,8 +755,7 @@ process will create a path that leads directly to identifying the triangle
     p1 -- p2
     p2 -- f
 
-}" class="graphviz" /></div>
-</section>
+}</section>
 <section id="cavity-formation">
 <h4>Cavity Formation<a class="headerlink" href="#cavity-formation" title="Link to this heading">#</a></h4>
 <p>Having found the triangle <span class="math notranslate nohighlight">\(t_p\)</span> that contains the point <span class="math notranslate nohighlight">\(p_i\)</span>, it is next
@@ -790,7 +814,7 @@ circumcircle will lead to a tetrahedron with a positive signed volume.</p>
 <div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
 <div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
 <div class="sd-col sd-d-flex-column docutils">
-<div class="graphviz"><img src="../_images/graphviz-9a9bd0cdb7a2574f5ff3b58dc526aefbb3cbc4ee.png" alt="graph supertriangle {
+graph supertriangle {
     node [shape=point, fontname=&quot;source code pro&quot;];
     edge [style=solid];
 
@@ -828,10 +852,9 @@ circumcircle will lead to a tetrahedron with a positive signed volume.</p>
     c1 [pos=&quot;0.5, 0.6!&quot;, shape=circle, width=1, label=&quot;&quot;, color=&quot;#BF616A&quot;]
     c2 [pos=&quot;0.4654, 0.5827!&quot;, shape=circle, width=0.96786, label=&quot;&quot;, color=&quot;#BF616A&quot;]
 
-}" class="graphviz" /></div>
-</div>
+}</div>
 <div class="sd-col sd-d-flex-column docutils">
-<div class="graphviz"><img src="../_images/graphviz-d380279b653fb51bad39968784db850ee1453626.png" alt="graph supertriangle {
+graph supertriangle {
     node [shape=point, fontname=&quot;source code pro&quot;];
     edge [style=solid];
 
@@ -865,8 +888,7 @@ circumcircle will lead to a tetrahedron with a positive signed volume.</p>
     e -- a [color=&quot;#000000:#5E81AC&quot;]
 
 
-}" class="graphviz" /></div>
-</div>
+}</div>
 </div>
 </div>
 </section>
@@ -880,7 +902,7 @@ the points of every triangle are ordered counter clockwise.</p>
 <div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
 <div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
 <div class="sd-col sd-d-flex-column docutils">
-<div class="graphviz"><img src="../_images/graphviz-0e9a85a5d4dedf548b8ed784af715255c0b85f29.png" alt="graph supertriangle {
+graph supertriangle {
     node [shape=point, fontname=&quot;source code pro&quot;];
     edge [style=solid];
 
@@ -918,10 +940,9 @@ the points of every triangle are ordered counter clockwise.</p>
     c -- f [color=&quot;#5E81AC&quot;]
     d -- f [color=&quot;#5E81AC&quot;]
     e -- f [color=&quot;#5E81AC&quot;]
-}" class="graphviz" /></div>
-</div>
+}</div>
 <div class="sd-col sd-d-flex-column docutils">
-<div class="graphviz"><img src="../_images/graphviz-0909d22ff6456ed6d4835267bac5cf11779bb73a.png" alt="graph supertriangle {
+graph supertriangle {
     node [shape=point, fontname=&quot;source code pro&quot;];
     edge [style=solid];
 
@@ -947,8 +968,7 @@ the points of every triangle are ordered counter clockwise.</p>
     c -- f
     d -- f
     e -- f
-}" class="graphviz" /></div>
-</div>
+}</div>
 </div>
 </div>
 </section>

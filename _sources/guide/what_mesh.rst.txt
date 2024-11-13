@@ -41,7 +41,7 @@ These surfaces can either be open (with exposed edges) or closed.
 
 
 Volume Meshes (``Type='vol'``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Volumetric meshes are made of three dimensional elements such as tetrahedra 
 or hexahedra.
 
