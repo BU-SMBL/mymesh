@@ -1,15 +1,13 @@
 name: Deploy Sphinx Documentation
-
 on:
   push:
     branches:
-      - main  # Adjust this if you want to trigger on a different branch
+      - main
   pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Check out code
       uses: actions/checkout@v3
@@ -19,7 +17,8 @@ jobs:
       with:
         auto-activate-base: true
         activate-environment: ""
-        
+        python-version: '3.10'  # Specify Python version for compatibility
+
     - name: Cache pip dependencies
       uses: actions/cache@v3
       with:
@@ -27,49 +26,61 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('docs/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-        steps:
-    ## Following vispy's setup 
-    - name: Install OpenGL
+
+    - name: Install OpenGL dependencies
       run: |
-        conda install -c conda-forge vispy
         sudo apt-get update
-        sudo apt-get -y install libglu1-mesa-dev libgl1-mesa-dev libxi-dev libglfw3-dev libgles2-mesa-dev libsdl2-2.0-0 mesa-utils x11-utils libxcb-cursor0
-    - name: Start xvfb daemon
+        sudo apt-get install -y \
+          libglu1-mesa-dev \
+          libgl1-mesa-dev \
+          libxi-dev \
+          libglfw3-dev \
+          libgles2-mesa-dev \
+          libsdl2-2.0-0 \
+          mesa-utils \
+          x11-utils \
+          libxcb-cursor0 \
+          xvfb
+
+    - name: Start Xvfb
       run: |
-        export DISPLAY=:99.0
-        /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
-        sleep 5
-    - name: Check OpenGL
-      run: |
-        export DISPLAY=:99.0
-        glxinfo
-    - name: Check Display Information
-      run: |
-        export DISPLAY=:99.0
-        xdpyinfo
-    ##
+        Xvfb :99 -screen 0 1400x900x24 -ac +extension GLX +render &
+        echo "DISPLAY=:99" >> $GITHUB_ENV
+
     - name: Install Graphviz
+      run: sudo apt-get install -y graphviz
+
+    - name: Install Python dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y graphviz
-    - name: Install dependencies
-      run: |
-        pip install sphinx pydata-sphinx-theme matplotlib sphinx-gallery sphinxcontrib-bibtex sphinx-copybutton jupyter-sphinx setuptools sphinx-design
-        conda install -c conda-forge vispy
-        pip install pillow PyQt6 jupyter_rfb triangle 
         python -m pip install --upgrade pip
-        pip install -e .[all]  
-    - name: Check VisPy Backend
-      run: |
-        export DISPLAY=:99.0
-        python -c "import vispy; print(vispy.sys_info())"
+        pip install \
+          sphinx \
+          pydata-sphinx-theme \
+          matplotlib \
+          sphinx-gallery \
+          sphinxcontrib-bibtex \
+          sphinx-copybutton \
+          jupyter-sphinx \
+          setuptools \
+          sphinx-design \
+          pillow \
+          PyQt6 \
+          jupyter_rfb \
+          triangle
+        conda install -c conda-forge vispy
+
+    - name: Install package
+      run: pip install -e .[all]
+
+    - name: Verify VisPy setup
+      run: python -c "import vispy; print(vispy.sys_info())"
+
     - name: Build documentation
-      run: |
-        export DISPLAY=:99.0
-        sphinx-build -b html ./docs/source ./docs/build
+      run: sphinx-build -b html ./docs/source ./docs/build
 
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3  # Updated to v3 as v4 isn't released yet
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./docs/build
