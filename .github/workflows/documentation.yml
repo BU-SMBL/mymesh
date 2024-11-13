@@ -92,14 +92,7 @@ jobs:
     - name: Verify VisPy setup
       shell: bash -l {0}
       run: |
-        python -c "
-        import vispy
-        print('VisPy imported successfully')
-        print('Current backend:', vispy.app.use_app().backend_name)
-        print('Available backends:', vispy.app.backends())
-        print('\nSystem info:')
-        print(vispy.sys_info())
-        "
+        python -c "import vispy; print(vispy.sys_info())"
 
     - name: Build documentation
       shell: bash -l {0}
