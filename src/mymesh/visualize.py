@@ -4,7 +4,8 @@
 """
 Mesh visualization and plotting
 
-:mod:`mymesh.visualize` is in the early stages of development. For more 
+:mod:`mymesh.visualize` is still experimental and may not work as expected
+on all systems or in all development environments. For more stable and
 full-featured mesh visualization, a mesh (``M``) can be converted to a PyVista
 mesh:
 
@@ -12,6 +13,23 @@ mesh:
 
     import pyvista as pv
     pvmesh = pv.wrap(M.mymesh2meshio())
+
+Visualization
+=============
+.. autosummary::
+    :toctree: submodules/
+
+    View
+
+Visualization Utilities
+=======================
+.. autosummary::
+    :toctree: submodules/
+
+    FaceColor
+    ParseColor
+    GetTheme
+    set_vispy_backend
 
 """
 
@@ -399,6 +417,21 @@ def GetTheme(theme, scalars):
     return color, bgcolor, linecolor
 
 def set_vispy_backend(preference='PyQt6'):
+    """
+    Set the backend for VisPy. Can only be set once.
+
+    Parameters
+    ----------
+    preference : str, optional
+        Preferred vispy backend, by default 'PyQt6'. If not available, an 
+        alternative will be attempted.
+
+    Returns
+    -------
+    chosen : str
+        The name of the backend that was selected
+
+    """    
     try:
         import vispy
     except:

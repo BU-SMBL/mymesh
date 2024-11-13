@@ -42,7 +42,20 @@ html_theme =  'pydata_sphinx_theme' #'sphinx_rtd_theme' #
 html_static_path = ['_static']
 html_logo = '_static/mymesh_logo.svg'
 html_css_files = ['css/mymesh.css']
-html_theme_options = dict(collapse_navigation=True, navigation_depth=1)
+html_theme_options = dict(collapse_navigation=True, 
+                           navigation_depth=1,
+                           icon_links= [
+                              {
+                                 # Label for this link
+                                 "name": "GitHub",
+                                 # URL where the link will redirect
+                                 "url": "https://github.com/BU-SMBL/mymesh",  # required
+                                 # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
+                                 "icon": "fa-brands fa-square-github",
+                                 # The type of image to be used (see below for details)
+                                 "type": "fontawesome",
+                              }]
+                        )
 html_context = {
    "default_mode": "light"
 }
