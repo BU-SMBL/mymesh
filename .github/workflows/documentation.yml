@@ -117,7 +117,7 @@ jobs:
       shell: bash -l {0}
       run: |
         export DISPLAY=:99.0
-        python -c "import vispy; print(vispy.sys_info())"
+        python -c "import vispy; vispy.use(app='PyQt6'); print(vispy.sys_info())"
     - name: Build documentation
       shell: bash -l {0}
       run: |

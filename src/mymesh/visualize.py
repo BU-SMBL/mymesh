@@ -172,7 +172,7 @@ def View(M, interactive=True, bgcolor=None,
         line_color = theme[2]
     
     # Create canvas
-    canvas = scene.SceneCanvas(keys='interactive', bgcolor=ParseColor(bgcolor), title='MyMesh Viewer',show=interactive,resizable=False)
+    canvas = scene.SceneCanvas(keys='interactive', bgcolor=ParseColor(bgcolor), title='MyMesh Viewer',show=interactive)
 
     # Set view mode
     viewmode='arcball'
