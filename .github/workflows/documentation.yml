@@ -31,6 +31,7 @@ jobs:
         sudo apt-get -y install \
           libglu1-mesa-dev \
           libgl1-mesa-dev \
+          libgl1-mesa-dri \
           libxi-dev \
           libglfw3-dev \
           libgles2-mesa-dev \
