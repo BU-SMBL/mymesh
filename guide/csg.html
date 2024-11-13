@@ -419,6 +419,12 @@ In computer graphics applications, this may involve ray tracing or other
 approaches for efficient visualization, but MyMesh is primarily concerned with
 generating and/or modifying meshes. MyMesh offers two approaches to CSG:
 implicit and explicit.</p>
+<figure class="align-default">
+<img alt="../_images/csg-1_00_00.png" class="plot-directive" src="../_images/csg-1_00_00.png" />
+</figure>
+<figure class="align-default">
+<img alt="../_images/csg-1_01_00.png" class="plot-directive" src="../_images/csg-1_01_00.png" />
+</figure>
 <section id="implicit-csg">
 <h2>Implicit CSG<a class="headerlink" href="#implicit-csg" title="Link to this heading">#</a></h2>
 <p>For implicit CSG, boolean operations are performed on implicit functions or a
@@ -443,6 +449,9 @@ new function can then be meshed as any other implicit function.</p>
 <span class="n">diff</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<figure class="align-default">
+<img alt="../_images/csg-2.png" class="plot-directive" src="../_images/csg-2.png" />
+</figure>
 <p>While this approach is straight forward and efficient, it suffers from some of
 the classic limitations of implicit meshing, particularly, poor resolution along
 the sharp edges introduced by the intersection of the two objects (though more
@@ -458,6 +467,9 @@ intended operation (and a union operations are more difficult to achieve).</p>
 <span class="n">diff</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<figure class="align-default">
+<img alt="../_images/csg-3.png" class="plot-directive" src="../_images/csg-3.png" />
+</figure>
 <p>This operation can equivalently be performed using the
 <a class="reference internal" href="../generated/mymesh.mesh.mesh.Contour.html#mymesh.mesh.mesh.Contour" title="mymesh.mesh.mesh.Contour"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Contour()</span></code></a> method.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">m1</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;func2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func2</span><span class="p">(</span><span class="n">m1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">m1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">m1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
@@ -515,6 +527,9 @@ symmetric, i.e. A-B ≠ B-A).</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
+<figure class="align-default">
+<img alt="../_images/csg-4.png" class="plot-directive" src="../_images/csg-4.png" />
+</figure>
 </section>
 </section>
 
