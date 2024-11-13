@@ -18,7 +18,14 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
-        
+    - name: Set up miniconda
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install wget
+        mkdir -p ~/miniconda3
+        wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+        bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+        rm ~/miniconda3/miniconda.sh
     - name: Cache pip dependencies
       uses: actions/cache@v3
       with:
@@ -31,7 +38,7 @@ jobs:
     - name: Install OpenGL
       run: |
         sudo apt-get update
-        sudo apt-get -y install libglu1-mesa-dev libgl1-mesa-dev libxi-dev libglfw3-dev libgles2-mesa-dev libsdl2-2.0-0 mesa-utils x11-utils libxcb-cursor-dev
+        sudo apt-get -y install x11-utils libxcb-cursor0
     - name: Start xvfb daemon
       run: |
         export DISPLAY=:99.0
@@ -53,7 +60,8 @@ jobs:
     - name: Install dependencies
       run: |
         pip install sphinx pydata-sphinx-theme matplotlib sphinx-gallery sphinxcontrib-bibtex sphinx-copybutton jupyter-sphinx setuptools sphinx-design
-        pip install vispy pillow PyQt6 jupyter_rfb triangle 
+        conda install -c conda-forge vispy
+        pip install pillow PyQt6 jupyter_rfb triangle 
         python -m pip install --upgrade pip
         pip install -e .[all]  
     - name: Check VisPy Backend
