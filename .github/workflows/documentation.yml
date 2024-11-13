@@ -59,6 +59,7 @@ jobs:
     - name: Install Python dependencies
       shell: bash -l {0}
       run: |
+        export DISPLAY=:99.0
         python -m pip install --upgrade pip
         # Install PyQt6 first
         pip install PyQt6
@@ -87,18 +88,18 @@ jobs:
       shell: bash -l {0}
       run: |
         glxinfo
-        xdpyinfo
-        echo "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR"
-        echo "DISPLAY=$DISPLAY"
 
     - name: Verify VisPy setup
       shell: bash -l {0}
       run: |
+        export DISPLAY=:99.0
         python -c "import vispy; print(vispy.sys_info())"
 
     - name: Build documentation
       shell: bash -l {0}
-      run: sphinx-build -b html ./docs/source ./docs/build
+      run: |
+        export DISPLAY=:99.0
+        sphinx-build -b html ./docs/source ./docs/build
 
     - name: Deploy to GitHub Pages
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
