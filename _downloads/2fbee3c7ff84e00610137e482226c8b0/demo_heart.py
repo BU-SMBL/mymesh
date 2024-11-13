@@ -23,7 +23,7 @@ def heart(x, y, z):
 # ------------------
 bounds = [-1.5, 1.5, -1.5, 1.5, -1.5, 1.5]
 h = 0.05 # element size
-Heart = implicit.SurfaceMesh(heart, bounds, h, interpolation='cubic')
+Heart = implicit.SurfaceMesh(heart, bounds, h)
 Heart.plot(bgcolor='white', color='red')
 
 #%%

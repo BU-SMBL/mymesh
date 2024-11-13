@@ -42,6 +42,12 @@ more closely to the true surface (see
     SmoothSphere = implicit.SurfaceNodeOptimization(Sphere, implicit.sphere([0,0,0], 1), 0.1, iterate=10)
     SmoothSphere.verbose=False
 
+
+
+
+
+
+
 .. GENERATED FROM PYTHON SOURCE LINES 24-34
 
 Curvature calculation
@@ -76,6 +82,54 @@ placement of the nodes onto the surface.
     Sphere.plot(scalars=k1a_sphere, bgcolor='white', show_edges=True, color='coolwarm')
     SmoothSphere.plot(scalars=k1a_smooth, bgcolor='white', show_edges=True, color='coolwarm')
 
+
+
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image-sg:: /examples/MeshAnalysis/images/sphx_glr_demo_curvature_001.png
+         :alt: demo curvature
+         :srcset: /examples/MeshAnalysis/images/sphx_glr_demo_curvature_001.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/MeshAnalysis/images/sphx_glr_demo_curvature_002.png
+         :alt: demo curvature
+         :srcset: /examples/MeshAnalysis/images/sphx_glr_demo_curvature_002.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/MeshAnalysis/images/sphx_glr_demo_curvature_003.png
+         :alt: demo curvature
+         :srcset: /examples/MeshAnalysis/images/sphx_glr_demo_curvature_003.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/MeshAnalysis/images/sphx_glr_demo_curvature_004.png
+         :alt: demo curvature
+         :srcset: /examples/MeshAnalysis/images/sphx_glr_demo_curvature_004.png
+         :class: sphx-glr-multi-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /home/runner/work/mymesh/mymesh/src/mymesh/utils.py:569: RuntimeWarning: invalid value encountered in arccos
+      alpha = np.arccos(cosAlpha)*Masknan
+    RFBOutputContext()
+    RFBOutputContext()
+    RFBOutputContext()
+    RFBOutputContext()
+
+
+
+
 .. GENERATED FROM PYTHON SOURCE LINES 51-56
 
 Error Measurement
@@ -109,6 +163,22 @@ curvatures deviate from the true curvature of 1 mm :sup:`-1`.
     ax.legend()
     ax.set_ylim([10**-4, 10**1])
     plt.show()
+
+
+.. image-sg:: /examples/MeshAnalysis/images/sphx_glr_demo_curvature_005.png
+   :alt: demo curvature
+   :srcset: /examples/MeshAnalysis/images/sphx_glr_demo_curvature_005.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+
+.. rst-class:: sphx-glr-timing
+
+   **Total running time of the script:** (0 minutes 3.111 seconds)
+
 
 .. _sphx_glr_download_examples_MeshAnalysis_demo_curvature.py:
 

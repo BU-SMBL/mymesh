@@ -68,6 +68,52 @@ including :func:`~mymesh.implicit.gyroid`, :func:`~mymesh.implicit.primitive`
     M4 = implicit.TetMesh(implicit.thickenf(mixed_topology4,1), bounds, h)
     M4.plot(bgcolor='white')
 
+
+
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image-sg:: /examples/MeshGeneration/images/sphx_glr_demo_mixed-top_001.png
+         :alt: demo mixed top
+         :srcset: /examples/MeshGeneration/images/sphx_glr_demo_mixed-top_001.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/MeshGeneration/images/sphx_glr_demo_mixed-top_002.png
+         :alt: demo mixed top
+         :srcset: /examples/MeshGeneration/images/sphx_glr_demo_mixed-top_002.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/MeshGeneration/images/sphx_glr_demo_mixed-top_003.png
+         :alt: demo mixed top
+         :srcset: /examples/MeshGeneration/images/sphx_glr_demo_mixed-top_003.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/MeshGeneration/images/sphx_glr_demo_mixed-top_004.png
+         :alt: demo mixed top
+         :srcset: /examples/MeshGeneration/images/sphx_glr_demo_mixed-top_004.png
+         :class: sphx-glr-multi-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    RFBOutputContext()
+    RFBOutputContext()
+    RFBOutputContext()
+    RFBOutputContext()
+
+
+
+
 .. GENERATED FROM PYTHON SOURCE LINES 52-59
 
 .. [#f1] 
@@ -78,6 +124,11 @@ including :func:`~mymesh.implicit.gyroid`, :func:`~mymesh.implicit.primitive`
     (:mod:`~mymesh.curvature`) and observing that the mean curvature is not zero at
     all points. Nevertheless, these are reasonably accurate and commonly used 
     approximations. 
+
+
+.. rst-class:: sphx-glr-timing
+
+   **Total running time of the script:** (0 minutes 5.554 seconds)
 
 
 .. _sphx_glr_download_examples_MeshGeneration_demo_mixed-top.py:

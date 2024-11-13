@@ -35,6 +35,12 @@ Please submit any new pasta constructions to toj@bu.edu
     import numpy as np
 
 
+
+
+
+
+
+
 .. GENERATED FROM PYTHON SOURCE LINES 16-45
 
 .. code-block:: Python
@@ -68,6 +74,61 @@ Please submit any new pasta constructions to toj@bu.edu
             14*np.pi, np.pi/36, shift=5, axis=0)
     fusilli.plot(bgcolor='w', color='#EBCB8B')
 
+
+
+
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image-sg:: /examples/MeshGeneration/images/sphx_glr_demo_pasta_001.png
+         :alt: demo pasta
+         :srcset: /examples/MeshGeneration/images/sphx_glr_demo_pasta_001.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/MeshGeneration/images/sphx_glr_demo_pasta_002.png
+         :alt: demo pasta
+         :srcset: /examples/MeshGeneration/images/sphx_glr_demo_pasta_002.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/MeshGeneration/images/sphx_glr_demo_pasta_003.png
+         :alt: demo pasta
+         :srcset: /examples/MeshGeneration/images/sphx_glr_demo_pasta_003.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/MeshGeneration/images/sphx_glr_demo_pasta_004.png
+         :alt: demo pasta
+         :srcset: /examples/MeshGeneration/images/sphx_glr_demo_pasta_004.png
+         :class: sphx-glr-multi-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    RFBOutputContext()
+    RFBOutputContext()
+    /home/runner/work/mymesh/mymesh/src/mymesh/utils.py:1445: UserWarning: CleanupDegenerateElements has not yet been optimized for hexs. Improperly numbered/inverted elements may occur.
+      warnings.warn('CleanupDegenerateElements has not yet been optimized for hexs. Improperly numbered/inverted elements may occur.')
+    RFBOutputContext()
+    /home/runner/work/mymesh/mymesh/src/mymesh/utils.py:1445: UserWarning: CleanupDegenerateElements has not yet been optimized for hexs. Improperly numbered/inverted elements may occur.
+      warnings.warn('CleanupDegenerateElements has not yet been optimized for hexs. Improperly numbered/inverted elements may occur.')
+    RFBOutputContext()
+
+
+
+
+
+.. rst-class:: sphx-glr-timing
+
+   **Total running time of the script:** (0 minutes 4.654 seconds)
 
 
 .. _sphx_glr_download_examples_MeshGeneration_demo_pasta.py:
