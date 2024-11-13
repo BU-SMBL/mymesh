@@ -140,6 +140,11 @@ jobs:
       run: |
         export DISPLAY=:99.0
         python -c "import vispy; vispy.use(app='PyQt6'); print(vispy.sys_info())"
+    - name: Install Graphviz
+      shell: bash -l {0}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y graphviz
     - name: Build documentation
       shell: bash -l {0}
       run: |
