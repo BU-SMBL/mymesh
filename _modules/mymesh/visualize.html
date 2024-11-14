@@ -821,14 +821,14 @@
 
 <div class="viewcode-block" id="set_vispy_backend">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.visualize.set_vispy_backend.html#mymesh.visualize.set_vispy_backend">[docs]</a>
-<span class="k">def</span> <span class="nf">set_vispy_backend</span><span class="p">(</span><span class="n">preference</span><span class="o">=</span><span class="s1">&#39;PyQt6&#39;</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">set_vispy_backend</span><span class="p">(</span><span class="n">preference</span><span class="o">=</span><span class="s1">&#39;PyGlet&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the backend for VisPy. Can only be set once.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    preference : str, optional</span>
-<span class="sd">        Preferred vispy backend, by default &#39;PyQt6&#39;. If not available, an </span>
+<span class="sd">        Preferred vispy backend, by default &#39;PyGlet&#39;. If not available, an </span>
 <span class="sd">        alternative will be attempted.</span>
 
 <span class="sd">    Returns</span>
@@ -864,7 +864,7 @@
                 <span class="k">break</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;A valid vispy backend must be installed. PyQt6 is recommended: pip install pyqt6&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;A valid vispy backend must be installed. PyQt6 is recommended: pip install pyglet&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">chosen</span></div>
 
