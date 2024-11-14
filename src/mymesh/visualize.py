@@ -419,14 +419,14 @@ def GetTheme(theme, scalars):
         linecolor = 'black'
     return color, bgcolor, linecolor
 
-def set_vispy_backend(preference='PyQt6'):
+def set_vispy_backend(preference='PyGlet'):
     """
     Set the backend for VisPy. Can only be set once.
 
     Parameters
     ----------
     preference : str, optional
-        Preferred vispy backend, by default 'PyQt6'. If not available, an 
+        Preferred vispy backend, by default 'PyGlet'. If not available, an 
         alternative will be attempted.
 
     Returns
@@ -462,7 +462,7 @@ def set_vispy_backend(preference='PyQt6'):
                 break
 
     if not success:
-        raise ImportError('A valid vispy backend must be installed. PyQt6 is recommended: pip install pyqt6')
+        raise ImportError('A valid vispy backend must be installed. PyQt6 is recommended: pip install pyglet')
 
     return chosen
     
