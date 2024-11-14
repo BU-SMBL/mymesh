@@ -1317,8 +1317,9 @@
 <span class="sd">        Offset along `axis` between the initial and final steps of the rotation,</span>
 <span class="sd">        by default 0.</span>
 <span class="sd">    ElemType : str, optional</span>
-<span class="sd">        Specify the element type of the revolved mesh. If m.Type=&#39;line&#39;, this</span>
-<span class="sd">        can be None or &#39;tri&#39; or if m.Type=&#39;surf&#39;, this can be None or &#39;tet&#39;. </span>
+<span class="sd">        Specify the element type of the revolved mesh. If the input is a line </span>
+<span class="sd">        mesh (m.Type=&#39;line&#39;), the element type can be None or &#39;tri&#39;; if the input</span>
+<span class="sd">        is a 2D surface (m.Type=&#39;surf&#39;), the element type can be None or &#39;tet&#39;. </span>
 <span class="sd">        If &#39;tri&#39; or &#39;tet&#39;, the mesh will be converted to a purely triangular/</span>
 <span class="sd">        tetrahedral mesh, otherwise it will follow from the input mesh (input </span>
 <span class="sd">        line meshes will get quad or quad-dominant meshes, input surf meshes</span>

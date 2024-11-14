@@ -439,8 +439,9 @@ by default [0,0,0]</p></li>
 three element vector denoting the axis, by default 2.</p></li>
 <li><p><strong>shift</strong> (<em>float</em><em>, </em><em>optional</em>) – Offset along <cite>axis</cite> between the initial and final steps of the rotation,
 by default 0.</p></li>
-<li><p><strong>ElemType</strong> (<em>str</em><em>, </em><em>optional</em>) – Specify the element type of the revolved mesh. If m.Type=’line’, this
-can be None or ‘tri’ or if m.Type=’surf’, this can be None or ‘tet’.
+<li><p><strong>ElemType</strong> (<em>str</em><em>, </em><em>optional</em>) – Specify the element type of the revolved mesh. If the input is a line
+mesh (m.Type=’line’), the element type can be None or ‘tri’; if the input
+is a 2D surface (m.Type=’surf’), the element type can be None or ‘tet’.
 If ‘tri’ or ‘tet’, the mesh will be converted to a purely triangular/
 tetrahedral mesh, otherwise it will follow from the input mesh (input
 line meshes will get quad or quad-dominant meshes, input surf meshes
