@@ -894,8 +894,9 @@ def Revolve(m, angle, anglestep, center=[0,0,0], shift=0, axis=2, ElemType=None)
         Offset along `axis` between the initial and final steps of the rotation,
         by default 0.
     ElemType : str, optional
-        Specify the element type of the revolved mesh. If m.Type='line', this
-        can be None or 'tri' or if m.Type='surf', this can be None or 'tet'. 
+        Specify the element type of the revolved mesh. If the input is a line 
+        mesh (m.Type='line'), the element type can be None or 'tri'; if the input
+        is a 2D surface (m.Type='surf'), the element type can be None or 'tet'. 
         If 'tri' or 'tet', the mesh will be converted to a purely triangular/
         tetrahedral mesh, otherwise it will follow from the input mesh (input 
         line meshes will get quad or quad-dominant meshes, input surf meshes

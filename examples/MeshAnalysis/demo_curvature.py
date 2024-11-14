@@ -7,7 +7,7 @@ direct result of marching cubes, which typically contains low quality
 triangles. The second sphere is a smoothed version of the first where nodes
 have been redistributed via tangential Laplacian smoothing and moved to lie 
 more closely to the true surface (see 
-:func:~mymesh.implicit.SurfaceNodeOptimization`). 
+:func:`~mymesh.implicit.SurfaceNodeOptimization`). 
 
 """
 #%%
