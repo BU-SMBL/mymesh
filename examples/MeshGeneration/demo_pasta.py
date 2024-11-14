@@ -1,6 +1,6 @@
 """
-Sweep Construction
-==================
+Pasta Shapes
+============
 
 This example creates pasta shapes with mymesh.primitives using sweep 
 construction methods (extrusions and revolutions). These demonstrate how meshes 

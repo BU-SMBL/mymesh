@@ -31,22 +31,25 @@ SmoothSphere.verbose=False
 # :func:`~mymesh.curvature.AnalyticalCurvature`) are generally much more,
 # accurate, with most of the error arising from interpolation error in the 
 # placement of the nodes onto the surface.
-
+# For a sphere, the :ref:`principal curvatures` (:math:`\kappa_1`, :math:`\kappa_2`) 
+# are theoretically both equal to the inverse of the radius of the sphere.
 
 k1m_sphere, k2m_sphere = curvature.CubicFit(Sphere.NodeCoords, Sphere.NodeConn, Sphere.NodeNeighbors, Sphere.NodeNormals)
-
 k1m_smooth, k2m_smooth = curvature.CubicFit(SmoothSphere.NodeCoords, SmoothSphere.NodeConn, SmoothSphere.NodeNeighbors, SmoothSphere.NodeNormals)
 
-
 k1a_sphere, k2a_sphere, _, _ = curvature.AnalyticalCurvature(implicit.sphere([0,0,0], 1), Sphere.NodeCoords)
-
 k1a_smooth, k2a_smooth, _, _ = curvature.AnalyticalCurvature(implicit.sphere([0,0,0], 1), SmoothSphere.NodeCoords)
 
-Sphere.plot(scalars=k1m_sphere, bgcolor='white', show_edges=True, color='coolwarm') 
-SmoothSphere.plot(scalars=k1m_smooth, bgcolor='white', show_edges=True, color='coolwarm')
+# Plotting:
+fig1, ax1 = Sphere.plot(scalars=k1m_sphere, bgcolor='white', show_edges=True, color='coolwarm', show=False, return_fig=True)
+ax1.set_title('Sphere - Mesh-based')
+fig2, ax2 = SmoothSphere.plot(scalars=k1m_smooth, bgcolor='white', show_edges=True, color='coolwarm', show=False, return_fig=True)
+ax2.set_title('Smooth Sphere - Mesh-based')
+fig3, ax3 = Sphere.plot(scalars=k1a_sphere, bgcolor='white', show_edges=True, color='coolwarm', show=False, return_fig=True)
+ax3.set_title('Sphere - Analytical')
+fig4, ax4 = SmoothSphere.plot(scalars=k1a_smooth, bgcolor='white', show_edges=True, color='coolwarm', show=False, return_fig=True)
+ax4.set_title('Smooth Sphere - Analytical')
 
-Sphere.plot(scalars=k1a_sphere, bgcolor='white', show_edges=True, color='coolwarm')
-SmoothSphere.plot(scalars=k1a_smooth, bgcolor='white', show_edges=True, color='coolwarm')
 # %%
 # Error Measurement
 # -----------------

@@ -1,6 +1,6 @@
 """
-Implicit meshing
-================
+Implicit Heart
+==============
 
 This example generates a surface mesh of an implicit function and then performs 
 Laplacian smoothing on it.

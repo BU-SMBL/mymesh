@@ -40,7 +40,7 @@ sphinx_gallery_conf = {
 html_title = f"{project} v{release} Manual"
 html_theme =  'pydata_sphinx_theme' #'sphinx_rtd_theme' #
 html_static_path = ['_static']
-html_logo = '_static/mymesh_logo.svg'
+html_logo = '_static/mymesh_logo.png'
 html_css_files = ['css/mymesh.css']
 html_theme_options = dict(collapse_navigation=True, 
                            navigation_depth=1,
