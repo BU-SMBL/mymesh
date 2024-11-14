@@ -54,5 +54,5 @@ all = [
     "matplotlib>=3.7.1",
     "pillow>=10.0.0",
     "jupyter_rfb>=0.4.2",
-    "PyQt6>=6.7",
+    "PyQt6>=6.2.3",
     ]
