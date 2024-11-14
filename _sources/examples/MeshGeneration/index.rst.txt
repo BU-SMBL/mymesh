@@ -27,7 +27,7 @@ Examples for different methods of generating meshes.
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">Implicit meshing</div>
+      <div class="sphx-glr-thumbnail-title">Implicit Heart</div>
     </div>
 
 
@@ -61,7 +61,7 @@ Examples for different methods of generating meshes.
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">Sweep Construction</div>
+      <div class="sphx-glr-thumbnail-title">Pasta Shapes</div>
     </div>
 
 

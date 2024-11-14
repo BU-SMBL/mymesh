@@ -129,8 +129,8 @@
     
     
     
-    <img src="../../_static/mymesh_logo.svg" class="logo__image only-light" alt="MyMesh v0.1.0 Manual - Home"/>
-    <img src="../../_static/mymesh_logo.svg" class="logo__image only-dark pst-js-only" alt="MyMesh v0.1.0 Manual - Home"/>
+    <img src="../../_static/mymesh_logo.png" class="logo__image only-light" alt="MyMesh v0.1.0 Manual - Home"/>
+    <img src="../../_static/mymesh_logo.png" class="logo__image only-dark pst-js-only" alt="MyMesh v0.1.0 Manual - Home"/>
   
   
 </a></div>
@@ -427,8 +427,8 @@
 <dt class="sig sig-object py" id="mymesh.octree.Function2Octree">
 <span class="sig-prename descclassname"><span class="pre">mymesh.octree.</span></span><span class="sig-name descname"><span class="pre">Function2Octree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mindepth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdepth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EDerror'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/octree.html#Function2Octree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.octree.Function2Octree" title="Link to this definition">#</a></dt>
 <dd><p>Generate an octree structure adapted to an implicit function.
-Based on octree generation approaches used by <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id27" title="Scott Schaefer and Joe Warren. Dual marching cubes: Primal contouring of dual grids. Computer Graphics Forum, 24(2):195–201, 2005. doi:10.1111/j.1467-8659.2005.00843.x.">SW05</a>]</span>,
-<span id="id2">[<a class="reference internal" href="../../guide/ref.html#id36" title="Yongjie Zhang, Chandrajit Bajaj, and Bong Soo Sohn. Adaptive and quality 3D meshing from imaging data. Proceedings of the Symposium on Solid Modeling and Applications, pages 286–291, 2003. doi:10.1145/781606.781653.">ZBS03</a>]</span>.</p>
+Based on octree generation approaches used by <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id17" title="Scott Schaefer and Joe Warren. Dual marching cubes: Primal contouring of dual grids. Computer Graphics Forum, 24(2):195–201, 2005. doi:10.1111/j.1467-8659.2005.00843.x.">SW05</a>]</span>,
+<span id="id2">[<a class="reference internal" href="../../guide/ref.html#id28" title="Yongjie Zhang, Chandrajit Bajaj, and Bong Soo Sohn. Adaptive and quality 3D meshing from imaging data. Proceedings of the Symposium on Solid Modeling and Applications, pages 286–291, 2003. doi:10.1145/781606.781653.">ZBS03</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -450,7 +450,7 @@ x, y, or z bounds.</p></li>
 <li><p><strong>strategy</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Strategy to guide subdivision, by default ‘EDerror’.</p>
 <ul>
 <li><dl class="simple">
-<dt>’EDerror’: Uses the Euclidian distance error function proposed by</dt><dd><p><span id="id3">[<a class="reference internal" href="../../guide/ref.html#id36" title="Yongjie Zhang, Chandrajit Bajaj, and Bong Soo Sohn. Adaptive and quality 3D meshing from imaging data. Proceedings of the Symposium on Solid Modeling and Applications, pages 286–291, 2003. doi:10.1145/781606.781653.">ZBS03</a>]</span> to assess the error between linear interpolation within
+<dt>’EDerror’: Uses the Euclidian distance error function proposed by</dt><dd><p><span id="id3">[<a class="reference internal" href="../../guide/ref.html#id28" title="Yongjie Zhang, Chandrajit Bajaj, and Bong Soo Sohn. Adaptive and quality 3D meshing from imaging data. Proceedings of the Symposium on Solid Modeling and Applications, pages 286–291, 2003. doi:10.1145/781606.781653.">ZBS03</a>]</span> to assess the error between linear interpolation within
 an octree node and with the evaluation of the function at vertices at
 the next level of refinement. If the error is less than the threshold
 specified by <cite>eps</cite> or if there are no sign changes detected, subdivision
@@ -459,7 +459,7 @@ is halted.</p>
 </dl>
 </li>
 <li><dl class="simple">
-<dt>’QEF’: Uses the quadratic error function proposed by</dt><dd><p><span id="id4">[<a class="reference internal" href="../../guide/ref.html#id27" title="Scott Schaefer and Joe Warren. Dual marching cubes: Primal contouring of dual grids. Computer Graphics Forum, 24(2):195–201, 2005. doi:10.1111/j.1467-8659.2005.00843.x.">SW05</a>]</span>. This approach is not fully implemented yet.</p>
+<dt>’QEF’: Uses the quadratic error function proposed by</dt><dd><p><span id="id4">[<a class="reference internal" href="../../guide/ref.html#id17" title="Scott Schaefer and Joe Warren. Dual marching cubes: Primal contouring of dual grids. Computer Graphics Forum, 24(2):195–201, 2005. doi:10.1111/j.1467-8659.2005.00843.x.">SW05</a>]</span>. This approach is not fully implemented yet.</p>
 </dd>
 </dl>
 </li>

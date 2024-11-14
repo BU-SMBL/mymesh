@@ -130,8 +130,8 @@
     
     
     
-    <img src="../_static/mymesh_logo.svg" class="logo__image only-light" alt="MyMesh v0.1.0 Manual - Home"/>
-    <img src="../_static/mymesh_logo.svg" class="logo__image only-dark pst-js-only" alt="MyMesh v0.1.0 Manual - Home"/>
+    <img src="../_static/mymesh_logo.png" class="logo__image only-light" alt="MyMesh v0.1.0 Manual - Home"/>
+    <img src="../_static/mymesh_logo.png" class="logo__image only-dark pst-js-only" alt="MyMesh v0.1.0 Manual - Home"/>
   
   
 </a></div>
@@ -449,7 +449,7 @@ respectively.</p>
 <section id="shape-index">
 <h3>Shape Index<a class="headerlink" href="#shape-index" title="Link to this heading">#</a></h3>
 <p>See <a class="reference internal" href="../generated/submodules/mymesh.curvature.ShapeIndex.html#mymesh.curvature.ShapeIndex" title="mymesh.curvature.ShapeIndex"><code class="xref py py-func docutils literal notranslate"><span class="pre">ShapeIndex()</span></code></a></p>
-<p>Shape index <span id="id1">[<a class="reference internal" href="../guide/ref.html#id16" title="Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. Image and Vision Computing, 10(8):557–564, 1992. URL: https://www.doi.org/10.1016/0262-8856(92)90076-F, doi:10.1016/0262-8856(92)90076-F.">KvD92</a>]</span> describes the directionality of curvature,
+<p>Shape index <span id="id1">[<a class="reference internal" href="../guide/ref.html#id23" title="Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. Image and Vision Computing, 10(8):557–564, 1992. URL: https://www.doi.org/10.1016/0262-8856(92)90076-F, doi:10.1016/0262-8856(92)90076-F.">KvD92</a>]</span> describes the directionality of curvature,
 independent of scale. It captures the intuitive notion that a sphere is
 recognizable as a sphere regardless of how big it is. Shape index is a
 unitless measure that ranges from -1 (concave spherical cup) to 1 (convex
@@ -464,7 +464,7 @@ respectively.</p>
 <section id="curvedness">
 <h3>Curvedness<a class="headerlink" href="#curvedness" title="Link to this heading">#</a></h3>
 <p>See <a class="reference internal" href="../generated/submodules/mymesh.curvature.Curvedness.html#mymesh.curvature.Curvedness" title="mymesh.curvature.Curvedness"><code class="xref py py-func docutils literal notranslate"><span class="pre">Curvedness()</span></code></a></p>
-<p>Curvedness <span id="id2">[<a class="reference internal" href="../guide/ref.html#id16" title="Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. Image and Vision Computing, 10(8):557–564, 1992. URL: https://www.doi.org/10.1016/0262-8856(92)90076-F, doi:10.1016/0262-8856(92)90076-F.">KvD92</a>]</span> complements shape index by capturing the
+<p>Curvedness <span id="id2">[<a class="reference internal" href="../guide/ref.html#id23" title="Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. Image and Vision Computing, 10(8):557–564, 1992. URL: https://www.doi.org/10.1016/0262-8856(92)90076-F, doi:10.1016/0262-8856(92)90076-F.">KvD92</a>]</span> complements shape index by capturing the
 magnitude of curvature, independent of direction. It is a non-negative measure
 of the scale of a surface’s curvature. For a sphere, curvedness is equal to
 the principal curvatures.</p>
@@ -539,7 +539,7 @@ inherent dependence on mesh and mesh quality, with low quality elements
 resulting in spurious results.</p>
 <section id="quadratic-surface-fitting">
 <h4>Quadratic Surface Fitting<a class="headerlink" href="#quadratic-surface-fitting" title="Link to this heading">#</a></h4>
-<p>Reference: <span id="id3">Goldfeather and Interrante [<a class="reference internal" href="../guide/ref.html#id11" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
+<p>Reference: <span id="id3">Goldfeather and Interrante [<a class="reference internal" href="../guide/ref.html#id25" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
 <p>Quadratic surface fitting (see <a class="reference internal" href="../generated/submodules/mymesh.curvature.QuadFit.html#mymesh.curvature.QuadFit" title="mymesh.curvature.QuadFit"><code class="xref py py-func docutils literal notranslate"><span class="pre">QuadFit()</span></code></a>) locally fits a quadratic
 surface <span class="math notranslate nohighlight">\(z = f(x,y) = \frac{A}{2}x^2 + Bxy + \frac{C}{2}y^2\)</span> to a
 local neighborhood of nodes. This can be accomplished by examining this
@@ -579,7 +579,7 @@ be overdetermined and can be solved by least squares
 </section>
 <section id="cubic-surface-fitting">
 <h4>Cubic Surface Fitting<a class="headerlink" href="#cubic-surface-fitting" title="Link to this heading">#</a></h4>
-<p>Reference: <span id="id4">Goldfeather and Interrante [<a class="reference internal" href="../guide/ref.html#id11" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
+<p>Reference: <span id="id4">Goldfeather and Interrante [<a class="reference internal" href="../guide/ref.html#id25" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
 <p>Cubic surface fitting (see <a class="reference internal" href="../generated/submodules/mymesh.curvature.CubicFit.html#mymesh.curvature.CubicFit" title="mymesh.curvature.CubicFit"><code class="xref py py-func docutils literal notranslate"><span class="pre">CubicFit()</span></code></a>) locally fits a cubic
 surface <span class="math notranslate nohighlight">\(z = f(x,y) = \frac{A}{2}x^2 + Bxy + \frac{C}{2}y^2 + Dx^3 + Ex^2y + Fxy^2 + Gy^3\)</span>
 to a local neighborhood of nodes. This can be accomplished by examining this
@@ -643,7 +643,7 @@ x_i              &amp; y_i    &amp; 0                &amp; 3x_i^2 &amp; 2x_iy _i
 </section>
 <section id="analytical-curvature">
 <h3>Analytical Curvature<a class="headerlink" href="#analytical-curvature" title="Link to this heading">#</a></h3>
-<p>Reference: <span id="id5">Goldman [<a class="reference internal" href="../guide/ref.html#id12" title="Ron Goldman. Curvature formulas for implicit curves and surfaces. Computer Aided Geometric Design, 22(7 SPEC. ISS.):632–658, 2005. doi:10.1016/j.cagd.2005.06.005.">Gol05</a>]</span></p>
+<p>Reference: <span id="id5">Goldman [<a class="reference internal" href="../guide/ref.html#id29" title="Ron Goldman. Curvature formulas for implicit curves and surfaces. Computer Aided Geometric Design, 22(7 SPEC. ISS.):632–658, 2005. doi:10.1016/j.cagd.2005.06.005.">Gol05</a>]</span></p>
 </section>
 </section>
 </section>

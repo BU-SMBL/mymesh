@@ -18,8 +18,8 @@
 .. _sphx_glr_examples_MeshGeneration_demo_pasta.py:
 
 
-Sweep Construction
-==================
+Pasta Shapes
+============
 
 This example creates pasta shapes with mymesh.primitives using sweep 
 construction methods (extrusions and revolutions). These demonstrate how meshes 
@@ -128,7 +128,7 @@ Please submit any new pasta constructions to toj@bu.edu
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.654 seconds)
+   **Total running time of the script:** (0 minutes 4.945 seconds)
 
 
 .. _sphx_glr_download_examples_MeshGeneration_demo_pasta.py:
