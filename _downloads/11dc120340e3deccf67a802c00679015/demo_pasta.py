@@ -3,7 +3,8 @@ Pasta Shapes
 ============
 
 This example creates pasta shapes with mymesh.primitives using sweep 
-construction methods (extrusions and revolutions). These demonstrate how meshes 
+construction methods (:func:`~mymesh.primitives.Extrude` and 
+:func:`~mymesh.primitives.Revolve`). These demonstrate how meshes 
 of complex shapes can be constructed starting with a single straight line.
 
 Please submit any new pasta constructions to toj@bu.edu
