@@ -14,9 +14,10 @@ then run:
 
 .. code-block::
 
-    pip install -e <path>/mymesh
+    pip install -e <path>/mymesh[all]
 
-with :code:`<path>` replaced with the file path to the mymesh root directory.
+with :code:`<path>` replaced with the file path to the mymesh root directory. 
+To install with only the required dependencies, the :code:`[all]` can be omitted.
 
 Dependencies
 ------------

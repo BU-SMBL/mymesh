@@ -35,9 +35,12 @@ Visualization Utilities
 
 #%%
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
 import io, re, warnings
+try:
+    import matplotlib
+    import matplotlib.pyplot as plt
+except ModuleNotFoundError:
+    warnings.warn('Matplotlib is used for mesh visualization. If needed, install with `pip install matplotlib`.')
 
 from . import converter, utils, mesh
 
