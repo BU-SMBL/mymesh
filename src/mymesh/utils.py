@@ -1582,7 +1582,18 @@ def DetectFeatures(NodeCoords,SurfConn,angle=25):
         list of nodes identified to lie on an edge of the geometry.
     corners : list
         list of nodes identified to lie on a corner of the geometry.
+    
+    Examples
+    --------
+    .. plot::
 
+        background = primitives.Grid([0,1,0,1,0,1], .02, ElemType='tet')
+        S = implicit.TetMesh(implicit.thickenf(implicit.gyroid,1), [0,1,0,1,0,1], .03, background=background)
+        edges, corners = utils.DetectFeatures(S.NodeCoords, S.SurfConn)
+        features = np.zeros(S.NNode)
+        features[edges] = 1
+        features[corners] = 2
+        S.plot(scalars=features, color='coolwarm', bgcolor='w')
     """
     ElemNormals = np.asarray(CalcFaceNormal(NodeCoords,SurfConn))
     Edges, EdgeConn, EdgeElem = converter.solid2edges(NodeCoords,SurfConn,return_EdgeConn=True,return_EdgeElem=True)

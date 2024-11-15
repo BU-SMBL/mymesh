@@ -2019,10 +2019,10 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
         character indicating an operation, by default 'scfS'.
 
         Possible operations:
-            's' - Splitting (:func:`TetSplit`)
-            'c' - Contraction (:func:`TetContract`)
-            'f' - Flipping (:func:`TetFlip`)
-            'S' - Smoothing 
+            - 's' - Splitting (:func:`TetSplit`)
+            - 'c' - Contraction (:func:`TetContract`)
+            - 'f' - Flipping (:func:`TetFlip`)
+            - 'S' - Smoothing 
 
     repeat : int, optional
         Number of times to repeat the schedule, by default 1
@@ -2046,8 +2046,8 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
 
     Returns
     -------
-    _type_
-        _description_
+    Mnew : mymesh.mesh
+        Tetrahedral mesh after quality improvement
     """    
     M.verbose=False
     for loop in range(repeat):
