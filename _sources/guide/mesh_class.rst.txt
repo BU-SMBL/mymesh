@@ -49,7 +49,7 @@ means that the following three code blocks all achieve the same thing:
 
 
 
-Additionally, since many of the more fundamental functions in MyMesh (such as 
+Additionally, since many of the lower-level functions in MyMesh (such as 
 those in :mod:`mymesh.utils`) take ``NodeCoords`` and ``NodeConn`` as inputs,
 users can use the `*` operator to unpack the mesh directly in the function call:
 
@@ -77,4 +77,52 @@ is equivalent to
     voxelized = mesh(*converter.surf2voxel(*sphere, .1))
 
 
+From meshes to meshes
+---------------------
+
+There are several :class:`mesh` class methods that produce new meshes based on
+the original. 
+
+:meth:`~mesh.copy`
+^^^^^^^^^^^^^^^^^^
+:meth:`~mesh.copy` produces an identical copy of the original mesh. The copies 
+are separate and do not reference each other, meaning any modification to one 
+mesh won't modify the other.
+
+.. code::
+
+    M = primitives.Grid([0,1,0,1,0,1], 0.1)
+    M2 = M.copy()
+
+:meth:`~mesh.Clip`
+^^^^^^^^^^^^^^^^^^
+:meth:`~mesh.Clip` cuts the mesh along a plane 
+
+.. plot::
+
+    M = primitives.Grid([-1,1,-1,1,-1,1], 0.1)
+    M2 = M.Clip(normal=[1,1,-1])
+    M2.plot(show_edges=False, view='trimetric', bgcolor='w')
+
+:meth:`~mesh.Threshold`
+^^^^^^^^^^^^^^^^^^
+:meth:`~mesh.Threshold` generates a new mesh that keeps elements from the 
+original mesh based on scalar values and the chosen thresholding rule.
+
+.. plot::
+
+    M = primitives.Grid([-1,1,-1,1,-1,1], 0.1)
+    M2 = M.Threshold(scalars=implicit.sphere([0,0,0], 1)(*M.points.T), threshold=0, mode='<=')
+    M2.plot(show_edges=False, view='trimetric', bgcolor='w')
+
+:meth:`~mesh.Contour`
+^^^^^^^^^^^^^^^^^^
+:meth:`~mesh.Contour` generates a new mesh that contours the 
+original mesh based on scalar values. 
+
+.. plot::
+
+    M = primitives.Grid([-1,1,-1,1,-1,1], 0.1)
+    M2 = M.Contour(scalars=implicit.sphere([0,0,0], 1)(*M.points.T), threshold=0, threshold_direction=-1, Type='surf')
+    M2.plot(show_edges=False, view='trimetric', bgcolor='w')
 

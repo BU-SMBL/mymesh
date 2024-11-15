@@ -40,3 +40,30 @@ submodules:
     ~mymesh.rays
     ~mymesh.utils
     ~mymesh.visualize
+
+Importing MyMesh
+----------------
+
+There are several ways MyMesh can be imported and used. 
+
+.. code::
+
+    import mymesh
+    S = mymesh.primitives.Sphere([0,0,0], 1)
+
+Alternatively, submodules can be imported directly as
+
+.. code::
+
+    from mymesh import primitives
+    S = primitives.Sphere([0,0,0], 1)
+
+Or to import all submodules (and the :class:`mesh` class), they can be imported
+as using :code:`*`, but this should be done carefully to avoid conflicts with
+other variables or modules that might have the same names. 
+
+.. code::
+
+    from mymesh import *
+    S = primitives.Sphere([0,0,0], 1)
+

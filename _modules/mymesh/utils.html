@@ -2038,7 +2038,18 @@
 <span class="sd">        list of nodes identified to lie on an edge of the geometry.</span>
 <span class="sd">    corners : list</span>
 <span class="sd">        list of nodes identified to lie on a corner of the geometry.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. plot::</span>
 
+<span class="sd">        background = primitives.Grid([0,1,0,1,0,1], .02, ElemType=&#39;tet&#39;)</span>
+<span class="sd">        S = implicit.TetMesh(implicit.thickenf(implicit.gyroid,1), [0,1,0,1,0,1], .03, background=background)</span>
+<span class="sd">        edges, corners = utils.DetectFeatures(S.NodeCoords, S.SurfConn)</span>
+<span class="sd">        features = np.zeros(S.NNode)</span>
+<span class="sd">        features[edges] = 1</span>
+<span class="sd">        features[corners] = 2</span>
+<span class="sd">        S.plot(scalars=features, color=&#39;coolwarm&#39;, bgcolor=&#39;w&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ElemNormals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">CalcFaceNormal</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">SurfConn</span><span class="p">))</span>
     <span class="n">Edges</span><span class="p">,</span> <span class="n">EdgeConn</span><span class="p">,</span> <span class="n">EdgeElem</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">SurfConn</span><span class="p">,</span><span class="n">return_EdgeConn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">return_EdgeElem</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

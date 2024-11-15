@@ -428,10 +428,15 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>NodeCoords</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Node coordinates, by default None</p></li>
-<li><p><strong>NodeConn</strong> (<em>list</em><em>, </em><em>array_like</em><em>, </em><em>optional</em>) – Node connectivity of elements, by default None</p></li>
-<li><p><strong>Type</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Mesh type, ‘surf’ for surface or ‘vol’ for volume. If not provided,
-it will be determined automatically (meth:<cite>mesh.identify_type</cite>), by default None</p></li>
+<li><p><strong>NodeCoords</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Node coordinates, by default None. Node coordinates should be formatted
+as an nx3 or nx2 array of coordinates.</p></li>
+<li><p><strong>NodeConn</strong> (<em>list</em><em>, </em><em>array_like</em><em>, </em><em>optional</em>) – Node connectivity of elements, by default None. Node connectivity
+is formatted as a 2D array or list of lists where each row (or inner list)
+is contains the node IDs of the nodes that make up the element. NodeConn
+can contain a uniform element type or a mix of different element types.</p></li>
+<li><p><strong>Type</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Mesh type, ‘surf’ for surface, ‘vol’ for volume, ‘line’ for line. If not
+provided, it will be determined automatically
+(<a class="reference internal" href="mymesh.mesh.mesh.identify_type.html#mymesh.mesh.mesh.identify_type" title="mymesh.mesh.mesh.identify_type"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mesh.identify_type()</span></code></a>), by default None</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, some operations will print activity or other information,
 by default True</p></li>
 </ul>
@@ -496,7 +501,7 @@ be a set (or array_like) of edge numbers.</p>
 <td><p>Node connectivity for the boundary mesh of a surface.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.BoundaryNodes.html#mymesh.mesh.mesh.BoundaryNodes" title="mymesh.mesh.mesh.BoundaryNodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BoundaryNodes</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Array of node IDs on the boundary of a surface.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.Centroids.html#mymesh.mesh.mesh.Centroids" title="mymesh.mesh.mesh.Centroids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Centroids</span></code></a></p></td>
 <td><p>Element centroids.</p></td>
@@ -568,7 +573,7 @@ be a set (or array_like) of edge numbers.</p>
 <td><p>Node neighbors for the surface mesh.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.SurfNodes.html#mymesh.mesh.mesh.SurfNodes" title="mymesh.mesh.mesh.SurfNodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfNodes</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Array of node IDs on the surface of a mesh.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.Surface.html#mymesh.mesh.mesh.Surface" title="mymesh.mesh.mesh.Surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Surface</span></code></a></p></td>
 <td><p><a class="reference internal" href="#mymesh.mesh" title="mymesh.mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code></a> object representation of the surface mesh.</p></td>
@@ -589,85 +594,82 @@ be a set (or array_like) of edge numbers.</p>
 <blockquote>
 <div><div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.AxisAlign.html#mymesh.mesh.mesh.AxisAlign" title="mymesh.mesh.mesh.AxisAlign"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AxisAlign</span></code></a>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.Clip.html#mymesh.mesh.mesh.Clip" title="mymesh.mesh.mesh.Clip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Clip</span></code></a>([pt, normal])</p></td>
+<td><p>Clip the mesh along a plane.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.Clip.html#mymesh.mesh.mesh.Clip" title="mymesh.mesh.mesh.Clip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Clip</span></code></a>([pt, normal, flip])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.Contour.html#mymesh.mesh.mesh.Contour" title="mymesh.mesh.mesh.Contour"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Contour</span></code></a>(scalars, threshold[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.Contour.html#mymesh.mesh.mesh.Contour" title="mymesh.mesh.mesh.Contour"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Contour</span></code></a>(scalars, threshold[, ...])</p></td>
 <td><p>Contour the mesh to extract an isosurface based on nodal scalar values.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.CreateBoundaryLayer.html#mymesh.mesh.mesh.CreateBoundaryLayer" title="mymesh.mesh.mesh.CreateBoundaryLayer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CreateBoundaryLayer</span></code></a>(nLayers[, FixedNodes, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.CreateBoundaryLayer.html#mymesh.mesh.mesh.CreateBoundaryLayer" title="mymesh.mesh.mesh.CreateBoundaryLayer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CreateBoundaryLayer</span></code></a>(nLayers[, FixedNodes, ...])</p></td>
 <td><p>Generate boundary layer elements.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.RenumberFacesBySet.html#mymesh.mesh.mesh.RenumberFacesBySet" title="mymesh.mesh.mesh.RenumberFacesBySet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RenumberFacesBySet</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.RenumberFacesBySet.html#mymesh.mesh.mesh.RenumberFacesBySet" title="mymesh.mesh.mesh.RenumberFacesBySet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RenumberFacesBySet</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.RenumberNodesBySet.html#mymesh.mesh.mesh.RenumberNodesBySet" title="mymesh.mesh.mesh.RenumberNodesBySet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RenumberNodesBySet</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.RenumberNodesBySet.html#mymesh.mesh.mesh.RenumberNodesBySet" title="mymesh.mesh.mesh.RenumberNodesBySet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RenumberNodesBySet</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.Threshold.html#mymesh.mesh.mesh.Threshold" title="mymesh.mesh.mesh.Threshold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Threshold</span></code></a>(scalars, threshold[, mode, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.Threshold.html#mymesh.mesh.mesh.Threshold" title="mymesh.mesh.mesh.Threshold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Threshold</span></code></a>(scalars, threshold[, mode, ...])</p></td>
 <td><p>Threshold the mesh by scalar values at either nodes or elements.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.addEdges.html#mymesh.mesh.mesh.addEdges" title="mymesh.mesh.mesh.addEdges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addEdges</span></code></a>(NewEdges[, EdgeSet])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.addEdges.html#mymesh.mesh.mesh.addEdges" title="mymesh.mesh.mesh.addEdges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addEdges</span></code></a>(NewEdges[, EdgeSet])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.addElems.html#mymesh.mesh.mesh.addElems" title="mymesh.mesh.mesh.addElems"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addElems</span></code></a>(NewNodeConn[, ElemSet])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.addElems.html#mymesh.mesh.mesh.addElems" title="mymesh.mesh.mesh.addElems"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addElems</span></code></a>(NewNodeConn[, ElemSet])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.addFaces.html#mymesh.mesh.mesh.addFaces" title="mymesh.mesh.mesh.addFaces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addFaces</span></code></a>(NewFaces[, FaceSet])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.addFaces.html#mymesh.mesh.mesh.addFaces" title="mymesh.mesh.mesh.addFaces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addFaces</span></code></a>(NewFaces[, FaceSet])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.addNodes.html#mymesh.mesh.mesh.addNodes" title="mymesh.mesh.mesh.addNodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addNodes</span></code></a>(NewNodeCoords[, NodeSet])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.addNodes.html#mymesh.mesh.mesh.addNodes" title="mymesh.mesh.mesh.addNodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addNodes</span></code></a>(NewNodeCoords[, NodeSet])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.cleanup.html#mymesh.mesh.mesh.cleanup" title="mymesh.mesh.mesh.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a>([tol])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.cleanup.html#mymesh.mesh.mesh.cleanup" title="mymesh.mesh.mesh.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a>([tol])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.copy.html#mymesh.mesh.mesh.copy" title="mymesh.mesh.mesh.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.copy.html#mymesh.mesh.mesh.copy" title="mymesh.mesh.mesh.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>()</p></td>
+<td><p>Create a copy of the mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.getCurvature.html#mymesh.mesh.mesh.getCurvature" title="mymesh.mesh.mesh.getCurvature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getCurvature</span></code></a>([metrics, nRings, SplitFeatures])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.getCurvature.html#mymesh.mesh.mesh.getCurvature" title="mymesh.mesh.mesh.getCurvature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getCurvature</span></code></a>([metrics, nRings, SplitFeatures])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.getQuality.html#mymesh.mesh.mesh.getQuality" title="mymesh.mesh.mesh.getQuality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getQuality</span></code></a>([metrics, verbose])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.getQuality.html#mymesh.mesh.mesh.getQuality" title="mymesh.mesh.mesh.getQuality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getQuality</span></code></a>([metrics, verbose])</p></td>
 <td><p>Evaluate mesh quality.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.identify_type.html#mymesh.mesh.mesh.identify_type" title="mymesh.mesh.mesh.identify_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">identify_type</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.identify_type.html#mymesh.mesh.mesh.identify_type" title="mymesh.mesh.mesh.identify_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">identify_type</span></code></a>()</p></td>
 <td><p>Classify the mesh as either a surface or volume.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.imread.html#mymesh.mesh.mesh.imread" title="mymesh.mesh.mesh.imread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">imread</span></code></a>(voxelsize[, scalefactor, scaleorder, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.imread.html#mymesh.mesh.mesh.imread" title="mymesh.mesh.mesh.imread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">imread</span></code></a>(voxelsize[, scalefactor, scaleorder, ...])</p></td>
 <td><p>Load an image into a voxel mesh.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.merge.html#mymesh.mesh.mesh.merge" title="mymesh.mesh.mesh.merge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code></a>(Mesh2[, cleanup, tol])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.merge.html#mymesh.mesh.mesh.merge" title="mymesh.mesh.mesh.merge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code></a>(Mesh2[, cleanup, tol])</p></td>
 <td><p>Merge multiple meshes together into the current mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.meshio2mymesh.html#mymesh.mesh.mesh.meshio2mymesh" title="mymesh.mesh.mesh.meshio2mymesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">meshio2mymesh</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.meshio2mymesh.html#mymesh.mesh.mesh.meshio2mymesh" title="mymesh.mesh.mesh.meshio2mymesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">meshio2mymesh</span></code></a>()</p></td>
 <td><p>Convert a <a class="reference external" href="https://github.com/nschloe/meshio">meshio</a> mesh object to a MyMesh mesh object</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.mymesh2meshio.html#mymesh.mesh.mesh.mymesh2meshio" title="mymesh.mesh.mesh.mymesh2meshio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mymesh2meshio</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.mymesh2meshio.html#mymesh.mesh.mesh.mymesh2meshio" title="mymesh.mesh.mesh.mymesh2meshio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mymesh2meshio</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.plot.html#mymesh.mesh.mesh.plot" title="mymesh.mesh.mesh.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([show, return_fig, clim])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.plot.html#mymesh.mesh.mesh.plot" title="mymesh.mesh.mesh.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([show, return_fig, clim])</p></td>
+<td><p>Generate a static plot of the mesh.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.read.html#mymesh.mesh.mesh.read" title="mymesh.mesh.mesh.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.read.html#mymesh.mesh.mesh.read" title="mymesh.mesh.mesh.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>()</p></td>
 <td><p>Read a mesh file written in any file type supported by meshio</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.removeElems.html#mymesh.mesh.mesh.removeElems" title="mymesh.mesh.mesh.removeElems"><code class="xref py py-obj docutils literal notranslate"><span class="pre">removeElems</span></code></a>(ElemIds)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.removeElems.html#mymesh.mesh.mesh.removeElems" title="mymesh.mesh.mesh.removeElems"><code class="xref py py-obj docutils literal notranslate"><span class="pre">removeElems</span></code></a>(ElemIds)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.reset.html#mymesh.mesh.mesh.reset" title="mymesh.mesh.mesh.reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code></a>([properties, keep])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.reset.html#mymesh.mesh.mesh.reset" title="mymesh.mesh.mesh.reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code></a>([properties, keep])</p></td>
 <td><p>Reset some or all properties.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.validate.html#mymesh.mesh.mesh.validate" title="mymesh.mesh.mesh.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.validate.html#mymesh.mesh.mesh.validate" title="mymesh.mesh.mesh.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate</span></code></a>()</p></td>
 <td><p>Check validity of the mesh.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.view.html#mymesh.mesh.mesh.view" title="mymesh.mesh.mesh.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a>(**kwargs)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.view.html#mymesh.mesh.mesh.view" title="mymesh.mesh.mesh.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a>(**kwargs)</p></td>
+<td><p>Generate an interactive plot of the mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mymesh.mesh.mesh.write.html#mymesh.mesh.mesh.write" title="mymesh.mesh.mesh.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(filename[, binary])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mymesh.mesh.mesh.write.html#mymesh.mesh.mesh.write" title="mymesh.mesh.mesh.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(filename[, binary])</p></td>
 <td><p>Write mesh to file.</p></td>
 </tr>
 </tbody>

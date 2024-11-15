@@ -435,10 +435,12 @@
 <li><p><strong>schedule</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Order of operations to perform, specified as a string with each
 character indicating an operation, by default ‘scfS’.</p>
 <dl class="simple">
-<dt>Possible operations:</dt><dd><p>’s’ - Splitting (<a class="reference internal" href="mymesh.improvement.TetSplit.html#mymesh.improvement.TetSplit" title="mymesh.improvement.TetSplit"><code class="xref py py-func docutils literal notranslate"><span class="pre">TetSplit()</span></code></a>)
-‘c’ - Contraction (<a class="reference internal" href="mymesh.improvement.TetContract.html#mymesh.improvement.TetContract" title="mymesh.improvement.TetContract"><code class="xref py py-func docutils literal notranslate"><span class="pre">TetContract()</span></code></a>)
-‘f’ - Flipping (<a class="reference internal" href="mymesh.improvement.TetFlip.html#mymesh.improvement.TetFlip" title="mymesh.improvement.TetFlip"><code class="xref py py-func docutils literal notranslate"><span class="pre">TetFlip()</span></code></a>)
-‘S’ - Smoothing</p>
+<dt>Possible operations:</dt><dd><ul>
+<li><p>’s’ - Splitting (<a class="reference internal" href="mymesh.improvement.TetSplit.html#mymesh.improvement.TetSplit" title="mymesh.improvement.TetSplit"><code class="xref py py-func docutils literal notranslate"><span class="pre">TetSplit()</span></code></a>)</p></li>
+<li><p>’c’ - Contraction (<a class="reference internal" href="mymesh.improvement.TetContract.html#mymesh.improvement.TetContract" title="mymesh.improvement.TetContract"><code class="xref py py-func docutils literal notranslate"><span class="pre">TetContract()</span></code></a>)</p></li>
+<li><p>’f’ - Flipping (<a class="reference internal" href="mymesh.improvement.TetFlip.html#mymesh.improvement.TetFlip" title="mymesh.improvement.TetFlip"><code class="xref py py-func docutils literal notranslate"><span class="pre">TetFlip()</span></code></a>)</p></li>
+<li><p>’S’ - Smoothing</p></li>
+</ul>
 </dd>
 </dl>
 </p></li>
@@ -457,10 +459,10 @@ Angle (in degrees) used to identify features, by default 25. See
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>_description_</p>
+<dd class="field-even"><p><strong>Mnew</strong> – Tetrahedral mesh after quality improvement</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>_type_</p>
+<dd class="field-odd"><p><a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh">mymesh.mesh</a></p>
 </dd>
 </dl>
 </dd></dl>

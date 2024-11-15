@@ -13,8 +13,7 @@ Theory Guide
     theory/rays
 
 .. note:: 
-    This section is a bit aspirational and very incomplete, but I aim to grow
-    it over time.
+    This section is a work in progress.
 
 The aim here is to provide explanations of how and why some of the important 
 algorithms in MyMesh work. While the user guide and API reference are intended 

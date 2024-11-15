@@ -2439,10 +2439,10 @@
 <span class="sd">        character indicating an operation, by default &#39;scfS&#39;.</span>
 
 <span class="sd">        Possible operations:</span>
-<span class="sd">            &#39;s&#39; - Splitting (:func:`TetSplit`)</span>
-<span class="sd">            &#39;c&#39; - Contraction (:func:`TetContract`)</span>
-<span class="sd">            &#39;f&#39; - Flipping (:func:`TetFlip`)</span>
-<span class="sd">            &#39;S&#39; - Smoothing </span>
+<span class="sd">            - &#39;s&#39; - Splitting (:func:`TetSplit`)</span>
+<span class="sd">            - &#39;c&#39; - Contraction (:func:`TetContract`)</span>
+<span class="sd">            - &#39;f&#39; - Flipping (:func:`TetFlip`)</span>
+<span class="sd">            - &#39;S&#39; - Smoothing </span>
 
 <span class="sd">    repeat : int, optional</span>
 <span class="sd">        Number of times to repeat the schedule, by default 1</span>
@@ -2466,8 +2466,8 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    _type_</span>
-<span class="sd">        _description_</span>
+<span class="sd">    Mnew : mymesh.mesh</span>
+<span class="sd">        Tetrahedral mesh after quality improvement</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
     <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeat</span><span class="p">):</span>

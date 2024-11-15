@@ -449,7 +449,7 @@ means that the following three code blocks all achieve the same thing:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mf">.5</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Additionally, since many of the more fundamental functions in MyMesh (such as
+<p>Additionally, since many of the lower-level functions in MyMesh (such as
 those in <a class="reference internal" href="../generated/mymesh.utils.html#module-mymesh.utils" title="mymesh.utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mymesh.utils</span></code></a>) take <code class="docutils literal notranslate"><span class="pre">NodeCoords</span></code> and <code class="docutils literal notranslate"><span class="pre">NodeConn</span></code> as inputs,
 users can use the <cite>*</cite> operator to unpack the mesh directly in the function call:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sphere</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mf">.5</span><span class="p">)</span>
@@ -470,6 +470,59 @@ values:</p>
 <span class="n">voxelized</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="o">*</span><span class="n">converter</span><span class="o">.</span><span class="n">surf2voxel</span><span class="p">(</span><span class="o">*</span><span class="n">sphere</span><span class="p">,</span> <span class="mf">.1</span><span class="p">))</span>
 </pre></div>
 </div>
+</section>
+<section id="from-meshes-to-meshes">
+<h2>From meshes to meshes<a class="headerlink" href="#from-meshes-to-meshes" title="Link to this heading">#</a></h2>
+<p>There are several <a class="reference internal" href="../generated/mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh.mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code></a> class methods that produce new meshes based on
+the original.</p>
+<section id="copy">
+<h3><a class="reference internal" href="../generated/mymesh.mesh.mesh.copy.html#mymesh.mesh.mesh.copy" title="mymesh.mesh.mesh.copy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">copy()</span></code></a><a class="headerlink" href="#copy" title="Link to this heading">#</a></h3>
+<p><a class="reference internal" href="../generated/mymesh.mesh.mesh.copy.html#mymesh.mesh.mesh.copy" title="mymesh.mesh.mesh.copy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">copy()</span></code></a> produces an identical copy of the original mesh. The copies
+are separate and do not reference each other, meaning any modification to one
+mesh won’t modify the other.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">M</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">M2</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="clip">
+<h3><a class="reference internal" href="../generated/mymesh.mesh.mesh.Clip.html#mymesh.mesh.mesh.Clip" title="mymesh.mesh.mesh.Clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Clip()</span></code></a><a class="headerlink" href="#clip" title="Link to this heading">#</a></h3>
+<p><a class="reference internal" href="../generated/mymesh.mesh.mesh.Clip.html#mymesh.mesh.mesh.Clip" title="mymesh.mesh.mesh.Clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Clip()</span></code></a> cuts the mesh along a plane</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">M</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">M2</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">Clip</span><span class="p">(</span><span class="n">normal</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">M2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../_images/mesh_class-1.png" class="plot-directive" src="../_images/mesh_class-1.png" />
+</figure>
+</section>
+<section id="threshold">
+<h3><a class="reference internal" href="../generated/mymesh.mesh.mesh.Threshold.html#mymesh.mesh.mesh.Threshold" title="mymesh.mesh.mesh.Threshold"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Threshold()</span></code></a><a class="headerlink" href="#threshold" title="Link to this heading">#</a></h3>
+<p><a class="reference internal" href="../generated/mymesh.mesh.mesh.Threshold.html#mymesh.mesh.mesh.Threshold" title="mymesh.mesh.mesh.Threshold"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Threshold()</span></code></a> generates a new mesh that keeps elements from the
+original mesh based on scalar values and the chosen thresholding rule.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">M</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">M2</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">Threshold</span><span class="p">(</span><span class="n">scalars</span><span class="o">=</span><span class="n">implicit</span><span class="o">.</span><span class="n">sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)(</span><span class="o">*</span><span class="n">M</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;&lt;=&#39;</span><span class="p">)</span>
+<span class="n">M2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../_images/mesh_class-2.png" class="plot-directive" src="../_images/mesh_class-2.png" />
+</figure>
+</section>
+<section id="contour">
+<h3><a class="reference internal" href="../generated/mymesh.mesh.mesh.Contour.html#mymesh.mesh.mesh.Contour" title="mymesh.mesh.mesh.Contour"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Contour()</span></code></a><a class="headerlink" href="#contour" title="Link to this heading">#</a></h3>
+<p><a class="reference internal" href="../generated/mymesh.mesh.mesh.Contour.html#mymesh.mesh.mesh.Contour" title="mymesh.mesh.mesh.Contour"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Contour()</span></code></a> generates a new mesh that contours the
+original mesh based on scalar values.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">M</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">M2</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">Contour</span><span class="p">(</span><span class="n">scalars</span><span class="o">=</span><span class="n">implicit</span><span class="o">.</span><span class="n">sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)(</span><span class="o">*</span><span class="n">M</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
+<span class="n">M2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../_images/mesh_class-3.png" class="plot-directive" src="../_images/mesh_class-3.png" />
+</figure>
+</section>
 </section>
 </section>
 
@@ -522,6 +575,13 @@ values:</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#on-demand-properties">On-demand properties</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unpacking">Unpacking</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-meshes-to-meshes">From meshes to meshes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#copy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">copy()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Clip()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#threshold"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Threshold()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#contour"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Contour()</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

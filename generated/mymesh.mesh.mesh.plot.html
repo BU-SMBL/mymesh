@@ -426,7 +426,30 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="mymesh.mesh.mesh.plot">
 <span class="sig-prename descclassname"><span class="pre">mesh.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mymesh/mesh.html#mesh.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.mesh.mesh.plot" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Generate a static plot of the mesh. See <code class="xref py py-func docutils literal notranslate"><span class="pre">mymesh.visualize.view()</span></code>
+for a full list of optional arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>show</strong> (<em>bool</em><em>, </em><em>optional</em>) – Display the plotted mesh, by default True. If False,
+the plot will be generated and can be returned, but won’t
+be displayed.</p></li>
+<li><p><strong>return_fig</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, a matplotlib figure and axis holding the plotted mesh
+will be returned, by default False</p></li>
+<li><p><strong>clim</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Two-element tuple, list, or array containing the lower and upper
+bound for the colorscale if a scalar is displayed, by default None.
+If None, the minimum and maximum values will be used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib.figure.Figure</em>) – matplotlib figure of the plotted mesh</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes._axes.Axes</em>) – matplotlib axes of the plotted mesh</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

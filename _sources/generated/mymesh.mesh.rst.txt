@@ -57,7 +57,6 @@ Methods
         :toctree:
 
     
-            ~mesh.mesh.AxisAlign
             ~mesh.mesh.Clip
             ~mesh.mesh.Contour
             ~mesh.mesh.CreateBoundaryLayer

@@ -466,6 +466,26 @@ submodules:</p>
 </table>
 </div>
 </section>
+<section id="importing-mymesh">
+<h2>Importing MyMesh<a class="headerlink" href="#importing-mymesh" title="Link to this heading">#</a></h2>
+<p>There are several ways MyMesh can be imported and used.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mymesh</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">mymesh</span><span class="o">.</span><span class="n">primitives</span><span class="o">.</span><span class="n">Sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Alternatively, submodules can be imported directly as</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mymesh</span> <span class="kn">import</span> <span class="n">primitives</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or to import all submodules (and the <code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code> class), they can be imported
+as using <code class="code docutils literal notranslate"><span class="pre">*</span></code>, but this should be done carefully to avoid conflicts with
+other variables or modules that might have the same names.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mymesh</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -516,6 +536,7 @@ submodules:</p>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#package-overview">Package Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#importing-mymesh">Importing MyMesh</a></li>
 </ul>
   </nav></div>
 

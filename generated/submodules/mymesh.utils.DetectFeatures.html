@@ -445,6 +445,19 @@ exists between two adjacent faces, by default 25.</p></li>
 </p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">background</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">.02</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;tet&#39;</span><span class="p">)</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">TetMesh</span><span class="p">(</span><span class="n">implicit</span><span class="o">.</span><span class="n">thickenf</span><span class="p">(</span><span class="n">implicit</span><span class="o">.</span><span class="n">gyroid</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">.03</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="n">background</span><span class="p">)</span>
+<span class="n">edges</span><span class="p">,</span> <span class="n">corners</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">DetectFeatures</span><span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">S</span><span class="o">.</span><span class="n">SurfConn</span><span class="p">)</span>
+<span class="n">features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">NNode</span><span class="p">)</span>
+<span class="n">features</span><span class="p">[</span><span class="n">edges</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">features</span><span class="p">[</span><span class="n">corners</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">S</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">scalars</span><span class="o">=</span><span class="n">features</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;coolwarm&#39;</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../_images/mymesh-utils-DetectFeatures-1.png" class="plot-directive" src="../../_images/mymesh-utils-DetectFeatures-1.png" />
+</figure>
 </dd></dl>
 
 </section>

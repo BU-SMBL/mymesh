@@ -412,12 +412,17 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    NodeCoords : array_like, optional</span>
-<span class="sd">        Node coordinates, by default None</span>
+<span class="sd">        Node coordinates, by default None. Node coordinates should be formatted </span>
+<span class="sd">        as an nx3 or nx2 array of coordinates.</span>
 <span class="sd">    NodeConn : list, array_like, optional</span>
-<span class="sd">        Node connectivity of elements, by default None</span>
+<span class="sd">        Node connectivity of elements, by default None. Node connectivity</span>
+<span class="sd">        is formatted as a 2D array or list of lists where each row (or inner list)</span>
+<span class="sd">        is contains the node IDs of the nodes that make up the element. NodeConn</span>
+<span class="sd">        can contain a uniform element type or a mix of different element types.</span>
 <span class="sd">    Type : str or None, optional</span>
-<span class="sd">        Mesh type, &#39;surf&#39; for surface or &#39;vol&#39; for volume. If not provided,</span>
-<span class="sd">        it will be determined automatically (meth:`mesh.identify_type`), by default None</span>
+<span class="sd">        Mesh type, &#39;surf&#39; for surface, &#39;vol&#39; for volume, &#39;line&#39; for line. If not</span>
+<span class="sd">        provided, it will be determined automatically </span>
+<span class="sd">        (:meth:`mesh.identify_type`), by default None</span>
 <span class="sd">    verbose : bool, optional</span>
 <span class="sd">        If true, some operations will print activity or other information, </span>
 <span class="sd">        by default True</span>
@@ -715,6 +720,9 @@
         <span class="k">return</span> <span class="n">SurfConn</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">SurfNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Array of node IDs on the surface of a mesh.</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SurfNodes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span> 
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="o">+</span><span class="s1">&#39;Identifying surface nodes...&#39;</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -738,6 +746,9 @@
         <span class="k">return</span> <span class="n">BoundaryConn</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">BoundaryNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Array of node IDs on the boundary of a surface.</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_BoundaryNodes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span> 
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="o">+</span><span class="s1">&#39;Identifying boundary nodes...&#39;</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -1054,6 +1065,7 @@
 <div class="viewcode-block" id="mesh.cleanup">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.cleanup.html#mymesh.mesh.cleanup">[docs]</a>
     <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+
         <span class="c1"># TODO: This needs to be improved so other variables that point to nodes or elements are updated accordingly</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
@@ -1068,7 +1080,16 @@
 <div class="viewcode-block" id="mesh.copy">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.copy.html#mymesh.mesh.copy">[docs]</a>
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a copy of the mesh. The copied mesh will be independent, with </span>
+<span class="sd">        no references to the original mesh, meaning changes to one mesh won&#39;t</span>
+<span class="sd">        influence the other.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        M : mymesh.mesh</span>
+<span class="sd">            Copied mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">M</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">),</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
         
         <span class="n">M</span><span class="o">.</span><span class="n">_Faces</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Faces</span><span class="p">)</span>
@@ -1305,12 +1326,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_FaceConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">ExtractRagged</span><span class="p">(</span><span class="n">NewFaceConn</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span></div>
 
     
-<div class="viewcode-block" id="mesh.AxisAlign">
-<a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.AxisAlign.html#mymesh.mesh.AxisAlign">[docs]</a>
-    <span class="k">def</span> <span class="nf">AxisAlign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span></div>
-
-
 <div class="viewcode-block" id="mesh.CreateBoundaryLayer">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.CreateBoundaryLayer.html#mymesh.mesh.CreateBoundaryLayer">[docs]</a>
     <span class="k">def</span> <span class="nf">CreateBoundaryLayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">nLayers</span><span class="p">,</span><span class="n">FixedNodes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span><span class="n">StiffnessFactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">Thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">OptimizeTets</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">FaceSets</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
@@ -1847,8 +1862,25 @@
 
 <div class="viewcode-block" id="mesh.Clip">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.Clip.html#mymesh.mesh.Clip">[docs]</a>
-    <span class="k">def</span> <span class="nf">Clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        
+    <span class="k">def</span> <span class="nf">Clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clip the mesh along a plane. Clipping with this method will not cut</span>
+<span class="sd">        through elements, but rather will only keep elements on one side of</span>
+<span class="sd">        the specified plane.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pt : array_like or NoneType, optional</span>
+<span class="sd">            Coordinates for a point on the clipping plane, by default None.</span>
+<span class="sd">            If None, the center of the bounding box of the mesh will be used.</span>
+<span class="sd">        normal : list, optional</span>
+<span class="sd">            Normal vector of the clipping plane, by default [1,0,0]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        clipped : mymesh.mesh</span>
+<span class="sd">            Clipped mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="k">if</span> <span class="n">pt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">zmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">zmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -2190,12 +2222,47 @@
 <div class="viewcode-block" id="mesh.view">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.view.html#mymesh.mesh.view">[docs]</a>
     <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate an interactive plot of the mesh. See :func:`mymesh.visualize.view` </span>
+<span class="sd">        for a full list of optional arguments.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        out </span>
+<span class="sd">            Output passed from :func:`mymesh.visualize.view`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">out</span> <span class="o">=</span> <span class="n">visualize</span><span class="o">.</span><span class="n">View</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>   
         <span class="k">return</span> <span class="n">out</span> </div>
 
 <div class="viewcode-block" id="mesh.plot">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.plot.html#mymesh.mesh.plot">[docs]</a>
     <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_fig</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a static plot of the mesh. See :func:`mymesh.visualize.view` </span>
+<span class="sd">        for a full list of optional arguments.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        show : bool, optional</span>
+<span class="sd">            Display the plotted mesh, by default True. If False,</span>
+<span class="sd">            the plot will be generated and can be returned, but won&#39;t </span>
+<span class="sd">            be displayed.</span>
+<span class="sd">        return_fig : bool, optional</span>
+<span class="sd">            If True, a matplotlib figure and axis holding the plotted mesh</span>
+<span class="sd">            will be returned, by default False</span>
+<span class="sd">        clim : array_like, optional</span>
+<span class="sd">            Two-element tuple, list, or array containing the lower and upper</span>
+<span class="sd">            bound for the colorscale if a scalar is displayed, by default None.</span>
+<span class="sd">            If None, the minimum and maximum values will be used.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fig : matplotlib.figure.Figure</span>
+<span class="sd">            matplotlib figure of the plotted mesh</span>
+<span class="sd">        ax : matplotlib.axes._axes.Axes</span>
+<span class="sd">            matplotlib axes of the plotted mesh</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">matplotlib</span>
             <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -2235,6 +2302,8 @@
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;scalar_preference must be &quot;nodes&quot; or &quot;elements&quot;&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">clim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">cmin</span><span class="p">,</span> <span class="n">cmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">scalars</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">scalars</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cmin</span><span class="p">,</span> <span class="n">cmax</span> <span class="o">=</span> <span class="n">clim</span>
 
             <span class="n">scale</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;coolwarm&#39;</span><span class="p">)</span>
             <span class="n">scale</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="n">cmin</span><span class="p">,</span> <span class="n">cmax</span><span class="p">)</span>
