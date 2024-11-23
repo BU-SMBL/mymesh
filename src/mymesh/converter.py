@@ -52,6 +52,7 @@ Element type conversion
     hex2tet
     wedge2tet
     pyramid2tet
+    surf2tris
     quad2tri
     tet102tet4
     tet42tet10

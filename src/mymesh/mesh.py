@@ -1619,18 +1619,21 @@ class mesh:
             ArrayConn = np.array(self.NodeConn,dtype=int)
         else:
             ArrayConn = np.array(self.NodeConn,dtype=object)
-        edges = ArrayConn[elemlengths==2].astype(int)
-        tris = ArrayConn[elemlengths==3].astype(int)
+
+        edges, tris, quads, tets, pyrs, wdgs, hexs, tet10 = [np.empty((0,0)) for i in range(8)]
+
+        if np.any(elemlengths == 2): edges = np.stack(ArrayConn[elemlengths==2])
+        if np.any(elemlengths == 3): tris = np.stack(ArrayConn[elemlengths==3])
         if self.Type == 'surf':
-            quads = ArrayConn[elemlengths==4].astype(int)
+            if np.any(elemlengths == 4): quads = np.stack(ArrayConn[elemlengths==4])
             tets = []
         else:
             quads = []
-            tets = ArrayConn[elemlengths==4].astype(int)
-        pyrs = ArrayConn[elemlengths==5].astype(int)
-        wdgs = ArrayConn[elemlengths==6].astype(int)
-        hexs = ArrayConn[elemlengths==8].astype(int)
-        tet10 = ArrayConn[elemlengths==10].astype(int)
+            if np.any(elemlengths == 4): tets = np.stack(ArrayConn[elemlengths==4])
+        if np.any(elemlengths == 5): pyrs = np.stack(ArrayConn[elemlengths==5])
+        if np.any(elemlengths == 6): wdgs = np.stack(ArrayConn[elemlengths==6])
+        if np.any(elemlengths == 8): hexs = np.stack(ArrayConn[elemlengths==8])
+        if np.any(elemlengths == 10): tet10 = np.stack(ArrayConn[elemlengths==10])
         
         
         elems = [e for e in [('line',edges),('triangle',tris),('quad',quads),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10)] if len(e[1]) > 0]

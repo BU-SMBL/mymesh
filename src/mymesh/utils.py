@@ -1407,9 +1407,10 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf', return_idx=Fals
         uConn = -1*np.ones_like(PadConn)
         np.put(uConn, ind, PadConn.flat[ind])
 
-        # Special attention need for degenerate wedge elements
+        
         to_delete = np.sum(uConn!=-1,axis=1) < min_node
         if PadConn.shape[1] >= 6:
+            # Special attention need for degenerate wedge elements
             wedge_rows = np.sum(PadConn!=-1,axis=1) == 6
             wedge2tet = np.where((wedge_rows) & (np.sum(uConn!=-1,axis=1) == 4))[0]
             wedge2pyr = np.where((wedge_rows) & (np.sum(uConn!=-1,axis=1) == 5))[0]
@@ -1442,7 +1443,30 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf', return_idx=Fals
                 warnings.warn(f'Unaccounted for wedge-to-pyr case(s) in CleanupDegenerateElements: {str(np.unique(pyrints[~np.isin(pyrints, [1,2,4,8,16])])):s}. This is a bug, please report.')
 
         if PadConn.shape[1] >= 8:
-            warnings.warn('CleanupDegenerateElements has not yet been optimized for hexs. Improperly numbered/inverted elements may occur.')
+            # Special attention need for degenerate hex elements
+
+            hex_rows = np.sum(PadConn!=-1,axis=1) == 8
+            hex2tet = np.where((hex_rows) & (np.sum(uConn!=-1,axis=1) == 4))[0]
+            hex2pyr = np.where((hex_rows) & (np.sum(uConn!=-1,axis=1) == 5))[0]
+            hex2wdg = np.where((hex_rows) & (np.sum(uConn!=-1,axis=1) == 6))[0]
+
+            tetints = np.sum((uConn[hex2tet, :8] == -1) * 2**np.arange(0,8)[::-1], axis=1)
+            pyrints = np.sum((uConn[hex2pyr, :8] == -1) * 2**np.arange(0,8)[::-1], axis=1)
+            wdgints = np.sum((uConn[hex2wdg, :8] == -1) * 2**np.arange(0,8)[::-1], axis=1)
+
+            # Wedge cases:
+            # Case 3 : Face 1 vertical collapse (2==6, 3==7)
+            uConn[hex2wdg[wdgints == 3], :8] = uConn[hex2wdg[wdgints == 3]][:,[0,3,4,1,2,5,6,7]]
+            
+            # Case 12 : Face 1 vertical collapse (0==4, 1==5)
+            uConn[hex2wdg[wdgints == 12], :8] = uConn[hex2wdg[wdgints == 12]][:,[0,3,7,1,2,6,4,5]]
+
+            if np.any((wdgints != 3) & (wdgints != 12)):
+                warnings.warn(f'Unaccounted for hex-to-wedge case(s) in CleanupDegenerateElements. This is a bug, please report.')
+            if len(pyrints) > 0:
+                warnings.warn(f'Unaccounted for hex-to-pyr case(s) in CleanupDegenerateElements. This is a bug, please report.')
+            if len(tetints) > 0:
+                warnings.warn(f'Unaccounted for hex-to-tet case(s) in CleanupDegenerateElements. This is a bug, please report.')
 
         uConn = uConn[~to_delete]
         NewConn = ExtractRagged(uConn)
