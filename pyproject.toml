@@ -62,5 +62,5 @@ all = [
 Documentation = 'https://bu-smbl.github.io/mymesh/'
 
 [tool.setuptools_scm]
-version_scheme = "python-simplified-semver"
+version_scheme = "only-version"
 local_scheme = "no-local-version"
