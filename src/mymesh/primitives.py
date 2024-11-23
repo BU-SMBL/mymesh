@@ -586,7 +586,7 @@ def Cylinder(center, radius, height, theta_resolution=20, axial_resolution=10, r
     --------
     .. plot::
 
-        cylinder = primitives.Cylinder(0,0,0], 1, 2, 20, axis_step=0.25, axis=0)
+        cylinder = primitives.Cylinder([0,0,0], 1, 2, 20, axis=0)
         cylinder.plot(bgcolor='w', show_edges=True)
 
     """    
@@ -608,7 +608,8 @@ def Cylinder(center, radius, height, theta_resolution=20, axial_resolution=10, r
         elif Type == 'surf':
             cylinder = Extrude(circle, height, height/axial_resolution, axis=axis)
             cylinder.NodeConn = converter.solid2surface(*cylinder)
-            cylinder.NodeCoords, cylinder.NodeConn = converter.surf2tris(*cylinder)
+            if ElemType == 'tri':
+                cylinder.NodeCoords, cylinder.NodeConn = converter.surf2tris(*cylinder)
             cylinder.Type='surf'
             cylinder.cleanup()
     
