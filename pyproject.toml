@@ -61,3 +61,7 @@ all = [
 [project.urls]
 "Source Code" = 'https://github.com/BU-SMBL/mymesh'
 Documentation = 'https://bu-smbl.github.io/mymesh/'
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
