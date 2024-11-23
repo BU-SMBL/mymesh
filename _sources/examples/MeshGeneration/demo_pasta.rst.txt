@@ -116,11 +116,7 @@ Please submit any new pasta constructions to toj@bu.edu
 
     RFBOutputContext()
     RFBOutputContext()
-    /home/runner/work/mymesh/mymesh/src/mymesh/utils.py:1445: UserWarning: CleanupDegenerateElements has not yet been optimized for hexs. Improperly numbered/inverted elements may occur.
-      warnings.warn('CleanupDegenerateElements has not yet been optimized for hexs. Improperly numbered/inverted elements may occur.')
     RFBOutputContext()
-    /home/runner/work/mymesh/mymesh/src/mymesh/utils.py:1445: UserWarning: CleanupDegenerateElements has not yet been optimized for hexs. Improperly numbered/inverted elements may occur.
-      warnings.warn('CleanupDegenerateElements has not yet been optimized for hexs. Improperly numbered/inverted elements may occur.')
     RFBOutputContext()
 
 
@@ -129,7 +125,7 @@ Please submit any new pasta constructions to toj@bu.edu
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.800 seconds)
+   **Total running time of the script:** (0 minutes 4.527 seconds)
 
 
 .. _sphx_glr_download_examples_MeshGeneration_demo_pasta.py:

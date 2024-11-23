@@ -440,6 +440,7 @@
 <span class="sd">    hex2tet</span>
 <span class="sd">    wedge2tet</span>
 <span class="sd">    pyramid2tet</span>
+<span class="sd">    surf2tris</span>
 <span class="sd">    quad2tri</span>
 <span class="sd">    tet102tet4</span>
 <span class="sd">    tet42tet10</span>
@@ -901,6 +902,8 @@
     <span class="k">return</span> <span class="n">TetCoords</span><span class="p">,</span> <span class="n">TetConn</span></div>
 
 
+<div class="viewcode-block" id="surf2tris">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.converter.surf2tris.html#mymesh.converter.surf2tris">[docs]</a>
 <span class="k">def</span> <span class="nf">surf2tris</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_inv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decompose all elements of a surface mesh to triangles.</span>
@@ -960,7 +963,8 @@
         <span class="k">return</span> <span class="n">TriCoords</span><span class="p">,</span> <span class="n">TriConn</span><span class="p">,</span> <span class="n">ElemIds</span>
     <span class="k">elif</span> <span class="n">return_inv</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">TriCoords</span><span class="p">,</span> <span class="n">TriConn</span><span class="p">,</span> <span class="n">inv</span>
-    <span class="k">return</span> <span class="n">TriCoords</span><span class="p">,</span> <span class="n">TriConn</span>
+    <span class="k">return</span> <span class="n">TriCoords</span><span class="p">,</span> <span class="n">TriConn</span></div>
+
 
 <div class="viewcode-block" id="hex2tet">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.hex2tet.html#mymesh.converter.hex2tet">[docs]</a>

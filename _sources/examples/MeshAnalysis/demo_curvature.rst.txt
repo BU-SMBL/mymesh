@@ -180,7 +180,7 @@ curvatures deviate from the true curvature of 1 mm :sup:`-1`.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.660 seconds)
+   **Total running time of the script:** (0 minutes 3.053 seconds)
 
 
 .. _sphx_glr_download_examples_MeshAnalysis_demo_curvature.py:

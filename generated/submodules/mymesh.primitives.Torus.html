@@ -425,8 +425,8 @@
 <h1>mymesh.primitives.Torus<a class="headerlink" href="#mymesh-primitives-torus" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.primitives.Torus">
-<span class="sig-prename descclassname"><span class="pre">mymesh.primitives.</span></span><span class="sig-name descname"><span class="pre">Torus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ElemType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tri'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/primitives.html#Torus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.primitives.Torus" title="Link to this definition">#</a></dt>
-<dd><p>Generate a sphere (or ellipsoid)
+<span class="sig-prename descclassname"><span class="pre">mymesh.primitives.</span></span><span class="sig-name descname"><span class="pre">Torus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radial_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ElemType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'surf'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/primitives.html#Torus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.primitives.Torus" title="Link to this definition">#</a></dt>
+<dd><p>Generate a torus
 The total number of points will be phi_resolution*(theta_resolution-2) + 2</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -439,9 +439,13 @@ torus to the center of the circular tube.</p></li>
 default 2</p></li>
 <li><p><strong>theta_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of circular cross sections rotated about the axis, by default 20.</p></li>
 <li><p><strong>phi_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of circumferential points for each circle section, by default 20.</p></li>
+<li><p><strong>radial_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of radial points from center to edge of the circular cross section,
+by default 10. Only relevant if Type=’vol’.</p></li>
 <li><p><strong>ElemType</strong> (<em>str</em><em>, </em><em>optional</em>) – Specify the element type of the mesh. This can either be ‘quad’ for
-a quadrilateral mesh or ‘tri’ for a triangular mesh, by default ‘tri’.
+a quadrilateral mesh or ‘tri’ for a triangular mesh, by default None.
 If ‘quad’ is specified, there will still be some triangles at z axis “poles”.</p></li>
+<li><p><strong>Type</strong> (<em>str</em><em>, </em><em>optional</em>) – Mesh type of the final mesh. This could be ‘surf’ for a surface mesh or
+‘vol’ for a volumetric mesh, by default ‘surf’.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

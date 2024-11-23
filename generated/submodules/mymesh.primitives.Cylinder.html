@@ -425,26 +425,41 @@
 <h1>mymesh.primitives.Cylinder<a class="headerlink" href="#mymesh-primitives-cylinder" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.primitives.Cylinder">
-<span class="sig-prename descclassname"><span class="pre">mymesh.primitives.</span></span><span class="sig-name descname"><span class="pre">Cylinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ElemType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tri'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/primitives.html#Cylinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.primitives.Cylinder" title="Link to this definition">#</a></dt>
-<dd><p>Generate an axis-aligned cylindrical surface mesh</p>
+<span class="sig-prename descclassname"><span class="pre">mymesh.primitives.</span></span><span class="sig-name descname"><span class="pre">Cylinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radial_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ElemType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'surf'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/primitives.html#Cylinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.primitives.Cylinder" title="Link to this definition">#</a></dt>
+<dd><p>Generate an axis-aligned cylindrical mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bounds</strong> (<em>list</em>) – Six element list of bounds [xmin,xmax,ymin,ymax,zmin,zmax].
-NodeCoords and NodeConn. By default False.</p></li>
-<li><p><strong>resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of points in the circumference of the cylinder, by default 20.</p></li>
+<li><p><strong>center</strong> (<em>array_like</em>) – Coordinates of the center of the circle at the base of the cylinder (x,y,z).</p></li>
+<li><p><strong>radius</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – The radius of the cylinder. Radius can be specified as a scalar radius of
+the cylinder or a two element array of half-axes for a cylinder with an
+elliptical cross-section. For elliptical cross-sections, the two elements
+correspond to the two axes in the plane perpendicular to &lt;axis&gt; (e.g. if
+axis=2, (r1, r2) specify the x, y radii, respectively; if axis=1,
+(r1, r2) specify the x, z radii, respectively, etc.).</p></li>
+<li><p><strong>height</strong> (<em>float</em>) – height of the cylinder. Cylinder will be extruded from &lt;center&gt; by &lt;height&gt;
+in the &lt;axis&gt; direction. To extrude in the negative-&lt;axis&gt; direction,
+a negative height can be given.</p></li>
+<li><p><strong>theta_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of points in the circumference of the cylinder, by default 20.</p></li>
+<li><p><strong>axial_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of points along the axis of the cylinder, by default 10.</p></li>
+<li><p><strong>radial_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of radial points from center to edge, by default 10. Only relevant
+if Type=’vol’.</p></li>
 <li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Long axis of the cylinder (i.e. the circular ends will lie in the plane of the other two axes).
 Must be 0, 1, or 2 (x, y, z), by default 2</p></li>
-<li><p><strong>axis_step</strong> (<em>float</em><em>, </em><em>optional</em>) – Element size in the &lt;axis&gt; direction, by default it will be set to the full length of the cylinder.</p></li>
-<li><p><strong>ElemType</strong> (<em>str</em><em>, </em><em>optional</em>) – Specify the element type of the walls of the cylinder mesh. This can either be
-‘quad’ for a quadrilateral mesh or ‘tri’ for a triangular mesh, by default ‘tri’.
-The ends of the cylinder will be triangular regardless of this input.</p></li>
 <li><p><strong>cap</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, will close the ends of the cylinder, otherwise it will leave them open, by
 default True.</p></li>
+<li><p><strong>ElemType</strong> (<em>str</em><em>, </em><em>optional</em>) – Specify the element type of the mesh. If Type=’surf’ (default), ElemType
+can be ‘tri’, which will produce a purely triangular mesh or None, which
+will produce a quad-dominant mesh with some triangles. If Type=’vol’,
+ElemType can be ‘tet’, which will produce a purely tetrahedral mesh or
+None, which  will produce a hex-dominant mesh with some tetrahedra. By
+default, None.</p></li>
+<li><p><strong>Type</strong> (<em>str</em><em>, </em><em>optional</em>) – Mesh type of the final mesh. This could be ‘surf’ for a surface mesh or
+‘vol’ for a volumetric mesh, by default ‘surf’.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>cyl</strong> – Mesh object containing the cylinder mesh.</p>
+<dd class="field-even"><p><strong>cylinder</strong> – Mesh object containing the cylinder mesh.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh">mymesh.mesh</a></p>
@@ -457,13 +472,10 @@ the NodeCoords and NodeConn array can be returned directly (instead of the mesh 
 by running: <code class="docutils literal notranslate"><span class="pre">NodeCoords,</span> <span class="pre">NodeConn</span> <span class="pre">=</span> <span class="pre">primitives.Cylinder(...)</span></code></p>
 </div>
 <p class="rubric">Examples</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cyl</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Cylinder</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mi">20</span><span class="p">,</span> <span class="n">axis_step</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">cyl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cylinder</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Cylinder</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">axis_step</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cylinder</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<figure class="align-default">
-<img alt="../../_images/mymesh-primitives-Cylinder-1.png" class="plot-directive" src="../../_images/mymesh-primitives-Cylinder-1.png" />
-</figure>
 </dd></dl>
 
 </section>

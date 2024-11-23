@@ -425,33 +425,37 @@
 <h1>mymesh.primitives.Sphere<a class="headerlink" href="#mymesh-primitives-sphere" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.primitives.Sphere">
-<span class="sig-prename descclassname"><span class="pre">mymesh.primitives.</span></span><span class="sig-name descname"><span class="pre">Sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ElemType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tri'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/primitives.html#Sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.primitives.Sphere" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mymesh.primitives.</span></span><span class="sig-name descname"><span class="pre">Sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radial_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ElemType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'surf'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/primitives.html#Sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.primitives.Sphere" title="Link to this definition">#</a></dt>
 <dd><p>Generate a sphere (or ellipsoid)
 The total number of points will be phi_resolution*(theta_resolution-2) + 2</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>center</strong> (<em>array_like</em>) – Three element array of the coordinates of the center of the sphere.</p></li>
-<li><p><strong>radius</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – The radius of the sphere. Radius can be specified as a scalar radius of the sphere
-or three element array of half-axes for an ellipsoid.</p></li>
-<li><p><strong>theta_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of circular (or elliptical) cross sections sampled along the z axis, by default 20.</p></li>
+<li><p><strong>radius</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – The radius of the sphere. Radius can be specified as a scalar radius of
+the sphere or three element array of half-axes for an ellipsoid.</p></li>
+<li><p><strong>theta_resolution</strong> (<em>int</em><em>, </em><em>optionalperpendicular</em>) – Number of circular (or elliptical) cross sections sampled along the z axis, by default 20.</p></li>
 <li><p><strong>phi_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of circumferential points for each cross section, by default 20.</p></li>
-<li><p><strong>ElemType</strong> (<em>str</em><em>, </em><em>optional</em>) – Specify the element type of the mesh. This can either be ‘quad’ for
-a quadrilateral mesh or ‘tri’ for a triangular mesh, by default ‘tri’.
-If ‘quad’ is specified, there will still be some triangles at z axis “poles”.</p></li>
+<li><p><strong>radial_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of radial points from center to edge, by default 10. Only relevant
+if Type=’vol’.</p></li>
+<li><p><strong>ElemType</strong> (<em>str</em><em>, </em><em>optional</em>) – Specify the element type of the mesh. If Type=’surf’ (default), ElemType
+can be ‘tri’, which will produce a purely triangular mesh or None, which
+will produce a quad-dominant mesh with some triangles. If Type=’vol’,
+ElemType can be ‘tet’, which will produce a purely tetrahedral mesh or
+None, which  will produce a hex-dominant mesh with some tetrahedra. By
+default, None.</p></li>
+<li><p><strong>Type</strong> (<em>str</em><em>, </em><em>optional</em>) – Mesh type of the final mesh. This could be ‘surf’ for a surface mesh or
+‘vol’ for a volumetric mesh, by default ‘surf’.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Mesh object containing the cylinder mesh.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>sphere, <a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh">mymesh.mesh</a></p>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>sphere, mymesh.mesh</em> – Mesh object containing the cylinder mesh.</p></li>
+<li><p><em>.. note::</em> – Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: <code class="docutils literal notranslate"><span class="pre">NodeCoords,</span> <span class="pre">NodeConn</span> <span class="pre">=</span> <span class="pre">primitives.Sphere(...)</span></code></p></li>
+</ul>
+</p>
 </dd>
 </dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: <code class="docutils literal notranslate"><span class="pre">NodeCoords,</span> <span class="pre">NodeConn</span> <span class="pre">=</span> <span class="pre">primitives.Sphere(...)</span></code></p>
-</div>
 <p class="rubric">Examples</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sphere</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">sphere</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
