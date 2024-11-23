@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mymesh"
-dynamic = ["version"]
+version = "0.0.1"
 authors = [
     {name = "Timothy O. Josephson", email = "toj@bu.edu"},
 ]
@@ -57,3 +57,7 @@ all = [
     "PyQt6>=6.2.3",
     "PyGlet>=2.0.10"
     ]
+
+[project.urls]
+"Source Code" = 'https://github.com/BU-SMBL/mymesh'
+Documentation = 'https://bu-smbl.github.io/mymesh/'

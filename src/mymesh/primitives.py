@@ -586,7 +586,7 @@ def Cylinder(center, radius, height, theta_resolution=20, axial_resolution=10, r
     --------
     .. plot::
 
-        cylinder = primitives.Cylinder([0,0,0], 1, 2, 20, axis=0)
+        cylinder = primitives.Cylinder([0,0,0], 1, 2, 20, axis=2)
         cylinder.plot(bgcolor='w', show_edges=True)
 
     """    
