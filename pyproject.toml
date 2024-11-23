@@ -62,5 +62,6 @@ all = [
 Documentation = 'https://bu-smbl.github.io/mymesh/'
 
 [tool.setuptools_scm]
-version_scheme = "only-version"
+version_scheme = "python-simplified-semver"
 local_scheme = "no-local-version"
+tag_regex = '^v(?P<version>[0-9]+\.[0-9]+\.[0-9]+(?:a|b|rc)[0-9]+)$'
