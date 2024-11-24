@@ -1,0 +1,6 @@
+mymesh.quality.quad\_skewness
+=============================
+
+.. currentmodule:: mymesh.quality
+
+.. autofunction:: quad_skewness

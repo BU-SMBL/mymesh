@@ -1,0 +1,1363 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Index &#8212; MyMesh vdev Manual</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/css/mymesh.css?v=152078be" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+
+    <script src="_static/documentation_options.js?v=3ce10a4d"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=4ea706d9"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="dev" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="_static/mymesh_logo.png" class="logo__image only-light" alt="MyMesh vdev Manual - Home"/>
+    <img src="_static/mymesh_logo.png" class="logo__image only-dark pst-js-only" alt="MyMesh vdev Manual - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none"></div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#Q"><strong>Q</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
+ | <a href="#X"><strong>X</strong></a>
+ | <a href="#Y"><strong>Y</strong></a>
+ | <a href="#Z"><strong>Z</strong></a>
+ 
+</div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.utils.AABB.html#mymesh.utils.AABB">AABB() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.contour.Adaptive.html#mymesh.contour.Adaptive">Adaptive() (in module mymesh.contour)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.addEdges.html#mymesh.mesh.mesh.addEdges">addEdges() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.addElems.html#mymesh.mesh.mesh.addElems">addElems() (mymesh.mesh.mesh method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/mymesh.mesh.mesh.addFaces.html#mymesh.mesh.mesh.addFaces">addFaces() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.addNodes.html#mymesh.mesh.mesh.addNodes">addNodes() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.curvature.AnalyticalCurvature.html#mymesh.curvature.AnalyticalCurvature">AnalyticalCurvature() (in module mymesh.curvature)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.Area.html#mymesh.quality.Area">Area() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.AspectRatio.html#mymesh.quality.AspectRatio">AspectRatio() (in module mymesh.quality)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.utils.BaryTet.html#mymesh.utils.BaryTet">BaryTet() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.BaryTri.html#mymesh.utils.BaryTri">BaryTri() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.BaryTris.html#mymesh.utils.BaryTris">BaryTris() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.BoundaryConn.html#mymesh.mesh.mesh.BoundaryConn">BoundaryConn (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.BoundaryNodes.html#mymesh.mesh.mesh.BoundaryNodes">BoundaryNodes (mymesh.mesh.mesh property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.delaunay.BowyerWatson2d.html#mymesh.delaunay.BowyerWatson2d">BowyerWatson2d() (in module mymesh.delaunay)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.delaunay.BowyerWatson3d.html#mymesh.delaunay.BowyerWatson3d">BowyerWatson3d() (in module mymesh.delaunay)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.box.html#mymesh.implicit.box">box() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.primitives.Box.html#mymesh.primitives.Box">Box() (in module mymesh.primitives)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.BoxTrianglesIntersection.html#mymesh.rays.BoxTrianglesIntersection">BoxTrianglesIntersection() (in module mymesh.rays)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.utils.CalcFaceNormal.html#mymesh.utils.CalcFaceNormal">CalcFaceNormal() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.cells.html#mymesh.mesh.mesh.cells">cells (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.Centroids.html#mymesh.mesh.mesh.Centroids">Centroids (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.Centroids.html#mymesh.utils.Centroids">Centroids() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.primitives.Circle.html#mymesh.primitives.Circle">Circle() (in module mymesh.primitives)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.primitives.CirclePt.html#mymesh.primitives.CirclePt">CirclePt() (in module mymesh.primitives)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.cleanup.html#mymesh.mesh.mesh.cleanup">cleanup() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.CleanupDegenerateElements.html#mymesh.utils.CleanupDegenerateElements">CleanupDegenerateElements() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.Clip.html#mymesh.mesh.mesh.Clip">Clip() (mymesh.mesh.mesh method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/mymesh.mesh.mesh.Contour.html#mymesh.mesh.mesh.Contour">Contour() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.delaunay.ConvexHull.html#mymesh.delaunay.ConvexHull">ConvexHull() (in module mymesh.delaunay)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.delaunay.ConvexHull_GiftWrapping.html#mymesh.delaunay.ConvexHull_GiftWrapping">ConvexHull_GiftWrapping() (in module mymesh.delaunay)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.delaunay.ConvexHullFanTriangulation.html#mymesh.delaunay.ConvexHullFanTriangulation">ConvexHullFanTriangulation() (in module mymesh.delaunay)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.copy.html#mymesh.mesh.mesh.copy">copy() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.CreateBoundaryLayer.html#mymesh.mesh.mesh.CreateBoundaryLayer">CreateBoundaryLayer() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.curvature.CubicFit.html#mymesh.curvature.CubicFit">CubicFit() (in module mymesh.curvature)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.curvature.Curvedness.html#mymesh.curvature.Curvedness">Curvedness() (in module mymesh.curvature)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.cylinder.html#mymesh.implicit.cylinder">cylinder() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.primitives.Cylinder.html#mymesh.primitives.Cylinder">Cylinder() (in module mymesh.primitives)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.utils.DeleteDegenerateElements.html#mymesh.utils.DeleteDegenerateElements">DeleteDegenerateElements() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.DeleteDuplicateNodes.html#mymesh.utils.DeleteDuplicateNodes">DeleteDuplicateNodes() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.DetectFeatures.html#mymesh.utils.DetectFeatures">DetectFeatures() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.diamond.html#mymesh.implicit.diamond">diamond() (in module mymesh.implicit)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.implicit.diff.html#mymesh.implicit.diff">diff() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.difff.html#mymesh.implicit.difff">difff() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.diffs.html#mymesh.implicit.diffs">diffs() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.dihedralAngles.html#mymesh.quality.dihedralAngles">dihedralAngles() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.DilateVoxel.html#mymesh.utils.DilateVoxel">DilateVoxel() (in module mymesh.utils)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/mymesh.mesh.mesh.EdgeConn.html#mymesh.mesh.mesh.EdgeConn">EdgeConn (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.EdgeElemConn.html#mymesh.mesh.mesh.EdgeElemConn">EdgeElemConn (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.Edges.html#mymesh.mesh.mesh.Edges">Edges (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.edges2unique.html#mymesh.converter.edges2unique">edges2unique() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.EdgesByElement.html#mymesh.converter.EdgesByElement">EdgesByElement() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.html#mymesh.mesh.EdgeSets">EdgeSets (mymesh.mesh attribute)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.ElemConn.html#mymesh.mesh.mesh.ElemConn">ElemConn (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.html#mymesh.mesh.ElemData">ElemData (mymesh.mesh attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/mymesh.mesh.mesh.ElemNeighbors.html#mymesh.mesh.mesh.ElemNeighbors">ElemNeighbors (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.ElemNormals.html#mymesh.mesh.mesh.ElemNormals">ElemNormals (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.html#mymesh.mesh.ElemSets">ElemSets (mymesh.mesh attribute)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.equiangular_skewness.html#mymesh.quality.equiangular_skewness">equiangular_skewness() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.ErodeVoxel.html#mymesh.utils.ErodeVoxel">ErodeVoxel() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.EulerCharacteristic.html#mymesh.mesh.mesh.EulerCharacteristic">EulerCharacteristic (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.ExtractRagged.html#mymesh.utils.ExtractRagged">ExtractRagged() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.primitives.Extrude.html#mymesh.primitives.Extrude">Extrude() (in module mymesh.primitives)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.utils.Face2NodeNormal.html#mymesh.utils.Face2NodeNormal">Face2NodeNormal() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.visualize.FaceColor.html#mymesh.visualize.FaceColor">FaceColor() (in module mymesh.visualize)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.FaceConn.html#mymesh.mesh.mesh.FaceConn">FaceConn (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.FaceElemConn.html#mymesh.mesh.mesh.FaceElemConn">FaceElemConn (mymesh.mesh.mesh property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/mymesh.mesh.mesh.Faces.html#mymesh.mesh.mesh.Faces">Faces (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.faces2surface.html#mymesh.converter.faces2surface">faces2surface() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.faces2unique.html#mymesh.converter.faces2unique">faces2unique() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.html#mymesh.mesh.FaceSets">FaceSets (mymesh.mesh attribute)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.octree.Function2Octree.html#mymesh.octree.Function2Octree">Function2Octree() (in module mymesh.octree)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.curvature.GaussianCurvature.html#mymesh.curvature.GaussianCurvature">GaussianCurvature() (in module mymesh.curvature)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.Genus.html#mymesh.mesh.mesh.Genus">Genus (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.improvement.GeoTransformSmoothing.html#mymesh.improvement.GeoTransformSmoothing">GeoTransformSmoothing() (in module mymesh.improvement)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.octree.getAllLeaf.html#mymesh.octree.getAllLeaf">getAllLeaf() (in module mymesh.octree)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.getConnectedElements.html#mymesh.utils.getConnectedElements">getConnectedElements() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.getConnectedNodes.html#mymesh.utils.getConnectedNodes">getConnectedNodes() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.getCurvature.html#mymesh.mesh.mesh.getCurvature">getCurvature() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.getElemConnectivity.html#mymesh.utils.getElemConnectivity">getElemConnectivity() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.getElemNeighbors.html#mymesh.utils.getElemNeighbors">getElemNeighbors() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.getNodeNeighborhood.html#mymesh.utils.getNodeNeighborhood">getNodeNeighborhood() (in module mymesh.utils)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.utils.getNodeNeighborhoodByRadius.html#mymesh.utils.getNodeNeighborhoodByRadius">getNodeNeighborhoodByRadius() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.getNodeNeighbors.html#mymesh.utils.getNodeNeighbors">getNodeNeighbors() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.getQuality.html#mymesh.mesh.mesh.getQuality">getQuality() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.visualize.GetTheme.html#mymesh.visualize.GetTheme">GetTheme() (in module mymesh.visualize)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.improvement.GlobalLaplacianSmoothing.html#mymesh.improvement.GlobalLaplacianSmoothing">GlobalLaplacianSmoothing() (in module mymesh.improvement)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.primitives.Grid.html#mymesh.primitives.Grid">Grid() (in module mymesh.primitives)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.primitives.Grid2D.html#mymesh.primitives.Grid2D">Grid2D() (in module mymesh.primitives)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.grid2fun.html#mymesh.implicit.grid2fun">grid2fun() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.grid2grad.html#mymesh.implicit.grid2grad">grid2grad() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.gyroid.html#mymesh.implicit.gyroid">gyroid() (in module mymesh.implicit)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.converter.hex2edges.html#mymesh.converter.hex2edges">hex2edges() (in module mymesh.converter)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.converter.hex2faces.html#mymesh.converter.hex2faces">hex2faces() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.hex2tet.html#mymesh.converter.hex2tet">hex2tet() (in module mymesh.converter)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.utils.identify_type.html#mymesh.utils.identify_type">identify_type() (in module mymesh.utils)</a>
+
+      <ul>
+        <li><a href="generated/mymesh.mesh.mesh.identify_type.html#mymesh.mesh.mesh.identify_type">(mymesh.mesh.mesh method)</a>
+</li>
+      </ul></li>
+      <li><a href="generated/submodules/mymesh.converter.im2voxel.html#mymesh.converter.im2voxel">im2voxel() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.curvature.ImageCurvature.html#mymesh.curvature.ImageCurvature">ImageCurvature() (in module mymesh.curvature)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.imread.html#mymesh.mesh.mesh.imread">imread() (mymesh.mesh.mesh method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.implicit.intersection.html#mymesh.implicit.intersection">intersection() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.intersectionf.html#mymesh.implicit.intersectionf">intersectionf() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.intersections.html#mymesh.implicit.intersections">intersections() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.InverseOrthogonality.html#mymesh.quality.InverseOrthogonality">InverseOrthogonality() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.InverseOrthogonalQuality.html#mymesh.quality.InverseOrthogonalQuality">InverseOrthogonalQuality() (in module mymesh.quality)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.implicit.lidinoid.html#mymesh.implicit.lidinoid">lidinoid() (in module mymesh.implicit)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.primitives.Line.html#mymesh.primitives.Line">Line() (in module mymesh.primitives)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.improvement.LocalLaplacianSmoothing.html#mymesh.improvement.LocalLaplacianSmoothing">LocalLaplacianSmoothing() (in module mymesh.improvement)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.utils.makePyramidLayer.html#mymesh.utils.makePyramidLayer">makePyramidLayer() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.contour.MarchingCubes.html#mymesh.contour.MarchingCubes">MarchingCubes() (in module mymesh.contour)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.contour.MarchingCubesImage.html#mymesh.contour.MarchingCubesImage">MarchingCubesImage() (in module mymesh.contour)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.contour.MarchingSquares.html#mymesh.contour.MarchingSquares">MarchingSquares() (in module mymesh.contour)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.contour.MarchingSquaresImage.html#mymesh.contour.MarchingSquaresImage">MarchingSquaresImage() (in module mymesh.contour)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.contour.MarchingTetrahedra.html#mymesh.contour.MarchingTetrahedra">MarchingTetrahedra() (in module mymesh.contour)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.MaxDihedral.html#mymesh.quality.MaxDihedral">MaxDihedral() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.curvature.MeanCurvature.html#mymesh.curvature.MeanCurvature">MeanCurvature() (in module mymesh.curvature)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.MeanRatio.html#mymesh.quality.MeanRatio">MeanRatio() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.merge.html#mymesh.mesh.mesh.merge">merge() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.MergeMesh.html#mymesh.utils.MergeMesh">MergeMesh() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.html#mymesh.mesh">mesh (class in mymesh)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.mesh2sdf.html#mymesh.implicit.mesh2sdf">mesh2sdf() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.mesh2udf.html#mymesh.implicit.mesh2udf">mesh2udf() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.booleans.MeshBooleans.html#mymesh.booleans.MeshBooleans">MeshBooleans() (in module mymesh.booleans)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.meshio2mymesh.html#mymesh.mesh.mesh.meshio2mymesh">meshio2mymesh() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.MinDihedral.html#mymesh.quality.MinDihedral">MinDihedral() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.MirrorMesh.html#mymesh.utils.MirrorMesh">MirrorMesh() (in module mymesh.utils)</a>
+</li>
+      <li>
+    module
+
+      <ul>
+        <li><a href="api.html#module-mymesh">mymesh</a>
+</li>
+        <li><a href="generated/mymesh.booleans.html#module-mymesh.booleans">mymesh.booleans</a>
+</li>
+        <li><a href="generated/mymesh.contour.html#module-mymesh.contour">mymesh.contour</a>
+</li>
+        <li><a href="generated/mymesh.converter.html#module-mymesh.converter">mymesh.converter</a>
+</li>
+        <li><a href="generated/mymesh.curvature.html#module-mymesh.curvature">mymesh.curvature</a>
+</li>
+        <li><a href="generated/mymesh.delaunay.html#module-mymesh.delaunay">mymesh.delaunay</a>
+</li>
+        <li><a href="generated/mymesh.image.html#module-mymesh.image">mymesh.image</a>
+</li>
+        <li><a href="generated/mymesh.implicit.html#module-mymesh.implicit">mymesh.implicit</a>
+</li>
+        <li><a href="generated/mymesh.improvement.html#module-mymesh.improvement">mymesh.improvement</a>
+</li>
+        <li><a href="generated/mymesh.octree.html#module-mymesh.octree">mymesh.octree</a>
+</li>
+        <li><a href="generated/mymesh.primitives.html#module-mymesh.primitives">mymesh.primitives</a>
+</li>
+        <li><a href="generated/mymesh.quality.html#module-mymesh.quality">mymesh.quality</a>
+</li>
+        <li><a href="generated/mymesh.rays.html#module-mymesh.rays">mymesh.rays</a>
+</li>
+        <li><a href="generated/mymesh.utils.html#module-mymesh.utils">mymesh.utils</a>
+</li>
+        <li><a href="generated/mymesh.visualize.html#module-mymesh.visualize">mymesh.visualize</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.utils.MVBB.html#mymesh.utils.MVBB">MVBB() (in module mymesh.utils)</a>
+</li>
+      <li>
+    mymesh
+
+      <ul>
+        <li><a href="api.html#module-mymesh">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.booleans
+
+      <ul>
+        <li><a href="generated/mymesh.booleans.html#module-mymesh.booleans">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.contour
+
+      <ul>
+        <li><a href="generated/mymesh.contour.html#module-mymesh.contour">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.converter
+
+      <ul>
+        <li><a href="generated/mymesh.converter.html#module-mymesh.converter">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.curvature
+
+      <ul>
+        <li><a href="generated/mymesh.curvature.html#module-mymesh.curvature">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.delaunay
+
+      <ul>
+        <li><a href="generated/mymesh.delaunay.html#module-mymesh.delaunay">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.image
+
+      <ul>
+        <li><a href="generated/mymesh.image.html#module-mymesh.image">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.implicit
+
+      <ul>
+        <li><a href="generated/mymesh.implicit.html#module-mymesh.implicit">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.improvement
+
+      <ul>
+        <li><a href="generated/mymesh.improvement.html#module-mymesh.improvement">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.octree
+
+      <ul>
+        <li><a href="generated/mymesh.octree.html#module-mymesh.octree">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.primitives
+
+      <ul>
+        <li><a href="generated/mymesh.primitives.html#module-mymesh.primitives">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.quality
+
+      <ul>
+        <li><a href="generated/mymesh.quality.html#module-mymesh.quality">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.rays
+
+      <ul>
+        <li><a href="generated/mymesh.rays.html#module-mymesh.rays">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.utils
+
+      <ul>
+        <li><a href="generated/mymesh.utils.html#module-mymesh.utils">module</a>
+</li>
+      </ul></li>
+      <li>
+    mymesh.visualize
+
+      <ul>
+        <li><a href="generated/mymesh.visualize.html#module-mymesh.visualize">module</a>
+</li>
+      </ul></li>
+      <li><a href="generated/mymesh.mesh.mesh.mymesh2meshio.html#mymesh.mesh.mesh.mymesh2meshio">mymesh2meshio() (mymesh.mesh.mesh method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/mymesh.mesh.mesh.ND.html#mymesh.mesh.mesh.ND">ND (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.NEdge.html#mymesh.mesh.mesh.NEdge">NEdge (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.NElem.html#mymesh.mesh.mesh.NElem">NElem (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.neovius.html#mymesh.implicit.neovius">neovius() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.NFace.html#mymesh.mesh.mesh.NFace">NFace (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.NNode.html#mymesh.mesh.mesh.NNode">NNode (mymesh.mesh.mesh property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/mymesh.mesh.html#mymesh.mesh.NodeData">NodeData (mymesh.mesh attribute)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.NodeNeighbors.html#mymesh.mesh.mesh.NodeNeighbors">NodeNeighbors (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.NodeNormals.html#mymesh.mesh.mesh.NodeNormals">NodeNormals (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.NodeNormalsMethod.html#mymesh.mesh.mesh.NodeNormalsMethod">NodeNormalsMethod (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.html#mymesh.mesh.NodeSets">NodeSets (mymesh.mesh attribute)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.improvement.NodeSpringSmoothing.html#mymesh.improvement.NodeSpringSmoothing">NodeSpringSmoothing() (in module mymesh.improvement)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.curvature.NormCurve.html#mymesh.curvature.NormCurve">NormCurve() (in module mymesh.curvature)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.octree.Octree2Dual.html#mymesh.octree.Octree2Dual">Octree2Dual() (in module mymesh.octree)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.octree.Octree2Voxel.html#mymesh.octree.Octree2Voxel">Octree2Voxel() (in module mymesh.octree)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.implicit.offset.html#mymesh.implicit.offset">offset() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.Orthogonality.html#mymesh.quality.Orthogonality">Orthogonality() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.OrthogonalQuality.html#mymesh.quality.OrthogonalQuality">OrthogonalQuality() (in module mymesh.quality)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.utils.PadRagged.html#mymesh.utils.PadRagged">PadRagged() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.visualize.ParseColor.html#mymesh.visualize.ParseColor">ParseColor() (in module mymesh.visualize)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.primitives.Plane.html#mymesh.primitives.Plane">Plane() (in module mymesh.primitives)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.PlaneBoxIntersection.html#mymesh.rays.PlaneBoxIntersection">PlaneBoxIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.PlaneSurfIntersection.html#mymesh.rays.PlaneSurfIntersection">PlaneSurfIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.PlaneTriangleIntersection.html#mymesh.rays.PlaneTriangleIntersection">PlaneTriangleIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.PlaneTrianglesIntersection.html#mymesh.rays.PlaneTrianglesIntersection">PlaneTrianglesIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.plot.html#mymesh.mesh.mesh.plot">plot() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.PointInBox.html#mymesh.rays.PointInBox">PointInBox() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.PointInSurf.html#mymesh.rays.PointInSurf">PointInSurf() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.PointInTri.html#mymesh.rays.PointInTri">PointInTri() (in module mymesh.rays)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/mymesh.mesh.mesh.points.html#mymesh.mesh.mesh.points">points (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.octree.Points2Octree.html#mymesh.octree.Points2Octree">Points2Octree() (in module mymesh.octree)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.PointsInSurf.html#mymesh.rays.PointsInSurf">PointsInSurf() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.PointsInTris.html#mymesh.rays.PointsInTris">PointsInTris() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.PointsInVoxel.html#mymesh.rays.PointsInVoxel">PointsInVoxel() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.polygon2edges.html#mymesh.converter.polygon2edges">polygon2edges() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.primitive.html#mymesh.implicit.primitive">primitive() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.octree.Print.html#mymesh.octree.Print">Print() (in module mymesh.octree)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.Project2Surface.html#mymesh.utils.Project2Surface">Project2Surface() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.pyramid2edges.html#mymesh.converter.pyramid2edges">pyramid2edges() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.pyramid2faces.html#mymesh.converter.pyramid2faces">pyramid2faces() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.pyramid2tet.html#mymesh.converter.pyramid2tet">pyramid2tet() (in module mymesh.converter)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Q">Q</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.converter.quad2edges.html#mymesh.converter.quad2edges">quad2edges() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.quad2tri.html#mymesh.converter.quad2tri">quad2tri() (in module mymesh.converter)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.quality.quad_skewness.html#mymesh.quality.quad_skewness">quad_skewness() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.curvature.QuadFit.html#mymesh.curvature.QuadFit">QuadFit() (in module mymesh.curvature)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.rays.RayBoxesIntersection.html#mymesh.rays.RayBoxesIntersection">RayBoxesIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.RayBoxIntersection.html#mymesh.rays.RayBoxIntersection">RayBoxIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.RayOctreeIntersection.html#mymesh.rays.RayOctreeIntersection">RayOctreeIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.RaySegmentsIntersection.html#mymesh.rays.RaySegmentsIntersection">RaySegmentsIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.RaysSurfIntersection.html#mymesh.rays.RaysSurfIntersection">RaysSurfIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.RaysTrianglesIntersection.html#mymesh.rays.RaysTrianglesIntersection">RaysTrianglesIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.RaySurfIntersection.html#mymesh.rays.RaySurfIntersection">RaySurfIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.RayTriangleIntersection.html#mymesh.rays.RayTriangleIntersection">RayTriangleIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.RayTrianglesIntersection.html#mymesh.rays.RayTrianglesIntersection">RayTrianglesIntersection() (in module mymesh.rays)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.image.read.html#mymesh.image.read">read() (in module mymesh.image)</a>
+
+      <ul>
+        <li><a href="generated/mymesh.mesh.mesh.read.html#mymesh.mesh.mesh.read">(mymesh.mesh.mesh method)</a>
+</li>
+      </ul></li>
+      <li><a href="generated/submodules/mymesh.utils.RelabelNodes.html#mymesh.utils.RelabelNodes">RelabelNodes() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.removeElems.html#mymesh.mesh.mesh.removeElems">removeElems() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.RenumberFacesBySet.html#mymesh.mesh.mesh.RenumberFacesBySet">RenumberFacesBySet() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.RenumberNodesBySet.html#mymesh.mesh.mesh.RenumberNodesBySet">RenumberNodesBySet() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.reset.html#mymesh.mesh.mesh.reset">reset() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.primitives.Revolve.html#mymesh.primitives.Revolve">Revolve() (in module mymesh.primitives)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.rMax.html#mymesh.implicit.rMax">rMax() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.rMin.html#mymesh.implicit.rMin">rMin() (in module mymesh.implicit)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.delaunay.SciPy.html#mymesh.delaunay.SciPy">SciPy() (in module mymesh.delaunay)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.octree.SearchOctree.html#mymesh.octree.SearchOctree">SearchOctree() (in module mymesh.octree)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.octree.SearchOctreeTri.html#mymesh.octree.SearchOctreeTri">SearchOctreeTri() (in module mymesh.octree)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.SegmentSegmentIntersection.html#mymesh.rays.SegmentSegmentIntersection">SegmentSegmentIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.improvement.SegmentSpringSmoothing.html#mymesh.improvement.SegmentSpringSmoothing">SegmentSpringSmoothing() (in module mymesh.improvement)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.SegmentsSegmentsIntersection.html#mymesh.rays.SegmentsSegmentsIntersection">SegmentsSegmentsIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.visualize.set_vispy_backend.html#mymesh.visualize.set_vispy_backend">set_vispy_backend() (in module mymesh.visualize)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.curvature.ShapeCategory.html#mymesh.curvature.ShapeCategory">ShapeCategory() (in module mymesh.curvature)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.curvature.ShapeIndex.html#mymesh.curvature.ShapeIndex">ShapeIndex() (in module mymesh.curvature)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.Skewness.html#mymesh.quality.Skewness">Skewness() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.improvement.SmartLaplacianSmoothing.html#mymesh.improvement.SmartLaplacianSmoothing">SmartLaplacianSmoothing() (in module mymesh.improvement)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.solid2edges.html#mymesh.converter.solid2edges">solid2edges() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.solid2faces.html#mymesh.converter.solid2faces">solid2faces() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.solid2surface.html#mymesh.converter.solid2surface">solid2surface() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.solid2tets.html#mymesh.converter.solid2tets">solid2tets() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.SortRaggedByLength.html#mymesh.utils.SortRaggedByLength">SortRaggedByLength() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.sphere.html#mymesh.implicit.sphere">sphere() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.primitives.Sphere.html#mymesh.primitives.Sphere">Sphere() (in module mymesh.primitives)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.booleans.SplitMesh.html#mymesh.booleans.SplitMesh">SplitMesh() (in module mymesh.booleans)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.utils.SplitRaggedByLength.html#mymesh.utils.SplitRaggedByLength">SplitRaggedByLength() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.surf2dual.html#mymesh.converter.surf2dual">surf2dual() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.surf2edges.html#mymesh.converter.surf2edges">surf2edges() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.surf2tris.html#mymesh.converter.surf2tris">surf2tris() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.surf2voxel.html#mymesh.converter.surf2voxel">surf2voxel() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.Surface.html#mymesh.mesh.mesh.Surface">Surface (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.octree.Surface2Octree.html#mymesh.octree.Surface2Octree">Surface2Octree() (in module mymesh.octree)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.image.SurfaceMesh.html#mymesh.image.SurfaceMesh">SurfaceMesh() (in module mymesh.image)</a>
+
+      <ul>
+        <li><a href="generated/submodules/mymesh.implicit.SurfaceMesh.html#mymesh.implicit.SurfaceMesh">(in module mymesh.implicit)</a>
+</li>
+      </ul></li>
+      <li><a href="generated/submodules/mymesh.image.SurfaceNodeOptimization.html#mymesh.image.SurfaceNodeOptimization">SurfaceNodeOptimization() (in module mymesh.image)</a>
+
+      <ul>
+        <li><a href="generated/submodules/mymesh.implicit.SurfaceNodeOptimization.html#mymesh.implicit.SurfaceNodeOptimization">(in module mymesh.implicit)</a>
+</li>
+      </ul></li>
+      <li><a href="generated/mymesh.mesh.mesh.SurfConn.html#mymesh.mesh.mesh.SurfConn">SurfConn (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.SurfDihedralAngles.html#mymesh.quality.SurfDihedralAngles">SurfDihedralAngles() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.SurfElemConn.html#mymesh.mesh.mesh.SurfElemConn">SurfElemConn (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.SurfMapping.html#mymesh.utils.SurfMapping">SurfMapping() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.SurfNodeNeighbors.html#mymesh.mesh.mesh.SurfNodeNeighbors">SurfNodeNeighbors (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.SurfNodes.html#mymesh.mesh.mesh.SurfNodes">SurfNodes (mymesh.mesh.mesh property)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.SurfSelfIntersection.html#mymesh.rays.SurfSelfIntersection">SurfSelfIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.SurfSurfIntersection.html#mymesh.rays.SurfSurfIntersection">SurfSurfIntersection() (in module mymesh.rays)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.improvement.TangentialLaplacianSmoothing.html#mymesh.improvement.TangentialLaplacianSmoothing">TangentialLaplacianSmoothing() (in module mymesh.improvement)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.tet102tet4.html#mymesh.converter.tet102tet4">tet102tet4() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.tet2edges.html#mymesh.converter.tet2edges">tet2edges() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.tet2faces.html#mymesh.converter.tet2faces">tet2faces() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.tet42tet10.html#mymesh.converter.tet42tet10">tet42tet10() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.tet_vol_skewness.html#mymesh.quality.tet_vol_skewness">tet_vol_skewness() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.improvement.TetContract.html#mymesh.improvement.TetContract">TetContract() (in module mymesh.improvement)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.improvement.TetFlip.html#mymesh.improvement.TetFlip">TetFlip() (in module mymesh.improvement)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.improvement.TetImprove.html#mymesh.improvement.TetImprove">TetImprove() (in module mymesh.improvement)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.image.TetMesh.html#mymesh.image.TetMesh">TetMesh() (in module mymesh.image)</a>
+
+      <ul>
+        <li><a href="generated/submodules/mymesh.implicit.TetMesh.html#mymesh.implicit.TetMesh">(in module mymesh.implicit)</a>
+</li>
+      </ul></li>
+      <li><a href="generated/submodules/mymesh.utils.TetMeshVol.html#mymesh.utils.TetMeshVol">TetMeshVol() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.improvement.TetSplit.html#mymesh.improvement.TetSplit">TetSplit() (in module mymesh.improvement)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.thicken.html#mymesh.implicit.thicken">thicken() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.thickenf.html#mymesh.implicit.thickenf">thickenf() (in module mymesh.implicit)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.implicit.thickens.html#mymesh.implicit.thickens">thickens() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.Threshold.html#mymesh.mesh.mesh.Threshold">Threshold() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.torus.html#mymesh.implicit.torus">torus() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.primitives.Torus.html#mymesh.primitives.Torus">Torus() (in module mymesh.primitives)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.tri2edges.html#mymesh.converter.tri2edges">tri2edges() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.quality.tri_skewness.html#mymesh.quality.tri_skewness">tri_skewness() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.delaunay.Triangle.html#mymesh.delaunay.Triangle">Triangle() (in module mymesh.delaunay)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.TriangleBoxIntersection.html#mymesh.rays.TriangleBoxIntersection">TriangleBoxIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.delaunay.TriangleSplittingTriangulation.html#mymesh.delaunay.TriangleSplittingTriangulation">TriangleSplittingTriangulation() (in module mymesh.delaunay)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.TrianglesTrianglesIntersection.html#mymesh.rays.TrianglesTrianglesIntersection">TrianglesTrianglesIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.TrianglesTrianglesIntersectionPts.html#mymesh.rays.TrianglesTrianglesIntersectionPts">TrianglesTrianglesIntersectionPts() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.TriangleTriangleIntersection.html#mymesh.rays.TriangleTriangleIntersection">TriangleTriangleIntersection() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.rays.TriangleTriangleIntersectionPt.html#mymesh.rays.TriangleTriangleIntersectionPt">TriangleTriangleIntersectionPt() (in module mymesh.rays)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.delaunay.Triangulate.html#mymesh.delaunay.Triangulate">Triangulate() (in module mymesh.delaunay)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.TriSurfVol.html#mymesh.utils.TriSurfVol">TriSurfVol() (in module mymesh.utils)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.implicit.union.html#mymesh.implicit.union">union() (in module mymesh.implicit)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.implicit.unionf.html#mymesh.implicit.unionf">unionf() (in module mymesh.implicit)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.implicit.unions.html#mymesh.implicit.unions">unions() (in module mymesh.implicit)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/mymesh.mesh.mesh.validate.html#mymesh.mesh.mesh.validate">validate() (mymesh.mesh.mesh method)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.utils.ValueMapping.html#mymesh.utils.ValueMapping">ValueMapping() (in module mymesh.utils)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.visualize.View.html#mymesh.visualize.View">View() (in module mymesh.visualize)</a>
+</li>
+      <li><a href="generated/mymesh.mesh.mesh.view.html#mymesh.mesh.mesh.view">view() (mymesh.mesh.mesh method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.quality.Volume.html#mymesh.quality.Volume">Volume() (in module mymesh.quality)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.voxel2im.html#mymesh.converter.voxel2im">voxel2im() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.octree.Voxel2Octree.html#mymesh.octree.Voxel2Octree">Voxel2Octree() (in module mymesh.octree)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.image.VoxelMesh.html#mymesh.image.VoxelMesh">VoxelMesh() (in module mymesh.image)</a>
+
+      <ul>
+        <li><a href="generated/submodules/mymesh.implicit.VoxelMesh.html#mymesh.implicit.VoxelMesh">(in module mymesh.implicit)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.converter.wedge2edges.html#mymesh.converter.wedge2edges">wedge2edges() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.converter.wedge2faces.html#mymesh.converter.wedge2faces">wedge2faces() (in module mymesh.converter)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.converter.wedge2tet.html#mymesh.converter.wedge2tet">wedge2tet() (in module mymesh.converter)</a>
+</li>
+      <li><a href="generated/submodules/mymesh.image.write.html#mymesh.image.write">write() (in module mymesh.image)</a>
+
+      <ul>
+        <li><a href="generated/mymesh.mesh.mesh.write.html#mymesh.mesh.mesh.write">(mymesh.mesh.mesh method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="X">X</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.implicit.xplane.html#mymesh.implicit.xplane">xplane() (in module mymesh.implicit)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Y">Y</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.implicit.yplane.html#mymesh.implicit.yplane">yplane() (in module mymesh.implicit)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Z">Z</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/submodules/mymesh.implicit.zplane.html#mymesh.implicit.zplane">zplane() (in module mymesh.implicit)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Timothy O. Josephson.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

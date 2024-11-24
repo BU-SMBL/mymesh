@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.validate
+=========================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.validate

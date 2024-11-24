@@ -1,0 +1,25 @@
+﻿mymesh.octree
+=============
+
+.. automodule:: mymesh.octree
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      OctreeNode
+   
+   
+
+   
+   
+   
+
+
+

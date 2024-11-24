@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.Faces
+======================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.Faces

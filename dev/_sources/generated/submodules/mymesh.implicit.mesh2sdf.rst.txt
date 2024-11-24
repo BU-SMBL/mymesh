@@ -1,0 +1,6 @@
+mymesh.implicit.mesh2sdf
+========================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: mesh2sdf

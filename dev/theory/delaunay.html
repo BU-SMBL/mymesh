@@ -1,0 +1,1117 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Delaunay Triangulation &#8212; MyMesh vdev Manual</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+
+    <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=4ea706d9"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'theory/delaunay';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Improvement" href="improvement.html" />
+    <link rel="prev" title="Curvature" href="curvature.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="dev" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/mymesh_logo.png" class="logo__image only-light" alt="MyMesh vdev Manual - Home"/>
+    <img src="../_static/mymesh_logo.png" class="logo__image only-dark pst-js-only" alt="MyMesh vdev Manual - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="contour.html">Contour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="curvature.html">Curvature</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Delaunay Triangulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="improvement.html">Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="octree.html">Octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rays.html">Rays</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../theory.html" class="nav-link">Theory Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Delaunay Triangulation</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="delaunay-triangulation">
+<h1>Delaunay Triangulation<a class="headerlink" href="#delaunay-triangulation" title="Link to this heading">#</a></h1>
+<section id="bowyer-watson">
+<h2>Bowyer-Watson<a class="headerlink" href="#bowyer-watson" title="Link to this heading">#</a></h2>
+<p>See <a class="reference internal" href="../generated/submodules/mymesh.delaunay.BowyerWatson2d.html#mymesh.delaunay.BowyerWatson2d" title="mymesh.delaunay.BowyerWatson2d"><code class="xref py py-func docutils literal notranslate"><span class="pre">BowyerWatson2d()</span></code></a>, <a class="reference internal" href="../generated/submodules/mymesh.delaunay.BowyerWatson3d.html#mymesh.delaunay.BowyerWatson3d" title="mymesh.delaunay.BowyerWatson3d"><code class="xref py py-func docutils literal notranslate"><span class="pre">BowyerWatson3d()</span></code></a></p>
+<p><span id="id1">Bowyer [<a class="reference internal" href="../guide/ref.html#id10" title="Adrian Bowyer. Computing Dirichlet Tessellations. Computer Journal, 24(2):162–166, 1981. URL: https://academic.oup.com/comjnl/article/24/2/162/338193, doi:10.1093/comjnl/24.2.162.">Bow81</a>]</span>, <span id="id2">Watson [<a class="reference internal" href="../guide/ref.html#id13" title="David F. Watson. Computing the n-dimensional Delaunau tessellation with application to Voronoi polytopes. Computer Journal, 24(2):167–172, 1981. URL: https://academic.oup.com/comjnl/article/24/2/167/338200, doi:10.1093/comjnl/24.2.167.">Wat81</a>]</span></p>
+<p>The Bowyer-Watson algorithm was developed independently and concurrently by
+Adrian Bowyer <span id="id3">[<a class="reference internal" href="../guide/ref.html#id10" title="Adrian Bowyer. Computing Dirichlet Tessellations. Computer Journal, 24(2):162–166, 1981. URL: https://academic.oup.com/comjnl/article/24/2/162/338193, doi:10.1093/comjnl/24.2.162.">Bow81</a>]</span> and David Watson <span id="id4">[<a class="reference internal" href="../guide/ref.html#id13" title="David F. Watson. Computing the n-dimensional Delaunau tessellation with application to Voronoi polytopes. Computer Journal, 24(2):167–172, 1981. URL: https://academic.oup.com/comjnl/article/24/2/167/338200, doi:10.1093/comjnl/24.2.167.">Wat81</a>]</span> (both
+published their papers in the same issue of <em>The Computer Journal</em>). The
+algorithm is an incremental approach to n-dimensional Delaunay triangulation
+where one point is inserted at a time, pre-existing triangles whose
+circumcircles contain the new point a removed, and the cavity is retriangulated.</p>
+<p>The MyMesh implementation of the Bowyer-Watson algorithm will be described here
+thoroughly for two dimensional triangulation, then the relevant changes needed
+to extend the algorithm to three dimensional tetrahedralization will be
+discussed.</p>
+<section id="bowyer-watson-initialization">
+<h3>Bowyer-Watson: Initialization<a class="headerlink" href="#bowyer-watson-initialization" title="Link to this heading">#</a></h3>
+<p>In order to start inserting points, an initial bounding triangle is necessary.
+This “super-triangle” must be big enough to contain all of the points that
+are to be triangulated. In theory, the super-triangle should also be big enough
+that its vertices are not contained within the circumcircles of any of the
+triangles that are to be created, however, in practice it can be difficult to
+know ahead of time how big that should be. Alternatively, the super-triangle
+can simply be big enough to contain the points and the vertices can be
+treated as infinitely far away without, which is discussed (ADD LINK).</p>
+<p>The choice of super-triangle is non-unique, but to ensure it bounds all points,
+it can be defined such that its incircle is centered on the average of the set
+of points with radius being the largest distance from the center to a point</p>
+<div class="graphviz"><img src="../_images/graphviz-ea93005d2c59ed54c5ab4c8b12195cba518225d7.png" alt="graph supertriangle {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    a [pos=&quot;1.0, 0.6!&quot;];
+    b [pos=&quot;0.8, 1.0!&quot;];
+    c [pos=&quot;0.1, 0.9!&quot;];
+    d [pos=&quot;0.0, .45!&quot;];
+    e [pos=&quot;0.5, 0.1!&quot;];
+    f [pos=&quot;0.4, 0.6!&quot;];
+
+    circle [pos=&quot;0.4667,0.60833!&quot;, shape=circle, width=1.0668, label=&quot;&quot;, color=&quot;#5E81AC&quot;]
+
+    s1 [pos=&quot;0.4667, -0.4585!&quot;, color=&quot;#d08770&quot;];
+    s2 [pos=&quot;1.3905, 1.1417!&quot;, color=&quot;#d08770&quot;];
+    s3 [pos=&quot;-0.4572, 1.1417!&quot;, color=&quot;#d08770&quot;];
+
+    s1 -- s2 [penwidth=1, color=&quot;#d08770&quot;];
+    s2 -- s3 [penwidth=1, color=&quot;#d08770&quot;];
+    s3 -- s1 [penwidth=1, color=&quot;#d08770&quot;];
+}" class="graphviz" /></div>
+<p>The data structure for constructing the triangulation consists of two tables
+(<code class="code docutils literal notranslate"><span class="pre">dict</span></code>) - an element table and an edge table. The element table, keyed by
+the node numbers that define the element, contain the oriented “half-edges”
+connected to each element and the edge table is keyed by edges and contains
+the element key connected to that edge. Each half-edge is connected to only one
+element, it’s “twin” has opposite numbering and is connected to a neighboring
+element, providing a structure allowing for efficient mesh traversal.</p>
+<p>The initial data structure for the super-triangle with vertices
+(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>) is:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Elements</p></th>
+<th class="head"><p>Edges</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>)</p></td>
+<td><p>(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>), (<span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>), (<span class="math notranslate nohighlight">\(p_{3^*}\)</span>, <span class="math notranslate nohighlight">\(p_{1^*}\)</span>)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Edges</p></th>
+<th class="head"><p>Element</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>)</p></td>
+<td><p>(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>(<span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>)</p></td>
+<td><p>(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>)</p></td>
+</tr>
+<tr class="row-even"><td><p>(<span class="math notranslate nohighlight">\(p_{3^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>)</p></td>
+<td><p>(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="bowyer-watson-point-insertion">
+<h3>Bowyer-Watson: Point Insertion<a class="headerlink" href="#bowyer-watson-point-insertion" title="Link to this heading">#</a></h3>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-6 sd-row-cols-xs-6 sd-row-cols-sm-6 sd-row-cols-md-6 sd-row-cols-lg-6 docutils">
+<div class="sd-col sd-d-flex-column docutils">
+<div class="graphviz"><img src="../_images/graphviz-abd7d6aafde2177415e1dd39ae3e74123f5b4735.png" alt="graph supertriangle {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    a [pos=&quot;1.0, 0.6!&quot;];
+
+    s1 [pos=&quot;0.4667, -0.4585!&quot;, color=&quot;#d08770&quot;];
+    s2 [pos=&quot;1.3905, 1.1417!&quot;, color=&quot;#d08770&quot;];
+    s3 [pos=&quot;-0.4572, 1.1417!&quot;, color=&quot;#d08770&quot;];
+
+    s1 -- s2 [penwidth=1, color=&quot;#d08770&quot;];
+    s2 -- s3 [penwidth=1, color=&quot;#d08770&quot;];
+    s3 -- s1 [penwidth=1, color=&quot;#d08770&quot;];
+
+    s1 -- a  [style=&quot;dotted&quot;]
+    s2 -- a  [style=&quot;dotted&quot;]
+    s3 -- a  [style=&quot;dotted&quot;]
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<div class="graphviz"><img src="../_images/graphviz-fab36bf70ef9065fec82b71b19b63babcbe0e31c.png" alt="graph supertriangle {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    a [pos=&quot;1.0, 0.6!&quot;];
+    b [pos=&quot;0.8, 1.0!&quot;];
+
+    s1 [pos=&quot;0.4667, -0.4585!&quot;, color=&quot;#d08770&quot;];
+    s2 [pos=&quot;1.3905, 1.1417!&quot;, color=&quot;#d08770&quot;];
+    s3 [pos=&quot;-0.4572, 1.1417!&quot;, color=&quot;#d08770&quot;];
+
+    s1 -- s2 [penwidth=1, color=&quot;#d08770&quot;];
+    s2 -- s3 [penwidth=1, color=&quot;#d08770&quot;];
+    s3 -- s1 [penwidth=1, color=&quot;#d08770&quot;];
+
+    s1 -- a [style=&quot;dotted&quot;]
+    s2 -- a [style=&quot;dotted&quot;]
+    s3 -- a [style=&quot;dotted&quot;]
+    s2 -- b [style=&quot;dotted&quot;]
+    s3 -- b [style=&quot;dotted&quot;]
+    a -- b
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<div class="graphviz"><img src="../_images/graphviz-17c51bacfe7d811bcdba3f4a0bdd3fa255fad421.png" alt="graph supertriangle {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    a [pos=&quot;1.0, 0.6!&quot;];
+    b [pos=&quot;0.8, 1.0!&quot;];
+    c [pos=&quot;0.1, 0.9!&quot;];
+
+    s1 [pos=&quot;0.4667, -0.4585!&quot;, color=&quot;#d08770&quot;];
+    s2 [pos=&quot;1.3905, 1.1417!&quot;, color=&quot;#d08770&quot;];
+    s3 [pos=&quot;-0.4572, 1.1417!&quot;, color=&quot;#d08770&quot;];
+
+    s1 -- s2 [penwidth=1, color=&quot;#d08770&quot;];
+    s2 -- s3 [penwidth=1, color=&quot;#d08770&quot;];
+    s3 -- s1 [penwidth=1, color=&quot;#d08770&quot;];
+
+    s1 -- a [style=&quot;dotted&quot;]
+    s2 -- a [style=&quot;dotted&quot;]
+    s2 -- b [style=&quot;dotted&quot;]
+    s3 -- b [style=&quot;dotted&quot;]
+    s1 -- c [style=&quot;dotted&quot;]
+    s3 -- c [style=&quot;dotted&quot;]
+    a -- b
+    b -- c
+    c -- a
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<div class="graphviz"><img src="../_images/graphviz-8b81daedad7146bd298334575ecce3568e01fbc7.png" alt="graph supertriangle {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    a [pos=&quot;1.0, 0.6!&quot;];
+    b [pos=&quot;0.8, 1.0!&quot;];
+    c [pos=&quot;0.1, 0.9!&quot;];
+    d [pos=&quot;0.0, .45!&quot;];
+
+    s1 [pos=&quot;0.4667, -0.4585!&quot;, color=&quot;#d08770&quot;];
+    s2 [pos=&quot;1.3905, 1.1417!&quot;, color=&quot;#d08770&quot;];
+    s3 [pos=&quot;-0.4572, 1.1417!&quot;, color=&quot;#d08770&quot;];
+
+    s1 -- s2 [penwidth=1, color=&quot;#d08770&quot;];
+    s2 -- s3 [penwidth=1, color=&quot;#d08770&quot;];
+    s3 -- s1 [penwidth=1, color=&quot;#d08770&quot;];
+
+    s1 -- a [style=&quot;dotted&quot;]
+    s2 -- a [style=&quot;dotted&quot;]
+    s2 -- b [style=&quot;dotted&quot;]
+    s3 -- b [style=&quot;dotted&quot;]
+    s3 -- c [style=&quot;dotted&quot;]
+    s3 -- d [style=&quot;dotted&quot;]
+    s1 -- d [style=&quot;dotted&quot;]
+    a -- b
+    b -- c
+    c -- a
+    d -- c
+    d -- a
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<div class="graphviz"><img src="../_images/graphviz-e077b9e30b683f159b75b913cd4b3a2be5890345.png" alt="graph supertriangle {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    a [pos=&quot;1.0, 0.6!&quot;];
+    b [pos=&quot;0.8, 1.0!&quot;];
+    c [pos=&quot;0.1, 0.9!&quot;];
+    d [pos=&quot;0.0, .45!&quot;];
+    e [pos=&quot;0.5, 0.1!&quot;];
+
+    s1 [pos=&quot;0.4667, -0.4585!&quot;, color=&quot;#d08770&quot;];
+    s2 [pos=&quot;1.3905, 1.1417!&quot;, color=&quot;#d08770&quot;];
+    s3 [pos=&quot;-0.4572, 1.1417!&quot;, color=&quot;#d08770&quot;];
+
+    s1 -- s2 [penwidth=1, color=&quot;#d08770&quot;];
+    s2 -- s3 [penwidth=1, color=&quot;#d08770&quot;];
+    s3 -- s1 [penwidth=1, color=&quot;#d08770&quot;];
+
+    s1 -- a [style=&quot;dotted&quot;]
+    s2 -- a [style=&quot;dotted&quot;]
+    s2 -- b [style=&quot;dotted&quot;]
+    s3 -- b [style=&quot;dotted&quot;]
+    s3 -- c [style=&quot;dotted&quot;]
+    s3 -- d [style=&quot;dotted&quot;]
+    s1 -- d [style=&quot;dotted&quot;]
+    s1 -- e [style=&quot;dotted&quot;]
+    a -- b
+    b -- c
+    d -- c
+    d -- e
+    e -- a
+    e -- b
+    e -- c
+
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<div class="graphviz"><img src="../_images/graphviz-264108a26901b8cf77ad3d24e22c2d15a3b61e0b.png" alt="graph supertriangle {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    a [pos=&quot;1.0, 0.6!&quot;];
+    b [pos=&quot;0.8, 1.0!&quot;];
+    c [pos=&quot;0.1, 0.9!&quot;];
+    d [pos=&quot;0.0, .45!&quot;];
+    e [pos=&quot;0.5, 0.1!&quot;];
+    f [pos=&quot;0.4, 0.6!&quot;];
+
+    s1 [pos=&quot;0.4667, -0.4585!&quot;, color=&quot;#d08770&quot;];
+    s2 [pos=&quot;1.3905, 1.1417!&quot;, color=&quot;#d08770&quot;];
+    s3 [pos=&quot;-0.4572, 1.1417!&quot;, color=&quot;#d08770&quot;];
+
+    s1 -- s2 [penwidth=1, color=&quot;#d08770&quot;];
+    s2 -- s3 [penwidth=1, color=&quot;#d08770&quot;];
+    s3 -- s1 [penwidth=1, color=&quot;#d08770&quot;];
+
+    s1 -- a [style=&quot;dotted&quot;]
+    s2 -- a [style=&quot;dotted&quot;]
+    s2 -- b [style=&quot;dotted&quot;]
+    s3 -- b [style=&quot;dotted&quot;]
+    s3 -- c [style=&quot;dotted&quot;]
+    s3 -- d [style=&quot;dotted&quot;]
+    s1 -- d [style=&quot;dotted&quot;]
+    s1 -- e [style=&quot;dotted&quot;]
+    a -- b
+    b -- c
+    c -- d
+    d -- e
+    e -- a
+    a -- f
+    b -- f
+    c -- f
+    d -- f
+    e -- f
+
+}" class="graphviz" /></div>
+</div>
+</div>
+</div>
+<p>The basic point insertion procedure is for adding point <span class="math notranslate nohighlight">\(p_i\)</span> is as
+follows:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p><strong>Point Location</strong>: Locate the existing triangle <span class="math notranslate nohighlight">\(t_p\)</span> that contains
+<span class="math notranslate nohighlight">\(p_i\)</span>.</p></li>
+<li><p><strong>Cavity Formation</strong>: Identify the set of triangles <span class="math notranslate nohighlight">\(\{t_j\}\)</span> whose
+circumcircles contain <span class="math notranslate nohighlight">\(p_i\)</span> and remove them from the triangulation,
+leaving behind a  star-shaped cavity.</p></li>
+<li><p><strong>Retriangulation</strong>: Re-triangulate the cavity by connecting each vertex on
+the cavity boundary to the newly inserted point</p></li>
+</ol>
+</div></blockquote>
+<section id="point-location">
+<h4>Point Location<a class="headerlink" href="#point-location" title="Link to this heading">#</a></h4>
+<p>CITE</p>
+<p>To start the point insertion process, it’s necessary to find all triangles in
+the existing triangulation the need to be removed (those whose circumcircles
+contain the new point). These triangles will all be connected, and the triangle
+(<span class="math notranslate nohighlight">\(t_p\)</span>) that contains the point is surely among them, so it’s useful to
+start by identifying that triangle. Points can be tested for inclusion in a
+triangle by calculating the barycentric coordinates
+(<a class="reference internal" href="../generated/submodules/mymesh.utils.BaryTri.html#mymesh.utils.BaryTri" title="mymesh.utils.BaryTri"><code class="xref py py-func docutils literal notranslate"><span class="pre">BaryTri()</span></code></a>).</p>
+<p>To find the triangle that contains <span class="math notranslate nohighlight">\(p_i\)</span> without having to test every
+triangle, a walking algorithm can be used to move from a randomly selected
+starting triangle towards <span class="math notranslate nohighlight">\(t_p\)</span>. If all of the barycentric
+coordinates of <span class="math notranslate nohighlight">\(p_i\)</span> in a triangle <span class="math notranslate nohighlight">\(t_j\)</span> (<span class="math notranslate nohighlight">\(\alpha_0\)</span>,
+<span class="math notranslate nohighlight">\(\beta_0\)</span>, <span class="math notranslate nohighlight">\(\gamma_0\)</span>) are positive, then <span class="math notranslate nohighlight">\(p_i\)</span> is in
+<span class="math notranslate nohighlight">\(t_j\)</span> and the algorithm terminates. Otherwise, the most negative
+barycentric coordinate indicates the vertex of <span class="math notranslate nohighlight">\(t_j\)</span> furthest from
+<span class="math notranslate nohighlight">\(p_i\)</span>, so taking a step into the triangle connect to <span class="math notranslate nohighlight">\(t_j\)</span> across the
+edge opposite that vertex will be a step towards <span class="math notranslate nohighlight">\(p_i\)</span>. Repeating this
+process will create a path that leads directly to identifying the triangle
+<span class="math notranslate nohighlight">\(t_p\)</span> tha contains <span class="math notranslate nohighlight">\(p_i\)</span></p>
+<div class="graphviz"><img src="../_images/graphviz-61038e71b96c71ee97b2cb4ae08dbdab8c90b37d.png" alt="graph supertriangle {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    a [pos=&quot;1.0, 0.6!&quot;];
+    b [pos=&quot;0.8, 1.0!&quot;];
+    c [pos=&quot;0.1, 0.9!&quot;];
+    d [pos=&quot;0.0, .45!&quot;];
+    e [pos=&quot;0.5, 0.1!&quot;];
+    f [pos=&quot;0.4, 0.6!&quot;, color=&quot;#5E81AC&quot;];
+
+    s1 [pos=&quot;0.4667, -0.4585!&quot;, color=&quot;#A3BE8C&quot;];
+    s2 [pos=&quot;1.3905, 1.1417!&quot;, color=&quot;#A3BE8C&quot;];
+    s3 [pos=&quot;-0.4572, 1.1417!&quot;, color=&quot;#A3BE8C&quot;];
+
+    s1 -- s2 [penwidth=1, color=&quot;#A3BE8C&quot;];
+    s2 -- s3 [penwidth=1, color=&quot;#A3BE8C&quot;];
+    s3 -- s1 [penwidth=1, color=&quot;#A3BE8C&quot;];
+
+    s1 -- a [style=&quot;dotted&quot;]
+    s2 -- a [style=&quot;dotted&quot;]
+    s2 -- b [style=&quot;dotted&quot;]
+    s3 -- b [style=&quot;dotted&quot;]
+    s3 -- c [style=&quot;dotted&quot;]
+    s3 -- d [style=&quot;dotted&quot;]
+    s1 -- d [style=&quot;dotted&quot;]
+    s1 -- e [style=&quot;dotted&quot;]
+    a -- b
+    b -- c [color=&quot;#000000:#BF616A&quot;]
+    d -- c
+    d -- e
+    e -- a
+    e -- b [color=&quot;#000000:#BF616A&quot;]
+    c -- e [color=&quot;#000000:#BF616A&quot;]
+
+    p1 [pos=&quot;1.0635,0.9139!&quot;, width=0]
+    p2 [pos=&quot;0.7667,0.5667!&quot;, width=0]
+    p1 -- p2
+    p2 -- f
+
+}" class="graphviz" /></div>
+</section>
+<section id="cavity-formation">
+<h4>Cavity Formation<a class="headerlink" href="#cavity-formation" title="Link to this heading">#</a></h4>
+<p>Having found the triangle <span class="math notranslate nohighlight">\(t_p\)</span> that contains the point <span class="math notranslate nohighlight">\(p_i\)</span>, it is next
+necessary to identify all other triangles whose circumcircles contain <span class="math notranslate nohighlight">\(p_i\)</span>.
+It can be shown that these triangles are all connected and when removed form a
+“star-shaped”<a class="footnote-reference brackets" href="#f1" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> cavity. Starting from <span class="math notranslate nohighlight">\(t_p\)</span>, the cavity can be
+expanded outwards, checking each adjacent triangle. If the triangle is invalid
+(i.e. its circumcircle contains <span class="math notranslate nohighlight">\(p_i\)</span>), its marked for deletion and its
+neighbors are added to the queue to be checked. When moving from an invalid
+triangle across an edge into a valid triangle, that edge is marked as a boundary
+of the cavity.</p>
+<p>As noted previously, it’s important to ensure that the vertices of the
+super-triangle don’t interfere with the triangulation of the interior points.
+Rather than placing the vertices of the super triangle infinitely far away,
+testing of triangles that contain super-triangle vertices can be handled as
+special cases when building the cavity:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>If crossing an edge <em>not</em> touching the super-triangle into a triangle
+that <em>is</em> touching the super-triangle, mark that edge as a boundary
+of the cavity treat that triangle as if it doesn’t have the point in
+it’s circumcircle.</p></li>
+</ol>
+</div></blockquote>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="f1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">1</a><span class="fn-bracket">]</span></span>
+<p>A polygon being star-shaped means that there is at least one point in the polygon
+that is “visible” from each vertex, i.e. lines can be drawn from the vertices to
+the point without intersecting the boundaries of the polygon.</p>
+</aside>
+</aside>
+</section>
+<section id="circumcircle-test">
+<h4>Circumcircle Test<a class="headerlink" href="#circumcircle-test" title="Link to this heading">#</a></h4>
+<p>Testing whether or not a point is in a triangle’s circumcircle is an essential
+part of most Delaunay triangulation algorithms, and the efficiency of the test
+is key to the efficiency of the overall algorithm. A popular test to determine
+if a point <span class="math notranslate nohighlight">\(p\)</span> is in a triangle <span class="math notranslate nohighlight">\(t\)</span> with counter-clockwise vertices
+<span class="math notranslate nohighlight">\(a, b, c\)</span> involves solving the determinant:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}v = \det
+\begin{pmatrix}
+    a_x &amp; a_y &amp; a_x^2 + a_y^2 &amp; 1 \\
+    b_x &amp; b_y &amp; b_x^2 + b_y^2 &amp; 1 \\
+    c_x &amp; c_y &amp; c_x^2 + c_y^2 &amp; 1 \\
+    p_x &amp; p_y &amp; p_x^2 + p_y^2 &amp; 1 \\
+\end{pmatrix}\end{split}\]</div>
+<p>If <span class="math notranslate nohighlight">\(v &gt; 0\)</span>, then <span class="math notranslate nohighlight">\(p\)</span> is in <span class="math notranslate nohighlight">\(t\)</span>.</p>
+<p>This test can be geometrically interpreted as a projection of the four points
+<span class="math notranslate nohighlight">\(a, b, c, p\)</span> onto the paraboloid <span class="math notranslate nohighlight">\(z=x^2+y^2\)</span> and calculation of the
+signed volume of the tetrahedron formed by <span class="math notranslate nohighlight">\(a, b, c, p\)</span>. If <span class="math notranslate nohighlight">\(p\)</span> lies
+exactly on the circumcircle of <span class="math notranslate nohighlight">\(t\)</span>, the four points will be coplanar on
+the paraboloid and the signed volume <span class="math notranslate nohighlight">\(v = 0\)</span>, while <span class="math notranslate nohighlight">\(p\)</span> inside the
+circumcircle will lead to a tetrahedron with a positive signed volume.</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-column docutils">
+<div class="graphviz"><img src="../_images/graphviz-9a9bd0cdb7a2574f5ff3b58dc526aefbb3cbc4ee.png" alt="graph supertriangle {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    a [pos=&quot;1.0, 0.6!&quot;];
+    b [pos=&quot;0.8, 1.0!&quot;];
+    c [pos=&quot;0.1, 0.9!&quot;];
+    d [pos=&quot;0.0, .45!&quot;];
+    e [pos=&quot;0.5, 0.1!&quot;];
+    f [pos=&quot;0.4, 0.6!&quot;, color=&quot;#5E81AC&quot;];
+
+    s1 [pos=&quot;0.4667, -0.4585!&quot;, color=&quot;#A3BE8C&quot;];
+    s2 [pos=&quot;1.3905, 1.1417!&quot;, color=&quot;#A3BE8C&quot;];
+    s3 [pos=&quot;-0.4572, 1.1417!&quot;, color=&quot;#A3BE8C&quot;];
+
+    s1 -- s2 [penwidth=1, color=&quot;#A3BE8C&quot;];
+    s2 -- s3 [penwidth=1, color=&quot;#A3BE8C&quot;];
+    s3 -- s1 [penwidth=1, color=&quot;#A3BE8C&quot;];
+
+    s1 -- a [style=&quot;dotted&quot;]
+    s2 -- a [style=&quot;dotted&quot;]
+    s2 -- b [style=&quot;dotted&quot;]
+    s3 -- b [style=&quot;dotted&quot;]
+    s3 -- c [style=&quot;dotted&quot;]
+    s3 -- d [style=&quot;dotted&quot;]
+    s1 -- d [style=&quot;dotted&quot;]
+    s1 -- e [style=&quot;dotted&quot;]
+    a -- b [color=&quot;#000000:#BF616A&quot;]
+    b -- c [color=&quot;#000000:#BF616A&quot;]
+    c -- d [color=&quot;#000000:#BF616A&quot;]
+    d -- e [color=&quot;#000000:#BF616A&quot;]
+    e -- a [color=&quot;#000000:#BF616A&quot;]
+    e -- b [color=&quot;#BF616A&quot;]
+    e -- c [color=&quot;#BF616A&quot;]
+
+    c1 [pos=&quot;0.5, 0.6!&quot;, shape=circle, width=1, label=&quot;&quot;, color=&quot;#BF616A&quot;]
+    c2 [pos=&quot;0.4654, 0.5827!&quot;, shape=circle, width=0.96786, label=&quot;&quot;, color=&quot;#BF616A&quot;]
+
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<div class="graphviz"><img src="../_images/graphviz-d380279b653fb51bad39968784db850ee1453626.png" alt="graph supertriangle {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    a [pos=&quot;1.0, 0.6!&quot;];
+    b [pos=&quot;0.8, 1.0!&quot;];
+    c [pos=&quot;0.1, 0.9!&quot;];
+    d [pos=&quot;0.0, .45!&quot;];
+    e [pos=&quot;0.5, 0.1!&quot;];
+    f [pos=&quot;0.4, 0.6!&quot;, color=&quot;#5E81AC&quot;];
+
+    s1 [pos=&quot;0.4667, -0.4585!&quot;, color=&quot;#A3BE8C&quot;];
+    s2 [pos=&quot;1.3905, 1.1417!&quot;, color=&quot;#A3BE8C&quot;];
+    s3 [pos=&quot;-0.4572, 1.1417!&quot;, color=&quot;#A3BE8C&quot;];
+
+    s1 -- s2 [penwidth=1, color=&quot;#A3BE8C&quot;];
+    s2 -- s3 [penwidth=1, color=&quot;#A3BE8C&quot;];
+    s3 -- s1 [penwidth=1, color=&quot;#A3BE8C&quot;];
+
+    s1 -- a [style=&quot;dotted&quot;]
+    s2 -- a [style=&quot;dotted&quot;]
+    s2 -- b [style=&quot;dotted&quot;]
+    s3 -- b [style=&quot;dotted&quot;]
+    s3 -- c [style=&quot;dotted&quot;]
+    s3 -- d [style=&quot;dotted&quot;]
+    s1 -- d [style=&quot;dotted&quot;]
+    s1 -- e [style=&quot;dotted&quot;]
+    a -- b [color=&quot;#000000:#5E81AC&quot;]
+    b -- c [color=&quot;#000000:#5E81AC&quot;]
+    c -- d [color=&quot;#000000:#5E81AC&quot;]
+    d -- e [color=&quot;#000000:#5E81AC&quot;]
+    e -- a [color=&quot;#000000:#5E81AC&quot;]
+
+
+}" class="graphviz" /></div>
+</div>
+</div>
+</div>
+</section>
+<section id="retriangulation">
+<h4>Retriangulation<a class="headerlink" href="#retriangulation" title="Link to this heading">#</a></h4>
+<p>Once the cavity has been formed and the edges at the boundary of the cavity
+identified, the vertices of the cavity can be simply connected to the inserted
+point to retriangulate the cavity. Due to the oriented nature of the half-edges
+in the data structure, the triangles can be formed in a way that ensures that
+the points of every triangle are ordered counter clockwise.</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-column docutils">
+<div class="graphviz"><img src="../_images/graphviz-0e9a85a5d4dedf548b8ed784af715255c0b85f29.png" alt="graph supertriangle {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    a [pos=&quot;1.0, 0.6!&quot;];
+    b [pos=&quot;0.8, 1.0!&quot;];
+    c [pos=&quot;0.1, 0.9!&quot;];
+    d [pos=&quot;0.0, .45!&quot;];
+    e [pos=&quot;0.5, 0.1!&quot;];
+    f [pos=&quot;0.4, 0.6!&quot;, color=&quot;#5E81AC&quot;];
+
+    s1 [pos=&quot;0.4667, -0.4585!&quot;, color=&quot;#A3BE8C&quot;];
+    s2 [pos=&quot;1.3905, 1.1417!&quot;, color=&quot;#A3BE8C&quot;];
+    s3 [pos=&quot;-0.4572, 1.1417!&quot;, color=&quot;#A3BE8C&quot;];
+
+    s1 -- s2 [penwidth=1, color=&quot;#A3BE8C&quot;];
+    s2 -- s3 [penwidth=1, color=&quot;#A3BE8C&quot;];
+    s3 -- s1 [penwidth=1, color=&quot;#A3BE8C&quot;];
+
+    s1 -- a [style=&quot;dotted&quot;]
+    s2 -- a [style=&quot;dotted&quot;]
+    s2 -- b [style=&quot;dotted&quot;]
+    s3 -- b [style=&quot;dotted&quot;]
+    s3 -- c [style=&quot;dotted&quot;]
+    s3 -- d [style=&quot;dotted&quot;]
+    s1 -- d [style=&quot;dotted&quot;]
+    s1 -- e [style=&quot;dotted&quot;]
+    a -- b [color=&quot;#000000:#5E81AC&quot;]
+    b -- c [color=&quot;#000000:#5E81AC&quot;]
+    c -- d [color=&quot;#000000:#5E81AC&quot;]
+    d -- e [color=&quot;#000000:#5E81AC&quot;]
+    e -- a [color=&quot;#000000:#5E81AC&quot;]
+
+    a -- f [color=&quot;#5E81AC&quot;]
+    b -- f [color=&quot;#5E81AC&quot;]
+    c -- f [color=&quot;#5E81AC&quot;]
+    d -- f [color=&quot;#5E81AC&quot;]
+    e -- f [color=&quot;#5E81AC&quot;]
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<div class="graphviz"><img src="../_images/graphviz-0909d22ff6456ed6d4835267bac5cf11779bb73a.png" alt="graph supertriangle {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    a [pos=&quot;1.0, 0.6!&quot;];
+    b [pos=&quot;0.8, 1.0!&quot;];
+    c [pos=&quot;0.1, 0.9!&quot;];
+    d [pos=&quot;0.0, .45!&quot;];
+    e [pos=&quot;0.5, 0.1!&quot;];
+    f [pos=&quot;0.4, 0.6!&quot;];
+
+    s1 [pos=&quot;0.4667, -0.4585!&quot;, color=white];
+    s2 [pos=&quot;1.3905, 1.1417!&quot;, color=white];
+    s3 [pos=&quot;-0.4572, 1.1417!&quot;, color=white];
+
+    a -- b
+    b -- c
+    c -- d
+    d -- e
+    e -- a
+
+    a -- f
+    b -- f
+    c -- f
+    d -- f
+    e -- f
+}" class="graphviz" /></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="curvature.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Curvature</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="improvement.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Improvement</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bowyer-watson">Bowyer-Watson</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bowyer-watson-initialization">Bowyer-Watson: Initialization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bowyer-watson-point-insertion">Bowyer-Watson: Point Insertion</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#point-location">Point Location</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cavity-formation">Cavity Formation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#circumcircle-test">Circumcircle Test</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#retriangulation">Retriangulation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/theory/delaunay.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Timothy O. Josephson.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
