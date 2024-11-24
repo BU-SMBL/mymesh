@@ -4,6 +4,8 @@ on:
     branches:
       - main
   pull_request:
+  release:
+    types: [published]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -145,14 +147,67 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y graphviz
+    - name: Determine doc version
+      if: github.event_name != 'pull_request'
+      id: doc-version
+      shell: bash -l {0}
+      run: |
+        if [[ ${{ github.event_name }} == 'release' ]]; then
+          echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          echo "doc_path=latest" >> $GITHUB_OUTPUT
+        else
+          echo "version=dev" >> $GITHUB_OUTPUT
+          echo "doc_path=dev" >> $GITHUB_OUTPUT
+        fi
+
     - name: Build documentation
       shell: bash -l {0}
       run: |
         export DISPLAY=:99.0
+        # Pass version to sphinx-build
+        export SPHINX_VERSION=${{ steps.doc-version.outputs.version }}
         sphinx-build -b html ./docs/source ./docs/build
+
     - name: Deploy to GitHub Pages
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/build
+      if: github.event_name != 'pull_request'
+      shell: bash -l {0}
+      run: |
+        # Configure git
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        
+        # Clone gh-pages branch
+        git clone --branch gh-pages --single-branch https://${GITHUB_TOKEN}@github.com/${{ github.repository }}.git gh-pages
+        cd gh-pages
+        
+        # Remove old version if it exists
+        rm -rf ${{ steps.doc-version.outputs.doc_path }}
+        
+        # Copy new docs
+        cp -r ../docs/build ${{ steps.doc-version.outputs.doc_path }}
+        
+        # If this is a release, also update the stable symlink
+        if [[ ${{ github.event_name }} == 'release' ]]; then
+          rm -rf stable
+          ln -s latest stable
+        fi
+        
+        # Update versions.json
+        python -c '
+        import json, os
+        versions = {"dev": "../dev"}
+        for d in os.listdir("."):
+            if os.path.isdir(d) and d.startswith("v"):
+                versions[d] = f"../{d}"
+        if os.path.exists("latest"):
+            versions["latest"] = "../latest"
+        with open("versions.json", "w") as f:
+            json.dump(versions, f)
+        '
+        
+        # Commit and push
+        git add .
+        git commit -m "Update ${{ steps.doc-version.outputs.version }} documentation" || echo "No changes to commit"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
