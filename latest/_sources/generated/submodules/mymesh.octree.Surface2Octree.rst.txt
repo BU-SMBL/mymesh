@@ -1,0 +1,6 @@
+mymesh.octree.Surface2Octree
+============================
+
+.. currentmodule:: mymesh.octree
+
+.. autofunction:: Surface2Octree

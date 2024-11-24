@@ -1,0 +1,6 @@
+mymesh.implicit.SurfaceNodeOptimization
+=======================================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: SurfaceNodeOptimization

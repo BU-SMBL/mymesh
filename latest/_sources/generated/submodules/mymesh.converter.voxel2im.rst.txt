@@ -1,0 +1,6 @@
+mymesh.converter.voxel2im
+=========================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: voxel2im
