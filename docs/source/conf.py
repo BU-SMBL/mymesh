@@ -38,7 +38,7 @@ sphinx_gallery_conf = {
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-html_title = f"{project} v{release} Manual"
+html_title = f"{project} {release} Manual"
 html_theme =  'pydata_sphinx_theme' #'sphinx_rtd_theme' #
 html_static_path = ['_static']
 html_logo = '_static/mymesh_logo.png'
@@ -57,7 +57,10 @@ html_theme_options = dict(collapse_navigation=True,
                                  "type": "fontawesome",
                               }],
                            version_dropdown=True,
-                           version_info=True,
+                           switcher = dict(
+                              version_match = version,
+                              json_url = 'https://github.com/BU-SMBL/mymesh/blob/gh-pages/versions.json'
+                           )
                         )
 html_context = {
    "default_mode": "light"
