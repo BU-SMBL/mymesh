@@ -5,7 +5,7 @@ on:
       - main
   pull_request:
   release:
-  types: [published]
+    types: [published]
 jobs:
   build:
     runs-on: ubuntu-latest
