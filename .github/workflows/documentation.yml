@@ -168,9 +168,6 @@ jobs:
         export SPHINX_VERSION=${{ steps.doc-version.outputs.version }}
         sphinx-build -b html ./docs/source ./docs/build
 
-    name: Deploy Sphinx Documentation
-# ... (previous configuration remains the same until the Deploy to GitHub Pages step)
-
     - name: Deploy to GitHub Pages
       if: github.event_name != 'pull_request'
       shell: bash -l {0}
@@ -188,25 +185,15 @@ jobs:
         
         # Copy new docs to appropriate directory
         if [[ ${{ github.event_name }} == 'release' ]]; then
-          mkdir -p latest
-          cp -r ../docs/build/* latest/
-          # Create a version-specific folder if needed
-          VERSION="${GITHUB_REF#refs/tags/}"
-          mkdir -p "$VERSION"
-          cp -r ../docs/build/* "$VERSION/"
+          cp -r ../docs/build latest
         else
-          mkdir -p dev
-          cp -r ../docs/build/* dev/
+          cp -r ../docs/build dev
         fi
         
-        # Create versions.json with proper URLs
-        cat > versions.json << EOF
-        {
-          "dev": "/mymesh/dev/",
-          "latest": "/mymesh/latest/"
-        }
+        # Create versions.json
+        echo '{"dev": "dev", "latest": "latest"}' > versions.json
         
-        # Create root level redirect
+        # Create root level redirect to dev or latest
         cat > index.html << EOF
         <!DOCTYPE html>
         <html>
@@ -214,6 +201,7 @@ jobs:
             <meta http-equiv="refresh" content="0; url=./dev/" />
           </head>
         </html>
+        EOF
         
         # Commit and push
         git add .
