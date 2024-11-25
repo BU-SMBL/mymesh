@@ -3,7 +3,7 @@ Installation
 
 Python Package Index (PyPI)
 ---------------------------
-MyMesh can be installed from the `python package index (PyPI) <https://pypi.org/project/mymesh/>_`: 
+MyMesh can be installed from the `python package index (PyPI) <https://pypi.org/project/mymesh/>`_: 
 
 .. code-block::
 
