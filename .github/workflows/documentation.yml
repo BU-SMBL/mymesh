@@ -195,12 +195,12 @@ jobs:
         # Update versions.json
         python -c '
         import json, os
-        versions = {"dev": "/dev"}
+        versions = {"dev": "../dev"}
         for d in os.listdir("."):
             if os.path.isdir(d) and d.startswith("v"):
-                versions[d] = f"/{d}"
+                versions[d] = f"../{d}"
         if os.path.exists("latest"):
-            versions["latest"] = "/latest"
+            versions["latest"] = "../latest"
         with open("versions.json", "w") as f:
             json.dump(versions, f)
         '
