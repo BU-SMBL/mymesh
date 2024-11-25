@@ -128,7 +128,7 @@ including :func:`~mymesh.implicit.gyroid`, :func:`~mymesh.implicit.primitive`
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 5.903 seconds)
+   **Total running time of the script:** (0 minutes 5.780 seconds)
 
 
 .. _sphx_glr_download_examples_MeshGeneration_demo_mixed-top.py:
