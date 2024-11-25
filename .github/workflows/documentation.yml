@@ -176,8 +176,8 @@ jobs:
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
         
-        # Clone gh-pages branch using authenticated HTTPS
-        git clone --branch gh-pages --single-branch "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+        # Clone gh-pages branch
+        git clone --branch gh-pages --single-branch https://${GITHUB_TOKEN}@github.com/${{ github.repository }}.git gh-pages
         cd gh-pages
         
         # Remove old version if it exists
@@ -208,6 +208,6 @@ jobs:
         # Commit and push
         git add .
         git commit -m "Update ${{ steps.doc-version.outputs.version }} documentation" || echo "No changes to commit"
-        git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+        git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
