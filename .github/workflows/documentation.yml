@@ -168,51 +168,56 @@ jobs:
         export SPHINX_VERSION=${{ steps.doc-version.outputs.version }}
         sphinx-build -b html ./docs/source ./docs/build
 
+    name: Deploy Sphinx Documentation
+# ... (previous configuration remains the same until the Deploy to GitHub Pages step)
+
     - name: Deploy to GitHub Pages
-          if: github.event_name != 'pull_request'
-          shell: bash -l {0}
-          run: |
-            # Configure git
-            git config --global user.name "github-actions"
-            git config --global user.email "github-actions@github.com"
-            
-            # Clone gh-pages branch
-            git clone --branch gh-pages --single-branch "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
-            cd gh-pages
-            
-            # Clear any existing content
-            rm -rf *
-            
-            # Copy new docs to appropriate directory
-            if [[ ${{ github.event_name }} == 'release' ]]; then
-              mkdir -p latest
-              cp -r ../docs/build/* latest/
-              # Create a version-specific folder if needed
-              VERSION="${GITHUB_REF#refs/tags/}"
-              mkdir -p "$VERSION"
-              cp -r ../docs/build/* "$VERSION/"
-            else
-              mkdir -p dev
-              cp -r ../docs/build/* dev/
-            fi
-            
-            # Create versions.json with proper URLs
-            echo '{
-              "dev": "/mymesh/dev/",
-              "latest": "/mymesh/latest/"
-            }' > versions.json
-            
-            # Create root level redirect
-            echo '<!DOCTYPE html>
-                  <html>
-                    <head>
-                      <meta http-equiv="refresh" content="0; url=./dev/" />
-                    </head>
-                  </html>' > index.html
-            
-            # Commit and push
-            git add .
-            git commit -m "Update documentation" || echo "No changes to commit"
-            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      if: github.event_name != 'pull_request'
+      shell: bash -l {0}
+      run: |
+        # Configure git
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        
+        # Clone gh-pages branch
+        git clone --branch gh-pages --single-branch "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+        cd gh-pages
+        
+        # Clear any existing content
+        rm -rf *
+        
+        # Copy new docs to appropriate directory
+        if [[ ${{ github.event_name }} == 'release' ]]; then
+          mkdir -p latest
+          cp -r ../docs/build/* latest/
+          # Create a version-specific folder if needed
+          VERSION="${GITHUB_REF#refs/tags/}"
+          mkdir -p "$VERSION"
+          cp -r ../docs/build/* "$VERSION/"
+        else
+          mkdir -p dev
+          cp -r ../docs/build/* dev/
+        fi
+        
+        # Create versions.json with proper URLs
+        cat > versions.json << EOF
+        {
+          "dev": "/mymesh/dev/",
+          "latest": "/mymesh/latest/"
+        }
+        
+        # Create root level redirect
+        cat > index.html << EOF
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta http-equiv="refresh" content="0; url=./dev/" />
+          </head>
+        </html>
+        
+        # Commit and push
+        git add .
+        git commit -m "Update documentation" || echo "No changes to commit"
+        git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
