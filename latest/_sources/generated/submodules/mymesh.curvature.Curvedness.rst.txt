@@ -1,6 +1,0 @@
-mymesh.curvature.Curvedness
-===========================
-
-.. currentmodule:: mymesh.curvature
-
-.. autofunction:: Curvedness

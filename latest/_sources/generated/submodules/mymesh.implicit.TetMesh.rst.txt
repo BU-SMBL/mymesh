@@ -1,6 +1,0 @@
-mymesh.implicit.TetMesh
-=======================
-
-.. currentmodule:: mymesh.implicit
-
-.. autofunction:: TetMesh

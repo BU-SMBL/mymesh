@@ -1,6 +1,0 @@
-mymesh.delaunay.Triangle
-========================
-
-.. currentmodule:: mymesh.delaunay
-
-.. autofunction:: Triangle

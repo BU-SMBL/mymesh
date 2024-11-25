@@ -1,6 +1,0 @@
-mymesh.converter.im2voxel
-=========================
-
-.. currentmodule:: mymesh.converter
-
-.. autofunction:: im2voxel

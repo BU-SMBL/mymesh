@@ -1,6 +1,0 @@
-mymesh.utils.getElemConnectivity
-================================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: getElemConnectivity

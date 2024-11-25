@@ -1,6 +1,0 @@
-mymesh.contour.Adaptive
-=======================
-
-.. currentmodule:: mymesh.contour
-
-.. autofunction:: Adaptive

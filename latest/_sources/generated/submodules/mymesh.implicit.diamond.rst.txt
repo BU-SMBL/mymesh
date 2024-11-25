@@ -1,6 +1,0 @@
-mymesh.implicit.diamond
-=======================
-
-.. currentmodule:: mymesh.implicit
-
-.. autofunction:: diamond

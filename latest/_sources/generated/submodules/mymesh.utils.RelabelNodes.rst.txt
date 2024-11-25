@@ -1,6 +1,0 @@
-mymesh.utils.RelabelNodes
-=========================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: RelabelNodes

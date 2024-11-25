@@ -1,6 +1,0 @@
-mymesh.implicit.rMax
-====================
-
-.. currentmodule:: mymesh.implicit
-
-.. autofunction:: rMax

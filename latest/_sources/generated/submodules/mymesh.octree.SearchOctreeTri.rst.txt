@@ -1,6 +1,0 @@
-mymesh.octree.SearchOctreeTri
-=============================
-
-.. currentmodule:: mymesh.octree
-
-.. autofunction:: SearchOctreeTri

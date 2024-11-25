@@ -1,6 +1,0 @@
-mymesh.delaunay.SciPy
-=====================
-
-.. currentmodule:: mymesh.delaunay
-
-.. autofunction:: SciPy

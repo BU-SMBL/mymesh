@@ -1,6 +1,0 @@
-mymesh.quality.MeanRatio
-========================
-
-.. currentmodule:: mymesh.quality
-
-.. autofunction:: MeanRatio

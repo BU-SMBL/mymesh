@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.points
-=======================
-
-.. currentmodule:: mymesh.mesh
-
-.. autoproperty:: mesh.points

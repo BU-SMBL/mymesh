@@ -1,6 +1,0 @@
-mymesh.primitives.Box
-=====================
-
-.. currentmodule:: mymesh.primitives
-
-.. autofunction:: Box

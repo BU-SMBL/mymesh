@@ -1,6 +1,0 @@
-mymesh.primitives.Plane
-=======================
-
-.. currentmodule:: mymesh.primitives
-
-.. autofunction:: Plane

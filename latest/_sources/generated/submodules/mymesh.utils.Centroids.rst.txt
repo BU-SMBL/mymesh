@@ -1,6 +1,0 @@
-mymesh.utils.Centroids
-======================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: Centroids

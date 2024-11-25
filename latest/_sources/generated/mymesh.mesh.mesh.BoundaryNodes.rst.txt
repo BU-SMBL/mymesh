@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.BoundaryNodes
-==============================
-
-.. currentmodule:: mymesh.mesh
-
-.. autoproperty:: mesh.BoundaryNodes

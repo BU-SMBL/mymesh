@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.removeElems
-============================
-
-.. currentmodule:: mymesh.mesh
-
-.. automethod:: mesh.removeElems

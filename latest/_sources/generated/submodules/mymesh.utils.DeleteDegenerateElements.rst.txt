@@ -1,6 +1,0 @@
-mymesh.utils.DeleteDegenerateElements
-=====================================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: DeleteDegenerateElements

@@ -1,6 +1,0 @@
-mymesh.primitives.Torus
-=======================
-
-.. currentmodule:: mymesh.primitives
-
-.. autofunction:: Torus

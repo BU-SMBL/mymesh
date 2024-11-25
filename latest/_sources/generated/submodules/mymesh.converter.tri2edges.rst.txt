@@ -1,6 +1,0 @@
-mymesh.converter.tri2edges
-==========================
-
-.. currentmodule:: mymesh.converter
-
-.. autofunction:: tri2edges

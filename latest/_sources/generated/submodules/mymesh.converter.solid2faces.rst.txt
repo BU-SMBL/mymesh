@@ -1,6 +1,0 @@
-mymesh.converter.solid2faces
-============================
-
-.. currentmodule:: mymesh.converter
-
-.. autofunction:: solid2faces

@@ -1,6 +1,0 @@
-mymesh.utils.BaryTri
-====================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: BaryTri

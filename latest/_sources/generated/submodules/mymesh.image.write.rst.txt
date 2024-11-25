@@ -1,6 +1,0 @@
-mymesh.image.write
-==================
-
-.. currentmodule:: mymesh.image
-
-.. autofunction:: write

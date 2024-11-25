@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.SurfNodes
-==========================
-
-.. currentmodule:: mymesh.mesh
-
-.. autoproperty:: mesh.SurfNodes

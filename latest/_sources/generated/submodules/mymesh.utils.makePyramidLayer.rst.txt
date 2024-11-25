@@ -1,6 +1,0 @@
-mymesh.utils.makePyramidLayer
-=============================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: makePyramidLayer

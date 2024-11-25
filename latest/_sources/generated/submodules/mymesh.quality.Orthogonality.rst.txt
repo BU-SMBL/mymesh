@@ -1,6 +1,0 @@
-mymesh.quality.Orthogonality
-============================
-
-.. currentmodule:: mymesh.quality
-
-.. autofunction:: Orthogonality

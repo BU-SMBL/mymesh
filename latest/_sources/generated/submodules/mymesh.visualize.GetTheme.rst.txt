@@ -1,6 +1,0 @@
-mymesh.visualize.GetTheme
-=========================
-
-.. currentmodule:: mymesh.visualize
-
-.. autofunction:: GetTheme

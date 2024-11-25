@@ -1,6 +1,0 @@
-mymesh.converter.pyramid2tet
-============================
-
-.. currentmodule:: mymesh.converter
-
-.. autofunction:: pyramid2tet

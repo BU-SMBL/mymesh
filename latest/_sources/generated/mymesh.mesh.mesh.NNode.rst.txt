@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.NNode
-======================
-
-.. currentmodule:: mymesh.mesh
-
-.. autoproperty:: mesh.NNode

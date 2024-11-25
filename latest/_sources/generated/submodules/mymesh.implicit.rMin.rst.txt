@@ -1,6 +1,0 @@
-mymesh.implicit.rMin
-====================
-
-.. currentmodule:: mymesh.implicit
-
-.. autofunction:: rMin

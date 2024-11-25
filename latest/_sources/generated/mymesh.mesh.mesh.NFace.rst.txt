@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.NFace
-======================
-
-.. currentmodule:: mymesh.mesh
-
-.. autoproperty:: mesh.NFace

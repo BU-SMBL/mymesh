@@ -1,6 +1,0 @@
-mymesh.utils.SortRaggedByLength
-===============================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: SortRaggedByLength

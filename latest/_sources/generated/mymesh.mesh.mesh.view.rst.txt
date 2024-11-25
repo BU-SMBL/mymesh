@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.view
-=====================
-
-.. currentmodule:: mymesh.mesh
-
-.. automethod:: mesh.view

@@ -1,6 +1,0 @@
-mymesh.utils.TetMeshVol
-=======================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: TetMeshVol

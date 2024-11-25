@@ -1,6 +1,0 @@
-mymesh.visualize.View
-=====================
-
-.. currentmodule:: mymesh.visualize
-
-.. autofunction:: View

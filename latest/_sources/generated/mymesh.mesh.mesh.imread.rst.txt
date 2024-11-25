@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.imread
-=======================
-
-.. currentmodule:: mymesh.mesh
-
-.. automethod:: mesh.imread

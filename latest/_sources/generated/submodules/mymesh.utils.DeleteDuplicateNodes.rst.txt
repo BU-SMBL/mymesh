@@ -1,6 +1,0 @@
-mymesh.utils.DeleteDuplicateNodes
-=================================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: DeleteDuplicateNodes

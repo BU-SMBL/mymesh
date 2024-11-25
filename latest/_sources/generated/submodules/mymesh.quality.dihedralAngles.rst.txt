@@ -1,6 +1,0 @@
-mymesh.quality.dihedralAngles
-=============================
-
-.. currentmodule:: mymesh.quality
-
-.. autofunction:: dihedralAngles

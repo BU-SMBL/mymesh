@@ -1,6 +1,0 @@
-mymesh.quality.InverseOrthogonalQuality
-=======================================
-
-.. currentmodule:: mymesh.quality
-
-.. autofunction:: InverseOrthogonalQuality

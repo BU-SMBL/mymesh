@@ -1,6 +1,0 @@
-mymesh.utils.getNodeNeighborhood
-================================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: getNodeNeighborhood

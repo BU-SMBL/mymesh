@@ -1,6 +1,0 @@
-mymesh.converter.surf2voxel
-===========================
-
-.. currentmodule:: mymesh.converter
-
-.. autofunction:: surf2voxel

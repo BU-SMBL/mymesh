@@ -1,6 +1,0 @@
-mymesh.converter.quad2edges
-===========================
-
-.. currentmodule:: mymesh.converter
-
-.. autofunction:: quad2edges

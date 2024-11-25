@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.FaceConn
-=========================
-
-.. currentmodule:: mymesh.mesh
-
-.. autoproperty:: mesh.FaceConn

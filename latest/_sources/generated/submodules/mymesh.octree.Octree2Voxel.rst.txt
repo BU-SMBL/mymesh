@@ -1,6 +1,0 @@
-mymesh.octree.Octree2Voxel
-==========================
-
-.. currentmodule:: mymesh.octree
-
-.. autofunction:: Octree2Voxel

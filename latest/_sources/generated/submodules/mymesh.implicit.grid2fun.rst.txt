@@ -1,6 +1,0 @@
-mymesh.implicit.grid2fun
-========================
-
-.. currentmodule:: mymesh.implicit
-
-.. autofunction:: grid2fun

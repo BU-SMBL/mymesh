@@ -1,6 +1,0 @@
-mymesh.implicit.neovius
-=======================
-
-.. currentmodule:: mymesh.implicit
-
-.. autofunction:: neovius

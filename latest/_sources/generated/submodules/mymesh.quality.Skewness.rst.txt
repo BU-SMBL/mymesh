@@ -1,6 +1,0 @@
-mymesh.quality.Skewness
-=======================
-
-.. currentmodule:: mymesh.quality
-
-.. autofunction:: Skewness

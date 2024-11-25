@@ -1,6 +1,0 @@
-mymesh.primitives.Grid2D
-========================
-
-.. currentmodule:: mymesh.primitives
-
-.. autofunction:: Grid2D

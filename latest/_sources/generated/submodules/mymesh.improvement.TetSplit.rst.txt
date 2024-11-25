@@ -1,6 +1,0 @@
-mymesh.improvement.TetSplit
-===========================
-
-.. currentmodule:: mymesh.improvement
-
-.. autofunction:: TetSplit
