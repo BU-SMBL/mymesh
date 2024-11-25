@@ -1,6 +1,0 @@
-mymesh.delaunay.ConvexHull
-==========================
-
-.. currentmodule:: mymesh.delaunay
-
-.. autofunction:: ConvexHull

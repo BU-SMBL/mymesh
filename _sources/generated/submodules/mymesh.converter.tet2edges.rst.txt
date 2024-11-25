@@ -1,6 +1,0 @@
-mymesh.converter.tet2edges
-==========================
-
-.. currentmodule:: mymesh.converter
-
-.. autofunction:: tet2edges

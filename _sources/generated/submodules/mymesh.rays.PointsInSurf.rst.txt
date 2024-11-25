@@ -1,6 +1,0 @@
-mymesh.rays.PointsInSurf
-========================
-
-.. currentmodule:: mymesh.rays
-
-.. autofunction:: PointsInSurf

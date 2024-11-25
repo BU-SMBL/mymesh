@@ -1,6 +1,0 @@
-mymesh.utils.MVBB
-=================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: MVBB

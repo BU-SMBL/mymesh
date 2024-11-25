@@ -1,6 +1,0 @@
-mymesh.quality.AspectRatio
-==========================
-
-.. currentmodule:: mymesh.quality
-
-.. autofunction:: AspectRatio

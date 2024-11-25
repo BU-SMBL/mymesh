@@ -1,6 +1,0 @@
-mymesh.utils.AABB
-=================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: AABB

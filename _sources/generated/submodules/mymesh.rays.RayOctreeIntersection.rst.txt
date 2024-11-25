@@ -1,6 +1,0 @@
-mymesh.rays.RayOctreeIntersection
-=================================
-
-.. currentmodule:: mymesh.rays
-
-.. autofunction:: RayOctreeIntersection

@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.addFaces
-=========================
-
-.. currentmodule:: mymesh.mesh
-
-.. automethod:: mesh.addFaces

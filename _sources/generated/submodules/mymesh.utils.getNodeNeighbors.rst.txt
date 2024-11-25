@@ -1,6 +1,0 @@
-mymesh.utils.getNodeNeighbors
-=============================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: getNodeNeighbors

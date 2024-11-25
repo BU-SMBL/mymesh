@@ -1,6 +1,0 @@
-mymesh.utils.DilateVoxel
-========================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: DilateVoxel

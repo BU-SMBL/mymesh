@@ -1,6 +1,0 @@
-mymesh.rays.PlaneSurfIntersection
-=================================
-
-.. currentmodule:: mymesh.rays
-
-.. autofunction:: PlaneSurfIntersection

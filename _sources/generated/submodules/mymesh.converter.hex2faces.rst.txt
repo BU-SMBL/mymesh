@@ -1,6 +1,0 @@
-mymesh.converter.hex2faces
-==========================
-
-.. currentmodule:: mymesh.converter
-
-.. autofunction:: hex2faces

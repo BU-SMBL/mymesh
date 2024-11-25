@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.copy
-=====================
-
-.. currentmodule:: mymesh.mesh
-
-.. automethod:: mesh.copy

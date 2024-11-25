@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.addEdges
-=========================
-
-.. currentmodule:: mymesh.mesh
-
-.. automethod:: mesh.addEdges

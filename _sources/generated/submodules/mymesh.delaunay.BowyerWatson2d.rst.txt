@@ -1,6 +1,0 @@
-mymesh.delaunay.BowyerWatson2d
-==============================
-
-.. currentmodule:: mymesh.delaunay
-
-.. autofunction:: BowyerWatson2d

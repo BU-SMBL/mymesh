@@ -1,6 +1,0 @@
-mymesh.primitives.Circle
-========================
-
-.. currentmodule:: mymesh.primitives
-
-.. autofunction:: Circle

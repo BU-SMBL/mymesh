@@ -1,6 +1,0 @@
-mymesh.implicit.zplane
-======================
-
-.. currentmodule:: mymesh.implicit
-
-.. autofunction:: zplane

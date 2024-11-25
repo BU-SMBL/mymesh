@@ -1,6 +1,0 @@
-mymesh.utils.DetectFeatures
-===========================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: DetectFeatures

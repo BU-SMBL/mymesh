@@ -1,6 +1,0 @@
-mymesh.utils.MergeMesh
-======================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: MergeMesh

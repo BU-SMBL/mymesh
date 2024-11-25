@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.Clip
-=====================
-
-.. currentmodule:: mymesh.mesh
-
-.. automethod:: mesh.Clip

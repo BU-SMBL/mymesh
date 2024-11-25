@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.RenumberFacesBySet
-===================================
-
-.. currentmodule:: mymesh.mesh
-
-.. automethod:: mesh.RenumberFacesBySet

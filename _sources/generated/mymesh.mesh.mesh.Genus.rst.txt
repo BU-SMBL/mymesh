@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.Genus
-======================
-
-.. currentmodule:: mymesh.mesh
-
-.. autoproperty:: mesh.Genus

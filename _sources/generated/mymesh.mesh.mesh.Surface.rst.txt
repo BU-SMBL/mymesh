@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.Surface
-========================
-
-.. currentmodule:: mymesh.mesh
-
-.. autoproperty:: mesh.Surface

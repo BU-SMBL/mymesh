@@ -1,6 +1,0 @@
-mymesh.utils.SurfMapping
-========================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: SurfMapping

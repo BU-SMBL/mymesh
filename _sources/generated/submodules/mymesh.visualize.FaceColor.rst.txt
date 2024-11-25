@@ -1,6 +1,0 @@
-mymesh.visualize.FaceColor
-==========================
-
-.. currentmodule:: mymesh.visualize
-
-.. autofunction:: FaceColor

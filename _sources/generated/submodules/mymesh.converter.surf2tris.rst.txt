@@ -1,6 +1,0 @@
-mymesh.converter.surf2tris
-==========================
-
-.. currentmodule:: mymesh.converter
-
-.. autofunction:: surf2tris

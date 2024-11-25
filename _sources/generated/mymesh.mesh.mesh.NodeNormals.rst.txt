@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.NodeNormals
-============================
-
-.. currentmodule:: mymesh.mesh
-
-.. autoproperty:: mesh.NodeNormals

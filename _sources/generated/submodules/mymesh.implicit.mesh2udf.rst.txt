@@ -1,6 +1,0 @@
-mymesh.implicit.mesh2udf
-========================
-
-.. currentmodule:: mymesh.implicit
-
-.. autofunction:: mesh2udf

@@ -1,6 +1,0 @@
-mymesh.contour.MarchingSquares
-==============================
-
-.. currentmodule:: mymesh.contour
-
-.. autofunction:: MarchingSquares

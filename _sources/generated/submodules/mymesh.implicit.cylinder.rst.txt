@@ -1,6 +1,0 @@
-mymesh.implicit.cylinder
-========================
-
-.. currentmodule:: mymesh.implicit
-
-.. autofunction:: cylinder

@@ -1,6 +1,0 @@
-mymesh.image.SurfaceMesh
-========================
-
-.. currentmodule:: mymesh.image
-
-.. autofunction:: SurfaceMesh

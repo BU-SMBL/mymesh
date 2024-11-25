@@ -1,6 +1,0 @@
-mymesh.quality.MinDihedral
-==========================
-
-.. currentmodule:: mymesh.quality
-
-.. autofunction:: MinDihedral

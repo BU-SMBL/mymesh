@@ -1,6 +1,0 @@
-mymesh.primitives.Cylinder
-==========================
-
-.. currentmodule:: mymesh.primitives
-
-.. autofunction:: Cylinder

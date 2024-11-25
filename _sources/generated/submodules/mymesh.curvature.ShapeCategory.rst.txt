@@ -1,6 +1,0 @@
-mymesh.curvature.ShapeCategory
-==============================
-
-.. currentmodule:: mymesh.curvature
-
-.. autofunction:: ShapeCategory

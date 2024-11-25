@@ -1,6 +1,0 @@
-mymesh.converter.polygon2edges
-==============================
-
-.. currentmodule:: mymesh.converter
-
-.. autofunction:: polygon2edges

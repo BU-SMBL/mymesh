@@ -1,6 +1,0 @@
-mymesh.curvature.ShapeIndex
-===========================
-
-.. currentmodule:: mymesh.curvature
-
-.. autofunction:: ShapeIndex

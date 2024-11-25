@@ -1,6 +1,0 @@
-mymesh.image.SurfaceNodeOptimization
-====================================
-
-.. currentmodule:: mymesh.image
-
-.. autofunction:: SurfaceNodeOptimization

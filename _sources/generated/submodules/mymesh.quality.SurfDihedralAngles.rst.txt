@@ -1,6 +1,0 @@
-mymesh.quality.SurfDihedralAngles
-=================================
-
-.. currentmodule:: mymesh.quality
-
-.. autofunction:: SurfDihedralAngles

@@ -1,6 +1,0 @@
-mymesh.mesh.mesh.addElems
-=========================
-
-.. currentmodule:: mymesh.mesh
-
-.. automethod:: mesh.addElems

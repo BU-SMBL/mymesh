@@ -1,6 +1,0 @@
-mymesh.improvement.TetImprove
-=============================
-
-.. currentmodule:: mymesh.improvement
-
-.. autofunction:: TetImprove

@@ -1,6 +1,0 @@
-mymesh.delaunay.TriangleSplittingTriangulation
-==============================================
-
-.. currentmodule:: mymesh.delaunay
-
-.. autofunction:: TriangleSplittingTriangulation

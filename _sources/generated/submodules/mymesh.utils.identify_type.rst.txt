@@ -1,6 +1,0 @@
-mymesh.utils.identify\_type
-===========================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: identify_type

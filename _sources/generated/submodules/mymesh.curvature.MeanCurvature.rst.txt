@@ -1,6 +1,0 @@
-mymesh.curvature.MeanCurvature
-==============================
-
-.. currentmodule:: mymesh.curvature
-
-.. autofunction:: MeanCurvature

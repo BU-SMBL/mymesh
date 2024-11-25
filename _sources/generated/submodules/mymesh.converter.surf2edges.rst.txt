@@ -1,6 +1,0 @@
-mymesh.converter.surf2edges
-===========================
-
-.. currentmodule:: mymesh.converter
-
-.. autofunction:: surf2edges

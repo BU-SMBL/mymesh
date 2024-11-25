@@ -1,6 +1,0 @@
-mymesh.utils.ExtractRagged
-==========================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: ExtractRagged

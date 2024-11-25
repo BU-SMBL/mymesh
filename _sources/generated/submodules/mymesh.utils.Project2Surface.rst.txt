@@ -1,6 +1,0 @@
-mymesh.utils.Project2Surface
-============================
-
-.. currentmodule:: mymesh.utils
-
-.. autofunction:: Project2Surface

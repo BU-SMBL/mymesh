@@ -1,6 +1,0 @@
-mymesh.improvement.GeoTransformSmoothing
-========================================
-
-.. currentmodule:: mymesh.improvement
-
-.. autofunction:: GeoTransformSmoothing

@@ -1,6 +1,0 @@
-mymesh.delaunay.ConvexHull\_GiftWrapping
-========================================
-
-.. currentmodule:: mymesh.delaunay
-
-.. autofunction:: ConvexHull_GiftWrapping
