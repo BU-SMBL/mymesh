@@ -9,6 +9,14 @@ Josephson in Elise Morgan’s Skeletal Mechanobiology and Biomechanics Lab at
 Boston University.
 
 # Getting Started
+For more details, see the [full documentation](https://bu-smbl.github.io/mymesh/)
+
+## Installing from the [Python Package Index (PyPI)](https://pypi.org/project/mymesh/)
+```
+pip install mymesh[all]
+```
+
+To install only the minimum required dependencies, omit `[all]`.
 
 ## Installing from source:
 Download/clone the repository, then run
