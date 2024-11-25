@@ -14,8 +14,7 @@ import mymesh
 project = 'MyMesh'
 copyright = '2023, Timothy O. Josephson'
 author = 'Timothy O. Josephson'
-version = os.environ.get('SPHINX_VERSION', 'dev')
-release = version
+release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -55,9 +54,7 @@ html_theme_options = dict(collapse_navigation=True,
                                  "icon": "fa-brands fa-square-github",
                                  # The type of image to be used (see below for details)
                                  "type": "fontawesome",
-                              }],
-                           version_dropdown=True,
-                           version_info=True,
+                              }]
                         )
 html_context = {
    "default_mode": "light"
