@@ -1,0 +1,785 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Curvature &#8212; MyMesh v0.1.0 Manual</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+
+    <script src="../_static/documentation_options.js?v=01f34227"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=4ea706d9"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'theory/curvature';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Delaunay Triangulation" href="delaunay.html" />
+    <link rel="prev" title="Contour" href="contour.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/mymesh_logo.png" class="logo__image only-light" alt="MyMesh v0.1.0 Manual - Home"/>
+    <img src="../_static/mymesh_logo.png" class="logo__image only-dark pst-js-only" alt="MyMesh v0.1.0 Manual - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="contour.html">Contour</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Curvature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="delaunay.html">Delaunay Triangulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="improvement.html">Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="octree.html">Octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rays.html">Rays</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../theory.html" class="nav-link">Theory Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Curvature</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="curvature">
+<h1>Curvature<a class="headerlink" href="#curvature" title="Link to this heading">#</a></h1>
+<section id="curvature-metrics">
+<h2>Curvature Metrics<a class="headerlink" href="#curvature-metrics" title="Link to this heading">#</a></h2>
+<section id="principal-curvatures">
+<h3>Principal Curvatures<a class="headerlink" href="#principal-curvatures" title="Link to this heading">#</a></h3>
+<p>The principal curvatures are the maximum (<span class="math notranslate nohighlight">\(\kappa_1\)</span>) and minimum
+(<span class="math notranslate nohighlight">\(\kappa_2\)</span>) curvatures of a surface at a particular point. When both
+principal curvatures are positive, the surface is convex at that point, when
+they’re both negative, the surface is concave at that point, and when they
+have opposite signs the surface is hyperbolic (saddle-shaped) at that point.</p>
+<p>The principal curvatures can be calculated from the mean (<span class="math notranslate nohighlight">\(H\)</span>) and
+Gaussian (<span class="math notranslate nohighlight">\(K\)</span>) curvatures as</p>
+<div class="math notranslate nohighlight">
+\[\kappa_{1,2} = H \pm \sqrt{(H^2 - K)}\]</div>
+</section>
+<section id="mean-curvature">
+<h3>Mean Curvature<a class="headerlink" href="#mean-curvature" title="Link to this heading">#</a></h3>
+<p>See <a class="reference internal" href="../generated/submodules/mymesh.curvature.MeanCurvature.html#mymesh.curvature.MeanCurvature" title="mymesh.curvature.MeanCurvature"><code class="xref py py-func docutils literal notranslate"><span class="pre">MeanCurvature()</span></code></a></p>
+<p>Mean curvature is the average of the two principal curvatures</p>
+<div class="math notranslate nohighlight">
+\[H = \frac{1}{2}(\kappa_1 + \kappa_2)\]</div>
+<p>where <span class="math notranslate nohighlight">\(\kappa_1, \kappa_2\)</span> are the maximum and minimum principal curvatures,
+respectively.</p>
+</section>
+<section id="gaussian-curvature">
+<h3>Gaussian Curvature<a class="headerlink" href="#gaussian-curvature" title="Link to this heading">#</a></h3>
+<p>See <a class="reference internal" href="../generated/submodules/mymesh.curvature.GaussianCurvature.html#mymesh.curvature.GaussianCurvature" title="mymesh.curvature.GaussianCurvature"><code class="xref py py-func docutils literal notranslate"><span class="pre">GaussianCurvature()</span></code></a></p>
+<p>Gaussian curvature of a surface is unchanged when a surface is bent without
+stretching (e.g. bending a plane into a cylinder) and is thus considered
+to be independent of the embedding of a surface, making it an “intinsic”
+geometric property (see <a class="reference external" href="https://en.wikipedia.org/wiki/Gaussian_curvature#Theorema_egregium">Gauss’s theorema egregium</a>).</p>
+<p>Gaussian curvature (<span class="math notranslate nohighlight">\(K\)</span>) is calculated as</p>
+<div class="math notranslate nohighlight">
+\[K = \kappa_1 \kappa_2\]</div>
+<p>where <span class="math notranslate nohighlight">\(\kappa_1, \kappa_2\)</span> are the maximum and minimum principal curvatures,
+respectively.</p>
+</section>
+<section id="shape-index">
+<h3>Shape Index<a class="headerlink" href="#shape-index" title="Link to this heading">#</a></h3>
+<p>See <a class="reference internal" href="../generated/submodules/mymesh.curvature.ShapeIndex.html#mymesh.curvature.ShapeIndex" title="mymesh.curvature.ShapeIndex"><code class="xref py py-func docutils literal notranslate"><span class="pre">ShapeIndex()</span></code></a></p>
+<p>Shape index <span id="id1">[<a class="reference internal" href="../guide/ref.html#id23" title="Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. Image and Vision Computing, 10(8):557–564, 1992. URL: https://www.doi.org/10.1016/0262-8856(92)90076-F, doi:10.1016/0262-8856(92)90076-F.">KvD92</a>]</span> describes the directionality of curvature,
+independent of scale. It captures the intuitive notion that a sphere is
+recognizable as a sphere regardless of how big it is. Shape index is a
+unitless measure that ranges from -1 (concave spherical cup) to 1 (convex
+spherical cap). <span class="math notranslate nohighlight">\(\pm\)</span> 0.5 correspond to cylindrical curvatures and 0
+corresponds to a saddle.</p>
+<p>Shape index (<span class="math notranslate nohighlight">\(s\)</span>) is calculated as</p>
+<div class="math notranslate nohighlight">
+\[s = \frac{2}{\pi} \arctan \frac{\kappa_2 + \kappa_1}{\kappa_2 - \kappa_1}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\kappa_1, \kappa_2\)</span> are the maximum and minimum principal curvatures,
+respectively.</p>
+</section>
+<section id="curvedness">
+<h3>Curvedness<a class="headerlink" href="#curvedness" title="Link to this heading">#</a></h3>
+<p>See <a class="reference internal" href="../generated/submodules/mymesh.curvature.Curvedness.html#mymesh.curvature.Curvedness" title="mymesh.curvature.Curvedness"><code class="xref py py-func docutils literal notranslate"><span class="pre">Curvedness()</span></code></a></p>
+<p>Curvedness <span id="id2">[<a class="reference internal" href="../guide/ref.html#id23" title="Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. Image and Vision Computing, 10(8):557–564, 1992. URL: https://www.doi.org/10.1016/0262-8856(92)90076-F, doi:10.1016/0262-8856(92)90076-F.">KvD92</a>]</span> complements shape index by capturing the
+magnitude of curvature, independent of direction. It is a non-negative measure
+of the scale of a surface’s curvature. For a sphere, curvedness is equal to
+the principal curvatures.</p>
+<p>Curvedness (<span class="math notranslate nohighlight">\(c\)</span>) is calculated as</p>
+<div class="math notranslate nohighlight">
+\[c = \sqrt{\frac{\kappa_1^2 + \kappa_2^2}{2}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\kappa_1, \kappa_2\)</span> are the maximum and minimum principal curvatures,
+respectively.</p>
+</section>
+<section id="conventions">
+<h3>Conventions<a class="headerlink" href="#conventions" title="Link to this heading">#</a></h3>
+<p>Some measures of curvature are coordinate system and/or reference frame
+independent, while others are not. For example, a sphere may be considered
+concave or convex depending on whether it’s being viewed from the inside
+or the outside. When measuring the curvature of surfaces, it is thus important
+to define a consistent convention when calculating and discussing curvature.</p>
+<p>While different conventions can be used, the most common, and the one
+adopted here, is that surface normal vectors point outward from the surface.
+Thus a sphere with normal vectors pointed towards the center would have
+negative principal curvatures and be considered concave, while if the normal
+vectors point outwards, the principal curvatures would be positive and the
+surface would be convex. The surface normals follow from the ordering of nodes
+in the surface elements of a mesh, and thus it is important to be mindful of
+element orientation when measuring curvature.</p>
+<p>For function- and image-based curvatures, the inside of a surface is considered
+to be less than and greater than the threshold isosurface value, respectively.
+For implicit functions, this follows from the convention that the inside of an implicit function, while for images this is based on the assumption that foreground
+objects are bright (as is the case in CT scans of bone).</p>
+</section>
+<section id="interpretation">
+<h3>Interpretation<a class="headerlink" href="#interpretation" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Classification</p></th>
+<th class="head"><p>Principal Curvatures</p></th>
+<th class="head"><p>Gaussian (<span class="math notranslate nohighlight">\(K\)</span>) &amp; Mean (<span class="math notranslate nohighlight">\(H\)</span>)</p></th>
+<th class="head"><p>Shape Index</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Convex, Elliptical</p></td>
+<td><p><span class="math notranslate nohighlight">\(\kappa_{1,2} &gt; 0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(K &gt; 0, H &gt; 0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(s &gt; 0.5\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>Concave, Elliptical</p></td>
+<td><p><span class="math notranslate nohighlight">\(\kappa_{1,2} &lt; 0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(K &gt; 0, H &lt; 0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(s &lt; -0.5\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>Hyperbolic (Saddle)</p></td>
+<td><p><span class="math notranslate nohighlight">\(\kappa_1 &gt; 0, \kappa_2 &lt; 0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(K &lt; 0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-0.5 &lt; s &lt; 0.5\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="calculating-curvature">
+<h2>Calculating Curvature<a class="headerlink" href="#calculating-curvature" title="Link to this heading">#</a></h2>
+<section id="mesh-based-curvature">
+<h3>Mesh-Based Curvature<a class="headerlink" href="#mesh-based-curvature" title="Link to this heading">#</a></h3>
+<p>Mesh-based curvature calculation relies only on the mesh itself to estimate
+local curvature. This relies on looking at neighborhoods of points around a
+point of interest, most commonly the “one-ring” neighborhood of nodes directly
+connected to the point of interest. The biggest advantage to this class of
+methods is that only the mesh and mesh-based features (such as normal vectors)
+are required. The disadvantage is that they can be inaccurate and have an
+inherent dependence on mesh and mesh quality, with low quality elements
+resulting in spurious results.</p>
+<section id="quadratic-surface-fitting">
+<h4>Quadratic Surface Fitting<a class="headerlink" href="#quadratic-surface-fitting" title="Link to this heading">#</a></h4>
+<p>Reference: <span id="id3">Goldfeather and Interrante [<a class="reference internal" href="../guide/ref.html#id25" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
+<p>Quadratic surface fitting (see <a class="reference internal" href="../generated/submodules/mymesh.curvature.QuadFit.html#mymesh.curvature.QuadFit" title="mymesh.curvature.QuadFit"><code class="xref py py-func docutils literal notranslate"><span class="pre">QuadFit()</span></code></a>) locally fits a quadratic
+surface <span class="math notranslate nohighlight">\(z = f(x,y) = \frac{A}{2}x^2 + Bxy + \frac{C}{2}y^2\)</span> to a
+local neighborhood of nodes. This can be accomplished by examining this
+neighborhood in a local coordinate system, in which the node of interest is
+positioned at <span class="math notranslate nohighlight">\((0, 0, 0)\)</span> and the normal vector to that node is oriented
+in the <span class="math notranslate nohighlight">\([0, 0, 1]\)</span> direction. This allows for convenient fitting to the
+quadratic surface equation, leading to a system of equations:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\left.
+\begin{align}
+z_0 &amp;= \frac{A}{2}x_0^2 + Bx_0y_0 + \frac{C}{2}y_0^2 \\
+z_1 &amp;= \frac{A}{2}x_1^2 + Bx_1y_1 + \frac{C}{2}y_1^2 \\
+\vdots &amp; \\
+z_n &amp;= \frac{A}{2}x_n^2 + Bx_ny_n + \frac{C}{2}y_n^2
+\end{align}\
+\right\} =
+\underbrace{\begin{bmatrix}
+\vdots &amp; \vdots &amp; \vdots \\
+\frac{1}{2}x_i^2 &amp; x_iy_i &amp; \frac{1}{2}y_i^2 \\
+\vdots &amp; \vdots &amp; \vdots
+\end{bmatrix}}_{\mathbf{A}}
+\underbrace{\begin{bmatrix}
+A \\ B \\ C
+\end{bmatrix}}_{\mathbf{x}}
+=
+\underbrace{\begin{bmatrix}
+\vdots \\ z_i \\ \vdots
+\end{bmatrix}}_{\mathbf{b}}\end{split}\]</div>
+<p>for all <span class="math notranslate nohighlight">\(n\)</span> nodes in the neighborhood (including the point of interest).
+For anything but the corner of an open surface, this system of equations will be
+be overdetermined and can be solved by least squares
+(<span class="math notranslate nohighlight">\(\mathbf{A}^\intercal\mathbf{A} \mathbf{x} = \mathbf{A}^\intercal \mathbf{b}\)</span>).</p>
+<p>The parameters <span class="math notranslate nohighlight">\(A, B,\)</span> and <span class="math notranslate nohighlight">\(C\)</span> are the components of the Weingarten matrix</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}W = \begin{bmatrix} A &amp; B \\ B &amp; C \end{bmatrix}\end{split}\]</div>
+<p>the eigenvalues of which are the principal curvatures.</p>
+</section>
+<section id="cubic-surface-fitting">
+<h4>Cubic Surface Fitting<a class="headerlink" href="#cubic-surface-fitting" title="Link to this heading">#</a></h4>
+<p>Reference: <span id="id4">Goldfeather and Interrante [<a class="reference internal" href="../guide/ref.html#id25" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
+<p>Cubic surface fitting (see <a class="reference internal" href="../generated/submodules/mymesh.curvature.CubicFit.html#mymesh.curvature.CubicFit" title="mymesh.curvature.CubicFit"><code class="xref py py-func docutils literal notranslate"><span class="pre">CubicFit()</span></code></a>) locally fits a cubic
+surface <span class="math notranslate nohighlight">\(z = f(x,y) = \frac{A}{2}x^2 + Bxy + \frac{C}{2}y^2 + Dx^3 + Ex^2y + Fxy^2 + Gy^3\)</span>
+to a local neighborhood of nodes. This can be accomplished by examining this
+neighborhood in a local coordinate system, in which the node of interest is
+positioned at <span class="math notranslate nohighlight">\((0, 0, 0)\)</span> and the normal vector to that node is oriented
+in the <span class="math notranslate nohighlight">\([0, 0, 1]\)</span> direction. This allows for convenient fitting to the
+cubic surface equation, leading to a system of equations:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+z_0 &amp;= \frac{A}{2}x_0^2 + Bx_0y_0 + \frac{C}{2}y_0^2 + Dx_0^3 + Ex_0^2y_0 + Fx_0y_0^2 + Gy_0^3 \\
+z_1 &amp;= \frac{A}{2}x_1^2 + Bx_1y_1 + \frac{C}{2}y_1^2 + Dx_1^3 + Ex_1^2y_1 + Fx_1y_1^2 + Gy_1^3 \\
+\vdots &amp; \\
+z_n &amp;= \frac{A}{2}x_n^2 + Bx_ny_n + \frac{C}{2}y_n^2 + Dx_n^3 + Ex_n^2y_n + Fx_ny_n^2 + Gy_n^3
+\end{align}\end{split}\]</div>
+<p>In many cases, there may not be enough nodes in the neighborhood to solve for
+the seven unknowns from these equations alone, therefore we can use additional
+information from the node normal vectors to obtain two additional equations per
+node.</p>
+<p>The surface normal at a point <span class="math notranslate nohighlight">\(i\)</span> in the local reference frame can be
+written as</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}n(x,y) =
+\begin{bmatrix}
+    -\frac{\partial z_i}{\partial x} \\
+    -\frac{\partial z_i}{\partial y} \\
+    1
+\end{bmatrix} =
+\begin{bmatrix}
+    -(Ax + By + 3Dx^2 + 2Exy + Fy^2) \\
+    -(Bx + Cy + Ex^2 + 2Fxy + 3Gy^2) \\
+    1
+\end{bmatrix}\end{split}\]</div>
+<p>A unit normal <span class="math notranslate nohighlight">\(\hat{n}(x,y) = \begin{bmatrix} a_i &amp; b_i &amp; c_i \end{bmatrix}^T\)</span>
+can be divided by <span class="math notranslate nohighlight">\(-c_i\)</span> such that <span class="math notranslate nohighlight">\(n(x,y) = -\hat{n}(x,y)/c_i\)</span>, which
+gives</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+Ax + By + 3Dx^2 + 2Exy + Fy^2 = -a_i/c_i, \\
+Bx + Cy + Ex^2 + 2Fxy + 3Gy^2 = -b_i/c_i.
+\end{align}\end{split}\]</div>
+<p>Now using each of the three equations for each point, a linear system can be
+constructed</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\underbrace{\begin{bmatrix}
+\vdots           &amp; \vdots &amp;           \vdots &amp; \vdots &amp;   \vdots &amp;   \vdots &amp; \vdots \\
+\frac{1}{2}x_i^2 &amp; x_iy_i &amp; \frac{1}{2}y_i^2 &amp; x_i^3  &amp; x_i^2y_i &amp; x_iy_i^2 &amp; y_i^3 \\
+x_i              &amp; y_i    &amp; 0                &amp; 3x_i^2 &amp; 2x_iy _i &amp;  y_i^2   &amp; 0 \\
+0                &amp; x_i    &amp; y_i              &amp; 0      &amp; x_i^2    &amp; 2x_iy_i  &amp; 3y_i^2 \\
+\vdots           &amp; \vdots &amp;           \vdots &amp; \vdots &amp;   \vdots &amp;   \vdots &amp; \vdots \\
+\end{bmatrix}}_{\mathbf{A}}
+\underbrace{\begin{bmatrix} A \\ B \\ C \\ D \\ E \\ F \\ G \end{bmatrix}}_{\mathbf{x}}
+=
+\underbrace{\begin{bmatrix} \vdots \\  z_i \\ \frac{a_i}{c_i} \\ \frac{b_i}{c_i} \\ \vdots \end{bmatrix}}_{\mathbf{b}}\end{split}\]</div>
+<p>This system of equations will be can be solved by least squares
+(<span class="math notranslate nohighlight">\(\mathbf{A}^\intercal\mathbf{A} \mathbf{x} = \mathbf{A}^\intercal \mathbf{b}\)</span>).</p>
+<p>The parameters <span class="math notranslate nohighlight">\(A, B,\)</span> and <span class="math notranslate nohighlight">\(C\)</span> are the components of the Weingarten matrix</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}W = \begin{bmatrix} A &amp; B \\ B &amp; C \end{bmatrix}\end{split}\]</div>
+<p>the eigenvalues of which are the principal curvatures.</p>
+</section>
+</section>
+<section id="analytical-curvature">
+<h3>Analytical Curvature<a class="headerlink" href="#analytical-curvature" title="Link to this heading">#</a></h3>
+<p>Reference: <span id="id5">Goldman [<a class="reference internal" href="../guide/ref.html#id29" title="Ron Goldman. Curvature formulas for implicit curves and surfaces. Computer Aided Geometric Design, 22(7 SPEC. ISS.):632–658, 2005. doi:10.1016/j.cagd.2005.06.005.">Gol05</a>]</span></p>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="contour.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Contour</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="delaunay.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Delaunay Triangulation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#curvature-metrics">Curvature Metrics</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#principal-curvatures">Principal Curvatures</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mean-curvature">Mean Curvature</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gaussian-curvature">Gaussian Curvature</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#shape-index">Shape Index</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#curvedness">Curvedness</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#conventions">Conventions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interpretation">Interpretation</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-curvature">Calculating Curvature</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mesh-based-curvature">Mesh-Based Curvature</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#quadratic-surface-fitting">Quadratic Surface Fitting</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cubic-surface-fitting">Cubic Surface Fitting</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analytical-curvature">Analytical Curvature</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/theory/curvature.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Timothy O. Josephson.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

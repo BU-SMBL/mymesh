@@ -1,0 +1,724 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Rays &#8212; MyMesh v0.1.0 Manual</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+
+    <script src="../_static/documentation_options.js?v=01f34227"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=4ea706d9"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'theory/rays';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Examples" href="../examples/index.html" />
+    <link rel="prev" title="Octree" href="octree.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/mymesh_logo.png" class="logo__image only-light" alt="MyMesh v0.1.0 Manual - Home"/>
+    <img src="../_static/mymesh_logo.png" class="logo__image only-dark pst-js-only" alt="MyMesh v0.1.0 Manual - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="contour.html">Contour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="curvature.html">Curvature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="delaunay.html">Delaunay Triangulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="improvement.html">Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="octree.html">Octree</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Rays</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../theory.html" class="nav-link">Theory Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Rays</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="rays">
+<h1>Rays<a class="headerlink" href="#rays" title="Link to this heading">#</a></h1>
+<section id="ray-shape-intersection-tests">
+<h2>Ray-Shape Intersection Tests<a class="headerlink" href="#ray-shape-intersection-tests" title="Link to this heading">#</a></h2>
+<p>Ray-Shape intersection tests determine whether rays intersect with a shape
+and where those intersections occur.</p>
+<section id="ray-triangle-intersection">
+<h3>Ray-Triangle Intersection<a class="headerlink" href="#ray-triangle-intersection" title="Link to this heading">#</a></h3>
+<p><em>The Möller-Trumbore Intersection Test</em> <span id="id1">[<a class="reference internal" href="../guide/ref.html#id35" title="Tomas Möller and Ben Trumbore. Fast, minimum storage ray/triangle intersection. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, pages 7823–7830, 2005. URL: https://www.doi.org/10.1145/1198555.1198746, doi:10.1145/1198555.1198746.">MollerT05</a>]</span></p>
+<p>See <a class="reference internal" href="../generated/submodules/mymesh.rays.RayTriangleIntersection.html#mymesh.rays.RayTriangleIntersection" title="mymesh.rays.RayTriangleIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RayTriangleIntersection()</span></code></a>,
+<a class="reference internal" href="../generated/submodules/mymesh.rays.RayTrianglesIntersection.html#mymesh.rays.RayTrianglesIntersection" title="mymesh.rays.RayTrianglesIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RayTrianglesIntersection()</span></code></a>,
+<a class="reference internal" href="../generated/submodules/mymesh.rays.RaysTrianglesIntersection.html#mymesh.rays.RaysTrianglesIntersection" title="mymesh.rays.RaysTrianglesIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RaysTrianglesIntersection()</span></code></a>.</p>
+<p>The Möller-Trumbore test efficiently determines whether a ray,
+<span class="math notranslate nohighlight">\(R(t) = O + tD\)</span> with origin <span class="math notranslate nohighlight">\(O\)</span> and direction <span class="math notranslate nohighlight">\(D\)</span> intersects
+the triangle with <span class="math notranslate nohighlight">\(V_0, V_1, V_2\)</span>. The test ultimately relies on
+determining whether the barycentric coordinates <span class="math notranslate nohighlight">\((u,v)\)</span> of the projection
+of the ray onto the plane of the triangle (<span class="math notranslate nohighlight">\(T(u,v)\)</span>) fall within the
+triangle (<span class="math notranslate nohighlight">\(u,v \geq 0\)</span> and <span class="math notranslate nohighlight">\(u+v\leq 1\)</span>), with checks along the way
+to ensure that only as much computation as is necessary is performed.</p>
+<div class="graphviz"><img src="../_images/graphviz-ebfedb4a8bc2ee13efa9eb9a15a528f60119f0d5.png" alt="graph raytri {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+a [pos=&quot;1.0,0.6!&quot;];
+b [pos=&quot;1.8,0.5!&quot;];
+c [pos=&quot;0.8,2.0!&quot;];
+
+o [pos=&quot;0.5,0.5!&quot;];
+r [pos=&quot;2.0,2.0!&quot;, style=&quot;invis&quot;]
+i [pos=&quot;1.2,1.2!&quot;, shape=&quot;circle&quot;, height=&quot;.1!&quot;, width=&quot;.1&quot;, label=&quot;&quot;]
+
+a -- b;
+b -- c;
+c -- a;
+o -- r [dir=&quot;forward&quot;, arrowhead=&quot;normal&quot;];
+
+labelv0 [label=&lt;V&lt;SUB&gt;0&lt;/SUB&gt;&gt;, pos=&quot;1.0,0.45!&quot;, shape=none, fontname=&quot;Times-Roman&quot;]
+labelv1 [label=&lt;V&lt;SUB&gt;1&lt;/SUB&gt;&gt;, pos=&quot;1.8,0.35!&quot;, shape=none, fontname=&quot;Times-Roman&quot;]
+labelv2 [label=&lt;V&lt;SUB&gt;2&lt;/SUB&gt;&gt;, pos=&quot;0.6,2.0!&quot;, shape=none, fontname=&quot;Times-Roman&quot;]
+label1 [label=&quot;O&quot;, pos=&quot;.4,.4!&quot;,  shape=none, fontname=&quot;Times-Roman&quot;]
+
+}" class="graphviz" /></div>
+<p>The intersection point (<span class="math notranslate nohighlight">\(T(u,v)\)</span>) between <span class="math notranslate nohighlight">\(R(t)\)</span> and the triangle is
+computed by solving <span class="math notranslate nohighlight">\(R(t) = T(u,v)\)</span> or</p>
+<div class="math notranslate nohighlight">
+\[O + tD = (1-u-v)V_0+uV_1 + vV_2\]</div>
+<p>The algorithm begins by computing the edge vectors <span class="math notranslate nohighlight">\(E_1=V_1-V_0\)</span> and
+<span class="math notranslate nohighlight">\(E_2 = V_2 - V_0\)</span>  followed by the calculation of the determinant of the
+<span class="math notranslate nohighlight">\(3\times3\)</span> matrix</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\det\left(\begin{bmatrix} r_0 &amp; r_1 &amp; r_2 \\ e_{2,0} &amp; e_{2,1} &amp; e_{2,2} \\ e_{1,0} &amp; e_{1,1} &amp; e_{1,2} \end{bmatrix} \right) = E_1 \cdot (R \times E_2) = det.\end{split}\]</div>
+<p>If this determinant is zero, then the ray lies in the plane of the triangle and
+the test concludes that there is no intersection. The small parameter
+<span class="math notranslate nohighlight">\(\epsilon\)</span> is used to determine if the determinant is sufficiently
+near-zero, with <span class="math notranslate nohighlight">\(\epsilon=10^{-6}\)</span> used in the original paper.  The
+barycentric coordinate <span class="math notranslate nohighlight">\(u\)</span> is first calculated and then checked for
+admissibility (<span class="math notranslate nohighlight">\(0 &lt; u &lt; 1\)</span>) followed by calculation of <span class="math notranslate nohighlight">\(v\)</span> and checking
+that <span class="math notranslate nohighlight">\(0&lt;v\)</span> and <span class="math notranslate nohighlight">\(u+v  &lt; 1\)</span>. Finally the parameter <span class="math notranslate nohighlight">\(t\)</span> of the
+intersection point can be calculated as</p>
+<div class="math notranslate nohighlight">
+\[t_i=\frac{1}{det}(E_2 \cdot ((O-V_0) \times E_1))\]</div>
+<p>For a unidirectional intersection test (only in the positive direction of
+<span class="math notranslate nohighlight">\(R(t)\)</span>), <span class="math notranslate nohighlight">\(t\)</span> must be positive. For a bidirectional test, the value
+of <span class="math notranslate nohighlight">\(t\)</span> is inconsequential for determining if the intersection occurs. The
+intersection point is then</p>
+<div class="math notranslate nohighlight">
+\[R(t_i) = O + t_i D\]</div>
+</section>
+<section id="ray-box-intersection">
+<h3>Ray-Box Intersection<a class="headerlink" href="#ray-box-intersection" title="Link to this heading">#</a></h3>
+<p><span id="id2">Williams <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id20" title="Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley. An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1):55–60, 2005. URL: https://www.doi.org/10.1145/1198555.1198748, doi:10.1145/1198555.1198748.">WBMS05</a>]</span></p>
+<p>See <a class="reference internal" href="../generated/submodules/mymesh.rays.RayBoxIntersection.html#mymesh.rays.RayBoxIntersection" title="mymesh.rays.RayBoxIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RayBoxIntersection()</span></code></a>,
+<a class="reference internal" href="../generated/submodules/mymesh.rays.RayBoxesIntersection.html#mymesh.rays.RayBoxesIntersection" title="mymesh.rays.RayBoxesIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RayBoxesIntersection()</span></code></a>.</p>
+<p>This test determines whether a ray,
+<span class="math notranslate nohighlight">\(R(t) = O + tD = \begin{bmatrix}R_x &amp; R_y &amp; R_z \end{bmatrix}\)</span> with origin
+<span class="math notranslate nohighlight">\(O\)</span> and direction <span class="math notranslate nohighlight">\(D\)</span> intersects an axis-aligned box with bounds
+<span class="math notranslate nohighlight">\((x_{min},x_{max}),(y_{min},y_{max}),(z_{min},z_{max})\)</span>. The test works by
+finding the values of the parameter <span class="math notranslate nohighlight">\(t\)</span> that correspond to the points
+where the ray reaches each bound of the box. For example,
+<span class="math notranslate nohighlight">\(t_{xmin} = (x_{min} - O_x)/R_x\)</span>, <span class="math notranslate nohighlight">\(t_{xmax} = (x_{max} - O_x)/R_x\)</span>
+correspond to the points where the ray crosses the lower and upper x axis bounds
+of the box. The order of these calculations is determined based on the sign of
+each component of the ray vector such that <span class="math notranslate nohighlight">\(t_{xmin} \leq t_{xmax}\)</span> (i.e.
+if <span class="math notranslate nohighlight">\(R_x&lt;0\)</span>, <span class="math notranslate nohighlight">\(t_{xmin}=(x_{max} - O_x)/R_x\)</span>).</p>
+<div class="graphviz"><img src="../_images/graphviz-5eb6842c50db25da29873817e4ce4ac8dec9e066.png" alt="graph raytri {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+a [pos=&quot;0.4,0.5!&quot;];
+b [pos=&quot;0.4,1.5!&quot;];
+c [pos=&quot;1.4,1.5!&quot;];
+d [pos=&quot;1.4,0.5!&quot;];
+e [pos=&quot;0.8,0.9!&quot;];
+f [pos=&quot;0.8,1.9!&quot;];
+g [pos=&quot;1.8,1.9!&quot;];
+h [pos=&quot;1.8,0.9!&quot;];
+
+o [pos=&quot;0.7,0.2!&quot;];
+r [pos=&quot;1.5,2.5!&quot;, style=&quot;invis&quot;]
+i [pos=&quot;1.24,1.75!&quot;, shape=&quot;circle&quot;, height=&quot;.1!&quot;, width=&quot;.1&quot;, label=&quot;&quot;]
+i2 [pos=&quot;0.875,0.7!&quot;, shape=&quot;circle&quot;, height=&quot;.1!&quot;, width=&quot;.1&quot;, label=&quot;&quot;]
+
+a -- b;
+b -- c;
+c -- d;
+d -- a;
+e -- f;
+f -- g;
+g -- h;
+h -- e;
+a -- e;
+b -- f;
+c -- g;
+d -- h;
+
+o -- r [dir=&quot;forward&quot;, arrowhead=&quot;normal&quot;];
+
+labelv0 [label=&lt;V&lt;SUB&gt;0&lt;/SUB&gt;&gt;, pos=&quot;0.25,0.5!&quot;, shape=none, fontname=&quot;Times-Roman&quot;]
+labelv1 [label=&lt;V&lt;SUB&gt;1&lt;/SUB&gt;&gt;, pos=&quot;1.55,0.45!&quot;, shape=none, fontname=&quot;Times-Roman&quot;]
+labelv2 [label=&lt;V&lt;SUB&gt;2&lt;/SUB&gt;&gt;, pos=&quot;1.95,0.9!&quot;, shape=none, fontname=&quot;Times-Roman&quot;]
+labelv3 [label=&lt;V&lt;SUB&gt;3&lt;/SUB&gt;&gt;, pos=&quot;0.65,1.0!&quot;, shape=none, fontname=&quot;Times-Roman&quot;]
+
+labelv4 [label=&lt;V&lt;SUB&gt;4&lt;/SUB&gt;&gt;, pos=&quot;0.25,1.5!&quot;, shape=none, fontname=&quot;Times-Roman&quot;]
+labelv5 [label=&lt;V&lt;SUB&gt;5&lt;/SUB&gt;&gt;, pos=&quot;1.55,1.45!&quot;, shape=none, fontname=&quot;Times-Roman&quot;]
+labelv6 [label=&lt;V&lt;SUB&gt;6&lt;/SUB&gt;&gt;, pos=&quot;1.95,1.9!&quot;, shape=none, fontname=&quot;Times-Roman&quot;]
+labelv7 [label=&lt;V&lt;SUB&gt;7&lt;/SUB&gt;&gt;, pos=&quot;0.65,2.0!&quot;, shape=none, fontname=&quot;Times-Roman&quot;]
+
+label1 [label=&quot;O&quot;, pos=&quot;.6,.2!&quot;,  shape=none, fontname=&quot;Times-Roman&quot;]
+
+}" class="graphviz" /></div>
+<p>For the ray to intersect the box, the limit-intersection parameters
+(<span class="math notranslate nohighlight">\(t_{xmin}, t_{xmax}, t_{ymin},...\)</span>) for each axis must be consistent with
+each other. If, for example, <span class="math notranslate nohighlight">\(t_{ymin} &gt; t_{xmax}\)</span>, that means that ray
+intersects with the first <span class="math notranslate nohighlight">\(y\)</span> bound of the box <em>after</em> it has crossed both
+<span class="math notranslate nohighlight">\(x\)</span> bounds and could not intersect with the box itself. If, instead,
+<span class="math notranslate nohighlight">\(t_{xmin} \leq t_{ymax}\)</span> and <span class="math notranslate nohighlight">\(t_{ymin} \leq t_{xmax}\)</span> then there may
+be an intersection and the test can proceed to checking the <span class="math notranslate nohighlight">\(z\)</span> limits. If
+<span class="math notranslate nohighlight">\(\max{(t_{xmin},t_{ymin})} \leq t_{zmax}\)</span> and
+<span class="math notranslate nohighlight">\(t_{zmin} \leq \min{(t_{xmax},t_{ymax})}\)</span>, then there is a section of the
+ray that falls between the bounds of the box on all three axes, so the ray must
+intersect with the box.</p>
+</section>
+<section id="ray-segment-intersection">
+<h3>Ray-Segment Intersection<a class="headerlink" href="#ray-segment-intersection" title="Link to this heading">#</a></h3>
+</section>
+</section>
+<section id="plane-shape-intersection-tests">
+<h2>Plane-Shape Intersection Tests<a class="headerlink" href="#plane-shape-intersection-tests" title="Link to this heading">#</a></h2>
+<section id="plane-triangle-intersection">
+<h3>Plane-Triangle Intersection<a class="headerlink" href="#plane-triangle-intersection" title="Link to this heading">#</a></h3>
+</section>
+<section id="plane-box-intersection">
+<h3>Plane-Box Intersection<a class="headerlink" href="#plane-box-intersection" title="Link to this heading">#</a></h3>
+</section>
+</section>
+<section id="shape-shape-intersection-tests">
+<h2>Shape-Shape Intersection Tests<a class="headerlink" href="#shape-shape-intersection-tests" title="Link to this heading">#</a></h2>
+<section id="triangle-triangle-intersection">
+<h3>Triangle-Triangle Intersection<a class="headerlink" href="#triangle-triangle-intersection" title="Link to this heading">#</a></h3>
+</section>
+</section>
+<section id="triangle-box-intersection">
+<h2>Triangle-Box Intersection<a class="headerlink" href="#triangle-box-intersection" title="Link to this heading">#</a></h2>
+<section id="segment-segment-intersection">
+<h3>Segment-Segment Intersection<a class="headerlink" href="#segment-segment-intersection" title="Link to this heading">#</a></h3>
+</section>
+</section>
+<section id="point-inclusion-tests">
+<h2>Point Inclusion Tests<a class="headerlink" href="#point-inclusion-tests" title="Link to this heading">#</a></h2>
+<section id="point-in-surface">
+<h3>Point in Surface<a class="headerlink" href="#point-in-surface" title="Link to this heading">#</a></h3>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="octree.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Octree</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../examples/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Examples</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ray-shape-intersection-tests">Ray-Shape Intersection Tests</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ray-triangle-intersection">Ray-Triangle Intersection</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ray-box-intersection">Ray-Box Intersection</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ray-segment-intersection">Ray-Segment Intersection</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plane-shape-intersection-tests">Plane-Shape Intersection Tests</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plane-triangle-intersection">Plane-Triangle Intersection</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plane-box-intersection">Plane-Box Intersection</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#shape-shape-intersection-tests">Shape-Shape Intersection Tests</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#triangle-triangle-intersection">Triangle-Triangle Intersection</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#triangle-box-intersection">Triangle-Box Intersection</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#segment-segment-intersection">Segment-Segment Intersection</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#point-inclusion-tests">Point Inclusion Tests</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#point-in-surface">Point in Surface</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/theory/rays.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Timothy O. Josephson.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
