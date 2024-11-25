@@ -14,7 +14,8 @@ import mymesh
 project = 'MyMesh'
 copyright = '2023, Timothy O. Josephson'
 author = 'Timothy O. Josephson'
-release = '0.1.0'
+version = os.environ.get('SPHINX_VERSION', 'dev')
+release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
