@@ -176,38 +176,36 @@ jobs:
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
         
-        # Clone gh-pages branch using authenticated HTTPS
+        # Clone gh-pages branch
         git clone --branch gh-pages --single-branch "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
         cd gh-pages
         
-        # Remove old version if it exists
-        rm -rf ${{ steps.doc-version.outputs.doc_path }}
+        # Clear any existing content
+        rm -rf *
         
-        # Copy new docs
-        cp -r ../docs/build ${{ steps.doc-version.outputs.doc_path }}
-        
-        # If this is a release, also update the stable symlink
+        # Copy new docs to appropriate directory
         if [[ ${{ github.event_name }} == 'release' ]]; then
-          rm -rf stable
-          ln -s latest stable
+          cp -r ../docs/build latest
+        else
+          cp -r ../docs/build dev
         fi
         
-        # Update versions.json
-        python -c '
-        import json, os
-        versions = {"dev": "/dev"}
-        for d in os.listdir("."):
-            if os.path.isdir(d) and d.startswith("v"):
-                versions[d] = f"/{d}"
-        if os.path.exists("latest"):
-            versions["latest"] = "/latest"
-        with open("versions.json", "w") as f:
-            json.dump(versions, f)
-        '
+        # Create versions.json
+        echo '{"dev": "dev", "latest": "latest"}' > versions.json
+        
+        # Create root level redirect to dev or latest
+        cat > index.html << EOF
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta http-equiv="refresh" content="0; url=./dev/" />
+          </head>
+        </html>
+        EOF
         
         # Commit and push
         git add .
-        git commit -m "Update ${{ steps.doc-version.outputs.version }} documentation" || echo "No changes to commit"
+        git commit -m "Update documentation" || echo "No changes to commit"
         git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
