@@ -14,7 +14,8 @@ import mymesh
 project = 'MyMesh'
 copyright = '2023, Timothy O. Josephson'
 author = 'Timothy O. Josephson'
-release = '0.1.0'
+version = os.environ.get('SPHINX_VERSION', 'dev')
+release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -40,9 +41,22 @@ sphinx_gallery_conf = {
 html_title = f"{project} v{release} Manual"
 html_theme =  'pydata_sphinx_theme' #'sphinx_rtd_theme' #
 html_static_path = ['_static']
-html_logo = '_static/mymesh_logo.svg'
+html_logo = '_static/mymesh_logo.png'
 html_css_files = ['css/mymesh.css']
-html_theme_options = dict(collapse_navigation=True, navigation_depth=1)
+html_theme_options = dict(collapse_navigation=True, 
+                           navigation_depth=1,
+                           icon_links= [
+                              {
+                                 # Label for this link
+                                 "name": "GitHub",
+                                 # URL where the link will redirect
+                                 "url": "https://github.com/BU-SMBL/mymesh",  # required
+                                 # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
+                                 "icon": "fa-brands fa-square-github",
+                                 # The type of image to be used (see below for details)
+                                 "type": "fontawesome",
+                              }]
+                        )
 html_context = {
    "default_mode": "light"
 }
@@ -58,8 +72,8 @@ from mymesh import *
 visualize.set_vispy_backend(preference='PyQt6')
 '''
 
-graphviz_dot = r"C:\Program Files\Graphviz\bin\neato.exe"
-
+# graphviz_dot = r"C:\Program Files\Graphviz\bin\neato.exe"
+graphviz_dot = r"neato"
 copybutton_prompt_text = ">>> "
 
 bibtex_bibfiles = ['references.bib']

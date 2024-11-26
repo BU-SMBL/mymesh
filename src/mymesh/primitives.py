@@ -423,7 +423,7 @@ def Plane(pt, normal, bounds, h, exact_h=False, ElemType='quad'):
         plane = mesh(PlaneCoords,PlaneConn,'surf')
     return plane
 
-def Circle(center, radius, theta_resolution=20, radial_resolution=10, axis=2, ElemType=None):
+def Circle(center, radius, theta_resolution=20, radial_resolution=10, axis=2, ElemType=None, Type='surf'):
     """
     Construct a circle from a center and radius.
 
@@ -444,6 +444,10 @@ def Circle(center, radius, theta_resolution=20, radial_resolution=10, axis=2, El
         Element type of final mesh. If None, the result will contain predominantly
         quadrilateral elements with triangular elements at the center. If 'tri', 
         the result will be a purely triangular mesh, by default None.
+    Type : str, optional
+        Mesh type of the final mesh. This could be 'surf' for a surface mesh or
+        'line' for a line mesh of just the circumference of the circle, by 
+        default 'surf'.
 
     Returns
     -------
@@ -457,11 +461,20 @@ def Circle(center, radius, theta_resolution=20, radial_resolution=10, axis=2, El
         circle = primitives.Circle([0, 0, 0], 1)
         circle.plot(bgcolor='w', show_edges=True)
     """    
-    pt2 = np.copy(center)
-    pt2[list({0,1,2}.difference({axis,}))[0]] += radius
+    if Type.lower() == 'line':
+        radial_resolution = 2 
+    pt2 = np.copy(center).astype(float)
+    pt2[list({2,1,0}.difference({axis,}))[0]] += radius
     L = Line(center, pt2, n=radial_resolution-1)
 
     circle = Revolve(L, 2*np.pi, 2*np.pi/theta_resolution, center=center, axis=axis, ElemType=ElemType)
+
+    if Type.lower() == 'line':
+        if 'mesh' in dir(mesh):
+            circle = mesh.mesh(circle.NodeCoords, converter.surf2edges(*circle), Type='line')
+        else:
+            circle = mesh(circle.NodeCoords, converter.surf2edges(*circle), Type='line')
+        circle.cleanup()
 
     return circle
 
@@ -507,38 +520,60 @@ def CirclePt(center, point, theta_resolution=20, radial_resolution=10, axis=2, E
     circle = Revolve(L, 2*np.pi, 2*np.pi/theta_resolution, center=center, axis=axis, ElemType=ElemType)
 
     if Type.lower() == 'line':
-        circle = mesh(circle.NodeCoords, converter.surf2edges(*circle), Type='line')
+        if 'mesh' in dir(mesh):
+            circle = mesh.mesh(circle.NodeCoords, converter.surf2edges(*circle), Type='line')
+        else:
+            circle = mesh(circle.NodeCoords, converter.surf2edges(*circle), Type='line')
         circle.cleanup()
 
     return circle
 
-def Cylinder(bounds, resolution=20, axis=2, axis_step=None, ElemType='tri', cap=True):
+def Cylinder(center, radius, height, theta_resolution=20, axial_resolution=10, radial_resolution=10, axis=2, cap=True, ElemType=None, Type='surf'):
     """
-    Generate an axis-aligned cylindrical surface mesh
+    Generate an axis-aligned cylindrical mesh
 
     Parameters
     ----------
-    bounds : list
-        Six element list of bounds [xmin,xmax,ymin,ymax,zmin,zmax].
-        NodeCoords and NodeConn. By default False.
-    resolution : int, optional
+    center : array_like
+        Coordinates of the center of the circle at the base of the cylinder (x,y,z). 
+    radius : scalar or array_like
+        The radius of the cylinder. Radius can be specified as a scalar radius of 
+        the cylinder or a two element array of half-axes for a cylinder with an
+        elliptical cross-section. For elliptical cross-sections, the two elements
+        correspond to the two axes in the plane perpendicular to <axis> (e.g. if
+        axis=2, (r1, r2) specify the x, y radii, respectively; if axis=1, 
+        (r1, r2) specify the x, z radii, respectively, etc.).
+    height : float
+        height of the cylinder. Cylinder will be extruded from <center> by <height>
+        in the <axis> direction. To extrude in the negative-<axis> direction,
+        a negative height can be given. 
+    theta_resolution : int, optional
         Number of points in the circumference of the cylinder, by default 20.
+    axial_resolution : int, optional
+        Number of points along the axis of the cylinder, by default 10.
+    radial_resolution : int, optional
+        Number of radial points from center to edge, by default 10. Only relevant
+        if Type='vol'.
     axis : int, optional
         Long axis of the cylinder (i.e. the circular ends will lie in the plane of the other two axes).
         Must be 0, 1, or 2 (x, y, z), by default 2
-    axis_step : float, optional
-        Element size in the <axis> direction, by default it will be set to the full length of the cylinder.
-    ElemType : str, optional
-        Specify the element type of the walls of the cylinder mesh. This can either be 
-        'quad' for a quadrilateral mesh or 'tri' for a triangular mesh, by default 'tri'.
-        The ends of the cylinder will be triangular regardless of this input.
     cap : bool, optional
         If True, will close the ends of the cylinder, otherwise it will leave them open, by 
         default True.
+    ElemType : str, optional
+        Specify the element type of the mesh. If Type='surf' (default), ElemType
+        can be 'tri', which will produce a purely triangular mesh or None, which
+        will produce a quad-dominant mesh with some triangles. If Type='vol', 
+        ElemType can be 'tet', which will produce a purely tetrahedral mesh or 
+        None, which  will produce a hex-dominant mesh with some tetrahedra. By
+        default, None. 
+    Type : str, optional
+        Mesh type of the final mesh. This could be 'surf' for a surface mesh or
+        'vol' for a volumetric mesh, by default 'surf'.
 
     Returns
     -------
-    cyl : mymesh.mesh
+    cylinder : mymesh.mesh
         Mesh object containing the cylinder mesh.
         
 
@@ -551,66 +586,45 @@ def Cylinder(bounds, resolution=20, axis=2, axis_step=None, ElemType='tri', cap=
     --------
     .. plot::
 
-        cyl = primitives.Cylinder([0,1,0,1,0,1], 20, axis_step=0.25, axis=0)
-        cyl.plot(bgcolor='w', show_edges=True)
+        cylinder = primitives.Cylinder([0,0,0], 1, 2, 20, axis=2)
+        cylinder.plot(bgcolor='w', show_edges=True)
 
     """    
-    bounds = np.asarray(bounds)
-    if axis == 2:
-        lbounds = bounds
-        order = [0,1,2]
-    elif axis == 1:
-        lbounds = bounds[[0,1,4,5,2,3]]
-        order = [0,2,1]
-    elif axis == 0:
-        lbounds = bounds[[4,5,2,3,0,1]]
-        order = [2,1,0]
+
+    if isinstance(radius, (list, tuple, np.ndarray)):
+        assert len(radius) == 2, 'radius must either be a scalar or a 2 element array_like.'
+    elif np.isscalar(radius):
+        radius = np.repeat(radius,2)
     else:
-        raise Exception('Axis must be 0 (x), 1 (y), or 2 (z).')
+        raise TypeError('radius must either be a scalar or a 2 element array_like.')
+
     
-    height = lbounds[5] - lbounds[4]
-    if axis_step is None:
-        axis_step = height
-
-    a = (lbounds[1] - lbounds[0])/2   
-    b = (lbounds[3] - lbounds[2])/2   
-    ashift = lbounds[0] + a
-    bshift = lbounds[2] + b
-
-    t = np.linspace(0,2*np.pi,resolution+1)
-    t = np.append(t, t[0])
-
-    x = a*np.cos(t) + ashift
-    y = b*np.sin(t) + bshift
-    z = np.repeat(lbounds[4],len(x))
-    xyz = [x,y,z]
-
-    coords = np.column_stack(xyz)[:,order]
-    conn = np.column_stack([np.arange(0,len(t)-1), np.arange(1,len(t))])
-
-    if 'mesh' in dir(mesh):
-        line = mesh.mesh(coords, conn)
+    if cap or Type == 'vol':
+        if not cap:
+            warnings.warn('Cannot create an un-capped cylinder with Type="vol".')
+        circle = Circle(center, radius[0], radial_resolution=radial_resolution, axis=axis, Type='surf')
+        if Type == 'vol':
+            cylinder = Extrude(circle, height, height/axial_resolution, axis=axis, ElemType=ElemType)
+        elif Type == 'surf':
+            cylinder = Extrude(circle, height, height/axial_resolution, axis=axis)
+            cylinder.NodeConn = converter.solid2surface(*cylinder)
+            if ElemType == 'tri':
+                cylinder.NodeCoords, cylinder.NodeConn = converter.surf2tris(*cylinder)
+            cylinder.Type='surf'
+            cylinder.cleanup()
+    
     else:
-        line = mesh(coords, conn)
-    cyl = Extrude(line, height, axis_step, axis=axis, ElemType=ElemType)
-    if cap:
-        capconn = delaunay.ConvexHullFanTriangulation(np.arange(line.NNode))
+        circle = Circle(center, radius[0], radial_resolution=radial_resolution, axis=axis, Type='line')
+        cylinder = Extrude(circle, height, height/axial_resolution, axis=axis, ElemType=ElemType)
 
-        if 'mesh' in dir(mesh):
-            cap1 = mesh.mesh(line.NodeCoords, np.fliplr(capconn))
-            cap2 = mesh.mesh(np.copy(line.NodeCoords), capconn)
-        else:
-            cap1 = mesh(line.NodeCoords, np.fliplr(capconn))
-            cap2 = mesh(np.copy(line.NodeCoords), capconn)
-        cap2.NodeCoords[:,axis] += height
+    if radius[0] != radius[1]:
+        keep_axis, warp_axis = list({0,1,2}.difference({axis,}))
+        cylinder.NodeCoords[:,warp_axis] = (cylinder.NodeCoords[:,warp_axis] - center[warp_axis])*radius[1]/radius[0] + center[warp_axis]
 
-        cyl.merge(cap1)
-        cyl.merge(cap2)
-    cyl.cleanup()
 
-    return cyl
-               
-def Sphere(center, radius, theta_resolution=20, phi_resolution=20, ElemType='tri'):
+    return cylinder
+
+def Sphere(center, radius, theta_resolution=20, phi_resolution=20, radial_resolution=10, ElemType=None, Type='surf'):
     """
     Generate a sphere (or ellipsoid)
     The total number of points will be phi_resolution*(theta_resolution-2) + 2
@@ -620,22 +634,30 @@ def Sphere(center, radius, theta_resolution=20, phi_resolution=20, ElemType='tri
     center : array_like
         Three element array of the coordinates of the center of the sphere.
     radius : scalar or array_like
-        The radius of the sphere. Radius can be specified as a scalar radius of the sphere 
-        or three element array of half-axes for an ellipsoid. 
-    theta_resolution : int, optional
+        The radius of the sphere. Radius can be specified as a scalar radius of 
+        the sphere or three element array of half-axes for an ellipsoid. 
+    theta_resolution : int, optionalperpendicular
         Number of circular (or elliptical) cross sections sampled along the z axis, by default 20.
     phi_resolution : int, optional
         Number of circumferential points for each cross section, by default 20.
+    radial_resolution : int, optional
+        Number of radial points from center to edge, by default 10. Only relevant
+        if Type='vol'.
     ElemType : str, optional
-        Specify the element type of the mesh. This can either be 'quad' for 
-        a quadrilateral mesh or 'tri' for a triangular mesh, by default 'tri'.
-        If 'quad' is specified, there will still be some triangles at z axis "poles".
+        Specify the element type of the mesh. If Type='surf' (default), ElemType
+        can be 'tri', which will produce a purely triangular mesh or None, which
+        will produce a quad-dominant mesh with some triangles. If Type='vol', 
+        ElemType can be 'tet', which will produce a purely tetrahedral mesh or 
+        None, which  will produce a hex-dominant mesh with some tetrahedra. By
+        default, None. 
+    Type : str, optional
+        Mesh type of the final mesh. This could be 'surf' for a surface mesh or
+        'vol' for a volumetric mesh, by default 'surf'.
 
     Returns
     -------
     sphere, mymesh.mesh
         Mesh object containing the cylinder mesh.
-        
 
     .. note:: 
         Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Sphere(...)``
@@ -663,33 +685,41 @@ def Sphere(center, radius, theta_resolution=20, phi_resolution=20, ElemType='tri
     else:
         raise TypeError('radius must either be a scalar or a 3 element array_like.')
 
-    # Create cross section
-    t = np.linspace(0,np.pi,theta_resolution)
+    if Type == 'surf':
+        # Create cross section
+        t = np.linspace(0,np.pi,theta_resolution)
+        x = np.repeat(center[0],len(t))
+        y = center[1] + radius[2]*np.sin(t)
+        z = center[2] + radius[2]*np.cos(t)
+        xyz = [x,y,z]
 
-    x = np.repeat(center[0],len(t))
-    y = center[1] + radius[1]*np.sin(t)
-    z = center[2] + radius[2]*np.cos(t)
-    xyz = [x,y,z]
+        coords = np.column_stack(xyz)
+        conn = np.column_stack([np.arange(0,len(t)-1), np.arange(1,len(t))])
 
-    coords = np.column_stack(xyz)
-    conn = np.column_stack([np.arange(0,len(t)-1), np.arange(1,len(t))])
+        if 'mesh' in dir(mesh):
+            semicircle = mesh.mesh(coords, conn)
+        else:
+            semicircle = mesh(coords, conn)
+    elif Type == 'vol':
+        pt2 = np.copy(center)
+        pt2[2] -= radius[2]
+        L = Line(center, pt2, n=radial_resolution-1)
 
-    if 'mesh' in dir(mesh):
-        circle = mesh.mesh(coords, conn)
+        semicircle = Revolve(L, np.pi, np.pi/theta_resolution, center=center, axis=0, ElemType=None)
     else:
-        circle = mesh(coords, conn)
-    
+        raise ValueError('Type must be "surf" or "vol" for primitives.Sphere.')
     # Revolve cross section
-    sphere = Revolve(circle, 2*np.pi, 2*np.pi/(phi_resolution), center=center, axis=2, ElemType=ElemType)
+    sphere = Revolve(semicircle, 2*np.pi, 2*np.pi/(phi_resolution), center=center, axis=2, ElemType=ElemType)
 
-    # Perform z-scaling for ellipsoids
-    sphere.NodeCoords[:,0] = (sphere.NodeCoords[:,0] - center[0])*radius[0]/radius[1] + center[0]
+    # Perform x,y-scaling for ellipsoids
+    sphere.NodeCoords[:,0] = (sphere.NodeCoords[:,0] - center[0])*radius[0]/radius[2] + center[0]
+    sphere.NodeCoords[:,1] = (sphere.NodeCoords[:,1] - center[1])*radius[1]/radius[2] + center[1]
 
     return sphere
 
-def Torus(center, R, r, axis=2, theta_resolution=20, phi_resolution=20, ElemType='tri'):
+def Torus(center, R, r, axis=2, theta_resolution=20, phi_resolution=20, radial_resolution=10, ElemType=None, Type='surf'):
     """
-    Generate a sphere (or ellipsoid)
+    Generate a torus
     The total number of points will be phi_resolution*(theta_resolution-2) + 2
 
     Parameters
@@ -708,11 +738,17 @@ def Torus(center, R, r, axis=2, theta_resolution=20, phi_resolution=20, ElemType
         Number of circular cross sections rotated about the axis, by default 20.
     phi_resolution : int, optional
         Number of circumferential points for each circle section, by default 20.
+    radial_resolution : int, optional
+        Number of radial points from center to edge of the circular cross section, 
+        by default 10. Only relevant if Type='vol'.
     ElemType : str, optional
         Specify the element type of the mesh. This can either be 'quad' for 
-        a quadrilateral mesh or 'tri' for a triangular mesh, by default 'tri'.
+        a quadrilateral mesh or 'tri' for a triangular mesh, by default None.
         If 'quad' is specified, there will still be some triangles at z axis "poles".
-
+    Type : str, optional
+        Mesh type of the final mesh. This could be 'surf' for a surface mesh or
+        'vol' for a volumetric mesh, by default 'surf'.
+        
     Returns
     -------
     sphere, mymesh.mesh
@@ -756,6 +792,24 @@ def Torus(center, R, r, axis=2, theta_resolution=20, phi_resolution=20, ElemType
         circle = mesh.mesh(coords, conn)
     else:
         circle = mesh(coords, conn)
+
+    if Type == 'surf':
+        circle_type = 'line'
+    elif Type == 'vol':
+        circle_type = 'surf'
+    
+    if axis == 2:
+        circle_center = [center[0], center[1]+R, center[2]] 
+        circle_axis = 0
+    elif axis == 1:
+        circle_center = [center[0]+R, center[1], center[2]] 
+        circle_axis = 2
+    elif axis == 0:
+        circle_center = [center[0], center[1], center[2]+R] 
+        circle_axis = 1
+
+    circle = Circle(circle_center, r, theta_resolution=theta_resolution, axis=circle_axis, Type=circle_type)
+
     torus = Revolve(circle, 2*np.pi, 2*np.pi/(phi_resolution), center=center, axis=axis, ElemType=ElemType)
     torus.cleanup()
     return torus
@@ -812,7 +866,6 @@ def Extrude(m, distance, step, axis=2, twist=0, twist_center=None, ElemType=None
 
     """    
     NodeCoords = np.array(m.NodeCoords)
-    OriginalConn = np.asarray(m.NodeConn)
     if twist != 0 and twist_center is None:
         twist_center = np.array([
             (np.max(NodeCoords[:,0]) + np.min(NodeCoords[:,0]))/2,
@@ -823,6 +876,7 @@ def Extrude(m, distance, step, axis=2, twist=0, twist_center=None, ElemType=None
         twist_center = np.array(twist_center)
         
     if m.Type == 'line':
+        OriginalConn = np.asarray(m.NodeConn)
         if ElemType is None:
             ElemType = 'quad'
         
@@ -846,7 +900,7 @@ def Extrude(m, distance, step, axis=2, twist=0, twist_center=None, ElemType=None
         Type = 'surf'
 
     elif m.Type == 'surf':
-        OriginalConn = OriginalConn.tolist()
+        OriginalConn = copy.copy(m.NodeConn)
         NodeConn = []
         steps = np.arange(step,distance+step,step)
         for i,s in enumerate(steps):
@@ -862,7 +916,7 @@ def Extrude(m, distance, step, axis=2, twist=0, twist_center=None, ElemType=None
             L = len(temp)
             NodeConn += [[n+((i)*L) for n in elem] + [n+((i+1)*L) for n in elem] for elem in OriginalConn]
         if ElemType == 'tet':
-            _,NodeConn = converter.solid2tets([],NodeConn)
+            NodeCoords,NodeConn = converter.solid2tets(NodeCoords,NodeConn)
         Type = 'vol'
     
     if 'mesh' in dir(mesh):
@@ -890,12 +944,13 @@ def Revolve(m, angle, anglestep, center=[0,0,0], shift=0, axis=2, ElemType=None)
     axis : int or array_like, optional
         Axis of revolution. This can be specified as either 0 (x), 1 (y), or 2 (z) or a 
         three element vector denoting the axis, by default 2.
-    shit : float, optional
+    shift : float, optional
         Offset along `axis` between the initial and final steps of the rotation,
         by default 0.
     ElemType : str, optional
-        Specify the element type of the revolved mesh. If m.Type='line', this
-        can be None or 'tri' or if m.Type='surf', this can be None or 'tet'. 
+        Specify the element type of the revolved mesh. If the input is a line 
+        mesh (m.Type='line'), the element type can be None or 'tri'; if the input
+        is a 2D surface (m.Type='surf'), the element type can be None or 'tet'. 
         If 'tri' or 'tet', the mesh will be converted to a purely triangular/
         tetrahedral mesh, otherwise it will follow from the input mesh (input 
         line meshes will get quad or quad-dominant meshes, input surf meshes
@@ -984,7 +1039,7 @@ def Revolve(m, angle, anglestep, center=[0,0,0], shift=0, axis=2, ElemType=None)
             NodeConn += [[n+((i)*L) for n in elem[::-1]] + [n+((i+1)*L) for n in elem[::-1]] for elem in OriginalConn]
 
         if ElemType == 'tet':
-            _,NodeConn = converter.solid2tets([],NodeConn)
+            NodeCoords,NodeConn = converter.solid2tets(NodeCoords,NodeConn)
 
         NodeCoords, NodeConn = utils.DeleteDuplicateNodes(NodeCoords, NodeConn)
         NodeCoords, NodeConn = utils.CleanupDegenerateElements(NodeCoords, NodeConn, Type='vol')

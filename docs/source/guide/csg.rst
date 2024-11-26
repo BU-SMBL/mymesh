@@ -13,13 +13,13 @@ implicit and explicit.
     :include-source: False
     
     cube = primitives.Box([-1,1,-1,1,-1,1], .25, ElemType='tri')
-    sphere = primitives.Sphere([1,1,-1], 1.65, ElemType='tri')
+    sphere = primitives.Sphere([1,-1,1], 1.65, ElemType='tri')
 
     U,I,D = booleans.MeshBooleans(cube,sphere)
 
     # Plotting:
-    fig1, ax1 = cube.plot(show=False,return_fig=True,color='w',bgcolor='w')
-    fig2, ax2 = sphere.plot(show=False,return_fig=True,color='dimgray',bgcolor='w')
+    fig1, ax1 = cube.plot(show=False,return_fig=True,color='w',bgcolor='w',view='trimetric')
+    fig2, ax2 = sphere.plot(show=False,return_fig=True,color='dimgray',bgcolor='w',view='trimetric')
     plt.close(fig1); plt.close(fig2); 
 
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(12,4))
@@ -35,9 +35,9 @@ implicit and explicit.
     plt.show()
 
     # Plotting:
-    fig1, ax1 = U.plot(show=False,return_fig=True,color='g',bgcolor='w')
-    fig2, ax2 = I.plot(show=False,return_fig=True,color='b',bgcolor='w')
-    fig3, ax3 = D.plot(show=False,return_fig=True,color='r',bgcolor='w')
+    fig1, ax1 = U.plot(show=False,return_fig=True,color='g',bgcolor='w',view='trimetric')
+    fig2, ax2 = I.plot(show=False,return_fig=True,color='b',bgcolor='w',view='trimetric')
+    fig3, ax3 = D.plot(show=False,return_fig=True,color='r',bgcolor='w',view='trimetric')
     plt.close(fig1); plt.close(fig2); plt.close(fig3);
 
     fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(12,4))
@@ -80,7 +80,7 @@ new function can then be meshed as any other implicit function.
     func2 = implicit.sphere([0,0,0],1)
     func = implicit.difff(func1, func2)
     diff = implicit.SurfaceMesh(func, [-1,1,-1,1,-1,1], .05)
-    diff.plot(bgcolor='w')
+    diff.plot(bgcolor='w',view='trimetric')
 
 While this approach is straight forward and efficient, it suffers from some of 
 the classic limitations of implicit meshing, particularly, poor resolution along
@@ -98,7 +98,7 @@ intended operation (and a union operations are more difficult to achieve).
     func2 = implicit.sphere([0,0,0],1)
     cube = implicit.TetMesh(func1, [-1,1,-1,1,-1,1], .05)
     diff = implicit.TetMesh(func2, [-1,1,-1,1,-1,1], .05, background=cube, threshold_direction=1)
-    diff.plot(bgcolor='w')
+    diff.plot(bgcolor='w',view='trimetric')
 
 This operation can equivalently be performed using the 
 :meth:`~mymesh.mesh.mesh.Contour` method.
@@ -144,9 +144,9 @@ symmetric, i.e. A-B ≠ B-A).
     U,I,D = booleans.MeshBooleans(cube,sphere)
 
     # Plotting:
-    fig1, ax1 = U.plot(show=False,return_fig=True,color='g',bgcolor='w')
-    fig2, ax2 = I.plot(show=False,return_fig=True,color='b',bgcolor='w')
-    fig3, ax3 = D.plot(show=False,return_fig=True,color='r',bgcolor='w')
+    fig1, ax1 = U.plot(show=False,return_fig=True,color='g',bgcolor='w',view='trimetric')
+    fig2, ax2 = I.plot(show=False,return_fig=True,color='b',bgcolor='w',view='trimetric')
+    fig3, ax3 = D.plot(show=False,return_fig=True,color='r',bgcolor='w',view='trimetric')
     plt.close(fig1); plt.close(fig2); plt.close(fig3);
 
     fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(12,4))

@@ -4,7 +4,8 @@
 """
 Mesh visualization and plotting
 
-:mod:`mymesh.visualize` is in the early stages of development. For more 
+:mod:`mymesh.visualize` is still experimental and may not work as expected
+on all systems or in all development environments. For more stable and
 full-featured mesh visualization, a mesh (``M``) can be converted to a PyVista
 mesh:
 
@@ -13,13 +14,33 @@ mesh:
     import pyvista as pv
     pvmesh = pv.wrap(M.mymesh2meshio())
 
+Visualization
+=============
+.. autosummary::
+    :toctree: submodules/
+
+    View
+
+Visualization Utilities
+=======================
+.. autosummary::
+    :toctree: submodules/
+
+    FaceColor
+    ParseColor
+    GetTheme
+    set_vispy_backend
+
 """
 
 #%%
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
 import io, re, warnings
+try:
+    import matplotlib
+    import matplotlib.pyplot as plt
+except ModuleNotFoundError:
+    warnings.warn('Matplotlib is used for mesh visualization. If needed, install with `pip install matplotlib`.')
 
 from . import converter, utils, mesh
 
@@ -154,7 +175,7 @@ def View(M, interactive=True, bgcolor=None,
         line_color = theme[2]
     
     # Create canvas
-    canvas = scene.SceneCanvas(keys='interactive', bgcolor=ParseColor(bgcolor), title='MyMesh Viewer',show=interactive,resizable=False)
+    canvas = scene.SceneCanvas(keys='interactive', bgcolor=ParseColor(bgcolor), title='MyMesh Viewer',show=interactive)
 
     # Set view mode
     viewmode='arcball'
@@ -398,7 +419,22 @@ def GetTheme(theme, scalars):
         linecolor = 'black'
     return color, bgcolor, linecolor
 
-def set_vispy_backend(preference='PyQt6'):
+def set_vispy_backend(preference='PyGlet'):
+    """
+    Set the backend for VisPy. Can only be set once.
+
+    Parameters
+    ----------
+    preference : str, optional
+        Preferred vispy backend, by default 'PyGlet'. If not available, an 
+        alternative will be attempted.
+
+    Returns
+    -------
+    chosen : str
+        The name of the backend that was selected
+
+    """    
     try:
         import vispy
     except:
@@ -426,7 +462,7 @@ def set_vispy_backend(preference='PyQt6'):
                 break
 
     if not success:
-        raise ImportError('A valid vispy backend must be installed. PyQt6 is recommended: pip install pyqt6')
+        raise ImportError('A valid vispy backend must be installed. PyQt6 is recommended: pip install pyglet')
 
     return chosen
     
