@@ -82,7 +82,6 @@ Miscellaneous
 
 import numpy as np
 import scipy
-import numba
 import sys, warnings, copy, time, itertools, collections
 from . import converter, rays, octree, improvement, quality, mesh
 from . import try_njit
@@ -1408,9 +1407,10 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf', return_idx=Fals
         uConn = -1*np.ones_like(PadConn)
         np.put(uConn, ind, PadConn.flat[ind])
 
-        # Special attention need for degenerate wedge elements
+        
         to_delete = np.sum(uConn!=-1,axis=1) < min_node
         if PadConn.shape[1] >= 6:
+            # Special attention need for degenerate wedge elements
             wedge_rows = np.sum(PadConn!=-1,axis=1) == 6
             wedge2tet = np.where((wedge_rows) & (np.sum(uConn!=-1,axis=1) == 4))[0]
             wedge2pyr = np.where((wedge_rows) & (np.sum(uConn!=-1,axis=1) == 5))[0]
@@ -1443,7 +1443,30 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf', return_idx=Fals
                 warnings.warn(f'Unaccounted for wedge-to-pyr case(s) in CleanupDegenerateElements: {str(np.unique(pyrints[~np.isin(pyrints, [1,2,4,8,16])])):s}. This is a bug, please report.')
 
         if PadConn.shape[1] >= 8:
-            warnings.warn('CleanupDegenerateElements has not yet been optimized for hexs. Improperly numbered/inverted elements may occur.')
+            # Special attention need for degenerate hex elements
+
+            hex_rows = np.sum(PadConn!=-1,axis=1) == 8
+            hex2tet = np.where((hex_rows) & (np.sum(uConn!=-1,axis=1) == 4))[0]
+            hex2pyr = np.where((hex_rows) & (np.sum(uConn!=-1,axis=1) == 5))[0]
+            hex2wdg = np.where((hex_rows) & (np.sum(uConn!=-1,axis=1) == 6))[0]
+
+            tetints = np.sum((uConn[hex2tet, :8] == -1) * 2**np.arange(0,8)[::-1], axis=1)
+            pyrints = np.sum((uConn[hex2pyr, :8] == -1) * 2**np.arange(0,8)[::-1], axis=1)
+            wdgints = np.sum((uConn[hex2wdg, :8] == -1) * 2**np.arange(0,8)[::-1], axis=1)
+
+            # Wedge cases:
+            # Case 3 : Face 1 vertical collapse (2==6, 3==7)
+            uConn[hex2wdg[wdgints == 3], :8] = uConn[hex2wdg[wdgints == 3]][:,[0,3,4,1,2,5,6,7]]
+            
+            # Case 12 : Face 1 vertical collapse (0==4, 1==5)
+            uConn[hex2wdg[wdgints == 12], :8] = uConn[hex2wdg[wdgints == 12]][:,[0,3,7,1,2,6,4,5]]
+
+            if np.any((wdgints != 3) & (wdgints != 12)):
+                warnings.warn(f'Unaccounted for hex-to-wedge case(s) in CleanupDegenerateElements. This is a bug, please report.')
+            if len(pyrints) > 0:
+                warnings.warn(f'Unaccounted for hex-to-pyr case(s) in CleanupDegenerateElements. This is a bug, please report.')
+            if len(tetints) > 0:
+                warnings.warn(f'Unaccounted for hex-to-tet case(s) in CleanupDegenerateElements. This is a bug, please report.')
 
         uConn = uConn[~to_delete]
         NewConn = ExtractRagged(uConn)
@@ -1583,7 +1606,18 @@ def DetectFeatures(NodeCoords,SurfConn,angle=25):
         list of nodes identified to lie on an edge of the geometry.
     corners : list
         list of nodes identified to lie on a corner of the geometry.
+    
+    Examples
+    --------
+    .. plot::
 
+        background = primitives.Grid([0,1,0,1,0,1], .02, ElemType='tet')
+        S = implicit.TetMesh(implicit.thickenf(implicit.gyroid,1), [0,1,0,1,0,1], .03, background=background)
+        edges, corners = utils.DetectFeatures(S.NodeCoords, S.SurfConn)
+        features = np.zeros(S.NNode)
+        features[edges] = 1
+        features[corners] = 2
+        S.plot(scalars=features, color='coolwarm', bgcolor='w')
     """
     ElemNormals = np.asarray(CalcFaceNormal(NodeCoords,SurfConn))
     Edges, EdgeConn, EdgeElem = converter.solid2edges(NodeCoords,SurfConn,return_EdgeConn=True,return_EdgeElem=True)
@@ -2063,14 +2097,15 @@ def ExtractRagged(In,delval=-1,dtype=None):
 def identify_type(NodeCoords, NodeConn):
         """
         Classify the mesh as either a surface or volume.
-        A mesh is classified as a volume mesh ('vol') if any elements are unambiguous 
+        A mesh is classified as a volume mesh (``vol``) if any elements are unambiguous 
         volume elements - pyramid (5 nodes), wedge (6), hexahedron (8), or if 
         any of a random sample of 10 elements (or all elements if NElem < 10) has
         a volume less than machine precision (``np.finfo(float).eps``). 
-        Alternatively, a surface mesh ('surf') is identified if any of the elements is 
+        Alternatively, a surface mesh (``surf``) is identified if any of the elements is 
         a triangle (3 nodes). In the case of a mesh containing both triangular
         and volume elements, the mesh will be classified arbitrarily by whichever
-        appears first in NodeConn. 
+        appears first in NodeConn. A ``line`` mesh is identified if any line (2
+         node) elements are present.
 
         This approach has a chance of mislabeling the mesh in some rare or 
         non-standard scenarios, but attempts to be as efficient as possible

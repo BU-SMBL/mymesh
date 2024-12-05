@@ -45,9 +45,22 @@ dependencies = [
 
 
 [project.optional-dependencies]
-io = [
+all = [
     "meshio>=5.1.0",
+    "numba>=0.60.0",
     "pydicom>=2.4.4",
     "opencv-python>=4.9.0.0",
-    "pillow>=10.0.0"
+    "vispy>=0.14.1",
+    "matplotlib>=3.7.1",
+    "pillow>=10.0.0",
+    "jupyter_rfb>=0.4.2",
+    "PyQt6>=6.2.3",
+    "PyGlet>=2.0.10"
     ]
+
+[project.urls]
+Documentation = 'https://bu-smbl.github.io/mymesh/'
+
+[tool.setuptools_scm]
+version_scheme = "python-simplified-semver"
+local_scheme = "no-local-version"

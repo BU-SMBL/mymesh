@@ -17,38 +17,40 @@ connectivities listed in the following table can all be obtained from the the no
 list (``NodeConn``) using either the :class:`mesh` class (see :doc:`mesh_class`) or the 
 :mod:`~mymesh.converter` module. 
 
-+--------------------------------------+--------------------------+-------------------------+
-| Connectivity Type                    | Row Correspondence       | Index Association       |
-+======================================+==========================+=========================+
-| Node Connectivity (``NodeConn``)     | Element                  | Node                    |
-+--------------------------------------+--------------------------+-------------------------+
-| Node Neighbors (``NodeNeighbors``)   | Node                     | Node                    |
-+--------------------------------------+--------------------------+-------------------------+
-| Element Connectivity (``ElemConn``)  | Node                     | Element                 |
-+--------------------------------------+--------------------------+-------------------------+
-| Element Neighbors (``ElemNeighbors``)| Element                  | Element                 |
-+--------------------------------------+--------------------------+-------------------------+
-| Edges (``Edges``) [1]_               | Edge                     | Node                    |
-+--------------------------------------+--------------------------+-------------------------+
-| Edge Connectivity (``EdgeConn``)     | Element                  | Edge                    |
-+--------------------------------------+--------------------------+-------------------------+
-| Edge-Element (``EdgeElemConn``)      | Edge                     | Element                 |
-+--------------------------------------+--------------------------+-------------------------+
-| Faces (``Faces``) [1]_               | Face                     | Node                    |
-+--------------------------------------+--------------------------+-------------------------+
-| Face Connectivity (``FaceConn``)     | Element                  | Face                    |
-+--------------------------------------+--------------------------+-------------------------+
-| Face-Element (``FaceElemConn``)      | Face                     | Element                 |
-+--------------------------------------+--------------------------+-------------------------+
++------------------------------------------------------------+--------------------------+-------------------------+
+| Connectivity Type                                          | Row Correspondence       | Index Association       |
++============================================================+==========================+=========================+
+| Node Connectivity (:attr:`~mymesh.mesh.mesh.NodeConn`)     | Element                  | Node                    |
++------------------------------------------------------------+--------------------------+-------------------------+
+| Node Neighbors (:attr:`~mymesh.mesh.mesh.NodeNeighbors`)   | Node                     | Node                    |
++------------------------------------------------------------+--------------------------+-------------------------+
+| Element Connectivity (:attr:`~mymesh.mesh.mesh.ElemConn`)  | Node                     | Element                 |
++------------------------------------------------------------+--------------------------+-------------------------+
+| Element Neighbors (:attr:`~mymesh.mesh.mesh.ElemNeighbors`)| Element                  | Element                 |
++------------------------------------------------------------+--------------------------+-------------------------+
+| Edges (:attr:`~mymesh.mesh.mesh.Edges`) [1]_               | Edge                     | Node                    |
++------------------------------------------------------------+--------------------------+-------------------------+
+| Edge Connectivity ( :attr:`~mymesh.mesh.mesh.EdgeConn` )   | Element                  | Edge                    |
++------------------------------------------------------------+--------------------------+-------------------------+
+| Edge-Element (:attr:`~mymesh.mesh.mesh.EdgeElemConn`)      | Edge                     | Element                 |
++------------------------------------------------------------+--------------------------+-------------------------+
+| Faces (:attr:`~mymesh.mesh.mesh.Faces`) [1]_               | Face                     | Node                    |
++------------------------------------------------------------+--------------------------+-------------------------+
+| Face Connectivity (:attr:`~mymesh.mesh.mesh.FaceConn`)     | Element                  | Face                    |
++------------------------------------------------------------+--------------------------+-------------------------+
+| Face-Element (:attr:`~mymesh.mesh.mesh.FaceElemConn`)      | Face                     | Element                 |
++------------------------------------------------------------+--------------------------+-------------------------+
 
 .. [1] 
-    Edges and faces can be represented as "half-edges" and "half-faces" where at shared edges/
-    faces, there multiple two half-edges/faces with each one being associated with only one element 
-    and  having a specific orientation. When obtained through the :obj:`mesh` class 
-    (:attr:`mesh.Edges`,  :attr:`mesh.Faces`), they are the "full" rather than the "half" 
-    representation. Half-edges and half-faces can be obtained through :func:`converter.solid2edges` 
-    and :func:`converter.solid2faces` and converted to full-edges and full-faces using
-    :func:`converter.edges2unique` and :func:`converter.faces2unique`.
+    Edges and faces can be represented as "half-edges" and "half-faces" where at 
+    shared edges/faces, there multiple two half-edges/faces with each one being 
+    associated with only one element and  having a specific orientation. When 
+    obtained through the :obj:`mesh` class (:attr:`~mymesh.mesh.mesh.Edges`,  
+    :attr:`~mymesh.mesh.mesh.Faces`), they are the "full" rather than the "half"
+    representation. Half-edges and half-faces can be obtained through 
+    :func:`converter.solid2edges` and :func:`converter.solid2faces` and converted
+    to full-edges and full-faces using :func:`converter.edges2unique` and 
+    :func:`converter.faces2unique`.
 
 
 2D Example

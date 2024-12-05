@@ -105,25 +105,33 @@ def test_Grid2D(bounds, h, exact_h, ElemType):
     else:
         assert np.shape(grid.NodeConn)[1] == 3, "Incorrect element type"
 
-@pytest.mark.parametrize("bounds, resolution, axis, axis_step, ElemType, cap", [
-    # unit sphere
-    ([0,1,0,1,0,1],
+@pytest.mark.parametrize("center, radius, height, theta_resolution, axial_resolution, radial_resolution, axis, cap, ElemType, Type", [
+    # unit cylinder (surface)
+    ([0,0,0],
+    1,
+    1,
+    20,
+    10,
     10,
     2,
-    0.1,
-    'tri',
-    True
+    True,
+    None,
+    'Surf'
     ),
-    ([0,2,0,1,0,3],
-    20,
+    ([0,0,0],
     1,
-    0.2,
-    'quad',
-    False
-    ),
+    1,
+    20,
+    10,
+    10,
+    2,
+    True,
+    None,
+    'vol'
+    )
      
 ])
-def test_Cylinder(bounds, resolution, axis, axis_step, ElemType, cap):
+def test_Cylinder(center, radius, height, theta_resolution, axial_resolution, radial_resolution, axis, cap, ElemType, Type):
     cylinder = primitives.Cylinder(bounds, resolution, axis=axis, axis_step=axis_step, ElemType=ElemType, cap=cap)
     
     if cap:

@@ -22,12 +22,17 @@ class mesh:
     Parameters
     ----------
     NodeCoords : array_like, optional
-        Node coordinates, by default None
+        Node coordinates, by default None. Node coordinates should be formatted 
+        as an nx3 or nx2 array of coordinates.
     NodeConn : list, array_like, optional
-        Node connectivity of elements, by default None
+        Node connectivity of elements, by default None. Node connectivity
+        is formatted as a 2D array or list of lists where each row (or inner list)
+        is contains the node IDs of the nodes that make up the element. NodeConn
+        can contain a uniform element type or a mix of different element types.
     Type : str or None, optional
-        Mesh type, 'surf' for surface or 'vol' for volume. If not provided,
-        it will be determined automatically (meth:`mesh.identify_type`), by default None
+        Mesh type, 'surf' for surface, 'vol' for volume, 'line' for line. If not
+        provided, it will be determined automatically 
+        (:meth:`mesh.identify_type`), by default None
     verbose : bool, optional
         If true, some operations will print activity or other information, 
         by default True
@@ -325,6 +330,9 @@ class mesh:
         return SurfConn
     @property
     def SurfNodes(self):
+        """
+        Array of node IDs on the surface of a mesh.
+        """ 
         if self._SurfNodes is None:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying surface nodes...',end='')
@@ -348,6 +356,9 @@ class mesh:
         return BoundaryConn
     @property
     def BoundaryNodes(self):
+        """
+        Array of node IDs on the boundary of a surface.
+        """ 
         if self._BoundaryNodes is None:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying boundary nodes...',end='')
@@ -653,6 +664,7 @@ class mesh:
         else:
             raise Exception('Invalid input.')
     def cleanup(self,tol=1e-10):
+
         # TODO: This needs to be improved so other variables that point to nodes or elements are updated accordingly
         
         self.reset()
@@ -664,7 +676,16 @@ class mesh:
         for key in self.NodeData.keys():
             self.NodeData[key] = np.asarray(self.NodeData[key])[OrigIds]
     def copy(self):
-        
+        """
+        Create a copy of the mesh. The copied mesh will be independent, with 
+        no references to the original mesh, meaning changes to one mesh won't
+        influence the other.
+
+        Returns
+        -------
+        M : mymesh.mesh
+            Copied mesh
+        """        
         M = mesh(copy.copy(self.NodeCoords), copy.copy(self.NodeConn), self.Type)
         
         M._Faces = copy.copy(self._Faces)
@@ -876,9 +897,6 @@ class mesh:
         self._FaceElemConn = NewFaceElemConn.tolist()
         self._FaceConn = utils.ExtractRagged(NewFaceConn,dtype=int)
     
-    def AxisAlign(self):
-        pass
-
     def CreateBoundaryLayer(self,nLayers,FixedNodes=set(),StiffnessFactor=1,Thickness=None,OptimizeTets=True,FaceSets='surf'):
         """
         Generate boundary layer elements.
@@ -1404,8 +1422,25 @@ class mesh:
             M.cleanup()
         return M
 
-    def Clip(self, pt=None, normal=[1,0,0], flip=False):
-        
+    def Clip(self, pt=None, normal=[1,0,0]):
+        """
+        Clip the mesh along a plane. Clipping with this method will not cut
+        through elements, but rather will only keep elements on one side of
+        the specified plane.
+
+        Parameters
+        ----------
+        pt : array_like or NoneType, optional
+            Coordinates for a point on the clipping plane, by default None.
+            If None, the center of the bounding box of the mesh will be used.
+        normal : list, optional
+            Normal vector of the clipping plane, by default [1,0,0]
+
+        Returns
+        -------
+        clipped : mymesh.mesh
+            Clipped mesh
+        """        
         if pt is None:
             xmax, ymax, zmax = np.max(self.NodeCoords, axis=0)
             xmin, ymin, zmin = np.min(self.NodeCoords, axis=0)
@@ -1584,18 +1619,21 @@ class mesh:
             ArrayConn = np.array(self.NodeConn,dtype=int)
         else:
             ArrayConn = np.array(self.NodeConn,dtype=object)
-        edges = ArrayConn[elemlengths==2].astype(int)
-        tris = ArrayConn[elemlengths==3].astype(int)
+
+        edges, tris, quads, tets, pyrs, wdgs, hexs, tet10 = [np.empty((0,0)) for i in range(8)]
+
+        if np.any(elemlengths == 2): edges = np.stack(ArrayConn[elemlengths==2])
+        if np.any(elemlengths == 3): tris = np.stack(ArrayConn[elemlengths==3])
         if self.Type == 'surf':
-            quads = ArrayConn[elemlengths==4].astype(int)
+            if np.any(elemlengths == 4): quads = np.stack(ArrayConn[elemlengths==4])
             tets = []
         else:
             quads = []
-            tets = ArrayConn[elemlengths==4].astype(int)
-        pyrs = ArrayConn[elemlengths==5].astype(int)
-        wdgs = ArrayConn[elemlengths==6].astype(int)
-        hexs = ArrayConn[elemlengths==8].astype(int)
-        tet10 = ArrayConn[elemlengths==10].astype(int)
+            if np.any(elemlengths == 4): tets = np.stack(ArrayConn[elemlengths==4])
+        if np.any(elemlengths == 5): pyrs = np.stack(ArrayConn[elemlengths==5])
+        if np.any(elemlengths == 6): wdgs = np.stack(ArrayConn[elemlengths==6])
+        if np.any(elemlengths == 8): hexs = np.stack(ArrayConn[elemlengths==8])
+        if np.any(elemlengths == 10): tet10 = np.stack(ArrayConn[elemlengths==10])
         
         
         elems = [e for e in [('line',edges),('triangle',tris),('quad',quads),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10)] if len(e[1]) > 0]
@@ -1723,9 +1761,44 @@ class mesh:
 
     ## Visualization Methods
     def view(self, **kwargs):
+        """
+        Generate an interactive plot of the mesh. See :func:`mymesh.visualize.view` 
+        for a full list of optional arguments.
+
+        Returns
+        -------
+        out 
+            Output passed from :func:`mymesh.visualize.view`.
+        """        
         out = visualize.View(self, **kwargs)   
         return out 
     def plot(self, show=True, return_fig=False, clim=None, **kwargs):
+        """
+        Generate a static plot of the mesh. See :func:`mymesh.visualize.view` 
+        for a full list of optional arguments.
+
+        Parameters
+        ----------
+        show : bool, optional
+            Display the plotted mesh, by default True. If False,
+            the plot will be generated and can be returned, but won't 
+            be displayed.
+        return_fig : bool, optional
+            If True, a matplotlib figure and axis holding the plotted mesh
+            will be returned, by default False
+        clim : array_like, optional
+            Two-element tuple, list, or array containing the lower and upper
+            bound for the colorscale if a scalar is displayed, by default None.
+            If None, the minimum and maximum values will be used.
+
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+            matplotlib figure of the plotted mesh
+        ax : matplotlib.axes._axes.Axes
+            matplotlib axes of the plotted mesh
+
+        """        
         try:
             import matplotlib
             import matplotlib.pyplot as plt
@@ -1765,6 +1838,8 @@ class mesh:
                     raise ValueError('scalar_preference must be "nodes" or "elements"')
             if clim is None:
                 cmin, cmax = np.min(scalars), np.max(scalars)
+            else:
+                cmin, cmax = clim
 
             scale = matplotlib.cm.ScalarMappable(cmap='coolwarm')
             scale.set_clim(cmin, cmax)

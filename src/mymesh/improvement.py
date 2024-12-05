@@ -38,12 +38,16 @@ Local mesh topology
 """
 
 import numpy as np
-import sys, warnings, time, random, copy, tqdm, heapq
+import sys, warnings, time, random, copy, heapq
 from collections import deque
 from . import converter, utils, quality, rays, octree, mesh, implicit
 from scipy import sparse, spatial
 from scipy.sparse.linalg import spsolve
 from scipy.optimize import minimize
+try:
+    import tqdm
+except:
+    pass
 
 ## Mesh smoothing/node repositioning
 def LocalLaplacianSmoothing(M, options=dict()):
@@ -2015,10 +2019,10 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
         character indicating an operation, by default 'scfS'.
 
         Possible operations:
-            's' - Splitting (:func:`TetSplit`)
-            'c' - Contraction (:func:`TetContract`)
-            'f' - Flipping (:func:`TetFlip`)
-            'S' - Smoothing 
+            - 's' - Splitting (:func:`TetSplit`)
+            - 'c' - Contraction (:func:`TetContract`)
+            - 'f' - Flipping (:func:`TetFlip`)
+            - 'S' - Smoothing 
 
     repeat : int, optional
         Number of times to repeat the schedule, by default 1
@@ -2042,8 +2046,8 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
 
     Returns
     -------
-    _type_
-        _description_
+    Mnew : mymesh.mesh
+        Tetrahedral mesh after quality improvement
     """    
     M.verbose=False
     for loop in range(repeat):
