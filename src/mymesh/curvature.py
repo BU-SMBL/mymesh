@@ -185,7 +185,10 @@ def QuadFit(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
     TargetAxis = np.array([0,0,-1])
     Bool = ((SurfNormals[:,0]!=0) | (SurfNormals[:,1]!=0)) & ~np.any(np.isnan(SurfNormals),axis=1)
     Cross = np.cross(TargetAxis,SurfNormals) 
-    RotAxes = Cross/np.linalg.norm(Cross,axis=1)[:,None]
+    CrossNorm = np.linalg.norm(Cross,axis=1)
+    NonZeroCross = CrossNorm != 0
+    RotAxes = np.nan*np.ones_like(Cross)
+    RotAxes[NonZeroCross] = Cross[NonZeroCross]/CrossNorm[NonZeroCross,None]
     RotAxes[np.all(SurfNormals == -TargetAxis,axis=1)] = [1,0,0]
     RotAxes[np.all(SurfNormals == TargetAxis,axis=1)] = TargetAxis
     # Rotation Angles
@@ -296,7 +299,10 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals):
     TargetAxis = np.array([0,0,-1])
     Bool = ((SurfNormals[:,0]!=0) | (SurfNormals[:,1]!=0)) & ~np.any(np.isnan(SurfNormals),axis=1)
     Cross = np.cross(TargetAxis,SurfNormals) 
-    RotAxes = Cross/np.linalg.norm(Cross,axis=1)[:,None]
+    CrossNorm = np.linalg.norm(Cross,axis=1)
+    NonZeroCross = CrossNorm != 0
+    RotAxes = np.nan*np.ones_like(Cross)
+    RotAxes[NonZeroCross] = Cross[NonZeroCross]/CrossNorm[NonZeroCross,None]
     RotAxes[np.all(SurfNormals == -TargetAxis,axis=1)] = [1,0,0]
     RotAxes[np.all(SurfNormals == TargetAxis,axis=1)] = TargetAxis
     # Rotation Angles
@@ -392,6 +398,7 @@ def AnalyticalCurvature(func,NodeCoords):
     mean : np.ndarray
         List of mean curvatures.
     """
+    np.seterr(divide='ignore', invalid='ignore')
     try:
         import sympy as sp
     except:
