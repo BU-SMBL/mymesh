@@ -512,12 +512,13 @@ def Area(NodeCoords,NodeConn,Type=None):
     if Type is None:
         Type = utils.identify_type(NodeCoords,NodeConn)
     if Type == 'surf':
-        ArrayCoords,TriConn,ElemIds = converter.surf2tris(NodeCoords,NodeConn,return_ids=True)     
-        ArrayCoords = np.asarray(ArrayCoords)
+        ArrayCoords = np.asarray(NodeCoords)
+        _, TriConn, inv = converter.surf2tris(NodeCoords, NodeConn, return_inv=True)
 
         area = tri_area(ArrayCoords, TriConn)
-        area = np.append(area,0)
-        A = np.sum(area[utils.PadRagged(ElemIds)],axis=1)
+
+        A = np.zeros(len(NodeConn))
+        np.add.at(A, inv, area)
     else:
         # Calculate element surface area
         Faces, FaceConn = converter.solid2faces(NodeCoords, NodeConn, return_FaceConn=True)
@@ -554,7 +555,7 @@ def Volume(NodeCoords,NodeConn,verbose=False,ElemType='auto'):
     if len(NodeConn) == 0:
         return []
     if ElemType != 'tet':
-        ArrayCoords,TetConn,ElemIds = converter.solid2tets(NodeCoords,NodeConn,return_ids=True)     
+        ArrayCoords,TetConn,inv = converter.solid2tets(NodeCoords,NodeConn,return_inv=True)     
         ArrayCoords = np.asarray(ArrayCoords)   
         ArrayConn = np.asarray(TetConn, dtype=int)
     else:
@@ -562,8 +563,8 @@ def Volume(NodeCoords,NodeConn,verbose=False,ElemType='auto'):
         ArrayConn = np.asarray(NodeConn, dtype=int)
     vol = tet_volume(ArrayCoords, ArrayConn)
     if ElemType != 'tet':
-        vol = np.append(vol,0)
-        V = np.sum(vol[utils.PadRagged(ElemIds)],axis=1)
+        V = np.zeros(len(NodeConn))
+        np.add.at(V,inv,vol)
     else:
         V = vol
 
