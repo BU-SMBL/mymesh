@@ -350,7 +350,14 @@ class mesh:
         """        
         if self._BoundaryConn is None:
             if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying boundary...',end='')
-            self._BoundaryConn = converter.surf2edges(*self, ElemType=self.Type)
+            if self.Type == 'vol':
+                self._BoundaryConn = converter.surf2edges(*self.Surface, ElemType='surf')
+            elif self.Type == 'surf':
+                self._BoundaryConn = converter.surf2edges(*self, ElemType='surf')
+            elif self.Type == 'line':
+                self._BoundaryConn = self.NodeConn
+            else:
+                raise ValueError('Invalid Type.')
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
         BoundaryConn = self._BoundaryConn
         return BoundaryConn
