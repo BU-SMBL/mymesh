@@ -239,12 +239,25 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
         hexs = [NodeConn[i] for i in hexIdx]
         tet10s = [NodeConn[i] for i in tet10Idx]
         
-        if ElemType == 'surf':
-            fournodefunc = quad2edges
-            fournodeedgenum = 4
-        else:
+        if ElemType == 'vol':
             fournodefunc = tet2edges
             fournodeedgenum = 6
+        elif ElemType == 'surf':
+            fournodefunc = quad2edges
+            fournodeedgenum = 4
+        else ElemType == 'auto':
+            if len(tetIdx) > 0:
+                Type = utils.identify_type(NodeCoords, NodeConn)
+                if Type == 'vol':
+                    fournodefunc = tet2edges
+                    fournodeedgenum = 6
+                else:
+                    fournodefunc = quad2edges
+                    fournodeedgenum = 4
+            else:
+                fournodefunc = tet2edges
+                fournodeedgenum = 6
+
         Edges = np.concatenate((edgs,tri2edges([],tris), 
                                 fournodefunc([],tets), 
                                 pyramid2edges([],pyrs), 
@@ -402,7 +415,7 @@ def EdgesByElement(NodeCoords,NodeConn,ElemType='auto'):
             Edges[i] = polygon2edges(NodeCoords,[elem])
     return Edges
 
-def solid2tets(NodeCoords,NodeConn,return_ids=False):
+def solid2tets(NodeCoords,NodeConn,return_ids=False,return_inv=False):
     """
     Decompose all elements of a 3D volume mesh to tetrahedra.
     NOTE the generated tetrahedra will not necessarily be continuously oriented, i.e.
@@ -421,6 +434,9 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
         Nodal connectivity list.
     return_ids : bool, optional
         Element IDs of the tets connected to the original elements, by default False
+    return_inv : bool, optional
+        If True, return element IDs of the original elements that correspond to 
+        the tetrahedral elements, by default False
 
     Returns
     -------
@@ -432,6 +448,9 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
     ElemIds : list, optional
         If return_ids = True, a list of the element ids of the new tetrahedra for each 
         of the original elements.
+    inv : np.ndarray, optional
+        Array of indices that point from the tetrahedral mesh back to the original
+        mesh
     """    
     if type(NodeConn) is np.ndarray:
         Ls = np.repeat(NodeConn.shape[1], NodeConn.shape[0])
@@ -439,9 +458,15 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
         Ls = np.array([len(elem) for elem in NodeConn])
 
     if np.all(Ls == 4):
+        if return_inv:
+            inv = np.arange(len(NodeConn))
         if return_ids:
             ElemIds = np.arange(len(NodeConn)).reshape(len(NodeConn),1)
+            if return_inv:
+                return NodeCoords, NodeConn, ElemIds, inv    
             return NodeCoords, NodeConn, ElemIds
+        elif return_inv:
+            return NodeCoords, NodeConn, inv
         else:
             return NodeCoords, NodeConn
             
@@ -482,9 +507,11 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
     TetCoords,fromtet10 = tet102tet4(TetCoords,tet10)
     # TetConn = tets + frompyr + fromwdg + fromhex + fromtet10
     TetConn = np.vstack([tets, frompyr, fromwdg, fromhex, fromtet10]).astype(int)
+    if return_ids or return_inv:
+        inv = np.concatenate((tetIdx,np.repeat(pyrIdx,pyrn),np.repeat(wdgIdx,wdgn),np.repeat(hexIdx,hexn),tet10Idx))
     if return_ids:
         # Element ids of the tets connected to the original elements
-        ElemIds_i = np.concatenate((tetIdx,np.repeat(pyrIdx,pyrn),np.repeat(wdgIdx,wdgn),np.repeat(hexIdx,hexn),tet10Idx))
+        ElemIds_i = inv
         ElemIds_j = np.concatenate((np.repeat(0,len(tetIdx)), 
                 np.repeat([np.arange(pyrn)],len(pyrIdx),axis=0).reshape(len(pyrIdx)*pyrn),                   
                 np.repeat([np.arange(wdgn)],len(wdgIdx),axis=0).reshape(len(wdgIdx)*wdgn),   
@@ -496,7 +523,11 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False):
         ElemIds = utils.ExtractRagged(ElemIds,dtype=int)
     
     if return_ids:
+        if return_inv:
+            return TetCoords, TetConn, ElemIds, inv
         return TetCoords, TetConn, ElemIds
+    elif return_inv:
+        return TetCoords, TetConn, inv
     return TetCoords, TetConn
 
 def surf2tris(NodeCoords,NodeConn,return_ids=False,return_inv=False):
