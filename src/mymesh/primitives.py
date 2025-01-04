@@ -599,19 +599,21 @@ def Cylinder(center, radius, height, theta_resolution=20, axial_resolution=10, r
         raise TypeError('radius must either be a scalar or a 2 element array_like.')
 
     
-    if cap or Type == 'vol':
+    if cap or Type.lower() == 'vol':
         if not cap:
             warnings.warn('Cannot create an un-capped cylinder with Type="vol".')
         circle = Circle(center, radius[0], radial_resolution=radial_resolution, axis=axis, Type='surf')
-        if Type == 'vol':
+        if Type.lower() == 'vol':
             cylinder = Extrude(circle, height, height/axial_resolution, axis=axis, ElemType=ElemType)
-        elif Type == 'surf':
+        elif Type.lower() == 'surf':
             cylinder = Extrude(circle, height, height/axial_resolution, axis=axis)
             cylinder.NodeConn = converter.solid2surface(*cylinder)
             if ElemType == 'tri':
                 cylinder.NodeCoords, cylinder.NodeConn = converter.surf2tris(*cylinder)
             cylinder.Type='surf'
             cylinder.cleanup()
+        else:
+            raise ValueError('Type must be "vol" or "surf".')
     
     else:
         circle = Circle(center, radius[0], radial_resolution=radial_resolution, axis=axis, Type='line')
