@@ -224,7 +224,7 @@ def getNodeNeighborhoodByRadius(NodeCoords,NodeConn,Radius):
                             NodeNeighborhoods[i].append(NodeNeighbors[j][k])
     return NodeNeighborhoods   
 
-def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None, v=1):
+def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None):
     """
     Get list of neighboring elements for each element in the mesh.
 
@@ -284,44 +284,44 @@ def getElemNeighbors(NodeCoords,NodeConn,mode='face',ElemConn=None, v=1):
         #TODO: This needs to updated, can be made faster, should use converter.faces2unique
         faces,faceconn,faceelem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
         ######
-        if v == 1:
-            sortface = [tuple(sorted(face)) for face in faces]
-            FaceElem = collections.defaultdict(set)
-            for i,facekey in enumerate(sortface):
-                FaceElem[facekey].add(faceelem[i])
-            
-            ElemNeighborDict = dict()
-            for i,fs in enumerate(faceconn):
-                neighbors = {elem for f in fs for elem in FaceElem[sortface[f]]}
-                neighbors.discard(i)
-                ElemNeighborDict[i] = neighbors
-            ElemNeighbors = [list(ElemNeighborDict[i]) for i in range(len(faceconn))]
+        # if v == 1:
+        sortface = [tuple(sorted(face)) for face in faces]
+        FaceElem = collections.defaultdict(set)
+        for i,facekey in enumerate(sortface):
+            FaceElem[facekey].add(faceelem[i])
+        
+        ElemNeighborDict = dict()
+        for i,fs in enumerate(faceconn):
+            neighbors = {elem for f in fs for elem in FaceElem[sortface[f]]}
+            neighbors.discard(i)
+            ElemNeighborDict[i] = neighbors
+        ElemNeighbors = [list(ElemNeighborDict[i]) for i in range(len(faceconn))]
         
         #####
-        elif v == 0:
-            ElemNeighbors = [set() for i in range(len(NodeConn))]
-            # Pad Ragged arrays in case of mixed-element meshes
-            Rfaces = PadRagged(faces)
-            Rfaceconn = PadRagged(faceconn)
-            # Get all unique element faces (accounting for flipped versions of faces)
-            _,idx,inv = np.unique(np.sort(Rfaces,axis=1),axis=0,return_index=True,return_inverse=True)
-            RFaces = Rfaces[idx]
-            FaceElem = faceelem[idx]
-            RFaces = np.append(RFaces, np.repeat(-1,RFaces.shape[1])[None,:],axis=0)
-            inv = np.append(inv,-1)
-            RFaceConn = inv[Rfaceconn] # Faces attached to each element
-            # Face-Element Connectivity
-            FaceElemConn = np.nan*(np.ones((len(RFaces),2)))
+        # elif v == 0:
+        #     ElemNeighbors = [set() for i in range(len(NodeConn))]
+        #     # Pad Ragged arrays in case of mixed-element meshes
+        #     Rfaces = PadRagged(faces)
+        #     Rfaceconn = PadRagged(faceconn)
+        #     # Get all unique element faces (accounting for flipped versions of faces)
+        #     _,idx,inv = np.unique(np.sort(Rfaces,axis=1),axis=0,return_index=True,return_inverse=True)
+        #     RFaces = Rfaces[idx]
+        #     FaceElem = faceelem[idx]
+        #     RFaces = np.append(RFaces, np.repeat(-1,RFaces.shape[1])[None,:],axis=0)
+        #     inv = np.append(inv,-1)
+        #     RFaceConn = inv[Rfaceconn] # Faces attached to each element
+        #     # Face-Element Connectivity
+        #     FaceElemConn = np.nan*(np.ones((len(RFaces),2)))
     
-            FECidx = (FaceElem[RFaceConn] == np.repeat(np.arange(len(NodeConn))[:,None],RFaceConn.shape[1],axis=1)).astype(int)
-            FaceElemConn[RFaceConn,FECidx] = np.repeat(np.arange(len(NodeConn))[:,None],RFaceConn.shape[1],axis=1)
-            FaceElemConn = [[int(x) if not np.isnan(x) else x for x in y] for y in FaceElemConn[:-1]]
+        #     FECidx = (FaceElem[RFaceConn] == np.repeat(np.arange(len(NodeConn))[:,None],RFaceConn.shape[1],axis=1)).astype(int)
+        #     FaceElemConn[RFaceConn,FECidx] = np.repeat(np.arange(len(NodeConn))[:,None],RFaceConn.shape[1],axis=1)
+        #     FaceElemConn = [[int(x) if not np.isnan(x) else x for x in y] for y in FaceElemConn[:-1]]
     
-            for i in range(len(FaceElemConn)):
-                if np.any(np.isnan(FaceElemConn[i])): continue
-                ElemNeighbors[FaceElemConn[i][0]].add(FaceElemConn[i][1])
-                ElemNeighbors[FaceElemConn[i][1]].add(FaceElemConn[i][0])
-            ElemNeighbors = [list(s) for s in ElemNeighbors] 
+        #     for i in range(len(FaceElemConn)):
+        #         if np.any(np.isnan(FaceElemConn[i])): continue
+        #         ElemNeighbors[FaceElemConn[i][0]].add(FaceElemConn[i][1])
+        #         ElemNeighbors[FaceElemConn[i][1]].add(FaceElemConn[i][0])
+        #     ElemNeighbors = [list(s) for s in ElemNeighbors] 
     else:
         raise Exception('Invalid mode. Must be "edge" or "face".')
 
@@ -358,7 +358,7 @@ def getConnectedNodes(NodeCoords,NodeConn,NodeNeighbors=None,BarrierNodes=set())
         NodeNeighbors = [[] if i in BarrierNodes else n for i,n in enumerate(NodeNeighbors)]
     NeighborSets = [set(n) for n in NodeNeighbors]
     AllNodes = set(range(len(NodeCoords)))
-    DetachedNodes = AllNodes.difference(set(np.unique(NodeConn)))
+    DetachedNodes = AllNodes.difference(set(np.unique([n for elem in NodeConn for n in elem])))
     todo = AllNodes.difference(DetachedNodes).difference(BarrierNodes)
     while len(todo) > 0:
         seed = todo.pop()
@@ -480,14 +480,14 @@ def CalcFaceNormal(NodeCoords,SurfConn):
         List of element surface normals .
 
     """
-    #TODO: Need to make this function handle tris/quads/mixed tris&quads and average for quads 
-    # (similar structure to quality.Area and qualtiy.tri_area)
-    # ArrayCoords = np.append(NodeCoords,[[np.nan,np.nan,np.nan]],axis=0)
     ArrayCoords = np.asarray(NodeCoords)
-    TriConn = SurfConn
-    # points = ArrayCoords[PadRagged(SurfConn)]
-    points = ArrayCoords[SurfConn]
-    ElemNormals = _tri_normals(points)
+    _, TriConn, inv = converter.surf2tris(NodeCoords, SurfConn, return_inv=True)
+    points = ArrayCoords[TriConn]
+    TriNormals = _tri_normals(points)
+
+    ElemNormals = np.zeros((len(SurfConn),3))
+    np.add.at(ElemNormals, inv, TriNormals)
+    ElemNormals /= np.bincount(inv)[:,None]
 
     return ElemNormals
 
@@ -538,7 +538,7 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
 
     """
     
-    if (method == 'Angle') or (method == 'angle'):
+    if (method.lower() == 'angle'):
         # Based on: Grit Thürrner & Charles A. Wüthrich (1998)
         # Perform angle weighted average to compute vertex normals
         # Calculate the angles to use as weight
@@ -572,14 +572,14 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
         NodeNormals = np.nan*np.ones_like(NodeCoords)
         NodeNormals[NodeSet] = sumAlphaN/np.linalg.norm(sumAlphaN,axis=1)[:,None]
 
-    elif (method == 'Average') or (method == 'average') or (method == 'none') or (method == None):
+    elif (method.lower() == 'average') or (method == 'none') or (method == None):
         # Cast ElemConn into a rectangular matrix
         NodeSet = np.unique(PadRagged(NodeConn,fillval=-1))
         R = PadRagged(ElemConn,fillval=-1)[NodeSet]
-        Ns = np.array(ElemNormals+[[np.nan,np.nan,np.nan]])[R]
+        Ns = np.array(np.append(ElemNormals,[[np.nan,np.nan,np.nan]],axis=0))[R]
         NodeNormals = np.nan*np.ones_like(NodeCoords)
         NodeNormals[NodeSet] = np.nanmean(Ns,axis=1)
-        NodeNormals[NodeSet] = (NodeNormals[NodeSet]/np.linalg.norm(NodeNormals[NodeSet],axis=1)[:,None]).tolist()
+        NodeNormals[NodeSet] = NodeNormals[NodeSet]/np.linalg.norm(NodeNormals[NodeSet],axis=1)[:,None]
         
     elif method == 'MostVisible':
         
@@ -592,6 +592,11 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
             NodeSet = np.delete(NodeSet,0)
 
         R = PadRagged(ElemConn,fillval=-1)
+        if np.shape(R)[1] < 3:
+            # Handling for case where no nodes have more than 2 connected elements
+            tempR = -1*np.ones((len(ElemConn), 3),dtype='int')
+            tempR[:,:np.shape(R)[1]] = R
+            R = tempR
         Ns = np.vstack([ElemNormals,[np.nan,np.nan,np.nan]])[R]
 
         # 2 Point Circles
@@ -631,109 +636,110 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
         NodeNormals[NodeSet] = Nbc[newIdx]
 
     else:
-        NodeNormals = [[] for i in range(len(NodeCoords))]      # Normal vectors for each vertex
-        NodeSet = {n for elem in NodeConn for n in elem}
-        for i in range(len(NodeCoords)):
-            if i not in NodeSet:
-                NodeNormals[i] = [np.nan,np.nan,np.nan]
-                continue
-            angles = [0 for j in range(len(ElemConn[i]))]
-            elemnormals = [np.array(ElemNormals[elem]) for elem in ElemConn[i]]
+        raise ValueError(f'Invalid method: {method:s}')
+        # NodeNormals = [[] for i in range(len(NodeCoords))]      # Normal vectors for each vertex
+        # NodeSet = {n for elem in NodeConn for n in elem}
+        # for i in range(len(NodeCoords)):
+        #     if i not in NodeSet:
+        #         NodeNormals[i] = [np.nan,np.nan,np.nan]
+        #         continue
+        #     angles = [0 for j in range(len(ElemConn[i]))]
+        #     elemnormals = [np.array(ElemNormals[elem]) for elem in ElemConn[i]]
 
-            if method == 'MostVisible_Loop':
+        #     if method == 'MostVisible_Loop':
                 
-                # This is kept for readability; 'MostVisible' is a vectorized equivalent that performs significantly faster
+        #         # This is kept for readability; 'MostVisible' is a vectorized equivalent that performs significantly faster
                 
-                # Note: this code uses dot(Ni,Nj) as a surrogate for radius; since Ni,Nj are both unit vectors
-                # cos(theta) = dot(Ni,Nj) -> theta = arccos(dot(Ni,Nj)). Since arccos is a monotonically 
-                # decreasing function, if dot(Ni,Nj) < dot(Ni,Nk), then rij > rik
-                eps = -1e-8
-                scalmin = -1
-                C = [np.nan,np.nan,np.nan]
-                for ii in range(len(elemnormals)-1):
-                    # Check the 2 point circles
-                    Ni = np.array(elemnormals[ii])
-                    for j in range(ii+1,len(elemnormals)):
-                        Nj = np.array(elemnormals[j])
-                        Nb = Ni+Nj
-                        Nb = Nb/np.linalg.norm(Nb)
-                        scal = np.dot(Nb,Ni)
-                        if scal < scalmin:      
-                            pass
-                        elif any((np.dot(Nl,Nb) - scal) < eps for Nl in elemnormals):
-                            pass
-                        else:
-                            C = Nb.tolist()
-                            scalmin = scal
-                for ii in range(len(elemnormals)-2): 
-                    # Check the 3 point circles
-                    Ni = elemnormals[ii]
-                    for j in range(ii+1,len(elemnormals)-1):
-                        Nj = elemnormals[j]
-                        for k in range(j+1,len(elemnormals)):
-                            Nk = elemnormals[k]
+        #         # Note: this code uses dot(Ni,Nj) as a surrogate for radius; since Ni,Nj are both unit vectors
+        #         # cos(theta) = dot(Ni,Nj) -> theta = arccos(dot(Ni,Nj)). Since arccos is a monotonically 
+        #         # decreasing function, if dot(Ni,Nj) < dot(Ni,Nk), then rij > rik
+        #         eps = -1e-8
+        #         scalmin = -1
+        #         C = [np.nan,np.nan,np.nan]
+        #         for ii in range(len(elemnormals)-1):
+        #             # Check the 2 point circles
+        #             Ni = np.array(elemnormals[ii])
+        #             for j in range(ii+1,len(elemnormals)):
+        #                 Nj = np.array(elemnormals[j])
+        #                 Nb = Ni+Nj
+        #                 Nb = Nb/np.linalg.norm(Nb)
+        #                 scal = np.dot(Nb,Ni)
+        #                 if scal < scalmin:      
+        #                     pass
+        #                 elif any((np.dot(Nl,Nb) - scal) < eps for Nl in elemnormals):
+        #                     pass
+        #                 else:
+        #                     C = Nb.tolist()
+        #                     scalmin = scal
+        #         for ii in range(len(elemnormals)-2): 
+        #             # Check the 3 point circles
+        #             Ni = elemnormals[ii]
+        #             for j in range(ii+1,len(elemnormals)-1):
+        #                 Nj = elemnormals[j]
+        #                 for k in range(j+1,len(elemnormals)):
+        #                     Nk = elemnormals[k]
 
-                            denom = (2*np.linalg.norm(np.cross(Ni-Nk,Nj-Nk))**2) 
-                            if denom == 0:
-                                continue
-                            Nc = np.cross(np.linalg.norm(Ni-Nk)**2 * (Nj-Nk) - np.linalg.norm(Nj-Nk)**2 * (Ni-Nk), np.cross(Ni-Nk,Nj-Nk))/denom + Nk
-                            nNc = np.linalg.norm(Nc)
-                            if nNc == 0:
-                                continue
-                            Nc = Nc/nNc
+        #                     denom = (2*np.linalg.norm(np.cross(Ni-Nk,Nj-Nk))**2) 
+        #                     if denom == 0:
+        #                         continue
+        #                     Nc = np.cross(np.linalg.norm(Ni-Nk)**2 * (Nj-Nk) - np.linalg.norm(Nj-Nk)**2 * (Ni-Nk), np.cross(Ni-Nk,Nj-Nk))/denom + Nk
+        #                     nNc = np.linalg.norm(Nc)
+        #                     if nNc == 0:
+        #                         continue
+        #                     Nc = Nc/nNc
                             
 
-                            scal = np.dot(Nc, Ni)
-                            if scal < 0:
-                                Nc = [-1*n for n in Nc]
-                                scal = -scal
-                            if scal < scalmin:
-                                pass
-                            elif any((np.dot(Nl,Nc) - scal) < eps for Nl in elemnormals):
-                                pass   
-                            else:
-                                C = Nc
-                                scalmin = scal
-                NodeNormals[i] = C    
-                if np.any(np.isnan(C)):
-                    print(i)
+        #                     scal = np.dot(Nc, Ni)
+        #                     if scal < 0:
+        #                         Nc = [-1*n for n in Nc]
+        #                         scal = -scal
+        #                     if scal < scalmin:
+        #                         pass
+        #                     elif any((np.dot(Nl,Nc) - scal) < eps for Nl in elemnormals):
+        #                         pass   
+        #                     else:
+        #                         C = Nc
+        #                         scalmin = scal
+        #         NodeNormals[i] = C    
+        #         if np.any(np.isnan(C)):
+        #             print(i)
                 
-            elif method == 'MostVisible_Iter':
+        #     elif method == 'MostVisible_Iter':
                 
-                conv = 1e-3
-                beta = 0.5
+        #         conv = 1e-3
+        #         beta = 0.5
                 
-                # Initial weights]
-                ws = [1/len(elemnormals) for i in range(len(elemnormals))]
-                # Compute initial guess normal
-                Sp = sum([w*n for w,n in zip(ws,elemnormals)])
-                Np = Sp/np.linalg.norm(Sp)
+        #         # Initial weights
+        #         ws = [1/len(elemnormals) for i in range(len(elemnormals))]
+        #         # Compute initial guess normal
+        #         Sp = sum([w*n for w,n in zip(ws,elemnormals)])
+        #         Np = Sp/np.linalg.norm(Sp)
                 
-                k = 0
-                thinking = True
-                while thinking:
-                    k+=1
-                    alphas = [np.arccos(np.clip(np.dot(Np,Ni),-1,1)) for Ni in elemnormals]
-                    Salpha = sum(alphas)
-                    if Salpha == 0:
-                        thinking = False
-                    else:
-                        ws = [w*alpha/Salpha for w,alpha in zip(ws,alphas)]
-                        Sw = sum(ws)
-                        ws = [w/Sw for w in ws]
-                        Spnew = sum([w*n for w,n in zip(ws,elemnormals)])
-                        if np.linalg.norm(Spnew) == 0:
-                            print('merp3')
-                        Npnew = Spnew/np.linalg.norm(Spnew)
+        #         k = 0
+        #         thinking = True
+        #         while thinking:
+        #             k+=1
+        #             alphas = [np.arccos(np.clip(np.dot(Np,Ni),-1,1)) for Ni in elemnormals]
+        #             Salpha = sum(alphas)
+        #             if Salpha == 0:
+        #                 thinking = False
+        #             else:
+        #                 ws = [w*alpha/Salpha for w,alpha in zip(ws,alphas)]
+        #                 Sw = sum(ws)
+        #                 ws = [w/Sw for w in ws]
+        #                 Spnew = sum([w*n for w,n in zip(ws,elemnormals)])
+        #                 if np.linalg.norm(Spnew) == 0:
+        #                     print('merp3')
+        #                 Npnew = Spnew/np.linalg.norm(Spnew)
                         
-                        # Relax
-                        Nprel = beta*Npnew + (1-beta)*Np
-                        if np.linalg.norm(Np-Nprel) < conv or k > 100:
-                            thinking = False
-                        Np = Nprel
-                if any(np.isnan(Np)) and len(elemnormals)>0:
-                    merp = 2
-                NodeNormals[i] = Np.tolist()
+        #                 # Relax
+        #                 Nprel = beta*Npnew + (1-beta)*Np
+        #                 if np.linalg.norm(Np-Nprel) < conv or k > 100:
+        #                     thinking = False
+        #                 Np = Nprel
+        #         if any(np.isnan(Np)) and len(elemnormals)>0:
+        #             merp = 2
+        #         NodeNormals[i] = Np.tolist()
     return NodeNormals
 
 @try_njit
@@ -775,8 +781,6 @@ def BaryTri(Nodes, Pt):
     PABA = np.dot(np.subtract(Pt,A), BA)
     PACA = np.dot(np.subtract(Pt,A), CA)
     d = (BABA * CACA - BACA * BACA)
-    if d == 0:
-        a = 2
     denom = 1/d
     beta = (CACA * PABA - BACA * PACA) * denom
     gamma = (BABA * PACA - BACA * PABA) * denom
@@ -786,15 +790,19 @@ def BaryTri(Nodes, Pt):
 
 def BaryTris(Tris, Pt):
     """
-    Returns the bary centric coordinates of a point (Pt) relative to 
-    a triangle (Nodes)
+    Returns the barycentric coordinates of a point or points relative to 
+    a triangle. This can either compare a set of n triangles to a single point, 
+    or pairwise comparison between n triangles and n points. 
 
     Parameters
     ----------
-    Nodes : list
-        List of coordinates of the triangle vertices.
-    Pt : list
-        Coordinates of the point.
+    Tris : array_like
+        nx3x3 coordinates of the vertices. The array should be formatted as if
+        obtained by indexing NodeCoords[NodeConn] for a purely triangular mesh.
+    Pt : array_like
+        Coordinates of the point or points. For a single point, this should have
+        the a shape = (3,), for a set of points, this should have a shape = (n,3)
+        where n is equal to the number of triangles. 
 
     Returns
     -------
@@ -1365,7 +1373,7 @@ def DeleteDegenerateElements(NodeCoords,NodeConn,tol=1e-12,angletol=1e-3,strict=
                 
     return NewCoords,NewConn
 
-def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf', return_idx=False):
+def CleanupDegenerateElements(NodeCoords, NodeConn, Type='auto', return_idx=False):
     """
     Checks for elements with degenerate edges and either changes the element type or 
     removes the element depending on how degenerate it is. Elements
@@ -1383,9 +1391,11 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf', return_idx=Fals
         Node coordinates
     NodeConn : list, array_like
         Node connectivity
-    type : str, optional
+    Type : str, optional
         Specifies whether the mesh contains surface elements (tris, quads) or volume
-        elements (tets, hexs, etc.). Must be either "surf" or "vol". By default "surf".
+        elements (tets, hexs, etc.). Must be either "auto", "surf" or "vol". If
+        "auto", Type will be inferred using :func:`identify_type`.
+        By default "auto".
 
     Returns
     -------
@@ -1454,27 +1464,47 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='surf', return_idx=Fals
             pyrints = np.sum((uConn[hex2pyr, :8] == -1) * 2**np.arange(0,8)[::-1], axis=1)
             wdgints = np.sum((uConn[hex2wdg, :8] == -1) * 2**np.arange(0,8)[::-1], axis=1)
 
-            # Wedge cases:
+            # Wedge cases: TODO: Not all cases accounted for
             # Case 3 : Face 1 vertical collapse (2==6, 3==7)
             uConn[hex2wdg[wdgints == 3], :8] = uConn[hex2wdg[wdgints == 3]][:,[0,3,4,1,2,5,6,7]]
             
             # Case 12 : Face 1 vertical collapse (0==4, 1==5)
             uConn[hex2wdg[wdgints == 12], :8] = uConn[hex2wdg[wdgints == 12]][:,[0,3,7,1,2,6,4,5]]
 
+            # Pyramid cases:
+            # Case 112 : Face 0 collapse (0==1==2==3)
+            uConn[hex2pyr[pyrints == 112], :8] = uConn[hex2pyr[pyrints == 112]][:,[7,6,5,4,0,1,2,3]]
+
+            # Case 76 : Face 1 collapse (0==1==4==5)
+            uConn[hex2pyr[pyrints == 76], :8] = uConn[hex2pyr[pyrints == 76]][:,[2,6,7,3,0,1,4,5]]
+
+            # Case 38 : Face 2 collapse (1==2==5==6)
+            uConn[hex2pyr[pyrints == 38], :8] = uConn[hex2pyr[pyrints == 38]][:,[0,3,7,4,1,2,5,6]]
+
+            # Case 25 : Face 4 collapse (0==3==4==7)
+            uConn[hex2pyr[pyrints == 25], :8] = uConn[hex2pyr[pyrints == 25]][:,[1,5,6,2,0,3,4,7]]
+
+            # Case 19 : Face 3 collapse (2==3==6==7)
+            uConn[hex2pyr[pyrints == 19], :8] = uConn[hex2pyr[pyrints == 19]][:,[0,4,5,1,2,3,6,7]]
+
+            # Case 7 : Face 5 collapse (4==5==6==7)
+            uConn[hex2pyr[pyrints == 7], :8] = uConn[hex2pyr[pyrints == 7]][:,[0,1,2,3,4,5,6,7]]
+
             if np.any((wdgints != 3) & (wdgints != 12)):
                 warnings.warn(f'Unaccounted for hex-to-wedge case(s) in CleanupDegenerateElements. This is a bug, please report.')
-            if len(pyrints) > 0:
+            if np.any((pyrints != 7) & (pyrints != 19) & (pyrints != 25) & (pyrints != 38) & (pyrints != 76) & (pyrints != 112)):
                 warnings.warn(f'Unaccounted for hex-to-pyr case(s) in CleanupDegenerateElements. This is a bug, please report.')
-            if len(tetints) > 0:
-                warnings.warn(f'Unaccounted for hex-to-tet case(s) in CleanupDegenerateElements. This is a bug, please report.')
+            # if len(tetints) > 0:
+            #     warnings.warn(f'Unaccounted for hex-to-tet case(s) in CleanupDegenerateElements. This is a bug, please report.')
 
         uConn = uConn[~to_delete]
         NewConn = ExtractRagged(uConn)
         return NewConn, np.where(~to_delete)[0]
-
-    if Type=='surf':
+    if Type.lower() == 'auto':
+        Type = identify_type(NodeCoords, NodeConn)
+    if Type.lower() == 'surf':
         NewConn, idx = rowunique(NodeConn, 3)
-    elif Type=='vol':
+    elif Type.lower() == 'vol':
         NewConn, idx = rowunique(NodeConn, 4)
     else:
         raise ValueError(f'Type must be "surf" or "vol", not {Type:s}.')
