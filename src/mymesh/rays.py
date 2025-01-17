@@ -86,7 +86,44 @@ def RayTriangleIntersection(pt, ray, TriCoords, bidirectional=False, eps=1e-6):
     intersectionPt : np.ndarray or []
         If there is an intersection, the 3D coordinates of the intersection point
         are returned, otherwise [] is returned.
+    
+    Examples
+    --------
+    .. jupyter-execute::
+
+        from mymesh import rays
+        import numpy as np
+        
+        pt = [0,0,0]
+        ray = np.array([1.,1.,0.])
+        ray /= np.linalg.norm(ray)
+        TriCoords = np.array([
+            [1,0,-1],
+            [0,1,-1],
+            [1,1,1]
+        ])
+        intersection = rays.RayTriangleIntersection(pt, ray, TriCoords)
+        print(intersection)
+
+    Flipping the direction causes the ray to no longer intersect with the triangle
+
+    .. jupyter-execute::
+
+        ray = -ray
+        
+        intersection = rays.RayTriangleIntersection(pt, ray, TriCoords)
+        print(intersection)
+
+    Using the :code:`bidirectional=True` option detects an intersection with 
+    the ray even though it's pointing in the opposite direction.
+    
+    .. jupyter-execute::
+
+        intersection = rays.RayTriangleIntersection(pt, ray, TriCoords, bidirectional=True)
+        print(intersection)
+
     """    
+
     edge1 = np.subtract(TriCoords[1],TriCoords[0])
     edge2 = np.subtract(TriCoords[2], TriCoords[0])
     
@@ -423,8 +460,8 @@ def PlaneBoxIntersection(pt, Normal, xlim, ylim, zlim):
         ]
     # Signed Distances from the vertices of the box to the plane
     sd = [np.dot(Normal,p)-np.dot(Normal,pt) for p in BoxCoords]
-    signs = [np.sign(x) for x in sd]
-    if all(signs) == 1 or all(signs) == -1:
+    signs = np.array([np.sign(x) for x in sd])
+    if np.all(signs == 1) or np.all(signs == -1):
         # No Intersection, all points on same side of plane
         intersection = False
     else:
@@ -455,8 +492,8 @@ def PlaneTriangleIntersection(pt, Normal, TriCoords):
     """    
     # Signed Distances from the vertices of the box to the plane
     sd = [np.dot(Normal,p)-np.dot(Normal,pt) for p in TriCoords]
-    signs = [np.sign(x) for x in sd]
-    if all(signs) == 1 or all(signs) == -1:
+    signs = np.array([np.sign(x) for x in sd])
+    if np.all(signs == 1) or np.all(signs == -1):
         # No Intersection, all points on same side of plane
         intersection = False
     else:
@@ -1477,9 +1514,18 @@ def BoxBoxIntersection(box1, box2):
     x1lim, y1lim, z1lim = box1
     x2lim, y2lim, z2lim = box2
 
-    xIx = ((x1lim[0] < x2lim[0]) and (x1lim[1] > x2lim[0])) or ((x1lim[0] < x2lim[1]) and (x1lim[1] > x2lim[1])) or ((x2lim[0] < x1lim[0]) and (x2lim[1] > x1lim[0])) or ((x2lim[0] < x1lim[1]) and (x2lim[1] > x1lim[1]))
-    yIx = ((y1lim[0] < y2lim[0]) and (y1lim[1] > y2lim[0])) or ((y1lim[0] < y2lim[1]) and (y1lim[1] > y2lim[1])) or ((y2lim[0] < y1lim[0]) and (y2lim[1] > y1lim[0])) or ((y2lim[0] < y1lim[1]) and (y2lim[1] > y1lim[1]))
-    zIx = ((z1lim[0] < z2lim[0]) and (z1lim[1] > z2lim[0])) or ((z1lim[0] < z2lim[1]) and (z1lim[1] > z2lim[1])) or ((z2lim[0] < z1lim[0]) and (z2lim[1] > z1lim[0])) or ((z2lim[0] < z1lim[1]) and (z2lim[1] > z1lim[1]))
+    xIx = ((x1lim[0] < x2lim[0]) and (x1lim[1] > x2lim[0])) or \
+        ((x1lim[0] < x2lim[1]) and (x1lim[1] > x2lim[1])) or \
+        ((x2lim[0] < x1lim[0]) and (x2lim[1] > x1lim[0])) or \
+        ((x2lim[0] < x1lim[1]) and (x2lim[1] > x1lim[1]))
+    yIx = ((y1lim[0] < y2lim[0]) and (y1lim[1] > y2lim[0])) or \
+        ((y1lim[0] < y2lim[1]) and (y1lim[1] > y2lim[1])) or \
+        ((y2lim[0] < y1lim[0]) and (y2lim[1] > y1lim[0])) or \
+        ((y2lim[0] < y1lim[1]) and (y2lim[1] > y1lim[1]))
+    zIx = ((z1lim[0] < z2lim[0]) and (z1lim[1] > z2lim[0])) or \
+        ((z1lim[0] < z2lim[1]) and (z1lim[1] > z2lim[1])) or \
+        ((z2lim[0] < z1lim[0]) and (z2lim[1] > z1lim[0])) or \
+        ((z2lim[0] < z1lim[1]) and (z2lim[1] > z1lim[1]))
 
     Ix = xIx and yIx and zIx
 
@@ -1983,6 +2029,20 @@ def PlaneSurfIntersection(pt, Normal, NodeCoords, SurfConn, eps=1e-14):
 
     Intersections = PlaneTrianglesIntersection(pt, Normal, NodeCoords[SurfConn], eps=eps)
     return Intersections
+
+## Projection
+def SilhouetteProjection(pts, pt, Normal):
+    
+    # point (x,y,z), normal (nx,ny,nz), point on plane (px,py,pz)
+    # find t s.t. (x+t*nx, y+t*ny, z+tc), (x,y,z), (px,py,pz) form a right triangle
+    pts = np.asarray(pts)
+    x = pts[:,0]; y = pts[:,1]; z = pts[:,2]
+    nx, ny, nz = Normal
+    px, py, pz = pt
+
+    t = (nx*px - nx*x + ny*py - ny*y + nz*pz - nz*z)/(nx**2 + ny**2 + nz**2)
+    projected = np.column_stack([x+t*nx, y+t*ny, z+t*nz])
+    return projected
 
 ## Inside/Outside Tests
 def PointInSurf(pt, NodeCoords, SurfConn, ElemNormals, Octree=None, eps=1e-8, ray=np.random.rand(3)):
