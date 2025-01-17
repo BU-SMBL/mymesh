@@ -719,10 +719,9 @@ def Curvedness(MaxPrincipal,MinPrincipal):
         Single value or list of curvedness values.
     """
 
-    curvedness = np.sqrt((np.asarray(MaxPrincipal)**2 + np.asarray(MinPrincipal)**2)/2)
-    if len(curvedness) == 1 and type(MaxPrincipal) is int or type(MaxPrincipal) is float:
+    curvedness = np.sqrt((np.atleast_1d(MaxPrincipal)**2 + np.atleast_1d(MinPrincipal)**2)/2)
+    if len(curvedness) == 1 and isinstance(MaxPrincipal, (int, float)):
         curvedness = curvedness[0]
-        
     
     return curvedness
  
@@ -747,13 +746,13 @@ def ShapeIndex(MaxPrincipal,MinPrincipal):
     # Note: the equation from Koenderink & van Doorn has the equation: pi/2*arctan((min+max)/(min-max)), but this doesn't
     # seem to give values consistent with what are described as cups/caps - instead using pi/2*arctan((max+min)/(max-min))
     
-    MaxPrincipal = np.asarray(MaxPrincipal) 
-    MinPrincipal = np.asarray(MinPrincipal) 
+    MaxP = np.atleast_1d(MaxPrincipal) 
+    MinP = np.atleast_1d(MinPrincipal) 
     with np.errstate(divide='ignore', invalid='ignore'):
-        shape = (2/np.pi) * np.arctan((MaxPrincipal + MinPrincipal)/(MaxPrincipal - MinPrincipal))
-    shape[MaxPrincipal == MinPrincipal] = 1*np.sign(MaxPrincipal[MaxPrincipal == MinPrincipal])
+        shape = (2/np.pi) * np.arctan((MaxP + MinP)/(MaxP - MinP))
+    shape[MaxP == MinP] = 1*np.sign(MaxP[MaxP == MinP])
     
-    if len(shape) == 1 and type(MaxPrincipal) is int or type(MaxPrincipal) is float:
+    if len(shape) == 1 and isinstance(MaxPrincipal, (int, float)):
         shape = shape[0]
     
     return shape
@@ -793,25 +792,28 @@ def ShapeCategory(shapeindex):
     shape : list
         List of shape categories.
     """   
-    shape = [-1 for i in range(len(shapeindex))]
-    for i in range(len(shapeindex)):
-        if shapeindex[i] < -7/8:
+    s = np.atleast_1d(shapeindex) 
+    shape = [-1 for i in range(len(s))]
+    for i in range(len(s)):
+        if s[i] < -7/8:
             shape[i] = 0
-        elif shapeindex[i] < -5/8:
+        elif s[i] < -5/8:
             shape[i] = 1
-        elif shapeindex[i] < -3/8:
+        elif s[i] < -3/8:
             shape[i] = 2
-        elif shapeindex[i] < -1/8:
+        elif s[i] < -1/8:
             shape[i] = 3
-        elif shapeindex[i] < 1/8:
+        elif s[i] < 1/8:
             shape[i] = 4
-        elif shapeindex[i] < 3/8:
+        elif s[i] < 3/8:
             shape[i] = 5
-        elif shapeindex[i] < 5/8:
+        elif s[i] < 5/8:
             shape[i] = 6
-        elif shapeindex[i] < 7/8:
+        elif s[i] < 7/8:
             shape[i] = 7
-        elif shapeindex[i] <= 1:
+        elif s[i] <= 1:
             shape[i] = 8
+    if len(shape) == 1 and isinstance(shapeindex, (int, float)):
+        shape = shape[0]
     return shape
                        
