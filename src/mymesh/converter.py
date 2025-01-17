@@ -162,8 +162,8 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
 
 def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return_EdgeElem=False,):
     """
-    Convert solid mesh to edges. The will be one edge for each edge of each element,
-    i.e. there will be multiple entries for shared edges. Solid2Edges is also suitable for use 
+    Convert a solid mesh to edges. There will be one edge for each edge of each element,
+    i.e. there will be multiple entries for shared edges. solid2edges is also suitable for use 
     with 2D or surface meshes. It differs from surface2edges in that surface2edges returns only exposed edges of unclosed surfaces.
 
     Parameters
@@ -175,30 +175,27 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
     ElemType : str, optional
         Specifies the element type contained within the mesh, by default 'auto'.
 
-        'auto' or 'mixed' - Will detect element type by the number of nodes present in each element. 
+        - 'auto' or 'mixed' - Will detect element type by the number of nodes present in each element using :func:`~mymesh.utils.identify_type`. 
 
-        'surf' - Will detect element type by the number of nodes present in each 
+        - 'surf' - Will detect element type by the number of nodes present in each 
         element, assuming four node elements are quads
 
-        'vol' - Will detect element type by the number of nodes present in each 
+        - 'vol' - Will detect element type by the number of nodes present in each 
         element, assuming four node elements are tets (functionally the ame as 'auto')
 
-        'tri' - All elements treated as 3-node triangular elements.
+        - 'tri' - All elements treated as 3-node triangular elements.
 
-        'quad' - All elements treated as 4-node quadrilateral elements.
+        - 'quad' - All elements treated as 4-node quadrilateral elements.
 
-        'tet' - All elements treated as 4-node tetrahedral elements.
+        - 'tet' - All elements treated as 4-node tetrahedral elements.
 
-        'pyramid' - All elements treated as 5-node wedge elements.
+        - 'pyramid' - All elements treated as 5-node wedge elements.
 
-        'wedge' - All elements treated as 6-node quadrilateral elements.
+        - 'wedge' - All elements treated as 6-node quadrilateral elements.
 
-        'hex' - All elements treated as 8-node quadrilateral elements.
+        - 'hex' - All elements treated as 8-node quadrilateral elements.
 
-        'polygon' - All elements treated as n-node polygonal elements. TODO: add support for return_EdgeConn and return_EdgeElem
-
-    .. note: 
-        If ElemType is 'auto' or 'mixed', 4-node elements are assumed to be tets, not quads.
+        - 'polygon' - All elements treated as n-node polygonal elements. TODO: add support for return_EdgeConn and return_EdgeElem
 
     return_EdgeConn : bool, optional
         If true, will return EdgeConn, the Edge Connectivity of each element.
@@ -245,7 +242,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
         elif ElemType == 'surf':
             fournodefunc = quad2edges
             fournodeedgenum = 4
-        else ElemType == 'auto':
+        else:
             if len(tetIdx) > 0:
                 Type = utils.identify_type(NodeCoords, NodeConn)
                 if Type == 'vol':
@@ -370,7 +367,6 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
 def EdgesByElement(NodeCoords,NodeConn,ElemType='auto'):
     """
     Returns edges grouped by the element from which they came.
-    TODO: This can/should be rewritten based on solid2edges using EdgeConn
 
     Parameters
     ----------
@@ -380,40 +376,16 @@ def EdgesByElement(NodeCoords,NodeConn,ElemType='auto'):
         Nodal connectivity list.
     ElemType : str, optional
         Specifies the element type contained within the mesh, by default 'auto'.
-        'auto' or 'mixed' - Will detect element type by the number of nodes present in each element. NOTE that 4-node elements are assumed to be tets, not quads
-        'tri' - All elements treated as 3-node triangular elements.
-        'quad' - All elements treated as 4-node quadrilateral elements.
-        'tet' - All elements treated as 4-node tetrahedral elements.
-        'pyramid' - All elements treated as 5-node wedge elements.
-        'wedge' - All elements treated as 6-node quadrilateral elements.
-        'hex' - All elements treated as 8-node quadrilateral elements.
-        'polygon' - All elements treated as n-node polygonal elements.
+        See :func:`solid2edges` for options.
 
     Returns
     -------
-    Edges, list
+    ElementEdges : list
         Edge connectivity, grouped by element
     """    
-    Edges = [[] for i in range(len(NodeConn))]
-    for i,elem in enumerate(NodeConn):
-        if (ElemType=='auto' and len(elem) == 3) or ElemType == 'tri':
-            # Tri
-            Edges[i] = tri2edges(NodeCoords,[elem])
-        if (ElemType=='auto' and len(elem) == 4) or ElemType == 'tet':
-            # Tet
-            Edges[i] = tet2edges(NodeCoords,[elem])
-        elif (ElemType=='auto' and len(elem) == 5) or ElemType == 'pyramid':
-            # Pyramid
-            Edges[i] = pyramid2edges(NodeCoords,[elem])
-        elif (ElemType=='auto' and len(elem) == 6) or ElemType == 'wedge':
-            # Wedge
-            Edges[i] = wedge2edges(NodeCoords,[elem])
-        elif (ElemType=='auto' and len(elem) == 8) or ElemType == 'hex':
-            # Hex
-            Edges[i] = hex2edges(NodeCoords,[elem])
-        elif ElemType=='polygon':
-            Edges[i] = polygon2edges(NodeCoords,[elem])
-    return Edges
+    Edges, EdgeConn = converter.solid2edges(*S, return_EdgeConn=True, ElemType=ElemType)
+    ElementEdges = [Edges[ec] for ec in EdgeConn]
+    return ElementEdges
 
 def solid2tets(NodeCoords,NodeConn,return_ids=False,return_inv=False):
     """
@@ -533,7 +505,6 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False,return_inv=False):
 def surf2tris(NodeCoords,NodeConn,return_ids=False,return_inv=False):
     """
     Decompose all elements of a surface mesh to triangles.
-    
 
     Parameters
     ----------
