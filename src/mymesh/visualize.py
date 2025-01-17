@@ -314,9 +314,9 @@ def View(M, interactive=True, bgcolor=None,
     mins = np.min(aabb, axis=0)
     maxs = np.max(aabb, axis=0)
     diffs = maxs-mins
-    canvasview.camera.set_range((mins[0]+0.2*diffs[0], maxs[0]-0.2*diffs[0]), 
-                                (mins[1]+0.2*diffs[1], maxs[1]-0.2*diffs[1]), 
-                                (mins[2]+0.2*diffs[2], maxs[2]-0.2*diffs[2]))
+    canvasview.camera.set_range((mins[0]+0.85*diffs[0], maxs[0]-0.85*diffs[0]), 
+                                (mins[1]+0.85*diffs[1], maxs[1]-0.85*diffs[1]), 
+                                (mins[2]+0.85*diffs[2], maxs[2]-0.85*diffs[2]))
     
     # Render
     if ipython and interactive:
