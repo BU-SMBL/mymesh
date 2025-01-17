@@ -115,6 +115,8 @@ def Orthogonality(NodeCoords,NodeConn,verbose=False):
     Orthogonality ranges from 0 to 1, with 0 being the worst element quality
     and 1 being the best.
 
+    This definition of Orthogonality comes from `Ansys <https://ansyshelp.ansys.com/public/account/secured?returnurl=//////Views/Secured/corp/v242/en/wb_msh/msh_orthogonal_quality.html>`_.
+
     Parameters
     ----------
     NodeCoords : list
@@ -156,7 +158,9 @@ def Orthogonality(NodeCoords,NodeConn,verbose=False):
     ci = np.append(c,[[np.nan,np.nan,np.nan]],axis=0)[RFaceConn]
     sidx = set(idx)
     sign = np.array([1 if i in sidx else -1 for i in range(len(A))])[RFaceConn]
-    Aici = np.nansum(sign[:,:,None]*Ai*ci,axis=2)/np.linalg.norm(ci,axis=2)
+    cinorm = np.linalg.norm(ci,axis=2)
+    Aici = np.nansum(sign[:,:,None]*Ai*ci,axis=2)/cinorm
+    Aici[np.isnan(cinorm)] = 1 # ci vectors on the surface i.e. not connected to any element
 
     ortho = np.minimum(np.nanmin(Aici,axis=1),np.nanmin(Aifi,axis=1))
 
@@ -179,6 +183,8 @@ def InverseOrthogonality(NodeCoords,NodeConn,verbose=False):
 
     Inverse orthogonality ranges from 0 to 1, with 0 being the best element quality
     and 1 being the worst.
+
+    This definition of Inverse Orthogonality comes from `Ansys <https://ansyshelp.ansys.com/public/account/secured?returnurl=//////Views/Secured/corp/v242/en/wb_msh/msh_orthogonal_quality.html>`_.
 
     Parameters
     ----------
@@ -217,6 +223,8 @@ def OrthogonalQuality(NodeCoords,NodeConn,verbose=False):
     Orthogonal quality ranges from 0 to 1, with 1 being the best element quality
     and 0 being the worst.
 
+    This definition of Orthogonal Quality comes from `Ansys <https://ansyshelp.ansys.com/public/account/secured?returnurl=//////Views/Secured/corp/v242/en/wb_msh/msh_orthogonal_quality.html>`_.
+
     Parameters
     ----------
     NodeCoords : list
@@ -254,6 +262,8 @@ def InverseOrthogonalQuality(NodeCoords,NodeConn,verbose=False):
 
     Inverse orthogonal quality ranges from 0 to 1, with 0 being the best element quality
     and 1 being the worst.
+
+    This definition of Inverse Orthogonal Quality comes from `Ansys <https://ansyshelp.ansys.com/public/account/secured?returnurl=//////Views/Secured/corp/v242/en/wb_msh/msh_orthogonal_quality.html>`_.
 
     Parameters
     ----------
@@ -486,7 +496,7 @@ def MeanRatio(NodeCoords,NodeConn,verbose=False):
 
     return q
 
-def Area(NodeCoords,NodeConn,Type=None):
+def Area(NodeCoords,NodeConn,Type=None,verbose=False):
     """
     Calculates element areas for each element in the mesh. For volume elements,
     the area will be the total surface area of each element. 
@@ -500,7 +510,7 @@ def Area(NodeCoords,NodeConn,Type=None):
     Type : str
         Specifies whether the mesh is a surface ('surf') or volume ('vol') mesh.
         If None, will be automatically determined by 
-        :func:`utils.identify_type`, by default, None.
+        :func:`~mymesh.utils.identify_type`, by default, None.
 
     Returns
     -------
@@ -526,7 +536,15 @@ def Area(NodeCoords,NodeConn,Type=None):
         area = Area(NodeCoords, Faces, 'surf')
         area = np.append(area,0)
         A = np.sum(area[utils.PadRagged(FaceConn)],axis=1)
-
+    if verbose:
+        minArea = min(A)
+        maxArea = max(A)
+        meanArea = np.mean(A)
+        print('------------------------------------------')
+        print('Minimum Area: {:.2e} on Element {:.0f}'.format(minArea,np.where(A==minArea)[0][0]))
+        print('Maximum Area: {:.2e} on Element {:.0f}'.format(maxArea,np.where(A==maxArea)[0][0]))
+        print('Mean Area: {:.2e}'.format(meanArea))
+        print('------------------------------------------')
     return A
 
 def Volume(NodeCoords,NodeConn,verbose=False,ElemType='auto'):
@@ -572,10 +590,13 @@ def Volume(NodeCoords,NodeConn,verbose=False,ElemType='auto'):
         minVol = min(V)
         maxVol = max(V)
         meanVol = np.mean(V)
+        totalVol = np.sum(V)
         print('------------------------------------------')
         print('Minimum Volume: {:.2e} on Element {:.0f}'.format(minVol,np.where(V==minVol)[0][0]))
         print('Maximum Volume: {:.2e} on Element {:.0f}'.format(maxVol,np.where(V==maxVol)[0][0]))
         print('Mean Volume: {:.2e}'.format(meanVol))
+        print('------------------------------------------')
+        print('Total Volume: {:.2e}'.format(totalVol))
         print('------------------------------------------')
     return V
 
