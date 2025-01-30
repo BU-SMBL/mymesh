@@ -1546,7 +1546,7 @@ def MirrorMesh(NodeCoords, NodeConn,x=None,y=None,z=None):
     if z != None:
         MirroredCoords = -(MirroredCoords[:,2] - z) + z 
     
-    return MirroredCoords, MirroredConn
+    return MirroredCoords, NodeConn
     
 def MergeMesh(NodeCoords1, NodeConn1, NodeCoords2, NodeConn2, NodeVals1=[], NodeVals2=[], cleanup=True):
     """
