@@ -1537,7 +1537,8 @@ def MirrorMesh(NodeCoords, NodeConn,x=None,y=None,z=None):
     MirroredConn : list
         Nodal Connectivity of Mirrored Elements.
     """
-    
+    if x is None and y is None and z is None:
+        warnings.warn('No mirror plane was specified, specify at least one of x, y, or z.')
     MirroredCoords = np.copy(NodeCoords)
     if x != None:
         MirroredCoords[:,0] = -(MirroredCoords[:,0] - x) + x 

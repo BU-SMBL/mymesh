@@ -1458,6 +1458,18 @@ class mesh:
 
         return clipped
     
+    def Mirror(self, x=None, y=None, z=None, InPlace=False):
+        
+        if InPlace:
+            M = self
+        else:
+            M = self.copy()
+
+        M.NodeCoords, M.NodeConn = utils.MirrorMesh(M.NodeCoords, M.NodeConn, x=x, y=y, z=z)
+
+        return M
+        
+    
     ## Mesh Measurements Methods
     def getQuality(self,metrics=['Skewness','Aspect Ratio'], verbose=None):
         """
