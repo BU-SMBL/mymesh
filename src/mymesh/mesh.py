@@ -1318,6 +1318,9 @@ class mesh:
             thresholding condition or if any nodes pass the condition, by default True
         InPlace : bool, optional
             If true, this mesh will be modified, otherwise a copy of the mesh will be created and modified, by default False.
+        cleanup : bool, optional
+            Option to run :meth:`mesh.cleanup`, removing nodes that are no 
+            longer in the cropped mesh, by default False.
         """        
 
         # Process inputs
@@ -1458,8 +1461,99 @@ class mesh:
 
         return clipped
     
-    def Mirror(self, x=None, y=None, z=None, InPlace=False):
+    def Crop(self, bounds, method='centroids', InPlace=False, cleanup=False):
+        """
+        Crop the mesh to specified bounds. Cropping with this method doesn't
+        modify any elements, it keeps the elements of the original mesh that
+        are within the cropping bounds. 
+
+        Parameters
+        ----------
+        bounds : array_like
+            Six element list of of cropping bounds, formatted as 
+            [xmin, xmax, ymin, ymax, zmin, zmax].
+        method : str, optional
+            Cropping method, by default 'centroids'
+
+                - 'centroids' - keep elements whose centroids are within the bounds
+                - 'nodes' - keep elements who have all of their nodes within the bound
+        InPlace : bool, optional
+            If True, the original mesh will be modified in place, otherwise a 
+            copy will be made and modified, leaving the original mesh unaltered.
+            By default False
+        cleanup : bool, optional
+            Option to run :meth:`mesh.cleanup`, removing nodes that are no 
+            longer in the cropped mesh, by default False.
+
+        Returns
+        -------
+        M : mymesh.mesh
+            Cropped mesh. If InPlace=True, the output will be a reference to the
+            same mesh instance as the input.
+
+        """
+        if InPlace:
+            M = self
+        else:
+            M = self.copy()
+
+        if method.lower() == 'centroids':
+            points = np.asarray(M.Centroids)
+            keep = ((bounds[0] < points[:,0]) & 
+                    (points[:,0] < bounds[1]) & 
+                    (bounds[2] < points[:,1]) & 
+                    (points[:,1] < bounds[3]) & 
+                    (bounds[4] < points[:,2]) & 
+                    (points[:,2] < bounds[5]))
+        elif method.lower() == 'nodes':
+            points = np.asarray(M.NodeCoords)
+            keep_nodes = ((bounds[0] < points[:,0]) & 
+                    (points[:,0] < bounds[1]) & 
+                    (bounds[2] < points[:,1]) & 
+                    (points[:,1] < bounds[3]) & 
+                    (bounds[4] < points[:,2]) & 
+                    (points[:,2] < bounds[5]))
+            keep = np.array([np.all(keep_nodes[elem]) for elem in M.NodeConn])
+        else:
+            raise ValueError(f'Invalid method: "{method:s}". Must be "centroids or nodes".')
         
+        RemoveElems = np.where(~keep)[0]
+        M.removeElems(RemoveElems)
+        if cleanup:
+            M.cleanup()
+
+        return M
+
+    
+    def Mirror(self, x=None, y=None, z=None, InPlace=False):
+        """
+        Mirror the mesh across Cartesian planes. At least one of x, y, or z
+        must be specified to mirror the mesh. If multiple planes are specified,
+        the mesh will first be mirrored across the x plane, then the y, then the 
+        z - for example, given x=0, y=0, z=None, a point at (-1,-1,0) would be
+        mirrored to (1,-1,0) and then to (1,1,0). Note that reflections across
+        planes parallel to the Cartesian planes are commutative, so the order
+        of reflections don't matter.
+
+        Parameters
+        ----------
+        x : float, optional
+            YZ plane at X = x. The default is None.
+        y : float, optional
+            XZ plane at Y = y. The default is None.
+        z : float, optional
+            XY plane at Z = z. The default is None.
+        InPlace : bool, optional
+            If True, the original mesh will be modified in place, otherwise a 
+            copy will be made and modified, leaving the original mesh unaltered.
+            By default False
+
+        Returns
+        -------
+        M : mymesh.mesh
+            Cropped mesh. If InPlace=True, the output will be a reference to the
+            same mesh instance as the input.
+        """        
         if InPlace:
             M = self
         else:
