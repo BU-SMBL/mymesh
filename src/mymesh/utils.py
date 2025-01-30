@@ -1538,13 +1538,13 @@ def MirrorMesh(NodeCoords, NodeConn,x=None,y=None,z=None):
         Nodal Connectivity of Mirrored Elements.
     """
     
-    MirroredCoords = np.array(NodeCoords)
+    MirroredCoords = np.copy(NodeCoords)
     if x != None:
-        MirroredCoords = -(MirroredCoords[:,0] - x) + x 
+        MirroredCoords[:,0] = -(MirroredCoords[:,0] - x) + x 
     if y != None:
-        MirroredCoords = -(MirroredCoords[:,1] - y) + y
+        MirroredCoords[:,1] = -(MirroredCoords[:,1] - y) + y
     if z != None:
-        MirroredCoords = -(MirroredCoords[:,2] - z) + z 
+        MirroredCoords[:,2] = -(MirroredCoords[:,2] - z) + z 
     
     return MirroredCoords, NodeConn
     
