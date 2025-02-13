@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -43,10 +43,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -337,9 +337,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -397,15 +402,15 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">implicit</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">contour</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">visualize</span>
-<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">getsizeof</span>
-<span class="kn">import</span> <span class="nn">scipy</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">warnings</span><span class="o">,</span> <span class="nn">pickle</span><span class="o">,</span> <span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">implicit</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">contour</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">visualize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sys</span><span class="w"> </span><span class="kn">import</span> <span class="n">getsizeof</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span><span class="o">,</span><span class="w"> </span><span class="nn">pickle</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span>
 
 <div class="viewcode-block" id="mesh">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.html#mymesh.mesh">[docs]</a>
-<span class="k">class</span> <span class="nc">mesh</span><span class="p">:</span>  
+<span class="k">class</span><span class="w"> </span><span class="nc">mesh</span><span class="p">:</span>  
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The :class:`mesh` class stores the nodes (``NodeCoords``) and elements (or node connectivity, ``NodeConn``) as its primary attributes. </span>
 
@@ -456,7 +461,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>    
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">NodeConn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">NodeConn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="c1"># Primary attributes</span>
         <span class="k">if</span> <span class="n">NodeCoords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
@@ -512,7 +517,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ElemData</span> <span class="o">=</span> <span class="p">{}</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">def</span> <span class="nf">__sizeof__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__sizeof__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="c1"># Base attributes</span>
         <span class="n">size</span> <span class="o">+=</span> <span class="n">getsizeof</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span>
@@ -545,7 +550,7 @@
 
 
         <span class="k">return</span> <span class="n">size</span>
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;surf&#39;</span><span class="p">,</span> <span class="s1">&#39;surface&#39;</span><span class="p">):</span>
             <span class="n">Type</span> <span class="o">=</span> <span class="s1">&#39;Surface&#39;</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">Type</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;vol&#39;</span><span class="p">,</span> <span class="s1">&#39;volume&#39;</span><span class="p">):</span>
@@ -553,59 +558,59 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">Type</span> <span class="o">=</span> <span class="s1">&#39;Unknown&#39;</span>
         <span class="k">return</span> <span class="s1">&#39;Mesh Object</span><span class="se">\n</span><span class="s1">Type: </span><span class="si">{0:s}</span><span class="se">\n</span><span class="si">{1:d}</span><span class="s1"> Nodes</span><span class="se">\n</span><span class="si">{2:d}</span><span class="s1"> Elements&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">NElem</span><span class="p">)</span>
-    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">iter</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">))</span>
     
     <span class="c1"># Properties</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Alias for ``NodeCoords`` &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span>
     <span class="nd">@points</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeCoords</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeCoords</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">NodeCoords</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cells</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cells</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Alias for ``NodeConn`` &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span>
     <span class="nd">@cells</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">cells</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cells</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="n">NodeConn</span>
     <span class="nd">@property</span> 
-    <span class="k">def</span> <span class="nf">ND</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ND</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of spatial dimensions. This is based on how many components each</span>
 <span class="sd">        node coordinate has.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">NNode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">NNode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of nodes in the mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">NElem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">NElem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of elements in the mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>   
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">NEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">NEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of edges in the mesh. If edges haven&#39;t been determined yet, they </span>
 <span class="sd">        will be. </span>
 <span class="sd">        &quot;&quot;&quot;</span>   
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Edges</span><span class="p">)</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">NFace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">NFace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of faces in the mesh. If faces haven&#39;t been determined yet, they </span>
 <span class="sd">        will be. </span>
 <span class="sd">        &quot;&quot;&quot;</span>  
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Faces</span><span class="p">)</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">Faces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Faces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Element faces. Each face is defined as a list of node indices.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
@@ -621,7 +626,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Faces</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">FaceConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">FaceConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Element-face connectivity. For each element, lists the connected faces.</span>
 <span class="sd">        See :ref:`connectivity` for more info.</span>
@@ -638,7 +643,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_FaceConn</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">FaceElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">FaceElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Face-element connectivity. For each face, lists the connected elements.</span>
 <span class="sd">        See :ref:`connectivity` for more info.</span>
@@ -655,7 +660,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_FaceElemConn</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">Edges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Edges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Element edges. Each edge is defined as a list of node indices.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
@@ -671,7 +676,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Edges</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">EdgeConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">EdgeConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Element-edge connectivity. For each element, lists the connected edges.</span>
 <span class="sd">        See :ref:`connectivity` for more info.</span>
@@ -688,7 +693,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_EdgeConn</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">EdgeElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">EdgeElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Edge-element connectivity. For each edge, lists the connected elements.</span>
 <span class="sd">        See :ref:`connectivity` for more info.</span>
@@ -705,7 +710,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_EdgeElemConn</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">SurfConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">SurfConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Node connectivity for the surface mesh. If the mesh is already a surface, this is the same as ``NodeConn``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
@@ -719,7 +724,7 @@
             <span class="n">SurfConn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SurfConn</span>
         <span class="k">return</span> <span class="n">SurfConn</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">SurfNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">SurfNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Array of node IDs on the surface of a mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span> 
@@ -734,18 +739,25 @@
         <span class="n">SurfNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SurfNodes</span>
         <span class="k">return</span> <span class="n">SurfNodes</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">BoundaryConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">BoundaryConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Node connectivity for the boundary mesh of a surface.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_BoundaryConn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="o">+</span><span class="s1">&#39;Identifying boundary...&#39;</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_BoundaryConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2edges</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_BoundaryConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2edges</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Surface</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_BoundaryConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2edges</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;line&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_BoundaryConn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid Type.&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="n">BoundaryConn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_BoundaryConn</span>
         <span class="k">return</span> <span class="n">BoundaryConn</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">BoundaryNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">BoundaryNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Array of node IDs on the boundary of a surface.</span>
 <span class="sd">        &quot;&quot;&quot;</span> 
@@ -760,7 +772,7 @@
         <span class="n">BoundaryNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_BoundaryNodes</span>
         <span class="k">return</span> <span class="n">BoundaryNodes</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">NodeNeighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">NodeNeighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Node neighbors. For each node, lists adjacent nodes.</span>
 <span class="sd">        See :ref:`connectivity` for more info.</span>
@@ -771,7 +783,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NodeNeighbors</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ElemNeighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ElemNeighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Element neighbors. For each element, lists adjacent elements.</span>
 <span class="sd">        See :ref:`connectivity` for more info.</span>
@@ -786,7 +798,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ElemNeighbors</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Node-Element connectivity. For each node, lists the connected elements.</span>
 <span class="sd">        See :ref:`connectivity` for more info.</span>
@@ -797,7 +809,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ElemConn</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">SurfNodeNeighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">SurfNodeNeighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Node neighbors for the surface mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -811,7 +823,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SurfNodeNeighbors</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">SurfElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">SurfElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Node-Element connectivity for the surface mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -826,7 +838,7 @@
                 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SurfElemConn</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ElemNormals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ElemNormals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Surface element normal vectors. For volume meshes, these will </span>
 <span class="sd">        be calculated in reference to the surface mesh (:attr:`SurfConn`).</span>
@@ -841,7 +853,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ElemNormals</span>        
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">NodeNormalsMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">NodeNormalsMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the method for calculating surface node normals. By default, </span>
 <span class="sd">        &quot;Angle&quot;. If the method gets changed, previously computed normal </span>
@@ -850,11 +862,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NodeNormalsMethod</span>
     <span class="nd">@NodeNormalsMethod</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">NodeNormalsMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">NodeNormalsMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">method</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_NodeNormals</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_NodeNormalsMethod</span> <span class="o">=</span> <span class="n">method</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">NodeNormals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">NodeNormals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Surface node normal vectors. Non-surface nodes will receive </span>
 <span class="sd">        [np.nan, np.nan, np.nan]. There are several methods for computing</span>
@@ -872,7 +884,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NodeNormals</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">Centroids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Centroids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Element centroids. &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Centroids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="o">+</span><span class="s1">&#39;Calculating element centroids...&#39;</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -880,7 +892,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Centroids</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">EulerCharacteristic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">EulerCharacteristic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Topological Euler characteristic number. For volume meshes, the surface mesh is used. To prevent unattached nodes from influencing</span>
 <span class="sd">        the vertex count, vertices are counted as the number of unique nodes</span>
@@ -906,7 +918,7 @@
 
         <span class="k">return</span> <span class="n">V</span> <span class="o">-</span> <span class="n">E</span> <span class="o">+</span> <span class="n">F</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">Genus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Genus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Topological genus calculated from the Euler characteristic. For volume</span>
 <span class="sd">        meshes, the surface mesh is used.</span>
@@ -922,7 +934,7 @@
 
         <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">EulerCharacteristic</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">Surface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Surface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :class:`mesh` object representation of the surface mesh. </span>
 <span class="sd">        ``Surface.NodeCoords`` and ``Surface.NodeConn`` are aliases of </span>
@@ -941,7 +953,7 @@
     <span class="c1">## Maintenance Methods</span>
 <div class="viewcode-block" id="mesh.identify_type">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.identify_type.html#mymesh.mesh.identify_type">[docs]</a>
-    <span class="k">def</span> <span class="nf">identify_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">identify_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Classify the mesh as either a surface or volume.</span>
 <span class="sd">        A mesh is classified as a volume mesh (&#39;vol&#39;) if any elements are unambiguous </span>
@@ -982,7 +994,7 @@
 
 <div class="viewcode-block" id="mesh.validate">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.validate.html#mymesh.mesh.validate">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check validity of the mesh. This will verify that ``NodeCoords`` and</span>
 <span class="sd">        ``NodeConn`` are of an appropriate type, confirm the mesh is non-empty, </span>
@@ -1008,7 +1020,7 @@
 
 <div class="viewcode-block" id="mesh.reset">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.reset.html#mymesh.mesh.reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">keep</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">keep</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reset some or all properties. If no arguments are provided,</span>
 <span class="sd">        all cached mesh properties will be reset. </span>
@@ -1064,7 +1076,7 @@
 
 <div class="viewcode-block" id="mesh.cleanup">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.cleanup.html#mymesh.mesh.cleanup">[docs]</a>
-    <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
 
         <span class="c1"># TODO: This needs to be improved so other variables that point to nodes or elements are updated accordingly</span>
         
@@ -1079,7 +1091,7 @@
 
 <div class="viewcode-block" id="mesh.copy">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.copy.html#mymesh.mesh.copy">[docs]</a>
-    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a copy of the mesh. The copied mesh will be independent, with </span>
 <span class="sd">        no references to the original mesh, meaning changes to one mesh won&#39;t</span>
@@ -1121,7 +1133,7 @@
     <span class="c1"># Modification Methods</span>
 <div class="viewcode-block" id="mesh.addNodes">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.addNodes.html#mymesh.mesh.addNodes">[docs]</a>
-    <span class="k">def</span> <span class="nf">addNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NewNodeCoords</span><span class="p">,</span><span class="n">NodeSet</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NewNodeCoords</span><span class="p">,</span><span class="n">NodeSet</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NewNodeCoords</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="n">NewNodeCoords</span> <span class="o">=</span> <span class="n">NewNodeCoords</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -1137,7 +1149,7 @@
 
 <div class="viewcode-block" id="mesh.addFaces">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.addFaces.html#mymesh.mesh.addFaces">[docs]</a>
-    <span class="k">def</span> <span class="nf">addFaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NewFaces</span><span class="p">,</span><span class="n">FaceSet</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addFaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NewFaces</span><span class="p">,</span><span class="n">FaceSet</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NewFaces</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="n">NewFaces</span> <span class="o">=</span> <span class="n">NewFaces</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">NewFaces</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">,</span> <span class="s1">&#39;Supplied Faces must be list or np.ndarray&#39;</span>
@@ -1150,7 +1162,7 @@
 
 <div class="viewcode-block" id="mesh.addEdges">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.addEdges.html#mymesh.mesh.addEdges">[docs]</a>
-    <span class="k">def</span> <span class="nf">addEdges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NewEdges</span><span class="p">,</span><span class="n">EdgeSet</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addEdges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NewEdges</span><span class="p">,</span><span class="n">EdgeSet</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NewEdges</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="n">NewEdges</span> <span class="o">=</span> <span class="n">NewEdges</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">NewEdges</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">,</span> <span class="s1">&#39;Supplied Edges must be list or np.ndarray&#39;</span>
@@ -1163,7 +1175,7 @@
 
 <div class="viewcode-block" id="mesh.addElems">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.addElems.html#mymesh.mesh.addElems">[docs]</a>
-    <span class="k">def</span> <span class="nf">addElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NewNodeConn</span><span class="p">,</span><span class="n">ElemSet</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NewNodeConn</span><span class="p">,</span><span class="n">ElemSet</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NewNodeConn</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="n">NewNodeConn</span> <span class="o">=</span> <span class="n">NewNodeConn</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -1178,7 +1190,7 @@
 
 <div class="viewcode-block" id="mesh.removeElems">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.removeElems.html#mymesh.mesh.removeElems">[docs]</a>
-    <span class="k">def</span> <span class="nf">removeElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">removeElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">):</span>
         
         <span class="n">KeepSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NElem</span><span class="p">))</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">ElemIds</span><span class="p">)</span>
         <span class="n">KeepIds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">KeepSet</span><span class="p">))</span>
@@ -1202,7 +1214,7 @@
 
 <div class="viewcode-block" id="mesh.merge">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.merge.html#mymesh.mesh.merge">[docs]</a>
-    <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">Mesh2</span><span class="p">,</span><span class="n">cleanup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">Mesh2</span><span class="p">,</span><span class="n">cleanup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Merge multiple meshes together into the current mesh.</span>
 
@@ -1270,7 +1282,7 @@
 
 <div class="viewcode-block" id="mesh.RenumberNodesBySet">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.RenumberNodesBySet.html#mymesh.mesh.RenumberNodesBySet">[docs]</a>
-    <span class="k">def</span> <span class="nf">RenumberNodesBySet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">RenumberNodesBySet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Re-organize the order of nodes based on their node sets and make required adjustments to other stored values</span>
         <span class="n">setkeys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NodeSets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
         <span class="c1"># newIds is a list of node ids where the new index is located at the old index</span>
@@ -1291,7 +1303,7 @@
 
 <div class="viewcode-block" id="mesh.RenumberFacesBySet">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.RenumberFacesBySet.html#mymesh.mesh.RenumberFacesBySet">[docs]</a>
-    <span class="k">def</span> <span class="nf">RenumberFacesBySet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">RenumberFacesBySet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">setkeys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FaceSets</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         
         <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FaceSets</span><span class="p">[</span><span class="n">key1</span><span class="p">])</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FaceSets</span><span class="p">[</span><span class="n">key2</span><span class="p">]))</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">key1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">setkeys</span><span class="p">)</span> <span class="k">for</span> <span class="n">key2</span> <span class="ow">in</span> <span class="n">setkeys</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]]):</span>
@@ -1328,7 +1340,7 @@
     
 <div class="viewcode-block" id="mesh.CreateBoundaryLayer">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.CreateBoundaryLayer.html#mymesh.mesh.CreateBoundaryLayer">[docs]</a>
-    <span class="k">def</span> <span class="nf">CreateBoundaryLayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">nLayers</span><span class="p">,</span><span class="n">FixedNodes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span><span class="n">StiffnessFactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">Thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">OptimizeTets</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">FaceSets</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">CreateBoundaryLayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">nLayers</span><span class="p">,</span><span class="n">FixedNodes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span><span class="n">StiffnessFactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">Thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">OptimizeTets</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">FaceSets</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate boundary layer elements.</span>
 <span class="sd">        Based partially on Bottasso, C. L., &amp; Detomi, D. (2002). A procedure for </span>
@@ -1652,7 +1664,7 @@
     
 <div class="viewcode-block" id="mesh.Contour">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.Contour.html#mymesh.mesh.Contour">[docs]</a>
-    <span class="k">def</span> <span class="nf">Contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scalars</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scalars</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Contour the mesh to extract an isosurface based on nodal scalar values.</span>
 
@@ -1699,7 +1711,7 @@
 
 <div class="viewcode-block" id="mesh.Threshold">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.Threshold.html#mymesh.mesh.Threshold">[docs]</a>
-    <span class="k">def</span> <span class="nf">Threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scalars</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scalar_preference</span><span class="o">=</span><span class="s1">&#39;elements&#39;</span><span class="p">,</span> <span class="n">all_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">InPlace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cleanup</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scalars</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scalar_preference</span><span class="o">=</span><span class="s1">&#39;elements&#39;</span><span class="p">,</span> <span class="n">all_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">InPlace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cleanup</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Threshold the mesh by scalar values at either nodes or elements. </span>
 
@@ -1748,6 +1760,9 @@
 <span class="sd">            thresholding condition or if any nodes pass the condition, by default True</span>
 <span class="sd">        InPlace : bool, optional</span>
 <span class="sd">            If true, this mesh will be modified, otherwise a copy of the mesh will be created and modified, by default False.</span>
+<span class="sd">        cleanup : bool, optional</span>
+<span class="sd">            Option to run :meth:`mesh.cleanup`, removing nodes that are no </span>
+<span class="sd">            longer in the cropped mesh, by default False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
 
         <span class="c1"># Process inputs</span>
@@ -1862,7 +1877,7 @@
 
 <div class="viewcode-block" id="mesh.Clip">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.Clip.html#mymesh.mesh.Clip">[docs]</a>
-    <span class="k">def</span> <span class="nf">Clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clip the mesh along a plane. Clipping with this method will not cut</span>
 <span class="sd">        through elements, but rather will only keep elements on one side of</span>
@@ -1892,10 +1907,119 @@
         <span class="k">return</span> <span class="n">clipped</span></div>
 
     
+<div class="viewcode-block" id="mesh.Crop">
+<a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.Crop.html#mymesh.mesh.Crop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;centroids&#39;</span><span class="p">,</span> <span class="n">InPlace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cleanup</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Crop the mesh to specified bounds. Cropping with this method doesn&#39;t</span>
+<span class="sd">        modify any elements, it keeps the elements of the original mesh that</span>
+<span class="sd">        are within the cropping bounds. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        bounds : array_like</span>
+<span class="sd">            Six element list of of cropping bounds, formatted as </span>
+<span class="sd">            [xmin, xmax, ymin, ymax, zmin, zmax].</span>
+<span class="sd">        method : str, optional</span>
+<span class="sd">            Cropping method, by default &#39;centroids&#39;</span>
+
+<span class="sd">                - &#39;centroids&#39; - keep elements whose centroids are within the bounds</span>
+<span class="sd">                - &#39;nodes&#39; - keep elements who have all of their nodes within the bound</span>
+<span class="sd">        InPlace : bool, optional</span>
+<span class="sd">            If True, the original mesh will be modified in place, otherwise a </span>
+<span class="sd">            copy will be made and modified, leaving the original mesh unaltered.</span>
+<span class="sd">            By default False</span>
+<span class="sd">        cleanup : bool, optional</span>
+<span class="sd">            Option to run :meth:`mesh.cleanup`, removing nodes that are no </span>
+<span class="sd">            longer in the cropped mesh, by default False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        M : mymesh.mesh</span>
+<span class="sd">            Cropped mesh. If InPlace=True, the output will be a reference to the</span>
+<span class="sd">            same mesh instance as the input.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">InPlace</span><span class="p">:</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;centroids&#39;</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">Centroids</span><span class="p">)</span>
+            <span class="n">keep</span> <span class="o">=</span> <span class="p">((</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> 
+                    <span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> 
+                    <span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> 
+                    <span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">&amp;</span> 
+                    <span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span> <span class="o">&amp;</span> 
+                    <span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;nodes&#39;</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span>
+            <span class="n">keep_nodes</span> <span class="o">=</span> <span class="p">((</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> 
+                    <span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> 
+                    <span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> 
+                    <span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">&amp;</span> 
+                    <span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span> <span class="o">&amp;</span> 
+                    <span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span>
+            <span class="n">keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">keep_nodes</span><span class="p">[</span><span class="n">elem</span><span class="p">])</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid method: &quot;</span><span class="si">{</span><span class="n">method</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">&quot;. Must be &quot;centroids or nodes&quot;.&#39;</span><span class="p">)</span>
+        
+        <span class="n">RemoveElems</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">keep</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">M</span><span class="o">.</span><span class="n">removeElems</span><span class="p">(</span><span class="n">RemoveElems</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cleanup</span><span class="p">:</span>
+            <span class="n">M</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">M</span></div>
+
+
+    
+<div class="viewcode-block" id="mesh.Mirror">
+<a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.Mirror.html#mymesh.mesh.Mirror">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Mirror</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">InPlace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Mirror the mesh across Cartesian planes. At least one of x, y, or z</span>
+<span class="sd">        must be specified to mirror the mesh. If multiple planes are specified,</span>
+<span class="sd">        the mesh will first be mirrored across the x plane, then the y, then the </span>
+<span class="sd">        z - for example, given x=0, y=0, z=None, a point at (-1,-1,0) would be</span>
+<span class="sd">        mirrored to (1,-1,0) and then to (1,1,0). Note that reflections across</span>
+<span class="sd">        planes parallel to the Cartesian planes are commutative, so the order</span>
+<span class="sd">        of reflections don&#39;t matter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : float, optional</span>
+<span class="sd">            YZ plane at X = x. The default is None.</span>
+<span class="sd">        y : float, optional</span>
+<span class="sd">            XZ plane at Y = y. The default is None.</span>
+<span class="sd">        z : float, optional</span>
+<span class="sd">            XY plane at Z = z. The default is None.</span>
+<span class="sd">        InPlace : bool, optional</span>
+<span class="sd">            If True, the original mesh will be modified in place, otherwise a </span>
+<span class="sd">            copy will be made and modified, leaving the original mesh unaltered.</span>
+<span class="sd">            By default False</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        M : mymesh.mesh</span>
+<span class="sd">            Cropped mesh. If InPlace=True, the output will be a reference to the</span>
+<span class="sd">            same mesh instance as the input.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">if</span> <span class="n">InPlace</span><span class="p">:</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">MirrorMesh</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">M</span></div>
+
+        
+    
     <span class="c1">## Mesh Measurements Methods</span>
 <div class="viewcode-block" id="mesh.getQuality">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.getQuality.html#mymesh.mesh.getQuality">[docs]</a>
-    <span class="k">def</span> <span class="nf">getQuality</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Skewness&#39;</span><span class="p">,</span><span class="s1">&#39;Aspect Ratio&#39;</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getQuality</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Skewness&#39;</span><span class="p">,</span><span class="s1">&#39;Aspect Ratio&#39;</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate mesh quality. This will create a dict with entries corresponding</span>
 <span class="sd">        to the specified quality metrics. This dict can be stored in </span>
@@ -1973,7 +2097,7 @@
 
 <div class="viewcode-block" id="mesh.getCurvature">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.getCurvature.html#mymesh.mesh.getCurvature">[docs]</a>
-    <span class="k">def</span> <span class="nf">getCurvature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Max Principal&#39;</span><span class="p">,</span><span class="s1">&#39;Min Principal&#39;</span><span class="p">,</span> <span class="s1">&#39;Curvedness&#39;</span><span class="p">,</span> <span class="s1">&#39;Shape Index&#39;</span><span class="p">,</span> <span class="s1">&#39;Mean&#39;</span><span class="p">,</span> <span class="s1">&#39;Gaussian&#39;</span><span class="p">],</span> <span class="n">nRings</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">SplitFeatures</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getCurvature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Max Principal&#39;</span><span class="p">,</span><span class="s1">&#39;Min Principal&#39;</span><span class="p">,</span> <span class="s1">&#39;Curvedness&#39;</span><span class="p">,</span> <span class="s1">&#39;Shape Index&#39;</span><span class="p">,</span> <span class="s1">&#39;Mean&#39;</span><span class="p">,</span> <span class="s1">&#39;Gaussian&#39;</span><span class="p">],</span> <span class="n">nRings</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">SplitFeatures</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span> <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics</span><span class="p">]</span>
         <span class="n">Curvature</span> <span class="o">=</span> <span class="p">{}</span>
@@ -2030,7 +2154,7 @@
     <span class="c1">## File I/O Methods</span>
 <div class="viewcode-block" id="mesh.mymesh2meshio">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.mymesh2meshio.html#mymesh.mesh.mymesh2meshio">[docs]</a>
-    <span class="k">def</span> <span class="nf">mymesh2meshio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mymesh2meshio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert mesh object to a `meshio &lt;https://github.com/nschloe/meshio&gt;`_  </span>
 <span class="sd">        mesh object.</span>
@@ -2043,7 +2167,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">meshio</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">meshio</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;mesh.Mesh2Meshio() requires the meshio library. Install with: pip install meshio&#39;</span><span class="p">)</span>
 
@@ -2091,7 +2215,7 @@
 
 <div class="viewcode-block" id="mesh.write">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.write.html#mymesh.mesh.write">[docs]</a>
-    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">,</span><span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">,</span><span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write mesh to file. Utilizes `meshio &lt;https://github.com/nschloe/meshio&gt;`_ </span>
 <span class="sd">        to access a variety of filetypes.</span>
@@ -2115,7 +2239,7 @@
 
 <div class="viewcode-block" id="mesh.meshio2mymesh">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.meshio2mymesh.html#mymesh.mesh.meshio2mymesh">[docs]</a>
-    <span class="k">def</span> <span class="nf">meshio2mymesh</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">meshio2mymesh</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert a `meshio &lt;https://github.com/nschloe/meshio&gt;`_ mesh object to a </span>
 <span class="sd">        MyMesh mesh object</span>
@@ -2132,7 +2256,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">meshio</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">meshio</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;mesh.Meshio2Mesh() requires the meshio library. Install with: pip install meshio&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">meshio</span><span class="o">.</span><span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">5</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">meshio</span><span class="o">.</span><span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
@@ -2155,7 +2279,7 @@
 
 <div class="viewcode-block" id="mesh.read">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.read.html#mymesh.mesh.read">[docs]</a>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read a mesh file written in any file type supported by meshio</span>
 
@@ -2170,7 +2294,7 @@
 <span class="sd">            Mesh object</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">meshio</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">meshio</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;mesh.read() requires the meshio library. Install with: pip install meshio&#39;</span><span class="p">)</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">meshio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
@@ -2180,7 +2304,7 @@
 
 <div class="viewcode-block" id="mesh.imread">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.imread.html#mymesh.mesh.imread">[docs]</a>
-    <span class="k">def</span> <span class="nf">imread</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">voxelsize</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_gradient</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gaussian_sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">imread</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">voxelsize</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_gradient</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gaussian_sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load an image into a voxel mesh. :func:``~mymesh.converter.im2voxel`` is</span>
 <span class="sd">        used to perform the conversion.</span>
@@ -2224,7 +2348,7 @@
     <span class="c1">## Visualization Methods</span>
 <div class="viewcode-block" id="mesh.view">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.view.html#mymesh.mesh.view">[docs]</a>
-    <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate an interactive plot of the mesh. See :func:`mymesh.visualize.view` </span>
 <span class="sd">        for a full list of optional arguments.</span>
@@ -2239,7 +2363,7 @@
 
 <div class="viewcode-block" id="mesh.plot">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.plot.html#mymesh.mesh.plot">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_fig</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_fig</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate a static plot of the mesh. See :func:`mymesh.visualize.view` </span>
 <span class="sd">        for a full list of optional arguments.</span>
@@ -2267,8 +2391,8 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">matplotlib</span>
-            <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Matplotlib required for plotting. Install with `pip install matplotlib`.&#39;</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;return_image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
@@ -2318,7 +2442,7 @@
 
 
     <span class="c1">## Helper Functions</span>
-    <span class="k">def</span> <span class="nf">_get_faces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_faces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Get all element faces</span>
             <span class="n">faces</span><span class="p">,</span><span class="n">faceconn</span><span class="p">,</span><span class="n">faceelem</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2faces</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_FaceConn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">return_FaceElem</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2345,7 +2469,7 @@
             <span class="k">return</span> <span class="n">Faces</span><span class="p">,</span> <span class="n">FaceConn</span><span class="p">,</span> <span class="n">FaceElemConn</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
-    <span class="k">def</span> <span class="nf">_get_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># TODO: This might not work properly with mixed element types - but I think it shoud</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Get all element edges</span>
@@ -2395,8 +2519,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2429,7 +2553,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

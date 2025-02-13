@@ -111,7 +111,11 @@ the mesh and more evenly distribute the nodes.
     Identifying volume node neighbors...Done
 
     Identifying volume node element connectivity...Done
-    RFBOutputContext()
+
+    Identifying boundary nodes...
+            Identifying boundary...Done
+            Done
+            RFBOutputContext()
 
 
 
@@ -119,7 +123,7 @@ the mesh and more evenly distribute the nodes.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.564 seconds)
+   **Total running time of the script:** (0 minutes 0.584 seconds)
 
 
 .. _sphx_glr_download_examples_MeshGeneration_demo_heart.py:

@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,10 +27,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -61,7 +61,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.improvement.SmartLaplacianSmoothing';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mymesh.improvement.GlobalLaplacianSmoothing" href="mymesh.improvement.GlobalLaplacianSmoothing.html" />
+    <link rel="next" title="mymesh.improvement.GeoTransformSmoothing" href="mymesh.improvement.GeoTransformSmoothing.html" />
     <link rel="prev" title="mymesh.improvement.TangentialLaplacianSmoothing" href="mymesh.improvement.TangentialLaplacianSmoothing.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -370,9 +370,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -426,7 +431,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.improvement.SmartLaplacianSmoothing">
 <span class="sig-prename descclassname"><span class="pre">mymesh.improvement.</span></span><span class="sig-name descname"><span class="pre">SmartLaplacianSmoothing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TangentialSurface</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/improvement.html#SmartLaplacianSmoothing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.improvement.SmartLaplacianSmoothing" title="Link to this definition">#</a></dt>
-<dd><p>Performs smart Laplacian smoothing <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id2" title="Lori A. Freitag. On combining laplacian and optimization-based mesh smoothing techniques. American Society of Mechanical Engineers, Applied Mechanics Division, AMD, 220:37–43, 1997.">Fre97</a>]</span>, repositioning
+<dd><p>Performs smart Laplacian smoothing <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id15" title="Lori A. Freitag. On combining laplacian and optimization-based mesh smoothing techniques. American Society of Mechanical Engineers, Applied Mechanics Division, AMD, 220:37–43, 1997.">Fre97</a>]</span>, repositioning
 each node to the center of its adjacent nodes only if doing so doesn’t
 reduce the element quality.</p>
 <dl class="field-list simple">
@@ -508,11 +513,11 @@ is created, by default False.</p>
       </div>
     </a>
     <a class="right-next"
-       href="mymesh.improvement.GlobalLaplacianSmoothing.html"
+       href="mymesh.improvement.GeoTransformSmoothing.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.improvement.GlobalLaplacianSmoothing</p>
+        <p class="prev-next-title">mymesh.improvement.GeoTransformSmoothing</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -540,13 +545,13 @@ is created, by default False.</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../../_sources/generated/submodules/mymesh.improvement.SmartLaplacianSmoothing.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/generated/submodules/mymesh.improvement.SmartLaplacianSmoothing.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -561,8 +566,8 @@ is created, by default False.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -595,7 +600,8 @@ is created, by default False.</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

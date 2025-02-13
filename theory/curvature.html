@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,10 +27,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -360,9 +360,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -449,7 +454,7 @@ respectively.</p>
 <section id="shape-index">
 <h3>Shape Index<a class="headerlink" href="#shape-index" title="Link to this heading">#</a></h3>
 <p>See <a class="reference internal" href="../generated/submodules/mymesh.curvature.ShapeIndex.html#mymesh.curvature.ShapeIndex" title="mymesh.curvature.ShapeIndex"><code class="xref py py-func docutils literal notranslate"><span class="pre">ShapeIndex()</span></code></a></p>
-<p>Shape index <span id="id1">[<a class="reference internal" href="../guide/ref.html#id23" title="Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. Image and Vision Computing, 10(8):557–564, 1992. URL: https://www.doi.org/10.1016/0262-8856(92)90076-F, doi:10.1016/0262-8856(92)90076-F.">KvD92</a>]</span> describes the directionality of curvature,
+<p>Shape index <span id="id1">[<a class="reference internal" href="../guide/ref.html#id39" title="Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. Image and Vision Computing, 10(8):557–564, 1992. URL: https://www.doi.org/10.1016/0262-8856(92)90076-F, doi:10.1016/0262-8856(92)90076-F.">KvD92</a>]</span> describes the directionality of curvature,
 independent of scale. It captures the intuitive notion that a sphere is
 recognizable as a sphere regardless of how big it is. Shape index is a
 unitless measure that ranges from -1 (concave spherical cup) to 1 (convex
@@ -464,7 +469,7 @@ respectively.</p>
 <section id="curvedness">
 <h3>Curvedness<a class="headerlink" href="#curvedness" title="Link to this heading">#</a></h3>
 <p>See <a class="reference internal" href="../generated/submodules/mymesh.curvature.Curvedness.html#mymesh.curvature.Curvedness" title="mymesh.curvature.Curvedness"><code class="xref py py-func docutils literal notranslate"><span class="pre">Curvedness()</span></code></a></p>
-<p>Curvedness <span id="id2">[<a class="reference internal" href="../guide/ref.html#id23" title="Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. Image and Vision Computing, 10(8):557–564, 1992. URL: https://www.doi.org/10.1016/0262-8856(92)90076-F, doi:10.1016/0262-8856(92)90076-F.">KvD92</a>]</span> complements shape index by capturing the
+<p>Curvedness <span id="id2">[<a class="reference internal" href="../guide/ref.html#id39" title="Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. Image and Vision Computing, 10(8):557–564, 1992. URL: https://www.doi.org/10.1016/0262-8856(92)90076-F, doi:10.1016/0262-8856(92)90076-F.">KvD92</a>]</span> complements shape index by capturing the
 magnitude of curvature, independent of direction. It is a non-negative measure
 of the scale of a surface’s curvature. For a sphere, curvedness is equal to
 the principal curvatures.</p>
@@ -539,7 +544,7 @@ inherent dependence on mesh and mesh quality, with low quality elements
 resulting in spurious results.</p>
 <section id="quadratic-surface-fitting">
 <h4>Quadratic Surface Fitting<a class="headerlink" href="#quadratic-surface-fitting" title="Link to this heading">#</a></h4>
-<p>Reference: <span id="id3">Goldfeather and Interrante [<a class="reference internal" href="../guide/ref.html#id25" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
+<p>Reference: <span id="id3">Goldfeather and Interrante [<a class="reference internal" href="../guide/ref.html#id38" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
 <p>Quadratic surface fitting (see <a class="reference internal" href="../generated/submodules/mymesh.curvature.QuadFit.html#mymesh.curvature.QuadFit" title="mymesh.curvature.QuadFit"><code class="xref py py-func docutils literal notranslate"><span class="pre">QuadFit()</span></code></a>) locally fits a quadratic
 surface <span class="math notranslate nohighlight">\(z = f(x,y) = \frac{A}{2}x^2 + Bxy + \frac{C}{2}y^2\)</span> to a
 local neighborhood of nodes. This can be accomplished by examining this
@@ -579,7 +584,7 @@ be overdetermined and can be solved by least squares
 </section>
 <section id="cubic-surface-fitting">
 <h4>Cubic Surface Fitting<a class="headerlink" href="#cubic-surface-fitting" title="Link to this heading">#</a></h4>
-<p>Reference: <span id="id4">Goldfeather and Interrante [<a class="reference internal" href="../guide/ref.html#id25" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
+<p>Reference: <span id="id4">Goldfeather and Interrante [<a class="reference internal" href="../guide/ref.html#id38" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
 <p>Cubic surface fitting (see <a class="reference internal" href="../generated/submodules/mymesh.curvature.CubicFit.html#mymesh.curvature.CubicFit" title="mymesh.curvature.CubicFit"><code class="xref py py-func docutils literal notranslate"><span class="pre">CubicFit()</span></code></a>) locally fits a cubic
 surface <span class="math notranslate nohighlight">\(z = f(x,y) = \frac{A}{2}x^2 + Bxy + \frac{C}{2}y^2 + Dx^3 + Ex^2y + Fxy^2 + Gy^3\)</span>
 to a local neighborhood of nodes. This can be accomplished by examining this
@@ -718,13 +723,13 @@ x_i              &amp; y_i    &amp; 0                &amp; 3x_i^2 &amp; 2x_iy _i
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/theory/curvature.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/theory/curvature.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -739,8 +744,8 @@ x_i              &amp; y_i    &amp; 0                &amp; 3x_i^2 &amp; 2x_iy _i
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -773,7 +778,8 @@ x_i              &amp; y_i    &amp; 0                &amp; 3x_i^2 &amp; 2x_iy _i
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

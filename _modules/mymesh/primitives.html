@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -43,10 +43,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -337,9 +337,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -422,13 +427,13 @@
 <span class="sd">    Revolve</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">gc</span><span class="o">,</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">implicit</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">delaunay</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span><span class="o">,</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">implicit</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">delaunay</span>
 
 <div class="viewcode-block" id="Line">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Line.html#mymesh.primitives.Line">[docs]</a>
-<span class="k">def</span> <span class="nf">Line</span><span class="p">(</span><span class="n">pt1</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Line</span><span class="p">(</span><span class="n">pt1</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a surface mesh of a rectangular box. </span>
 
@@ -489,7 +494,7 @@
 
 <div class="viewcode-block" id="Box">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Box.html#mymesh.primitives.Box">[docs]</a>
-<span class="k">def</span> <span class="nf">Box</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;quad&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Box</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;quad&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a surface mesh of a rectangular box. </span>
 
@@ -535,7 +540,7 @@
 
 <div class="viewcode-block" id="Grid">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Grid.html#mymesh.primitives.Grid">[docs]</a>
-<span class="k">def</span> <span class="nf">Grid</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;hex&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Grid</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;hex&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a 3D rectangular grid mesh.</span>
 
@@ -625,7 +630,7 @@
 
 <div class="viewcode-block" id="Grid2D">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Grid2D.html#mymesh.primitives.Grid2D">[docs]</a>
-<span class="k">def</span> <span class="nf">Grid2D</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;quad&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Grid2D</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;quad&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a rectangular grid mesh.</span>
 
@@ -709,7 +714,7 @@
 
 <div class="viewcode-block" id="Plane">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Plane.html#mymesh.primitives.Plane">[docs]</a>
-<span class="k">def</span> <span class="nf">Plane</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;quad&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Plane</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;quad&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a 2D grid oriented on a plane</span>
 
@@ -747,7 +752,7 @@
     <span class="c1"># Get rotation between the plane and the xy (z=0) plane</span>
     <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">quat_rotate</span><span class="p">(</span><span class="n">rotAxis</span><span class="p">,</span><span class="n">angle</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">quat_rotate</span><span class="p">(</span><span class="n">rotAxis</span><span class="p">,</span><span class="n">angle</span><span class="p">):</span>
         <span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>               <span class="c1"># Quaternion Rotation</span>
                 <span class="n">rotAxis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
                 <span class="n">rotAxis</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
@@ -828,7 +833,7 @@
 
 <div class="viewcode-block" id="Circle">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Circle.html#mymesh.primitives.Circle">[docs]</a>
-<span class="k">def</span> <span class="nf">Circle</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Circle</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct a circle from a center and radius.</span>
 
@@ -886,7 +891,7 @@
 
 <div class="viewcode-block" id="CirclePt">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.CirclePt.html#mymesh.primitives.CirclePt">[docs]</a>
-<span class="k">def</span> <span class="nf">CirclePt</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">CirclePt</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct a circle from a center and point.</span>
 
@@ -939,7 +944,7 @@
 
 <div class="viewcode-block" id="Cylinder">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Cylinder.html#mymesh.primitives.Cylinder">[docs]</a>
-<span class="k">def</span> <span class="nf">Cylinder</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">axial_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">cap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Cylinder</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">axial_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">cap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate an axis-aligned cylindrical mesh</span>
 
@@ -1010,19 +1015,21 @@
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;radius must either be a scalar or a 2 element array_like.&#39;</span><span class="p">)</span>
 
     
-    <span class="k">if</span> <span class="n">cap</span> <span class="ow">or</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cap</span> <span class="ow">or</span> <span class="n">Type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">cap</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Cannot create an un-capped cylinder with Type=&quot;vol&quot;.&#39;</span><span class="p">)</span>
         <span class="n">circle</span> <span class="o">=</span> <span class="n">Circle</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="n">radial_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">Type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
             <span class="n">cylinder</span> <span class="o">=</span> <span class="n">Extrude</span><span class="p">(</span><span class="n">circle</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">height</span><span class="o">/</span><span class="n">axial_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="n">ElemType</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">Type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
             <span class="n">cylinder</span> <span class="o">=</span> <span class="n">Extrude</span><span class="p">(</span><span class="n">circle</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">height</span><span class="o">/</span><span class="n">axial_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
             <span class="n">cylinder</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2surface</span><span class="p">(</span><span class="o">*</span><span class="n">cylinder</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
                 <span class="n">cylinder</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">cylinder</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2tris</span><span class="p">(</span><span class="o">*</span><span class="n">cylinder</span><span class="p">)</span>
             <span class="n">cylinder</span><span class="o">.</span><span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span>
             <span class="n">cylinder</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Type must be &quot;vol&quot; or &quot;surf&quot;.&#39;</span><span class="p">)</span>
     
     <span class="k">else</span><span class="p">:</span>
         <span class="n">circle</span> <span class="o">=</span> <span class="n">Circle</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="n">radial_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;line&#39;</span><span class="p">)</span>
@@ -1038,7 +1045,7 @@
 
 <div class="viewcode-block" id="Sphere">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Sphere.html#mymesh.primitives.Sphere">[docs]</a>
-<span class="k">def</span> <span class="nf">Sphere</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">phi_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Sphere</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">phi_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a sphere (or ellipsoid)</span>
 <span class="sd">    The total number of points will be phi_resolution*(theta_resolution-2) + 2</span>
@@ -1115,7 +1122,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">semicircle</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">conn</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
-        <span class="n">pt2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">pt2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">center</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
         <span class="n">pt2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-=</span> <span class="n">radius</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="n">L</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">pt2</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">radial_resolution</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
@@ -1134,7 +1141,7 @@
 
 <div class="viewcode-block" id="Torus">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Torus.html#mymesh.primitives.Torus">[docs]</a>
-<span class="k">def</span> <span class="nf">Torus</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">phi_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Torus</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">phi_resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a torus</span>
 <span class="sd">    The total number of points will be phi_resolution*(theta_resolution-2) + 2</span>
@@ -1234,7 +1241,7 @@
 
 <div class="viewcode-block" id="Extrude">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Extrude.html#mymesh.primitives.Extrude">[docs]</a>
-<span class="k">def</span> <span class="nf">Extrude</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">twist</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">twist_center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Extrude</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">twist</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">twist_center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extrude a 2D mesh to a 3D surface or volume</span>
 
@@ -1349,7 +1356,7 @@
 
 <div class="viewcode-block" id="Revolve">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Revolve.html#mymesh.primitives.Revolve">[docs]</a>
-<span class="k">def</span> <span class="nf">Revolve</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">anglestep</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Revolve</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">anglestep</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Revolve a 2D mesh to a 3D surface or volume</span>
 
@@ -1503,8 +1510,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1537,7 +1544,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

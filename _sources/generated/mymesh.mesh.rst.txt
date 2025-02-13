@@ -60,6 +60,8 @@ Methods
             ~mesh.mesh.Clip
             ~mesh.mesh.Contour
             ~mesh.mesh.CreateBoundaryLayer
+            ~mesh.mesh.Crop
+            ~mesh.mesh.Mirror
             ~mesh.mesh.RenumberFacesBySet
             ~mesh.mesh.RenumberNodesBySet
             ~mesh.mesh.Threshold

@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,10 +27,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -370,9 +370,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -426,7 +431,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.contour.MarchingCubes">
 <span class="sig-prename descclassname"><span class="pre">mymesh.contour.</span></span><span class="sig-name descname"><span class="pre">MarchingCubes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">VoxelNodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VoxelNodeConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'33'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_anchors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/contour.html#MarchingCubes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.contour.MarchingCubes" title="Link to this definition">#</a></dt>
-<dd><p>Marching cubes algorithm <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id5" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span> for extracting an isosurface from a hexahedral mesh.</p>
+<dd><p>Marching cubes algorithm <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id26" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span> for extracting an isosurface from a hexahedral mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -441,7 +446,7 @@ from primitives.Grid) of hexahedra.</p></li>
 <p>’linear’ - Bilinear interpolation is performed between adjacent nodes on the input mesh</p>
 </p></li>
 <li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Mesh generation method, either ‘original’ for the original marching cubes
-algorithm or ‘33’ for the marching cubes 33 algorithm <span id="id2">[<a class="reference internal" href="../../guide/ref.html#id6" title="Ev Chernyaev. Marching cubes 33: Construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1–8, 1995.">Che95</a>]</span>.</p></li>
+algorithm or ‘33’ for the marching cubes 33 algorithm <span id="id2">[<a class="reference internal" href="../../guide/ref.html#id32" title="Ev Chernyaev. Marching cubes 33: Construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1–8, 1995.">Che95</a>]</span>.</p></li>
 <li><p><strong>flip</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the interior/exterior of the mesh, by default False. By default, values less than the threshold are assumed to be the “inside” of the mesh. If the inside is denoted by values greater than the threshold, set flip=True.</p></li>
 </ul>
 </dd>
@@ -509,13 +514,13 @@ algorithm or ‘33’ for the marching cubes 33 algorithm <span id="id2">[<a cla
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../../_sources/generated/submodules/mymesh.contour.MarchingCubes.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/generated/submodules/mymesh.contour.MarchingCubes.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -530,8 +535,8 @@ algorithm or ‘33’ for the marching cubes 33 algorithm <span id="id2">[<a cla
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -564,7 +569,8 @@ algorithm or ‘33’ for the marching cubes 33 algorithm <span id="id2">[<a cla
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

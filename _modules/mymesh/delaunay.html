@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -43,10 +43,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -337,9 +337,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -430,15 +435,15 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1">#%%</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">itertools</span><span class="o">,</span> <span class="nn">warnings</span><span class="o">,</span> <span class="nn">random</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">converter</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">try_njit</span><span class="p">,</span> <span class="n">check_numba</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">spatial</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">copy</span><span class="o">,</span><span class="w"> </span><span class="nn">itertools</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span><span class="o">,</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">converter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">try_njit</span><span class="p">,</span> <span class="n">check_numba</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">spatial</span>
 
 <div class="viewcode-block" id="Triangulate">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.Triangulate.html#mymesh.delaunay.Triangulate">[docs]</a>
-<span class="k">def</span> <span class="nf">Triangulate</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">Constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Triangulate</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">Constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generic interface for two dimensional triangulation.</span>
 
@@ -496,7 +501,7 @@
 
 <div class="viewcode-block" id="ConvexHull">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.ConvexHull.html#mymesh.delaunay.ConvexHull">[docs]</a>
-<span class="k">def</span> <span class="nf">ConvexHull</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">IncludeCollinear</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;GiftWrapping&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ConvexHull</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">IncludeCollinear</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;GiftWrapping&#39;</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GiftWrapping&#39;</span><span class="p">:</span>
         <span class="n">Hull</span> <span class="o">=</span> <span class="n">ConvexHull_GiftWrapping</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">IncludeCollinear</span><span class="o">=</span><span class="n">IncludeCollinear</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -506,7 +511,7 @@
 
 <div class="viewcode-block" id="SciPy">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.SciPy.html#mymesh.delaunay.SciPy">[docs]</a>
-<span class="k">def</span> <span class="nf">SciPy</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SciPy</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrapper for scipy.spatial.Delaunay</span>
 
@@ -534,7 +539,7 @@
 
 <div class="viewcode-block" id="Triangle">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.Triangle.html#mymesh.delaunay.Triangle">[docs]</a>
-<span class="k">def</span> <span class="nf">Triangle</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">Constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Triangle</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">Constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interface to Jonathan Shewchuk&#39;s Triangle via a python wrapper (https://pypi.org/project/triangle/). To use, the python wrapper must be installed (pip install triangle).</span>
 
@@ -553,7 +558,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">triangle</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">triangle</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;This function interfaces with a python wrapper for Jonathan Shewchuk&#39;s Triangle. To install: pip install triangle&quot;</span><span class="p">)</span>
     <span class="c1"># Uses Triangle by Jonathan Shewchuk</span>
@@ -583,7 +588,7 @@
     
 <div class="viewcode-block" id="ConvexHull_GiftWrapping">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.ConvexHull_GiftWrapping.html#mymesh.delaunay.ConvexHull_GiftWrapping">[docs]</a>
-<span class="k">def</span> <span class="nf">ConvexHull_GiftWrapping</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">IncludeCollinear</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ConvexHull_GiftWrapping</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">IncludeCollinear</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ConvexHull_GiftWrapping Gift wrapping algorithm for computing the convex hull of a set of 2D points.</span>
 
@@ -651,7 +656,7 @@
 
 <div class="viewcode-block" id="ConvexHullFanTriangulation">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.ConvexHullFanTriangulation.html#mymesh.delaunay.ConvexHullFanTriangulation">[docs]</a>
-<span class="k">def</span> <span class="nf">ConvexHullFanTriangulation</span><span class="p">(</span><span class="n">Hull</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ConvexHullFanTriangulation</span><span class="p">(</span><span class="n">Hull</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ConvexHullFanTriangulation Generate a fan triangulation of a convex hull</span>
 
@@ -679,7 +684,7 @@
     
 <div class="viewcode-block" id="TriangleSplittingTriangulation">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.TriangleSplittingTriangulation.html#mymesh.delaunay.TriangleSplittingTriangulation">[docs]</a>
-<span class="k">def</span> <span class="nf">TriangleSplittingTriangulation</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Hull</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_Hull</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">TriangleSplittingTriangulation</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Hull</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_Hull</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;At least three points are required.&#39;</span>
     <span class="k">if</span> <span class="n">NodeCoords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -713,7 +718,7 @@
         
 <div class="viewcode-block" id="BowyerWatson2d">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.BowyerWatson2d.html#mymesh.delaunay.BowyerWatson2d">[docs]</a>
-<span class="k">def</span> <span class="nf">BowyerWatson2d</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">BowyerWatson2d</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Bowyer-Watson algorithm for 2D Delaunay triangulation</span>
 
@@ -730,8 +735,8 @@
 <span class="sd">        mx3 array of node connectivities for the Delaunay triangulation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">check_numba</span><span class="p">():</span>
-        <span class="kn">import</span> <span class="nn">numba</span>
-        <span class="kn">from</span> <span class="nn">numba.typed</span> <span class="kn">import</span> <span class="n">Dict</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">numba</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">numba.typed</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Using numba is strongly recommended for efficiency of BowyerWatson2d. Activate with `mymesh.use_numba(True)`&#39;</span><span class="p">)</span>
         <span class="n">Dict</span> <span class="o">=</span> <span class="nb">dict</span>
@@ -806,7 +811,7 @@
 
 <div class="viewcode-block" id="BowyerWatson3d">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.BowyerWatson3d.html#mymesh.delaunay.BowyerWatson3d">[docs]</a>
-<span class="k">def</span> <span class="nf">BowyerWatson3d</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">BowyerWatson3d</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Bowyer-Watson algorithm for 3D Delaunay tetrahedralization</span>
 <span class="sd">    https://arxiv.org/pdf/1805.08831v2</span>
@@ -821,7 +826,7 @@
 <span class="sd">    NodeConn : np.ndarray</span>
 <span class="sd">        mx3 array of node connectivities for the Delaunay triangulation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">numba</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numba</span>
     <span class="c1"># from numba.typed import Dict as dict</span>
 
     <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
@@ -911,7 +916,7 @@
 
 <span class="c1">## Utils ##</span>
 <span class="nd">@try_njit</span>
-<span class="k">def</span> <span class="nf">_walk_2d</span><span class="p">(</span><span class="n">TempCoords</span><span class="p">,</span> <span class="n">ElemTable</span><span class="p">,</span> <span class="n">EdgeTable</span><span class="p">,</span> <span class="n">newPt</span><span class="p">,</span> <span class="n">nsample</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_walk_2d</span><span class="p">(</span><span class="n">TempCoords</span><span class="p">,</span> <span class="n">ElemTable</span><span class="p">,</span> <span class="n">EdgeTable</span><span class="p">,</span> <span class="n">newPt</span><span class="p">,</span> <span class="n">nsample</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="c1"># Walking algorithm to find triangle containing the new point</span>
     <span class="n">tri</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ElemTable</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ElemTable</span><span class="p">))]</span>
     <span class="n">minL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">TempCoords</span><span class="p">[</span><span class="n">tri</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">-</span><span class="n">newPt</span><span class="p">)</span>
@@ -940,7 +945,7 @@
     <span class="k">return</span> <span class="n">tri</span>
 
 <span class="nd">@try_njit</span>
-<span class="k">def</span> <span class="nf">_build_cavity_2d</span><span class="p">(</span><span class="n">TempCoords</span><span class="p">,</span> <span class="n">ElemTable</span><span class="p">,</span> <span class="n">EdgeTable</span><span class="p">,</span> <span class="n">tri</span><span class="p">,</span> <span class="n">newPt</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_cavity_2d</span><span class="p">(</span><span class="n">TempCoords</span><span class="p">,</span> <span class="n">ElemTable</span><span class="p">,</span> <span class="n">EdgeTable</span><span class="p">,</span> <span class="n">tri</span><span class="p">,</span> <span class="n">newPt</span><span class="p">):</span>
     <span class="n">bad_triangles</span> <span class="o">=</span> <span class="p">[</span><span class="n">tri</span><span class="p">]</span>
     <span class="n">cavity_edges</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ElemTable</span><span class="p">[</span><span class="n">tri</span><span class="p">])</span>
@@ -981,7 +986,7 @@
 <span class="c1"># TODO: Traversals in 3d probably won&#39;t work right because half-face pairs can&#39;t </span>
 <span class="c1"># necessarily be obtained just by reversing the order</span>
 <span class="c1"># @numba.njit(cache=True)</span>
-<span class="k">def</span> <span class="nf">_walk_3d</span><span class="p">(</span><span class="n">TempCoords</span><span class="p">,</span> <span class="n">ElemTable</span><span class="p">,</span> <span class="n">EdgeTable</span><span class="p">,</span> <span class="n">newPt</span><span class="p">,</span> <span class="n">nsample</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_walk_3d</span><span class="p">(</span><span class="n">TempCoords</span><span class="p">,</span> <span class="n">ElemTable</span><span class="p">,</span> <span class="n">EdgeTable</span><span class="p">,</span> <span class="n">newPt</span><span class="p">,</span> <span class="n">nsample</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="c1"># Walking algorithm to find tets containing the new point</span>
     <span class="n">tet</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ElemTable</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ElemTable</span><span class="p">))]</span>
     <span class="n">minL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">TempCoords</span><span class="p">[</span><span class="n">tet</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">-</span><span class="n">newPt</span><span class="p">)</span>
@@ -1005,7 +1010,7 @@
     <span class="k">return</span> <span class="n">tet</span>
 
 <span class="c1"># @numba.njit(cache=True)</span>
-<span class="k">def</span> <span class="nf">_build_cavity_3d</span><span class="p">(</span><span class="n">TempCoords</span><span class="p">,</span> <span class="n">ElemTable</span><span class="p">,</span> <span class="n">EdgeTable</span><span class="p">,</span> <span class="n">tet</span><span class="p">,</span> <span class="n">newPt</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_cavity_3d</span><span class="p">(</span><span class="n">TempCoords</span><span class="p">,</span> <span class="n">ElemTable</span><span class="p">,</span> <span class="n">EdgeTable</span><span class="p">,</span> <span class="n">tet</span><span class="p">,</span> <span class="n">newPt</span><span class="p">):</span>
     <span class="c1"># TODO: it seems like some of the tets get visited more than once</span>
     <span class="n">bad_tets</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="n">tet</span><span class="p">,))</span> <span class="c1">#[tet]</span>
     <span class="n">cavity_edges</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1086,8 +1091,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1120,7 +1125,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

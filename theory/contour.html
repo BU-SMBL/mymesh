@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,10 +27,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -360,9 +360,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -413,7 +418,7 @@
 <p>Isosurface contouring methods are used to extract the surface from a field of
 values, most often an image or an implicit function evaluated on a grid of
 points. One of the earliest and most famous methods is the Marching Cubes
-algorithm by <span id="id1">Lorensen and Cline [<a class="reference internal" href="../guide/ref.html#id5" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span>, which inspired a variety of “marching
+algorithm by <span id="id1">Lorensen and Cline [<a class="reference internal" href="../guide/ref.html#id26" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span>, which inspired a variety of “marching
 element” methods that follow a similar approach. These methods “march” from
 element to element, at each one assessing the node values to determine whether
 each node is above or below the isovalue threshold in order to determine whether
@@ -1373,7 +1378,7 @@ blank [pos=&quot;0.,0!&quot;, color=white];
 </section>
 <section id="marching-cubes">
 <h2>Marching Cubes<a class="headerlink" href="#marching-cubes" title="Link to this heading">#</a></h2>
-<p><span id="id2">Lorensen and Cline [<a class="reference internal" href="../guide/ref.html#id5" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span></p>
+<p><span id="id2">Lorensen and Cline [<a class="reference internal" href="../guide/ref.html#id26" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span></p>
 <p>See also <a class="reference internal" href="../generated/submodules/mymesh.contour.MarchingCubes.html#mymesh.contour.MarchingCubes" title="mymesh.contour.MarchingCubes"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingCubes()</span></code></a></p>
 <p>For a cube, there are <span class="math notranslate nohighlight">\(2^8 = 256\)</span> possible combinations of vertices
 falling inside or outside of the surface, however by rotations and inversion,
@@ -2239,7 +2244,7 @@ blank [pos=&quot;0.,0!&quot;, color=white];
 </div>
 <section id="marching-cubes-33">
 <h3>Marching Cubes 33<a class="headerlink" href="#marching-cubes-33" title="Link to this heading">#</a></h3>
-<p><span id="id3">Chernyaev [<a class="reference internal" href="../guide/ref.html#id6" title="Ev Chernyaev. Marching cubes 33: Construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1–8, 1995.">Che95</a>]</span></p>
+<p><span id="id3">Chernyaev [<a class="reference internal" href="../guide/ref.html#id32" title="Ev Chernyaev. Marching cubes 33: Construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1–8, 1995.">Che95</a>]</span></p>
 <p>See also <a class="reference internal" href="../generated/submodules/mymesh.contour.MarchingCubes.html#mymesh.contour.MarchingCubes" title="mymesh.contour.MarchingCubes"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingCubes()</span></code></a></p>
 <p>One of the main shortcomings of the marching cubes algorithm is that there exist
 several ambiguous cases - situations in which there are multiple possible
@@ -2248,13 +2253,13 @@ surface. For example, the opposite corners of Case 4 could be connected through
 the center of the cube. These ambiguities can lead to topological errors and
 non-watertight surfaces. Several methods have been proposed to resolve these
 ambiguities, including an extend lookup table that has 33 entries, rather than
-15 <span id="id4">[<a class="reference internal" href="../guide/ref.html#id6" title="Ev Chernyaev. Marching cubes 33: Construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1–8, 1995.">Che95</a>]</span>. Additional tests are used to test whether diagonal
+15 <span id="id4">[<a class="reference internal" href="../guide/ref.html#id32" title="Ev Chernyaev. Marching cubes 33: Construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1–8, 1995.">Che95</a>]</span>. Additional tests are used to test whether diagonal
 nodes are connected or separated to choose the correct triangulation.</p>
 </section>
 </section>
 <section id="marching-tetrahedra">
 <h2>Marching Tetrahedra<a class="headerlink" href="#marching-tetrahedra" title="Link to this heading">#</a></h2>
-<p><span id="id5">Bloomenthal [<a class="reference internal" href="../guide/ref.html#id7" title="Jules Bloomenthal. An Implicit Surface Polygonizer. Graphics Gems, pages 324–349, 1994. doi:10.1016/b978-0-12-336156-1.50040-9.">Blo94</a>]</span></p>
+<p><span id="id5">Bloomenthal [<a class="reference internal" href="../guide/ref.html#id20" title="Jules Bloomenthal. An Implicit Surface Polygonizer. Graphics Gems, pages 324–349, 1994. doi:10.1016/b978-0-12-336156-1.50040-9.">Blo94</a>]</span></p>
 <p>See also <a class="reference internal" href="../generated/submodules/mymesh.contour.MarchingTetrahedra.html#mymesh.contour.MarchingTetrahedra" title="mymesh.contour.MarchingTetrahedra"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingTetrahedra()</span></code></a></p>
 <p>Another approach to resolve the ambiguities of marching cubes is to partition
 tetrahedra, rather than cubes.</p>
@@ -2833,13 +2838,13 @@ blank [pos=&quot;0.,0!&quot;, color=white];
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/theory/contour.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/theory/contour.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -2854,8 +2859,8 @@ blank [pos=&quot;0.,0!&quot;, color=white];
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2888,7 +2893,8 @@ blank [pos=&quot;0.,0!&quot;, color=white];
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

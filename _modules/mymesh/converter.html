@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -43,10 +43,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -337,9 +337,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -448,15 +453,15 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">ndimage</span><span class="p">,</span> <span class="n">sparse</span>
-<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">warnings</span><span class="o">,</span> <span class="nn">glob</span><span class="o">,</span> <span class="nn">gc</span><span class="o">,</span> <span class="nn">tempfile</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">primitives</span><span class="p">,</span> <span class="n">image</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ndimage</span><span class="p">,</span> <span class="n">sparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span><span class="o">,</span><span class="w"> </span><span class="nn">glob</span><span class="o">,</span><span class="w"> </span><span class="nn">gc</span><span class="o">,</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">primitives</span><span class="p">,</span> <span class="n">image</span>
 
 <div class="viewcode-block" id="solid2surface">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.solid2surface.html#mymesh.converter.solid2surface">[docs]</a>
-<span class="k">def</span> <span class="nf">solid2surface</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_SurfElem</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">solid2surface</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_SurfElem</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract the 2D surface elements from a 3D volume mesh</span>
 
@@ -486,7 +491,7 @@
 
 <div class="viewcode-block" id="solid2faces">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.solid2faces.html#mymesh.converter.solid2faces">[docs]</a>
-<span class="k">def</span> <span class="nf">solid2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_FaceConn</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_FaceElem</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">solid2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_FaceConn</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_FaceElem</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert solid mesh to faces. The will be one face for each side of each element,</span>
 <span class="sd">    i.e. there will be duplicate faces for non-surface faces. Use faces2surface(Faces) to extract only the surface faces or face2unique(Faces) to remove duplicates.</span>
@@ -556,10 +561,10 @@
 
 <div class="viewcode-block" id="solid2edges">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.solid2edges.html#mymesh.converter.solid2edges">[docs]</a>
-<span class="k">def</span> <span class="nf">solid2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span><span class="n">return_EdgeConn</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_EdgeElem</span><span class="o">=</span><span class="kc">False</span><span class="p">,):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">solid2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span><span class="n">return_EdgeConn</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_EdgeElem</span><span class="o">=</span><span class="kc">False</span><span class="p">,):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert solid mesh to edges. The will be one edge for each edge of each element,</span>
-<span class="sd">    i.e. there will be multiple entries for shared edges. Solid2Edges is also suitable for use </span>
+<span class="sd">    Convert a solid mesh to edges. There will be one edge for each edge of each element,</span>
+<span class="sd">    i.e. there will be multiple entries for shared edges. solid2edges is also suitable for use </span>
 <span class="sd">    with 2D or surface meshes. It differs from surface2edges in that surface2edges returns only exposed edges of unclosed surfaces.</span>
 
 <span class="sd">    Parameters</span>
@@ -571,30 +576,27 @@
 <span class="sd">    ElemType : str, optional</span>
 <span class="sd">        Specifies the element type contained within the mesh, by default &#39;auto&#39;.</span>
 
-<span class="sd">        &#39;auto&#39; or &#39;mixed&#39; - Will detect element type by the number of nodes present in each element. </span>
+<span class="sd">        - &#39;auto&#39; or &#39;mixed&#39; - Will detect element type by the number of nodes present in each element using :func:`~mymesh.utils.identify_type`. </span>
 
-<span class="sd">        &#39;surf&#39; - Will detect element type by the number of nodes present in each </span>
+<span class="sd">        - &#39;surf&#39; - Will detect element type by the number of nodes present in each </span>
 <span class="sd">        element, assuming four node elements are quads</span>
 
-<span class="sd">        &#39;vol&#39; - Will detect element type by the number of nodes present in each </span>
+<span class="sd">        - &#39;vol&#39; - Will detect element type by the number of nodes present in each </span>
 <span class="sd">        element, assuming four node elements are tets (functionally the ame as &#39;auto&#39;)</span>
 
-<span class="sd">        &#39;tri&#39; - All elements treated as 3-node triangular elements.</span>
+<span class="sd">        - &#39;tri&#39; - All elements treated as 3-node triangular elements.</span>
 
-<span class="sd">        &#39;quad&#39; - All elements treated as 4-node quadrilateral elements.</span>
+<span class="sd">        - &#39;quad&#39; - All elements treated as 4-node quadrilateral elements.</span>
 
-<span class="sd">        &#39;tet&#39; - All elements treated as 4-node tetrahedral elements.</span>
+<span class="sd">        - &#39;tet&#39; - All elements treated as 4-node tetrahedral elements.</span>
 
-<span class="sd">        &#39;pyramid&#39; - All elements treated as 5-node wedge elements.</span>
+<span class="sd">        - &#39;pyramid&#39; - All elements treated as 5-node wedge elements.</span>
 
-<span class="sd">        &#39;wedge&#39; - All elements treated as 6-node quadrilateral elements.</span>
+<span class="sd">        - &#39;wedge&#39; - All elements treated as 6-node quadrilateral elements.</span>
 
-<span class="sd">        &#39;hex&#39; - All elements treated as 8-node quadrilateral elements.</span>
+<span class="sd">        - &#39;hex&#39; - All elements treated as 8-node quadrilateral elements.</span>
 
-<span class="sd">        &#39;polygon&#39; - All elements treated as n-node polygonal elements. TODO: add support for return_EdgeConn and return_EdgeElem</span>
-
-<span class="sd">    .. note: </span>
-<span class="sd">        If ElemType is &#39;auto&#39; or &#39;mixed&#39;, 4-node elements are assumed to be tets, not quads.</span>
+<span class="sd">        - &#39;polygon&#39; - All elements treated as n-node polygonal elements. TODO: add support for return_EdgeConn and return_EdgeElem</span>
 
 <span class="sd">    return_EdgeConn : bool, optional</span>
 <span class="sd">        If true, will return EdgeConn, the Edge Connectivity of each element.</span>
@@ -635,12 +637,25 @@
         <span class="n">hexs</span> <span class="o">=</span> <span class="p">[</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hexIdx</span><span class="p">]</span>
         <span class="n">tet10s</span> <span class="o">=</span> <span class="p">[</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tet10Idx</span><span class="p">]</span>
         
-        <span class="k">if</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+            <span class="n">fournodefunc</span> <span class="o">=</span> <span class="n">tet2edges</span>
+            <span class="n">fournodeedgenum</span> <span class="o">=</span> <span class="mi">6</span>
+        <span class="k">elif</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
             <span class="n">fournodefunc</span> <span class="o">=</span> <span class="n">quad2edges</span>
             <span class="n">fournodeedgenum</span> <span class="o">=</span> <span class="mi">4</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">fournodefunc</span> <span class="o">=</span> <span class="n">tet2edges</span>
-            <span class="n">fournodeedgenum</span> <span class="o">=</span> <span class="mi">6</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tetIdx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">Type</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">identify_type</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+                    <span class="n">fournodefunc</span> <span class="o">=</span> <span class="n">tet2edges</span>
+                    <span class="n">fournodeedgenum</span> <span class="o">=</span> <span class="mi">6</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">fournodefunc</span> <span class="o">=</span> <span class="n">quad2edges</span>
+                    <span class="n">fournodeedgenum</span> <span class="o">=</span> <span class="mi">4</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fournodefunc</span> <span class="o">=</span> <span class="n">tet2edges</span>
+                <span class="n">fournodeedgenum</span> <span class="o">=</span> <span class="mi">6</span>
+
         <span class="n">Edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">edgs</span><span class="p">,</span><span class="n">tri2edges</span><span class="p">([],</span><span class="n">tris</span><span class="p">),</span> 
                                 <span class="n">fournodefunc</span><span class="p">([],</span><span class="n">tets</span><span class="p">),</span> 
                                 <span class="n">pyramid2edges</span><span class="p">([],</span><span class="n">pyrs</span><span class="p">),</span> 
@@ -753,10 +768,9 @@
 
 <div class="viewcode-block" id="EdgesByElement">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.EdgesByElement.html#mymesh.converter.EdgesByElement">[docs]</a>
-<span class="k">def</span> <span class="nf">EdgesByElement</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">EdgesByElement</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns edges grouped by the element from which they came.</span>
-<span class="sd">    TODO: This can/should be rewritten based on solid2edges using EdgeConn</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -766,45 +780,21 @@
 <span class="sd">        Nodal connectivity list.</span>
 <span class="sd">    ElemType : str, optional</span>
 <span class="sd">        Specifies the element type contained within the mesh, by default &#39;auto&#39;.</span>
-<span class="sd">        &#39;auto&#39; or &#39;mixed&#39; - Will detect element type by the number of nodes present in each element. NOTE that 4-node elements are assumed to be tets, not quads</span>
-<span class="sd">        &#39;tri&#39; - All elements treated as 3-node triangular elements.</span>
-<span class="sd">        &#39;quad&#39; - All elements treated as 4-node quadrilateral elements.</span>
-<span class="sd">        &#39;tet&#39; - All elements treated as 4-node tetrahedral elements.</span>
-<span class="sd">        &#39;pyramid&#39; - All elements treated as 5-node wedge elements.</span>
-<span class="sd">        &#39;wedge&#39; - All elements treated as 6-node quadrilateral elements.</span>
-<span class="sd">        &#39;hex&#39; - All elements treated as 8-node quadrilateral elements.</span>
-<span class="sd">        &#39;polygon&#39; - All elements treated as n-node polygonal elements.</span>
+<span class="sd">        See :func:`solid2edges` for options.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Edges, list</span>
+<span class="sd">    ElementEdges : list</span>
 <span class="sd">        Edge connectivity, grouped by element</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="n">Edges</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">))]</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">ElemType</span><span class="o">==</span><span class="s1">&#39;auto&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
-            <span class="c1"># Tri</span>
-            <span class="n">Edges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tri2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">elem</span><span class="p">])</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">ElemType</span><span class="o">==</span><span class="s1">&#39;auto&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;tet&#39;</span><span class="p">:</span>
-            <span class="c1"># Tet</span>
-            <span class="n">Edges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tet2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">elem</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">ElemType</span><span class="o">==</span><span class="s1">&#39;auto&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;pyramid&#39;</span><span class="p">:</span>
-            <span class="c1"># Pyramid</span>
-            <span class="n">Edges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyramid2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">elem</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">ElemType</span><span class="o">==</span><span class="s1">&#39;auto&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;wedge&#39;</span><span class="p">:</span>
-            <span class="c1"># Wedge</span>
-            <span class="n">Edges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">wedge2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">elem</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">ElemType</span><span class="o">==</span><span class="s1">&#39;auto&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="o">==</span> <span class="mi">8</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;hex&#39;</span><span class="p">:</span>
-            <span class="c1"># Hex</span>
-            <span class="n">Edges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">hex2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">elem</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="n">ElemType</span><span class="o">==</span><span class="s1">&#39;polygon&#39;</span><span class="p">:</span>
-            <span class="n">Edges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">polygon2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">elem</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">Edges</span></div>
+    <span class="n">Edges</span><span class="p">,</span> <span class="n">EdgeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2edges</span><span class="p">(</span><span class="o">*</span><span class="n">S</span><span class="p">,</span> <span class="n">return_EdgeConn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="n">ElemType</span><span class="p">)</span>
+    <span class="n">ElementEdges</span> <span class="o">=</span> <span class="p">[</span><span class="n">Edges</span><span class="p">[</span><span class="n">ec</span><span class="p">]</span> <span class="k">for</span> <span class="n">ec</span> <span class="ow">in</span> <span class="n">EdgeConn</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">ElementEdges</span></div>
 
 
 <div class="viewcode-block" id="solid2tets">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.solid2tets.html#mymesh.converter.solid2tets">[docs]</a>
-<span class="k">def</span> <span class="nf">solid2tets</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">solid2tets</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_inv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decompose all elements of a 3D volume mesh to tetrahedra.</span>
 <span class="sd">    NOTE the generated tetrahedra will not necessarily be continuously oriented, i.e.</span>
@@ -823,6 +813,9 @@
 <span class="sd">        Nodal connectivity list.</span>
 <span class="sd">    return_ids : bool, optional</span>
 <span class="sd">        Element IDs of the tets connected to the original elements, by default False</span>
+<span class="sd">    return_inv : bool, optional</span>
+<span class="sd">        If True, return element IDs of the original elements that correspond to </span>
+<span class="sd">        the tetrahedral elements, by default False</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -834,6 +827,9 @@
 <span class="sd">    ElemIds : list, optional</span>
 <span class="sd">        If return_ids = True, a list of the element ids of the new tetrahedra for each </span>
 <span class="sd">        of the original elements.</span>
+<span class="sd">    inv : np.ndarray, optional</span>
+<span class="sd">        Array of indices that point from the tetrahedral mesh back to the original</span>
+<span class="sd">        mesh</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="n">Ls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">NodeConn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">NodeConn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -841,9 +837,15 @@
         <span class="n">Ls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">NodeConn</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">Ls</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">return_inv</span><span class="p">:</span>
+            <span class="n">inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">return_ids</span><span class="p">:</span>
             <span class="n">ElemIds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">),</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">return_inv</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">,</span> <span class="n">inv</span>    
             <span class="k">return</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">ElemIds</span>
+        <span class="k">elif</span> <span class="n">return_inv</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">inv</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span>
             
@@ -884,9 +886,11 @@
     <span class="n">TetCoords</span><span class="p">,</span><span class="n">fromtet10</span> <span class="o">=</span> <span class="n">tet102tet4</span><span class="p">(</span><span class="n">TetCoords</span><span class="p">,</span><span class="n">tet10</span><span class="p">)</span>
     <span class="c1"># TetConn = tets + frompyr + fromwdg + fromhex + fromtet10</span>
     <span class="n">TetConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">tets</span><span class="p">,</span> <span class="n">frompyr</span><span class="p">,</span> <span class="n">fromwdg</span><span class="p">,</span> <span class="n">fromhex</span><span class="p">,</span> <span class="n">fromtet10</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_ids</span> <span class="ow">or</span> <span class="n">return_inv</span><span class="p">:</span>
+        <span class="n">inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">tetIdx</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">pyrIdx</span><span class="p">,</span><span class="n">pyrn</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">wdgIdx</span><span class="p">,</span><span class="n">wdgn</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">hexIdx</span><span class="p">,</span><span class="n">hexn</span><span class="p">),</span><span class="n">tet10Idx</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">return_ids</span><span class="p">:</span>
         <span class="c1"># Element ids of the tets connected to the original elements</span>
-        <span class="n">ElemIds_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">tetIdx</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">pyrIdx</span><span class="p">,</span><span class="n">pyrn</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">wdgIdx</span><span class="p">,</span><span class="n">wdgn</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">hexIdx</span><span class="p">,</span><span class="n">hexn</span><span class="p">),</span><span class="n">tet10Idx</span><span class="p">))</span>
+        <span class="n">ElemIds_i</span> <span class="o">=</span> <span class="n">inv</span>
         <span class="n">ElemIds_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">tetIdx</span><span class="p">)),</span> 
                 <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">pyrn</span><span class="p">)],</span><span class="nb">len</span><span class="p">(</span><span class="n">pyrIdx</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pyrIdx</span><span class="p">)</span><span class="o">*</span><span class="n">pyrn</span><span class="p">),</span>                   
                 <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">wdgn</span><span class="p">)],</span><span class="nb">len</span><span class="p">(</span><span class="n">wdgIdx</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wdgIdx</span><span class="p">)</span><span class="o">*</span><span class="n">wdgn</span><span class="p">),</span>   
@@ -898,16 +902,19 @@
         <span class="n">ElemIds</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">ExtractRagged</span><span class="p">(</span><span class="n">ElemIds</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">return_ids</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">return_inv</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TetCoords</span><span class="p">,</span> <span class="n">TetConn</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">,</span> <span class="n">inv</span>
         <span class="k">return</span> <span class="n">TetCoords</span><span class="p">,</span> <span class="n">TetConn</span><span class="p">,</span> <span class="n">ElemIds</span>
+    <span class="k">elif</span> <span class="n">return_inv</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">TetCoords</span><span class="p">,</span> <span class="n">TetConn</span><span class="p">,</span> <span class="n">inv</span>
     <span class="k">return</span> <span class="n">TetCoords</span><span class="p">,</span> <span class="n">TetConn</span></div>
 
 
 <div class="viewcode-block" id="surf2tris">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.surf2tris.html#mymesh.converter.surf2tris">[docs]</a>
-<span class="k">def</span> <span class="nf">surf2tris</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_inv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">surf2tris</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_inv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decompose all elements of a surface mesh to triangles.</span>
-<span class="sd">    </span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -968,7 +975,7 @@
 
 <div class="viewcode-block" id="hex2tet">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.hex2tet.html#mymesh.converter.hex2tet">[docs]</a>
-<span class="k">def</span> <span class="nf">hex2tet</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;1to6&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hex2tet</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;1to6&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decompose all elements of a 3D hexahedral mesh to tetrahedra.</span>
 <span class="sd">    Generally solid2tets should be used rather than hex2tet directly</span>
@@ -1095,7 +1102,7 @@
 
 <div class="viewcode-block" id="wedge2tet">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.wedge2tet.html#mymesh.converter.wedge2tet">[docs]</a>
-<span class="k">def</span> <span class="nf">wedge2tet</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;1to3c&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wedge2tet</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;1to3c&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decompose all elements of a 3D wedge-element mesh to tetrahedra.</span>
 <span class="sd">    Generally solid2tets should be used rather than wedge2tet directly</span>
@@ -1366,7 +1373,7 @@
 
 <div class="viewcode-block" id="pyramid2tet">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.pyramid2tet.html#mymesh.converter.pyramid2tet">[docs]</a>
-<span class="k">def</span> <span class="nf">pyramid2tet</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;1to2c&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pyramid2tet</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;1to2c&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decompose all elements of a 3D pyramidal mesh to tetrahedra.</span>
 <span class="sd">    Generally solid2tets should be used rather than pyramid2tet directly</span>
@@ -1468,7 +1475,7 @@
 
 <div class="viewcode-block" id="faces2surface">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.faces2surface.html#mymesh.converter.faces2surface">[docs]</a>
-<span class="k">def</span> <span class="nf">faces2surface</span><span class="p">(</span><span class="n">Faces</span><span class="p">,</span> <span class="n">return_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">faces2surface</span><span class="p">(</span><span class="n">Faces</span><span class="p">,</span> <span class="n">return_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Identify surface elements, i.e. faces that aren&#39;t shared between two elements</span>
 
@@ -1507,7 +1514,7 @@
 
 <div class="viewcode-block" id="faces2unique">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.faces2unique.html#mymesh.converter.faces2unique">[docs]</a>
-<span class="k">def</span> <span class="nf">faces2unique</span><span class="p">(</span><span class="n">Faces</span><span class="p">,</span><span class="n">return_idx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_inv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">faces2unique</span><span class="p">(</span><span class="n">Faces</span><span class="p">,</span><span class="n">return_idx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_inv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reduce set of mesh faces to contain only unique faces, i.e. there will only</span>
 <span class="sd">    be one entry to indicate a face shared between two elements.</span>
@@ -1553,7 +1560,7 @@
         <span class="k">return</span> <span class="n">UFaces</span></div>
 
 
-<span class="k">def</span> <span class="nf">faces2faceelemconn</span><span class="p">(</span><span class="n">Faces</span><span class="p">,</span><span class="n">FaceConn</span><span class="p">,</span><span class="n">FaceElem</span><span class="p">,</span><span class="n">return_UniqueFaceInfo</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">faces2faceelemconn</span><span class="p">(</span><span class="n">Faces</span><span class="p">,</span><span class="n">FaceConn</span><span class="p">,</span><span class="n">FaceElem</span><span class="p">,</span><span class="n">return_UniqueFaceInfo</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    FaceElemConn gives the elements connected to each face (max 2), ordered such that the element that the face</span>
 <span class="sd">    is facing (based on face normal direction) is listed first. If the face is only attached to one element (such</span>
@@ -1617,7 +1624,7 @@
 
 <div class="viewcode-block" id="edges2unique">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.edges2unique.html#mymesh.converter.edges2unique">[docs]</a>
-<span class="k">def</span> <span class="nf">edges2unique</span><span class="p">(</span><span class="n">Edges</span><span class="p">,</span><span class="n">return_idx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_inv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_counts</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">edges2unique</span><span class="p">(</span><span class="n">Edges</span><span class="p">,</span><span class="n">return_idx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_inv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_counts</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reduce set of mesh edges to contain only unique edges, i.e. there will only</span>
 <span class="sd">    be one entry to indicate a edge shared between multiple elements.</span>
@@ -1666,7 +1673,7 @@
 
 <div class="viewcode-block" id="tet2faces">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.tet2faces.html#mymesh.converter.tet2faces">[docs]</a>
-<span class="k">def</span> <span class="nf">tet2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tet2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract triangular faces from all elements of a purely 4-Node tetrahedral mesh.</span>
 <span class="sd">    All faces will be ordered such that the nodes are in counter-clockwise order when</span>
@@ -1716,7 +1723,7 @@
 
 <div class="viewcode-block" id="hex2faces">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.hex2faces.html#mymesh.converter.hex2faces">[docs]</a>
-<span class="k">def</span> <span class="nf">hex2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hex2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract quadrilateral faces from all elements of a purely 8-Node hexahedral mesh.</span>
 <span class="sd">    All faces will be ordered such that the nodes are in counter-clockwise order when</span>
@@ -1755,7 +1762,7 @@
 
 <div class="viewcode-block" id="pyramid2faces">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.pyramid2faces.html#mymesh.converter.pyramid2faces">[docs]</a>
-<span class="k">def</span> <span class="nf">pyramid2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pyramid2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract triangular and quadrilateral faces from all elements of a </span>
 <span class="sd">    purely 5-Node pyramidal mesh. All faces will be ordered such that the nodes are in </span>
@@ -1790,7 +1797,7 @@
         
 <div class="viewcode-block" id="wedge2faces">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.wedge2faces.html#mymesh.converter.wedge2faces">[docs]</a>
-<span class="k">def</span> <span class="nf">wedge2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wedge2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract triangular and quadrilateral faces from all elements of a purely </span>
 <span class="sd">    6-Node wedge elemet mesh. All faces will be ordered such that the nodes are in </span>
@@ -1825,7 +1832,7 @@
 
 <div class="viewcode-block" id="tri2edges">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.tri2edges.html#mymesh.converter.tri2edges">[docs]</a>
-<span class="k">def</span> <span class="nf">tri2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tri2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract edges from all elements of a purely 3-Node triangular mesh.</span>
 <span class="sd">    Best practice is to use solid2edges, rather than using tri2edges directly.</span>
@@ -1860,7 +1867,7 @@
 
 <div class="viewcode-block" id="quad2edges">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.quad2edges.html#mymesh.converter.quad2edges">[docs]</a>
-<span class="k">def</span> <span class="nf">quad2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">quad2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract edges from all elements of a purely 4-Node quadrilateral mesh.</span>
 <span class="sd">    Best practice is to use solid2edges, rather than using quad2edges directly.</span>
@@ -1894,7 +1901,7 @@
 
 <div class="viewcode-block" id="polygon2edges">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.polygon2edges.html#mymesh.converter.polygon2edges">[docs]</a>
-<span class="k">def</span> <span class="nf">polygon2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">polygon2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract edges from all elements of a polygonal mesh.</span>
 <span class="sd">    Best practice is to use solid2edges, rather than using polygon2edges directly.</span>
@@ -1920,7 +1927,7 @@
 
 <div class="viewcode-block" id="tet2edges">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.tet2edges.html#mymesh.converter.tet2edges">[docs]</a>
-<span class="k">def</span> <span class="nf">tet2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tet2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract edges from all elements of a purely 4-Node tetrahedral mesh.</span>
 <span class="sd">    Best practice is to use solid2edges, rather than using tet2edges directly.</span>
@@ -1952,7 +1959,7 @@
     <span class="k">return</span> <span class="n">Edges</span></div>
 
 
-<span class="k">def</span> <span class="nf">tet102edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tet102edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract edges from all elements of a purely 10-Node tetrahedral mesh.</span>
 
@@ -1984,7 +1991,7 @@
 
 <div class="viewcode-block" id="pyramid2edges">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.pyramid2edges.html#mymesh.converter.pyramid2edges">[docs]</a>
-<span class="k">def</span> <span class="nf">pyramid2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pyramid2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract edges from all elements of a purely 5-Node pyramidal mesh.</span>
 <span class="sd">    Best practice is to use solid2edges, rather than using pyramid2edges directly.</span>
@@ -2021,7 +2028,7 @@
 
 <div class="viewcode-block" id="wedge2edges">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.wedge2edges.html#mymesh.converter.wedge2edges">[docs]</a>
-<span class="k">def</span> <span class="nf">wedge2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wedge2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract edges from all elements of a purely 6-Node wedge element mesh.</span>
 <span class="sd">    Best practice is to use solid2edges, rather than using wedge2edges directly.</span>
@@ -2058,7 +2065,7 @@
 
 <div class="viewcode-block" id="hex2edges">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.hex2edges.html#mymesh.converter.hex2edges">[docs]</a>
-<span class="k">def</span> <span class="nf">hex2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hex2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract edges from all elements of a purely 8-Node hexahedral mesh.</span>
 <span class="sd">    Best practice is to use solid2edges, rather than using hex2edges directly.</span>
@@ -2098,7 +2105,7 @@
 
 <div class="viewcode-block" id="quad2tri">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.quad2tri.html#mymesh.converter.quad2tri">[docs]</a>
-<span class="k">def</span> <span class="nf">quad2tri</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">quad2tri</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a quadrilateral mesh to a triangular mesh by splitting each quad into 2 tris  </span>
 
@@ -2132,7 +2139,7 @@
         
 <div class="viewcode-block" id="tet102tet4">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.tet102tet4.html#mymesh.converter.tet102tet4">[docs]</a>
-<span class="k">def</span> <span class="nf">tet102tet4</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Tet10NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tet102tet4</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Tet10NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a 10-node tetradehdral mesh to a 4-node tetradehedral mesh.</span>
 <span class="sd">    Assumes a 10-node tetrahedral numbering scheme where the first 4 nodes define</span>
@@ -2161,7 +2168,7 @@
 
 <div class="viewcode-block" id="tet42tet10">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.tet42tet10.html#mymesh.converter.tet42tet10">[docs]</a>
-<span class="k">def</span> <span class="nf">tet42tet10</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Tet4NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tet42tet10</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Tet4NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a 4 node tetrahedral mesh to 10 node tetrahedral mesh. A new node </span>
 <span class="sd">    is placed at the midpoint of each edge.</span>
@@ -2217,7 +2224,7 @@
  
 <div class="viewcode-block" id="surf2edges">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.surf2edges.html#mymesh.converter.surf2edges">[docs]</a>
-<span class="k">def</span> <span class="nf">surf2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">surf2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract the edges of an unclosed surface mesh.</span>
 <span class="sd">    This differs from solid2edges in that it doesn&#39;t return any</span>
@@ -2248,7 +2255,7 @@
 
 <div class="viewcode-block" id="im2voxel">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.im2voxel.html#mymesh.converter.im2voxel">[docs]</a>
-<span class="k">def</span> <span class="nf">im2voxel</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">voxelsize</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_gradient</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gaussian_sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">im2voxel</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">voxelsize</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_gradient</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gaussian_sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert 3D image data to a cubic mesh. Each voxel will be represented by an element.</span>
 
@@ -2391,7 +2398,7 @@
         
 <div class="viewcode-block" id="surf2voxel">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.surf2voxel.html#mymesh.converter.surf2voxel">[docs]</a>
-<span class="k">def</span> <span class="nf">surf2voxel</span><span class="p">(</span><span class="n">SurfCoords</span><span class="p">,</span><span class="n">SurfConn</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">Octree</span><span class="o">=</span><span class="s1">&#39;generate&#39;</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;any&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">surf2voxel</span><span class="p">(</span><span class="n">SurfCoords</span><span class="p">,</span><span class="n">SurfConn</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">Octree</span><span class="o">=</span><span class="s1">&#39;generate&#39;</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;any&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a surface mesh to a filled voxel mesh. The surface must be </span>
 <span class="sd">    closed to work properly, unexpected behavior could occur with unclosed</span>
@@ -2450,7 +2457,7 @@
 
 <div class="viewcode-block" id="voxel2im">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.voxel2im.html#mymesh.converter.voxel2im">[docs]</a>
-<span class="k">def</span> <span class="nf">voxel2im</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">Vals</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">voxel2im</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">Vals</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a rectilinear voxel mesh (grid) to an 3D image matrix.</span>
 
@@ -2484,7 +2491,7 @@
     <span class="k">return</span> <span class="n">I</span></div>
 
 
-<span class="k">def</span> <span class="nf">removeNodes</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">removeNodes</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Removes nodes that aren&#39;t held by any element</span>
 
@@ -2524,7 +2531,7 @@
 
 <div class="viewcode-block" id="surf2dual">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.surf2dual.html#mymesh.converter.surf2dual">[docs]</a>
-<span class="k">def</span> <span class="nf">surf2dual</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">SurfConn</span><span class="p">,</span><span class="n">Centroids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ElemConn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">NodeNormals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">sort</span><span class="o">=</span><span class="s1">&#39;ccw&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">surf2dual</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">SurfConn</span><span class="p">,</span><span class="n">Centroids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ElemConn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">NodeNormals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">sort</span><span class="o">=</span><span class="s1">&#39;ccw&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a surface mesh to it&#39;s dual mesh.</span>
 <span class="sd">    NOTE: this function has undergone limited testing and hasn&#39;t been optimized.</span>
@@ -2651,8 +2658,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2685,7 +2692,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

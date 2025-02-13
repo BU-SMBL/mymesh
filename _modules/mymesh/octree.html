@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -43,10 +43,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -337,9 +337,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -429,15 +434,15 @@
 
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy</span>
-<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">rays</span><span class="p">,</span> <span class="n">utils</span>
-<span class="kn">import</span> <span class="nn">sympy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">rays</span><span class="p">,</span> <span class="n">utils</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
 
-<span class="k">class</span> <span class="nc">OctreeNode</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OctreeNode</span><span class="p">:</span>
           
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">centroid</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">state</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">centroid</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">state</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The OctreeNode is the basic unit of the octree data structure. The structure</span>
 <span class="sd">        consists of a series of nodes that reference their parent and child nodes, </span>
@@ -478,11 +483,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="n">level</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Octree Node (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">Centroid: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">)</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="se">\n</span><span class="s1">Size: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="si">:</span><span class="s1">f</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="k">return</span> <span class="n">out</span>
     
-    <span class="k">def</span> <span class="nf">getMaxDepth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getMaxDepth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the maximum depth of the octree. The depth is the highest level</span>
 <span class="sd">        reachable from the current node. The depth is given as the absolute level, </span>
@@ -496,7 +501,7 @@
 <span class="sd">            Depth of the octree</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">level</span>
-        <span class="k">def</span> <span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">level</span> <span class="o">&gt;</span> <span class="n">depth</span><span class="p">:</span>
                 <span class="n">depth</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">level</span>
             <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
@@ -505,7 +510,7 @@
         <span class="n">depth</span> <span class="o">=</span> <span class="n">recur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">depth</span>
 
-    <span class="k">def</span> <span class="nf">getLevel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getLevel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get all child nodes at a particular octree level</span>
 
@@ -514,7 +519,7 @@
 <span class="sd">        level : _type_</span>
 <span class="sd">            _description_</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
-        <span class="k">def</span> <span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">nodes</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">nodes</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">level</span> <span class="o">==</span> <span class="n">level</span><span class="p">:</span>
                 <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">nodes</span>
@@ -528,7 +533,7 @@
         <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">return</span> <span class="n">recur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">nodes</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">getLimits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getLimits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the spatial bounds of the current octree node. Limits are formatted</span>
 <span class="sd">        as [[xmin, xmax], [ymin, ymax], [zmin, zmax]]. These are equivalent </span>
@@ -543,7 +548,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)])</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits</span>
     
-    <span class="k">def</span> <span class="nf">getVertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getVertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the coordinates of the 8 vertices of the cube that correspond to the</span>
 <span class="sd">        octree node. These are ordered following the hexahedral element node </span>
@@ -561,7 +566,7 @@
                                       <span class="p">[</span><span class="n">x0</span><span class="p">,</span><span class="n">y0</span><span class="p">,</span><span class="n">z1</span><span class="p">],[</span><span class="n">x1</span><span class="p">,</span><span class="n">y0</span><span class="p">,</span><span class="n">z1</span><span class="p">],[</span><span class="n">x1</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">z1</span><span class="p">],[</span><span class="n">x0</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">z1</span><span class="p">]])</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span>
 
-    <span class="k">def</span> <span class="nf">PointInNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">point</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">PointInNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">point</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if a point is within the bounds of the current node.</span>
 
@@ -581,7 +586,7 @@
         <span class="n">inside</span> <span class="o">=</span> <span class="n">rays</span><span class="o">.</span><span class="n">PointInBox</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">getLimits</span><span class="p">(),</span> <span class="n">inclusive</span><span class="o">=</span><span class="n">inclusive</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">inside</span>
     
-    <span class="k">def</span> <span class="nf">PointsInNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">points</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">PointsInNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">points</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if a set of points is within the bounds of the current node.</span>
 
@@ -604,36 +609,36 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([(</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">points</span><span class="p">[:,</span><span class="n">d</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">points</span><span class="p">[:,</span><span class="n">d</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">TriInNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tri</span><span class="p">,</span><span class="n">TriNormal</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">TriInNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tri</span><span class="p">,</span><span class="n">TriNormal</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         
         <span class="n">lims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLimits</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">rays</span><span class="o">.</span><span class="n">TriangleBoxIntersection</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span> <span class="n">lims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">lims</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">BoxCenter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">,</span><span class="n">TriNormal</span><span class="o">=</span><span class="n">TriNormal</span><span class="p">)</span>
         
         <span class="c1"># return (any([self.PointInNode(pt,inclusive=inclusive) for pt in tri]) or rays.TriangleBoxIntersection(tri, lims[0], lims[1], lims[2]))</span>
     
-    <span class="k">def</span> <span class="nf">Contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">points</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">points</span><span class="p">):</span>
         <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">point</span><span class="p">)]</span>
         <span class="c1"># out = np.where(self.PointsInNode(points))[0]</span>
         <span class="k">return</span> <span class="n">out</span>
     
-    <span class="k">def</span> <span class="nf">ContainsTris</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tris</span><span class="p">,</span><span class="n">TriNormals</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ContainsTris</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tris</span><span class="p">,</span><span class="n">TriNormals</span><span class="p">):</span>
         
         <span class="n">lims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLimits</span><span class="p">()</span>
         <span class="n">Intersections</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rays</span><span class="o">.</span><span class="n">BoxTrianglesIntersection</span><span class="p">(</span><span class="n">tris</span><span class="p">,</span> <span class="n">lims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">lims</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">TriNormals</span><span class="o">=</span><span class="n">TriNormals</span><span class="p">,</span> <span class="n">BoxCenter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">Intersections</span>
     
-    <span class="k">def</span> <span class="nf">ContainsBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">boxes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ContainsBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">boxes</span><span class="p">):</span>
         <span class="n">Intersections</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">([</span><span class="n">rays</span><span class="o">.</span><span class="n">BoxBoxIntersection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLimits</span><span class="p">(),</span> <span class="n">box</span><span class="p">)</span> <span class="k">for</span> <span class="n">box</span> <span class="ow">in</span> <span class="n">boxes</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">Intersections</span>
     
-    <span class="k">def</span> <span class="nf">isEmpty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">points</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">isEmpty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">points</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span>
     
-    <span class="k">def</span> <span class="nf">hasChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hasChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># includes both &quot;leaf&quot; and &quot;empty&quot; nodes</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
     
-    <span class="k">def</span> <span class="nf">makeChildrenPts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">points</span><span class="p">,</span><span class="n">minsize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">maxsize</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span><span class="n">maxdepth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">makeChildrenPts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">points</span><span class="p">,</span><span class="n">minsize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">maxsize</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span><span class="n">maxdepth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="n">minsize</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="o">&lt;</span><span class="n">maxdepth</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">makeChildren</span><span class="p">()</span>
             
@@ -660,7 +665,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
             
-    <span class="k">def</span> <span class="nf">makeChildrenTris</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tris</span><span class="p">,</span><span class="n">TriNormals</span><span class="p">,</span><span class="n">minsize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">maxsize</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span><span class="n">maxdepth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">makeChildrenTris</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tris</span><span class="p">,</span><span class="n">TriNormals</span><span class="p">,</span><span class="n">minsize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">maxsize</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span><span class="n">maxdepth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
         <span class="c1"># tris is a list of Triangular vertices [tri1,tri2,...] where tri1 = [pt1,pt2,pt3]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">makeChildren</span><span class="p">()</span>
                     
@@ -685,7 +690,7 @@
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">trisInChild</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;empty&#39;</span>
 
-    <span class="k">def</span> <span class="nf">makeChildrenBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">boxes</span><span class="p">,</span><span class="n">minsize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">maxsize</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span><span class="n">maxdepth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">makeChildrenBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">boxes</span><span class="p">,</span><span class="n">minsize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">maxsize</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span><span class="n">maxdepth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">makeChildren</span><span class="p">()</span>
                     
@@ -709,7 +714,7 @@
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">boxesInChild</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;empty&#39;</span>
 
-    <span class="k">def</span> <span class="nf">makeChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childstate</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">makeChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childstate</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">):</span>
         <span class="n">childSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Note other things (e.g. Function2Octree) depend on this ordering not changing </span>
@@ -717,7 +722,7 @@
             <span class="n">centroid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">xSign</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">ySign</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">zSign</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">4</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OctreeNode</span><span class="p">(</span><span class="n">centroid</span><span class="p">,</span><span class="n">childSize</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="p">[],</span><span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">state</span><span class="o">=</span><span class="n">childstate</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">addTri</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tri</span><span class="p">,</span><span class="n">triId</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">minsize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addTri</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tri</span><span class="p">,</span><span class="n">triId</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">minsize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
             <span class="c1"># triId can be an identifier for the element corresponding to the given triangle</span>
             <span class="c1"># If given, triId will be stored in the octree node data instead of the tri itself</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">minsize</span><span class="p">:</span>
@@ -726,7 +731,7 @@
                             <span class="nb">max</span><span class="p">([</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">tri</span><span class="p">])</span><span class="o">-</span><span class="nb">min</span><span class="p">([</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">tri</span><span class="p">]),</span>
                             <span class="nb">max</span><span class="p">([</span><span class="n">pt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">tri</span><span class="p">])</span><span class="o">-</span><span class="nb">min</span><span class="p">([</span><span class="n">pt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">tri</span><span class="p">]),</span>
                             <span class="p">])</span>
-            <span class="k">def</span> <span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">tri</span><span class="p">,</span><span class="n">triId</span><span class="p">,</span><span class="n">minsize</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">tri</span><span class="p">,</span><span class="n">triId</span><span class="p">,</span><span class="n">minsize</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">TriInNode</span><span class="p">(</span><span class="n">tri</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;unknown&#39;</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;empty&#39;</span><span class="p">:</span>
                         <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;branch&#39;</span>
@@ -747,13 +752,13 @@
                     <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;empty&#39;</span>
             <span class="n">recur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tri</span><span class="p">,</span><span class="n">triId</span><span class="p">,</span><span class="n">minsize</span><span class="p">)</span>
             
-    <span class="k">def</span> <span class="nf">clearData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">clearChildren</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clearData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">clearChildren</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">clearChildren</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
                 <span class="n">child</span><span class="o">.</span><span class="n">clearData</span><span class="p">()</span>                 
 
-<span class="k">def</span> <span class="nf">isInsideOctree</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">node</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>   
+<span class="k">def</span><span class="w"> </span><span class="nf">isInsideOctree</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">node</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>   
     <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="n">inclusive</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
@@ -767,7 +772,7 @@
             
 <div class="viewcode-block" id="SearchOctree">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.octree.SearchOctree.html#mymesh.octree.SearchOctree">[docs]</a>
-<span class="k">def</span> <span class="nf">SearchOctree</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">root</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SearchOctree</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">root</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve the octree leaf node that contains the given point.</span>
 
@@ -799,7 +804,7 @@
     
 <div class="viewcode-block" id="SearchOctreeTri">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.octree.SearchOctreeTri.html#mymesh.octree.SearchOctreeTri">[docs]</a>
-<span class="k">def</span> <span class="nf">SearchOctreeTri</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span><span class="n">root</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SearchOctreeTri</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span><span class="n">root</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve the octree leaf node(s) that contain the triangle</span>
 
@@ -819,7 +824,7 @@
 <span class="sd">    nodes : list</span>
 <span class="sd">        List of octree nodes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span> <span class="nf">recur</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">inclusive</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recur</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">inclusive</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">TriInNode</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="n">inclusive</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span><span class="p">:</span>
                 <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
@@ -834,7 +839,7 @@
     
 <div class="viewcode-block" id="getAllLeaf">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.octree.getAllLeaf.html#mymesh.octree.getAllLeaf">[docs]</a>
-<span class="k">def</span> <span class="nf">getAllLeaf</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">getAllLeaf</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve a list of all leaf nodes of the octree</span>
 
@@ -849,7 +854,7 @@
 <span class="sd">        List of octree leaf nodes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="c1"># Return a list of all terminal(leaf) nodes in the octree</span>
-    <span class="k">def</span> <span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">leaves</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">leaves</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span><span class="p">:</span>
             <span class="n">leaves</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">leaves</span>
@@ -865,7 +870,7 @@
 
 <div class="viewcode-block" id="Points2Octree">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.octree.Points2Octree.html#mymesh.octree.Points2Octree">[docs]</a>
-<span class="k">def</span> <span class="nf">Points2Octree</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Points2Octree</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate an octree structure from a set of points. The octree will be </span>
 <span class="sd">    subdivided until each node contains only one point or the maximum depth</span>
@@ -904,7 +909,7 @@
 
 <div class="viewcode-block" id="Voxel2Octree">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.octree.Voxel2Octree.html#mymesh.octree.Voxel2Octree">[docs]</a>
-<span class="k">def</span> <span class="nf">Voxel2Octree</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Voxel2Octree</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate an octree representation of an isotropic voxel mesh. </span>
 
@@ -947,7 +952,7 @@
 
 <div class="viewcode-block" id="Surface2Octree">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.octree.Surface2Octree.html#mymesh.octree.Surface2Octree">[docs]</a>
-<span class="k">def</span> <span class="nf">Surface2Octree</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Surface2Octree</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate an octree representation of a triangular surface mesh. The octree</span>
 <span class="sd">    will be refined until each node contains only one triangle or the maximum</span>
@@ -1006,7 +1011,7 @@
     <span class="k">return</span> <span class="n">root</span></div>
 
 
-<span class="k">def</span> <span class="nf">Mesh2Octree</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mindepth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Mesh2Octree</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mindepth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
     
     <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
     <span class="c1"># Bounds of each element (minx, maxx, miny, maxy, minz, maxz)</span>
@@ -1029,7 +1034,7 @@
 
 <div class="viewcode-block" id="Function2Octree">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.octree.Function2Octree.html#mymesh.octree.Function2Octree">[docs]</a>
-<span class="k">def</span> <span class="nf">Function2Octree</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">grad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mindepth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;EDerror&#39;</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Function2Octree</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">grad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mindepth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;EDerror&#39;</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate an octree structure adapted to an implicit function.</span>
 <span class="sd">    Based on octree generation approaches used by :cite:`Schaefer2005`, </span>
@@ -1090,7 +1095,7 @@
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;x y z&#39;</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="n">sp</span><span class="o">.</span><span class="n">Basic</span><span class="p">):</span>
-                <span class="k">def</span> <span class="nf">DiracDelta</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">DiracDelta</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
                     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
                         <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
@@ -1106,7 +1111,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">F</span> <span class="o">=</span> <span class="n">func</span>
                 <span class="n">finite_diff_step</span> <span class="o">=</span> <span class="mf">1e-5</span>
-                <span class="k">def</span> <span class="nf">grad</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">):</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">grad</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">):</span>
                     <span class="n">gradx</span> <span class="o">=</span> <span class="p">(</span><span class="n">F</span><span class="p">(</span><span class="n">X</span><span class="o">+</span><span class="n">finite_diff_step</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">)</span> <span class="o">-</span> <span class="n">F</span><span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">finite_diff_step</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">))</span><span class="o">/</span><span class="n">finite_diff_step</span>
                     <span class="n">grady</span> <span class="o">=</span> <span class="p">(</span><span class="n">F</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="o">+</span><span class="n">finite_diff_step</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">Z</span><span class="p">)</span> <span class="o">-</span> <span class="n">F</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="o">-</span><span class="n">finite_diff_step</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">Z</span><span class="p">))</span><span class="o">/</span><span class="n">finite_diff_step</span>
                     <span class="n">gradz</span> <span class="o">=</span> <span class="p">(</span><span class="n">F</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="o">+</span><span class="n">finite_diff_step</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">F</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="o">-</span><span class="n">finite_diff_step</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="n">finite_diff_step</span>
@@ -1312,7 +1317,7 @@
 
 <div class="viewcode-block" id="Octree2Voxel">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.octree.Octree2Voxel.html#mymesh.octree.Octree2Voxel">[docs]</a>
-<span class="k">def</span> <span class="nf">Octree2Voxel</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;sparse&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Octree2Voxel</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;sparse&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert an octree to a voxel mesh</span>
 
@@ -1342,7 +1347,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;mode must be &quot;sparse&quot; or &quot;full&quot;, not </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">recurSearch</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recurSearch</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">condition</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
             <span class="n">VoxelConn</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">3</span><span class="p">,</span>
                             <span class="nb">len</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">5</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">6</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">)</span><span class="o">+</span><span class="mi">7</span><span class="p">])</span>
@@ -1382,7 +1387,7 @@
 
 <div class="viewcode-block" id="Octree2Dual">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.octree.Octree2Dual.html#mymesh.octree.Octree2Dual">[docs]</a>
-<span class="k">def</span> <span class="nf">Octree2Dual</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;centroid&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Octree2Dual</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;centroid&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts an octree to a mesh that is dual to the octree structure. This mesh</span>
 <span class="sd">    contains hexahedral elements with nodes contained inside octree nodes, rather</span>
@@ -1409,7 +1414,7 @@
 <span class="sd">    DualConn : np.ndarray</span>
 <span class="sd">        List of node connectivities for the hexahedral mesh.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span> <span class="nf">nodeProc</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nodeProc</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
                 <span class="n">nodeProc</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">)</span>
@@ -1430,7 +1435,7 @@
 
             <span class="n">vertProc</span><span class="p">(</span><span class="o">*</span><span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">)</span>
  
-    <span class="k">def</span> <span class="nf">faceProcXY</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">faceProcXY</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
         <span class="c1"># Nodes should be ordered bottom-top (n0 is below n1)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">n0</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()</span> <span class="ow">and</span> <span class="n">n1</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()):</span>    
             <span class="c1"># c0, c1, c2, c3 are the *top* nodes of n0 and c4, c5, c6, c7 are the *bottom* nodes of n1</span>
@@ -1457,7 +1462,7 @@
 
             <span class="n">vertProc</span><span class="p">(</span><span class="n">c0</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">,</span><span class="n">c3</span><span class="p">,</span><span class="n">c4</span><span class="p">,</span><span class="n">c5</span><span class="p">,</span><span class="n">c6</span><span class="p">,</span><span class="n">c7</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">faceProcYZ</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">faceProcYZ</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
         <span class="c1"># Nodes should be ordered left-right (n0 is left of n1)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">n0</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()</span> <span class="ow">and</span> <span class="n">n1</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()):</span>    
             <span class="c1"># c0, c3, c7, c4 are the *right* nodes of n0 and c1, c2, c6, c5 are the *left* nodes of n1</span>
@@ -1485,7 +1490,7 @@
 
             <span class="n">vertProc</span><span class="p">(</span><span class="n">c0</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">,</span><span class="n">c3</span><span class="p">,</span><span class="n">c4</span><span class="p">,</span><span class="n">c5</span><span class="p">,</span><span class="n">c6</span><span class="p">,</span><span class="n">c7</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">faceProcXZ</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">faceProcXZ</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
         <span class="c1"># Nodes should be ordered front-back (n0 is in front of n1)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">n0</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()</span> <span class="ow">and</span> <span class="n">n1</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()):</span>    
             <span class="c1"># c0, c1, c5, c4 are the *back* nodes of n0 and c3, c2, c6, c7 are the *front* nodes of n1</span>
@@ -1512,7 +1517,7 @@
 
             <span class="n">vertProc</span><span class="p">(</span><span class="n">c0</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">,</span><span class="n">c3</span><span class="p">,</span><span class="n">c4</span><span class="p">,</span><span class="n">c5</span><span class="p">,</span><span class="n">c6</span><span class="p">,</span><span class="n">c7</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">edgeProcX</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span><span class="n">n3</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">edgeProcX</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span><span class="n">n3</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">n0</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">(),</span> <span class="n">n1</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">(),</span> <span class="n">n2</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">(),</span> <span class="n">n3</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()]):</span>
             <span class="n">c1</span> <span class="o">=</span> <span class="n">n0</span> <span class="k">if</span> <span class="n">n0</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()</span> <span class="k">else</span> <span class="n">n0</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
             <span class="n">c0</span> <span class="o">=</span> <span class="n">n0</span> <span class="k">if</span> <span class="n">n0</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()</span> <span class="k">else</span> <span class="n">n0</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
@@ -1528,7 +1533,7 @@
 
             <span class="n">vertProc</span><span class="p">(</span><span class="n">c0</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">,</span><span class="n">c3</span><span class="p">,</span><span class="n">c4</span><span class="p">,</span><span class="n">c5</span><span class="p">,</span><span class="n">c6</span><span class="p">,</span><span class="n">c7</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">edgeProcY</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span><span class="n">n3</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">edgeProcY</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span><span class="n">n3</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
         <span class="c1"># Nodes should be ordered counter clockwise about the axis</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">n0</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">(),</span> <span class="n">n1</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">(),</span> <span class="n">n2</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">(),</span> <span class="n">n3</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()]):</span>
             <span class="n">c0</span> <span class="o">=</span> <span class="n">n0</span> <span class="k">if</span> <span class="n">n0</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()</span> <span class="k">else</span> <span class="n">n0</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
@@ -1545,7 +1550,7 @@
 
             <span class="n">vertProc</span><span class="p">(</span><span class="n">c0</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">,</span><span class="n">c3</span><span class="p">,</span><span class="n">c4</span><span class="p">,</span><span class="n">c5</span><span class="p">,</span><span class="n">c6</span><span class="p">,</span><span class="n">c7</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">edgeProcZ</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span><span class="n">n3</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">edgeProcZ</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span><span class="n">n3</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
         <span class="c1"># Nodes should be ordered counter clockwise about the axis</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">n0</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">(),</span> <span class="n">n1</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">(),</span> <span class="n">n2</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">(),</span> <span class="n">n3</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()]):</span>
             <span class="n">c0</span> <span class="o">=</span> <span class="n">n0</span> <span class="k">if</span> <span class="n">n0</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()</span> <span class="k">else</span> <span class="n">n0</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
@@ -1562,7 +1567,7 @@
 
             <span class="n">vertProc</span><span class="p">(</span><span class="n">c0</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">,</span><span class="n">c3</span><span class="p">,</span><span class="n">c4</span><span class="p">,</span><span class="n">c5</span><span class="p">,</span><span class="n">c6</span><span class="p">,</span><span class="n">c7</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">vertProc</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n5</span><span class="p">,</span> <span class="n">n6</span><span class="p">,</span> <span class="n">n7</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vertProc</span><span class="p">(</span><span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n5</span><span class="p">,</span> <span class="n">n6</span><span class="p">,</span> <span class="n">n7</span><span class="p">,</span> <span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">):</span>
         <span class="n">ns</span> <span class="o">=</span> <span class="p">[</span><span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n5</span><span class="p">,</span> <span class="n">n6</span><span class="p">,</span> <span class="n">n7</span><span class="p">]</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">n</span><span class="o">.</span><span class="n">hasChildren</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ns</span><span class="p">]):</span>
@@ -1597,7 +1602,7 @@
 
 <div class="viewcode-block" id="Print">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.octree.Print.html#mymesh.octree.Print">[docs]</a>
-<span class="k">def</span> <span class="nf">Print</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">show_empty</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Print</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">show_empty</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prints a formatted list of all nodes in the octree.</span>
 
@@ -1608,7 +1613,7 @@
 <span class="sd">    show_empty : bool, optional</span>
 <span class="sd">        Option to include &#39;empty&#39; nodes in the printed octree, by default False.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span> <span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recur</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">show_empty</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">!=</span> <span class="s1">&#39;empty&#39;</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    &#39;</span><span class="o">*</span><span class="n">node</span><span class="o">.</span><span class="n">level</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span><span class="s1">&#39;. &#39;</span><span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
@@ -1646,8 +1651,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1680,7 +1685,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

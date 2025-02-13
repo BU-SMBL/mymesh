@@ -90,7 +90,7 @@ in `Elise Morgan <https://scholar.google.com/citations?user=hLf0lzEAAAAJ&hl=en&o
 at Boston University. MyMesh was used extensively in the scaffold design 
 optimization research by :cite:t:`Josephson2024b` and is currently 
 being used in  various ongoing projects at Boston University, including vertebral 
-modeling (Andre Gutierrez-Marty, Neilesh Frings), hip fracture modeling (Joshua 
+modeling (Andre Gutierrez Marty, Neilesh Frings), hip fracture modeling (Joshua 
 Auger, Ariella Blake), mechanobiologically-driven growth modeling of skeletal 
 tissue (Tim Josephson, Vivian Shi), and analysis of micro CT-scanned teeth 
 (Sydney Holder, Shadi Mohebi). 

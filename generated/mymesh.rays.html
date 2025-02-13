@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,10 +27,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -370,9 +370,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -468,30 +473,33 @@
 <td><p>Intersection test for detecting intersections between a triangle and a box.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.SegmentSegmentIntersection.html#mymesh.rays.SegmentSegmentIntersection" title="mymesh.rays.SegmentSegmentIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SegmentSegmentIntersection</span></code></a>(s1, s2[, ...])</p></td>
-<td><p></p></td>
+<td><p>Detect intersections between two line segments.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.SegmentsSegmentsIntersection.html#mymesh.rays.SegmentsSegmentsIntersection" title="mymesh.rays.SegmentsSegmentsIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SegmentsSegmentsIntersection</span></code></a>(s1, s2[, ...])</p></td>
-<td><p></p></td>
+<td><p>Detect intersections between pairs of line segments.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaySegmentsIntersection.html#mymesh.rays.RaySegmentsIntersection" title="mymesh.rays.RaySegmentsIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaySegmentsIntersection</span></code></a>(pt, ray, segments[, ...])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaySegmentIntersection.html#mymesh.rays.RaySegmentIntersection" title="mymesh.rays.RaySegmentIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaySegmentIntersection</span></code></a>(pt, ray, segment[, ...])</p></td>
+<td><p>Detect intersections between a ray and a line segment.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaySurfIntersection.html#mymesh.rays.RaySurfIntersection" title="mymesh.rays.RaySurfIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaySurfIntersection</span></code></a>(pt, ray, NodeCoords, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaySegmentsIntersection.html#mymesh.rays.RaySegmentsIntersection" title="mymesh.rays.RaySegmentsIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaySegmentsIntersection</span></code></a>(pt, ray, segments[, ...])</p></td>
+<td><p>Detect intersections between pairs of line segments.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaySurfIntersection.html#mymesh.rays.RaySurfIntersection" title="mymesh.rays.RaySurfIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaySurfIntersection</span></code></a>(pt, ray, NodeCoords, ...)</p></td>
 <td><p>Identify intersections between a ray and a triangular surface mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaysSurfIntersection.html#mymesh.rays.RaysSurfIntersection" title="mymesh.rays.RaysSurfIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaysSurfIntersection</span></code></a>(pts, rays, NodeCoords, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaysSurfIntersection.html#mymesh.rays.RaysSurfIntersection" title="mymesh.rays.RaysSurfIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaysSurfIntersection</span></code></a>(pts, rays, NodeCoords, ...)</p></td>
 <td><p>Identify intersections between rays and a triangular surface mesh.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.RayOctreeIntersection.html#mymesh.rays.RayOctreeIntersection" title="mymesh.rays.RayOctreeIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RayOctreeIntersection</span></code></a>(pt, ray, Octree)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.RayOctreeIntersection.html#mymesh.rays.RayOctreeIntersection" title="mymesh.rays.RayOctreeIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RayOctreeIntersection</span></code></a>(pt, ray, Octree)</p></td>
 <td><p>Test for identifying intersections between a ray and an octree.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.SurfSelfIntersection.html#mymesh.rays.SurfSelfIntersection" title="mymesh.rays.SurfSelfIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfSelfIntersection</span></code></a>(NodeCoords, SurfConn[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.SurfSelfIntersection.html#mymesh.rays.SurfSelfIntersection" title="mymesh.rays.SurfSelfIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfSelfIntersection</span></code></a>(NodeCoords, SurfConn[, ...])</p></td>
 <td><p>Identify self intersections in a mesh</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.SurfSurfIntersection.html#mymesh.rays.SurfSurfIntersection" title="mymesh.rays.SurfSurfIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfSurfIntersection</span></code></a>(NodeCoords1, SurfConn1, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.SurfSurfIntersection.html#mymesh.rays.SurfSurfIntersection" title="mymesh.rays.SurfSurfIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfSurfIntersection</span></code></a>(NodeCoords1, SurfConn1, ...)</p></td>
 <td><p>Identify intersections between two surface meshes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PlaneSurfIntersection.html#mymesh.rays.PlaneSurfIntersection" title="mymesh.rays.PlaneSurfIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PlaneSurfIntersection</span></code></a>(pt, Normal, ...[, eps])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.PlaneSurfIntersection.html#mymesh.rays.PlaneSurfIntersection" title="mymesh.rays.PlaneSurfIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PlaneSurfIntersection</span></code></a>(pt, Normal, ...[, eps])</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -502,22 +510,25 @@
 <h2>Inside/Outside Tests<a class="headerlink" href="#inside-outside-tests" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInSurf.html#mymesh.rays.PointInSurf" title="mymesh.rays.PointInSurf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInSurf</span></code></a>(pt, NodeCoords, SurfConn, ...[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInBoundary.html#mymesh.rays.PointInBoundary" title="mymesh.rays.PointInBoundary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInBoundary</span></code></a>(pt, NodeCoords, BoundaryConn)</p></td>
+<td><p>Test to determine whether a point is inside a boundary mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInSurf.html#mymesh.rays.PointInSurf" title="mymesh.rays.PointInSurf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInSurf</span></code></a>(pt, NodeCoords, SurfConn[, ...])</p></td>
 <td><p>Test to determine whether a point is inside a surface mesh.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointsInSurf.html#mymesh.rays.PointsInSurf" title="mymesh.rays.PointsInSurf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointsInSurf</span></code></a>(pts, NodeCoords, SurfConn[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointsInSurf.html#mymesh.rays.PointsInSurf" title="mymesh.rays.PointsInSurf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointsInSurf</span></code></a>(pts, NodeCoords, SurfConn[, ...])</p></td>
 <td><p>Test to determine whether points are inside a surface mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInBox.html#mymesh.rays.PointInBox" title="mymesh.rays.PointInBox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInBox</span></code></a>(pt, xlim, ylim, zlim[, inclusive])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInBox.html#mymesh.rays.PointInBox" title="mymesh.rays.PointInBox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInBox</span></code></a>(pt, xlim, ylim, zlim[, inclusive])</p></td>
 <td><p>Test whether a point is inside a box</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointsInVoxel.html#mymesh.rays.PointsInVoxel" title="mymesh.rays.PointsInVoxel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointsInVoxel</span></code></a>(pts, VoxelCoords, VoxelConn[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointsInVoxel.html#mymesh.rays.PointsInVoxel" title="mymesh.rays.PointsInVoxel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointsInVoxel</span></code></a>(pts, VoxelCoords, VoxelConn[, ...])</p></td>
 <td><p>Test to determine whether points are inside a voxel mesh</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInTri.html#mymesh.rays.PointInTri" title="mymesh.rays.PointInTri"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInTri</span></code></a>(Tri, pt[, method, eps, inclusive])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInTri.html#mymesh.rays.PointInTri" title="mymesh.rays.PointInTri"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInTri</span></code></a>(Tri, pt[, method, eps, inclusive])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointsInTris.html#mymesh.rays.PointsInTris" title="mymesh.rays.PointsInTris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointsInTris</span></code></a>(Tris, pts[, method, eps, inclusive])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointsInTris.html#mymesh.rays.PointsInTris" title="mymesh.rays.PointsInTris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointsInTris</span></code></a>(Tris, pts[, method, eps, inclusive])</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -579,13 +590,13 @@
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/generated/mymesh.rays.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/generated/mymesh.rays.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -600,8 +611,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -634,7 +645,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

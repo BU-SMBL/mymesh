@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mymesh.improvement.GlobalLaplacianSmoothing &#8212; MyMesh vdev Manual</title>
+    <title>mymesh.rays.PointInBoundary &#8212; MyMesh vdev Manual</title>
   
   
   
@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,10 +27,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -58,11 +58,11 @@
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.improvement.GlobalLaplacianSmoothing';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.rays.PointInBoundary';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mymesh.improvement.GeoTransformSmoothing" href="mymesh.improvement.GeoTransformSmoothing.html" />
-    <link rel="prev" title="mymesh.improvement.SmartLaplacianSmoothing" href="mymesh.improvement.SmartLaplacianSmoothing.html" />
+    <link rel="next" title="mymesh.rays.PointInSurf" href="mymesh.rays.PointInSurf.html" />
+    <link rel="prev" title="mymesh.rays.PlaneSurfIntersection" href="mymesh.rays.PlaneSurfIntersection.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -356,11 +356,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.delaunay.html">mymesh.delaunay</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
-<li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
 </ul>
@@ -370,9 +370,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -402,9 +407,9 @@
     <li class="breadcrumb-item"><a href="../../api.html" class="nav-link">API Reference</a></li>
     
     
-    <li class="breadcrumb-item"><a href="../mymesh.improvement.html" class="nav-link">mymesh.improvement</a></li>
+    <li class="breadcrumb-item"><a href="../mymesh.rays.html" class="nav-link">mymesh.rays</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh.improvement.GlobalLaplacianSmoothing</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh.rays.PointInBoundary</span></li>
   </ul>
 </nav>
 </div>
@@ -421,12 +426,36 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="mymesh-improvement-globallaplaciansmoothing">
-<h1>mymesh.improvement.GlobalLaplacianSmoothing<a class="headerlink" href="#mymesh-improvement-globallaplaciansmoothing" title="Link to this heading">#</a></h1>
+  <section id="mymesh-rays-pointinboundary">
+<h1>mymesh.rays.PointInBoundary<a class="headerlink" href="#mymesh-rays-pointinboundary" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="mymesh.improvement.GlobalLaplacianSmoothing">
-<span class="sig-prename descclassname"><span class="pre">mymesh.improvement.</span></span><span class="sig-name descname"><span class="pre">GlobalLaplacianSmoothing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FeatureNodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FixedNodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FeatureWeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BaryWeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3333333333333333</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/improvement.html#GlobalLaplacianSmoothing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.improvement.GlobalLaplacianSmoothing" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="mymesh.rays.PointInBoundary">
+<span class="sig-prename descclassname"><span class="pre">mymesh.rays.</span></span><span class="sig-name descname"><span class="pre">PointInBoundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BoundaryConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ray</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/rays.html#PointInBoundary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.rays.PointInBoundary" title="Link to this definition">#</a></dt>
+<dd><p>Test to determine whether a point is inside a boundary mesh. By default,
+this test assumes a 2D mesh parallel to the xy plane. For a boundary mesh in
+another plane, the <cite>ray</cite> argument should be modified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pt</strong> (<em>array_like</em>) – 3D coordinates for point shape=(3,).</p></li>
+<li><p><strong>NodeCoords</strong> (<em>array_like</em>) – List of node coordinates of the surface</p></li>
+<li><p><strong>BoundaryConn</strong> (<em>array_like</em>) – Node connectivity of elements. This function is only valid for triangular surface meshes.</p></li>
+<li><p><strong>ElemNormals</strong> (<em>array_like</em>) – Element normal vectors</p></li>
+<li><p><strong>eps</strong> (<em>float</em><em>, </em><em>optional</em>) – Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8</p></li>
+<li><p><strong>ray</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Ray that will be cast to determine whether the point is inside or outside
+the boundary, by default a random unit vector parallel to the xy plane will be
+used. For a closed boundary, the choice of ray shouldn’t matter as long
+as the ray is in the same plane as the boundary.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>inside</strong> – True if the point is inside the surface, otherwise False.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 
@@ -441,20 +470,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mymesh.improvement.SmartLaplacianSmoothing.html"
+       href="mymesh.rays.PlaneSurfIntersection.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.improvement.SmartLaplacianSmoothing</p>
+        <p class="prev-next-title">mymesh.rays.PlaneSurfIntersection</p>
       </div>
     </a>
     <a class="right-next"
-       href="mymesh.improvement.GeoTransformSmoothing.html"
+       href="mymesh.rays.PointInSurf.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.improvement.GeoTransformSmoothing</p>
+        <p class="prev-next-title">mymesh.rays.PointInSurf</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -477,18 +506,18 @@
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mymesh.improvement.GlobalLaplacianSmoothing"><code class="docutils literal notranslate"><span class="pre">GlobalLaplacianSmoothing()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mymesh.rays.PointInBoundary"><code class="docutils literal notranslate"><span class="pre">PointInBoundary()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../../_sources/generated/submodules/mymesh.improvement.GlobalLaplacianSmoothing.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/generated/submodules/mymesh.rays.PointInBoundary.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -503,8 +532,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -537,7 +566,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

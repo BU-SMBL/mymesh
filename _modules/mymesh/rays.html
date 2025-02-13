@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -43,10 +43,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -337,9 +337,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -416,6 +421,7 @@
 <span class="sd">    BoxTrianglesIntersection</span>
 <span class="sd">    SegmentSegmentIntersection</span>
 <span class="sd">    SegmentsSegmentsIntersection</span>
+<span class="sd">    RaySegmentIntersection</span>
 <span class="sd">    RaySegmentsIntersection</span>
 <span class="sd">    RaySurfIntersection</span>
 <span class="sd">    RaysSurfIntersection</span>
@@ -429,6 +435,7 @@
 <span class="sd">.. autosummary::</span>
 <span class="sd">    :toctree: submodules/</span>
 
+<span class="sd">    PointInBoundary</span>
 <span class="sd">    PointInSurf</span>
 <span class="sd">    PointsInSurf</span>
 <span class="sd">    PointInBox</span>
@@ -437,15 +444,15 @@
 <span class="sd">    PointsInTris</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1">#%%</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">octree</span><span class="p">,</span> <span class="n">delaunay</span><span class="p">,</span> <span class="n">try_njit</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">itertools</span><span class="o">,</span> <span class="nn">random</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">octree</span><span class="p">,</span> <span class="n">delaunay</span><span class="p">,</span> <span class="n">try_njit</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span><span class="o">,</span><span class="w"> </span><span class="nn">random</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
 
 <span class="c1">## Intersection Tests:</span>
 <div class="viewcode-block" id="RayTriangleIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.RayTriangleIntersection.html#mymesh.rays.RayTriangleIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">RayTriangleIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">TriCoords</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RayTriangleIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">TriCoords</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Möller-Trumbore intersection algorithm to detect whether a ray intersects with a triangle.</span>
 <span class="sd">    Möller, T., &amp; Trumbore, B. (2005). Fast, minimum storage ray/triangle intersection. In ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198746</span>
@@ -476,7 +483,44 @@
 <span class="sd">    intersectionPt : np.ndarray or []</span>
 <span class="sd">        If there is an intersection, the 3D coordinates of the intersection point</span>
 <span class="sd">        are returned, otherwise [] is returned.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. jupyter-execute::</span>
+
+<span class="sd">        from mymesh import rays</span>
+<span class="sd">        import numpy as np</span>
+<span class="sd">        </span>
+<span class="sd">        pt = [0,0,0]</span>
+<span class="sd">        ray = np.array([1.,1.,0.])</span>
+<span class="sd">        ray /= np.linalg.norm(ray)</span>
+<span class="sd">        TriCoords = np.array([</span>
+<span class="sd">            [1,0,-1],</span>
+<span class="sd">            [0,1,-1],</span>
+<span class="sd">            [1,1,1]</span>
+<span class="sd">        ])</span>
+<span class="sd">        intersection = rays.RayTriangleIntersection(pt, ray, TriCoords)</span>
+<span class="sd">        print(intersection)</span>
+
+<span class="sd">    Flipping the direction causes the ray to no longer intersect with the triangle</span>
+
+<span class="sd">    .. jupyter-execute::</span>
+
+<span class="sd">        ray = -ray</span>
+<span class="sd">        </span>
+<span class="sd">        intersection = rays.RayTriangleIntersection(pt, ray, TriCoords)</span>
+<span class="sd">        print(intersection)</span>
+
+<span class="sd">    Using the :code:`bidirectional=True` option detects an intersection with </span>
+<span class="sd">    the ray even though it&#39;s pointing in the opposite direction.</span>
+<span class="sd">    </span>
+<span class="sd">    .. jupyter-execute::</span>
+
+<span class="sd">        intersection = rays.RayTriangleIntersection(pt, ray, TriCoords, bidirectional=True)</span>
+<span class="sd">        print(intersection)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>    
+
     <span class="n">edge1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">TriCoords</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">TriCoords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">edge2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">TriCoords</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">TriCoords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     
@@ -506,7 +550,7 @@
 
 <div class="viewcode-block" id="RayTrianglesIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.RayTrianglesIntersection.html#mymesh.rays.RayTrianglesIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">RayTrianglesIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">Tris</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RayTrianglesIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">Tris</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Vectorized Möller-Trumbore intersection algorithm to detect whether a ray intersects with a set of triangles.</span>
 <span class="sd">    Möller, T., &amp; Trumbore, B. (2005). Fast, minimum storage ray/triangle intersection. In ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198746</span>
@@ -570,7 +614,7 @@
 
 <div class="viewcode-block" id="RaysTrianglesIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.RaysTrianglesIntersection.html#mymesh.rays.RaysTrianglesIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">RaysTrianglesIntersection</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">Tris</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RaysTrianglesIntersection</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">Tris</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Vectorized Möller-Trumbore intersection algorithm to detect intersections between a pairwise set of rays and a set of triangles.</span>
 <span class="sd">    Möller, T., &amp; Trumbore, B. (2005). Fast, minimum storage ray/triangle intersection. In ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. https://doi.org/10.1145/1198555.1198746</span>
@@ -637,7 +681,7 @@
 
 <div class="viewcode-block" id="RayBoxIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.RayBoxIntersection.html#mymesh.rays.RayBoxIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">RayBoxIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RayBoxIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Intersection algorithm for detecting intersections between a ray and an axis-aligned box.</span>
 <span class="sd">    Williams, A., Barrus, S., Morley, R. K., &amp; Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748</span>
@@ -716,7 +760,7 @@
 
 <div class="viewcode-block" id="RayBoxesIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.RayBoxesIntersection.html#mymesh.rays.RayBoxesIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">RayBoxesIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">xlims</span><span class="p">,</span> <span class="n">ylims</span><span class="p">,</span> <span class="n">zlims</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RayBoxesIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">xlims</span><span class="p">,</span> <span class="n">ylims</span><span class="p">,</span> <span class="n">zlims</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Vectorized intersection algorithm for detecting intersections between a ray and a set of axis-aligned boxes.</span>
 <span class="sd">    Williams, A., Barrus, S., Morley, R. K., &amp; Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748</span>
@@ -793,7 +837,7 @@
 
 <div class="viewcode-block" id="PlaneBoxIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PlaneBoxIntersection.html#mymesh.rays.PlaneBoxIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">PlaneBoxIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PlaneBoxIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Intersection algorithm for detecting intersections between a plane and an axis-aligned box.</span>
 
@@ -828,8 +872,8 @@
         <span class="p">]</span>
     <span class="c1"># Signed Distances from the vertices of the box to the plane</span>
     <span class="n">sd</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Normal</span><span class="p">,</span><span class="n">p</span><span class="p">)</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Normal</span><span class="p">,</span><span class="n">pt</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">BoxCoords</span><span class="p">]</span>
-    <span class="n">signs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sd</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">signs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">all</span><span class="p">(</span><span class="n">signs</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+    <span class="n">signs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sd</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">signs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">signs</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
         <span class="c1"># No Intersection, all points on same side of plane</span>
         <span class="n">intersection</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">else</span><span class="p">:</span>
@@ -840,7 +884,7 @@
     
 <div class="viewcode-block" id="PlaneTriangleIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PlaneTriangleIntersection.html#mymesh.rays.PlaneTriangleIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">PlaneTriangleIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">TriCoords</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PlaneTriangleIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">TriCoords</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Intersection test for detecting intersections between a plane and a triangle.</span>
 
@@ -863,8 +907,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="c1"># Signed Distances from the vertices of the box to the plane</span>
     <span class="n">sd</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Normal</span><span class="p">,</span><span class="n">p</span><span class="p">)</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Normal</span><span class="p">,</span><span class="n">pt</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">TriCoords</span><span class="p">]</span>
-    <span class="n">signs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sd</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">signs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">all</span><span class="p">(</span><span class="n">signs</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+    <span class="n">signs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sd</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">signs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">signs</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
         <span class="c1"># No Intersection, all points on same side of plane</span>
         <span class="n">intersection</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">else</span><span class="p">:</span>
@@ -875,7 +919,7 @@
     
 <div class="viewcode-block" id="PlaneTrianglesIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PlaneTrianglesIntersection.html#mymesh.rays.PlaneTrianglesIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">PlaneTrianglesIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">Tris</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PlaneTrianglesIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">Tris</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Vectorized intersection test for detecting intersections between a plane and a set of triangles.</span>
 
@@ -911,7 +955,7 @@
     
 <div class="viewcode-block" id="TriangleTriangleIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.TriangleTriangleIntersection.html#mymesh.rays.TriangleTriangleIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">TriangleTriangleIntersection</span><span class="p">(</span><span class="n">Tri1</span><span class="p">,</span><span class="n">Tri2</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span><span class="n">edgeedge</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">TriangleTriangleIntersection</span><span class="p">(</span><span class="n">Tri1</span><span class="p">,</span><span class="n">Tri2</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span><span class="n">edgeedge</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Intersection test for two triangles. </span>
 
@@ -987,11 +1031,11 @@
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="c1"># Intersection line of Tri1 &amp; Tri2: L = O+tD</span>
-    <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">N1</span><span class="p">,</span><span class="n">N2</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-  
-    <span class="n">Dmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">N1</span><span class="p">,</span><span class="n">N2</span><span class="p">)</span>
+    
+    <span class="n">Dmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">D</span><span class="p">))</span>
     <span class="c1"># Projections of Tri1 to L</span>
-    <span class="n">Pv1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="n">D</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">Dmax</span><span class="p">)]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">Tri1</span><span class="p">])</span>
+    <span class="n">Pv1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="n">Dmax</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">Tri1</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">signs1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">signs1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">:</span>
         <span class="n">t11</span> <span class="o">=</span> <span class="n">Pv1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">Pv1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Pv1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">sd1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">sd1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">sd1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -1012,7 +1056,7 @@
         <span class="n">t11</span> <span class="o">=</span> <span class="n">Pv1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">Pv1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">Pv1</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="n">sd1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">sd1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">sd1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">t12</span> <span class="o">=</span> <span class="n">Pv1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">Pv1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">Pv1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">sd1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">sd1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">sd1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="c1"># Projections of Tri2 to L</span>
-    <span class="n">Pv2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="n">D</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">Dmax</span><span class="p">)]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">Tri2</span><span class="p">])</span>
+    <span class="n">Pv2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">v</span><span class="p">[</span><span class="n">Dmax</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">Tri2</span><span class="p">])</span>
 
     <span class="c1"># sumzero = np.sum(signs2==0)</span>
     <span class="k">if</span> <span class="n">signs2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">signs2</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
@@ -1046,7 +1090,7 @@
 
 <div class="viewcode-block" id="TriangleTriangleIntersectionPt">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.TriangleTriangleIntersectionPt.html#mymesh.rays.TriangleTriangleIntersectionPt">[docs]</a>
-<span class="k">def</span> <span class="nf">TriangleTriangleIntersectionPt</span><span class="p">(</span><span class="n">Tri1</span><span class="p">,</span><span class="n">Tri2</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span> <span class="n">edgeedge</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">TriangleTriangleIntersectionPt</span><span class="p">(</span><span class="n">Tri1</span><span class="p">,</span><span class="n">Tri2</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span> <span class="n">edgeedge</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Intersection test for two triangles that returns the point(s) of intersection. </span>
 
@@ -1206,7 +1250,7 @@
     
 <div class="viewcode-block" id="TrianglesTrianglesIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.TrianglesTrianglesIntersection.html#mymesh.rays.TrianglesTrianglesIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">TrianglesTrianglesIntersection</span><span class="p">(</span><span class="n">Tri1s</span><span class="p">,</span><span class="n">Tri2s</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span><span class="n">edgeedge</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">TrianglesTrianglesIntersection</span><span class="p">(</span><span class="n">Tri1s</span><span class="p">,</span><span class="n">Tri2s</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span><span class="n">edgeedge</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Vectorized intersection test for two sets of triangles. </span>
 
@@ -1374,7 +1418,7 @@
     
 <div class="viewcode-block" id="TrianglesTrianglesIntersectionPts">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.TrianglesTrianglesIntersectionPts.html#mymesh.rays.TrianglesTrianglesIntersectionPts">[docs]</a>
-<span class="k">def</span> <span class="nf">TrianglesTrianglesIntersectionPts</span><span class="p">(</span><span class="n">Tri1s</span><span class="p">,</span><span class="n">Tri2s</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span><span class="n">edgeedge</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">TrianglesTrianglesIntersectionPts</span><span class="p">(</span><span class="n">Tri1s</span><span class="p">,</span><span class="n">Tri2s</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span><span class="n">edgeedge</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Vectorized intersection test for two sets of triangles that returns the intersection point(s) between each pair of triangles. </span>
 
@@ -1620,7 +1664,7 @@
 
 <div class="viewcode-block" id="TriangleBoxIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.TriangleBoxIntersection.html#mymesh.rays.TriangleBoxIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">TriangleBoxIntersection</span><span class="p">(</span><span class="n">TriCoords</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">,</span> <span class="n">TriNormal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">BoxCenter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">TriangleBoxIntersection</span><span class="p">(</span><span class="n">TriCoords</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">,</span> <span class="n">TriNormal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">BoxCenter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Intersection test for detecting intersections between a triangle and a box.</span>
 
@@ -1756,7 +1800,7 @@
 
 <div class="viewcode-block" id="BoxTrianglesIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.BoxTrianglesIntersection.html#mymesh.rays.BoxTrianglesIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">BoxTrianglesIntersection</span><span class="p">(</span><span class="n">Tris</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">,</span> <span class="n">TriNormals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">BoxCenter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">BoxTrianglesIntersection</span><span class="p">(</span><span class="n">Tris</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">,</span> <span class="n">TriNormals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">BoxCenter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Intersection test for detecting intersections between a triangle and a box. A vectorized version of :func:`TriangleBoxIntersection` for one box and multiple triangles</span>
 
@@ -1902,14 +1946,23 @@
 
 
 <span class="nd">@try_njit</span>    
-<span class="k">def</span> <span class="nf">BoxBoxIntersection</span><span class="p">(</span><span class="n">box1</span><span class="p">,</span> <span class="n">box2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">BoxBoxIntersection</span><span class="p">(</span><span class="n">box1</span><span class="p">,</span> <span class="n">box2</span><span class="p">):</span>
 
     <span class="n">x1lim</span><span class="p">,</span> <span class="n">y1lim</span><span class="p">,</span> <span class="n">z1lim</span> <span class="o">=</span> <span class="n">box1</span>
     <span class="n">x2lim</span><span class="p">,</span> <span class="n">y2lim</span><span class="p">,</span> <span class="n">z2lim</span> <span class="o">=</span> <span class="n">box2</span>
 
-    <span class="n">xIx</span> <span class="o">=</span> <span class="p">((</span><span class="n">x1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">x1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">x2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">x2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-    <span class="n">yIx</span> <span class="o">=</span> <span class="p">((</span><span class="n">y1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">y2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">y1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">y2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">y1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">y2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">y1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">y2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">y2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">y1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">y2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">y1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">y2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">y1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">y2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">y1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-    <span class="n">zIx</span> <span class="o">=</span> <span class="p">((</span><span class="n">z1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">z2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">z1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">z2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">z1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">z2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">z1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">z2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">z2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">z1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">z2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">z1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">z2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">z1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">z2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">z1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">xIx</span> <span class="o">=</span> <span class="p">((</span><span class="n">x1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> \
+        <span class="p">((</span><span class="n">x1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="ow">or</span> \
+        <span class="p">((</span><span class="n">x2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> \
+        <span class="p">((</span><span class="n">x2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">yIx</span> <span class="o">=</span> <span class="p">((</span><span class="n">y1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">y2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">y1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">y2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> \
+        <span class="p">((</span><span class="n">y1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">y2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">y1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">y2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="ow">or</span> \
+        <span class="p">((</span><span class="n">y2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">y1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">y2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">y1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> \
+        <span class="p">((</span><span class="n">y2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">y1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">y2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">y1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">zIx</span> <span class="o">=</span> <span class="p">((</span><span class="n">z1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">z2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">z1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">z2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> \
+        <span class="p">((</span><span class="n">z1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">z2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">z1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">z2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="ow">or</span> \
+        <span class="p">((</span><span class="n">z2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">z1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">z2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">z1lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">or</span> \
+        <span class="p">((</span><span class="n">z2lim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">z1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">z2lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">z1lim</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
     <span class="n">Ix</span> <span class="o">=</span> <span class="n">xIx</span> <span class="ow">and</span> <span class="n">yIx</span> <span class="ow">and</span> <span class="n">zIx</span>
 
@@ -1917,14 +1970,48 @@
 
 <div class="viewcode-block" id="SegmentSegmentIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.SegmentSegmentIntersection.html#mymesh.rays.SegmentSegmentIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">SegmentSegmentIntersection</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">return_intersection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">endpt_inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SegmentSegmentIntersection</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">return_intersection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">endpt_inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Detect intersections between two line segments.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    s1 : array_like</span>
+<span class="sd">        Coordinates of the two points of the first line segment (shape=(2,3))</span>
+<span class="sd">    s2 : array_like</span>
+<span class="sd">        Coordinates of the two points of the second line segment (shape=(2,3))</span>
+<span class="sd">    return_intersection : bool, optional</span>
+<span class="sd">        If True, return the coordinates of the intersection point. If no </span>
+<span class="sd">        intersection, np.empty((0,3)) is returned. By default False</span>
+<span class="sd">    endpt_inclusive : bool, optional</span>
+<span class="sd">        If True, one end point lying exactly on the other segment will be </span>
+<span class="sd">        considered an intersection, by default True</span>
+<span class="sd">    eps : int, optional</span>
+<span class="sd">        Small tolerance parameter, by default 0</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Intersection : bool</span>
+<span class="sd">        Specifies whether the two line segments intersect</span>
+<span class="sd">    pt : np.ndarray, optional</span>
+<span class="sd">        Point where the two lines intersect, returned if return_intersection=True.</span>
+<span class="sd">        If the two lines don&#39;t intersect, np.empty((0,3)) is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
     <span class="c1"># https://mathworld.wolfram.com/Line-LineIntersection.html</span>
     <span class="c1"># Goldman (1990)</span>
-    <span class="p">[</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span>
-    <span class="p">[</span><span class="n">p3</span><span class="p">,</span><span class="n">p4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
+    <span class="p">[</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span>
+    <span class="p">[</span><span class="n">p3</span><span class="p">,</span><span class="n">p4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
     
     <span class="n">a</span> <span class="o">=</span> <span class="n">p2</span><span class="o">-</span><span class="n">p1</span><span class="p">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">p4</span><span class="o">-</span><span class="n">p3</span><span class="p">;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">p3</span><span class="o">-</span><span class="n">p1</span>
     <span class="n">axb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+    <span class="c1"># coplanar test</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">axb</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># scalar triple product</span>
+        <span class="k">if</span> <span class="n">return_intersection</span><span class="p">:</span>
+            <span class="n">pt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">pt</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
     <span class="n">axbnorm2</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">axb</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">),</span><span class="n">axb</span><span class="p">)</span><span class="o">/</span><span class="n">axbnorm2</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">a</span><span class="p">),</span><span class="n">axb</span><span class="p">)</span><span class="o">/</span><span class="n">axbnorm2</span>
@@ -1943,7 +2030,34 @@
 
 <div class="viewcode-block" id="SegmentsSegmentsIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.SegmentsSegmentsIntersection.html#mymesh.rays.SegmentsSegmentsIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">SegmentsSegmentsIntersection</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">return_intersection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">endpt_inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SegmentsSegmentsIntersection</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">return_intersection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">endpt_inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Detect intersections between pairs of line segments.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    s1 : array_like</span>
+<span class="sd">        Coordinates of the first set of n line segments (shape=(n,2,3))</span>
+<span class="sd">    s2 : array_like</span>
+<span class="sd">        Coordinates of the second set of n line segments (shape=(n,2,3))</span>
+<span class="sd">    return_intersection : bool, optional</span>
+<span class="sd">        If True, return the coordinates of the intersection point. If no </span>
+<span class="sd">        intersection, np.empty((0,3)) is returned. By default False</span>
+<span class="sd">    endpt_inclusive : bool, optional</span>
+<span class="sd">        If True, one end point lying exactly on the other segment will be </span>
+<span class="sd">        considered an intersection, by default True</span>
+<span class="sd">    eps : int, optional</span>
+<span class="sd">        Small tolerance parameter, by default 0</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Intersection : bool</span>
+<span class="sd">        Specifies whether the two line segments intersect</span>
+<span class="sd">    pt : np.ndarray, optional</span>
+<span class="sd">        Point where the two lines intersect, returned if return_intersection=True.</span>
+<span class="sd">        If the two lines don&#39;t intersect, the coordinates of the returned point </span>
+<span class="sd">        is [np.nan, np.nan, np.nan].</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
     <span class="c1"># https://mathworld.wolfram.com/Line-LineIntersection.html</span>
     <span class="c1"># Goldman (1990)</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span> <span class="n">s1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span>
@@ -1952,16 +2066,20 @@
     <span class="n">p3</span> <span class="o">=</span> <span class="n">s2</span><span class="p">[:,</span><span class="mi">0</span><span class="p">];</span> <span class="n">p4</span> <span class="o">=</span> <span class="n">s2</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
     
     <span class="n">a</span> <span class="o">=</span> <span class="n">p2</span><span class="o">-</span><span class="n">p1</span><span class="p">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">p4</span><span class="o">-</span><span class="n">p3</span><span class="p">;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">p3</span><span class="o">-</span><span class="n">p1</span>
+
     <span class="n">axb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">cxb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">cxa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">axbnorm2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axb</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1">#+ 1e-32</span>
+
+    <span class="n">coplanar_check</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">c</span><span class="o">*</span><span class="n">axb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="c1"># scalar triple product</span>
+
     <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cxb</span><span class="o">*</span><span class="n">axb</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">axbnorm2</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cxa</span><span class="o">*</span><span class="n">axb</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">axbnorm2</span>
     <span class="c1"># Collinear: Currently not getting intersection points for perfectly collinear lines</span>
     <span class="k">if</span> <span class="n">endpt_inclusive</span><span class="p">:</span>
-        <span class="n">Intersections</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="n">eps</span> <span class="o">&lt;=</span> <span class="n">s</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">s</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="o">+</span><span class="n">eps</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="n">eps</span> <span class="o">&lt;=</span> <span class="n">t</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="o">+</span><span class="n">eps</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">axbnorm2</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="c1">## DON&#39;T GET RID OF THE LAST CHECK</span>
+        <span class="n">Intersections</span> <span class="o">=</span> <span class="n">coplanar_check</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="n">eps</span> <span class="o">&lt;=</span> <span class="n">s</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">s</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="o">+</span><span class="n">eps</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="n">eps</span> <span class="o">&lt;=</span> <span class="n">t</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="o">+</span><span class="n">eps</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">axbnorm2</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="c1">## DON&#39;T GET RID OF THE LAST CHECK</span>
         <span class="c1"># Intersections = (0 &lt;= s) &amp; (s &lt;= 1) &amp; (0 &lt;= t) &amp; (t &lt;= 1) &amp; (axbnorm2 &gt; eps**2)</span>
         <span class="c1">###</span>
 
@@ -1969,7 +2087,7 @@
         <span class="c1"># np.linalg.norm(axb/(np.linalg.norm(a,axis=1)*np.linalg.norm(b,axis=1))[:,None],axis=1)</span>
         
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">Intersections</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="o">+</span><span class="n">eps</span> <span class="o">&lt;</span> <span class="n">s</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">s</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="o">-</span><span class="n">eps</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0</span><span class="o">+</span><span class="n">eps</span> <span class="o">&lt;</span> <span class="n">t</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="o">-</span><span class="n">eps</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">axbnorm2</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">Intersections</span> <span class="o">=</span> <span class="n">coplanar_check</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0</span><span class="o">+</span><span class="n">eps</span> <span class="o">&lt;</span> <span class="n">s</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">s</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="o">-</span><span class="n">eps</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0</span><span class="o">+</span><span class="n">eps</span> <span class="o">&lt;</span> <span class="n">t</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="o">-</span><span class="n">eps</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">axbnorm2</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">return_intersection</span><span class="p">:</span>
         <span class="c1">### Without collinear:</span>
         <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">Intersections</span><span class="p">),</span><span class="mi">3</span><span class="p">))</span>
@@ -1983,66 +2101,170 @@
     <span class="k">return</span> <span class="n">Intersections</span></div>
 
 
-<span class="k">def</span> <span class="nf">SegmentsSegmentsIntersection2</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">return_intersection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">endpt_inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
-    <span class="c1"># https://mathworld.wolfram.com/Line-LineIntersection.html</span>
-    <span class="c1"># Goldman (1990)</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span> <span class="n">s1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span> <span class="n">s2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
-    
-    <span class="n">x1</span><span class="p">,</span><span class="n">x2</span> <span class="o">=</span> <span class="n">s1</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">s1</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">x3</span><span class="p">,</span><span class="n">x4</span> <span class="o">=</span> <span class="n">s2</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">s2</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">p1</span> <span class="o">=</span> <span class="n">x1</span><span class="p">;</span> <span class="n">V1</span> <span class="o">=</span> <span class="n">x2</span><span class="o">-</span><span class="n">x1</span>
-    <span class="n">p2</span> <span class="o">=</span> <span class="n">x3</span><span class="p">;</span> <span class="n">V2</span> <span class="o">=</span> <span class="n">x4</span><span class="o">-</span><span class="n">x3</span>
-    <span class="n">V1xV2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">V1</span><span class="p">,</span><span class="n">V2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">denom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">V1xV2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+<div class="viewcode-block" id="RaySegmentIntersection">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.rays.RaySegmentIntersection.html#mymesh.rays.RaySegmentIntersection">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">RaySegmentIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">ray</span><span class="p">,</span><span class="n">segment</span><span class="p">,</span><span class="n">return_intersection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">endpt_inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Detect intersections between a ray and a line segment.</span>
 
-    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p2</span><span class="o">-</span><span class="n">p1</span><span class="p">,</span><span class="n">V2</span><span class="p">,</span><span class="n">V1xV2</span><span class="p">])</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="n">denom</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p2</span><span class="o">-</span><span class="n">p1</span><span class="p">,</span><span class="n">V1</span><span class="p">,</span><span class="n">V1xV2</span><span class="p">])</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="n">denom</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pt : array_like</span>
+<span class="sd">        3D coordinates for the starting point of the ray.</span>
+<span class="sd">    ray : array_like</span>
+<span class="sd">        3D vector giving the orientation of the ray.</span>
+<span class="sd">    segment : array_like</span>
+<span class="sd">        Coordinates of the two points of the line segment (shape=(2,3))</span>
+<span class="sd">    return_intersection : bool, optional</span>
+<span class="sd">        If True, return the coordinates of the intersection point. If no </span>
+<span class="sd">        intersection, np.empty((0,3)) is returned. By default False</span>
+<span class="sd">    endpt_inclusive : bool, optional</span>
+<span class="sd">        If True, one end point lying exactly on the other segment will be </span>
+<span class="sd">        considered an intersection, by default True</span>
+<span class="sd">    eps : int, optional</span>
+<span class="sd">        Small tolerance parameter used when excluding endpoint intersections, by default 0</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Intersection : bool</span>
+<span class="sd">        Specifies whether the two line segments intersect</span>
+<span class="sd">    pt : np.ndarray, optional</span>
+<span class="sd">        Point where the two lines intersect, returned if return_intersection=True.</span>
+<span class="sd">        If the two lines don&#39;t intersect, np.empty((0,3)) is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="p">[</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+    <span class="n">p3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+    <span class="n">p4</span> <span class="o">=</span> <span class="n">p3</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ray</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">p2</span><span class="o">-</span><span class="n">p1</span><span class="p">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">p4</span><span class="o">-</span><span class="n">p3</span><span class="p">;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">p3</span><span class="o">-</span><span class="n">p1</span>
+    <span class="n">axb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+
+    <span class="c1"># coplanar test</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">axb</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># scalar triple product</span>
+        <span class="k">if</span> <span class="n">return_intersection</span><span class="p">:</span>
+            <span class="n">pt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">pt</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">axbnorm2</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">axb</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">),</span><span class="n">axb</span><span class="p">)</span><span class="o">/</span><span class="n">axbnorm2</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">a</span><span class="p">),</span><span class="n">axb</span><span class="p">)</span><span class="o">/</span><span class="n">axbnorm2</span>
     
-    <span class="n">x1</span> <span class="o">=</span> <span class="n">p1</span><span class="o">+</span><span class="n">V1</span><span class="o">*</span><span class="n">t</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span>
-    <span class="n">x2</span> <span class="o">=</span> <span class="n">p2</span><span class="o">+</span><span class="n">V2</span><span class="o">*</span><span class="n">s</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span>
-    <span class="c1"># print((np.linalg.norm(x1-s1[:,0],axis=1)))</span>
-    <span class="c1"># print((np.linalg.norm(x1-s1[:,1],axis=1)))</span>
     <span class="k">if</span> <span class="n">endpt_inclusive</span><span class="p">:</span>
-        <span class="n">Intersections</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x2</span><span class="o">-</span><span class="n">x1</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">Intersection</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">s</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">t</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">axbnorm2</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">Intersections</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x2</span><span class="o">-</span><span class="n">x1</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x1</span><span class="o">-</span><span class="n">s1</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">eps</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x1</span><span class="o">-</span><span class="n">s1</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">eps</span><span class="p">))</span>
+        <span class="n">Intersection</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="o">+</span><span class="n">eps</span> <span class="o">&lt;</span> <span class="n">s</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="o">-</span><span class="n">eps</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="mi">0</span><span class="o">+</span><span class="n">eps</span> <span class="o">&lt;</span> <span class="n">t</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">axbnorm2</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">return_intersection</span><span class="p">:</span>
-        <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">Intersections</span><span class="p">),</span><span class="mi">3</span><span class="p">))</span>
-        <span class="n">pts</span><span class="p">[</span><span class="n">Intersections</span><span class="p">]</span> <span class="o">=</span> <span class="n">x1</span><span class="p">[</span><span class="n">Intersections</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">Intersections</span><span class="p">,</span> <span class="n">pts</span>
-    <span class="k">return</span> <span class="n">Intersections</span>
+        <span class="k">if</span> <span class="n">Intersection</span><span class="p">:</span>
+            <span class="n">pt</span> <span class="o">=</span> <span class="n">p1</span> <span class="o">+</span> <span class="n">a</span><span class="o">*</span><span class="n">s</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Intersection</span><span class="p">,</span> <span class="n">pt</span>
+
+    <span class="k">return</span> <span class="n">Intersection</span></div>
+
 
 <div class="viewcode-block" id="RaySegmentsIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.RaySegmentsIntersection.html#mymesh.rays.RaySegmentsIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">RaySegmentsIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">segments</span><span class="p">,</span> <span class="n">return_intersection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RaySegmentsIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">segments</span><span class="p">,</span> <span class="n">return_intersection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">endpt_inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Detect intersections between pairs of line segments.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    s1 : array_like</span>
+<span class="sd">        Coordinates of the first set of n line segments (shape=(n,2,3))</span>
+<span class="sd">    s2 : array_like</span>
+<span class="sd">        Coordinates of the second set of n line segments (shape=(n,2,3))</span>
+<span class="sd">    return_intersection : bool, optional</span>
+<span class="sd">        If True, return the coordinates of the intersection point. If no </span>
+<span class="sd">        intersection, np.empty((0,3)) is returned. By default False</span>
+<span class="sd">    endpt_inclusive : bool, optional</span>
+<span class="sd">        If True, one end point lying exactly on the other segment will be </span>
+<span class="sd">        considered an intersection, by default True</span>
+<span class="sd">    eps : int, optional</span>
+<span class="sd">        Small tolerance parameter, by default 0</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Intersection : bool</span>
+<span class="sd">        Specifies whether the two line segments intersect</span>
+<span class="sd">    pt : np.ndarray, optional</span>
+<span class="sd">        Point where the two lines intersect, returned if return_intersection=True.</span>
+<span class="sd">        If the two lines don&#39;t intersect, the coordinates of the returned point </span>
+<span class="sd">        is [np.nan, np.nan, np.nan].</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="c1"># https://mathworld.wolfram.com/Line-LineIntersection.html</span>
+    <span class="c1"># Goldman (1990)</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span> <span class="n">segments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span>
     
-    <span class="n">x1</span><span class="p">,</span><span class="n">x2</span> <span class="o">=</span> <span class="n">segments</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">segments</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">p1</span> <span class="o">=</span> <span class="n">x1</span><span class="p">;</span> <span class="n">V1</span> <span class="o">=</span> <span class="n">x2</span><span class="o">-</span><span class="n">x1</span>
-    <span class="n">p2</span> <span class="o">=</span> <span class="n">pt</span><span class="p">;</span> <span class="n">V2</span> <span class="o">=</span> <span class="n">ray</span>
-    <span class="n">V1xV2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">V1</span><span class="p">,</span><span class="n">V2</span><span class="p">)</span>
-    <span class="n">denom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">V1xV2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-
-    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p2</span><span class="o">-</span><span class="n">p1</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="n">V2</span><span class="p">],</span><span class="nb">len</span><span class="p">(</span><span class="n">V1</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span><span class="n">V1xV2</span><span class="p">])</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="n">denom</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p2</span><span class="o">-</span><span class="n">p1</span><span class="p">,</span><span class="n">V1</span><span class="p">,</span><span class="n">V1xV2</span><span class="p">])</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="n">denom</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">segments</span><span class="p">[:,</span><span class="mi">0</span><span class="p">];</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">segments</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">p3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+    <span class="n">p4</span> <span class="o">=</span> <span class="n">p3</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ray</span><span class="p">)</span>
     
-    <span class="n">x1</span> <span class="o">=</span> <span class="n">p1</span><span class="o">+</span><span class="n">V1</span><span class="o">*</span><span class="n">t</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span>
-    <span class="n">x2</span> <span class="o">=</span> <span class="n">p2</span><span class="o">+</span><span class="n">V2</span><span class="o">*</span><span class="n">s</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">p2</span><span class="o">-</span><span class="n">p1</span><span class="p">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">p4</span><span class="o">-</span><span class="n">p3</span><span class="p">;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">p3</span><span class="o">-</span><span class="n">p1</span>
 
-    <span class="n">Intersections</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">s</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">s</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">axb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">axbnorm2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axb</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1">#+ 1e-32</span>
+
+    <span class="n">coplanar_check</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">c</span><span class="o">*</span><span class="n">axb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="c1"># scalar triple product</span>
+
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">axb</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">axbnorm2</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">axb</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">axbnorm2</span>
+    <span class="c1"># Collinear: Currently not getting intersection points for perfectly collinear lines</span>
+    <span class="k">if</span> <span class="n">endpt_inclusive</span><span class="p">:</span>
+        <span class="n">Intersections</span> <span class="o">=</span> <span class="n">coplanar_check</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="n">eps</span> <span class="o">&lt;=</span> <span class="n">s</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">s</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="o">+</span><span class="n">eps</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="n">eps</span> <span class="o">&lt;=</span> <span class="n">t</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">axbnorm2</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> 
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Intersections</span> <span class="o">=</span> <span class="n">coplanar_check</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0</span><span class="o">+</span><span class="n">eps</span> <span class="o">&lt;</span> <span class="n">s</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">s</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="o">-</span><span class="n">eps</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0</span><span class="o">+</span><span class="n">eps</span> <span class="o">&lt;</span> <span class="n">t</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">axbnorm2</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">return_intersection</span><span class="p">:</span>
+        <span class="c1">### Without collinear:</span>
         <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">Intersections</span><span class="p">),</span><span class="mi">3</span><span class="p">))</span>
-        <span class="n">pts</span><span class="p">[</span><span class="n">Intersections</span><span class="p">]</span> <span class="o">=</span> <span class="n">x1</span><span class="p">[</span><span class="n">Intersections</span><span class="p">]</span>
+        <span class="n">pts</span><span class="p">[</span><span class="n">Intersections</span><span class="p">]</span> <span class="o">=</span> <span class="n">p1</span><span class="p">[</span><span class="n">Intersections</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="n">Intersections</span><span class="p">]</span><span class="o">*</span><span class="n">s</span><span class="p">[</span><span class="n">Intersections</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span>
+
         <span class="k">return</span> <span class="n">Intersections</span><span class="p">,</span> <span class="n">pts</span>
     <span class="k">return</span> <span class="n">Intersections</span></div>
 
     
+<span class="k">def</span><span class="w"> </span><span class="nf">RayBoundaryIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">BoundaryConn</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identify intersections between a ray and a boundary mesh of line elements. </span>
+<span class="sd">    This is generally intended for 2D boundary meshes, though it will work </span>
+<span class="sd">    in 3D as well. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pt : array_like</span>
+<span class="sd">        3D point coordinate (shape = (3,))</span>
+<span class="sd">    ray : array_like</span>
+<span class="sd">        3D vector (shape = (3,))</span>
+<span class="sd">    NodeCoords : array_like</span>
+<span class="sd">        nx3 list of node coordinates</span>
+<span class="sd">    BoundaryConn : array_like</span>
+<span class="sd">        List of line element connectivities. This should have shape = (n,2)</span>
+<span class="sd">    eps : float, optional</span>
+<span class="sd">        Small tolerance parameter, by default 1e-14</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    intersections : np.ndarray</span>
+<span class="sd">        Indices of line segment elements that are intersected by ray.</span>
+<span class="sd">    distances : np.ndarray</span>
+<span class="sd">        Distances between the point and the intersection points.</span>
+<span class="sd">    intersectionPts : np.ndarray</span>
+<span class="sd">        Coordinates of intersection points for each intersection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">segments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="n">BoundaryConn</span><span class="p">]</span>
+    <span class="n">intersections</span><span class="p">,</span> <span class="n">intersectionPts</span> <span class="o">=</span> <span class="n">RaySegmentsIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">segments</span><span class="p">,</span> <span class="n">return_intersection</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ray</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ray</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">intersectionPts</span><span class="o">-</span><span class="n">pt</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">intersections</span><span class="p">,</span> <span class="n">distances</span><span class="p">,</span> <span class="n">intersectionPts</span>
+
 <div class="viewcode-block" id="RaySurfIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.RaySurfIntersection.html#mymesh.rays.RaySurfIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">RaySurfIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span> <span class="n">Octree</span><span class="o">=</span><span class="s1">&#39;generate&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RaySurfIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span> <span class="n">Octree</span><span class="o">=</span><span class="s1">&#39;generate&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Identify intersections between a ray and a triangular surface mesh. </span>
 
@@ -2080,7 +2302,7 @@
 <span class="sd">    </span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
         <span class="n">iPt</span> <span class="o">=</span> <span class="n">RayTriangleIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">iPt</span>
     <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
@@ -2089,7 +2311,7 @@
     <span class="k">if</span> <span class="n">Octree</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">Octree</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="ow">or</span> <span class="n">Octree</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
         <span class="c1"># Won&#39;t use any octree structure to accelerate intersection tests</span>
         <span class="n">intersections</span><span class="p">,</span><span class="n">intersectionPts</span> <span class="o">=</span> <span class="n">RayTrianglesIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">SurfConn</span><span class="p">],</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
-        <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ray</span><span class="o">*</span><span class="p">(</span><span class="n">intersectionPts</span><span class="o">-</span><span class="n">pt</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ray</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ray</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">intersectionPts</span><span class="o">-</span><span class="n">pt</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">Octree</span> <span class="o">==</span> <span class="s1">&#39;generate&#39;</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">Octree</span><span class="p">)</span> <span class="o">==</span> <span class="n">octree</span><span class="o">.</span><span class="n">OctreeNode</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">Octree</span> <span class="o">==</span> <span class="s1">&#39;generate&#39;</span><span class="p">:</span>
             <span class="c1"># Create an octree structure based on the provided structure</span>
@@ -2106,7 +2328,7 @@
         <span class="n">Tris</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">SurfConn</span><span class="p">)[</span><span class="n">TriIds</span><span class="p">]]</span>
         <span class="n">intersections</span><span class="p">,</span><span class="n">intersectionPts</span> <span class="o">=</span> <span class="n">RayTrianglesIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">Tris</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
         <span class="n">intersections</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">TriIds</span><span class="p">)[</span><span class="n">intersections</span><span class="p">]</span>
-        <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ray</span><span class="o">*</span><span class="p">(</span><span class="n">intersectionPts</span><span class="o">-</span><span class="n">pt</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ray</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ray</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">intersectionPts</span><span class="o">-</span><span class="n">pt</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Invalid octree argument given&#39;</span><span class="p">)</span>
         
@@ -2115,7 +2337,7 @@
 
 <div class="viewcode-block" id="RaysSurfIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.RaysSurfIntersection.html#mymesh.rays.RaysSurfIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">RaysSurfIntersection</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span> <span class="n">Octree</span><span class="o">=</span><span class="s1">&#39;generate&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RaysSurfIntersection</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span> <span class="n">Octree</span><span class="o">=</span><span class="s1">&#39;generate&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Identify intersections between rays and a triangular surface mesh. </span>
 
@@ -2229,7 +2451,7 @@
 
 <div class="viewcode-block" id="RayOctreeIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.RayOctreeIntersection.html#mymesh.rays.RayOctreeIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">RayOctreeIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">Octree</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RayOctreeIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">ray</span><span class="p">,</span> <span class="n">Octree</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Test for identifying intersections between a ray and an octree.</span>
 
@@ -2275,7 +2497,7 @@
 
 <div class="viewcode-block" id="SurfSelfIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.SurfSelfIntersection.html#mymesh.rays.SurfSelfIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">SurfSelfIntersection</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">Octree</span><span class="o">=</span><span class="s1">&#39;generate&#39;</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span> <span class="n">return_pts</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SurfSelfIntersection</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">Octree</span><span class="o">=</span><span class="s1">&#39;generate&#39;</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span> <span class="n">return_pts</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Identify self intersections in a mesh</span>
 
@@ -2346,7 +2568,7 @@
     
 <div class="viewcode-block" id="SurfSurfIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.SurfSurfIntersection.html#mymesh.rays.SurfSurfIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">SurfSurfIntersection</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">,</span> <span class="n">SurfConn1</span><span class="p">,</span> <span class="n">NodeCoords2</span><span class="p">,</span> <span class="n">SurfConn2</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span> <span class="n">return_pts</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SurfSurfIntersection</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">,</span> <span class="n">SurfConn1</span><span class="p">,</span> <span class="n">NodeCoords2</span><span class="p">,</span> <span class="n">SurfConn2</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">,</span> <span class="n">return_pts</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Identify intersections between two surface meshes.</span>
 
@@ -2430,7 +2652,7 @@
 
 <div class="viewcode-block" id="PlaneSurfIntersection">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PlaneSurfIntersection.html#mymesh.rays.PlaneSurfIntersection">[docs]</a>
-<span class="k">def</span> <span class="nf">PlaneSurfIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PlaneSurfIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">):</span>
 
     <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
     <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">SurfConn</span><span class="p">)</span>
@@ -2441,10 +2663,80 @@
     <span class="k">return</span> <span class="n">Intersections</span></div>
 
 
+<span class="c1">## Projection</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SilhouetteProjection</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">pt</span><span class="p">,</span> <span class="n">Normal</span><span class="p">):</span>
+    
+    <span class="c1"># point (x,y,z), normal (nx,ny,nz), point on plane (px,py,pz)</span>
+    <span class="c1"># find t s.t. (x+t*nx, y+t*ny, z+tc), (x,y,z), (px,py,pz) form a right triangle</span>
+    <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">];</span> <span class="n">y</span> <span class="o">=</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">];</span> <span class="n">z</span> <span class="o">=</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span> <span class="o">=</span> <span class="n">Normal</span>
+    <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span> <span class="o">=</span> <span class="n">pt</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">px</span> <span class="o">-</span> <span class="n">nx</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">ny</span><span class="o">*</span><span class="n">py</span> <span class="o">-</span> <span class="n">ny</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">nz</span><span class="o">*</span><span class="n">pz</span> <span class="o">-</span> <span class="n">nz</span><span class="o">*</span><span class="n">z</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">nx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">ny</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">nz</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">projected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">x</span><span class="o">+</span><span class="n">t</span><span class="o">*</span><span class="n">nx</span><span class="p">,</span> <span class="n">y</span><span class="o">+</span><span class="n">t</span><span class="o">*</span><span class="n">ny</span><span class="p">,</span> <span class="n">z</span><span class="o">+</span><span class="n">t</span><span class="o">*</span><span class="n">nz</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">projected</span>
+
 <span class="c1">## Inside/Outside Tests</span>
+<div class="viewcode-block" id="PointInBoundary">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PointInBoundary.html#mymesh.rays.PointInBoundary">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">PointInBoundary</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">BoundaryConn</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">ray</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test to determine whether a point is inside a boundary mesh. By default, </span>
+<span class="sd">    this test assumes a 2D mesh parallel to the xy plane. For a boundary mesh in</span>
+<span class="sd">    another plane, the `ray` argument should be modified. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pt : array_like</span>
+<span class="sd">        3D coordinates for point shape=(3,).</span>
+<span class="sd">    NodeCoords : array_like</span>
+<span class="sd">        List of node coordinates of the surface</span>
+<span class="sd">    BoundaryConn : array_like</span>
+<span class="sd">        Node connectivity of elements. This function is only valid for triangular surface meshes.</span>
+<span class="sd">    ElemNormals : array_like</span>
+<span class="sd">        Element normal vectors </span>
+<span class="sd">    eps : float, optional</span>
+<span class="sd">        Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8</span>
+<span class="sd">    ray : array_like, optional</span>
+<span class="sd">        Ray that will be cast to determine whether the point is inside or outside </span>
+<span class="sd">        the boundary, by default a random unit vector parallel to the xy plane will be </span>
+<span class="sd">        used. For a closed boundary, the choice of ray shouldn&#39;t matter as long</span>
+<span class="sd">        as the ray is in the same plane as the boundary.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    inside : bool</span>
+<span class="sd">        True if the point is inside the surface, otherwise False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    
+    <span class="k">if</span> <span class="n">ray</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">ray</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ray</span><span class="p">)</span>
+    <span class="n">intersections</span><span class="p">,</span> <span class="n">distances</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">RayBoundaryIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">ray</span><span class="p">,</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">BoundaryConn</span><span class="p">)</span>
+    <span class="n">posDistances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">distances</span> <span class="k">if</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">])</span>
+    <span class="n">zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span><span class="o">&lt;</span><span class="n">eps</span><span class="p">)</span>
+    
+    <span class="c1"># Checking unique to not double count instances where ray intersects an edge</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">posDistances</span><span class="o">/</span><span class="n">eps</span><span class="p">)))</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">zero</span><span class="p">:</span>
+        <span class="c1"># No intersection</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">inside</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># dist = min(np.abs(distances))</span>
+        <span class="c1"># if dist &lt; eps:</span>
+        <span class="c1">#     closest = np.array(intersections)[np.abs(distances)==dist][0]</span>
+        <span class="c1">#     dot = np.dot(ray,ElemNormals[closest])</span>
+        <span class="c1">#     return dot</span>
+        <span class="c1"># else:</span>
+        <span class="c1"># Inside</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">inside</span></div>
+
+
 <div class="viewcode-block" id="PointInSurf">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PointInSurf.html#mymesh.rays.PointInSurf">[docs]</a>
-<span class="k">def</span> <span class="nf">PointInSurf</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">ElemNormals</span><span class="p">,</span> <span class="n">Octree</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">ray</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">)):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PointInSurf</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">ElemNormals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Octree</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">ray</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">)):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Test to determine whether a point is inside a surface mesh.</span>
 
@@ -2474,7 +2766,8 @@
 <span class="sd">        True if the point is inside the surface, otherwise False.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="n">root</span> <span class="o">=</span> <span class="n">OctreeInputProcessor</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">Octree</span><span class="p">)</span>
-        
+    <span class="k">if</span> <span class="n">ElemNormals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ElemNormals</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">CalcFaceNormal</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">)</span>
     <span class="n">intersections</span><span class="p">,</span> <span class="n">distances</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">RaySurfIntersection</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">ray</span><span class="p">,</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">SurfConn</span><span class="p">,</span><span class="n">Octree</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
     <span class="n">posDistances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">distances</span> <span class="k">if</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">])</span>
     <span class="n">zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span><span class="o">&lt;</span><span class="n">eps</span><span class="p">)</span>
@@ -2498,7 +2791,7 @@
 
 <div class="viewcode-block" id="PointsInSurf">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PointsInSurf.html#mymesh.rays.PointsInSurf">[docs]</a>
-<span class="k">def</span> <span class="nf">PointsInSurf</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">ElemNormals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Octree</span><span class="o">=</span><span class="s1">&#39;generate&#39;</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">rays</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PointsInSurf</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">ElemNormals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Octree</span><span class="o">=</span><span class="s1">&#39;generate&#39;</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">rays</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Test to determine whether points are inside a surface mesh.</span>
 
@@ -2553,10 +2846,63 @@
     <span class="k">return</span> <span class="n">Insides</span></div>
 
 
+<span class="c1"># def PointInBoundary(pt, NodeCoords, BoundaryConn, ElemNormals, Octree=None, eps=1e-8, ray=np.random.rand(2), validate_mesh=False):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Test to determine whether a point is inside a closed 2D boundary mesh of</span>
+<span class="c1">#     line elements.</span>
+
+<span class="c1">#     Parameters</span>
+<span class="c1">#     ----------</span>
+<span class="c1">#     pt : array_like</span>
+<span class="c1">#         2D or 3D coordinates for point shape=(2,) or shape=(3,). If given, the</span>
+<span class="c1">#         third dimension will be ignored.</span>
+<span class="c1">#     NodeCoords : array_like</span>
+<span class="c1">#         List of node coordinates of the surface</span>
+<span class="c1">#     BoundaryConn : array_like</span>
+<span class="c1">#         Node connectivity of elements. This function is only valid for line meshes.</span>
+<span class="c1">#     ElemNormals : array_like</span>
+<span class="c1">#         Element normal vectors </span>
+<span class="c1">#     Octree : None, str, or octree.octreeNode, optional</span>
+<span class="c1">#         Determines whether to use/generate an octree data structure for acceleration of the intersection testing, by default None. </span>
+<span class="c1">#         &#39;generate&#39; - Will generate an octree structure of the surface</span>
+<span class="c1">#         None - Will not use an octree structure</span>
+<span class="c1">#         octree.octreeNode - Octree data structure precomputed using :func:`mymesh.octree.Surface2Octree`</span>
+<span class="c1">#     eps : float, optional</span>
+<span class="c1">#         Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8</span>
+<span class="c1">#     ray : array_like, optional</span>
+<span class="c1">#         Ray that will be cast to determine whether the point is inside or outside the surface, by default np.random.rand(3). For a closed, manifold surface, the choice of ray shouldn&#39;t matter.</span>
+
+<span class="c1">#     Returns</span>
+<span class="c1">#     -------</span>
+<span class="c1">#     inside : bool</span>
+<span class="c1">#         True if the point is inside the surface, otherwise False.</span>
+<span class="c1">#     &quot;&quot;&quot;    </span>
+<span class="c1">#     # root = OctreeInputProcessor(NodeCoords, SurfConn, Octree)</span>
+<span class="c1">#     segments = np.asarray(NodeCoords)[BoundaryConn]</span>
+<span class="c1">#     intersections, distances, _ = RaySegmentsIntersection(pt,ray,segments)</span>
+<span class="c1">#     posDistances = np.array([d for d in distances if d &gt; eps])</span>
+<span class="c1">#     zero = np.any(np.abs(distances)&lt;eps)</span>
+    
+<span class="c1">#     # Checking unique to not double count instances where ray intersects an edge</span>
+<span class="c1">#     if len(np.unique(np.round(posDistances/eps)))%2 == 0 and not zero:</span>
+<span class="c1">#         # No intersection</span>
+<span class="c1">#         inside = False</span>
+<span class="c1">#         return inside</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         dist = min(np.abs(distances))</span>
+<span class="c1">#         if dist &lt; eps:</span>
+<span class="c1">#             closest = np.array(intersections)[np.abs(distances)==dist][0]</span>
+<span class="c1">#             dot = np.dot(ray,ElemNormals[closest])</span>
+<span class="c1">#             return dot</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             # Inside</span>
+<span class="c1">#             inside = True</span>
+<span class="c1">#             return inside</span>
+
 <div class="viewcode-block" id="PointInBox">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PointInBox.html#mymesh.rays.PointInBox">[docs]</a>
 <span class="nd">@try_njit</span>
-<span class="k">def</span> <span class="nf">PointInBox</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PointInBox</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Test whether a point is inside a box</span>
 
@@ -2592,7 +2938,7 @@
 
 <div class="viewcode-block" id="PointsInVoxel">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PointsInVoxel.html#mymesh.rays.PointsInVoxel">[docs]</a>
-<span class="k">def</span> <span class="nf">PointsInVoxel</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>    
+<span class="k">def</span><span class="w"> </span><span class="nf">PointsInVoxel</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>    
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Test to determine whether points are inside a voxel mesh</span>
 
@@ -2623,7 +2969,7 @@
         
 <div class="viewcode-block" id="PointInTri">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PointInTri.html#mymesh.rays.PointInTri">[docs]</a>
-<span class="k">def</span> <span class="nf">PointInTri</span><span class="p">(</span><span class="n">Tri</span><span class="p">,</span><span class="n">pt</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;BaryArea&#39;</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PointInTri</span><span class="p">(</span><span class="n">Tri</span><span class="p">,</span><span class="n">pt</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;BaryArea&#39;</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;Normal&#39;</span><span class="p">:</span>
         <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">Tri</span><span class="p">,</span><span class="n">pt</span><span class="p">])</span>
@@ -2663,7 +3009,7 @@
 
 <div class="viewcode-block" id="PointsInTris">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PointsInTris.html#mymesh.rays.PointsInTris">[docs]</a>
-<span class="k">def</span> <span class="nf">PointsInTris</span><span class="p">(</span><span class="n">Tris</span><span class="p">,</span><span class="n">pts</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;BaryArea&#39;</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PointsInTris</span><span class="p">(</span><span class="n">Tris</span><span class="p">,</span><span class="n">pts</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;BaryArea&#39;</span><span class="p">,</span><span class="n">eps</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="c1"># Pairwise comparisons between each triangle in tris and its corresponding point in pts</span>
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;BaryArea&#39;</span><span class="p">:</span>
         <span class="n">A</span> <span class="o">=</span> <span class="n">Tris</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
@@ -2691,7 +3037,7 @@
 
 
 <span class="nd">@try_njit</span>
-<span class="k">def</span> <span class="nf">PointInTet</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">Tet</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PointInTet</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">Tet</span><span class="p">):</span>
 
     <span class="n">alpha</span><span class="p">,</span><span class="n">beta</span><span class="p">,</span><span class="n">gamma</span><span class="p">,</span><span class="n">delta</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">BaryTet</span><span class="p">(</span><span class="n">Tet</span><span class="p">,</span><span class="n">pt</span><span class="p">)</span>
     <span class="n">In</span> <span class="o">=</span> <span class="kc">True</span>
@@ -2706,7 +3052,7 @@
 
     <span class="k">return</span> <span class="n">In</span>
 
-<span class="k">def</span> <span class="nf">OctreeInputProcessor</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">Octree</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">OctreeInputProcessor</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">Octree</span><span class="p">):</span>
     
     <span class="k">if</span> <span class="n">Octree</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">Octree</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="ow">or</span> <span class="n">Octree</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
         <span class="c1"># Won&#39;t use any octree structure to accelerate intersection tests</span>
@@ -2751,8 +3097,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2785,7 +3131,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

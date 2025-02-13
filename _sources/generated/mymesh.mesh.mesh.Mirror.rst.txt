@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.Mirror
+=======================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.Mirror

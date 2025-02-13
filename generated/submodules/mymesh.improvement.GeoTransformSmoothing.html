@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,10 +27,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="mymesh.improvement.NodeSpringSmoothing" href="mymesh.improvement.NodeSpringSmoothing.html" />
-    <link rel="prev" title="mymesh.improvement.GlobalLaplacianSmoothing" href="mymesh.improvement.GlobalLaplacianSmoothing.html" />
+    <link rel="prev" title="mymesh.improvement.SmartLaplacianSmoothing" href="mymesh.improvement.SmartLaplacianSmoothing.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -370,9 +370,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -426,7 +431,27 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.improvement.GeoTransformSmoothing">
 <span class="sig-prename descclassname"><span class="pre">mymesh.improvement.</span></span><span class="sig-name descname"><span class="pre">GeoTransformSmoothing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualityThreshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/improvement.html#GeoTransformSmoothing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.improvement.GeoTransformSmoothing" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Geometric element transformation method for tetrahedral mesh smoothing <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id13" title="Dimitris Vartziotis, Joachim Wipper, and Bernd Schwald. The geometric element transformation method for tetrahedral mesh smoothing. Computer Methods in Applied Mechanics and Engineering, 199(1-4):169–182, 2009. URL: http://www.twt-gmbh.de, doi:10.1016/j.cma.2009.09.027.">VWS09</a>]</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>M</strong> (<a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><em>mymesh.mesh</em></a>) – Mesh object to smooth. Must be a purely tetrahedral mesh.</p></li>
+<li><p><strong>sigma_min</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_, by default None</p></li>
+<li><p><strong>sigma_max</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_, by default None</p></li>
+<li><p><strong>eta</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_, by default None</p></li>
+<li><p><strong>rho</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_, by default None</p></li>
+<li><p><strong>qualityThreshold</strong> (<em>float</em><em>, </em><em>optional</em>) – _description_, by default .2</p></li>
+<li><p><strong>options</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_, by default dict()</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Mnew</strong> – Mesh object with the new node locations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh">mymesh.mesh</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 
@@ -441,12 +466,12 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mymesh.improvement.GlobalLaplacianSmoothing.html"
+       href="mymesh.improvement.SmartLaplacianSmoothing.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.improvement.GlobalLaplacianSmoothing</p>
+        <p class="prev-next-title">mymesh.improvement.SmartLaplacianSmoothing</p>
       </div>
     </a>
     <a class="right-next"
@@ -482,13 +507,13 @@
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../../_sources/generated/submodules/mymesh.improvement.GeoTransformSmoothing.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/generated/submodules/mymesh.improvement.GeoTransformSmoothing.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -503,8 +528,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -537,7 +562,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

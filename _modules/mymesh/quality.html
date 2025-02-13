@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -43,10 +43,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -337,9 +337,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -442,16 +447,16 @@
 <span class="sd">    SurfDihedralAngles</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">mesh</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">copy</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">mesh</span>
 
 <span class="c1"># Finite element modeling mesh quality, energy balance and validation methods: A review with recommendations associated with the modeling of bone tissue - Burkhart et al.</span>
 
 <div class="viewcode-block" id="AspectRatio">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.AspectRatio.html#mymesh.quality.AspectRatio">[docs]</a>
-<span class="k">def</span> <span class="nf">AspectRatio</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">AspectRatio</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates element aspect ratios for each element in the mesh.</span>
 <span class="sd">    For all element types, the aspect ratio is calculated as the length of the </span>
@@ -497,7 +502,7 @@
 
 <div class="viewcode-block" id="Orthogonality">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.Orthogonality.html#mymesh.quality.Orthogonality">[docs]</a>
-<span class="k">def</span> <span class="nf">Orthogonality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Orthogonality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates element orthogonality for each element in the mesh.</span>
 <span class="sd">    For all element types, orthogonality is calculated by determining the minimum </span>
@@ -507,6 +512,8 @@
 
 <span class="sd">    Orthogonality ranges from 0 to 1, with 0 being the worst element quality</span>
 <span class="sd">    and 1 being the best.</span>
+
+<span class="sd">    This definition of Orthogonality comes from `Ansys &lt;https://ansyshelp.ansys.com/public/account/secured?returnurl=//////Views/Secured/corp/v242/en/wb_msh/msh_orthogonal_quality.html&gt;`_.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -549,7 +556,9 @@
     <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">,[[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="n">RFaceConn</span><span class="p">]</span>
     <span class="n">sidx</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
     <span class="n">sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sidx</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">))])[</span><span class="n">RFaceConn</span><span class="p">]</span>
-    <span class="n">Aici</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">sign</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">Ai</span><span class="o">*</span><span class="n">ci</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ci</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">cinorm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ci</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">Aici</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">sign</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">Ai</span><span class="o">*</span><span class="n">ci</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">cinorm</span>
+    <span class="n">Aici</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">cinorm</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># ci vectors on the surface i.e. not connected to any element</span>
 
     <span class="n">ortho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">Aici</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">Aifi</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
 
@@ -568,13 +577,15 @@
 
 <div class="viewcode-block" id="InverseOrthogonality">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.InverseOrthogonality.html#mymesh.quality.InverseOrthogonality">[docs]</a>
-<span class="k">def</span> <span class="nf">InverseOrthogonality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">InverseOrthogonality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates element inverse orthogonality for each element in the mesh.</span>
 <span class="sd">    For all element types, inverse orthogonality is calculated as 1-orthogonality.</span>
 
 <span class="sd">    Inverse orthogonality ranges from 0 to 1, with 0 being the best element quality</span>
 <span class="sd">    and 1 being the worst.</span>
+
+<span class="sd">    This definition of Inverse Orthogonality comes from `Ansys &lt;https://ansyshelp.ansys.com/public/account/secured?returnurl=//////Views/Secured/corp/v242/en/wb_msh/msh_orthogonal_quality.html&gt;`_.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -608,13 +619,15 @@
 
 <div class="viewcode-block" id="OrthogonalQuality">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.OrthogonalQuality.html#mymesh.quality.OrthogonalQuality">[docs]</a>
-<span class="k">def</span> <span class="nf">OrthogonalQuality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">OrthogonalQuality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates element orthogonality for each element in the mesh.</span>
 <span class="sd">    For all element types, orthogonal quality is calculated as 1-InverseOrthogonalQuality.</span>
 
 <span class="sd">    Orthogonal quality ranges from 0 to 1, with 1 being the best element quality</span>
 <span class="sd">    and 0 being the worst.</span>
+
+<span class="sd">    This definition of Orthogonal Quality comes from `Ansys &lt;https://ansyshelp.ansys.com/public/account/secured?returnurl=//////Views/Secured/corp/v242/en/wb_msh/msh_orthogonal_quality.html&gt;`_.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -647,7 +660,7 @@
 
 <div class="viewcode-block" id="InverseOrthogonalQuality">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.InverseOrthogonalQuality.html#mymesh.quality.InverseOrthogonalQuality">[docs]</a>
-<span class="k">def</span> <span class="nf">InverseOrthogonalQuality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">InverseOrthogonalQuality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates element inverse orthogonal quality for each </span>
 <span class="sd">    element in the mesh. For tetrahedral, wedge, and pyramidal elements, inverse orthogonal</span>
@@ -656,6 +669,8 @@
 
 <span class="sd">    Inverse orthogonal quality ranges from 0 to 1, with 0 being the best element quality</span>
 <span class="sd">    and 1 being the worst.</span>
+
+<span class="sd">    This definition of Inverse Orthogonal Quality comes from `Ansys &lt;https://ansyshelp.ansys.com/public/account/secured?returnurl=//////Views/Secured/corp/v242/en/wb_msh/msh_orthogonal_quality.html&gt;`_.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -693,7 +708,7 @@
 
 <div class="viewcode-block" id="Skewness">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.Skewness.html#mymesh.quality.Skewness">[docs]</a>
-<span class="k">def</span> <span class="nf">Skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">simplexmethod</span><span class="o">=</span><span class="s1">&#39;size&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">simplexmethod</span><span class="o">=</span><span class="s1">&#39;size&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates element skewness for each element in the mesh. </span>
 <span class="sd">    For triangular, hexahedral, wedge, and pyramidal elements, skewness is </span>
@@ -778,7 +793,7 @@
 
 <div class="viewcode-block" id="MinDihedral">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.MinDihedral.html#mymesh.quality.MinDihedral">[docs]</a>
-<span class="k">def</span> <span class="nf">MinDihedral</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">MinDihedral</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the minimum dihedral angle between element faces</span>
 
@@ -821,7 +836,7 @@
 
 <div class="viewcode-block" id="MaxDihedral">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.MaxDihedral.html#mymesh.quality.MaxDihedral">[docs]</a>
-<span class="k">def</span> <span class="nf">MaxDihedral</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">MaxDihedral</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the maximum dihedral angle between element faces</span>
 
@@ -864,7 +879,7 @@
 
 <div class="viewcode-block" id="MeanRatio">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.MeanRatio.html#mymesh.quality.MeanRatio">[docs]</a>
-<span class="k">def</span> <span class="nf">MeanRatio</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">MeanRatio</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span>
     <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">),</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
@@ -903,7 +918,7 @@
 
 <div class="viewcode-block" id="Area">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.Area.html#mymesh.quality.Area">[docs]</a>
-<span class="k">def</span> <span class="nf">Area</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">Type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Area</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">Type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates element areas for each element in the mesh. For volume elements,</span>
 <span class="sd">    the area will be the total surface area of each element. </span>
@@ -917,7 +932,7 @@
 <span class="sd">    Type : str</span>
 <span class="sd">        Specifies whether the mesh is a surface (&#39;surf&#39;) or volume (&#39;vol&#39;) mesh.</span>
 <span class="sd">        If None, will be automatically determined by </span>
-<span class="sd">        :func:`utils.identify_type`, by default, None.</span>
+<span class="sd">        :func:`~mymesh.utils.identify_type`, by default, None.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -929,12 +944,13 @@
     <span class="k">if</span> <span class="n">Type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Type</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">identify_type</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
-        <span class="n">ArrayCoords</span><span class="p">,</span><span class="n">TriConn</span><span class="p">,</span><span class="n">ElemIds</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2tris</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_ids</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>     
-        <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ArrayCoords</span><span class="p">)</span>
+        <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">TriConn</span><span class="p">,</span> <span class="n">inv</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2tris</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">return_inv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">area</span> <span class="o">=</span> <span class="n">tri_area</span><span class="p">(</span><span class="n">ArrayCoords</span><span class="p">,</span> <span class="n">TriConn</span><span class="p">)</span>
-        <span class="n">area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">area</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">ElemIds</span><span class="p">)],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">))</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">area</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Calculate element surface area</span>
         <span class="n">Faces</span><span class="p">,</span> <span class="n">FaceConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">return_FaceConn</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -942,13 +958,21 @@
         <span class="n">area</span> <span class="o">=</span> <span class="n">Area</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Faces</span><span class="p">,</span> <span class="s1">&#39;surf&#39;</span><span class="p">)</span>
         <span class="n">area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">area</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">FaceConn</span><span class="p">)],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">minArea</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+        <span class="n">maxArea</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+        <span class="n">meanArea</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Minimum Area: </span><span class="si">{:.2e}</span><span class="s1"> on Element </span><span class="si">{:.0f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">minArea</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span><span class="o">==</span><span class="n">minArea</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Maximum Area: </span><span class="si">{:.2e}</span><span class="s1"> on Element </span><span class="si">{:.0f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maxArea</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span><span class="o">==</span><span class="n">maxArea</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Mean Area: </span><span class="si">{:.2e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">meanArea</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">A</span></div>
 
 
 <div class="viewcode-block" id="Volume">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.Volume.html#mymesh.quality.Volume">[docs]</a>
-<span class="k">def</span> <span class="nf">Volume</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Volume</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates element volumes for each element in the mesh.</span>
 
@@ -974,7 +998,7 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">ElemType</span> <span class="o">!=</span> <span class="s1">&#39;tet&#39;</span><span class="p">:</span>
-        <span class="n">ArrayCoords</span><span class="p">,</span><span class="n">TetConn</span><span class="p">,</span><span class="n">ElemIds</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2tets</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_ids</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>     
+        <span class="n">ArrayCoords</span><span class="p">,</span><span class="n">TetConn</span><span class="p">,</span><span class="n">inv</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2tets</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_inv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>     
         <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ArrayCoords</span><span class="p">)</span>   
         <span class="n">ArrayConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">TetConn</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -982,8 +1006,8 @@
         <span class="n">ArrayConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">vol</span> <span class="o">=</span> <span class="n">tet_volume</span><span class="p">(</span><span class="n">ArrayCoords</span><span class="p">,</span> <span class="n">ArrayConn</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ElemType</span> <span class="o">!=</span> <span class="s1">&#39;tet&#39;</span><span class="p">:</span>
-        <span class="n">vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vol</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">ElemIds</span><span class="p">)],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">))</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="n">inv</span><span class="p">,</span><span class="n">vol</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">V</span> <span class="o">=</span> <span class="n">vol</span>
 
@@ -991,22 +1015,25 @@
         <span class="n">minVol</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
         <span class="n">maxVol</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
         <span class="n">meanVol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+        <span class="n">totalVol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Minimum Volume: </span><span class="si">{:.2e}</span><span class="s1"> on Element </span><span class="si">{:.0f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">minVol</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">V</span><span class="o">==</span><span class="n">minVol</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Maximum Volume: </span><span class="si">{:.2e}</span><span class="s1"> on Element </span><span class="si">{:.0f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maxVol</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">V</span><span class="o">==</span><span class="n">maxVol</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Mean Volume: </span><span class="si">{:.2e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">meanVol</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total Volume: </span><span class="si">{:.2e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">totalVol</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">V</span></div>
 
 
-<span class="k">def</span> <span class="nf">tri_area</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tri_area</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">):</span>
 
     <span class="n">Points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)]</span>
     <span class="n">area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">Points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">Points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">Points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> 
 
     <span class="k">return</span> <span class="n">area</span>
     
-<span class="k">def</span> <span class="nf">tet_volume</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tet_volume</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">):</span>
 
     <span class="n">pt0</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">][:,</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">pt1</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">][:,</span><span class="mi">1</span><span class="p">]</span>
@@ -1018,7 +1045,7 @@
 
 <div class="viewcode-block" id="tri_skewness">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.tri_skewness.html#mymesh.quality.tri_skewness">[docs]</a>
-<span class="k">def</span> <span class="nf">tri_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tri_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates triangular skewness for each triangle in the mesh. </span>
 <span class="sd">    Mesh should be strictly triangular.</span>
@@ -1064,7 +1091,7 @@
     <span class="k">return</span> <span class="n">skew</span></div>
 
 
-<span class="k">def</span> <span class="nf">tri_area_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tri_area_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates element skewness for each triangular element in the mesh</span>
 <span class="sd">    using the equilateral area skewness method.</span>
@@ -1105,7 +1132,7 @@
 
 <div class="viewcode-block" id="quad_skewness">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.quad_skewness.html#mymesh.quality.quad_skewness">[docs]</a>
-<span class="k">def</span> <span class="nf">quad_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">quad_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates quadrilateral skewness for each quad in the mesh. </span>
 <span class="sd">    Mesh should be strictly quadrilateral.</span>
@@ -1160,7 +1187,7 @@
 
 <div class="viewcode-block" id="tet_vol_skewness">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.tet_vol_skewness.html#mymesh.quality.tet_vol_skewness">[docs]</a>
-<span class="k">def</span> <span class="nf">tet_vol_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tet_vol_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates element skewness for each tetrahedral element in the mesh</span>
 <span class="sd">    using the equilateral volume skewness method.</span>
@@ -1208,7 +1235,7 @@
 
 <div class="viewcode-block" id="equiangular_skewness">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.equiangular_skewness.html#mymesh.quality.equiangular_skewness">[docs]</a>
-<span class="k">def</span> <span class="nf">equiangular_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">equiangular_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates element skewness for each element in the mesh</span>
 <span class="sd">    using the equiangular skewness method.</span>
@@ -1252,7 +1279,7 @@
 
 <div class="viewcode-block" id="dihedralAngles">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.dihedralAngles.html#mymesh.quality.dihedralAngles">[docs]</a>
-<span class="k">def</span> <span class="nf">dihedralAngles</span><span class="p">(</span><span class="n">Nis</span><span class="p">,</span><span class="n">Njs</span><span class="p">,</span><span class="n">Abs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dihedralAngles</span><span class="p">(</span><span class="n">Nis</span><span class="p">,</span><span class="n">Njs</span><span class="p">,</span><span class="n">Abs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate dihedral angles between paired normal vectors. This function</span>
 <span class="sd">    is primarily for internal use with MinDihedral() and MaxDihedral()</span>
@@ -1281,7 +1308,7 @@
 
 <div class="viewcode-block" id="SurfDihedralAngles">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.SurfDihedralAngles.html#mymesh.quality.SurfDihedralAngles">[docs]</a>
-<span class="k">def</span> <span class="nf">SurfDihedralAngles</span><span class="p">(</span><span class="n">ElemNormals</span><span class="p">,</span><span class="n">ElemNeighbors</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SurfDihedralAngles</span><span class="p">(</span><span class="n">ElemNormals</span><span class="p">,</span><span class="n">ElemNeighbors</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate dihedral angles between adjacent faces in a triangular surface mesh</span>
 
@@ -1334,8 +1361,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1368,7 +1395,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

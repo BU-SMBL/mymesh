@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,10 +27,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -355,9 +355,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -413,12 +418,12 @@ to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="mixed-topology-tpms">
 <span id="sphx-glr-examples-meshgeneration-demo-mixed-top-py"></span><h1>Mixed-Topology TPMS<a class="headerlink" href="#mixed-topology-tpms" title="Link to this heading">#</a></h1>
-<p>Mixed-topology surfaces <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id36" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1–18, jul 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span> combine multiple implicit
+<p>Mixed-topology surfaces <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id3" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1–18, jul 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span> combine multiple implicit
 functions by taking weighted sums of the functions. By controlling the weights,
 the resulting surface can be varied continuously between the set of surfaces.
 Depending on the set of surfaces, this can constitute a low-parameter,
 topology-varying design space that can be used for design optimization (as in
-<span id="id2">[<a class="reference internal" href="../../guide/ref.html#id36" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1–18, jul 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span>).</p>
+<span id="id2">[<a class="reference internal" href="../../guide/ref.html#id3" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1–18, jul 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span>).</p>
 <p>Triply periodic minimal surfaces (TPMS) are particularly
 interesting subjects for a mixed-topology approach because the resultant surface
 will remain triply periodic (though not minimal) as long as the periodicities
@@ -427,8 +432,8 @@ are compatible.</p>
 module. Several TPMSs are available as built-in functions in <a class="reference internal" href="../../generated/mymesh.implicit.html#module-mymesh.implicit" title="mymesh.implicit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">implicit</span></code></a>
 including <a class="reference internal" href="../../generated/submodules/mymesh.implicit.gyroid.html#mymesh.implicit.gyroid" title="mymesh.implicit.gyroid"><code class="xref py py-func docutils literal notranslate"><span class="pre">gyroid()</span></code></a>, <a class="reference internal" href="../../generated/submodules/mymesh.implicit.primitive.html#mymesh.implicit.primitive" title="mymesh.implicit.primitive"><code class="xref py py-func docutils literal notranslate"><span class="pre">primitive()</span></code></a>
 (Schwarz P), and <a class="reference internal" href="../../generated/submodules/mymesh.implicit.diamond.html#mymesh.implicit.diamond" title="mymesh.implicit.diamond"><code class="xref py py-func docutils literal notranslate"><span class="pre">diamond()</span></code></a> (Schwarz D) <a class="footnote-reference brackets" href="#f1" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mymesh</span> <span class="kn">import</span> <span class="n">implicit</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mymesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">implicit</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="n">functions</span> <span class="o">=</span> <span class="p">[</span><span class="n">implicit</span><span class="o">.</span><span class="n">primitive</span><span class="p">,</span> <span class="n">implicit</span><span class="o">.</span><span class="n">gyroid</span><span class="p">]</span>
 <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
@@ -472,14 +477,14 @@ RFBOutputContext()
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
 <p>To be specific, the implicit function TPMS representations are
 Fourier series approximations (also known as periodic nodal surfaces
-<span id="id4">[<a class="reference internal" href="../../guide/ref.html#id38" title="H. G. von Schnering and R. Nesper. Nodal surfaces of Fourier series: Fundamental invariants of structured matter. Zeitschrift für Physik B Condensed Matter, 83(3):407–412, 1991. URL: https://www.doi.org/10.1007/BF01313411, doi:10.1007/BF01313411.">vSN91</a>]</span>) and are not <em>truly</em> minimal surfaces (though they
+<span id="id4">[<a class="reference internal" href="../../guide/ref.html#id28" title="H. G. von Schnering and R. Nesper. Nodal surfaces of Fourier series: Fundamental invariants of structured matter. Zeitschrift für Physik B Condensed Matter, 83(3):407–412, 1991. URL: https://www.doi.org/10.1007/BF01313411, doi:10.1007/BF01313411.">vSN91</a>]</span>) and are not <em>truly</em> minimal surfaces (though they
 are truly triply periodic). This can be seen by measuring the surface curvature
 (<a class="reference internal" href="../../generated/mymesh.curvature.html#module-mymesh.curvature" title="mymesh.curvature"><code class="xref py py-mod docutils literal notranslate"><span class="pre">curvature</span></code></a>) and observing that the mean curvature is not zero at
 all points. Nevertheless, these are reasonably accurate and commonly used
 approximations.</p>
 </aside>
 </aside>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.623 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.641 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshgeneration-demo-mixed-top-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/188cf3c47a11ac8ef0666307cef28cf2/demo_mixed-top.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">demo_mixed-top.ipynb</span></code></a></p>
@@ -534,13 +539,13 @@ approximations.</p>
 
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../../_sources/examples/MeshGeneration/demo_mixed-top.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/examples/MeshGeneration/demo_mixed-top.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -555,8 +560,8 @@ approximations.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -589,7 +594,8 @@ approximations.</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>
