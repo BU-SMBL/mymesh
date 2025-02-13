@@ -40,6 +40,8 @@ jobs:
           libglu1-mesa-dev \
           libgl1-mesa-dev \
           libgl1-mesa-dri \
+          libgl1 \
+          libglx-mesa0 \
           libosmesa6-dev \
           mesa-common-dev \
           libxi-dev \
@@ -58,6 +60,7 @@ jobs:
           libxcb-image0-dev \
           libxcb-keysyms1 \
           libxcb-cursor0 \
+          libegl1-mesa \
           x11-utils \
           xvfb
 
