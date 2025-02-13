@@ -89,7 +89,7 @@ def AxisAlign(M, axis_order=[2,1,0]):
 def AxisAlignImage():
     return
 
-def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metric='closest_point_MSE', 
+def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metric='symmetric_closest_point_MSE', 
     method='direct', decimation=1, transform_args={}, optimizer_args=None, verbose=True):
     """
     Point cloud-to-point cloud alignment. points2 will be aligned to points1.
@@ -227,7 +227,12 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
         
     assert len(x0) == nparam, f"The provided parameters for x0 don't match the transformation model ({transform:s})."
     
-    if metric.lower() == 'hausdorff':
+    if metric.lower() == 'symmetric_closest_point_mse':
+        tree1 = scipy.spatial.KDTree(points1) 
+        # Note: can't precommute tree for the moving points
+        obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)
+        
+    elif metric.lower() == 'hausdorff':
         obj = hausdorff
     elif metric.lower() == 'closest_point_mse':
         tree1 = scipy.spatial.KDTree(points1)
@@ -973,6 +978,20 @@ def closest_point_MSE(points1, points2, tree1=None):
 
     return MSE
 
+def symmetric_closest_point_MSE(points1, points2, tree1=None, tree2=None):
+    
+    if tree1 is None:
+        tree1 = scipy.spatial.KDTree(points1)
+    if tree2 is None:
+        tree2 = scipy.spatial.KDTree(points2)
+    
+    distances1, _ = tree1.query(points2)
+    distances2, _ = tree2.query(points1)
+    distances = np.append(distances1, distances2)
+    MSE = np.sum(distances**2)/len(distances)
+    
+    return MSE
+
 ### Optimization
 def optimize(objective, method, x0=None, bounds=None, optimizer_args=None):
 
@@ -984,9 +1003,11 @@ def optimize(objective, method, x0=None, bounds=None, optimizer_args=None):
             optimizer_args = {}
 
 
-    if method.lower() == 'direct':
+    if method.lower() == 'direct' or method.lower() == 'directl':
         if bounds is None:
             raise ValueError('bounds are required for the "direct" optimizer.')
+        if method.lower() == 'directl':
+            optimizer_args['locally_biased'] = True
         res = scipy.optimize.direct(objective, bounds, **optimizer_args)
     elif method.lower() in ['nelder-mead', 'powell', 'cg', 'bfgs', 'newton-cg',
                 'l-bfgs-b', 'tnc', 'cobyla', 'cobyqa', 'slsqp', 'trust-constr', 
