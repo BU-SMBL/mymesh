@@ -19,7 +19,6 @@ Mesh smoothing/node repositioning
     LocalLaplacianSmoothing
     TangentialLaplacianSmoothing
     SmartLaplacianSmoothing
-    GlobalLaplacianSmoothing
     GeoTransformSmoothing
     NodeSpringSmoothing
     SegmentSpringSmoothing
@@ -94,6 +93,18 @@ def LocalLaplacianSmoothing(M, options=dict()):
     Mnew : mymesh.mesh
         Mesh object with the new node locations.
 
+    Examples
+    --------
+
+    .. plot::
+
+        M = mesh(np.array([[0,0,0],[0,1,0],[1,1,0],[1,0,0],[0.4,0.4,0]]),
+                np.array([[0,1,4],[1,2,4],[2,3,4],[3,0,4]]))
+        Mnew = improvement.LocalLaplacianSmoothing(M, options=dict(iterate=1))
+        
+        M.plot(bgcolor='w', show_edges=True, view='xy')
+        Mnew.plot(bgcolor='w', show_edges=True, view='xy')
+
     """    
     
     NodeCoords, NodeConn = M
@@ -110,10 +121,11 @@ def LocalLaplacianSmoothing(M, options=dict()):
                         FixedNodes = set(),
                         FixFeatures = False,
                         FixSurf = False,
+                        FixEdge = True,
                         qualityFunc = quality.MeanRatio
                     )
 
-    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, options)
+    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(M, SmoothOptions, options)
     FreeNodes = SmoothOptions['FreeNodes']
     FixedNodes = SmoothOptions['FixedNodes']
     tolerance = SmoothOptions['tolerance']
@@ -127,7 +139,7 @@ def LocalLaplacianSmoothing(M, options=dict()):
     ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
     
     if SmoothOptions['iterate'] == 'converge':
-        condition = lambda i, U : (i == 0) | (i < maxIter) | (np.max(U) < tolerance)
+        condition = lambda i, U : ((i == 0) | (np.max(U) > tolerance)) & (i < maxIter) 
     elif isinstance(SmoothOptions['iterate'], (int, np.integer)):
         condition = lambda i, U : i < SmoothOptions['iterate']
     else:
@@ -210,10 +222,11 @@ def TangentialLaplacianSmoothing(M, options=dict()):
                         FixedNodes = set(),
                         FixFeatures = False,
                         FixSurf = False,
+                        FixEdge = True,
                         qualityFunc = quality.MeanRatio
                     )
 
-    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, options)
+    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(M, SmoothOptions, options)
     FreeNodes = SmoothOptions['FreeNodes']
     FixedNodes = SmoothOptions['FixedNodes']
     tolerance = SmoothOptions['tolerance']
@@ -232,15 +245,15 @@ def TangentialLaplacianSmoothing(M, options=dict()):
     NodeNormals = M.NodeNormals
     
     if SmoothOptions['iterate'] == 'converge':
-        condition = lambda i, U : (i == 0) | (i < maxIter) | (np.max(U) < tolerance)
+        condition = lambda i, U : ((i == 0) | (np.max(U) > tolerance)) & (i < maxIter) 
     elif isinstance(SmoothOptions['iterate'], (int, np.integer)):
         condition = lambda i, U : i < SmoothOptions['iterate']
     else:
         raise ValueError('options["iterate"] must be "converge" or an integer.')
     
     i = 0
-    U = np.zeros(len(NodeCoords))
-    while condition(i, U[FreeNodes]):
+    R = np.zeros(len(NodeCoords))
+    while condition(i, R[FreeNodes]):
         i += 1
 
         Q = ArrayCoords[r]
@@ -371,11 +384,12 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
                         FixedNodes = set(),
                         FixFeatures = False,
                         FixSurf = False,
+                        FixEdge = True,
                         qualityFunc = quality.MeanRatio,
                         InPlace = False
                     )
 
-    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, options)
+    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(M, SmoothOptions, options)
     FreeNodes = SmoothOptions['FreeNodes']
     FixedNodes = SmoothOptions['FixedNodes']
     tolerance = SmoothOptions['tolerance']
@@ -475,7 +489,31 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
     return Mnew
 
 def GeoTransformSmoothing(M, sigma_min=None, sigma_max=None, eta=None, rho=None, qualityThreshold=.2, options=dict()):
+    """
+    Geometric element transformation method for tetrahedral mesh smoothing :cite:p:`Vartziotis2009`.
+    
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Mesh object to smooth. Must be a purely tetrahedral mesh.
+    sigma_min : _type_, optional
+        _description_, by default None
+    sigma_max : _type_, optional
+        _description_, by default None
+    eta : _type_, optional
+        _description_, by default None
+    rho : _type_, optional
+        _description_, by default None
+    qualityThreshold : float, optional
+        _description_, by default .2
+    options : _type_, optional
+        _description_, by default dict()
 
+    Returns
+    -------
+    Mnew : mymesh.mesh
+        Mesh object with the new node locations.
+    """
     # For method=sequential only, elements with quality less than qualityThreshold will be considered
     NodeCoords, NodeConn = M
     NodeCoords = np.copy(NodeCoords)
@@ -491,10 +529,11 @@ def GeoTransformSmoothing(M, sigma_min=None, sigma_max=None, eta=None, rho=None,
                         FixedNodes = set(),
                         FixFeatures = False,
                         FixSurf = True,
+                        FixEdge = True,
                         qualityFunc = quality.MeanRatio
                     )
 
-    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, options)
+    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(M, SmoothOptions, options)
     FreeNodes = SmoothOptions['FreeNodes']
     FixedNodes = SmoothOptions['FixedNodes']
     tolerance = SmoothOptions['tolerance']
@@ -816,7 +855,7 @@ def SegmentSpringSmoothing(M, StiffnessFactor=1, Forces=None, Displacements=None
                         qualityFunc = quality.MeanRatio
                     )
 
-    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, options)
+    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(M, SmoothOptions, options)
     FreeNodes = SmoothOptions['FreeNodes']
     FixedNodes = SmoothOptions['FixedNodes']
     tolerance = SmoothOptions['tolerance']
@@ -1017,11 +1056,12 @@ def NodeSpringSmoothing(M, Stiffness=1, Forces=None, Displacements=None, options
                         FixedNodes = set(),
                         FixFeatures = False,
                         FixSurf = False,
+                        FixEdge = True,
                         qualityFunc = quality.MeanRatio,
                         InPlace = False
                     )
 
-    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, options)
+    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(M, SmoothOptions, options)
     FreeNodes = SmoothOptions['FreeNodes']
     FixedNodes = SmoothOptions['FixedNodes']
     tolerance = SmoothOptions['tolerance']
@@ -2109,11 +2149,11 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
     return M
 
 ## Utilities
-def _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, UserOptions):
+def _SmoothingInputParser(M, SmoothOptions, UserOptions):
 
-    NodeCoords = np.asarray(NodeCoords)
-    NodeConn = np.asarray(NodeConn)
-    SurfConn = np.asarray(SurfConn)
+    NodeCoords = np.asarray(M.NodeCoords)
+    NodeConn = np.asarray(M.NodeConn)
+    SurfConn = np.asarray(M.SurfConn)
     for key in UserOptions.keys(): SmoothOptions[key] = UserOptions[key]
 
     # Process input options
@@ -2125,7 +2165,9 @@ def _SmoothingInputParser(NodeCoords, NodeConn, SurfConn, SmoothOptions, UserOpt
         SmoothOptions['FixedNodes'].update(corners)
 
     if SmoothOptions['FixSurf']:
-        SmoothOptions['FixedNodes'].update(SurfConn.flatten())
+        SmoothOptions['FixedNodes'].update(M.SurfaceNodes)
+    if SmoothOptions['FixEdge']:
+        SmoothOptions['FixedNodes'].update(M.BoundaryNodes)
     idx = set([n for elem in NodeConn for n in elem])
     
 
