@@ -28,6 +28,7 @@ Intersection Tests
     BoxTrianglesIntersection
     SegmentSegmentIntersection
     SegmentsSegmentsIntersection
+    RaySegmentIntersection
     RaySegmentsIntersection
     RaySurfIntersection
     RaysSurfIntersection
@@ -41,6 +42,7 @@ Inside/Outside Tests
 .. autosummary::
     :toctree: submodules/
 
+    PointInBoundary
     PointInSurf
     PointsInSurf
     PointInBox
@@ -610,11 +612,11 @@ def TriangleTriangleIntersection(Tri1,Tri2,eps=1e-14,edgeedge=False):
         return False
 
     # Intersection line of Tri1 & Tri2: L = O+tD
-    D = np.cross(N1,N2).tolist()
-  
-    Dmax = max(D)
+    D = np.cross(N1,N2)
+    
+    Dmax = np.argmax(np.abs(D))
     # Projections of Tri1 to L
-    Pv1 = np.array([v[D.index(Dmax)] for v in Tri1])
+    Pv1 = np.array([v[Dmax] for v in Tri1])
 
     if signs1[0] == signs1[2] :
         t11 = Pv1[0] + (Pv1[1]-Pv1[0])*sd1[0]/(sd1[0]-sd1[1])
@@ -635,7 +637,7 @@ def TriangleTriangleIntersection(Tri1,Tri2,eps=1e-14,edgeedge=False):
         t11 = Pv1[2] + (Pv1[0]-Pv1[2])*sd1[2]/(sd1[2]-sd1[0])
         t12 = Pv1[1] + (Pv1[0]-Pv1[1])*sd1[1]/(sd1[1]-sd1[0])
     # Projections of Tri2 to L
-    Pv2 = np.array([v[D.index(Dmax)] for v in Tri2])
+    Pv2 = np.array([v[Dmax] for v in Tri2])
 
     # sumzero = np.sum(signs2==0)
     if signs2[0] == signs2[2]:
@@ -1532,13 +1534,47 @@ def BoxBoxIntersection(box1, box2):
     return Ix
 
 def SegmentSegmentIntersection(s1,s2,return_intersection=False,endpt_inclusive=True,eps=0):
+    """
+    Detect intersections between two line segments.
+
+    Parameters
+    ----------
+    s1 : array_like
+        Coordinates of the two points of the first line segment (shape=(2,3))
+    s2 : array_like
+        Coordinates of the two points of the second line segment (shape=(2,3))
+    return_intersection : bool, optional
+        If True, return the coordinates of the intersection point. If no 
+        intersection, np.empty((0,3)) is returned. By default False
+    endpt_inclusive : bool, optional
+        If True, one end point lying exactly on the other segment will be 
+        considered an intersection, by default True
+    eps : int, optional
+        Small tolerance parameter, by default 0
+
+    Returns
+    -------
+    Intersection : bool
+        Specifies whether the two line segments intersect
+    pt : np.ndarray, optional
+        Point where the two lines intersect, returned if return_intersection=True.
+        If the two lines don't intersect, np.empty((0,3)) is returned.
+    """    
     # https://mathworld.wolfram.com/Line-LineIntersection.html
     # Goldman (1990)
-    [p1,p2] = np.array(s1)
-    [p3,p4] = np.array(s2)
+    [p1,p2] = np.asarray(s1)
+    [p3,p4] = np.asarray(s2)
     
     a = p2-p1; b = p4-p3; c = p3-p1
     axb = np.cross(a,b)
+
+    # coplanar test
+    if np.dot(c, axb) != 0: # scalar triple product
+        if return_intersection:
+            pt = np.empty((0,3))
+            return False, pt
+        return False
+
     axbnorm2 = (np.linalg.norm(axb))**2
     s = np.dot(np.cross(c,b),axb)/axbnorm2
     t = np.dot(np.cross(c,a),axb)/axbnorm2
@@ -1555,6 +1591,33 @@ def SegmentSegmentIntersection(s1,s2,return_intersection=False,endpt_inclusive=T
     return Intersection
 
 def SegmentsSegmentsIntersection(s1,s2,return_intersection=False,endpt_inclusive=True,eps=0):
+    """
+    Detect intersections between pairs of line segments.
+
+    Parameters
+    ----------
+    s1 : array_like
+        Coordinates of the first set of n line segments (shape=(n,2,3))
+    s2 : array_like
+        Coordinates of the second set of n line segments (shape=(n,2,3))
+    return_intersection : bool, optional
+        If True, return the coordinates of the intersection point. If no 
+        intersection, np.empty((0,3)) is returned. By default False
+    endpt_inclusive : bool, optional
+        If True, one end point lying exactly on the other segment will be 
+        considered an intersection, by default True
+    eps : int, optional
+        Small tolerance parameter, by default 0
+
+    Returns
+    -------
+    Intersection : bool
+        Specifies whether the two line segments intersect
+    pt : np.ndarray, optional
+        Point where the two lines intersect, returned if return_intersection=True.
+        If the two lines don't intersect, the coordinates of the returned point 
+        is [np.nan, np.nan, np.nan].
+    """    
     # https://mathworld.wolfram.com/Line-LineIntersection.html
     # Goldman (1990)
     if type(s1) is list: s1 = np.array(s1)
@@ -1563,16 +1626,20 @@ def SegmentsSegmentsIntersection(s1,s2,return_intersection=False,endpt_inclusive
     p3 = s2[:,0]; p4 = s2[:,1]
     
     a = p2-p1; b = p4-p3; c = p3-p1
+
     axb = np.cross(a,b,axis=1)
     cxb = np.cross(c,b,axis=1)
     cxa = np.cross(c,a,axis=1)
     axbnorm2 = np.sum(axb**2,axis=1) #+ 1e-32
+
+    coplanar_check = np.sum(c*axb, axis=1) == 0 # scalar triple product
+
     with np.errstate(divide='ignore', invalid='ignore'):
         s = np.sum(cxb*axb,axis=1)/axbnorm2
         t = np.sum(cxa*axb,axis=1)/axbnorm2
     # Collinear: Currently not getting intersection points for perfectly collinear lines
     if endpt_inclusive:
-        Intersections = (0-eps <= s) & (s <= 1+eps) & (0-eps <= t) & (t <= 1+eps) & (axbnorm2 > eps**2) ## DON'T GET RID OF THE LAST CHECK
+        Intersections = coplanar_check & (0-eps <= s) & (s <= 1+eps) & (0-eps <= t) & (t <= 1+eps) & (axbnorm2 > eps**2) ## DON'T GET RID OF THE LAST CHECK
         # Intersections = (0 <= s) & (s <= 1) & (0 <= t) & (t <= 1) & (axbnorm2 > eps**2)
         ###
 
@@ -1580,7 +1647,7 @@ def SegmentsSegmentsIntersection(s1,s2,return_intersection=False,endpt_inclusive
         # np.linalg.norm(axb/(np.linalg.norm(a,axis=1)*np.linalg.norm(b,axis=1))[:,None],axis=1)
         
     else:
-        Intersections = (0+eps < s) & (s < 1-eps) & (0+eps < t) & (t < 1-eps) & (axbnorm2 > eps**2)
+        Intersections = coplanar_check & (0+eps < s) & (s < 1-eps) & (0+eps < t) & (t < 1-eps) & (axbnorm2 > eps**2)
     if return_intersection:
         ### Without collinear:
         pts = np.nan*np.ones((len(Intersections),3))
@@ -1593,60 +1660,161 @@ def SegmentsSegmentsIntersection(s1,s2,return_intersection=False,endpt_inclusive
         return Intersections, pts
     return Intersections
 
-def SegmentsSegmentsIntersection2(s1,s2,return_intersection=False,endpt_inclusive=True,eps=1e-14):
+def RaySegmentIntersection(pt,ray,segment,return_intersection=False,endpt_inclusive=True,eps=0):
+    """
+    Detect intersections between a ray and a line segment.
+
+    Parameters
+    ----------
+    pt : array_like
+        3D coordinates for the starting point of the ray.
+    ray : array_like
+        3D vector giving the orientation of the ray.
+    segment : array_like
+        Coordinates of the two points of the line segment (shape=(2,3))
+    return_intersection : bool, optional
+        If True, return the coordinates of the intersection point. If no 
+        intersection, np.empty((0,3)) is returned. By default False
+    endpt_inclusive : bool, optional
+        If True, one end point lying exactly on the other segment will be 
+        considered an intersection, by default True
+    eps : int, optional
+        Small tolerance parameter used when excluding endpoint intersections, by default 0
+
+    Returns
+    -------
+    Intersection : bool
+        Specifies whether the two line segments intersect
+    pt : np.ndarray, optional
+        Point where the two lines intersect, returned if return_intersection=True.
+        If the two lines don't intersect, np.empty((0,3)) is returned.
+    """    
+    [p1,p2] = np.asarray(segment)
+    p3 = np.asarray(pt)
+    p4 = p3 + np.asarray(ray)
+    a = p2-p1; b = p4-p3; c = p3-p1
+    axb = np.cross(a,b)
+
+    # coplanar test
+    if np.dot(c, axb) != 0: # scalar triple product
+        if return_intersection:
+            pt = np.empty((0,3))
+            return False, pt
+        return False
+
+    axbnorm2 = (np.linalg.norm(axb))**2
+    s = np.dot(np.cross(c,b),axb)/axbnorm2
+    t = np.dot(np.cross(c,a),axb)/axbnorm2
+    
+    if endpt_inclusive:
+        Intersection = (0 <= s <= 1) and (0 <= t) & (axbnorm2 > eps)
+    else:
+        Intersection = (0+eps < s < 1-eps) and (0+eps < t) & (axbnorm2 > eps)
+
+    if return_intersection:
+        if Intersection:
+            pt = p1 + a*s
+        else:
+            pt = np.empty((0,3))
+        return Intersection, pt
+
+    return Intersection
+
+def RaySegmentsIntersection(pt, ray, segments, return_intersection=False, endpt_inclusive=True, eps=0):
+    """
+    Detect intersections between pairs of line segments.
+
+    Parameters
+    ----------
+    s1 : array_like
+        Coordinates of the first set of n line segments (shape=(n,2,3))
+    s2 : array_like
+        Coordinates of the second set of n line segments (shape=(n,2,3))
+    return_intersection : bool, optional
+        If True, return the coordinates of the intersection point. If no 
+        intersection, np.empty((0,3)) is returned. By default False
+    endpt_inclusive : bool, optional
+        If True, one end point lying exactly on the other segment will be 
+        considered an intersection, by default True
+    eps : int, optional
+        Small tolerance parameter, by default 0
+
+    Returns
+    -------
+    Intersection : bool
+        Specifies whether the two line segments intersect
+    pt : np.ndarray, optional
+        Point where the two lines intersect, returned if return_intersection=True.
+        If the two lines don't intersect, the coordinates of the returned point 
+        is [np.nan, np.nan, np.nan].
+    """    
     # https://mathworld.wolfram.com/Line-LineIntersection.html
     # Goldman (1990)
-    if type(s1) is list: s1 = np.array(s1)
-    if type(s2) is list: s2 = np.array(s2)
-    
-    x1,x2 = s1[:,0],s1[:,1]
-    x3,x4 = s2[:,0],s2[:,1]
-    p1 = x1; V1 = x2-x1
-    p2 = x3; V2 = x4-x3
-    V1xV2 = np.cross(V1,V2,axis=1)
-    denom = np.linalg.norm(V1xV2,axis=1)**2
-
-    t = np.linalg.det(np.array([p2-p1,V2,V1xV2]).swapaxes(0,1))/denom
-    s = np.linalg.det(np.array([p2-p1,V1,V1xV2]).swapaxes(0,1))/denom
-    s = np.clip(s,0,1)
-    t = np.clip(t,0,1)
-    
-    x1 = p1+V1*t[:,None]
-    x2 = p2+V2*s[:,None]
-    # print((np.linalg.norm(x1-s1[:,0],axis=1)))
-    # print((np.linalg.norm(x1-s1[:,1],axis=1)))
-    if endpt_inclusive:
-        Intersections = (np.linalg.norm(x2-x1,axis=1) == 0)
-    else:
-        Intersections = (np.linalg.norm(x2-x1,axis=1) == 0) & ~((np.linalg.norm(x1-s1[:,0],axis=1) <= eps) | (np.linalg.norm(x1-s1[:,1],axis=1) <= eps))
-    if return_intersection:
-        pts = np.nan*np.ones((len(Intersections),3))
-        pts[Intersections] = x1[Intersections]
-        return Intersections, pts
-    return Intersections
-
-def RaySegmentsIntersection(pt, ray, segments, return_intersection=False, eps=1e-14):
     if type(segments) is list: segments = np.array(segments)
     
-    x1,x2 = segments[:,0],segments[:,1]
-    p1 = x1; V1 = x2-x1
-    p2 = pt; V2 = ray
-    V1xV2 = np.cross(V1,V2)
-    denom = np.linalg.norm(V1xV2,axis=1)**2
-
-    t = np.linalg.det(np.array([p2-p1,np.repeat([V2],len(V1),axis=0),V1xV2]).swapaxes(0,1))/denom
-    s = np.linalg.det(np.array([p2-p1,V1,V1xV2]).swapaxes(0,1))/denom
+    p1 = segments[:,0]; p2 = segments[:,1]
+    p3 = np.asarray(pt)
+    p4 = p3 + np.asarray(ray)
     
-    x1 = p1+V1*t[:,None]
-    x2 = p2+V2*s[:,None]
+    a = p2-p1; b = p4-p3; c = p3-p1
 
-    Intersections = (t <= 0) & (s <= 1) & (s >= 0)
+    axb = np.cross(a,b)
+    axbnorm2 = np.sum(axb**2,axis=1) #+ 1e-32
+
+    coplanar_check = np.sum(c*axb, axis=1) == 0 # scalar triple product
+
+    with np.errstate(divide='ignore', invalid='ignore'):
+        s = np.sum(np.cross(c,b)*axb,axis=1)/axbnorm2
+        t = np.sum(np.cross(c,a)*axb,axis=1)/axbnorm2
+    # Collinear: Currently not getting intersection points for perfectly collinear lines
+    if endpt_inclusive:
+        Intersections = coplanar_check & (0-eps <= s) & (s <= 1+eps) & (0-eps <= t) & (axbnorm2 > eps**2) 
+        
+    else:
+        Intersections = coplanar_check & (0+eps < s) & (s < 1-eps) & (0+eps < t) & (axbnorm2 > eps**2)
     if return_intersection:
+        ### Without collinear:
         pts = np.nan*np.ones((len(Intersections),3))
-        pts[Intersections] = x1[Intersections]
+        pts[Intersections] = p1[Intersections] + a[Intersections]*s[Intersections,None]
+
         return Intersections, pts
     return Intersections
     
+def RayBoundaryIntersection(pt, ray, NodeCoords, BoundaryConn, eps=0):
+    """
+    Identify intersections between a ray and a boundary mesh of line elements. 
+    This is generally intended for 2D boundary meshes, though it will work 
+    in 3D as well. 
+
+    Parameters
+    ----------
+    pt : array_like
+        3D point coordinate (shape = (3,))
+    ray : array_like
+        3D vector (shape = (3,))
+    NodeCoords : array_like
+        nx3 list of node coordinates
+    BoundaryConn : array_like
+        List of line element connectivities. This should have shape = (n,2)
+    eps : float, optional
+        Small tolerance parameter, by default 1e-14
+
+    Returns
+    -------
+    intersections : np.ndarray
+        Indices of line segment elements that are intersected by ray.
+    distances : np.ndarray
+        Distances between the point and the intersection points.
+    intersectionPts : np.ndarray
+        Coordinates of intersection points for each intersection.
+    """
+
+    segments = np.asarray(NodeCoords)[BoundaryConn]
+    intersections, intersectionPts = RaySegmentsIntersection(pt, ray, segments, return_intersection=True, eps=eps)
+    distances = np.sum(ray/np.linalg.norm(ray)*(intersectionPts-pt),axis=1)
+
+    return intersections, distances, intersectionPts
+
 def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, Octree='generate'):
     """
     Identify intersections between a ray and a triangular surface mesh. 
@@ -1694,7 +1862,7 @@ def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, Octree='genera
     if Octree == None or Octree == 'None' or Octree == 'none':
         # Won't use any octree structure to accelerate intersection tests
         intersections,intersectionPts = RayTrianglesIntersection(pt, ray, ArrayCoords[SurfConn], bidirectional=True, eps=eps)
-        distances = np.sum(ray*(intersectionPts-pt),axis=1)
+        distances = np.sum(ray/np.linalg.norm(ray)*(intersectionPts-pt),axis=1)
     elif Octree == 'generate' or type(Octree) == octree.OctreeNode:
         if Octree == 'generate':
             # Create an octree structure based on the provided structure
@@ -1711,7 +1879,7 @@ def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, Octree='genera
         Tris = ArrayCoords[np.asarray(SurfConn)[TriIds]]
         intersections,intersectionPts = RayTrianglesIntersection(pt, ray, Tris, bidirectional=True, eps=eps)
         intersections = np.array(TriIds)[intersections]
-        distances = np.sum(ray*(intersectionPts-pt),axis=1)
+        distances = np.sum(ray/np.linalg.norm(ray)*(intersectionPts-pt),axis=1)
     else:
         raise Exception('Invalid octree argument given')
         
@@ -2045,7 +2213,60 @@ def SilhouetteProjection(pts, pt, Normal):
     return projected
 
 ## Inside/Outside Tests
-def PointInSurf(pt, NodeCoords, SurfConn, ElemNormals, Octree=None, eps=1e-8, ray=np.random.rand(3)):
+def PointInBoundary(pt, NodeCoords, BoundaryConn, eps=1e-8, ray=None):
+    """
+    Test to determine whether a point is inside a boundary mesh. By default, 
+    this test assumes a 2D mesh parallel to the xy plane. For a boundary mesh in
+    another plane, the `ray` argument should be modified. 
+
+    Parameters
+    ----------
+    pt : array_like
+        3D coordinates for point shape=(3,).
+    NodeCoords : array_like
+        List of node coordinates of the surface
+    BoundaryConn : array_like
+        Node connectivity of elements. This function is only valid for triangular surface meshes.
+    ElemNormals : array_like
+        Element normal vectors 
+    eps : float, optional
+        Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8
+    ray : array_like, optional
+        Ray that will be cast to determine whether the point is inside or outside 
+        the boundary, by default a random unit vector parallel to the xy plane will be 
+        used. For a closed boundary, the choice of ray shouldn't matter as long
+        as the ray is in the same plane as the boundary.
+
+    Returns
+    -------
+    inside : bool
+        True if the point is inside the surface, otherwise False.
+    """    
+    
+    if ray is None:
+        ray = np.array([np.random.rand(), np.random.rand(), 0])
+        ray /= np.linalg.norm(ray)
+    intersections, distances, _ = RayBoundaryIntersection(pt,ray,NodeCoords,BoundaryConn)
+    posDistances = np.array([d for d in distances if d > eps])
+    zero = np.any(np.abs(distances)<eps)
+    
+    # Checking unique to not double count instances where ray intersects an edge
+    if len(np.unique(np.round(posDistances/eps)))%2 == 0 and not zero:
+        # No intersection
+        inside = False
+        return inside
+    else:
+        # dist = min(np.abs(distances))
+        # if dist < eps:
+        #     closest = np.array(intersections)[np.abs(distances)==dist][0]
+        #     dot = np.dot(ray,ElemNormals[closest])
+        #     return dot
+        # else:
+        # Inside
+        inside = True
+        return inside
+
+def PointInSurf(pt, NodeCoords, SurfConn, ElemNormals=None, Octree=None, eps=1e-8, ray=np.random.rand(3)):
     """
     Test to determine whether a point is inside a surface mesh.
 
@@ -2075,7 +2296,8 @@ def PointInSurf(pt, NodeCoords, SurfConn, ElemNormals, Octree=None, eps=1e-8, ra
         True if the point is inside the surface, otherwise False.
     """    
     root = OctreeInputProcessor(NodeCoords, SurfConn, Octree)
-        
+    if ElemNormals is None:
+        ElemNormals = utils.CalcFaceNormal(NodeCoords, SurfConn)
     intersections, distances, _ = RaySurfIntersection(pt,ray,NodeCoords,SurfConn,Octree=root)
     posDistances = np.array([d for d in distances if d > eps])
     zero = np.any(np.abs(distances)<eps)
@@ -2149,6 +2371,59 @@ def PointsInSurf(pts, NodeCoords, SurfConn, ElemNormals=None, Octree='generate',
                 # Inside
                 Insides[i] = True
     return Insides
+
+# def PointInBoundary(pt, NodeCoords, BoundaryConn, ElemNormals, Octree=None, eps=1e-8, ray=np.random.rand(2), validate_mesh=False):
+#     """
+#     Test to determine whether a point is inside a closed 2D boundary mesh of
+#     line elements.
+
+#     Parameters
+#     ----------
+#     pt : array_like
+#         2D or 3D coordinates for point shape=(2,) or shape=(3,). If given, the
+#         third dimension will be ignored.
+#     NodeCoords : array_like
+#         List of node coordinates of the surface
+#     BoundaryConn : array_like
+#         Node connectivity of elements. This function is only valid for line meshes.
+#     ElemNormals : array_like
+#         Element normal vectors 
+#     Octree : None, str, or octree.octreeNode, optional
+#         Determines whether to use/generate an octree data structure for acceleration of the intersection testing, by default None. 
+#         'generate' - Will generate an octree structure of the surface
+#         None - Will not use an octree structure
+#         octree.octreeNode - Octree data structure precomputed using :func:`mymesh.octree.Surface2Octree`
+#     eps : float, optional
+#         Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8
+#     ray : array_like, optional
+#         Ray that will be cast to determine whether the point is inside or outside the surface, by default np.random.rand(3). For a closed, manifold surface, the choice of ray shouldn't matter.
+
+#     Returns
+#     -------
+#     inside : bool
+#         True if the point is inside the surface, otherwise False.
+#     """    
+#     # root = OctreeInputProcessor(NodeCoords, SurfConn, Octree)
+#     segments = np.asarray(NodeCoords)[BoundaryConn]
+#     intersections, distances, _ = RaySegmentsIntersection(pt,ray,segments)
+#     posDistances = np.array([d for d in distances if d > eps])
+#     zero = np.any(np.abs(distances)<eps)
+    
+#     # Checking unique to not double count instances where ray intersects an edge
+#     if len(np.unique(np.round(posDistances/eps)))%2 == 0 and not zero:
+#         # No intersection
+#         inside = False
+#         return inside
+#     else:
+#         dist = min(np.abs(distances))
+#         if dist < eps:
+#             closest = np.array(intersections)[np.abs(distances)==dist][0]
+#             dot = np.dot(ray,ElemNormals[closest])
+#             return dot
+#         else:
+#             # Inside
+#             inside = True
+#             return inside
 
 @try_njit
 def PointInBox(pt, xlim, ylim, zlim, inclusive=True):
