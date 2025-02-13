@@ -58,7 +58,6 @@ jobs:
           libxcb-image0-dev \
           libxcb-keysyms1 \
           libxcb-cursor0 \
-          libegl1-mesa0 \
           x11-utils \
           xvfb
 
