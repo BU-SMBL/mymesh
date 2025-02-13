@@ -703,7 +703,7 @@ def Sphere(center, radius, theta_resolution=20, phi_resolution=20, radial_resolu
         else:
             semicircle = mesh(coords, conn)
     elif Type == 'vol':
-        pt2 = np.copy(center)
+        pt2 = np.copy(center).astype(float)
         pt2[2] -= radius[2]
         L = Line(center, pt2, n=radial_resolution-1)
 
