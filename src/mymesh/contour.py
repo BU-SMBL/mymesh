@@ -4010,9 +4010,9 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         xAs = np.stack([x[xbool]**3, x[xbool]**2, x[xbool]**1, x[xbool]**0],axis=2)
         yAs = np.stack([y[ybool]**3, y[ybool]**2, y[ybool]**1, y[ybool]**0],axis=2)
         zAs = np.stack([z[zbool]**3, z[zbool]**2, z[zbool]**1, z[zbool]**0],axis=2)
-        xCoeff = np.linalg.solve(xAs,v[xbool,:])
-        yCoeff = np.linalg.solve(yAs,v[ybool,:])
-        zCoeff = np.linalg.solve(zAs,v[zbool,:])
+        xCoeff = np.linalg.solve(xAs,v[xbool,:,None])
+        yCoeff = np.linalg.solve(yAs,v[ybool,:,None])
+        zCoeff = np.linalg.solve(zAs,v[zbool,:,None])
         
         # cf. https://en.wikipedia.org/wiki/Cubic_equation#General_cubic_formula
         Roots = []
@@ -4029,16 +4029,16 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
             C[C==0] = ((delta1[C==0] - np.sqrt(delta1[C==0]**2 - 4*delta0[C==0]**3))/2)**(1/3)
             
             zeta = (-1 + np.sqrt(-3+0J))/2
-            roots = np.vstack([-1/(3*a) * ( b + zeta**k*C + delta0/(zeta**k*C) ) for k in [0, 1, 2]]).T
-            realcheck = np.isclose(np.imag(roots), 0)
-            roots[realcheck]  = np.real(roots[realcheck])
+            roots = np.column_stack([-1/(3*a) * ( b + zeta**k*C + delta0/(zeta**k*C) ) for k in [0, 1, 2]])
             
             # overwrite with quadratic for a ~ 0
-            near0 = np.isclose(a,0)
+            near0 = np.isclose(a,0).flatten()
             with np.errstate(divide='ignore', invalid='ignore'):
-                roots[near0] = np.vstack([(-c[near0] + np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]), 
+                roots[near0] = np.column_stack([(-c[near0] + np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]), 
                                         (-c[near0] - np.sqrt(c[near0]**2 - 4*b[near0]*d[near0]))/(2*b[near0]),
-                                            np.repeat(np.nan,len(b[near0]))]).T
+                                            np.repeat(np.nan,len(b[near0]))])
+            realcheck = np.isclose(np.imag(roots), 0)
+            roots[realcheck]  = np.real(roots[realcheck])
             Roots.append(roots)
         xRoots = Roots[0]
         yRoots = Roots[1]
@@ -4046,7 +4046,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         
         NewCoords = np.nan*np.ones((v.shape[0],3))
         eps = 1e-10
-        warnings.filterwarnings('ignore', category=np.ComplexWarning)
+        warnings.filterwarnings('ignore', category=np.exceptions.ComplexWarning)
         with np.errstate(divide='ignore', invalid='ignore'):
             xCheck = (x[xbool,1,None] <= xRoots) & (x[xbool,2,None] >= xRoots) & np.isreal(xRoots)
             xcubic = np.repeat(False,len(xbool)); xlinear = np.repeat(False,len(xbool))
@@ -4544,7 +4544,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
 
             mat[:,:,2] = 1
 
-            a, b, c = np.linalg.solve(mat, np.hstack([vals1[notconstant], vals2[notconstant], vals3[notconstant]])).T
+            a,b,c = (np.linalg.solve(mat, np.column_stack([vals1[notconstant], vals2[notconstant], vals3[notconstant]])[...,None])[:,:,0]).T
 
             # Solve for roots
             root1 = (-b + np.sqrt(b**2 - 4*a*c))/(2*a)
