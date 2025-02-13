@@ -107,7 +107,7 @@ def test_TetMesh(func, bounds, h, threshold, threshold_direction, interpolation)
     'quadratic',
     ),
 ])
-def testSurfaceNodeOptimization(func, bounds, h, threshold, threshold_direction, interpolation):
+def test_SurfaceNodeOptimization(func, bounds, h, threshold, threshold_direction, interpolation):
 
     M = implicit.TetMesh(func, bounds, h, threshold=threshold, threshold_direction=threshold_direction, interpolation=interpolation)
 

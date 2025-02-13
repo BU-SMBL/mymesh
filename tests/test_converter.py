@@ -2,6 +2,104 @@ import pytest
 import numpy as np
 from mymesh import converter, quality
 
+@pytest.mark.parametrize("NodeCoords, NodeConn, return_SurfElem, expected",[
+    # Single hex, False
+    (np.array([[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]]),
+    [[0,1,2,3,4,5,6,7]],
+    False,
+    [[0, 3, 2, 1],
+    [0, 1, 5, 4],
+    [1, 2, 6, 5],
+    [2, 3, 7, 6],
+    [3, 0, 4, 7],
+    [4, 5, 6, 7]]
+    ),
+    # Single hex, True
+    (np.array([[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]]),
+    [[0,1,2,3,4,5,6,7]],
+    True,
+    ([[0, 3, 2, 1],
+    [0, 1, 5, 4],
+    [1, 2, 6, 5],
+    [2, 3, 7, 6],
+    [3, 0, 4, 7],
+    [4, 5, 6, 7]],
+    np.array([0, 0, 0, 0, 0, 0]))
+    )
+])
+def test_solid2surface(NodeCoords, NodeConn, return_SurfElem, expected):
+
+    out = converter.solid2surface(NodeCoords,NodeConn, return_SurfElem=return_SurfElem)
+
+    if type(out) is tuple:
+        for i in range(len(out)):
+            assert np.all(out[i] == expected[i])
+    else:
+        assert np.all(out == expected)
+
+@pytest.mark.parametrize("NodeCoords, NodeConn, return_FaceConn, return_FaceElem, expected",[
+    # Single hex, False, False
+    (np.array([[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]]),
+    [[0,1,2,3,4,5,6,7]],
+    False,
+    False,
+    [[0, 3, 2, 1],
+    [0, 1, 5, 4],
+    [1, 2, 6, 5],
+    [2, 3, 7, 6],
+    [3, 0, 4, 7],
+    [4, 5, 6, 7]]
+    ),
+    # Single hex, True, True
+    (np.array([[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]]),
+    [[0,1,2,3,4,5,6,7]],
+    True,
+    True,
+    ([[0, 3, 2, 1],
+    [0, 1, 5, 4],
+    [1, 2, 6, 5],
+    [2, 3, 7, 6],
+    [3, 0, 4, 7],
+    [4, 5, 6, 7]],
+    [[0, 1, 2, 3, 4, 5]],
+    np.array([0, 0, 0, 0, 0, 0]))
+    ),
+    # Single hex, True, False
+    (np.array([[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]]),
+    [[0,1,2,3,4,5,6,7]],
+    True,
+    False,
+    ([[0, 3, 2, 1],
+    [0, 1, 5, 4],
+    [1, 2, 6, 5],
+    [2, 3, 7, 6],
+    [3, 0, 4, 7],
+    [4, 5, 6, 7]],
+    [[0, 1, 2, 3, 4, 5]])
+    ),
+    # Single hex, False, True
+    (np.array([[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]]),
+    [[0,1,2,3,4,5,6,7]],
+    False,
+    True,
+    ([[0, 3, 2, 1],
+    [0, 1, 5, 4],
+    [1, 2, 6, 5],
+    [2, 3, 7, 6],
+    [3, 0, 4, 7],
+    [4, 5, 6, 7]],
+    np.array([0, 0, 0, 0, 0, 0]))
+    )
+    
+])
+def test_solid2faces(NodeCoords, NodeConn, return_FaceConn, return_FaceElem, expected):
+
+    out = converter.solid2faces(NodeCoords,NodeConn, return_FaceConn=return_FaceConn, return_FaceElem=return_FaceElem)
+    if type(out) is tuple:
+        for i in range(len(out)):
+            assert np.all(out[i] == expected[i])
+    else:
+        assert np.all(out == expected)
 
 @pytest.mark.parametrize("NodeCoords, NodeConn, method, n_expected", [
     # Case 1: single hex, 1to5

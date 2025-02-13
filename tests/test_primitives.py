@@ -116,7 +116,7 @@ def test_Grid2D(bounds, h, exact_h, ElemType):
     2,
     True,
     None,
-    'Surf'
+    'surf'
     ),
     ([0,0,0],
     1,
@@ -132,7 +132,7 @@ def test_Grid2D(bounds, h, exact_h, ElemType):
      
 ])
 def test_Cylinder(center, radius, height, theta_resolution, axial_resolution, radial_resolution, axis, cap, ElemType, Type):
-    cylinder = primitives.Cylinder(bounds, resolution, axis=axis, axis_step=axis_step, ElemType=ElemType, cap=cap)
+    cylinder = primitives.Cylinder(center, radius, height, theta_resolution, axial_resolution, radial_resolution, axis, cap, ElemType, Type)
     
     if cap:
         assert len(cylinder.BoundaryNodes) == 0, 'Unclosed edges'
