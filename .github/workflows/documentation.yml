@@ -8,7 +8,7 @@ on:
     types: [published]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     defaults:
       run:
         shell: bash --login -e {0}
@@ -40,8 +40,7 @@ jobs:
           libglu1-mesa-dev \
           libgl1-mesa-dev \
           libgl1-mesa-dri \
-          libgl1 \
-          libglx-mesa0 \
+          libgl1-mesa-glx \
           libosmesa6-dev \
           mesa-common-dev \
           libxi-dev \
@@ -60,7 +59,7 @@ jobs:
           libxcb-image0-dev \
           libxcb-keysyms1 \
           libxcb-cursor0 \
-          libegl1-mesa-dev \
+          libegl1-mesa \
           x11-utils \
           xvfb
 
