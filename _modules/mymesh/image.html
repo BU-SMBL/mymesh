@@ -436,7 +436,7 @@
 <span class="sd">    img : str or np.ndarray</span>
 <span class="sd">        Image array or file path to an image</span>
 <span class="sd">    h : scalar, tuple</span>
-<span class="sd">        Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).</span>
+<span class="sd">        Voxel size of the image. Can be specified as a single scalar value, or a three element tuple (or array_like).</span>
 <span class="sd">        If a tuple, entries should correspond to (hx, hy, hz).</span>
 <span class="sd">    threshold : scalar</span>
 <span class="sd">        Isovalue threshold to use for keeping/removing elements, by default 0.</span>
@@ -506,7 +506,7 @@
 <span class="sd">    img : str or np.ndarray</span>
 <span class="sd">        Image array or file path to an image</span>
 <span class="sd">    h : scalar, tuple</span>
-<span class="sd">        Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).</span>
+<span class="sd">        Voxel size of the image. Can be specified as a single scalar value, or a three element tuple (or array_like).</span>
 <span class="sd">        If a tuple, entries should correspond to (hx, hy, hz).</span>
 <span class="sd">    threshold : scalar</span>
 <span class="sd">        Isovalue threshold to use for keeping/removing elements, by default 0.</span>
@@ -591,11 +591,18 @@
 <span class="sd">    img : str or np.ndarray</span>
 <span class="sd">        Image array or file path to an image</span>
 <span class="sd">    h : scalar, tuple</span>
-<span class="sd">        Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).</span>
+<span class="sd">        Voxel size of the image. Can be specified as a single scalar value, or a three element tuple (or array_like).</span>
+<span class="sd">        If a tuple, entries should correspond to (hx, hy, hz).</span>
 <span class="sd">    threshold : scalar</span>
 <span class="sd">        Isovalue threshold to use for keeping/removing elements, by default 0.</span>
 <span class="sd">    threshold_dir : signed integer</span>
 <span class="sd">        If threshold_dir is negative (default), values less than or equal to the threshold will be considered &quot;inside&quot; the mesh and the opposite if threshold_dir is positive, by default 1.</span>
+<span class="sd">    scalefactor : float, optional</span>
+<span class="sd">        Scale factor for resampling the image. If greater than 1, there will be more than</span>
+<span class="sd">        1 elements per voxel. If less than 1, will coarsen the image, by default 1.</span>
+<span class="sd">    scaleorder : int, optional</span>
+<span class="sd">        Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.</span>
+<span class="sd">        Must be 0-5.</span>
 <span class="sd">    interpolation : str, optional</span>
 <span class="sd">        Method of interpolation used for placing the vertices on the approximated isosurface. This can be &#39;midpoint&#39;, &#39;linear&#39;, by default &#39;linear&#39;. </span>
 

@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:03.490** total execution time for 1 file **from examples/MeshAnalysis**:
+**00:02.530** total execution time for 1 file **from examples/MeshAnalysis**:
 
 .. container::
 
@@ -33,5 +33,5 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_MeshAnalysis_demo_curvature.py` (``demo_curvature.py``)
-     - 00:03.490
+     - 00:02.530
      - 0.0
