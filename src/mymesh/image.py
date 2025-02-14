@@ -41,7 +41,7 @@ def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scal
     img : str or np.ndarray
         Image array or file path to an image
     h : scalar, tuple
-        Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).
+        Voxel size of the image. Can be specified as a single scalar value, or a three element tuple (or array_like).
         If a tuple, entries should correspond to (hx, hy, hz).
     threshold : scalar
         Isovalue threshold to use for keeping/removing elements, by default 0.
@@ -108,7 +108,7 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
     img : str or np.ndarray
         Image array or file path to an image
     h : scalar, tuple
-        Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).
+        Voxel size of the image. Can be specified as a single scalar value, or a three element tuple (or array_like).
         If a tuple, entries should correspond to (hx, hy, hz).
     threshold : scalar
         Isovalue threshold to use for keeping/removing elements, by default 0.
@@ -190,11 +190,18 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
     img : str or np.ndarray
         Image array or file path to an image
     h : scalar, tuple
-        Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).
+        Voxel size of the image. Can be specified as a single scalar value, or a three element tuple (or array_like).
+        If a tuple, entries should correspond to (hx, hy, hz).
     threshold : scalar
         Isovalue threshold to use for keeping/removing elements, by default 0.
     threshold_dir : signed integer
         If threshold_dir is negative (default), values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_dir is positive, by default 1.
+    scalefactor : float, optional
+        Scale factor for resampling the image. If greater than 1, there will be more than
+        1 elements per voxel. If less than 1, will coarsen the image, by default 1.
+    scaleorder : int, optional
+        Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
+        Must be 0-5.
     interpolation : str, optional
         Method of interpolation used for placing the vertices on the approximated isosurface. This can be 'midpoint', 'linear', by default 'linear'. 
 
