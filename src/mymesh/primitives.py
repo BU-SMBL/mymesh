@@ -40,7 +40,7 @@ from . import utils, converter, implicit, mesh, delaunay
 
 def Line(pt1, pt2, h=None, n=None):
     """
-    Generate a surface mesh of a rectangular box. 
+    Generate a mesh of a straight line between two points 
 
     Parameters
     ----------
