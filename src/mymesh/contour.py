@@ -4349,6 +4349,8 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     """    
     TetNodeCoords = np.asarray(TetNodeCoords)
     TetNodeConn = np.asarray(TetNodeConn)
+    NodeValues = np.asarray(NodeValues).flatten()
+    assert len(NodeValues) == len(TetNodeCoords), 'Number of nodes must much number of node values.'
 
     MT_Lookup = np.array([
             [],                     # 0-0000
