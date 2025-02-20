@@ -449,7 +449,7 @@
 <span class="sd">    quad2tri</span>
 <span class="sd">    tet102tet4</span>
 <span class="sd">    tet42tet10</span>
-
+<span class="sd">    hexsubdivide</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -2253,6 +2253,8 @@
     <span class="k">return</span> <span class="n">Edges</span></div>
 
 
+<div class="viewcode-block" id="hexsubdivide">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.converter.hexsubdivide.html#mymesh.converter.hexsubdivide">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">hexsubdivide</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Subdivide hexahedra into 8 sub-hexahedra, connecting corners to the </span>
@@ -2333,7 +2335,8 @@
     <span class="n">SubConn</span><span class="p">[</span><span class="mi">6</span><span class="p">::</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">CentroidIds</span><span class="p">,</span> <span class="n">Face2CentroidIds</span><span class="p">,</span> <span class="n">Edge26Ids</span><span class="p">,</span> <span class="n">Face3CentroidIds</span><span class="p">,</span> <span class="n">Face5CentroidIds</span><span class="p">,</span> <span class="n">Edge56Ids</span><span class="p">,</span> <span class="n">ArrayConn</span><span class="p">[:,</span><span class="mi">6</span><span class="p">],</span> <span class="n">Edge67Ids</span><span class="p">])</span>
     <span class="n">SubConn</span><span class="p">[</span><span class="mi">7</span><span class="p">::</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">Face4CentroidIds</span><span class="p">,</span> <span class="n">CentroidIds</span><span class="p">,</span> <span class="n">Face3CentroidIds</span><span class="p">,</span> <span class="n">Edge37Ids</span><span class="p">,</span> <span class="n">Edge74Ids</span><span class="p">,</span> <span class="n">Face5CentroidIds</span><span class="p">,</span> <span class="n">Edge67Ids</span><span class="p">,</span> <span class="n">ArrayConn</span><span class="p">[:,</span><span class="mi">7</span><span class="p">]])</span>
 
-    <span class="k">return</span> <span class="n">NewCoords</span><span class="p">,</span> <span class="n">SubConn</span>
+    <span class="k">return</span> <span class="n">NewCoords</span><span class="p">,</span> <span class="n">SubConn</span></div>
+
 
 
 <div class="viewcode-block" id="im2voxel">

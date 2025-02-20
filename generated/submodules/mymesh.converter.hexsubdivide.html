@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mymesh.converter.tet42tet10 &#8212; MyMesh vdev Manual</title>
+    <title>mymesh.converter.hexsubdivide &#8212; MyMesh vdev Manual</title>
   
   
   
@@ -58,11 +58,11 @@
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.converter.tet42tet10';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.converter.hexsubdivide';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mymesh.converter.hexsubdivide" href="mymesh.converter.hexsubdivide.html" />
-    <link rel="prev" title="mymesh.converter.tet102tet4" href="mymesh.converter.tet102tet4.html" />
+    <link rel="next" title="mymesh.curvature" href="../mymesh.curvature.html" />
+    <link rel="prev" title="mymesh.converter.tet42tet10" href="mymesh.converter.tet42tet10.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -409,7 +409,7 @@
     
     <li class="breadcrumb-item"><a href="../mymesh.converter.html" class="nav-link">mymesh.converter</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh.converter.tet42tet10</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh.converter.hexsubdivide</span></li>
   </ul>
 </nav>
 </div>
@@ -426,24 +426,29 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="mymesh-converter-tet42tet10">
-<h1>mymesh.converter.tet42tet10<a class="headerlink" href="#mymesh-converter-tet42tet10" title="Link to this heading">#</a></h1>
+  <section id="mymesh-converter-hexsubdivide">
+<h1>mymesh.converter.hexsubdivide<a class="headerlink" href="#mymesh-converter-hexsubdivide" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="mymesh.converter.tet42tet10">
-<span class="sig-prename descclassname"><span class="pre">mymesh.converter.</span></span><span class="sig-name descname"><span class="pre">tet42tet10</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tet4NodeConn</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/converter.html#tet42tet10"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.converter.tet42tet10" title="Link to this definition">#</a></dt>
-<dd><p>Converts a 4 node tetrahedral mesh to 10 node tetrahedral mesh. A new node
-is placed at the midpoint of each edge.</p>
+<dt class="sig sig-object py" id="mymesh.converter.hexsubdivide">
+<span class="sig-prename descclassname"><span class="pre">mymesh.converter.</span></span><span class="sig-name descname"><span class="pre">hexsubdivide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeConn</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/converter.html#hexsubdivide"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.converter.hexsubdivide" title="Link to this definition">#</a></dt>
+<dd><p>Subdivide hexahedra into 8 sub-hexahedra, connecting corners to the
+element, face, and edge centroids.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>NodeCoords</strong> (<em>array_like</em>) – List of nodal coordinates.</p></li>
-<li><p><strong>Tet4NodeConn</strong> (<em>array_like</em>) – Nodal connectivities for a 4-node tetrahedral mesh</p></li>
+<li><p><strong>NodeCoords</strong> (<em>array_like</em>) – List of node coordinates</p></li>
+<li><p><strong>NodeConn</strong> (<em>array_like</em>) – List of node connectivities (must be purely hexahedra, shape=(n,8))</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>NodeCoords</strong> (<em>np.ndarray</em>) – New list of nodal coordinates.</p></li>
-<li><p><strong>Tet4NodeConn</strong> (<em>np.ndarray</em>) – Nodal connectivities for the 10-Node tetrahedral mesh</p></li>
+<li><p><strong>NewCoords</strong> (<em>np.ndarray</em>) – Node coordinates of the subdivided mesh. The node new nodes are
+appended to the original nodes, so the node numbers of the original
+mesh will refer to the same nodes in the new mesh.</p></li>
+<li><p><strong>NewConn</strong> (<em>np.ndarray</em>) – Node connectivities of the subdivided mesh. The elements are ordered
+so that the first element in the original mesh is subdivided into
+the first 8 elements in the new mesh, the second element in the mesh
+is the next 8 elements, and so on.</p></li>
 </ul>
 </p>
 </dd>
@@ -463,20 +468,20 @@ is placed at the midpoint of each edge.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mymesh.converter.tet102tet4.html"
+       href="mymesh.converter.tet42tet10.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.converter.tet102tet4</p>
+        <p class="prev-next-title">mymesh.converter.tet42tet10</p>
       </div>
     </a>
     <a class="right-next"
-       href="mymesh.converter.hexsubdivide.html"
+       href="../mymesh.curvature.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.converter.hexsubdivide</p>
+        <p class="prev-next-title">mymesh.curvature</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -499,7 +504,7 @@ is placed at the midpoint of each edge.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mymesh.converter.tet42tet10"><code class="docutils literal notranslate"><span class="pre">tet42tet10()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mymesh.converter.hexsubdivide"><code class="docutils literal notranslate"><span class="pre">hexsubdivide()</span></code></a></li>
 </ul>
   </nav></div>
 
@@ -507,7 +512,7 @@ is placed at the midpoint of each edge.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/generated/submodules/mymesh.converter.tet42tet10.rst.txt"
+      <li><a href="../../_sources/generated/submodules/mymesh.converter.hexsubdivide.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>
