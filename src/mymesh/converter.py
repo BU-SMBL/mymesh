@@ -56,7 +56,7 @@ Element type conversion
     quad2tri
     tet102tet4
     tet42tet10
-
+    hexsubdivide
 
 """
 
