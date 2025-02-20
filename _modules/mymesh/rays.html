@@ -426,6 +426,7 @@
 <span class="sd">    RaySurfIntersection</span>
 <span class="sd">    RaysSurfIntersection</span>
 <span class="sd">    RayOctreeIntersection</span>
+<span class="sd">    BoundaryBoundaryIntersection</span>
 <span class="sd">    SurfSelfIntersection</span>
 <span class="sd">    SurfSurfIntersection</span>
 <span class="sd">    PlaneSurfIntersection</span>
@@ -2493,6 +2494,61 @@
         <span class="n">children</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">child</span> <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">nodes</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">intersection_leaves</span></div>
+
+
+<div class="viewcode-block" id="BoundaryBoundaryIntersection">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.rays.BoundaryBoundaryIntersection.html#mymesh.rays.BoundaryBoundaryIntersection">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">BoundaryBoundaryIntersection</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">,</span> <span class="n">BoundaryConn1</span><span class="p">,</span> <span class="n">NodeCoords2</span><span class="p">,</span> <span class="n">BoundaryConn2</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">return_pts</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identify intersections between two surface meshes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    NodeCoords1 : array_like</span>
+<span class="sd">        Node coordinates of the first boundary mesh</span>
+<span class="sd">    BoundaryConn1 : list, array_like</span>
+<span class="sd">        Node connectivity of the first boundary mesh</span>
+<span class="sd">    NodeCoords2 : array_like</span>
+<span class="sd">        Node coordinates of the second bounday mesh</span>
+<span class="sd">    BoundaryConn2 : list, array_like</span>
+<span class="sd">        Node connectivity of the second boundary mesh</span>
+<span class="sd">    eps : float, optional</span>
+<span class="sd">        Small tolerance parameter, by default 0, by default 1e-14</span>
+<span class="sd">    return_pts : bool, optional</span>
+<span class="sd">        If true, will return intersection points, by default False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Intersections1 : np.ndarray</span>
+<span class="sd">        Element ids from the first mesh that intersect with the second</span>
+<span class="sd">    Intersections2 : np.ndarray</span>
+<span class="sd">        Element ids from the second mesh that intersect with the first</span>
+<span class="sd">    IntersectionPoints : np.ndarray, optional</span>
+<span class="sd">        Coordinates of intersections (returned if return_pts=True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="n">segments1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">)[</span><span class="n">BoundaryConn1</span><span class="p">]</span>
+    <span class="n">segments2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords2</span><span class="p">)[</span><span class="n">BoundaryConn2</span><span class="p">]</span>
+    <span class="n">s1idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">segments1</span><span class="p">)),</span><span class="nb">len</span><span class="p">(</span><span class="n">segments2</span><span class="p">))</span>
+    <span class="n">s2idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">segments2</span><span class="p">)),</span> <span class="nb">len</span><span class="p">(</span><span class="n">segments1</span><span class="p">))</span>
+    <span class="n">s1</span> <span class="o">=</span> <span class="n">segments1</span><span class="p">[</span><span class="n">s1idx</span><span class="p">]</span> <span class="c1"># Pairwise segments from 1 [seg1, seg1, ..., seg2, seg2, ...]</span>
+    <span class="n">s2</span> <span class="o">=</span> <span class="n">segments2</span><span class="p">[</span><span class="n">s2idx</span><span class="p">]</span> <span class="c1"># Pairwise segments from 2 [seg1, seg2, ..., seg1, seg2, ...]</span>
+
+    <span class="k">if</span> <span class="n">return_pts</span><span class="p">:</span>
+        <span class="n">Intersections</span><span class="p">,</span> <span class="n">pts</span> <span class="o">=</span> <span class="n">SegmentsSegmentsIntersection</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="n">return_intersection</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Intersections</span> <span class="o">=</span> <span class="n">SegmentsSegmentsIntersection</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="n">return_intersection</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    
+    <span class="n">IntersectionIdx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Intersections</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">Intersections1</span> <span class="o">=</span> <span class="n">s1idx</span><span class="p">[</span><span class="n">IntersectionIdx</span><span class="p">]</span>
+    <span class="n">Intersections2</span> <span class="o">=</span> <span class="n">s2idx</span><span class="p">[</span><span class="n">IntersectionIdx</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">return_pts</span><span class="p">:</span>
+        <span class="n">IntersectionPoints</span> <span class="o">=</span> <span class="n">pts</span><span class="p">[</span><span class="n">IntersectionIdx</span><span class="p">]</span> 
+        <span class="k">return</span> <span class="n">Intersections1</span><span class="p">,</span> <span class="n">Intersections2</span><span class="p">,</span> <span class="n">IntersectionPoints</span>
+    
+    <span class="k">return</span> <span class="n">Intersections1</span><span class="p">,</span> <span class="n">Intersections2</span></div>
 
 
 <div class="viewcode-block" id="SurfSelfIntersection">

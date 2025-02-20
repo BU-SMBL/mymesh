@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mymesh.rays.PointInSurf &#8212; MyMesh vdev Manual</title>
+    <title>mymesh.rays.BoundaryBoundaryIntersection &#8212; MyMesh vdev Manual</title>
   
   
   
@@ -58,11 +58,11 @@
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.rays.PointInSurf';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.rays.BoundaryBoundaryIntersection';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mymesh.rays.PointsInSurf" href="mymesh.rays.PointsInSurf.html" />
-    <link rel="prev" title="mymesh.rays.PointInBoundary" href="mymesh.rays.PointInBoundary.html" />
+    <link rel="next" title="mymesh.rays.SurfSelfIntersection" href="mymesh.rays.SurfSelfIntersection.html" />
+    <link rel="prev" title="mymesh.rays.RayOctreeIntersection" href="mymesh.rays.RayOctreeIntersection.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -409,7 +409,7 @@
     
     <li class="breadcrumb-item"><a href="../mymesh.rays.html" class="nav-link">mymesh.rays</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh.rays.PointInSurf</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh.rays.BoundaryBoundaryIntersection</span></li>
   </ul>
 </nav>
 </div>
@@ -426,32 +426,30 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="mymesh-rays-pointinsurf">
-<h1>mymesh.rays.PointInSurf<a class="headerlink" href="#mymesh-rays-pointinsurf" title="Link to this heading">#</a></h1>
+  <section id="mymesh-rays-boundaryboundaryintersection">
+<h1>mymesh.rays.BoundaryBoundaryIntersection<a class="headerlink" href="#mymesh-rays-boundaryboundaryintersection" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="mymesh.rays.PointInSurf">
-<span class="sig-prename descclassname"><span class="pre">mymesh.rays.</span></span><span class="sig-name descname"><span class="pre">PointInSurf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SurfConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ElemNormals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Octree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ray</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.90373065,</span> <span class="pre">0.17715907,</span> <span class="pre">0.69016785])</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/rays.html#PointInSurf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.rays.PointInSurf" title="Link to this definition">#</a></dt>
-<dd><p>Test to determine whether a point is inside a surface mesh.</p>
+<dt class="sig sig-object py" id="mymesh.rays.BoundaryBoundaryIntersection">
+<span class="sig-prename descclassname"><span class="pre">mymesh.rays.</span></span><span class="sig-name descname"><span class="pre">BoundaryBoundaryIntersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NodeCoords1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BoundaryConn1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeCoords2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BoundaryConn2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_pts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/rays.html#BoundaryBoundaryIntersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.rays.BoundaryBoundaryIntersection" title="Link to this definition">#</a></dt>
+<dd><p>Identify intersections between two surface meshes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pt</strong> (<em>array_like</em>) – 3D coordinates for point shape=(3,).</p></li>
-<li><p><strong>NodeCoords</strong> (<em>array_like</em>) – List of node coordinates of the surface</p></li>
-<li><p><strong>SurfConn</strong> (<em>array_like</em>) – Node connectivity of elements. This function is only valid for triangular surface meshes.</p></li>
-<li><p><strong>ElemNormals</strong> (<em>array_like</em>) – Element normal vectors</p></li>
-<li><p><strong>Octree</strong> (<em>None</em><em>, </em><em>str</em><em>, or </em><em>octree.octreeNode</em><em>, </em><em>optional</em>) – Determines whether to use/generate an octree data structure for acceleration of the intersection testing, by default None.
-‘generate’ - Will generate an octree structure of the surface
-None - Will not use an octree structure
-octree.octreeNode - Octree data structure precomputed using <a class="reference internal" href="mymesh.octree.Surface2Octree.html#mymesh.octree.Surface2Octree" title="mymesh.octree.Surface2Octree"><code class="xref py py-func docutils literal notranslate"><span class="pre">mymesh.octree.Surface2Octree()</span></code></a></p></li>
-<li><p><strong>eps</strong> (<em>float</em><em>, </em><em>optional</em>) – Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8</p></li>
-<li><p><strong>ray</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Ray that will be cast to determine whether the point is inside or outside the surface, by default np.random.rand(3). For a closed, manifold surface, the choice of ray shouldn’t matter.</p></li>
+<li><p><strong>NodeCoords1</strong> (<em>array_like</em>) – Node coordinates of the first boundary mesh</p></li>
+<li><p><strong>BoundaryConn1</strong> (<em>list</em><em>, </em><em>array_like</em>) – Node connectivity of the first boundary mesh</p></li>
+<li><p><strong>NodeCoords2</strong> (<em>array_like</em>) – Node coordinates of the second bounday mesh</p></li>
+<li><p><strong>BoundaryConn2</strong> (<em>list</em><em>, </em><em>array_like</em>) – Node connectivity of the second boundary mesh</p></li>
+<li><p><strong>eps</strong> (<em>float</em><em>, </em><em>optional</em>) – Small tolerance parameter, by default 0, by default 1e-14</p></li>
+<li><p><strong>return_pts</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, will return intersection points, by default False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>inside</strong> – True if the point is inside the surface, otherwise False.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>Intersections1</strong> (<em>np.ndarray</em>) – Element ids from the first mesh that intersect with the second</p></li>
+<li><p><strong>Intersections2</strong> (<em>np.ndarray</em>) – Element ids from the second mesh that intersect with the first</p></li>
+<li><p><strong>IntersectionPoints</strong> (<em>np.ndarray, optional</em>) – Coordinates of intersections (returned if return_pts=True)</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -469,20 +467,20 @@ octree.octreeNode - Octree data structure precomputed using <a class="reference 
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mymesh.rays.PointInBoundary.html"
+       href="mymesh.rays.RayOctreeIntersection.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.rays.PointInBoundary</p>
+        <p class="prev-next-title">mymesh.rays.RayOctreeIntersection</p>
       </div>
     </a>
     <a class="right-next"
-       href="mymesh.rays.PointsInSurf.html"
+       href="mymesh.rays.SurfSelfIntersection.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.rays.PointsInSurf</p>
+        <p class="prev-next-title">mymesh.rays.SurfSelfIntersection</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -505,7 +503,7 @@ octree.octreeNode - Octree data structure precomputed using <a class="reference 
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mymesh.rays.PointInSurf"><code class="docutils literal notranslate"><span class="pre">PointInSurf()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mymesh.rays.BoundaryBoundaryIntersection"><code class="docutils literal notranslate"><span class="pre">BoundaryBoundaryIntersection()</span></code></a></li>
 </ul>
   </nav></div>
 
@@ -513,7 +511,7 @@ octree.octreeNode - Octree data structure precomputed using <a class="reference 
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/generated/submodules/mymesh.rays.PointInSurf.rst.txt"
+      <li><a href="../../_sources/generated/submodules/mymesh.rays.BoundaryBoundaryIntersection.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

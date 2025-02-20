@@ -4756,6 +4756,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="n">TetNodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">TetNodeCoords</span><span class="p">)</span>
     <span class="n">TetNodeConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">TetNodeConn</span><span class="p">)</span>
+    <span class="n">NodeValues</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeValues</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeValues</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">TetNodeCoords</span><span class="p">),</span> <span class="s1">&#39;Number of nodes must much number of node values.&#39;</span>
 
     <span class="n">MT_Lookup</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
             <span class="p">[],</span>                     <span class="c1"># 0-0000</span>
