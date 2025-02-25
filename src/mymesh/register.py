@@ -82,12 +82,44 @@ Optimization
 import numpy as np
 import scipy
 import sys, os, copy, warnings
+from mymesh import utils
 
-def AxisAlign(M, axis_order=[2,1,0]):
-    return
+def AxisAlignPoints(points, axis_order=[2,1,0], return_transform=False):
+    
+    mvbb, mat = utils.MVBB(points, return_matrix=True)
 
-def AxisAlignImage():
-    return
+    # Restore center after rotation
+    mvbb_t = transform_points(mvbb, mat)
+    center_shift = np.mean(mvbb,axis=0) - np.mean(mvbb_t,axis=0)
+
+    transform = np.eye(4)
+    transform[:3,:3] = mat
+    transform[:3,3] = center_shift
+    transformed = transform_points(points, transform)
+    
+    if return_transform:
+        return transformed, transform
+
+    return transform
+
+def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, return_transform=False):
+
+    if threshold is not None:
+        # TODO: Should have other thresholding options
+        binarized = img > threshold 
+    else:
+        binarized = np.copy(img)
+    
+    points = np.column_stack(np.where(binarized))
+
+    _, transform = AxisAlignPoints(points, axis_order=axis_order, return_transform=True)
+    inv_transform = np.linalg.inv(transform)
+    transformed = scipy.ndimage.affine_transform(img, inv_transform)
+    
+    if return_transform:
+        return transformed, transform
+
+    return transform
 
 def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metric='symmetric_closest_point_MSE', 
     method='direct', decimation=1, transform_args={}, optimizer_args=None, verbose=True):
@@ -925,6 +957,9 @@ def transform_points(points, T):
         # Affine matrix
         pointsT = (T@np.column_stack([points, np.ones(len(points))]).T).T
         new_points = pointsT[:,:-1]
+    elif np.shape(T) == (3,3):
+        # non-affine transfomration matirx
+        new_points = (T@points.T).T
     else:
         raise Exception("I haven't set up handling of any other cases yet.")
         
