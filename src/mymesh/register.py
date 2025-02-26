@@ -85,13 +85,53 @@ import sys, os, copy, warnings
 from mymesh import utils
 
 def AxisAlignPoints(points, axis_order=[2,1,0], return_transform=False):
-    
+    """
+    Align an point cloud to the x, y, z axes. This works by identifying
+    the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and 
+    aligning that box to the principal axes, so point clouds representing 
+    rounded objects with ambiguous orientation may be oriented
+    seemingly-arbitrarily. The center of the object (defined as the centroid
+    of the MVBB) will be preserved in the alignment.
+
+    Parameters
+    ----------
+    points : array_like
+        Array of point coordinates (shape=(n,3))
+    axis_order : array_like, optional
+        Orientation of the aligned image in terms of the lengths of each side
+        of the object, by default [2,1,0]. For example, with [2, 1, 0], the 
+        longest side will be aligned with the z (2) axis, and the shortest will
+        be aligned with the x (0) axis. Must be a combination of 0, 1, and 2.
+    return_transform : bool, optional
+        Option to return the transformation matrix as well as the transformed
+        point cloud, by default False
+
+    Returns
+    -------
+    transformed : np.ndarray
+        Array of point coordinates transformed to be aligned to the axes
+    transform : np.ndarray, optional
+        Affine transformation matrix (shape=(4,4)) to transform `points` to 
+        `transformed` (`transformed=(transform@points.T).T`). Only returned if
+        `return_transform = True`.
+    """    
+    assert ValueError(len(axis_order) == 3 and np.array_equal([0,1,2], np.sort(axis_order))), 'axis_order must contain only 0, 1, and 2.'
+
     mvbb, mat = utils.MVBB(points, return_matrix=True)
 
-    # Restore center after rotation
+    # Modify rotation to specified axis_order
     mvbb_t = transform_points(mvbb, mat)
+    side_lengths = np.max(mvbb_t,axis=0) - np.min(mvbb_t,axis=0)
+    current_order = np.argsort(side_lengths)
+    if not np.all(current_order == axis_order):
+        idx = np.argsort(np.argsort(current_order)[np.argsort(axis_order)])
+        perpendicular_transform = np.eye(3)[idx]
+        mat = perpendicular_transform@mat
+        mvbb_t = transform_points(mvbb, mat)
+    
+    # Restore center after rotation
     center_shift = np.mean(mvbb,axis=0) - np.mean(mvbb_t,axis=0)
-
+    
     transform = np.eye(4)
     transform[:3,:3] = mat
     transform[:3,3] = center_shift
@@ -100,9 +140,44 @@ def AxisAlignPoints(points, axis_order=[2,1,0], return_transform=False):
     if return_transform:
         return transformed, transform
 
-    return transform
+    return transformed
 
 def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, return_transform=False):
+    """
+    Align an object in an image to the x, y, z axes. This works by identifying
+    the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and 
+    aligning that box to the principal axes, so objects with rounded objects 
+    with ambiguous orientation may be oriented seemingly-arbitrarily. The center 
+    of the object (defined as the centroid of the MVBB) will be preserved in the 
+    alignment.
+
+    Parameters
+    ----------
+    img : array_like
+        3 dimensional image array of the image
+    axis_order : array_like, optional
+        Orientation of the aligned image in terms of the lengths of each side
+        of the object, by default [2,1,0]. For example, with [2, 1, 0], the 
+        longest side will be aligned with the z (2) axis, and the shortest will
+        be aligned with the x (0) axis. Must be a combination of 0, 1, and 2.
+    threshold : float, optional
+        Threshold value used to binarize the image for identification of the
+        object. If the image is already binarized, this is not necessary, by 
+        default None.
+    return_transform : bool, optional
+        Option to return the transformation matrix as well as the transformed
+        point cloud, by default False
+
+    Returns
+    -------
+    transformed : np.ndarray
+        Array of point coordinates transformed to be aligned to the axes
+    transform : np.ndarray, optional
+        Affine transformation matrix (shape=(4,4)) to transform `img` to 
+        `transformed`. Only returned if
+        `return_transform = True`.
+    """
+    assert ValueError(len(axis_order) == 3 and np.array_equal([0,1,2], np.sort(axis_order))), 'axis_order must contain only 0, 1, and 2.'
 
     if threshold is not None:
         # TODO: Should have other thresholding options
@@ -119,7 +194,7 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, return_transform=Fal
     if return_transform:
         return transformed, transform
 
-    return transform
+    return transformed
 
 def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metric='symmetric_closest_point_MSE', 
     method='direct', decimation=1, transform_args={}, optimizer_args=None, verbose=True):
