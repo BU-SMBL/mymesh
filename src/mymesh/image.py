@@ -287,7 +287,8 @@ def read(img, scalefactor=1, scaleorder=1):
 
         if os.path.isdir(path):
             # Image directory
-            tiffs = glob.glob(os.path.join(path,'*.TIFF*')) + glob.glob(os.path.join(path,'*.TIF*'))  +glob.glob(os.path.join(path,'*.tiff*')) + glob.glob(os.path.join(path,'*.tif*')) + glob.glob(os.path.join(path,'*.jpg*')) + glob.glob(os.path.join(path,'*.jpeg*')) + glob.glob(os.path.join(path,'*.png*'))
+            tiffs = glob.glob(os.path.join(path,'*.TIF*')) + glob.glob(os.path.join(path,'*.tif*')) + glob.glob(os.path.join(path,'*.jpg*')) + glob.glob(os.path.join(path,'*.JPG*')) + glob.glob(os.path.join(path,'*.jpeg*')) + glob.glob(os.path.join(path,'*.JPEG*')) + glob.glob(os.path.join(path,'*.png*')) + glob.glob(os.path.join(path,'*.PNG*'))
+            tiffs = np.unique(tiffs).tolist() # This catches double reads on Windows due to case insensitive glob
             tiffs.sort()
 
             dicoms = glob.glob(os.path.join(path,'*.dcm*'))
