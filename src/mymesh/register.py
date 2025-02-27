@@ -84,14 +84,15 @@ import scipy
 import sys, os, copy, warnings
 from mymesh import utils
 
-def AxisAlignPoints(points, axis_order=[2,1,0], return_transform=False):
+def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transform=False):
     """
     Align an point cloud to the x, y, z axes. This works by identifying
     the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and 
     aligning that box to the principal axes, so point clouds representing 
     rounded objects with ambiguous orientation may be oriented
     seemingly-arbitrarily. The center of the object (defined as the centroid
-    of the MVBB) will be preserved in the alignment.
+    of the MVBB) will be preserved in the alignment unless a different center
+    is specified.
 
     Parameters
     ----------
@@ -102,6 +103,11 @@ def AxisAlignPoints(points, axis_order=[2,1,0], return_transform=False):
         of the object, by default [2,1,0]. For example, with [2, 1, 0], the 
         longest side will be aligned with the z (2) axis, and the shortest will
         be aligned with the x (0) axis. Must be a combination of 0, 1, and 2.
+    center : array_like or NoneType, optional
+        If provided, coordinates `[x,y,z]` of where to place to place the center
+        of the bounding box of the object after transformation. If `None`, the 
+        center of the oriented points will be the center of the original points,
+        by default None.
     return_transform : bool, optional
         Option to return the transformation matrix as well as the transformed
         point cloud, by default False
@@ -122,7 +128,7 @@ def AxisAlignPoints(points, axis_order=[2,1,0], return_transform=False):
     # Modify rotation to specified axis_order
     mvbb_t = transform_points(mvbb, mat)
     side_lengths = np.max(mvbb_t,axis=0) - np.min(mvbb_t,axis=0)
-    current_order = np.argsort(side_lengths)
+    current_order = np.argsort(side_lengths)[::-1]
     if not np.all(current_order == axis_order):
         idx = np.argsort(np.argsort(current_order)[np.argsort(axis_order)])
         perpendicular_transform = np.eye(3)[idx]
@@ -130,7 +136,12 @@ def AxisAlignPoints(points, axis_order=[2,1,0], return_transform=False):
         mvbb_t = transform_points(mvbb, mat)
     
     # Restore center after rotation
-    center_shift = np.mean(mvbb,axis=0) - np.mean(mvbb_t,axis=0)
+    if center is None:
+        center = np.mean(mvbb,axis=0)
+    else:
+        assert isinstance(center, (tuple, list, np.ndarray)) and len(center) == 3, 'If provided, center must be be a three element list or array.'
+        center = np.asarray(center)
+    center_shift = center - np.mean(mvbb_t,axis=0)
     
     transform = np.eye(4)
     transform[:3,:3] = mat
@@ -142,14 +153,12 @@ def AxisAlignPoints(points, axis_order=[2,1,0], return_transform=False):
 
     return transformed
 
-def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, return_transform=False):
+def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', return_transform=False):
     """
     Align an object in an image to the x, y, z axes. This works by identifying
     the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and 
     aligning that box to the principal axes, so objects with rounded objects 
-    with ambiguous orientation may be oriented seemingly-arbitrarily. The center 
-    of the object (defined as the centroid of the MVBB) will be preserved in the 
-    alignment.
+    with ambiguous orientation may be oriented seemingly-arbitrarily. 
 
     Parameters
     ----------
@@ -164,9 +173,20 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, return_transform=Fal
         Threshold value used to binarize the image for identification of the
         object. If the image is already binarized, this is not necessary, by 
         default None.
+    center : str, array_like, or NoneType, optional
+        Location of the center of the object after axis alignment, by default
+        'image'. Options are:
+
+        - 'image': Centers the object at the center of the image
+        - 'object': Keeps the center of the object in place
+        - `[x,y,z]`: A three element list or array specifies the location, in
+        voxels, of where to place to place the center of the bounding box of the 
+        object after transformation. 
+
     return_transform : bool, optional
         Option to return the transformation matrix as well as the transformed
         point cloud, by default False
+    
 
     Returns
     -------
@@ -184,10 +204,23 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, return_transform=Fal
         binarized = img > threshold 
     else:
         binarized = np.copy(img)
+
+    if type(center) is str:
+        if center == 'image':
+            center = np.shape(img)/2
+        elif center == 'center':
+            center = None
+    else:
+        assert isinstance(center, (tuple, list, np.ndarray)) and len(center) == 3, 'If provided as coordinates, center must be be a three element list or array.'
+
     
     points = np.column_stack(np.where(binarized))
 
-    _, transform = AxisAlignPoints(points, axis_order=axis_order, return_transform=True)
+    transformed_points, transform = AxisAlignPoints(points, axis_order=axis_order, center=center, return_transform=True)
+    maxs = np.max(transformed_points,axis=0)
+    mins = np.min(transform_points,axis=0)
+    if np.any(maxs > np.shape(img)) or np.any(mins < 0):
+        warnings.warn('Some of the object is being moved out of frame. Consider padding the image, adjusting center, or changing the axis_order.')
     inv_transform = np.linalg.inv(transform)
     transformed = scipy.ndimage.affine_transform(img, inv_transform)
     
