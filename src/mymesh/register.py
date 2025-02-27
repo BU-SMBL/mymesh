@@ -99,10 +99,12 @@ def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transform=Fa
     points : array_like
         Array of point coordinates (shape=(n,3))
     axis_order : array_like, optional
-        Orientation of the aligned image in terms of the lengths of each side
-        of the object, by default [2,1,0]. For example, with [2, 1, 0], the 
-        longest side will be aligned with the z (2) axis, and the shortest will
-        be aligned with the x (0) axis. Must be a combination of 0, 1, and 2.
+        Orientation of the aligned object in terms of the lengths of each side
+        of the object, by default [0,1,2]. The first axis will correspond to the
+        shortest side of the object and the last index to the longest side. For 
+        example, with [0,1,2], the longest side will be aligned with the z (2) 
+        axis, and the shortest will be aligned with the x (0) axis. Must be a 
+        combination of 0, 1, and 2.
     center : array_like or NoneType, optional
         If provided, coordinates `[x,y,z]` of where to place to place the center
         of the bounding box of the object after transformation. If `None`, the 
@@ -128,7 +130,7 @@ def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transform=Fa
     # Modify rotation to specified axis_order
     mvbb_t = transform_points(mvbb, mat)
     side_lengths = np.max(mvbb_t,axis=0) - np.min(mvbb_t,axis=0)
-    current_order = np.argsort(side_lengths)[::-1]
+    current_order = np.argsort(side_lengths)
     if not np.all(current_order == axis_order):
         idx = np.argsort(np.argsort(current_order)[np.argsort(axis_order)])
         perpendicular_transform = np.eye(3)[idx]
@@ -153,7 +155,7 @@ def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transform=Fa
 
     return transformed
 
-def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', return_transform=False):
+def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', transform_options=dict(),return_transform=False):
     """
     Align an object in an image to the x, y, z axes. This works by identifying
     the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and 
@@ -166,10 +168,11 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', retu
         3 dimensional image array of the image
     axis_order : array_like, optional
         Orientation of the aligned image in terms of the lengths of each side
-        of the object, by default [2,1,0]. For example, with [2, 1, 0], the 
-        longest side will be aligned with the z (2) axis, and the shortest will
-        be aligned with the x (0) axis. Must be a combination of 0, 1, and 2.
-    threshold : float, optional
+        of the object, by default [0,1,2]. The first axis will correspond to the
+        shortest side of the object and the last index to the longest side. For 
+        example, with [0,1,2], the longest side will be aligned with the z (2) 
+        axis, and the shortest will be aligned with the x (0) axis. Must be a 
+        combination of 0, 1, and 2.
         Threshold value used to binarize the image for identification of the
         object. If the image is already binarized, this is not necessary, by 
         default None.
@@ -182,7 +185,9 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', retu
         - `[x,y,z]`: A three element list or array specifies the location, in
         voxels, of where to place to place the center of the bounding box of the 
         object after transformation. 
-
+    transform_options : dict, optional
+        Optional input arguments passed to `scipy.ndimage.affine_transform <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html>`_, by 
+        default dict().
     return_transform : bool, optional
         Option to return the transformation matrix as well as the transformed
         point cloud, by default False
@@ -216,13 +221,14 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', retu
     
     points = np.column_stack(np.where(binarized))
 
+    axis_order = np.asarray(axis_order)[[2,1,0]] # Flip axes to correspond to image axis order (z,y,x)
     transformed_points, transform = AxisAlignPoints(points, axis_order=axis_order, center=center, return_transform=True)
     maxs = np.max(transformed_points,axis=0)
     mins = np.min(transformed_points,axis=0)
     if np.any(maxs > np.shape(img)) or np.any(mins < 0):
         warnings.warn('Some of the object is being moved out of frame. Consider padding the image, adjusting center, or changing the axis_order.')
-    inv_transform = np.linalg.inv(transform)
-    transformed = scipy.ndimage.affine_transform(img, inv_transform)
+    
+    transformed = transform_image(img, transform, options=transform_options)
     
     if return_transform:
         return transformed, transform
@@ -713,7 +719,6 @@ def Image2Image2d(img1, img2, x0=None, bounds=None, transform='rigid', metric='m
 def Mesh2Image3d():
     return
 
-
 ### Transformations
 def T2d(t0,t1,h=1):
     """
@@ -1060,19 +1065,66 @@ def affine(x, center=np.array([0,0,0]), rotation_order=[0,1,2], rotation_mode='c
     return A
 
 def transform_points(points, T):
-    
+    """
+    Apply transformation matrix to an array of points.
+
+    Parameters
+    ----------
+    points : array_like
+        Array of point coordinates (shape=(n,3)).
+    T : array_like
+        Transformation matrix (either 3x3 or 4x4).
+
+    Returns
+    -------
+    new_points : np.ndarray
+        Transformed point coordinates
+
+    """    
     if np.shape(T) == (4,4):
         # Affine matrix
         pointsT = (T@np.column_stack([points, np.ones(len(points))]).T).T
         new_points = pointsT[:,:-1]
     elif np.shape(T) == (3,3):
         # non-affine transfomration matirx
-        new_points = (T@points.T).T
+        new_points = (T@np.asarray(points).T).T
     else:
         raise Exception("I haven't set up handling of any other cases yet.")
         
     return new_points
 
+def transform_image(image, T, options=dict()):
+    """
+    Apply transformation matrix to an image. This is essentially an interface
+    to `scipy.ndimage.affine_transform <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html>`_
+    but takes into account the need to invert the transformation matrix for 
+    consistency between the "pull" resampling performed by `affine_transform`
+    and the "push" transformations used to transform points. The `options` input
+    allows for inputting any of the keyword arguments used by `affine_transform`.
+
+    Parameters
+    ----------
+    image : array_like
+        Image array
+    T : array_like
+        Transformation matrix (either 3x3 or 4x4).
+    options : dict, optional
+        Options to be used by `scipy.ndimage.affine_transform <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html>`_. If none are
+        provide, all defaults will be used, by default dict(). Common options 
+        that may be used are `mode` to allow wrapping ('wrap') or mirroring 
+        ('mirror') to change what happens when the contents of the image are
+        moved beyond the bounds of the image, and `order` which changes the 
+        interpolation order of the transformation (the default is 3, 
+        transformations can be performed more efficiently by reducing to 1).
+
+    Returns
+    -------
+    new_image : np.ndarray
+        Transformed image array.
+    """    
+    new_image = scipy.ndimage.affine_transform(image, np.linalg.inv(T), **options)
+
+    return new_image
 ### Similarity Metrics
 def dice(u, v):
     TP = np.sum(u & v)
