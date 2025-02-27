@@ -207,7 +207,7 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', retu
 
     if type(center) is str:
         if center == 'image':
-            center = np.shape(img)/2
+            center = np.array(np.shape(img))/2
         elif center == 'center':
             center = None
     else:
