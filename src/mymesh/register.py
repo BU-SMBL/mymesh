@@ -218,7 +218,7 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', retu
 
     transformed_points, transform = AxisAlignPoints(points, axis_order=axis_order, center=center, return_transform=True)
     maxs = np.max(transformed_points,axis=0)
-    mins = np.min(transform_points,axis=0)
+    mins = np.min(transformed_points,axis=0)
     if np.any(maxs > np.shape(img)) or np.any(mins < 0):
         warnings.warn('Some of the object is being moved out of frame. Consider padding the image, adjusting center, or changing the axis_order.')
     inv_transform = np.linalg.inv(transform)
