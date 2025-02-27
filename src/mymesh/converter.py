@@ -56,7 +56,7 @@ Element type conversion
     quad2tri
     tet102tet4
     tet42tet10
-
+    hexsubdivide
 
 """
 
@@ -1778,6 +1778,89 @@ def surf2edges(NodeCoords,NodeConn,ElemType='auto'):
     Edges = np.asarray(edges)[EdgeIdx]
 
     return Edges
+
+def hexsubdivide(NodeCoords, NodeConn):
+    """
+    Subdivide hexahedra into 8 sub-hexahedra, connecting corners to the 
+    element, face, and edge centroids.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of node coordinates
+    NodeConn : array_like
+        List of node connectivities (must be purely hexahedra, shape=(n,8))
+
+    Returns
+    -------
+    NewCoords : np.ndarray
+        Node coordinates of the subdivided mesh. The node new nodes are 
+        appended to the original nodes, so the node numbers of the original 
+        mesh will refer to the same nodes in the new mesh.
+    NewConn : np.ndarray
+        Node connectivities of the subdivided mesh. The elements are ordered 
+        so that the first element in the original mesh is subdivided into
+        the first 8 elements in the new mesh, the second element in the mesh
+        is the next 8 elements, and so on.
+    """
+    ArrayCoords = np.asarray(NodeCoords)
+    ArrayConn = np.asarray(NodeConn, dtype=int)
+
+    Centroids = utils.Centroids(ArrayCoords,NodeConn)
+    Face0Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1,2,3]]],axis=1)
+    Face1Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1,5,4]]],axis=1)
+    Face2Centroids = np.mean(ArrayCoords[ArrayConn[:,[1,2,6,5]]],axis=1)
+    Face3Centroids = np.mean(ArrayCoords[ArrayConn[:,[2,3,7,6]]],axis=1)
+    Face4Centroids = np.mean(ArrayCoords[ArrayConn[:,[3,0,4,7]]],axis=1)
+    Face5Centroids = np.mean(ArrayCoords[ArrayConn[:,[4,5,6,7]]],axis=1)
+    Edge01 = np.mean(ArrayCoords[ArrayConn[:,[0,1]]],axis=1)
+    Edge12 = np.mean(ArrayCoords[ArrayConn[:,[1,2]]],axis=1)
+    Edge23 = np.mean(ArrayCoords[ArrayConn[:,[2,3]]],axis=1)
+    Edge30 = np.mean(ArrayCoords[ArrayConn[:,[3,0]]],axis=1)
+    Edge04 = np.mean(ArrayCoords[ArrayConn[:,[0,4]]],axis=1)
+    Edge15 = np.mean(ArrayCoords[ArrayConn[:,[1,5]]],axis=1)
+    Edge26 = np.mean(ArrayCoords[ArrayConn[:,[2,6]]],axis=1)
+    Edge37 = np.mean(ArrayCoords[ArrayConn[:,[3,7]]],axis=1)
+    Edge45 = np.mean(ArrayCoords[ArrayConn[:,[4,5]]],axis=1)
+    Edge56 = np.mean(ArrayCoords[ArrayConn[:,[5,6]]],axis=1)
+    Edge67 = np.mean(ArrayCoords[ArrayConn[:,[6,7]]],axis=1)
+    Edge74 = np.mean(ArrayCoords[ArrayConn[:,[7,4]]],axis=1)
+
+    CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*0,len(NodeCoords)+len(NodeConn)*1, dtype=int)
+    Face0CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*1,len(NodeCoords)+len(NodeConn)*2, dtype=int)
+    Face1CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*2,len(NodeCoords)+len(NodeConn)*3, dtype=int)
+    Face2CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*3,len(NodeCoords)+len(NodeConn)*4, dtype=int)
+    Face3CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*4,len(NodeCoords)+len(NodeConn)*5, dtype=int)
+    Face4CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*5,len(NodeCoords)+len(NodeConn)*6, dtype=int)
+    Face5CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*6,len(NodeCoords)+len(NodeConn)*7, dtype=int)
+    Edge01Ids = np.arange(len(NodeCoords)+len(NodeConn)*7,len(NodeCoords)+len(NodeConn)*8, dtype=int)
+    Edge12Ids = np.arange(len(NodeCoords)+len(NodeConn)*8,len(NodeCoords)+len(NodeConn)*9, dtype=int)
+    Edge23Ids = np.arange(len(NodeCoords)+len(NodeConn)*9,len(NodeCoords)+len(NodeConn)*10, dtype=int)
+    Edge30Ids = np.arange(len(NodeCoords)+len(NodeConn)*10,len(NodeCoords)+len(NodeConn)*11, dtype=int)
+    Edge04Ids = np.arange(len(NodeCoords)+len(NodeConn)*11,len(NodeCoords)+len(NodeConn)*12, dtype=int)
+    Edge15Ids = np.arange(len(NodeCoords)+len(NodeConn)*12,len(NodeCoords)+len(NodeConn)*13, dtype=int)
+    Edge26Ids = np.arange(len(NodeCoords)+len(NodeConn)*13,len(NodeCoords)+len(NodeConn)*14, dtype=int)
+    Edge37Ids = np.arange(len(NodeCoords)+len(NodeConn)*14,len(NodeCoords)+len(NodeConn)*15, dtype=int)
+    Edge45Ids = np.arange(len(NodeCoords)+len(NodeConn)*15,len(NodeCoords)+len(NodeConn)*16, dtype=int)
+    Edge56Ids = np.arange(len(NodeCoords)+len(NodeConn)*16,len(NodeCoords)+len(NodeConn)*17, dtype=int)
+    Edge67Ids = np.arange(len(NodeCoords)+len(NodeConn)*17,len(NodeCoords)+len(NodeConn)*18, dtype=int)
+    Edge74Ids = np.arange(len(NodeCoords)+len(NodeConn)*18,len(NodeCoords)+len(NodeConn)*19, dtype=int)
+    
+    NewCoords = np.vstack([ArrayCoords,Centroids,Face0Centroids,Face1Centroids,Face2Centroids,Face3Centroids,Face4Centroids,Face5Centroids, Edge01, Edge12, Edge23, Edge30, Edge04, Edge15, Edge26, Edge37, Edge45, Edge56, Edge67, Edge74])        
+    
+    SubConn = -1*np.ones((len(NodeConn)*8,8), dtype=int)
+    SubConn[0::8] = np.column_stack([ArrayConn[:,0], Edge01Ids, Face0CentroidIds, Edge30Ids, Edge04Ids, Face1CentroidIds, CentroidIds, Face4CentroidIds])
+    SubConn[1::8] = np.column_stack([Edge01Ids, ArrayConn[:,1], Edge12Ids, Face0CentroidIds, Face1CentroidIds, Edge15Ids, Face2CentroidIds, CentroidIds])
+    SubConn[2::8] = np.column_stack([Face0CentroidIds, Edge12Ids, ArrayConn[:,2], Edge23Ids, CentroidIds, Face2CentroidIds, Edge26Ids, Face3CentroidIds])
+    SubConn[3::8] = np.column_stack([Edge30Ids, Face0CentroidIds, Edge23Ids, ArrayConn[:,3], Face4CentroidIds, CentroidIds, Face3CentroidIds, Edge37Ids])
+
+    SubConn[4::8] = np.column_stack([Edge04Ids, Face1CentroidIds, CentroidIds, Face4CentroidIds, ArrayConn[:,4], Edge45Ids, Face5CentroidIds, Edge74Ids])
+    SubConn[5::8] = np.column_stack([Face1CentroidIds, Edge15Ids, Face2CentroidIds, CentroidIds, Edge45Ids, ArrayConn[:,5], Edge56Ids, Face5CentroidIds])
+    SubConn[6::8] = np.column_stack([CentroidIds, Face2CentroidIds, Edge26Ids, Face3CentroidIds, Face5CentroidIds, Edge56Ids, ArrayConn[:,6], Edge67Ids])
+    SubConn[7::8] = np.column_stack([Face4CentroidIds, CentroidIds, Face3CentroidIds, Edge37Ids, Edge74Ids, Face5CentroidIds, Edge67Ids, ArrayConn[:,7]])
+
+    return NewCoords, SubConn
+
 
 def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
     """

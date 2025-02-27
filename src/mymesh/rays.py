@@ -33,6 +33,7 @@ Intersection Tests
     RaySurfIntersection
     RaysSurfIntersection
     RayOctreeIntersection
+    BoundaryBoundaryIntersection
     SurfSelfIntersection
     SurfSurfIntersection
     PlaneSurfIntersection
@@ -2038,6 +2039,58 @@ def RayOctreeIntersection(pt, ray, Octree):
         children = np.array([child for parent in nodes for child in parent.children], dtype=object)
 
     return intersection_leaves
+
+def BoundaryBoundaryIntersection(NodeCoords1, BoundaryConn1, NodeCoords2, BoundaryConn2, eps=0, return_pts=False):
+    """
+    Identify intersections between two surface meshes.
+
+    Parameters
+    ----------
+    NodeCoords1 : array_like
+        Node coordinates of the first boundary mesh
+    BoundaryConn1 : list, array_like
+        Node connectivity of the first boundary mesh
+    NodeCoords2 : array_like
+        Node coordinates of the second bounday mesh
+    BoundaryConn2 : list, array_like
+        Node connectivity of the second boundary mesh
+    eps : float, optional
+        Small tolerance parameter, by default 0, by default 1e-14
+    return_pts : bool, optional
+        If true, will return intersection points, by default False.
+
+    Returns
+    -------
+    Intersections1 : np.ndarray
+        Element ids from the first mesh that intersect with the second
+    Intersections2 : np.ndarray
+        Element ids from the second mesh that intersect with the first
+    IntersectionPoints : np.ndarray, optional
+        Coordinates of intersections (returned if return_pts=True)
+    """    
+
+    segments1 = np.asarray(NodeCoords1)[BoundaryConn1]
+    segments2 = np.asarray(NodeCoords2)[BoundaryConn2]
+    s1idx = np.repeat(np.arange(len(segments1)),len(segments2))
+    s2idx = np.tile(np.arange(len(segments2)), len(segments1))
+    s1 = segments1[s1idx] # Pairwise segments from 1 [seg1, seg1, ..., seg2, seg2, ...]
+    s2 = segments2[s2idx] # Pairwise segments from 2 [seg1, seg2, ..., seg1, seg2, ...]
+
+    if return_pts:
+        Intersections, pts = SegmentsSegmentsIntersection(s1, s2, eps=eps, return_intersection=True)
+
+    else:
+        Intersections = SegmentsSegmentsIntersection(s1, s2, eps=eps, return_intersection=False)
+    
+    IntersectionIdx = np.where(Intersections)[0]
+    Intersections1 = s1idx[IntersectionIdx]
+    Intersections2 = s2idx[IntersectionIdx]
+
+    if return_pts:
+        IntersectionPoints = pts[IntersectionIdx] 
+        return Intersections1, Intersections2, IntersectionPoints
+    
+    return Intersections1, Intersections2
 
 def SurfSelfIntersection(NodeCoords, SurfConn, Octree='generate', eps=1e-14, return_pts=False):
     """
