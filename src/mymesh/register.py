@@ -318,21 +318,62 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
             ]
             
         if verbose:
-            print('iter.|| score||       tx |       ty |       tz |    alpha |     beta |    gamma ')
-            print('-----||------||----------|----------|----------|----------|----------|----------')
-            
+            print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma ')
+            print('-----||-----------||----------|----------|----------|----------|----------|----------')          
     elif transform.lower() == 'similarity':
         nparam = 7
         transformation = lambda x : similarity(x, **transform_args)
         if x0 is None:
             x0 = np.zeros(nparam)
             x0[6] = 1
+        if bounds is None:
+            eps = 1e-10
+            xbounds = sorted([np.min(points2[:,0]) - np.max(points1[:,0])-eps, np.max(points2[:,0]) - np.min(points1[:,0])+eps])
+            ybounds = sorted([np.min(points2[:,1]) - np.max(points1[:,1])-eps, np.max(points2[:,1]) - np.min(points1[:,1])+eps])
+            zbounds = sorted([np.min(points2[:,2]) - np.max(points1[:,2])-eps, np.max(points2[:,2]) - np.min(points1[:,2])+eps])
+            bounds = [
+                xbounds,
+                ybounds,
+                zbounds,
+                (-np.pi, np.pi),
+                (-np.pi, np.pi),
+                (-np.pi, np.pi),
+                (0.9, 1.1),
+            ]
+        if verbose:
+            print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma |        s |')
+            print('-----||-----------||----------|----------|----------|----------|----------|----------|----------|')
     elif transform.lower() == 'affine':
         nparam = 15
         transformation = lambda x : affine(x, **transform_args)
         if x0 is None:
             x0 = np.zeros(nparam)
             x0[6:9] = 1
+        if bounds is None:
+            eps = 1e-10
+            xbounds = sorted([np.min(points2[:,0]) - np.max(points1[:,0])-eps, np.max(points2[:,0]) - np.min(points1[:,0])+eps])
+            ybounds = sorted([np.min(points2[:,1]) - np.max(points1[:,1])-eps, np.max(points2[:,1]) - np.min(points1[:,1])+eps])
+            zbounds = sorted([np.min(points2[:,2]) - np.max(points1[:,2])-eps, np.max(points2[:,2]) - np.min(points1[:,2])+eps])
+            bounds = [
+                xbounds,
+                ybounds,
+                zbounds,
+                (-np.pi, np.pi),
+                (-np.pi, np.pi),
+                (-np.pi, np.pi),
+                (0.9, 1.1),
+                (0.9, 1.1),
+                (0.9, 1.1),
+                np.divide(xbounds,10),
+                np.divide(xbounds,10),
+                np.divide(ybounds,10),
+                np.divide(ybounds,10),
+                np.divide(zbounds,10),
+                np.divide(zbounds,10),
+            ]
+        if verbose:
+            print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma |       sx |       sy |       sz |    shxy |')
+            print('-----||-----------||----------|----------|----------|----------|----------|----------|----------|----------|----------|----------')
     elif transform.lower() == 'rigid2d':
         nparam = 3
         transformation = lambda x : rigid2d(x, **transform_args)
@@ -348,8 +389,7 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
             
         if verbose:
             print('iter.|| score||       tx |       ty |    theta ')
-            print('-----||------||----------|----------|----------')
-            
+            print('-----||------||----------|----------|----------')           
     elif transform.lower() == 'similarity2d':
         nparam = 4
         transformation = lambda x : similarity2d(x, **transform_args)
@@ -376,8 +416,7 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
     if metric.lower() == 'symmetric_closest_point_mse':
         tree1 = scipy.spatial.KDTree(points1) 
         # Note: can't precommute tree for the moving points
-        obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)
-        
+        obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)     
     elif metric.lower() == 'hausdorff':
         obj = hausdorff
     elif metric.lower() == 'closest_point_mse':
@@ -425,11 +464,19 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
 
     return new_points, T
 
-def Mesh2Mesh():
-    return
+def Mesh2Mesh(M1, M2, x0=None, bounds=None, transform='rigid', metric='symmetric_closest_point_MSE', 
+    method='direct', decimation=1, transform_args={}, optimizer_args=None, verbose=True):
+
+    points1 = M1.NodeCoords
+    points2 = M2.NodeCoords
+
+    new_points2, T = Point2Point(points1, points2, x0=x0, bounds=bounds, transform=transform, metric=metric, method=method, decimation=decimation, transform_args=transform_args, optimizer_args=optimizer_args, verbose=verbose)
+    Mnew = M2.copy()
+    Mnew.NodeCoords = new_points2
+    return Mnew, T
 
 def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='dice', 
-        method='direct', scalefactor=1, interpolation_order=3, threshold=None, transform_args={}, optimizer_args=None, verbose=True):
+        method='direct', scalefactor=1, interpolation_order=3, threshold=None, transform_args={}, optimizer_args=None, decimation=1, verbose=True):
         """
         3-dimensional image registration. img2 will be registered to img1
 
@@ -491,54 +538,73 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
             to img1.
 
         """
+        
         if transform.lower() == 'rigid':
             nparam = 6
-            transformation = lambda x : rigid(x, image=True, center=np.array(img1.shape)/2, **transform_args)
+            transformation = lambda x : rigid(x, **transform_args)
             if x0 is None:
                 x0 = np.zeros(nparam)
             if bounds is None:
-                pass
-                # bounds = [
-                #     sorted([np.min(points2[:,0]) - np.max(points1[:,0]), np.max(points2[:,0]) - np.min(points1[:,0])]),
-                #     sorted([np.min(points2[:,1]) - np.max(points1[:,1]), np.max(points2[:,1]) - np.min(points1[:,1])]),
-                #     sorted([np.min(points2[:,2]) - np.max(points1[:,2]), np.max(points2[:,2]) - np.min(points1[:,2])]),
-                #     (-np.pi, np.pi)
-                # ]
+                bounds = [
+                    (0.25*np.shape(img1)[0],0.75*np.shape(img1)[0]),
+                    (0.25*np.shape(img1)[1],0.75*np.shape(img1)[1]),
+                    (0.25*np.shape(img1)[2],0.75*np.shape(img1)[2]),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi)
+                ]
                 
             if verbose:
-                print('iter.|| score||       tx |       ty |       tz |    alpha |     beta |    gamma ')
-                print('-----||------||----------|----------|----------|----------|----------|----------')
-                
+                print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma ')
+                print('-----||-----------||----------|----------|----------|----------|----------|----------')      
         elif transform.lower() == 'similarity':
-            pass
-            # nparam = 7
-            # transformation = lambda x : similarity(x, **transform_args)
-            # x0 = np.zeros(nparam)
-            # x0[6] = 1
+            nparam = 7
+            transformation = lambda x : similarity(x, **transform_args)
+            if x0 is None:
+                x0 = np.zeros(nparam)
+                x0[6] = 1
+            if bounds is None:
+                bounds = [
+                    (0.25*np.shape(img1)[0],0.75*np.shape(img1)[0]),
+                    (0.25*np.shape(img1)[1],0.75*np.shape(img1)[1]),
+                    (0.25*np.shape(img1)[2],0.75*np.shape(img1)[2]),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi),
+                    (0.9, 1.1),
+                ]
+            if verbose:
+                print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma |        s |')
+                print('-----||-----------||----------|----------|----------|----------|----------|----------|----------|')
         elif transform.lower() == 'affine':
-            pass
-            # nparam = 15
-            # transformation = lambda x : affine(x, **transform_args)
-            # x0 = np.zeros(nparam)
-            # x0[6:9] = 1
+            nparam = 15
+            transformation = lambda x : affine(x, **transform_args)
+            if x0 is None:
+                x0 = np.zeros(nparam)
+                x0[6:9] = 1
+            if bounds is None:
+                bounds = [
+                    (0.25*np.shape(img1)[0],0.75*np.shape(img1)[0]),
+                    (0.25*np.shape(img1)[1],0.75*np.shape(img1)[1]),
+                    (0.25*np.shape(img1)[2],0.75*np.shape(img1)[2]),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi),
+                    (0.9, 1.1),
+                    (0.9, 1.1),
+                    (0.9, 1.1),
+                    np.divide((0.25*np.shape(img1)[0],0.75*np.shape(img1)[0]),10),
+                    np.divide((0.25*np.shape(img1)[0],0.75*np.shape(img1)[0]),10),
+                    np.divide((0.25*np.shape(img1)[1],0.75*np.shape(img1)[1]),10),
+                    np.divide((0.25*np.shape(img1)[1],0.75*np.shape(img1)[1]),10),
+                    np.divide((0.25*np.shape(img1)[2],0.75*np.shape(img1)[2]),10),
+                    np.divide((0.25*np.shape(img1)[2],0.75*np.shape(img1)[2]),10),
+                ]
+            if verbose:
+                print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma |       sx |       sy |       sz |    shxy |')
+                print('-----||-----------||----------|----------|----------|----------|----------|----------|----------|----------|----------|----------')
         else:
-            raise ValueError('Invalid transform model. Must be one of: "rigid", "similarity" or "affine".')
-            
-        assert len(x0) == nparam, f"The provided parameters for x0 don't match the transformation model ({transform:s})."
-        
-        if metric.lower() == 'mutual_information' or metric.lower() == 'MI':
-            obj = mutual_information
-        elif metric.lower() == 'dice':
-            if threshold is not None:
-                if isinstance(threshold, (tuple, list, np.ndarray)):
-                    # TODO: Handle threshold functions
-                    obj = lambda img1, img2 : -dice(img1 > threshold[0], img2 > threshold[1])
-                else:
-                    obj = lambda img1, img2 : -dice(img1 > threshold, img2 > threshold)
-            else:
-                raise ValueError('Threshold required for metric="dice".')
-        else:
-            raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Image2Image2d registration.')
+            raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Image2Image3d registration.')
 
         if scalefactor != 1:
             moving_img = scipy.ndimage.zoom(img2, scalefactor, order=interpolation_order)
@@ -547,32 +613,60 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
             moving_img = img2
             fixed_img = img1
 
-        
-        def objective(x):
-            objective.k += 1
-            if verbose: 
-                print('{:5d}'.format(objective.k),end='')
-            T = np.linalg.inv(transformation(x))
-            imgT = scipy.ndimage.affine_transform(moving_img, T, order=interpolation_order)
+        if threshold is not None:
+            binarized1 = img1 > threshold
+            binarized2 = img2 > threshold
+        else:
+            binarized1 = img1
+            binarized2 = img2
+            
+        point_based = False
+        if metric.lower() == 'mutual_information' or metric.lower() == 'MI':
+            obj = mutual_information
+        elif metric.lower() == 'dice':
+            obj = dice
+        elif metric.lower() == 'symmetric_closest_point_mse':
+            point_based = True
+            points1 = np.column_stack(np.where(binarized1))
+            points2 = np.column_stack(np.where(binarized2))
+            tree1 = scipy.spatial.KDTree(points1) 
+            # Note: can't precommute tree for the moving points
+            obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)
+        else:
+            raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Image2Image3d registration.')
 
-            f = obj(fixed_img, imgT)
+        if point_based:
+            _, T = Point2Point(points1, points2, x0=x0, bounds=bounds, transform=transform, metric=metric, method=method, transform_args=transform_args, decimation=decimation, optimizer_args=optimizer_args, verbose=verbose)
+            new_img = transform_image(img2, T)
+        else:
+            if np.shape(img1) != np.shape(img2):
+            r   age-based image-to-image registration.')
+            def objective(x):
+                objective.k += 1
+                if verbose: 
+                    print('{:5d}'.format(objective.k),end='')
+                T = transformation(x)
+                
+                imgT = transform_image(moving_img, T)
+
+                f = obj(fixed_img, imgT)
+                if verbose: 
+                    print(f'||{f:.4f}|',end='')
+                    print(('|{:10.4f}'*len(x)).format(*x))
+                return f
+            objective.k = 0
+            x,f = optimize(objective, method, x0, bounds, optimizer_args=optimizer_args)
+            
+            T = transformation(x)
+            new_img = transform_image(img2, T)
+            f = obj(img1, new_img)
             if verbose: 
-                print(f'||{f:.4f}|',end='')
+                print('-----||------|', end='')
+                for i in x:
+                    print('|----------',end = '')
+                print('')
+                print(f'final||{f:.4f}|',end='')
                 print(('|{:10.4f}'*len(x)).format(*x))
-            return f
-        objective.k = 0
-        x,f = optimize(objective, method, x0, bounds, optimizer_args=optimizer_args)
-        
-        T = np.linalg.inv(transformation(x))
-        new_img = scipy.ndimage.affine_transform(img2, T, order=interpolation_order)
-        f = obj(img1, new_img)
-        if verbose: 
-            print('-----||------|', end='')
-            for i in x:
-                print('|----------',end = '')
-            print('')
-            print(f'final||{f:.4f}|',end='')
-            print(('|{:10.4f}'*len(x)).format(*x))
 
         return new_img, T
 
@@ -1032,7 +1126,7 @@ def similarity(x, center=None, rotation_order=[0,1,2], rotation_mode='cartesian'
         [t0,t1,t2,alpha,beta,gamma,s0] = x
     t = T3d(t0,t1,t2)
     r = R3d(alpha,beta,gamma,np.asarray(center),rotation_order=rotation_order,rotation_mode=rotation_mode)
-    s = S3d(s0, s0, s0, reference=shear_reference)
+    s = S3d(s0, s0, s0, reference=center)
     A = s@t@r
     return A
 
@@ -1196,7 +1290,6 @@ def optimize(objective, method, x0=None, bounds=None, optimizer_args=None):
             optimizer_args = dict(locally_biased=False)
         else:
             optimizer_args = {}
-
 
     if method.lower() == 'direct' or method.lower() == 'directl':
         if bounds is None:
