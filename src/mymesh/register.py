@@ -640,7 +640,7 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
             new_img = transform_image(img2, T)
         else:
             if np.shape(img1) != np.shape(img2):
-            r   age-based image-to-image registration.')
+               raise Exception('Images must be the same size for image-based image-to-image registration.')
             def objective(x):
                 objective.k += 1
                 if verbose: 
