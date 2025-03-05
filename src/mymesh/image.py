@@ -287,7 +287,7 @@ def read(img, scalefactor=1, scaleorder=1):
 
         if os.path.isdir(path):
             # Image directory
-            tiffs = glob.glob(os.path.join(path,'*.TIF*')) + glob.glob(os.path.join(path,'*.tif*')) + glob.glob(os.path.join(path,'*.jpg*')) + glob.glob(os.path.join(path,'*.JPG*')) + glob.glob(os.path.join(path,'*.jpeg*')) + glob.glob(os.path.join(path,'*.JPEG*')) + glob.glob(os.path.join(path,'*.png*')) + glob.glob(os.path.join(path,'*.PNG*'))
+            tiffs = glob.glob(os.path.join(path,'*.TIF*')) + glob.glob(os.path.join(path,'*.tif*'))
             tiffs = np.unique(tiffs).tolist() # This catches double reads on Windows due to case insensitive glob
             tiffs.sort()
 
@@ -296,27 +296,35 @@ def read(img, scalefactor=1, scaleorder=1):
                 dicoms = glob.glob(os.path.join(path,'*.DCM*'))
             dicoms.sort()
 
-            if len(tiffs) > 0 & len(dicoms) > 0:
-                warnings.warn('Image directory: "{:s}" contains .dcm files as well as other image file types - only loading dcm files.')
-                files = dicoms
-                ftype = 'dcm'
+            cv2s = glob.glob(os.path.join(path,'*.jpg*')) + glob.glob(os.path.join(path,'*.JPG*')) + glob.glob(os.path.join(path,'*.jpeg*')) + glob.glob(os.path.join(path,'*.JPEG*')) + glob.glob(os.path.join(path,'*.png*')) + glob.glob(os.path.join(path,'*.PNG*'))
+            cv2s = np.unique(cv2s).tolist()
+            cv2s.sort()
+
+            if len(tiffs) > 0 & len(dicoms) > 0 & len(cv2s) > 0:
+                raise Exception('Image directory: "{:s}" contains multiple image file types.')
             elif len(tiffs) > 0:
                 files = tiffs
                 ftype = 'tiff'
             elif len(dicoms) > 0:
                 files = dicoms
                 ftype = 'dcm'
+            elif len(cv2s) > 0:
+                files = cv2s
+                ftype = 'cv2_type'
             else:
                 raise Exception('Image directory empty.')
 
         else:
             # Single file
             ext = os.path.splitext(path)[1]
-            if ext.lower() in ('.tiff', '.tif', '.jpg', '.jpeg', '.png'):
+            if ext.lower() in ('.tiff', '.tif'):
                 ftype = 'tiff'
                 files = [path]
             elif ext.lower() in ('.dcm'):
                 ftype = 'dcm'
+                files = [path]
+            elif ext.lower() in ('.jpg', '.jpeg', '.png'):
+                ftype = 'cv2_type'
                 files = [path]
             else:
                 raise ValueError('Image file must have one of the following extensions: .tiff, .tif, .jpg, .jpeg, .png, .dcm')
@@ -325,11 +333,14 @@ def read(img, scalefactor=1, scaleorder=1):
         # If img is a list, treat it as a list of file paths
         if type(img[0]) == str:
             ext = os.path.splitext(img[0])
-            if ext.lower() in ('.tiff', '.tif', '.jpg', '.jpeg', '.png'):
+            if ext.lower() in ('.tiff', '.tif'):
                 ftype = 'tiff'
                 files = img
             elif ext.lower() in ('.dcm'):
                 ftype = 'dcm'
+                files = img
+            elif ext.lower() in ('.jpg', '.jpeg', '.png'):
+                ftype = 'cv2_type'
                 files = img
             else:
                 raise ValueError('Image file must have one of the following extensions: .tiff, .tif, .jpg, .jpeg, .png, .dcm')
@@ -357,26 +368,47 @@ def read(img, scalefactor=1, scaleorder=1):
         try:
             import tifffile
         except:
-            if len(files) == 1:
-                warnings.warn('tifffile recommended for reading single-file 3D tiff images. Install with: pip install tifffile')
-                tifffile is None
-        
-        if len(files) == 1 and tifffile is not None:
-            imgs = tifffile.imread(files[0])
+            raise ImportError('tifffile needed for reading tiff images. Install with: pip install tifffile')
             
+        if len(files) == 1:
+            imgs = tifffile.imread(files[0])
+            if len(imgs.shape) > 2:
+                multichannel = True
+                multiimgs = np.array([imgs[...,i] for i in range(np.shape(imgs)[-1])])
+            
+        else:
+            temp = tifffile.imread(files[0])
+            
+            if len(temp.shape) > 2:
+                multichannel = True
+                multiimgs = tuple([np.array([tifffile.imread(file)[...,i] for file in files]) for i in range(temp.shape[-1])])
+            else:
+                multichannel = False
+                imgs = np.array([tifffile.imread(file) for file in files])
+    elif ftype == 'cv2_type':
+        if len(files) == 1:
+            imgs = cv2.imread(files[0])
+            if len(imgs.shape) > 2:
+                multichannel = True
+                multiimgs = np.array([imgs[...,i] for i in range(np.shape(imgs)[-1])])
         else:
             temp = cv2.imread(files[0])
             
             if len(temp.shape) > 2:
                 multichannel = True
-                multiimgs = tuple([np.array([cv2.imread(file)[:,:,i] for file in files]) for i in range(temp.shape[2])])
+                multiimgs = tuple([np.array([cv2.imread(file)[...,i] for file in files]) for i in range(temp.shape[-1])])
             else:
                 multichannel = False
                 imgs = np.array([cv2.imread(file) for file in files])
     else:
         # temp = pydicom.dcmread(files[0]).pixel_array
         imgs = np.array([pydicom.dcmread(file).pixel_array for file in files])
-    
+    # Check if true multichannel
+    if multichannel:
+        if np.all([np.all(channel == multiimgs[0]) for channel in multiimgs[1:]]):
+            # data is the same in every channel, converting to single channel
+            imgs = multiimgs[0]
+            multichannel = False
     if scalefactor != 1:
         if multichannel:
             imgs = tuple([ndimage.zoom(I,scalefactor,order=scaleorder) for I in multiimgs])
@@ -389,10 +421,15 @@ def read(img, scalefactor=1, scaleorder=1):
     print(' done.')
     return imgs
 
-def write(impath, I, filetype=None,verbose=True, dtype=np.int16):
+def write(impath, I, filetype=None, verbose=True, dtype=np.int16):
     """
     Write an image array to an image file or stack of image files
     
+    .. note:: 
+        When writing a jpg, png, or tiff, if the input image data has a maximum
+        value greater than 255 or less than or equal to 1, the data will be 
+        automatically scaled to be in the range from, 0-255
+
     Parameters
     ----------
     impath : str
@@ -502,6 +539,9 @@ def write(impath, I, filetype=None,verbose=True, dtype=np.int16):
             #     tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), np.stack(I,axis=-1))
             # else:
             tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), I)
+        elif filetype == 'jpeg' or filetype == 'png':
+            img = I*255/np.max(I).astype(dtype)
+            cv2.imwrite(os.path.join(imdir, filename_prefix+ext), img)
     
     if not singlefile:
         if multichannel:
@@ -521,12 +561,10 @@ def write(impath, I, filetype=None,verbose=True, dtype=np.int16):
                     img = np.stack([channel[i] for channel in I], axis=-1)
                 else:
                     img = I[i]
-                if np.max(img) > 255:
+                if np.max(img) > 255 or np.max(img) <= 1:
                     img = img*255/np.max(I).astype(dtype)
                 cv2.imwrite(os.path.join(imdir, filename_prefix+f'_{str(i).zfill(ndigits):s}{ext:s}'), img)
-
-                
-
+             
 def _writedcm(imdir, filename, I, dtype):
     # I should be a 2D image at this point
     import datetime
@@ -561,8 +599,7 @@ def _writedcm(imdir, filename, I, dtype):
         ds.PixelRepresentation = 1
     ds.PixelData = I.astype(dtype).tobytes()
     ds.save_as(os.path.join(imdir,file))
-    
-    
+       
 def SurfaceNodeOptimization(M, img, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, gaussian_sigma=1, smooth=True, copy=True, interpolation='linear', 
 springs=True):
     """
