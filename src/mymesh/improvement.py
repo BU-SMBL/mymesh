@@ -122,7 +122,8 @@ def LocalLaplacianSmoothing(M, options=dict()):
                         FixFeatures = False,
                         FixSurf = False,
                         FixEdge = True,
-                        qualityFunc = quality.MeanRatio
+                        qualityFunc = quality.MeanRatio,
+                        limit = np.inf
                     )
 
     NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(M, SmoothOptions, options)
@@ -147,11 +148,15 @@ def LocalLaplacianSmoothing(M, options=dict()):
     
     i = 0
     U = np.zeros(len(NodeCoords))
+    Utotal = np.zeros(len(NodeCoords))
     while condition(i, U[FreeNodes]):
         i += 1
         Q = ArrayCoords[r]
         U = (1/lens)[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
-        ArrayCoords[FreeNodes] += U[FreeNodes]
+        Utotal[FreeNodes] += U[FreeNodes]
+        Unorm = np.linalg.norm(Utotal[FreeNodes], axis=1)
+        Utotal[FreeNodes[Unorm > SmoothOptions['limit']]] = Utotal[FreeNodes[Unorm > SmoothOptions['limit']]]/Unorm[Unorm > SmoothOptions['limit']] * SmoothOptions['limit']
+        ArrayCoords[FreeNodes] = NodeCoords[FreeNodes] + Utotal[FreeNodes]
 
     NewCoords = ArrayCoords[:-1]
 
