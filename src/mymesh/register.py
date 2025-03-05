@@ -84,7 +84,7 @@ import scipy
 import sys, os, copy, warnings
 from mymesh import utils
 
-def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transform=False):
+def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=True, return_transform=False):
     """
     Align an point cloud to the x, y, z axes. This works by identifying
     the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and 
@@ -148,14 +148,18 @@ def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transform=Fa
     transform = np.eye(4)
     transform[:3,:3] = mat
     transform[:3,3] = center_shift
-    transformed = transform_points(points, transform)
     
-    if return_transform:
-        return transformed, transform
+    if return_transformed:
+        transformed = transform_points(points, transform)
+        if return_transform:
+            return transformed, transform
+        else:
+            return transformed
+    elif return_transform:
+        return transform
+    return
 
-    return transformed
-
-def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', transform_options=dict(),return_transform=False):
+def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', transform_options=dict(), return_transformed=True, return_transform=False):
     """
     Align an object in an image to the x, y, z axes. This works by identifying
     the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and 
@@ -203,12 +207,14 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', tran
         `return_transform = True`.
     """
     assert ValueError(len(axis_order) == 3 and np.array_equal([0,1,2], np.sort(axis_order))), 'axis_order must contain only 0, 1, and 2.'
-
+    img = np.asarray(img)
     if threshold is not None:
         # TODO: Should have other thresholding options
         binarized = img > threshold 
     else:
-        binarized = np.copy(img)
+        if img.dtype is np.dtype(bool) or np.all(np.isin(img, [np.min(img), np.max(img)])):
+            binarized = img
+            raise ValueError('For non-binary images, a threshold must be given.')
 
     if type(center) is str:
         if center == 'image':
@@ -222,18 +228,23 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', tran
     points = np.column_stack(np.where(binarized))
 
     axis_order = np.asarray(axis_order)[[2,1,0]] # Flip axes to correspond to image axis order (z,y,x)
-    transformed_points, transform = AxisAlignPoints(points, axis_order=axis_order, center=center, return_transform=True)
-    maxs = np.max(transformed_points,axis=0)
-    mins = np.min(transformed_points,axis=0)
-    if np.any(maxs > np.shape(img)) or np.any(mins < 0):
-        warnings.warn('Some of the object is being moved out of frame. Consider padding the image, adjusting center, or changing the axis_order.')
-    
-    transformed = transform_image(img, transform, options=transform_options)
-    
-    if return_transform:
-        return transformed, transform
+    transform = AxisAlignPoints(points, axis_order=axis_order, center=center, return_transformed=False, return_transform=True)
 
-    return transformed
+    # maxs = np.max(transformed_points,axis=0)
+    # mins = np.min(transformed_points,axis=0)
+    # if np.any(maxs > np.shape(img)) or np.any(mins < 0):
+    #     warnings.warn('Some of the object is being moved out of frame. Consider padding the image, adjusting center, or changing the axis_order.')
+    
+    if return_transformed:
+        transformed = transform_image(img, transform, options=transform_options)
+        if return_transform:
+            return transformed, transform
+        else:
+            return transformed
+    elif return_transform:
+        return transform
+    return
+
 
 def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metric='symmetric_closest_point_MSE', 
     method='direct', decimation=1, transform_args={}, optimizer_args=None, verbose=True):
@@ -538,7 +549,13 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
             to img1.
 
         """
-        
+        if scalefactor != 1:
+            moving_img = scipy.ndimage.zoom(img2, scalefactor, order=interpolation_order)
+            fixed_img =  scipy.ndimage.zoom(img1, scalefactor, order=interpolation_order)
+        else:
+            moving_img = img2
+            fixed_img = img1
+            
         if transform.lower() == 'rigid':
             nparam = 6
             transformation = lambda x : rigid(x, **transform_args)
@@ -546,9 +563,9 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
                 x0 = np.zeros(nparam)
             if bounds is None:
                 bounds = [
-                    (0.25*np.shape(img1)[0],0.75*np.shape(img1)[0]),
-                    (0.25*np.shape(img1)[1],0.75*np.shape(img1)[1]),
-                    (0.25*np.shape(img1)[2],0.75*np.shape(img1)[2]),
+                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
+                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
+                    (-0.25*np.shape(fixed_img)[2],0.25*np.shape(fixed_img)[2]),
                     (-np.pi, np.pi),
                     (-np.pi, np.pi),
                     (-np.pi, np.pi)
@@ -565,9 +582,9 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
                 x0[6] = 1
             if bounds is None:
                 bounds = [
-                    (0.25*np.shape(img1)[0],0.75*np.shape(img1)[0]),
-                    (0.25*np.shape(img1)[1],0.75*np.shape(img1)[1]),
-                    (0.25*np.shape(img1)[2],0.75*np.shape(img1)[2]),
+                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
+                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
+                    (-0.25*np.shape(fixed_img)[2],0.25*np.shape(fixed_img)[2]),
                     (-np.pi, np.pi),
                     (-np.pi, np.pi),
                     (-np.pi, np.pi),
@@ -584,48 +601,40 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
                 x0[6:9] = 1
             if bounds is None:
                 bounds = [
-                    (0.25*np.shape(img1)[0],0.75*np.shape(img1)[0]),
-                    (0.25*np.shape(img1)[1],0.75*np.shape(img1)[1]),
-                    (0.25*np.shape(img1)[2],0.75*np.shape(img1)[2]),
+                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
+                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
+                    (-0.25*np.shape(fixed_img)[2],0.25*np.shape(fixed_img)[2]),
                     (-np.pi, np.pi),
                     (-np.pi, np.pi),
                     (-np.pi, np.pi),
                     (0.9, 1.1),
                     (0.9, 1.1),
                     (0.9, 1.1),
-                    np.divide((0.25*np.shape(img1)[0],0.75*np.shape(img1)[0]),10),
-                    np.divide((0.25*np.shape(img1)[0],0.75*np.shape(img1)[0]),10),
-                    np.divide((0.25*np.shape(img1)[1],0.75*np.shape(img1)[1]),10),
-                    np.divide((0.25*np.shape(img1)[1],0.75*np.shape(img1)[1]),10),
-                    np.divide((0.25*np.shape(img1)[2],0.75*np.shape(img1)[2]),10),
-                    np.divide((0.25*np.shape(img1)[2],0.75*np.shape(img1)[2]),10),
+                    np.divide((0.25*np.shape(fixed_img)[0],0.75*np.shape(fixed_img)[0]),10),
+                    np.divide((0.25*np.shape(fixed_img)[0],0.75*np.shape(fixed_img)[0]),10),
+                    np.divide((0.25*np.shape(fixed_img)[1],0.75*np.shape(fixed_img)[1]),10),
+                    np.divide((0.25*np.shape(fixed_img)[1],0.75*np.shape(fixed_img)[1]),10),
+                    np.divide((0.25*np.shape(fixed_img)[2],0.75*np.shape(fixed_img)[2]),10),
+                    np.divide((0.25*np.shape(fixed_img)[2],0.75*np.shape(fixed_img)[2]),10),
                 ]
             if verbose:
                 print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma |       sx |       sy |       sz |    shxy |')
                 print('-----||-----------||----------|----------|----------|----------|----------|----------|----------|----------|----------|----------')
         else:
-            raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Image2Image3d registration.')
-
-        if scalefactor != 1:
-            moving_img = scipy.ndimage.zoom(img2, scalefactor, order=interpolation_order)
-            fixed_img =  scipy.ndimage.zoom(img1, scalefactor, order=interpolation_order)
-        else:
-            moving_img = img2
-            fixed_img = img1
-
-        if threshold is not None:
-            binarized1 = img1 > threshold
-            binarized2 = img2 > threshold
-        else:
-            binarized1 = img1
-            binarized2 = img2
+            raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Image2Image3d registration.')       
             
         point_based = False
         if metric.lower() == 'mutual_information' or metric.lower() == 'MI':
             obj = mutual_information
         elif metric.lower() == 'dice':
-            obj = dice
+            obj = lambda img1, img2 : -dice(img1 > threshold, img2 > threshold)
         elif metric.lower() == 'symmetric_closest_point_mse':
+            if threshold is not None:
+                binarized1 = fixed_img > threshold
+                binarized2 = moving_img > threshold
+            else:
+                binarized1 = fixed_img
+                binarized2 = moving_img
             point_based = True
             points1 = np.column_stack(np.where(binarized1))
             points2 = np.column_stack(np.where(binarized2))
@@ -651,7 +660,7 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
 
                 f = obj(fixed_img, imgT)
                 if verbose: 
-                    print(f'||{f:.4f}|',end='')
+                    print(f'||{f:11.4f}|',end='')
                     print(('|{:10.4f}'*len(x)).format(*x))
                 return f
             objective.k = 0
@@ -665,7 +674,7 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
                 for i in x:
                     print('|----------',end = '')
                 print('')
-                print(f'final||{f:.4f}|',end='')
+                print(f'final||{f:11.4f}|',end='')
                 print(('|{:10.4f}'*len(x)).format(*x))
 
         return new_img, T
