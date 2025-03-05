@@ -627,14 +627,14 @@ springs=True):
     Fy = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,1,0))
     Fz = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,0,1))
     
-    X = np.arange(img.shape[2])*h[2] 
-    Y = np.arange(img.shape[1])*h[1]
-    Z = np.arange(img.shape[0])*h[0]
+    Ximg = np.arange(img.shape[2])*h[2] 
+    Yimg = np.arange(img.shape[1])*h[1]
+    Zimg = np.arange(img.shape[0])*h[0]
 
-    F = lambda x,y,z : interpolate.RegularGridInterpolator((X,Y,Z),img.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
-    gradFx = lambda x,y,z : interpolate.RegularGridInterpolator((X,Y,Z),Fx.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
-    gradFy = lambda x,y,z : interpolate.RegularGridInterpolator((X,Y,Z),Fy.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
-    gradFz = lambda x,y,z : interpolate.RegularGridInterpolator((X,Y,Z),Fx.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
+    F = lambda x,y,z : interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),img.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
+    gradFx = lambda x,y,z : interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),Fx.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
+    gradFy = lambda x,y,z : interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),Fy.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
+    gradFz = lambda x,y,z : interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),Fx.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
 
     gradF = lambda x,y,z : np.column_stack([gradFx(x,y,z), gradFy(x,y,z), gradFz(x,y,z)])
 
@@ -652,16 +652,17 @@ springs=True):
         X = points[:,0]; Y = points[:,1]; Z = points[:,2]
         f = F(X,Y,Z) - threshold
         g = np.squeeze(gradF(X,Y,Z))
-        fg = (f*g).T
-        tau = h/(100*np.max(np.linalg.norm(fg,axis=1)))
+        fg = (f[:,None]*g)
+        tau = h/(100*np.max(np.linalg.norm(fg,axis=0)))
 
         Zflow = -2*tau*fg
 
         # Rflow = np.zeros((len(NodeCoords),3))
         if smooth == 'tangential':
-            Q = M.NodeCoords[r]
+            Q = NodeCoords[r]
             U = (1/lengths)[:,None] * np.nansum(Q - points[:,None,:],axis=1)
-            NodeNormals = (g/np.linalg.norm(g,axis=0)).T
+            gnorm = np.linalg.norm(g,axis=1)[:,None]
+            NodeNormals = np.divide(g, gnorm, out=np.zeros_like(g), where=gnorm!=0)
             Rflow = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
         elif smooth == 'local':
             Q = NodeCoords[r]
