@@ -3834,6 +3834,233 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
         return NewCoords, NewConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
     return NewCoords, NewConn
 
+def MarchingTriangles(TriNodeCoords, TriNodeConn, NodeValues, threshold=0, interpolation='linear', Type='surf', mixed_elements=False, flip=False, return_NodeValues=False, return_ParentIds=False, cleanup_tol=1e-10, cleanup=True):
+    """
+    Marching tetrahedra algorithm for extracting an isoline from a triangular
+    mesh. This can be used to generate either a surface mesh of the region 
+    above or below the threshold or a line mesh of the isoline. Note that this
+    method is different than the Marching Triangles algorithm by :cite:`Hilton1996`
+    and is instead analogous to the other "marching" contouring algorithms.
+
+    Parameters
+    ----------
+    TriNodeCoords : array_like
+        Node coordinates for the input triangular mesh
+    TriNodeConn : array_like
+        Node connectivity for the input triangular mesh. All elements must be triangles.
+    NodeValues : array_like
+        Values at each node in the mesh that are used to extract the isoline
+    threshold : int, optional
+        Isoline level, by default 0
+    interpolation : str, optional
+        Interpolation to interpolate the position of the new nodes along the edges
+        of the input mesh, by default 'linear'.
+
+        'midpoint' - No interpolation is performed, new nodes are placed at the midpoint of edges
+
+        'linear' - Linear interpolation is performed between adjacent nodes on the input mesh.
+
+    Type : str, optional
+        Determines whether to generate a surface mesh ('surf') or volume mesh ('vol'), 
+        by default 'surf'
+    mixed_elements : bool, optional
+        If True and Type='surf', the generated mesh will have mixed element types 
+        (triangles/quadrilateral otherwise a single element type (triangles), by 
+        default False.
+    flip : bool, optional
+        Flip the interior/exterior of the mesh, by default False.
+        By default, values less than the threshold are assumed to be the "inside" 
+        of the mesh. If the inside is denoted by values greater than the threshold,
+        set flip=True.
+    return_NodeValues : bool, optional
+        Return the node values for each node in the triangular mesh. If Type='line',
+        these will all be `threshold`, if Type='surf', these will be `threshold` 
+        for the boundary nodes and the original grid values for the interior nodes
+    return_ParentIds : bool, optional
+        Return Ids that refer to the original triangles that each of the new elements is connected to, by default False.
+    cleanup_tol : float, optional
+        Tolerance value used to classify whether two nodes are sufficiently close to be considered a single node (see :func:`mymesh.utils.DeleteDuplicateNodes`), by default 1e-12.
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        Node coordinates of the generated mesh
+    NodeConn : list
+        Node connetivity for the generated mesh
+    NewValues : np.ndarray, optional
+        Node values transfered to the generated mesh, returned if return_NodeValues=True 
+    ParentIds : np.ndarray, optional
+        Element ids that refer to the original triangles that each of the new elements is connected to,
+        returned if return_ParentIds=True
+
+
+    Examples
+    --------
+
+
+    """    
+    TriNodeCoords = np.asarray(TriNodeCoords)
+    TriNodeConn = np.asarray(TriNodeConn)
+    NodeValues = np.asarray(NodeValues).flatten()
+    assert len(NodeValues) == len(TriNodeCoords), 'Number of nodes must much number of node values.'
+
+    #      5
+    #     / \
+    #    /   \
+    #   2     1
+    #  /       \
+    # 3----0----4
+    MTEdge_Lookup = np.array([
+            [],                     # 0-000
+            [[2,1]],                # 1-001
+            [[1,0]],                # 2-010
+            [[2,0]],                # 3-011
+            [[0,2]],                # 4-100
+            [[0,1]],                # 5-101
+            [[1,2]],                # 6-110
+            [],                     # 7-111
+        ],dtype=object)
+
+    MTTriMixed_Lookup = np.array([
+            [],                     # 0-000
+            [[2,1,5]],              # 1-001
+            [[1,0,4]],              # 2-010
+            [[2,0,4,5]],            # 3-011
+            [[0,2,3]],              # 4-100
+            [[0,1,5,3]],            # 5-101
+            [[1,2,3,4]],            # 6-110
+            [[3,4,5]],              # 7-111
+        ],dtype=object)
+
+    MTTri_Lookup = np.array([
+            [],                     # 0-000
+            [[2,1,5]],              # 1-001
+            [[1,0,4]],              # 2-010
+            [[2,0,4],[2,4,5]],            # 3-011
+            [[0,2,3]],              # 4-100
+            [[0,1,5],[0,5,3]],            # 5-101
+            [[1,2,3],[1,3,4]],            # 6-110
+            [[3,4,5]],              # 7-111
+        ],dtype=object)
+    
+    if interpolation.lower() == 'midpoint' or interpolation.lower() == 'linear':
+        edgeLookup = np.array([
+            [0, 1],  # (0) Edge 0 - Between nodes 0 and 1
+            [1, 2],  # (1) Edge 1
+            [2, 0],  # (2) Edge 2
+            [0, 0],  # (3) Node 0
+            [1, 1],  # (4) Node 1
+            [2, 2],  # (5) Node 2
+            ])
+        PadEdgeLookup = np.vstack([edgeLookup, [-1,-1]])
+        ninterppts = 2
+    else:
+        raise ValueError(f'Interpolation must be one of "midpoint", "linear", or "quadratic", not "{interpolation:s}"')
+    
+    NodeValues = np.asarray(NodeValues) - threshold
+    if flip:
+        NodeValues = -1*NodeValues
+
+    # Determine configuration of nodes
+    TriVals = NodeValues[TriNodeConn[:,:3]]
+    inside = TriVals <= 0
+    if not np.any(inside):
+        NodeCoords = np.empty((0,3))
+        NodeConn = np.empty((0,3),dtype=int)
+        NewValues = np.empty((0))
+        ParentIds = np.empty((0), dtype=int)
+        if return_NodeValues:
+            if return_ParentIds:
+                return NodeCoords, NodeConn, NewValues, ParentIds
+            return NodeCoords, NodeConn, NewValues
+        if return_ParentIds:
+            return NodeCoords, NodeConn, ParentIds
+        return NodeCoords, NodeConn
+
+    ints = np.sum(inside[:,:3] * 2**np.arange(0,3)[::-1], axis=1)
+
+    # Query lookup tables
+    if Type.lower() == 'surf':
+        if mixed_elements:
+            element_lists = MTTriMixed_Lookup[ints]
+        else:
+            element_lists = MTTri_Lookup[ints]
+    elif Type.lower() == 'line':
+        element_lists = MTEdge_Lookup[ints]
+    else:
+        raise ValueError('Invalid Type, Type must be "surf" or "line".')
+
+    # Process lookup results
+    trinum, elem = zip(*[(i,e) for i,lst in enumerate(element_lists) for e in lst if len(lst) > 0])
+    trinum = np.array(trinum)
+    nelem = len(trinum)
+
+    relevant_tris = TriNodeConn[trinum]
+    
+    PadElem = utils.PadRagged(elem)
+    pad_relevant_tris = np.hstack([relevant_tris, -1*np.ones((len(elem),1))])
+    
+    lookup_indices = pad_relevant_tris[:, PadEdgeLookup]
+    interpolation_pairs = (lookup_indices[np.arange(len(elem))[:, None], PadElem]).reshape((np.prod(PadElem.shape),ninterppts))
+    interpolation_pairs = (interpolation_pairs[np.any(interpolation_pairs!=-1,axis=1)]).astype(int)
+    
+    uinterpolation_pairs,inv = np.unique(np.sort(interpolation_pairs,axis=1),axis=0,return_inverse=True)
+
+    # Interpolation
+    if interpolation.lower() == 'midpoint':
+        NodeCoords = np.mean(TriNodeCoords[uinterpolation_pairs],axis=1)
+        if return_NodeValues: 
+            NewValues = np.zeros(len(NodeCoords))
+            NewValues = np.mean(NodeValues[uinterpolation_pairs],axis=1)
+
+    elif interpolation.lower() == 'linear':
+        check = uinterpolation_pairs[:,0] != uinterpolation_pairs[:,1]
+        coords1 = TriNodeCoords[uinterpolation_pairs[check,0]]
+        coords2 = TriNodeCoords[uinterpolation_pairs[check,1]]
+        vals1 = NodeValues[uinterpolation_pairs[check,0]][:,None]
+        vals2 = NodeValues[uinterpolation_pairs[check,1]][:,None]
+        NodeCoords = np.copy(TriNodeCoords[uinterpolation_pairs[:,0]])
+        coefficient = (0 - vals1)/(vals2-vals1)
+        position = coords1 + coefficient*(coords2 - coords1)
+        position[coefficient.flatten() >= 1] = coords2[coefficient.flatten() >= 1]  # This is to prevent floating pt errors inverting elements
+        NodeCoords[check] =  position
+
+        if return_NodeValues: 
+            NewValues = np.zeros(len(NodeCoords))
+            NewValues[~check] = NodeValues[uinterpolation_pairs[~check,0]]
+
+    else:
+        raise ValueError('interpolation must be either "midpoint", "linear", or "quadratic"')
+
+    # Format points into NodeCoords, NodeConn
+    if Type.lower() == 'line':
+        NodeConn = inv[np.reshape(np.arange(nelem*2), (nelem, 2))]
+    elif Type.lower() == 'surf' and not mixed_elements:
+        NodeConn = inv[np.reshape(np.arange(nelem*3), (nelem, 3))]
+    else:
+        lengths = [len(e) for e in elem]
+        sums = np.append([0],np.cumsum(lengths))
+        NodeConn = [[inv[n+sums[i]] for n in range(lengths[i])] for i in range(len(lengths))]
+    ParentIds = trinum
+
+    if cleanup: 
+        NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
+        if return_NodeValues:
+            NewValues = NewValues[Idx]
+        # NodeCoords,NodeConn,EIdx = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type=Type, return_idx=True)
+        if return_ParentIds:
+            ParentIds = ParentIds[EIdx]
+
+    if return_NodeValues:
+        if flip:
+            NewValues = -1*NewValues
+        NewValues += threshold
+        if return_ParentIds:
+            return NodeCoords, NodeConn, NewValues, ParentIds
+        return NodeCoords, NodeConn, NewValues
+    if return_ParentIds:
+        return NodeCoords, NodeConn, ParentIds
+    return NodeCoords, NodeConn
+
 def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='original', VertexValues=False, edgemode='constant', flip=False, cleanup=True):
     """
     Marching cubes algorithm :cite:p:`Lorensen1987` applied to 3D image data.
@@ -4308,8 +4535,11 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         Determines whether to generate a surface mesh ('surf') or volume mesh ('vol'), 
         by default 'surf'
     mixed_elements : bool, optional
-        If True, the generated mesh will have mixed element types (triangles/quadrilaterals, tetrahedra/wedges), otherwise a single element type (triangles, tetrahedra), by default False. For surface
-        meshes, either version is generated directly. For a volume mesh, a mixed mesh is generated initially and then converted to tetrahedra using converter.solid2tets()
+        If True, the generated mesh will have mixed element types 
+        (triangles/quadrilaterals, tetrahedra/wedges), otherwise a single element 
+        type (triangles, tetrahedra), by default False. For surface meshes, either 
+        version is generated directly. For a volume mesh, a mixed mesh is generated 
+        initially and then converted to tetrahedra using converter.solid2tets()
         which results in additional computational cost.
     flip : bool, optional
         Flip the interior/exterior of the mesh, by default False.
@@ -4317,11 +4547,17 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         of the mesh. If the inside is denoted by values greater than the threshold,
         set flip=True.
     return_NodeValues : bool, optional
-        Return the node values for each node in the tetrahedral mesh. If method='surface', these will all be `threshold`, if method='volume', these will be `threshold` for the surface nodes and the original grid values for the interior nodes
+        Return the node values for each node in the tetrahedral mesh. If 
+        Type='surf', these will all be `threshold`, if Type='vol', these will be 
+        `threshold` for the surface nodes and the original grid values for the 
+        interior nodes
     return_ParentIds : bool, optional
-        Return Ids that refer to the original tetrahedra that each of the new elements is connected to, by default False.
+        Return Ids that refer to the original tetrahedra that each of the new 
+        elements is connected to, by default False.
     cleanup_tol : float, optional
-        Tolerance value used to classify whether two nodes are sufficiently close to be considered a single node (see :func:`mymesh.utils.DeleteDuplicateNodes`), by default 1e-12.
+        Tolerance value used to classify whether two nodes are sufficiently close 
+        to be considered a single node (see :func:`mymesh.utils.DeleteDuplicateNodes`), 
+        by default 1e-12.
     Returns
     -------
     NodeCoords : np.ndarray
@@ -4589,7 +4825,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
             NewValues[~check] = NodeValues[uinterpolation_pairs[~check,0]]
 
     else:
-        raise ValueError('interpolation must be either "midpoint" or "linear"')
+        raise ValueError('interpolation must be either "midpoint", "linear", or "quadratic"')
 
     # Format points into NodeCoords, NodeConn
     if Type.lower() == 'surf' and not mixed_elements:
