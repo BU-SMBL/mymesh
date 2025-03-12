@@ -17,15 +17,16 @@ Triangulation
     
     Triangulate
     BowyerWatson2d
-    TriangleSplittingTriangulation
     SciPy
     Triangle
+    FanTriangulation
 
 Tetrahedralization
 ==================
 .. autosummary::
     :toctree: submodules/
 
+    Tetrahedralize
     BowyerWatson3d
 
 Convex Hull
@@ -34,23 +35,21 @@ Convex Hull
     :toctree: submodules/
 
     ConvexHull
-    ConvexHull_GiftWrapping
-    ConvexHullFanTriangulation
-
-
+    GiftWrapping
     
 
 """
 #%%
 import numpy as np
 import sys, copy, itertools, warnings, random
-from . import utils, rays, converter
+from . import utils, rays, converter, mesh
 from . import try_njit, check_numba
 from scipy import spatial
 
 def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8):
     """
-    Generic interface for two dimensional triangulation.
+    Generate a triangulation for a 2D set of points. This will be a strictly
+    convex triangulation.
 
     Parameters
     ----------
@@ -64,10 +63,17 @@ def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8):
     method : str, optional
         Triangulation method, by default 'BowyerWatson' if no constraints are 
         provided and 'Triangle' if constraints are provided.
-        'BowyerWatson' - Generate a Delaunay triangulation by the Bowyer-Watson algorithm
-        'NonDelaunay' - Generate a non-Delaunay triangulation by triangle splitting
-        'scipy' - Use scipy.spatial.delaunay
-        'Triangle' - Use Jonathon Shewchuk's Delaunay triangulator
+
+        - 'BowyerWatson' - Generate a Delaunay triangulation by the Bowyer-Watson algorithm (:func:`BowyerWatson2d`)
+
+        - 'scipy' - Use :external+scipy:class:`scipy.spatial.Delaunay`
+
+        - 'Triangle' - Use Jonathon Shewchuk's Delaunay triangulator
+    
+    Returns
+    -------
+    T : mymesh.mesh
+        Mesh object containing the triangulated mesh.
     """    
     
     Points = np.asarray(NodeCoords)
@@ -79,17 +85,14 @@ def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8):
 
     if (Constraints is None or len(Constraints) == 0):
         Points,_,idx = utils.DeleteDuplicateNodes(Points,[],return_idx=True, tol=tol)
-        if method.lower() == 'nondelaunay':
-            Hull = ConvexHull_GiftWrapping(Points,IncludeCollinear=True)
-            NodeConn = idx[TriangleSplittingTriangulation(Points,Hull=Hull)]
-        elif method.lower() == 'bowyerwatson':
+        if method.lower() == 'bowyerwatson':
             NodeConn = idx[BowyerWatson2d(Points)]
         elif method.lower() == 'scipy':
             NodeConn = idx[SciPy(Points)]
         elif method.lower() == 'triangle':
             NodeConn = idx[Triangle(Points)]
         else:
-            raise Exception('Invalid method.')
+            raise ValueError(f'Invalid method "{method:s}".')
     else: 
         # Constrained Delaunay Triangulation - Sloan (1993)
         # Generate initial triangulation
@@ -100,19 +103,119 @@ def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8):
         
         NodeConn = Triangle(Points,Constraints=Constraints)
 
-    # NodeCoords = Points
-    return NodeCoords, NodeConn
-
-def ConvexHull(NodeCoords,IncludeCollinear=True,method='GiftWrapping'):
-    if method == 'GiftWrapping':
-        Hull = ConvexHull_GiftWrapping(NodeCoords,IncludeCollinear=IncludeCollinear)
+    if 'mesh' in dir(mesh):
+        T = mesh.mesh(NodeCoords,NodeConn)
     else:
-        raise Exception('Invalid method')
+        T = mesh(NodeCoords,NodeConn)
+    return T
+
+def Tetrahedralize(NodeCoords, method=None):
+    """
+    Generate a Delaunay tetrahedralization for a 3D set of points. This will be 
+    a strictly convex tetrahedralization.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Coordinates of nodes to be triangulated. This can be an (n,3) or (n,2)
+        array_like, however if given as an (n,3), the third dimension is ignored.
+    Constraints : array_like, optional
+        List of edge constraints that must be present in the final triangulation, 
+        by default None. Edge constraints should be specified by node indices,
+        for example [[0, 1], [1,2], ...]
+    method : str, optional
+        Triangulation method, by default 'BowyerWatson'.
+
+        - 'BowyerWatson' - Generate a Delaunay triangulation by the Bowyer-Watson algorithm (:func:`BowyerWatson3d`)
+
+        - 'scipy' - Use :external+scipy:class:`scipy.spatial.Delaunay`
+
+    Returns
+    -------
+    T : mymesh.mesh
+        Mesh object containing the tetrahedralized mesh.
+    """    
+    
+    Points = np.asarray(NodeCoords)
+    if method is None:
+        method = 'bowyerwatson'
+
+    Points,_,idx = utils.DeleteDuplicateNodes(Points,[],return_idx=True, tol=tol)
+    if method.lower() == 'bowyerwatson':
+        NodeConn = idx[BowyerWatson3d(Points)]
+    elif method.lower() == 'scipy':
+        NodeConn = idx[SciPy(Points)]
+    else:
+        raise ValueError(f'Invalid method "{method:s}".')
+
+
+    T = mesh(NodeCoords, NodeConn)
+    return T
+
+def ConvexHull(NodeCoords,method='scipy'):
+    """
+    Identify the convex hull of a set of points. For a 2D point set 
+    (np.shape(NodeCoords) = (n,2)), a 2D convex hull of line elements will be 
+    generated. For a 3D point set (np.shape(NodeCoords) = (n,2)), a 3D convex
+    hull of triangle elements will be generated.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Coordinates of points around which the convex hull will be identified.
+        If shape = (n,2), a 2D convex hull will be identified, or if shape = (n,3)
+        a 3D convex hull will be identified. 
+    method : str, optional
+        Convex hull method, by default 'scipy'.
+
+        - 'scipy' - Use :external+scipy:class:`scipy.spatial.ConvexHull`
+
+        - 'BowyerWatson' - Generate a Delaunay triangulation by the Bowyer-Watson algorithm (:func:`BowyerWatson2d` or :func:`BowyerWatson3d`)
+
+        - 'GiftWrapping' - Use the gift wrapping algorithm (:func:`GiftWrapping`)
+
+    Returns
+    -------
+    Hull : mymesh.mesh
+        Mesh object containing the convex hull. :code:`Hull.Type='line'` for a 2D hull
+        or :code:`Hull.Type='surf'` for a 3D hull.
+
+    """    
+    nD = np.shape(NodeCoords)[1]
+
+    if nD == 2:
+        if method.lower() == 'giftwrapping':
+            hull = GiftWrapping(NodeCoords,IncludeCollinear=True)
+        elif method.lower() == 'scipy':
+            qhull = spatial.ConvexHull(NodeCoords)
+            hull = qhull.simplices
+        elif method.lower() == 'bowyerwatson':
+            tri = BowyerWatson2d(NodeCoords)
+            hull = converter.surf2edges(NodeCoords, tri)
+        else:
+            raise Exception(f'Invalid method: "{method:s}" for 2D convex hull.')
+        Hull = mesh(NodeCoords, hull, Type='line')
+
+    elif nD == 3:
+        if method.lower() == 'scipy':
+            qhull = spatial.ConvexHull(NodeCoords)
+            hull = qhull.simplices
+        elif method.lower() == 'bowyerwatson':
+            tet = BowyerWatson3d(NodeCoords)
+            hull = converter.solid2surface(NodeCoords, tet)
+        else:
+            raise Exception(f'Invalid method: "{method:s}" for 3D convex hull.')
+
+        Hull = mesh(NodeCoords, hull, Type='surf')
+    else:
+        raise ValueError('NodeCoords must contain two or three dimensional data with shape (n,2) or (n,3). Input NodeCoords has shape {str(np.shape(NodeCoords)):s}.')
+    
     return Hull
 
 def SciPy(NodeCoords):
     """
-    Wrapper for scipy.spatial.Delaunay
+    Wrapper for :external+scipy:class:`scipy.spatial.Delaunay` for 2D triangulation
+    or 3D tetrahedralization.
 
     Parameters
     ----------
@@ -126,18 +229,14 @@ def SciPy(NodeCoords):
     NodeConn : np.ndarray
         mx3 array of node connectivity for the triangles
     """    
-    if NodeCoords.shape[1] == 2:
-        TempCoords = NodeCoords
-    else:
-        warnings.warn('SciPy Delaunay triangulation is only valid for points on a plane, the third dimension is ignored.')
-        TempCoords = NodeCoords[:,:2]
-    out = spatial.Delaunay(TempCoords,qhull_options='Qbb Qc Qz Q12 Qt')
+        
+    out = spatial.Delaunay(NodeCoords,qhull_options='Qbb Qc Qz Q12 Qt')
     NodeConn = out.simplices
     return NodeConn
 
 def Triangle(NodeCoords,Constraints=None):
     """
-    Interface to Jonathan Shewchuk's Triangle via a python wrapper (https://pypi.org/project/triangle/). To use, the python wrapper must be installed (pip install triangle).
+    Interface to Jonathan Shewchuk's Triangle via a python wrapper (https://pypi.org/project/triangle/). To use, the python wrapper must be installed (`pip install triangle`).
 
     Parameters
     ----------
@@ -181,19 +280,20 @@ def Triangle(NodeCoords,Constraints=None):
 
     return NodeConn
     
-def ConvexHull_GiftWrapping(NodeCoords,IncludeCollinear=True):
+def GiftWrapping(NodeCoords,IncludeCollinear=True):
     """
-    ConvexHull_GiftWrapping Gift wrapping algorithm for computing the convex hull of a set of 2D points.
+    Gift wrapping algorithm for computing the convex hull of a set of 2D points.
 
-    Jarvis, R. A. (1973). On the identification of the convex hull of a finite set of points in the plane. Information Processing Letters, 2(1), 18–21. https://doi.org/10.1016/0020-0190(73)90020-3
+    :cite:`Jarvis1973`
 
     Parameters
     ----------
-    NodeCoords : list or np.ndarray
+    NodeCoords : array_like
         List of 2D point coordinates
-     Returns
+
+    Returns
     -------
-    Hull : list
+    Hull : np.ndarray
         List of point indices that form the convex hull, in counterclockwise order
     """    
 
@@ -201,7 +301,7 @@ def ConvexHull_GiftWrapping(NodeCoords,IncludeCollinear=True):
     if NodeCoords.shape[1] == 2:
         Points = np.asarray(NodeCoords)
     else:
-        warnings.warn('ConvexHull_GiftWrapping is only valid for points on a plane, the third dimension is ignored.')
+        warnings.warn('GiftWrapping is only valid for points on a plane, the third dimension is ignored.')
         Points = np.asarray(NodeCoords)[:,:2]
 
     sortidx = Points[:,1].argsort()[::-1]
@@ -244,45 +344,56 @@ def ConvexHull_GiftWrapping(NodeCoords,IncludeCollinear=True):
         theta[theta<0] += 2*np.pi
 
     Hull = sortidx[Hull[:-1]]
-    return Hull
+    HullConn = np.column_stack([Hull, np.roll(Hull,-1)])
+    return HullConn
 
-def ConvexHullFanTriangulation(Hull):
+def FanTriangulation(NodeCoords, Hull=None):
     """
-    ConvexHullFanTriangulation Generate a fan triangulation of a convex hull
+    Generate a fan triangulation of a two dimensional convex hull around the points.
 
     Parameters
     ----------
-    Hull : list or np.ndarray
-        List of point indices that form the convex hull. Points should be ordered in 
-        either clockwise or counterclockwise order. The ordering of the triangles will
-        follow the ordering of the hull.
+    NodeCoords: array_like
+        Coordinates of points whose convex hull will be the basis of the fan
+        triangulation. If 3 dimensional coordinates are given, the third coordinate
+        will be ignored
+    Hull : array_like
+        Node connectivity of the 2D convex hull. If not provided, it will be 
+        calculated internally.
 
     Returns
     -------
-    NodeConn np.ndarray
+    NodeConn : np.ndarray
         Nodal connectivity of the triangulated hull.
     """
-    assert len(Hull) >= 3
-    Hull = np.asarray(Hull)
-    NodeConn = np.array([
-                    np.repeat(Hull[0], len(Hull)-2),
-                    Hull[np.arange(1, len(Hull)-1, dtype=int)],
-                    Hull[np.arange(2, len(Hull), dtype=int)]
-                ]).T
+    NodeCoords = np.asarray(NodeCoords)
+    if Hull is None:
+        _, Hull = ConvexHull(NodeCoords[:,:2])
+    else:
+        Hull = np.asarray(Hull)
+    HullShape = np.shape(Hull)
+    assert len(HullShape) == 2, 'Hull must be a two-dimensional array of node connectivities.'
+    assert HullShape[0] >= 3, 'Convex hull must contain at least 3 elements.'
+    assert HullShape[1] == 2, 'Convex hull must be two dimensional, containing line elements (shape(Hull)=(m,2)).'
+    
+    NodeConn = np.column_stack([np.repeat(Hull[0][0], len(Hull)-2), 
+                                Hull[1:-1,0],
+                                Hull[1:-1,1]
+                            ])
     return NodeConn
     
-def TriangleSplittingTriangulation(NodeCoords, Hull=None, return_Hull=False):
-
+def TriangleSplitting(NodeCoords, Hull=None):
+    # This should be rewritten to use data structures like BowyerWatson
     assert len(NodeCoords) > 2, 'At least three points are required.'
     if NodeCoords.shape[1] == 2:
         Points = np.asarray(NodeCoords)
     else:
-        warnings.warn('TriangleSplittingTriangulation is only valid for points on a plane, the third dimension is ignored.')
+        warnings.warn('TriangleSplitting is only valid for points on a plane, the third dimension is ignored.')
         Points = np.asarray(NodeCoords)[:,:2]
 
 
-    if Hull is None: Hull = ConvexHull_GiftWrapping(Points)
-    NodeConn = ConvexHullFanTriangulation(Hull)
+    if Hull is None: Hull = GiftWrapping(Points)
+    NodeConn = FanTriangulation(Hull)
 
     interior = np.setdiff1d(np.arange(len(NodeCoords)),Hull,assume_unique=True)
     for i in interior:
@@ -298,8 +409,7 @@ def TriangleSplittingTriangulation(NodeCoords, Hull=None, return_Hull=False):
         Elem = copy.copy(NodeConn[TriId])
         NodeConn[TriId] = [Elem[0],Elem[1],i]
         NodeConn = np.append(NodeConn,[[Elem[1],Elem[2],i],[Elem[2],Elem[0],i]],axis=0)
-    if return_Hull:
-        return NodeConn, Hull
+
     return NodeConn
         
 def BowyerWatson2d(NodeCoords):
@@ -311,7 +421,8 @@ def BowyerWatson2d(NodeCoords):
     Parameters
     ----------
     NodeCoords : array_like
-        nx2 or nx3 set of points to be triangulated
+        (n,2) or (n,3) array of points to be triangulated. If three dimensional
+        coordinates are given, the third coordinate will be ignored.
 
     Returns
     -------
@@ -395,7 +506,7 @@ def BowyerWatson2d(NodeCoords):
 def BowyerWatson3d(NodeCoords):
     """
     Bowyer-Watson algorithm for 3D Delaunay tetrahedralization
-    https://arxiv.org/pdf/1805.08831v2
+    :cite:p:`Bowyer1981`, :cite:p:`Watson1981`, :cite:p:`Marot2019`
 
     Parameters
     ----------
@@ -405,10 +516,13 @@ def BowyerWatson3d(NodeCoords):
     Returns
     -------
     NodeConn : np.ndarray
-        mx3 array of node connectivities for the Delaunay triangulation
+        mx4 array of node connectivities for the Delaunay tetrahedralization
     """
-    import numba
-    # from numba.typed import Dict as dict
+    if check_numba():
+        import numba
+        from numba.typed import Dict
+    else:
+        Dict = dict
 
     NodeCoords = np.asarray(NodeCoords)
     assert NodeCoords.shape[0] >= 3, 'At least three points are required.'
@@ -424,18 +538,19 @@ def BowyerWatson3d(NodeCoords):
     # Get super tetrahedron - tetrahedron with insphere that bounds the point set
     center = np.mean(NodeCoords, axis=0)
     r = np.max(np.sqrt((NodeCoords[:,0]-center[0])**2 + (NodeCoords[:,1]-center[1])**2 + (NodeCoords[:,2]-center[2])**2))
-    a = r*np.sqrt(24) # side length of tetrahedron
+    R = r + 1000*r/10
+    a = R*np.sqrt(24) # side length of tetrahedron
 
     super_tet_points = np.array([
-                                [center[0]-a/2, center[1]-np.sqrt(3)*a/6, center[2]-r],
-                                [center[0]+a/2, center[1]-np.sqrt(3)*a/6, center[2]-r],
-                                [center[0],     center[1]+np.sqrt(3)*a/3, center[2]-r],
-                                [center[0],     center[1], center[2]+np.sqrt(6)*a/3-r]
+                                [center[0]-a/2, center[1]-np.sqrt(3)*a/6, center[2]-R],
+                                [center[0]+a/2, center[1]-np.sqrt(3)*a/6, center[2]-R],
+                                [center[0],     center[1]+np.sqrt(3)*a/3, center[2]-R],
+                                [center[0],     center[1], center[2]+np.sqrt(6)*a/3-R]
                             ])    
     TempCoords = np.vstack([NodeCoords, super_tet_points])
     super_tet = (nPts, nPts+1, nPts+2, nPts+3)
 
-    ElemTable = dict()
+    ElemTable = Dict()
     # Elem table links elements to tuples of (oriented) faces
     # e.g. ElemTable[(0,1,2,3)] = ((2,0,1),(1,0,3),(3,0,2),(2,1,3)))
     # Faces are stragically numbered s.t. the minimum node number is in the 
@@ -447,7 +562,7 @@ def BowyerWatson3d(NodeCoords):
         (super_tet[2], super_tet[1], super_tet[3])
         )
 
-    EdgeTable = dict()
+    EdgeTable = Dict()
     # Edge table links oriented (half) faces to their one connected element
     # e.g. EdgeTable[(2,0,1)] = (0,1,2,3)
     EdgeTable[(super_tet[2], super_tet[0], super_tet[1])] = super_tet
@@ -477,6 +592,7 @@ def BowyerWatson3d(NodeCoords):
             min_e2_idx = e2.index(min(e2))
             min_e3_idx = e3.index(min(e3))
 
+            # Ordering each new edge to have the smallest value in the middle
             e1 = e1 if min_e1_idx == 1 else (e1[1], e1[2], e1[0]) if min_e1_idx == 2 else (e1[2], e1[0], e1[1])
             e2 = e2 if min_e2_idx == 1 else (e2[1], e2[2], e2[0]) if min_e2_idx == 2 else (e2[2], e2[0], e2[1])
             e3 = e3 if min_e3_idx == 1 else (e3[1], e3[2], e3[0]) if min_e3_idx == 2 else (e3[2], e3[0], e3[1])
@@ -565,7 +681,7 @@ def _build_cavity_2d(TempCoords, ElemTable, EdgeTable, tri, newPt):
 
 # TODO: Traversals in 3d probably won't work right because half-face pairs can't 
 # necessarily be obtained just by reversing the order
-# @numba.njit(cache=True)
+@try_njit
 def _walk_3d(TempCoords, ElemTable, EdgeTable, newPt, nsample=1):
     # Walking algorithm to find tets containing the new point
     tet = list(ElemTable.keys())[np.random.randint(0,len(ElemTable))]
@@ -589,9 +705,9 @@ def _walk_3d(TempCoords, ElemTable, EdgeTable, newPt, nsample=1):
         alpha, beta, gamma, delta = utils.BaryTet(TempCoords[np.array(list(tet))], newPt)
     return tet
 
-# @numba.njit(cache=True)
+@try_njit
 def _build_cavity_3d(TempCoords, ElemTable, EdgeTable, tet, newPt):
-    # TODO: it seems like some of the tets get visited more than once
+    # TODO: it seems like some of the tets get visited more than once - maybe not anymore?
     bad_tets = set((tet,)) #[tet]
     cavity_edges = []
     valid_set = set()
@@ -641,4 +757,3 @@ def _build_cavity_3d(TempCoords, ElemTable, EdgeTable, tet, newPt):
             cavity_edges.append(edge)
     return list(bad_tets), cavity_edges
 
-# %%
