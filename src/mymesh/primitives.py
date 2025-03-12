@@ -206,7 +206,7 @@ def Grid(bounds, h, exact_h=False, ElemType='hex'):
 
     Ids = np.reshape(np.arange(len(GridCoords)),(nX,nY,nZ))
     
-    GridConn = np.zeros(((nX-1)*(nY-1)*(nZ-1),8),dtype=int)
+    GridConn = np.empty(((nX-1)*(nY-1)*(nZ-1),8),dtype=int)
 
     GridConn[:,0] = Ids[:-1,:-1,:-1].flatten()
     GridConn[:,1] = Ids[1:,:-1,:-1].flatten()

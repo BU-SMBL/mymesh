@@ -95,15 +95,15 @@ See :func:`~mymesh.rays.RayBoxIntersection`,
 
 This test determines whether a ray, 
 :math:`R(t) = O + tD = \begin{bmatrix}R_x & R_y & R_z \end{bmatrix}` with origin 
-:math:`O` and direction :math:`D` intersects an axis-aligned box with bounds 
+:math:`O` and direction :math:`D=\begin{bmatrix}D_x & D_y & D_z \end{bmatrix}` intersects an axis-aligned box with bounds 
 :math:`(x_{min},x_{max}),(y_{min},y_{max}),(z_{min},z_{max})`. The test works by 
 finding the values of the parameter :math:`t` that correspond to the points 
 where the ray reaches each bound of the box. For example, 
-:math:`t_{xmin} = (x_{min} - O_x)/R_x`, :math:`t_{xmax} = (x_{max} - O_x)/R_x`
+:math:`t_{xmin} = (x_{min} - O_x)/D_x`, :math:`t_{xmax} = (x_{max} - O_x)/D_x`
 correspond to the points where the ray crosses the lower and upper x axis bounds
 of the box. The order of these calculations is determined based on the sign of 
 each component of the ray vector such that :math:`t_{xmin} \leq t_{xmax}` (i.e. 
-if :math:`R_x<0`, :math:`t_{xmin}=(x_{max} - O_x)/R_x`). 
+if :math:`D_x<0`, :math:`t_{xmin}=(x_{max} - O_x)/D_x`). 
 
 .. graphviz::
 
@@ -165,6 +165,10 @@ be an intersection and the test can proceed to checking the :math:`z` limits. If
 :math:`t_{zmin} \leq \min{(t_{xmax},t_{ymax})}`, then there is a section of the 
 ray that falls between the bounds of the box on all three axes, so the ray must
 intersect with the box. 
+
+For unidirectional intersections (intersections only in the positive direction
+of the ray from the point), at least one of the limit-intersection parameters
+must be positive.
 
 Ray-Segment Intersection
 ^^^^^^^^^^^^^^^^^^^^^^^^^

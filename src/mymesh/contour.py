@@ -14,6 +14,7 @@ Contouring
 
     MarchingSquares
     MarchingSquaresImage
+    MarchingTriangles
     MarchingCubes
     MarchingCubesImage
     MarchingTetrahedra

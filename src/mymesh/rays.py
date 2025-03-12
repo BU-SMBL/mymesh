@@ -1219,8 +1219,8 @@ def TrianglesTrianglesIntersectionPts(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
             p11s = es1[:,0]   # First point in the edges
             p12s = es1[:,1]   # Second point in the edges
             tris1 = Tri2s[coplanar_where[where1]]    # Corresponding triangle
-            In11 = PointsInTris(p11s,tris1,method='BaryArea') & (~np.any(np.all(np.abs(p11s[:,:,None] - edge1_ixpts[i][where1])<eps,axis=2),axis=1))
-            In12 = PointsInTris(p12s,tris1,method='BaryArea') & (~np.any(np.all(np.abs(p12s[:,:,None] - edge1_ixpts[i][where1])<eps,axis=2),axis=1))
+            In11 = PointsInTris(p11s,tris1) & (~np.any(np.all(np.abs(p11s[:,:,None] - edge1_ixpts[i][where1])<eps,axis=2),axis=1))
+            In12 = PointsInTris(p12s,tris1) & (~np.any(np.all(np.abs(p12s[:,:,None] - edge1_ixpts[i][where1])<eps,axis=2),axis=1))
 
             nanidx1 = np.where(np.all(np.isnan(edge1_ixpts[i][where1]),axis=2).cumsum(axis=1).cumsum(axis=1) == 1)
             edge1_ixpts[i][where1[nanidx1[0][In11]],nanidx1[1][In11]] = p11s[In11]
@@ -1232,8 +1232,8 @@ def TrianglesTrianglesIntersectionPts(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
             p21s = es2[:,0]   # First point in the edges
             p22s = es2[:,1]   # Second point in the edges
             tris2 = Tri1s[coplanar_where[where2]]    # Corresponding triangle
-            In21 = PointsInTris(p21s,tris2,method='BaryArea') & (~np.any(np.all(np.abs(p21s[:,:,None] - edge2_ixpts[i][where2])<eps,axis=2),axis=1))
-            In22 = PointsInTris(p22s,tris2,method='BaryArea') & (~np.any(np.all(np.abs(p22s[:,:,None] - edge2_ixpts[i][where2])<eps,axis=2),axis=1))
+            In21 = PointsInTris(p21s,tris2) & (~np.any(np.all(np.abs(p21s[:,:,None] - edge2_ixpts[i][where2])<eps,axis=2),axis=1))
+            In22 = PointsInTris(p22s,tris2) & (~np.any(np.all(np.abs(p22s[:,:,None] - edge2_ixpts[i][where2])<eps,axis=2),axis=1))
 
             nanidx2 = np.where(np.all(np.isnan(edge2_ixpts[i][where2]),axis=2).cumsum(axis=1).cumsum(axis=1) == 1)
             edge2_ixpts[i][where2[nanidx2[0][In21]],nanidx2[1][In21]] = p21s[In21]
@@ -1254,8 +1254,8 @@ def TrianglesTrianglesIntersectionPts(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
 
         # Check triangles with no edge intersections to see if one is completely within the other
         PtInTriChecks = coplanar_where[~Intersections[coplanar_where]]
-        TwoInOne = PointsInTris(Tri2s[PtInTriChecks,0],Tri1s[PtInTriChecks],method='BaryArea',eps=eps,inclusive=False)
-        OneInTwo = PointsInTris(Tri1s[PtInTriChecks,0],Tri2s[PtInTriChecks],method='BaryArea',eps=eps,inclusive=False)
+        TwoInOne = PointsInTris(Tri2s[PtInTriChecks,0],Tri1s[PtInTriChecks],eps=eps,inclusive=False)
+        OneInTwo = PointsInTris(Tri1s[PtInTriChecks,0],Tri2s[PtInTriChecks],eps=eps,inclusive=False)
 
         Intersections[PtInTriChecks] = OneInTwo | TwoInOne
         IntersectionPts[PtInTriChecks[TwoInOne],:6,:] = Tri2s[PtInTriChecks[TwoInOne]][:,[0,1,1,2,2,0]]
@@ -2499,59 +2499,6 @@ def PointsInSurf(pts, NodeCoords, SurfConn, ElemNormals=None, Octree='generate',
                 # Inside
                 Insides[i] = True
     return Insides
-
-# def PointInBoundary(pt, NodeCoords, BoundaryConn, ElemNormals, Octree=None, eps=1e-8, ray=np.random.rand(2), validate_mesh=False):
-#     """
-#     Test to determine whether a point is inside a closed 2D boundary mesh of
-#     line elements.
-
-#     Parameters
-#     ----------
-#     pt : array_like
-#         2D or 3D coordinates for point shape=(2,) or shape=(3,). If given, the
-#         third dimension will be ignored.
-#     NodeCoords : array_like
-#         List of node coordinates of the surface
-#     BoundaryConn : array_like
-#         Node connectivity of elements. This function is only valid for line meshes.
-#     ElemNormals : array_like
-#         Element normal vectors 
-#     Octree : None, str, or octree.octreeNode, optional
-#         Determines whether to use/generate an octree data structure for acceleration of the intersection testing, by default None. 
-#         'generate' - Will generate an octree structure of the surface
-#         None - Will not use an octree structure
-#         octree.octreeNode - Octree data structure precomputed using :func:`mymesh.octree.Surface2Octree`
-#     eps : float, optional
-#         Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8
-#     ray : array_like, optional
-#         Ray that will be cast to determine whether the point is inside or outside the surface, by default np.random.rand(3). For a closed, manifold surface, the choice of ray shouldn't matter.
-
-#     Returns
-#     -------
-#     inside : bool
-#         True if the point is inside the surface, otherwise False.
-#     """    
-#     # root = OctreeInputProcessor(NodeCoords, SurfConn, Octree)
-#     segments = np.asarray(NodeCoords)[BoundaryConn]
-#     intersections, distances, _ = RaySegmentsIntersection(pt,ray,segments)
-#     posDistances = np.array([d for d in distances if d > eps])
-#     zero = np.any(np.abs(distances)<eps)
-    
-#     # Checking unique to not double count instances where ray intersects an edge
-#     if len(np.unique(np.round(posDistances/eps)))%2 == 0 and not zero:
-#         # No intersection
-#         inside = False
-#         return inside
-#     else:
-#         dist = min(np.abs(distances))
-#         if dist < eps:
-#             closest = np.array(intersections)[np.abs(distances)==dist][0]
-#             dot = np.dot(ray,ElemNormals[closest])
-#             return dot
-#         else:
-#             # Inside
-#             inside = True
-#             return inside
 
 @try_njit
 def PointInBox(pt, xlim, ylim, zlim, inclusive=True):

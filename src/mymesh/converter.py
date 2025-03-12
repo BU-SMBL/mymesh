@@ -1794,14 +1794,14 @@ def hexsubdivide(NodeCoords, NodeConn):
     Returns
     -------
     NewCoords : np.ndarray
-        Node coordinates of the subdivided mesh. The node new nodes are 
+        Node coordinates of the subdivided mesh. The new nodes are 
         appended to the original nodes, so the node numbers of the original 
         mesh will refer to the same nodes in the new mesh.
     NewConn : np.ndarray
         Node connectivities of the subdivided mesh. The elements are ordered 
         so that the first element in the original mesh is subdivided into
         the first 8 elements in the new mesh, the second element in the mesh
-        is the next 8 elements, and so on.
+        becomes the next 8 elements, and so on.
     """
     ArrayCoords = np.asarray(NodeCoords)
     ArrayConn = np.asarray(NodeConn, dtype=int)
