@@ -2211,3 +2211,61 @@ def identify_type(NodeCoords, NodeConn):
             Type = 'surf'
 
         return Type
+
+@try_njit(cache=True)
+def RotateNormalToVector(NodeCoords, Normal, Vector):
+    """
+    Reorient nodes to align an asociated normal vector with a chosen vector.
+    This can be used to reorient a mesh so that a particular element is facing
+    in a certain direction
+
+    Parameters
+    ----------
+    NodeCoords : np.ndarray(dtype=np.float64)
+        Array of node coordinates (shape=(n,3))
+    Normal : np.ndarray(dtype=np.float64)
+        Normal vector associated with the nodes (shape=(3,)). This could 
+        be the normal vector of a particular node or element of the mesh, or 
+        some other vector related to the nodes that is the basis of reorientation.
+    Vector : np.ndarray(dtype=np.float64)
+        Vector which the nodes will be rotated so that Normal is aligned with it (shape=(3,)).
+
+    Returns
+    -------
+    RotCoords : np.ndarray
+        Coordinates of the rotated nodes. These will be positioned arbitrarily
+        in space, but will be rotated so that Normal is parallel with Vector
+    R : np.ndarray
+        3x3 rotation matrix. RotCoords = (R @ NodeCoords.T).T
+    """    
+    Normal = Normal / np.linalg.norm(Normal)
+    Vector = Vector / np.linalg.norm(Vector)
+    Cross = np.cross(Normal,Vector) 
+    CrossNorm = np.linalg.norm(Cross)
+    if CrossNorm == 0:
+        pass
+        # RotAxis = np.array([[0,0,1],[1,0,0],[0,1,0]],dtype=np.float64) @ Normal[:,None]
+        RotAxis = Normal[np.array([2,0,1])]
+    else:
+        RotAxis = Cross/CrossNorm
+
+    if np.array_equal(Normal, Vector):
+        Angle = 0
+    else:
+        Angle = np.arccos(np.dot(Vector, Normal))
+    
+    outer_prod = np.outer(RotAxis, RotAxis)
+    cross_prod_matrix = np.zeros((3, 3))
+    cross_prod_matrix[0,1] = -RotAxis[2]
+    cross_prod_matrix[1,0] =  RotAxis[2]
+    cross_prod_matrix[0,2] =  RotAxis[1]
+    cross_prod_matrix[2,0] = -RotAxis[1]
+    cross_prod_matrix[1,2] = -RotAxis[0]
+    cross_prod_matrix[2,1] =  RotAxis[0]
+    R = np.cos(Angle)*np.eye(3) + np.sin(Angle)*cross_prod_matrix + (1 - np.cos(Angle))*outer_prod
+
+    RotCoords = (R @ NodeCoords.T).T
+
+    return RotCoords, R
+
+    
