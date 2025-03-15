@@ -437,19 +437,23 @@ def _CubicFit(NodeCoords, neighborhood, normals):
     Bmat[nNeighbors:2*nNeighbors,0] = -ajs/cjs
     Bmat[2*nNeighbors:3*nNeighbors,0] = -bjs/cjs
 
-    A = Amat.T@Amat
-    B = Amat.T@Bmat
-
-    X = np.linalg.solve(A,B).T[0]
-    W = np.array([[X[0],X[1]],
-                    [X[1],X[2]]])
-    if np.any(np.isnan(W)):
+    if np.any(np.isnan(Amat)) or np.any(np.isnan(Bmat)):
         MaxPrincipal = np.nan
         MinPrincipal = np.nan
     else:
-        [v,x] = np.linalg.eig(W)
-        MaxPrincipal= np.max(v)
-        MinPrincipal = np.min(v)
+        A = Amat.T@Amat
+        B = Amat.T@Bmat
+    
+        X = np.linalg.solve(A,B).T[0]
+        W = np.array([[X[0],X[1]],
+                        [X[1],X[2]]])
+        if np.any(np.isnan(W)):
+            MaxPrincipal = np.nan
+            MinPrincipal = np.nan
+        else:
+            [v,x] = np.linalg.eig(W)
+            MaxPrincipal= np.max(v)
+            MinPrincipal = np.min(v)
     
     return MaxPrincipal, MinPrincipal
 
