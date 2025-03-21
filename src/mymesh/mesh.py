@@ -1416,9 +1416,9 @@ class mesh:
                     keep = np.any(keep[self.NodeConn],axis=1)
             else:
                 if all_nodes:
-                    keep = np.array(np.all(keep[elem] for elem in self.NodeConn))
+                    keep = np.array([np.all(keep[elem]) for elem in self.NodeConn])
                 else:
-                    keep = np.array(np.any(keep[elem] for elem in self.NodeConn))
+                    keep = np.array([np.any(keep[elem]) for elem in self.NodeConn])
 
         RemoveElems = np.where(~keep)[0]
 
