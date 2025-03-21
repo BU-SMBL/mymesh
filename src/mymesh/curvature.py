@@ -443,17 +443,19 @@ def _CubicFit(NodeCoords, neighborhood, normals):
     else:
         A = Amat.T@Amat
         B = Amat.T@Bmat
-    
-        X = np.linalg.solve(A,B).T[0]
-        W = np.array([[X[0],X[1]],
-                        [X[1],X[2]]])
-        if np.any(np.isnan(W)):
-            MaxPrincipal = np.nan
-            MinPrincipal = np.nan
-        else:
+        try:
+            X = np.linalg.solve(A,B).T[0]
+            W = np.array([[X[0],X[1]],
+                            [X[1],X[2]]])
+            
             [v,x] = np.linalg.eig(W)
             MaxPrincipal= np.max(v)
             MinPrincipal = np.min(v)
+            
+        except:
+            # For singular matrix errors
+            MaxPrincipal = np.nan
+            MinPrincipal = np.nan
     
     return MaxPrincipal, MinPrincipal
 
