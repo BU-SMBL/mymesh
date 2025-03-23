@@ -35,6 +35,7 @@ Implicit Functions
     diamond
     cylinder
     box
+    plane
     xplane
     yplane
     zplane
@@ -149,13 +150,8 @@ def PlanarMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolati
     X,Y = np.meshgrid(xs, ys, indexing='ij')
     Z = np.zeros_like(X)
     F = vector_func(X,Y,Z,*args,**kwargs).T
-    if Type.lower() == 'surf':
-        method = 'triangle'
-    elif Type.lower() == 'line':
-        method = 'edge'
-    else:
-        raise ValueError('Invalid Type.')
-    NodeCoords, NodeConn = contour.MarchingSquaresImage(F, h=h, threshold=threshold, flip=flip, method=method, interpolation=interpolation)
+
+    NodeCoords, NodeConn = contour.MarchingSquaresImage(F, h=h, threshold=threshold, flip=flip, Type=Type, interpolation=interpolation)
     NodeCoords[:,0] += bounds[0]
     NodeCoords[:,1] += bounds[2]
     
@@ -652,7 +648,42 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
     M.NodeCoords = M.NodeCoords[:-1]
     return M
 
-def SurfaceReconstruction(M, decimate=1, method='compact',R=None):
+def SurfaceReconstruction(M, decimate=1, method='compact', Radius=None):
+    """
+    Implicit surface reconstruction to convert a mesh into an implicit function
+
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Input mesh to reconstruct (can be a volume (Type='vol') or surface 
+        (Type='surf')).
+    decimate : float, optional
+        Downsampling factor to select a random subset of points to use for the 
+        reconstruction, by default 1
+    method : str, optional
+        Method to use , by default 'compact'
+    Radius : float, optional
+        Radius of support to use for radial basis functions, by default None
+
+    Returns
+    -------
+    func : callable
+        Implicit function representation of the input surface
+    """
+    
+    # Get offset distance based on edge lengths
+    SurfEdgeLengths = np.linalg.norm(M.NodeCoords[M.Surface.Edges[0,:]] - M.NodeCoords[M.Surface.Edges[1,:]],axis=1)
+    MeanEdge = np.mean(SurfEdgeLengths)
+    OffsetDistance =  1*MeanEdge # np.percentile(SurfEdgeLengths, 10)
+    if Radius is None:
+        SupportRadius = 10*(MeanEdge/decimate)
+    else:
+        SupportRadius = Radius
+
+    gaussian = lambda r : np.exp(r**2 * SupportRadius**2)
+    biharmonic = lambda r : r
+    triharmonic = lambda r : r**3
+    compact = lambda r : np.maximum(0, (SupportRadius-r))**4 * (4*r + SupportRadius)
 
     if decimate != 1:
         nodeset = np.random.choice(M.SurfNodes, int(len(M.SurfNodes)*decimate),replace=False)
@@ -661,27 +692,12 @@ def SurfaceReconstruction(M, decimate=1, method='compact',R=None):
     SurfCoords = np.asarray(M.NodeCoords)[nodeset] # won't work for mixed-element surfaces
     SurfNormals = M.NodeNormals[nodeset]
 
-    # Get offset distance based on edge lengths
-    SurfEdgeLengths = np.linalg.norm(M.NodeCoords[M.Surface.Edges[0,:]] - M.NodeCoords[M.Surface.Edges[1,:]],axis=1)
-    MeanEdge = np.mean(SurfEdgeLengths)
-    OffsetDistance =  1*MeanEdge # np.percentile(SurfEdgeLengths, 10)
-    if R is None:
-        SupportRadius = 10*(MeanEdge/decimate)
-    else:
-        SupportRadius = R    
-
     PosOffset = SurfCoords + OffsetDistance*SurfNormals
     NegOffset = SurfCoords - OffsetDistance*SurfNormals
     Coords = np.vstack([SurfCoords, PosOffset, NegOffset])
 
-    gaussian = lambda r : np.exp(r**2 * SupportRadius**2)
-    biharmonic = lambda r : r
-    triharmonic = lambda r : r**3
-    compact = lambda r : np.maximum(0, (SupportRadius-r))**4 * (4*r + SupportRadius)
-
-    rbf = compact
-    method = 'rbf'
     if method.lower() == 'compact':
+        rbf = compact
         tree = KDTree(Coords)
         neighbors = tree.query_ball_point(Coords, SupportRadius)
         nneighbors = [len(n) for n in neighbors]
@@ -699,9 +715,8 @@ def SurfaceReconstruction(M, decimate=1, method='compact',R=None):
             z = np.asarray(z)
 
             neighbors = tree.query_ball_point(np.column_stack([x,y,z]), SupportRadius)
-            uneighbors = np.unqiue(neighbors)
 
-            rbf_sum = np.sum(Lambda*rbf(np.sqrt((x[...,None]-Coords[uneighbors,0])**2 + (y[...,None]-Coords[uneighbors,1])**2 + (z[...,None]-Coords[uneighbors,2])**2)),axis=-1)
+            rbf_sum = np.array([Lambda[neighbors[i]] @ rbf(np.sqrt((x[i] - Coords[neighbors[i],0])**2 + (y[i] - Coords[neighbors[i],1])**2 + (z[i] - Coords[neighbors[i],2])**2))[:,None] for i in range(len(x))])
 
             f = rbf_sum
             return f 
@@ -1576,6 +1591,31 @@ def mesh2udf(M, points):
     NodeVals = Out[0].flatten()
     
     return NodeVals
+
+def sp2np(func):
+    """
+    Convert a sympy symbolic to a vectorized numpy function
+
+    Parameters
+    ----------
+    func : callable or sp.Basic
+        Symbolic function
+
+    Returns
+    -------
+    vector_func
+        Vectorized function
+    """    
+    if isinstance(func, sp.Basic):
+        x, y, z = sp.symbols('x y z', real=True)
+        vector_func = sp.lambdify((x, y, z), func, 'numpy')
+    elif isinstance(func(0,0,0), sp.Basic):
+        x, y, z = sp.symbols('x y z', real=True)
+        vector_func = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
+    else:
+        vector_func = func
+
+    return vector_func
 
 # def FastMarchingMethod(VoxelCoords, VoxelConn, NodeVals):
 #     """
