@@ -2,7 +2,7 @@
 # Created on Wed Feb 16 11:28:28 2022
 # @author: toj
 """
-Boolean operations for meshes
+Boolean (union, intersection, difference) operations for meshes
 
 Operations
 ==========
@@ -14,14 +14,16 @@ Operations
 
 """
 
-import warnings, itertools, copy
-from scipy import spatial
+import warnings
 import numpy as np
 from . import mesh, converter, utils, octree, rays, improvement, delaunay, primitives
 
 def MeshBooleans(Surf1, Surf2, tol=1e-8):
     """
-    Boolean (union, intersection, difference) for two surface meshes.
+    Boolean (union, intersection, difference) for two meshes.
+    Currently operations are only supported on purely triangular meshes.
+    If a volume or non-triangular mesh is given, it will be converted
+    and the output will be purely triangular.
     https://dl.acm.org/doi/pdf/10.1145/15922.15904
 
     Parameters
@@ -42,8 +44,14 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
     Difference : mesh.mesh
         Mesh object containing the difference of the two input surfaces
     """    
+    if (Surf1.BoundaryNodes) > 0:
+        warnings.warn('Surf1 is not a fully closed surface - boolean operations may produce unexpected results.')
+    if (Surf2.BoundaryNodes) > 0:
+        warnings.warn('Surf2 is not a fully closed surface - boolean operations may produce unexpected results.')
+
     eps = tol/100
-    eps_final = tol*10
+    eps_final = tol*10    
+
     # Split Mesh
     Split1, Split2 = SplitMesh(Surf1, Surf2, eps=eps)
 
@@ -51,31 +59,31 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
     Split2.cleanup(tol=eps)
 
     # Get Shared Nodes
-    Shared1,Shared2 = GetSharedNodes(Split1.NodeCoords, Split2.NodeCoords, eps=tol)
+    Shared1,Shared2 = _GetSharedNodes(Split1.NodeCoords, Split2.NodeCoords, eps=tol)
     
     # Classify Tris
-    AinB, AoutB, AsameB, AflipB, BinA, BoutA, BsameA, BflipA = ClassifyTris(Split1, Shared1, Split2, Shared2, eps=eps)
+    AinB, AoutB, AsameB, AflipB, BinA, BoutA, BsameA, BflipA = _ClassifyTris(Split1, Shared1, Split2, Shared2, eps=eps)
     # Perform Boolean Operations
     # Union
     AUtris = AoutB.union(AsameB)
     BUtris = BoutA
-    AUConn = [elem for e,elem in enumerate(Split1.NodeConn) if e in AUtris]
-    BUConn = [elem for e,elem in enumerate(Split2.NodeConn) if e in BUtris]
+    AUConn = Split1.NodeConn[list(AUtris)]
+    BUConn = Split2.NodeConn[list(BUtris)]
     # Intersection
     AItris = AinB.union(AsameB)
     BItris = BinA
-    AIConn = [elem for e,elem in enumerate(Split1.NodeConn) if e in AItris]
-    BIConn = [elem for e,elem in enumerate(Split2.NodeConn) if e in BItris]
+    AIConn = Split1.NodeConn[list(AItris)]
+    BIConn = Split2.NodeConn[list(BItris)]
     # Difference
     ADtris = AoutB.union(AflipB)
     BDtris = BinA
-    ADConn = [elem for e,elem in enumerate(Split1.NodeConn) if e in ADtris]
-    BDConn = [elem for e,elem in enumerate(Split2.NodeConn) if e in BDtris]
+    ADConn = Split1.NodeConn[list(ADtris)]
+    BDConn = Split2.NodeConn[list(BDtris)]
     
     # Merge and Cleanup Mesh
     MergedUCoords, MergedUConn = utils.MergeMesh(Split1.NodeCoords, AUConn, Split2.NodeCoords, BUConn)
     MergedICoords, MergedIConn = utils.MergeMesh(Split1.NodeCoords, AIConn, Split2.NodeCoords, BIConn)
-    MergedDCoords, MergedDConn = utils.MergeMesh(Split1.NodeCoords, ADConn, Split2.NodeCoords, np.fliplr(BDConn).tolist())
+    MergedDCoords, MergedDConn = utils.MergeMesh(Split1.NodeCoords, ADConn, Split2.NodeCoords, np.fliplr(BDConn))
 
     if 'mesh' in dir(mesh):
         Union = mesh.mesh(MergedUCoords,MergedUConn)
@@ -91,86 +99,40 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
     Difference.cleanup(tol=eps_final)
 
     return Union, Intersection, Difference
-
-def PlaneClip(pt, normal, Surf, tol=1e-8, flip=True, plane_h=None, return_splitplane=False):
-    
-    
-    Tris = np.asarray(Surf.NodeCoords)[Surf.NodeConn]
-    pt = np.asarray(pt)
-    normal = np.asarray(normal)/np.linalg.norm(normal)
-    sd = np.sum(normal*Tris,axis=2) - np.dot(normal,pt)
-    Intersections = ~(np.all((sd < -tol),axis=1) | np.all((sd > tol),axis=1))
-    
-    if flip:
-        Clipped = mesh(Surf.NodeCoords,(np.asarray(Surf.NodeConn)[~Intersections & np.all(sd < 0,axis=1)]))
-    else:
-        Clipped = mesh(Surf.NodeCoords,(np.asarray(Surf.NodeConn)[~Intersections & np.all(sd > 0,axis=1)]))
-
-    Intersected = mesh(Surf.NodeCoords, [elem for i,elem in enumerate(Surf.NodeConn) if Intersections[i]])
-    
-    mins = np.min(Surf.NodeCoords,axis=0)
-    maxs = np.max(Surf.NodeCoords,axis=0)
-    bounds = [mins[0]-tol,maxs[0]+tol,mins[1]-tol,maxs[1]+tol,mins[2]-tol,maxs[2]+tol]
-    if plane_h is None:
-        plane_h = np.linalg.norm(maxs-mins)/10
-    Plane = primitives.Plane(pt, normal, bounds, plane_h, exact_h=False, ElemType='tri')
-
-    SplitSurf, SplitPlane = SplitMesh(Intersected,Plane) # TODO: This could be done more efficiently for planar case
-    SplitSurf.cleanup()
-    SplitPlane.cleanup()
-
-    SplitTris = np.asarray(SplitSurf.NodeCoords)[SplitSurf.NodeConn]
-    sd2 = np.sum(normal*SplitTris,axis=2) - np.dot(normal,pt)
-
-    if flip:
-        Clipped2 = mesh(SplitSurf.NodeCoords,(np.asarray(SplitSurf.NodeConn)[np.all(sd2 <= tol,axis=1)]))
-    else:
-        Clipped2 = mesh(SplitSurf.NodeCoords,(np.asarray(SplitSurf.NodeConn)[np.all(sd2 >= -tol,axis=1)]))
-    Clipped.merge(Clipped2)
-    Clipped.cleanup()
-    if return_splitplane:
-        return Clipped,SplitPlane
-    return Clipped
        
-def VoxelIntersect(VoxelCoordsA, VoxelConnA, VoxelCoordsB, VoxelConnB):
-    # Requires Voxel meshes that exsits within the same grid
-    centroidsA = [np.mean([VoxelCoordsA[n] for n in elem],axis=0).tolist() for elem in VoxelConnA]
-    centroidsB = set([tuple(np.mean([VoxelCoordsB[n] for n in elem],axis=0).tolist()) for elem in VoxelConnB])
-    
-    IConn = [elem for i,elem in enumerate(VoxelConnA) if tuple(centroidsA[i]) in centroidsB]
-    ICoords,IConn,_ = utils.RemoveNodes(VoxelCoordsA, IConn)
-    return ICoords, IConn
-    
-def VoxelDifference(VoxelCoordsA, VoxelConnA, VoxelCoordsB, VoxelConnB):
-    # Requires Voxel meshes that exsits within the same grid
-    centroidsA = [np.mean([VoxelCoordsA[n] for n in elem],axis=0).tolist() for elem in VoxelConnA]
-    centroidsB = set([tuple(np.mean([VoxelCoordsB[n] for n in elem],axis=0).tolist()) for elem in VoxelConnB])
-    
-    DConn = [elem for i,elem in enumerate(VoxelConnA) if tuple(centroidsA[i]) not in centroidsB]
-    DCoords,DConn,_ = utils.RemoveNodes(VoxelCoordsA, DConn)
-    return DCoords, DConn
-
 def SplitMesh(Surf1, Surf2, eps=1e-12):
     """
     Find intersections between two surfaces and split them. The resulting meshes
-    will have nodes placed along their interfaces.
+    will have nodes placed along their interfaces and retriangulated to contain 
+    the lines of intersection. If a volume or non-triangular mesh is given, it 
+    will be converted and the output will be purely triangular.
 
     Parameters
     ----------
     Surf1 : mymesh.mesh
-        First surface mesh to split. This must be a triangular surface.
+        First surface mesh to split.
     Surf2 : mymesh.mesh
-        Second surface mesh to split. This must be a triangular surface.
+        Second surface mesh to split. 
     eps : float, optional
         Small tolerance parameter, by default 1e-12
 
     Returns
     -------
     Surf1 : mymesh.mesh
-        First split surface mesh.
+        First surface mesh split by the second.
     Surf2 : mymesh.mesh
-        Second split surface mesh.
+        Second surface mesh split by the first.
     """    
+    if Surf1.Type != 'surf':
+        Surf1 = Surf1.Surface
+    if Surf2.Type != 'surf':
+        Surf2 = Surf2.Surface
+
+    if len(Surf1.ElemType) != 1 or Surf1.ElemType[0] != 'tri':
+        Surf1.NodeCoords, Surf1.NodeConn = converter.surf2tris(*Surf1)
+    if len(Surf2.ElemType) != 1 or Surf2.ElemType[0] != 'tri':
+        Surf2.NodeCoords, Surf2.NodeConn = converter.surf2tris(*Surf2)
+
     Surf1Intersections,Surf2Intersections,IntersectionPts = rays.SurfSurfIntersection(*Surf1,*Surf2,return_pts=True)
     
     SurfIntersections12 = [Surf1Intersections,Surf2Intersections]
@@ -180,7 +142,7 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
         # Group nodes for each triangle
         SurfIntersections = SurfIntersections12[i]
         ArrayCoords = np.array(surf.NodeCoords)
-        SplitGroupNodes = [ArrayCoords[elem] for elem in surf.NodeConn]
+        SplitGroupNodes = ArrayCoords[surf.NodeConn].tolist()
         for j,elemid in enumerate(SurfIntersections):
             if len(IntersectionPts[j]) == 2:
                 SplitGroupNodes[elemid] = np.append(SplitGroupNodes[elemid], IntersectionPts[j], axis=0)
@@ -204,35 +166,17 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
 
                 # Transform to Local Coordinates
                 # Rotation matrix from global z (k=[0,0,1]) to local z(n)
-                k=np.array([0,0,1])
-                if np.array_equal(n, k) or np.array_equal(n, -k):
-                    R = np.eye(3)
-                    flatnodes = SplitGroupNodes[j]#[:,0:2]
-
-                else:
-                    kxn = np.cross(k,n)
-                    rotAxis = kxn/np.linalg.norm(kxn)
-                    angle = -np.arccos(np.dot(k,n))
-                    q = [np.cos(angle/2),               # Quaternion Rotation
-                            rotAxis[0]*np.sin(angle/2),
-                            rotAxis[1]*np.sin(angle/2),
-                            rotAxis[2]*np.sin(angle/2)]
-                
-                    R = [[2*(q[0]**2+q[1]**2)-1,   2*(q[1]*q[2]-q[0]*q[3]), 2*(q[1]*q[3]+q[0]*q[2])],
-                            [2*(q[1]*q[2]+q[0]*q[3]), 2*(q[0]**2+q[2]**2)-1,   2*(q[2]*q[3]-q[0]*q[1])],
-                            [2*(q[1]*q[3]-q[0]*q[2]), 2*(q[2]*q[3]+q[0]*q[1]), 2*(q[0]**2+q[3]**2)-1]
-                            ]
-
-                    # Delaunay Triangulation to retriangulate the split face
-                    flatnodes = np.matmul(R,np.transpose(SplitGroupNodes[j])).T
+                k=np.array([0,0,1],dtype=np.float64)
+                flatnodes,R = utils.RotateNormalToVector(SplitGroupNodes[j], n, np.array([0,0,1],dtype=np.float64))
                     
                 coords, conn = delaunay.Triangulate(flatnodes[:,0:2],method='Triangle',Constraints=Constraints,tol=eps)  
+                
 
-                SplitGroupNodes[j] = np.matmul(np.linalg.inv(R),np.append(coords,flatnodes[0,2]*np.ones((len(coords),1)),axis=1).T).T
-                ###
-                flip = [np.dot(utils.CalcFaceNormal(SplitGroupNodes[j],[conn[i]]), n)[0] < 0 for i in range(len(conn))]
+                if len(coords) != len(SplitGroupNodes[j]):
+                    # Accounts for possible constraint splitting
+                    SplitGroupNodes[j] = np.matmul(np.linalg.inv(R),np.append(coords,flatnodes[0,2]*np.ones((len(coords),1)),axis=1).T).T
                 conn = (conn+surf.NNode).tolist()
-                surf.addElems([elem[::-1] if flip[i] else elem for i,elem in enumerate(conn)])
+                surf.addElems(conn)
                 surf.addNodes(SplitGroupNodes[j].tolist())
 
         # Collinear check
@@ -251,7 +195,7 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
 
     return Split1, Split2
     
-def GetSharedNodes(NodeCoordsA, NodeCoordsB, eps=1e-10):
+def _GetSharedNodes(NodeCoordsA, NodeCoordsB, eps=1e-10):
     
     RoundCoordsA = np.round(np.asarray(NodeCoordsA)/eps)*eps
     RoundCoordsB = np.round(np.asarray(NodeCoordsB)/eps)*eps
@@ -264,15 +208,53 @@ def GetSharedNodes(NodeCoordsA, NodeCoordsB, eps=1e-10):
 
     return SharedA, SharedB
                            
-def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
+def _ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
+    """
+    Classify triangles of meshes split by :func:`SplitMesh`.
+
+    Parameters
+    ----------
+    SplitA : mymesh.mesh
+        Triangular surface mesh, the result of :func:`SplitMesh` 
+    SharedA : set
+        Set of nodes of A that are shared with B, the result of :func:`_GetSharedNodes`
+    SplitB : mymesh.mesh
+        Triangular surface mesh, the result of :func:`SplitMesh` 
+    SharedB : set
+        Set of nodes of B that are shared with A, the result of :func:`_GetSharedNodes`
+    eps : float, optional
+        Small tolerance parameter, by default 1e-10
+
+    Returns
+    -------
+    AinB : set
+        Set of element IDs of A that are inside surface B
+    AoutB : set 
+        Set of element IDs of A that are outside surface B
+    AsameB : set 
+        Set of element IDs of A that are on the surface of surface B
+    AflipB : set
+        Set of element IDs of A that are on the surface of surface B, facing the opposite direction
+    BinA : set 
+        Set of element IDs of B that are inside surface A
+    BoutA : set
+        Set of element IDs of B that are outside surface A
+    BsameA : set 
+        Set of element IDs of B that are on the surface of surface A
+    BflipA : set
+        Set of element IDs of B that are on the surface of surface A, facing the opposite direction
+    """
     # Classifies each Triangle in A as inside, outside, or on the surface facing the same or opposite direction as surface B
     
     octA = None# octree.Surface2Octree(*SplitA)
     octB = None# octree.Surface2Octree(*SplitB)
-    AllBoundaryA = np.array([i for i,elem in enumerate(SplitA.NodeConn) if all([n in SharedA for n in elem])])
-    AllBoundaryB = np.array([i for i,elem in enumerate(SplitB.NodeConn) if all([n in SharedB for n in elem])])  
-    NotSharedConnA = [elem for i,elem in enumerate(SplitA.NodeConn) if not any([n in SharedA for n in elem]) and i not in AllBoundaryA]  
-    NotSharedConnB = [elem for i,elem in enumerate(SplitB.NodeConn) if not any([n in SharedB for n in elem]) and i not in AllBoundaryB]  
+    
+    AShared = np.isin(SplitA.NodeConn, list(SharedA))
+    BShared = np.isin(SplitB.NodeConn, list(SharedB))
+    AllBoundaryA = np.where(np.all(AShared, axis=1))[0]
+    AllBoundaryB = np.where(np.all(BShared, axis=1))[0]
+    NotSharedConnA = SplitA.NodeConn[~np.any(AShared, axis=1)]
+    NotSharedConnB = SplitB.NodeConn[~np.any(BShared, axis=1)]
     
     if len(NotSharedConnA) > 0:
         RegionsA = utils.getConnectedNodes(SplitA.NodeCoords,NotSharedConnA)  # Node Sets
@@ -312,7 +294,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
         BflipA.update(AllBoundaryB[check <= 0])
 
     for r in range(len(RegionsA)):
-        RegionElems = [e for e in range(len(SplitA.NodeConn)) if all([n in RegionsA[r] for n in SplitA.NodeConn[e]])] # Elem Set
+        RegionElems = np.where(np.all(np.isin(SplitA.NodeConn, list(RegionsA[r])),axis=1))[0] # Elements of SplitA in this region
         pt = SplitA.NodeCoords[RegionsA[r].pop()]
         if rays.PointInSurf(pt,SplitB.NodeCoords,SplitB.NodeConn,ElemNormalsB,Octree=octB,eps=eps):
             AinB.update(RegionElems)
@@ -321,7 +303,7 @@ def ClassifyTris(SplitA, SharedA, SplitB, SharedB, eps=1e-10):
             
     #
     for r in range(len(RegionsB)):
-        RegionElems = [e for e in range(len(SplitB.NodeConn)) if all([n in RegionsB[r] for n in SplitB.NodeConn[e]])] # Elem Set
+        RegionElems = np.where(np.all(np.isin(SplitB.NodeConn, list(RegionsB[r])),axis=1))[0] # Elements of SplitB in this region
         pt = SplitB.NodeCoords[RegionsB[r].pop()]
         if rays.PointInSurf(pt,SplitA.NodeCoords,SplitA.NodeConn,ElemNormalsA,Octree=octA,eps=eps):
             BinA.update(RegionElems)

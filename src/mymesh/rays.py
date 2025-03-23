@@ -1397,6 +1397,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     
     return True
 
+@try_njit(cache=True)
 def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=None):
     """
     Intersection test for detecting intersections between a triangle and a box. A vectorized version of :func:`TriangleBoxIntersection` for one box and multiple triangles
@@ -1406,19 +1407,19 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
 
     Parameters
     ----------
-    Tris : array_like
+    Tris : np.ndarray
         Coordinates of triangle vertices for each triangle in the format
         np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...).
         Should have shape (n,3,3) for n triangles.
-    xlim : array_like
+    xlim : np.ndarray
         2 element array of the lower and upper bounds of the box in the x direction ``[xmin, xmax]``
-    ylim : array_like
+    ylim : np.ndarray
         2 element array of the lower and upper bounds of the box in the y direction ``[ymin, ymax]``
-    zlim : array_like
+    zlim : np.ndarray
         2 element array of the lower and upper bounds of the box in the z direction ``[zmin, zmax]``
-    TriNormal : array_like, optional
+    TriNormal : np.ndarray, optional
         Triangle normal vector, by default None. Will be computed if not provided.
-    BoxCenter : array_like, optional
+    BoxCenter : np.ndarray, optional
         Coordinates of the center of the box, by default None. Will be computed if not provided.
 
     Returns
@@ -1426,9 +1427,9 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
     intersection : bool
         True if there is an intersection, otherwise False.
     """    
-    if BoxCenter is None: BoxCenter = np.mean([xlim,ylim,zlim],axis=1)
+    if BoxCenter is None: BoxCenter = np.array([np.mean(lim) for lim in (xlim,ylim,zlim)])
     
-    if type(Tris) is list: Tris = np.array(Tris)
+    # if type(Tris) is list: Tris = np.array(Tris)
         
     f0 = Tris[:,1]-Tris[:,0]
     f1 = Tris[:,2]-Tris[:,1]
@@ -1443,70 +1444,68 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
     
     if TriNormals is None: 
         TriNormals = np.cross(f0,f1)
-    elif type(TriNormals) is list:
-        TriNormals = np.array(TriNormals)
     
     dist = np.sum(TriNormals*v0,axis=1)
     r0 = hx*np.abs(TriNormals[:,0]) + hy*np.abs(TriNormals[:,1]) + hz*np.abs(TriNormals[:,2])
     
     # Test Axes
     # a00
-    a00 = np.vstack([np.zeros(len(f0)), -f0[:,2], f0[:,1]]).T
+    a00 = np.column_stack((np.zeros(len(f0)), -f0[:,2], f0[:,1]))
     p0 = np.sum(v0*a00,axis=1)
     p2 = np.sum(v2*a00,axis=1)
     r1 = hy*np.abs(a00[:,1]) + hz*np.abs(a00[:,2])
     ps1 = (p0,p2)
     
     # a01
-    a01 = np.vstack([np.zeros(len(f1)), -f1[:,2], f1[:,1]]).T
+    a01 = np.column_stack((np.zeros(len(f1)), -f1[:,2], f1[:,1]))
     p0 = np.sum(v0*a01,axis=1)
     p1 = np.sum(v1*a01,axis=1)
     r2 = hy*np.abs(a01[:,1]) + hz*np.abs(a01[:,2])
     ps2 = (p0,p1)
     
     # a02
-    a02 = np.vstack([np.zeros(len(f2)), -f2[:,2], f2[:,1]]).T
+    a02 = np.column_stack((np.zeros(len(f2)), -f2[:,2], f2[:,1]))
     p0 = np.sum(v0*a02,axis=1)
     p1 = np.sum(v1*a02,axis=1)
     r3 = hy*np.abs(a02[:,1]) + hz*np.abs(a02[:,2])
     ps3 = (p0,p1)
     
     # a10
-    a10 = np.vstack([f0[:,2], np.zeros(len(f0)), -f0[:,0]]).T
+    a10 = np.column_stack((f0[:,2], np.zeros(len(f0)), -f0[:,0]))
     p0 = np.sum(v0*a10,axis=1)
     p2 = np.sum(v2*a10,axis=1)
     r4 = hx*np.abs(a10[:,0]) + hz*np.abs(a10[:,2])
     ps4 = (p0,p2)
     
     # a11
-    a11 = np.vstack([f1[:,2], np.zeros(len(f1)), -f1[:,0]]).T
+    a11 = np.column_stack((f1[:,2], np.zeros(len(f1)), -f1[:,0]))
     p0 = np.sum(v0*a11,axis=1)
     p1 = np.sum(v1*a11,axis=1)
     r5 = hx*np.abs(a11[:,0]) + hz*np.abs(a11[:,2])
     ps5 = (p0,p1)
     
     # a12
-    a12 = np.vstack([f2[:,2], np.zeros(len(f2)), -f2[:,0]]).T
+    a12 = np.column_stack((f2[:,2], np.zeros(len(f2)), -f2[:,0]))
     p0 = np.sum(v0*a12,axis=1)
     p1 = np.sum(v1*a12,axis=1)
     r6 = hx*np.abs(a12[:,0]) + hz*np.abs(a12[:,2])
     ps6 = (p0,p1)
     # a20
-    a20 = np.vstack([-f0[:,1], f0[:,0], np.zeros(len(f0))]).T
+    a20 = np.column_stack((-f0[:,1], f0[:,0], np.zeros(len(f0))))
     p0 = np.sum(v0*a20,axis=1)
     p2 = np.sum(v2*a20,axis=1)
     r7 = hx*np.abs(a20[:,0]) + hy*np.abs(a20[:,1])
     ps7 = (p0,p2)
     
     # a21
-    a21 = np.vstack([-f1[:,1], f1[:,0], np.zeros(len(f1))]).T
+    a21 = np.column_stack((-f1[:,1], f1[:,0], np.zeros(len(f1))))
     p0 = np.sum(v0*a21,axis=1)
     p1 = np.sum(v1*a21,axis=1)
     r8 = hx*np.abs(a21[:,0]) + hy*np.abs(a21[:,1])
     ps8 = (p0,p1)
     
     # a22
-    a22 = np.vstack([-f2[:,1], f2[:,0], np.zeros(len(f2))]).T
+    a22 = np.column_stack((-f2[:,1], f2[:,0], np.zeros(len(f2))))
     p0 = np.sum(v0*a22,axis=1)
     p1 = np.sum(v1*a22,axis=1)
     r9 = hx*np.abs(a22[:,0]) + hy*np.abs(a22[:,1])
@@ -1517,12 +1516,12 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
     
     checks = (
         # Test the box against the minimal Axis Aligned Bounding Box (AABB) of the tri
-        (np.amax([v0[:,0],v1[:,0],v2[:,0]],axis=0) < -hx) | 
-        (np.amin([v0[:,0],v1[:,0],v2[:,0]],axis=0) >  hx) |
-        (np.amax([v0[:,1],v1[:,1],v2[:,1]],axis=0) < -hy) | 
-        (np.amin([v0[:,1],v1[:,1],v2[:,1]],axis=0) >  hy) |
-        (np.amax([v0[:,2],v1[:,2],v2[:,2]],axis=0) < -hz) | 
-        (np.amin([v0[:,2],v1[:,2],v2[:,2]],axis=0) >  hz) |
+        (np.maximum(np.maximum(v0[:,0],v1[:,0]),v2[:,0]) < -hx) | 
+        (np.minimum(np.minimum(v0[:,0],v1[:,0]),v2[:,0]) >  hx) |
+        (np.maximum(np.maximum(v0[:,1],v1[:,1]),v2[:,1]) < -hy) | 
+        (np.minimum(np.minimum(v0[:,1],v1[:,1]),v2[:,1]) >  hy) |
+        (np.maximum(np.maximum(v0[:,2],v1[:,2]),v2[:,2]) < -hz) | 
+        (np.minimum(np.minimum(v0[:,2],v1[:,2]),v2[:,2]) >  hz) |
         # Test normal of the triangle
         (dist > r0) |
         # Test Axes
@@ -2263,6 +2262,7 @@ def SurfSurfIntersection(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, eps=1e-
     IntersectionPoints : list, optional
         Coordinates of intersections (returned if return_pts=True)
     """
+    # Merge the meshes to get create a single octree representing both
     MergeCoords,MergeConn = utils.MergeMesh(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, cleanup=False)
     root = octree.Surface2Octree(MergeCoords,MergeConn)
     
@@ -2275,7 +2275,12 @@ def SurfSurfIntersection(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, eps=1e-
         leaves = octree.getAllLeaf(root)
         combinations = []
         for leaf in leaves:
-            combinations += list(itertools.combinations(leaf.data,2))
+            data = np.array(leaf.data)
+            labels = data >= len(SurfConn1) # 0 if from Surf1, 1 if from Surf2
+            if len(data) <= 1 or np.all(labels == 0) or np.all(labels == 1):
+                # If there's only one tri in the octree leaf or if all the triangles are from the same surface, no intersections
+                continue
+            combinations += list(itertools.product(data[~labels], data[labels]))
         
         idx1,idx2 = zip(*combinations)
         Tri1s = Points[np.array(idx1)]; Tri2s = Points[np.array(idx2)]
@@ -2285,34 +2290,18 @@ def SurfSurfIntersection(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, eps=1e-
         IntersectionPairs = np.array(combinations)[intersections].tolist()
         IPoints = intersectionPts[intersections]
         IPoints[np.isnan(IPoints)] = np.inf
-        IPoints = utils.ExtractRagged(IPoints, delval=np.inf)
-
-        # TODO: I'm being lazy here
-        Surf1Intersections = []; Surf2Intersections = []; IntersectionPoints = []
-        for i in range(len(IntersectionPairs)):
-            if IntersectionPairs[i][0] < len(SurfConn1) and IntersectionPairs[i][1] >= len(SurfConn1):
-                Surf1Intersections.append(IntersectionPairs[i][0])
-                Surf2Intersections.append(IntersectionPairs[i][1]-len(SurfConn1))
-                IntersectionPoints.append(IPoints[i])
-            elif IntersectionPairs[i][1] < len(SurfConn1) and IntersectionPairs[i][0] >= len(SurfConn1):
-                Surf1Intersections.append(IntersectionPairs[i][1])
-                Surf2Intersections.append(IntersectionPairs[i][0]-len(SurfConn1))
-                IntersectionPoints.append(IPoints[i])
-            # Ignoring self intersections
+        
+        IntersectionPoints = utils.ExtractRagged(IPoints, delval=np.inf)
+        Surf1Intersections = np.array(IntersectionPairs)[:,0]
+        Surf2Intersections = np.array(IntersectionPairs)[:,1] - len(SurfConn1)
+        
         return Surf1Intersections, Surf2Intersections, IntersectionPoints
         
     else:
         intersections = TrianglesTrianglesIntersection(Tri1s,Tri2s,eps=eps,edgeedge=True)
         IntersectionPairs = np.array(combinations)[intersections].tolist()
-        # TODO: I'm being lazy here
-        Surf1Intersections = []; Surf2Intersections = []
-        for i in range(len(IntersectionPairs)):
-            if IntersectionPairs[i][0] < len(SurfConn1) and IntersectionPairs[i][1] >= len(SurfConn1):
-                Surf1Intersections.append(IntersectionPairs[i][0])
-                Surf2Intersections.append(IntersectionPairs[i][1]-len(SurfConn1))
-            elif IntersectionPairs[i][1] < len(SurfConn1) and IntersectionPairs[i][0] >= len(SurfConn1):
-                Surf1Intersections.append(IntersectionPairs[i][1])
-                Surf2Intersections.append(IntersectionPairs[i][0]-len(SurfConn1))
+        Surf1Intersections = np.array(IntersectionPairs)[:,0]
+        Surf2Intersections = np.array(IntersectionPairs)[:,1] - len(SurfConn1)
             
     return Surf1Intersections, Surf2Intersections
 

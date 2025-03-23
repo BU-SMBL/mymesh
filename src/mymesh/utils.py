@@ -1156,13 +1156,22 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False,return_i
         arrayCoords = np.array(NodeCoords)
     unq,idx,inv = np.unique(arrayCoords, return_index=True, return_inverse=True, axis=0)
     if type(NodeCoords) is list:
-        NewCoords = np.asarray(NodeCoords)[idx].tolist()
+        NewCoords = [NodeCoords[i] for i in idx]
     else:
-        NewCoords = np.asarray(NodeCoords)[idx]
+        NewCoords = NodeCoords[idx]
     if len(NodeConn) > 0:
-        tempIds = np.append(inv,-1)
-        R = PadRagged(NodeConn,fillval=-1)
-        NewConn = ExtractRagged(tempIds[R],delval=-1)
+        if type(NodeConn) is np.ndarray:
+            # NodeConn already an array
+            NewConn = inv[NodeConn]
+        else:
+            try:
+                # Try to index with NodeConn, assuming it's rectangular (uniform element type)
+                NewConn = inv[NodeConn]
+            except ValueError:
+                # If NodeConn is a ragged list of lists (mixed element types), pad ragged
+                tempIds = np.append(inv,-1)
+                R = PadRagged(NodeConn,fillval=-1)
+                NewConn = ExtractRagged(tempIds[R],delval=-1)
     else:
         NewConn = NodeConn
 
@@ -1593,18 +1602,41 @@ def MergeMesh(NodeCoords1, NodeConn1, NodeCoords2, NodeConn2, NodeVals1=[], Node
         NodeVals1 = NodeVals1.tolist()
     if type(NodeVals2) == np.ndarray:
         NodeVals2 = NodeVals2.tolist()
-        
-    MergeCoords = NodeCoords1 + NodeCoords2
 
-    MergeConn = NodeConn1 + [[node+len(NodeCoords1) for node in elem] for elem in NodeConn2]
+    if isinstance(NodeCoords1, (list, tuple)) and isinstance(NodeCoords2, (list, tuple)):
+        MergeCoords = NodeCoords1 + NodeCoords2 
+    else:
+        MergeCoords = np.vstack([NodeCoords1, NodeCoords2])
+    
+    if type(NodeConn1) is np.ndarray and type(NodeConn2) is np.ndarray and np.shape(NodeConn1)[1] == np.shape(NodeConn2)[1]:
+        # Use vstack if NodeConns are arrays and compatible sizes
+        MergeConn = np.vstack([NodeConn1, NodeConn2+len(NodeCoords1)])
+    else:
+        # Handle as lists
+        if type(NodeConn2) is np.ndarray:
+            NodeConn2 = (NodeConn2 + len(NodeCoords1)).tolist()
+        else:
+            NodeConn2 = [[node+len(NodeCoords1) for node in elem] for elem in NodeConn2]
+        
+        if type(NodeConn1) is np.ndarray:
+            NodeConn1 = NodeConn1.tolist()
+        
+        MergeConn = NodeConn1 + NodeConn2
     
     if len(NodeVals1) > 0:
         assert len(NodeVals1) == len(NodeCoords1), 'NodeVals lists must contain the number of entries as nodes.'
         assert len(NodeVals2) == len(NodeCoords2), 'NodeVals lists must contain the number of entries as nodes.'
 
-        MergeVals = [[] for i in range(len(NodeVals1))]
-        for i in range(len(NodeVals1)):
-            MergeVals[i] = NodeVals1[i] + NodeVals2[i]
+        if isinstance(NodeVals1, (list, tuple)) and isinstance(NodeVals2, (list, tuple)):
+            MergeVals = NodeVals1 + NodeVals2 
+        else:
+            if len(np.shape(NodeVals1)) == 2 and len(np.shape(NodeVals2)) == 2:
+                MergeVals = np.vstack([NodeVals1, NodeVals2])
+            elif len(np.shape(NodeVals1)) == 1 and len(np.shape(NodeVals2)) == 1:
+                MergeVals = np.concatenate([NodeVals1, NodeVals2])
+            else:
+                raise ValueError('Dimensions of NodeVals1 and NodeVals2 are incompatible')
+        
         if cleanup:
             MergeCoords,MergeConn,inv = DeleteDuplicateNodes(MergeCoords,MergeConn,return_inv=True)
             for i in range(len(MergeVals)):
@@ -2210,7 +2242,47 @@ def identify_type(NodeCoords, NodeConn):
         else:
             Type = 'surf'
 
-        return Type
+        return Type    
+
+def identify_elem(NodeCoords, NodeConn, Type=None):
+
+    ambiguous_lengths = {4,} # Element lengths that are ambiguous
+    if type(NodeConn) is np.ndarray and NodeConn.dtype is not object:
+        lengths = (np.shape(NodeConn)[1],)
+    else:
+        try:
+            NodeConn = np.array(NodeConn)
+            lengths = (np.shape(NodeConn)[1],)
+        except ValueError:
+            # ragged list of lists, check all lengths
+            lengths = tuple(set(map(len, NodeConn)))
+    
+    lengths
+    if any(l in ambiguous_lengths for l in lengths) and Type is None:
+        Type = identify_type(NodeCoords, NodeConn)
+
+    
+    elems = []
+    for l in lengths:
+        if l == 2:
+            elems.append('line')
+        elif l == 3:
+            elems.append('tri')
+        elif l == 4 and Type == 'surf':
+            elems.append('quad')
+        elif l == 4 and Type == 'vol':
+            elems.append('tet')
+        elif l == 5:
+            elems.append('pyr')
+        elif l == 6:
+            elems.append('wdg')
+        elif l == 8:
+            elems.append('hex')
+        elif l == 10:
+            elems.append('tet10')
+        else:
+            elems.append('unknown')
+    return elems
 
 @try_njit(cache=True)
 def RotateNormalToVector(NodeCoords, Normal, Vector):
