@@ -811,8 +811,10 @@ def Torus(center, R, r, axis=2, theta_resolution=20, phi_resolution=20, radial_r
         circle_axis = 1
 
     circle = Circle(circle_center, r, theta_resolution=theta_resolution, axis=circle_axis, Type=circle_type)
-
-    torus = Revolve(circle, 2*np.pi, 2*np.pi/(phi_resolution), center=center, axis=axis, ElemType=ElemType)
+    if Type == 'vol':
+        torus = Revolve(circle, 2*np.pi, 2*np.pi/(phi_resolution), center=center, axis=axis, ElemType=ElemType)
+    else:
+        torus = Revolve(circle, -2*np.pi, -2*np.pi/(phi_resolution), center=center, axis=axis, ElemType=ElemType)
     torus.cleanup()
     return torus
 
