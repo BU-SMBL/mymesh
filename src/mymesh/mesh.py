@@ -90,9 +90,11 @@ class mesh:
         self.verbose = verbose
 
         # Properties:
+        self._ElemType = []
         self._Surface = None
         self._SurfConn = []
         self._SurfNodes = None
+        self._Boundary = None
         self._BoundaryConn = None
         self._BoundaryNodes = None
         self._NodeNeighbors = []
@@ -344,6 +346,21 @@ class mesh:
         SurfNodes = self._SurfNodes
         return SurfNodes
     @property
+    def Surface(self):
+        """
+        :class:`mesh` object representation of the surface mesh. 
+        ``Surface.NodeCoords`` and ``Surface.NodeConn`` are aliases of 
+        ``NodeCoords`` and ``SurfConn``, so changes to one will change the 
+        other, however some operations may break this link. 
+        """
+        if self.Type != 'surf':
+            if self._Surface is None:
+                self._Surface = mesh(self.NodeCoords, self.SurfConn, 'surf')
+            surf = self._Surface
+        else:
+            surf = self
+        return surf
+    @property
     def BoundaryConn(self):
         """
         Node connectivity for the boundary mesh of a surface.
@@ -376,6 +393,23 @@ class mesh:
                 self._printlevel -= 1
         BoundaryNodes = self._BoundaryNodes
         return BoundaryNodes
+    @property
+    def Boundary(self):
+        """
+        :class:`mesh` object representation of the boundary mesh. 
+        ``Boundary.NodeCoords`` and ``Boundary.NodeConn`` are aliases of 
+        ``NodeCoords`` and ``BoundaryConn``, so changes to one will change the 
+        other, however some operations may break this link. Volume (Type='vol')
+        or closed surface meshes will have no Boundary and this mesh will be 
+        empty.
+        """
+        if self.Type != 'line':
+            if self._Boundary is None:
+                self._Boundary = mesh(self.NodeCoords, self.BoundaryConn, 'line')
+            surf = self._Boundary
+        else:
+            surf = self
+        return surf
     @property
     def NodeNeighbors(self):
         """
@@ -539,21 +573,13 @@ class mesh:
 
         return -(self.EulerCharacteristic - 2 + b)/2
     @property
-    def Surface(self):
-        """
-        :class:`mesh` object representation of the surface mesh. 
-        ``Surface.NodeCoords`` and ``Surface.NodeConn`` are aliases of 
-        ``NodeCoords`` and ``SurfConn``, so changes to one will change the 
-        other, however some operations may break this link. 
-        """
-        if self.Type == 'vol':
-            if self._Surface is None:
-                self._Surface = mesh(self.NodeCoords, self.SurfConn, 'surf')
-            surf = self._Surface
-        else:
-            surf = self
-        return surf
-    
+    def ElemType(self):
+        """ Element Types. """
+        if len(self._ElemType) == 0:
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying element types...',end='')
+            self._ElemType = utils.identify_elem(*self, Type=self.Type)
+            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+        return self._ElemType
     # Methods
     ## Maintenance Methods
     def identify_type(self):
@@ -640,6 +666,7 @@ class mesh:
         elif keep is None:
             keep = []
         if properties == None:
+            if 'ElemType' not in keep: self._ElemType = []
             if 'SurfConn' not in keep: self._SurfConn = []
             if 'SurfNodes' not in keep: self._SurfNodes = None
             if 'Surface' not in keep: self._Surface = None
@@ -659,6 +686,7 @@ class mesh:
             if 'Faces' not in keep or 'FaceConn' not in keep: self._FaceConn = []
             if 'Faces' not in keep or 'FaceElemConn' not in keep: self._FaceElemConn = [] 
             if 'Surface' not in keep: self._Surface = None
+            
         elif type(properties) is list:
             for prop in properties:
                 if prop[0] != '_':
@@ -766,6 +794,7 @@ class mesh:
             self.ElemSets[ElemSet] = list(self.ElemSets[ElemSet]) + list(range(nelem,self.NElem))
         elif ElemSet:
             self.ElemSets[ElemSet] = range(nelem,self.NElem) 
+        self._ElemType = [] # resetting, will be recalculated if requested
     def removeElems(self, ElemIds):
         
         KeepSet = set(range(self.NElem)).difference(ElemIds)
@@ -784,7 +813,6 @@ class mesh:
                 self.ElemData[key] = np.empty(shape)
 
         # TODO: remove from ElemSets
-
         self.reset()
 
     def merge(self,Mesh2,cleanup=True,tol=1e-14):
@@ -1225,9 +1253,9 @@ class mesh:
             # NewCoords[NodeIds] = NewRelevantCoords
         self.reset()
     
-    def Contour(self, scalars, threshold, threshold_direction=1, method=None, Type='surf'):
+    def Contour(self, scalars, threshold, threshold_direction=1, mixed_elements=True, Type=None):
         """
-        Contour the mesh to extract an isosurface based on nodal scalar values.
+        Contour the mesh to extract an isosurface/isoline based on nodal scalar values.
 
         Parameters
         ----------
@@ -1237,11 +1265,17 @@ class mesh:
             Isosurface level that defines the boundary
         threshold_direction : signed int
             If threshold_direction is negative (default), values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_direction is positive, by default 1.
-        method : str, optional
-            Method to be used for contouring. This option not currently implemented.
+        mixed_elements : bool, optional
+            If True, the generated mesh will have mixed element types 
+            (triangles/quadrilaterals, tetrahedra/wedges), otherwise a single element 
+            type (triangles, tetrahedra), by default False. 
         Type : str, optional
-            Specfies the mesh type ('surf' or 'vol') to produce by contouring, 
-            by default 'surf'.
+            Specfies the mesh type ('vol', 'surf', or 'line') to produce by 
+            contouring. If None is provided, the output Type will be the same 
+            as the input Type, by default None. A volumetric mesh can be contoured
+            to create a volumetric mesh or a surface mesh, and a surface mesh can
+            be contoured to create a surface mesh or a line mesh. Contouring of
+            line meshes isn't currently supported.
 
         Returns
         -------
@@ -1258,15 +1292,12 @@ class mesh:
             flip = False
         else:
             flip = True
-
-        if Type == 'surf':
-            NewCoords, NewConn = contour.MarchingTetrahedra(*converter.solid2tets(*self), scalars, threshold=threshold, flip=flip, Type='surf')
-            M = mesh(NewCoords, NewConn)
-        elif Type == 'vol':
-            NewCoords, NewConn, Values = contour.MarchingTetrahedra(*converter.solid2tets(*self), scalars, threshold=threshold, flip=flip, Type='vol', return_NodeValues=True)
-            M = mesh(NewCoords, NewConn)
-            M.NodeData[scalar_str] = Values
-
+        
+        NewCoords, NewConn = contour.MarchingElements(self.NodeCoords, self.NodeConn,
+                                                      scalars, threshold=threshold, 
+                                                      flip=flip, mixed_elements=mixed_elements, 
+                                                      Type=Type)
+        M = mesh(NewCoords, NewConn)
         return M
 
     def Threshold(self, scalars, threshold, mode=None, scalar_preference='elements', all_nodes=True, InPlace=False, cleanup=False):
@@ -1432,7 +1463,7 @@ class mesh:
             M.cleanup()
         return M
 
-    def Clip(self, pt=None, normal=[1,0,0]):
+    def Clip(self, pt=None, normal=[1,0,0], exact=False):
         """
         Clip the mesh along a plane. Clipping with this method will not cut
         through elements, but rather will only keep elements on one side of
@@ -1455,9 +1486,13 @@ class mesh:
             xmax, ymax, zmax = np.max(self.NodeCoords, axis=0)
             xmin, ymin, zmin = np.min(self.NodeCoords, axis=0)
             pt = np.array([(xmax+xmin)/2, (ymax+ymin)/2, (zmax+zmin)/2])
-        vals = implicit.plane(pt, normal)(*self.Centroids.T)
-
-        clipped = self.Threshold(vals, 0)
+        
+        if exact:
+            vals = implicit.plane(pt, normal)(*self.NodeCoords.T)
+            clipped = self.Contour(vals, 0)
+        else:
+            vals = implicit.plane(pt, normal)(*self.Centroids.T)
+            clipped = self.Threshold(vals, 0)
 
         return clipped
     
@@ -1523,7 +1558,6 @@ class mesh:
             M.cleanup()
 
         return M
-
     
     def Mirror(self, x=None, y=None, z=None, InPlace=False):
         """
@@ -1563,7 +1597,6 @@ class mesh:
 
         return M
         
-    
     ## Mesh Measurements Methods
     def getQuality(self,metrics=['Skewness','Aspect Ratio'], verbose=None):
         """
