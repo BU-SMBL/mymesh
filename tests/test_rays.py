@@ -305,11 +305,13 @@ def test_TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, Intersection):
 @pytest.mark.parametrize("Tris, xlim, ylim, zlim, Intersection", [
     # Case 1
     (
-        [
+        np.array([
         [[0,0,0.5],[1,0,0.5],[1,1,0.5]],
         [[0,0,1.5],[1,0,1.5],[1,1,1.5]]
-        ],
-        [0,1],[0,1],[0,1],
+        ]),
+        np.array([0.,1.]),
+        np.array([0.,1.]),
+        np.array([0.,1.]),
         [True, False]
     )
 ])
