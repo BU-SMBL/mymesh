@@ -18,6 +18,7 @@ Contouring
     MarchingCubes
     MarchingCubesImage
     MarchingTetrahedra
+    MarchingElements
     Adaptive
 
 
@@ -67,6 +68,24 @@ MSTriangle_Lookup = np.array([
             [[0,1,3],[1,5,6],[6,3,1]], # 13-1101
             [[0,1,2],[0,2,6],[6,7,0]], # 14-1110
             [[0,1,2],[2,3,0]]   # 15-1111
+        ],dtype=object)
+MSMixed_Lookup = np.array([
+            [[]],               # 0-0000
+            [[7,6,3]],          # 1-0001
+            [[5,2,6]],          # 2-0010
+            [[7,5,2,3]],  # 3-0011
+            [[4,1,5]],          # 4-0100
+            [[4,1,5,6],[4,6,3,7]], # 5-0101
+            [[1,2,6,4]],  # 6-0110
+            [[1,2,3,4],[4,3,7]], # 7-0111
+            [[0,4,7]],          # 8-1000
+            [[0,4,6,3]],  # 9-1001
+            [[0,4,5,7],[7,5,2,6]], # 10-1010
+            [[0,5,2,3],[0,4,5]], # 11-1011
+            [[0,1,5,7]], # 12-1100
+            [[0,1,6,3],[1,5,6]], # 13-1101
+            [[0,1,2,6],[6,7,0]], # 14-1110
+            [[0,1,2,3]]   # 15-1111
         ],dtype=object)
 MSEdge_Lookup = np.array([
             [[]],           # 0-0000
@@ -3469,7 +3488,7 @@ MC33_Signs = np.array([-1,
          1,
          -1])
 
-def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', method='triangle', flip=False, edgemode='constant', cleanup=True):
+def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', Type='surf', flip=False, edgemode='constant', cleanup=True):
     """
     Marching squares algorithm applied to 2D image data.
 
@@ -3493,8 +3512,9 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', metho
         'linear' - Bilinear interpolation is performed between adjacent nodes on the input mesh
 
         'cubic' - Bicubic interpolation is performed between adjacent nodes on the input mesh
-    method : str, optional
-        Mesh generation method, either 'edge' for a line mesh of the boundary or 'triangle' for a filled triangular mesh, by default 'triangle'
+    Type : str, optional
+        Determines whether to generate a surface mesh ('surf') or volume mesh ('vol'), 
+        by default 'surf'
     flip : bool, optional
         Flip the interior/exterior of the mesh, by default False. By default, values less than the threshold are assumed to be the “inside” of the mesh. If the inside is denoted by values greater than the threshold, set flip=True.
     edgemode : str, optional
@@ -3513,12 +3533,12 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', metho
     
     assert len(I.shape) == 2, 'I must be a 2D numpy array of image data. For 3D, use MarchingCubesImage.'
     I = I - threshold  
-    if method == 'triangle':
+    if Type.lower() == 'surf':
         LookupTable = MSTriangle_Lookup
-    elif method == 'edge':
+    elif Type.lower() == 'line':
         LookupTable = MSEdge_Lookup
     else:
-        raise Exception('Invalid method. Must be "triangle" or "edge".')
+        raise Exception('Invalid Type. Must be "surf" or "line".')
     if flip: 
         I = -I
     if isinstance(h, (int, float, np.number)):
@@ -3605,8 +3625,8 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', metho
         
         xAs = np.stack([x[xbool]**3, x[xbool]**2, x[xbool]**1, x[xbool]**0],axis=2)
         yAs = np.stack([y[ybool]**3, y[ybool]**2, y[ybool]**1, y[ybool]**0],axis=2)
-        xCoeff = np.linalg.solve(xAs,v[xbool,:])
-        yCoeff = np.linalg.solve(yAs,v[ybool,:])
+        xCoeff = np.linalg.solve(xAs,v[xbool,:,None])[:,:,0]
+        yCoeff = np.linalg.solve(yAs,v[ybool,:,None])[:,:,0]
         
         # cf. https://en.wikipedia.org/wiki/Cubic_equation#General_cubic_formula
         Roots = []
@@ -3636,13 +3656,15 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', metho
         xRoots = Roots[0]
         yRoots = Roots[1]
         
-        NewCoords = np.nan*np.ones((v.shape[0],3))
+        NewCoords = np.column_stack([x[:,1], y[:,1], np.repeat(z,len(x))]).astype(np.float64)
         
-        NewCoords[xbool,0] = xRoots[(x[xbool,1,None] <= xRoots) & (x[xbool,2,None] >= xRoots) & np.isreal(xRoots)]
-        NewCoords[xbool,1] = y[xbool,1]
+        xRootsReal = np.real(xRoots)
+        NewCoords[xbool,0] = xRootsReal[(x[xbool,1,None] <= xRootsReal) & (x[xbool,2,None] >= xRootsReal) & np.isreal(xRoots)]
+        # NewCoords[xbool,1] = y[xbool,1]
         
-        NewCoords[ybool,0] = x[ybool,1]
-        NewCoords[ybool,1] = yRoots[(y[ybool,1,None] <= yRoots) & (y[ybool,2,None] >= yRoots) & np.isreal(yRoots)]
+        # NewCoords[ybool,0] = x[ybool,1]
+        yRootsReal = np.real(yRoots)
+        NewCoords[ybool,1] = yRootsReal[(y[ybool,1,None] <= yRootsReal) & (y[ybool,2,None] >= yRootsReal) & np.isreal(yRoots)]
         
         NewCoords[:,2] = z
         
@@ -3680,20 +3702,20 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', metho
     NewConn = np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F')
     if cleanup:
         NewCoords,NewConn,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
-        if (interpolation=='linear' or interpolation=='cubic') and method=='triangle':
+        if (interpolation=='linear' or interpolation=='cubic') and Type.lower()=='surf':
             NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
             
     return NewCoords, NewConn
 
-def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation='linear', method='triangle', flip=False, return_anchors=False, cleanup=True):
+def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation='linear', Type='surf', flip=False, mixed_elements=False, return_anchors=False, cleanup=True):
     """
     Marching squares algorithm for extracting an isocontour from a quadrilateral mesh.
 
     For a two dimensional grid (NodeCoords, NodeConn) with values (NodeValues),
     Marching Squares will extract the isovalue contour defined by threshold. 
     This can either be used to obtain line segments along the isoline 
-    (method='edge') or triangles filling the region inside the isoline
-    (method='triangle'). 
+    (Type='line) or triangles filling the region inside the isoline
+    (Type='surf'). 
 
     Parameters
     ----------
@@ -3717,14 +3739,18 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
         'linear' - Bilinear interpolation is performed between adjacent nodes on 
         the input mesh
 
-    method : str, optional
-        Mesh generation method, either 'edge' for a line mesh of the boundary or 
-        'triangle' for a filled triangular mesh, by default 'triangle'
+    Type : str, optional
+        Determines whether to generate a surface mesh ('surf') or volume mesh ('vol'), 
+        by default 'surf'
     flip : bool, optional
         Flip the interior/exterior of the mesh, by default False. By default, 
         values less than the threshold are assumed to be the “inside” of the 
         mesh. If the inside is denoted by values greater than the threshold, set 
         flip=True.
+    mixed_elements : bool, optional
+        If True and Type='surf', the generated mesh will have mixed element types 
+        (triangles/quadrilateral otherwise a single element type (triangles), by 
+        default False.
     cleanup : bool, optional
         Determines whether or not to perform mesh cleanup, removing degenerate elements and duplicate nodes, by default True
 
@@ -3760,12 +3786,15 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
         vals = np.array([NodeValues[node] for node in NodeConn[e]])
         inside = [1 if v <= 0 else 0 for v in vals]
         i = int("".join(str(j) for j in inside), 2)
-        if method == 'triangle':
-            NewElems = MSTriangle_Lookup[i]
-        elif method == 'edge':
+        if Type.lower() == 'surf':
+            if mixed_elements:
+                NewElems = MSMixed_Lookup[i]
+            else:
+                NewElems = MSTriangle_Lookup[i]
+        elif Type.lower() == 'line':
             NewElems = MSEdge_Lookup[i]
         else:
-            raise Exception('Invalid method. Must be "triangle" or "edge".')
+            raise Exception('Invalid method. Must be "surf" or "line".')
     
         if len(NewElems) > 0:
             for t in NewElems:
@@ -3791,9 +3820,6 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
                             coords1[1] + (0-v1)*(coords2[1]-coords1[1])/(v2-v1),
                             coords1[2] + (0-v1)*(coords2[2]-coords1[2])/(v2-v1)
                             ]
-                        if np.sign(v2) == np.sign(v1):
-                            print('Marching squares fuckup')
-                            print(str(e) + str(np.sign(vals)) + str(edgeLookup[n]))
                         elem.append(len(NewCoords))
                         NewCoords.append(newNode)                            
                     else:
@@ -3824,7 +3850,7 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
                     NewConn.append(elem)  
     if cleanup:                  
         NewCoords,NewConn,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
-        if interpolation=='linear' and method=='triangle':
+        if interpolation=='linear' and Type.lower()=='surf':
             NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
     else:
         Idx = np.arange(len(NewCoords),dtype=int)
@@ -4687,7 +4713,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     # Determine configuration of nodes
     TetVals = NodeValues[TetNodeConn[:,:4]]
     inside = TetVals <= 0
-    if not np.any(inside):
+    if not np.any(inside) or (np.all(inside) and Type=='surf'):
         NodeCoords = np.empty((0,3))
         NodeConn = np.empty((0,4),dtype=int)
         NewValues = np.empty((0))
@@ -4864,6 +4890,92 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         return NodeCoords, NodeConn, ParentIds
     return NodeCoords, NodeConn
 
+def MarchingElements(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation='linear', Type=None, mixed_elements=True, flip=False):
+    """
+    Generic wrapper class for :func:`MarchingSquares`, :func:'MarchingTriangles',
+    :func:`MarchingCubes`, and :func:`MarchingTetrahedra`. Mixed element meshes
+    will be split up and processed by the appropriate method. Only options that
+    are available for all other methods are available, more advanced options
+    (like higher order interpolation) must be accessed directly through the
+    more specific functions. 
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates for the input mesh
+    NodeConn : array_like
+        Node connectivity for the input mesh. All elements must be tetrahedra.
+    NodeValues : array_like
+        Values at each node in the mesh that are used to extract the isosurface
+    threshold : int, optional
+        Isosurface level, by default 0
+    interpolation : str, optional
+        Interpolation to interpolate the position of the new nodes along the edges
+        of the input mesh, by default 'linear'.
+
+        'midpoint' - No interpolation is performed, new nodes are placed at the midpoint of edges
+
+        'linear' - Linear interpolation is performed between adjacent nodes on the input mesh.
+
+    Type : str, optional
+        Determines whether to generate a surface mesh ('surf') or volume mesh ('vol'), 
+        by default None. If None is provided, the output type will be the same as the
+        input type
+    mixed_elements : bool, optional
+        If True, the generated mesh will have mixed element types 
+        (triangles/quadrilaterals, tetrahedra/wedges), otherwise a single element 
+        type (triangles, tetrahedra), by default False. 
+    flip : bool, optional
+        Flip the interior/exterior of the mesh, by default False.
+        By default, values less than the threshold are assumed to be the "inside" 
+        of the mesh. If the inside is denoted by values greater than the threshold,
+        set flip=True.
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        Node coordinates of the generated mesh
+    NodeConn : list
+        Node connetivity for the generated mesh
+
+
+    """    
+
+    InputType = utils.identify_type(NodeCoords, NodeConn)
+    if Type is None:
+        Type = InputType
+    SplitConn = utils.SplitRaggedByLength(NodeConn)
+
+    NewCoords = np.empty((0,3))
+    NewConn = np.empty((0,3))
+
+    for conn in SplitConn:
+        if InputType == 'surf':
+            if np.shape(conn)[1] == 3:
+                # Marching Triangles
+                ccoords, cconn = MarchingTriangles(NodeCoords, conn, NodeValues, threshold=threshold, interpolation=interpolation, Type=Type, mixed_elements=mixed_elements, flip=flip)
+            elif np.shape(conn)[1] == 4:
+                # Marching squares
+                ccoords, cconn = MarchingSquares(NodeCoords, conn, NodeValues, threshold=threshold, interpolation=interpolation, Type=Type, mixed_elements=mixed_elements, flip=flip)
+            else:
+                raise ValueError('Unsupported element type for input surface mesh.')
+            
+        elif InputType == 'vol':
+            if Type == 'vol':
+                # Currently no volumentric option for marching cubes, must convert all to tetrahedra
+                ccoords, cconn = MarchingTetrahedra(*converter.solid2tets(NodeCoords, conn), NodeValues, threshold=threshold, interpolation=interpolation, Type=Type, mixed_elements=mixed_elements, flip=flip)
+            elif Type == 'surf':
+                if np.shape(conn)[1] == 4:
+                    ccoords, cconn = MarchingTetrahedra(NodeCoords, conn, NodeValues, threshold=threshold, interpolation=interpolation, Type=Type, mixed_elements=mixed_elements, flip=flip)
+                elif np.shape(conn)[1] == 8:
+                    ccoords, cconn = MarchingCubes(NodeCoords, conn, NodeValues, threshold=threshold, interpolation=interpolation, method='33', flip=flip)
+                else:
+                    ccoords, cconn = MarchingTetrahedra(*converter.solid2tets(NodeCoords, conn), NodeValues, threshold=threshold, interpolation=interpolation, Type=Type, mixed_elements=mixed_elements, flip=flip)
+
+        NewCoords, NewConn = utils.MergeMesh(NewCoords, NewConn, ccoords, cconn)
+
+    return NewCoords, NewConn
+
 def Adaptive(func, bounds, threshold=0, method=None, grad=None, mindepth=2, maxdepth=5, octree_strategy='EDerror', octree_eps=0.1, dualgrid_method='centroid', Type='surf'):
     """
     Adaptively contour an implicit function. Uses an octree 
@@ -4950,8 +5062,8 @@ def Adaptive(func, bounds, threshold=0, method=None, grad=None, mindepth=2, maxd
     elif method == 'mc33':
         NodeCoords, NodeConn = MarchingCubes(DualCoords, DualConn, NodeValues, threshold=threshold, method='33')
     elif method == 'mt':
-        TetCoords, TetConn = converter.hex2tet(DualCords, DualConn)
-        NodeCoords, NodeConn = MarchingTetrahedra(TetCoords, TetConn, NodeValues, threshold=threshold, method='33', Type=Type)
+        TetCoords, TetConn = converter.hex2tet(DualCoords, DualConn)
+        NodeCoords, NodeConn = MarchingTetrahedra(TetCoords, TetConn, NodeValues, threshold=threshold, Type=Type)
     
             
     return NodeCoords, NodeConn
@@ -5466,7 +5578,7 @@ def _InternalConnection(vals,case13=False):
     return connected
 
 def _generateLookup33():
-    # LookupTable, Cases, FaceTests = _generateLookup33()
+    # LookupTable, Cases, FaceTests, Signs = _generateLookup33()
     import random
     def R1x(bits, k, sign):
         # 90 deg x-axis rotation (ccw)
@@ -5838,7 +5950,7 @@ def _generateLookup():
                 thinking = True
                 while thinking == True:
                     TriElems, Case = random.choice([R1x, R1z, Mxy, Re])(bits, 0)
-                    if Case != False:
+                    if not Case is False:
                         thinking = False
             else:
                 k += 1
@@ -5851,11 +5963,8 @@ def _generateLookup():
     LookupTable = [[] for i in range(256)]
     Cases = [0 for i in range(256)]
     for i in range(256):
-        print(i)
         bits = np.array([int(b) for b in list('{:08b}'.format(i))])
         LookupTable[i], Cases[i] = lookup(bits)
-    # i = 26
-    # bits = np.array([int(b) for b in list('{:08b}'.format(i))])
-    # lookuptab
+    return LookupTable, Cases
  
 # %%
