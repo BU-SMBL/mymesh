@@ -109,7 +109,7 @@ def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8):
         T = mesh(NodeCoords,NodeConn)
     return T
 
-def Tetrahedralize(NodeCoords, method=None):
+def Tetrahedralize(NodeCoords, method=None, tol=1e-8):
     """
     Generate a Delaunay tetrahedralization for a 3D set of points. This will be 
     a strictly convex tetrahedralization.
@@ -149,7 +149,10 @@ def Tetrahedralize(NodeCoords, method=None):
         raise ValueError(f'Invalid method "{method:s}".')
 
 
-    T = mesh(NodeCoords, NodeConn)
+    if 'mesh' in dir(mesh):
+        T = mesh.mesh(NodeCoords,NodeConn)
+    else:
+        T = mesh(NodeCoords,NodeConn)
     return T
 
 def ConvexHull(NodeCoords,method='scipy'):
