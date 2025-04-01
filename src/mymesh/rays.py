@@ -1704,7 +1704,148 @@ def SegmentsSegmentsIntersection(s1,s2,return_intersection=False,endpt_inclusive
         return Intersections, pts
     return Intersections
 
-def RaySegmentIntersection(pt,ray,segment,return_intersection=False,endpt_inclusive=True,eps=0):
+def SegmentBox2DIntersection(segment, xlim, ylim):
+    """
+    Intersection algorithm for detecting intersections between a ray and an axis-aligned box.
+    Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748
+    :cite:p:`Williams2005`
+
+    Parameters
+    ----------
+    pt : array_like
+        3D coordinates for the starting point of the ray.
+    ray : array_like
+        3D vector of ray direction. This should, in general, be a unit vector.
+    xlim : array_like
+        Two element list, array, or tuple with the upper and lower x-direction bounds for an axis-aligned box.
+    ylim : array_like
+        Two element list, array, or tuple with the upper and lower y-direction bounds for an axis-aligned box.
+    zlim : array_like
+        Two element list, array, or tuple with the upper and lower z-direction bounds for an axis-aligned box.
+
+    Returns
+    -------
+    intersection : bool
+        True if there is an intersection between the ray and the box, otherwise False.
+    """    
+    
+    pt = segment[0]
+    ray = segment[1] - segment[0]
+    if ray[0] > 0:
+        divx = 1/ray[0]
+        tmin = (xlim[0] - pt[0]) * divx
+        tmax = (xlim[1] - pt[0]) * divx
+    elif ray[0] < 0:
+        divx = 1/ray[0]
+        tmin = (xlim[1] - pt[0]) * divx
+        tmax = (xlim[0] - pt[0]) * divx
+    else:
+        tmin = np.sign(xlim[0] - pt[0])*np.inf
+        tmax = np.sign(xlim[1] - pt[0])*np.inf
+    if ((tmin < 0) and (tmax < 0)) or ((tmin > 1) and (tmax > 1)):
+        return False
+    
+    if ray[1] > 0:
+        divy = 1/ray[1]
+        tymin = (ylim[0] - pt[1]) * divy
+        tymax = (ylim[1] - pt[1]) * divy
+    elif ray[1] < 0:
+        divy = 1/ray[1]
+        tymin = (ylim[1] - pt[1]) * divy
+        tymax = (ylim[0] - pt[1]) * divy
+    else:
+        tymin = np.sign(ylim[0] - pt[1])*np.inf
+        tymax = np.sign(ylim[1] - pt[1])*np.inf
+    if ((tymin < 0) and (tymax < 0)) or ((tymin > 1) and (tymax > 1)):
+        return False
+    
+    if (tmin > tymax) or (tymin > tmax):
+        return False
+    
+    return True
+
+def SegmentBoxIntersection(segment, xlim, ylim, zlim):
+    """
+    Intersection algorithm for detecting intersections between a ray and an axis-aligned box.
+    Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748
+    :cite:p:`Williams2005`
+
+    Parameters
+    ----------
+    pt : array_like
+        3D coordinates for the starting point of the ray.
+    ray : array_like
+        3D vector of ray direction. This should, in general, be a unit vector.
+    xlim : array_like
+        Two element list, array, or tuple with the upper and lower x-direction bounds for an axis-aligned box.
+    ylim : array_like
+        Two element list, array, or tuple with the upper and lower y-direction bounds for an axis-aligned box.
+    zlim : array_like
+        Two element list, array, or tuple with the upper and lower z-direction bounds for an axis-aligned box.
+
+    Returns
+    -------
+    intersection : bool
+        True if there is an intersection between the ray and the box, otherwise False.
+    """    
+    
+    ray = segment[1] - segment[0]
+    if ray[0] > 0:
+        divx = 1/ray[0]
+        tmin = (xlim[0] - pt[0]) * divx
+        tmax = (xlim[1] - pt[0]) * divx
+    elif ray[0] < 0:
+        divx = 1/ray[0]
+        tmin = (xlim[1] - pt[0]) * divx
+        tmax = (xlim[0] - pt[0]) * divx
+    else:
+        tmin = np.sign(xlim[0] - pt[0])*np.inf
+        tmax = np.sign(xlim[1] - pt[0])*np.inf
+    if ((tmin < 0) and (tmax < 0)) or ((tmin > 1) and (tmax > 1)):
+        return False
+    
+    if ray[1] > 0:
+        divy = 1/ray[1]
+        tymin = (ylim[0] - pt[1]) * divy
+        tymax = (ylim[1] - pt[1]) * divy
+    elif ray[1] < 0:
+        divy = 1/ray[1]
+        tymin = (ylim[1] - pt[1]) * divy
+        tymax = (ylim[0] - pt[1]) * divy
+    else:
+        tymin = np.sign(ylim[0] - pt[1])*np.inf
+        tymax = np.sign(ylim[1] - pt[1])*np.inf
+    if ((tymin < 0) and (tymax < 0)) or ((tymin > 1) and (tymax > 1)):
+        return False
+    
+    if (tmin > tymax) or (tymin > tmax):
+        return False
+    if (tymin > tmin):
+        tmin = tymin
+    if (tymax < tmax):
+        tmax = tymax
+    
+    
+    if ray[2] > 0:
+        divz = 1/ray[2]
+        tzmin = (zlim[0] - pt[2]) * divz
+        tzmax = (zlim[1] - pt[2]) * divz
+    elif ray[2] < 0:
+        divz = 1/ray[2]
+        tzmin = (zlim[1] - pt[2]) * divz
+        tzmax = (zlim[0] - pt[2]) * divz
+    else:
+        tzmin = np.sign(zlim[0] - pt[2])*np.inf
+        tzmax = np.sign(zlim[1] - pt[2])*np.inf
+    if ((tzmin < 0) and (tzmax < 0)) or ((tzmin > 1) and (tzmax > 1)):
+        return False
+        
+    if (tmin > tzmax) or (tzmin > tmax):
+        return False
+    
+    return True
+
+def RaySegmentIntersection(pt, ray, segment,return_intersection=False,endpt_inclusive=True,eps=0):
     """
     Detect intersections between a ray and a line segment.
 
@@ -2330,7 +2471,7 @@ def SilhouetteProjection(pts, pt, Normal):
     return projected
 
 ## Inside/Outside Tests
-def PointInBoundary(pt, NodeCoords, BoundaryConn, eps=1e-8, ray=None):
+def PointInBoundary(pt, NodeCoords, BoundaryConn, eps=1e-8, inclusive=True, ray=None):
     """
     Test to determine whether a point is inside a boundary mesh. By default, 
     this test assumes a 2D mesh parallel to the xy plane. For a boundary mesh in
@@ -2348,6 +2489,9 @@ def PointInBoundary(pt, NodeCoords, BoundaryConn, eps=1e-8, ray=None):
         Element normal vectors 
     eps : float, optional
         Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8
+    inclusive : bool, optional
+        If True, include points on the boundary (within tolerance `eps`) as 
+        inside the boundary.
     ray : array_like, optional
         Ray that will be cast to determine whether the point is inside or outside 
         the boundary, by default a random unit vector parallel to the xy plane will be 
@@ -2368,19 +2512,21 @@ def PointInBoundary(pt, NodeCoords, BoundaryConn, eps=1e-8, ray=None):
     zero = np.any(np.abs(distances)<eps)
     
     # Checking unique to not double count instances where ray intersects an edge
-    if len(np.unique(np.round(posDistances/eps)))%2 == 0 and not zero:
+    if eps > 0:
+        uposDistances = np.unique(np.round(posDistances/eps))
+    else:
+        uposDistances = np.unique(posDistances)
+    if len(uposDistances)%2 == 0 and not zero:
         # No intersection
         inside = False
         return inside
     else:
-        # dist = min(np.abs(distances))
-        # if dist < eps:
-        #     closest = np.array(intersections)[np.abs(distances)==dist][0]
-        #     dot = np.dot(ray,ElemNormals[closest])
-        #     return dot
-        # else:
-        # Inside
-        inside = True
+        dist = min(np.abs(distances))
+        if (zero or dist < eps) and not inclusive:
+            inside = False
+        else:
+            inside = True
+        
         return inside
 
 def PointInSurf(pt, NodeCoords, SurfConn, ElemNormals=None, Octree=None, eps=1e-8, ray=np.random.rand(3)):
@@ -2488,6 +2634,38 @@ def PointsInSurf(pts, NodeCoords, SurfConn, ElemNormals=None, Octree='generate',
                 # Inside
                 Insides[i] = True
     return Insides
+
+@try_njit
+def PointInBox2D(pt, xlim, ylim, inclusive=True):
+    """
+    Test whether a point is inside a 2 dimensional box
+
+    Parameters
+    ----------
+    pt : array_like
+        3D coordinates of a point, shape=(3,)
+    xlim : array_like
+        Lower and upper x limits (e.g. [xmin, xmax])
+    ylim : array_like
+        Lower and upper y limits (e.g. [ymin, ymax])
+
+    Returns
+    -------
+    inside : bool
+        True if the point is in the box.
+    """    
+    lims = [xlim,ylim]
+    inside = True
+    for d in range(2):
+        if inclusive:
+            if not lims[d][0] <= pt[d] <= lims[d][1]:
+                inside = False
+                break
+        else:
+            if not lims[d][0] < pt[d] < lims[d][1]:
+                inside = False
+                break
+    return inside
 
 @try_njit
 def PointInBox(pt, xlim, ylim, zlim, inclusive=True):
