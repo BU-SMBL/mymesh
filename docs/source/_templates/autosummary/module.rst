@@ -13,16 +13,16 @@
    {% endif %}
    {% endblock %}
 
-   {% block classes %}
-   {% if classes %}
-   .. rubric:: {{ _('Classes') }}
+   .. {% block classes %}
+   .. {% if classes %}
+   .. .. rubric:: {{ _('Classes') }}
 
-   .. autosummary::
-   {% for item in classes %}
-      {{ item }}
-   {%- endfor %}
-   {% endif %}
-   {% endblock %}
+   .. .. autosummary::
+   .. {% for item in classes %}
+   ..    {{ item }}
+   .. {%- endfor %}
+   .. {% endif %}
+   .. {% endblock %}
 
    {% block exceptions %}
    {% if exceptions %}

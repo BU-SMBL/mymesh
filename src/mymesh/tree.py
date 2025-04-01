@@ -490,7 +490,7 @@ class OctreeNode(TreeNode):
 
         Parameters
         ----------
-        parent : octree.OctreeNode, optional
+        parent : tree.OctreeNode, optional
             The octree node that contains this node, by default None
         data : list or dict, optional
             Data associated with the octree node. The type of data depends on 
@@ -833,12 +833,12 @@ def SearchOctree(pt,root):
     ----------
     pt : array_like
         3D coordinate ([x,y,z])
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root of the octree to be searched
 
     Returns
     -------
-    node : octree.OctreeNode or NoneType
+    node : tree.OctreeNode or NoneType
         Octree node containing the point. If the no node can be found to contain the point, None will be returned.
     """    
     if rays.PointInBox(pt, *root.getLimits(), inclusive=True): #root.PointInNode(pt,inclusive=True):
@@ -863,7 +863,7 @@ def SearchOctreeTri(tri,root,inclusive=True):
     tri : array_like
         3x3 list or np.ndarray containing the coordinates of the three vertices
         of a triangle.
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root node of the octree to be searched
     inclusive : bool, optional
         Specifies whether to include leaf nodes that the triangle is exactly
@@ -901,7 +901,7 @@ def Points2Octree(Points, maxdepth=10):
 
     Returns
     -------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root node of the generated octree structure.
     """    
     if type(Points) is list:
@@ -935,7 +935,7 @@ def Voxel2Octree(VoxelCoords, VoxelConn):
 
     Returns
     -------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root node of the generated octree structure
     """    
     if type(VoxelCoords) is list:
@@ -986,7 +986,7 @@ def Surface2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=5):
 
     Returns
     -------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root node of the generate octree
     """    
     if type(NodeCoords) is list:
@@ -1039,7 +1039,7 @@ def Mesh2Octree(NodeCoords, NodeConn, minsize=None, mindepth=2, maxdepth=5):
 
     Returns
     -------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root node of the generate octree
     """   
     NodeCoords = np.asarray(NodeCoords)
@@ -1107,7 +1107,7 @@ def Function2Octree(func, bounds, threshold=0, grad=None, mindepth=2, maxdepth=5
 
     Returns
     -------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         The root node of the generated octree.
 
     """    
@@ -1347,7 +1347,7 @@ def Octree2Voxel(root, mode='sparse'):
 
     Parameters
     ----------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Octree node from which the mesh will be generated. 
     mode : str, optional
         Determines voxelization mode. If "sparse", only leaf nodes that contain
@@ -1419,7 +1419,7 @@ def Octree2Dual(root, method='centroid'):
 
     Parameters
     ----------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root node of the octree
     method : str, optional
         Method used for placing the dual vertices within the octree nodes, by 
@@ -1636,7 +1636,7 @@ def Points2Quadtree(Points, maxdepth=10):
 
     Returns
     -------
-    root : octree.Quadtree
+    root : tree.Quadtree
         Root node of the generated octree structure.
     """    
     if type(Points) is list:
@@ -1679,7 +1679,7 @@ def Edges2Quadtree(NodeCoords, LineConn, minsize=None, maxdepth=5):
 
     Returns
     -------
-    root : octree.QuadtreeNode
+    root : tree.QuadtreeNode
         Root node of the generate quadtree
     """    
     if type(NodeCoords) is list:
@@ -1779,7 +1779,7 @@ def Quadtree2Dual(root, method='centroid'):
 
     Parameters
     ----------
-    root : octree.QuadNode
+    root : tree.QuadNode
         Root node of the quadtree
     method : str, optional
         Method used for placing the dual vertices within the quadtree nodes, by 
@@ -1902,14 +1902,14 @@ def getAllLeaf(root):
 
 def Print(root, show_empty=False):
     """
-    Prints a formatted list of all nodes in the octree.
+    Prints a formatted list of all nodes in the tree.
 
     Parameters
     ----------
-    root : octree.OctreeNode
-        Root node of the octree
+    root : tree.TreeNode
+        Root node of the tree
     show_empty : bool, optional
-        Option to include 'empty' nodes in the printed octree, by default False.
+        Option to include 'empty' nodes in the printed tree, by default False.
     """    
     def recur(node):
         if show_empty or node.state != 'empty':
