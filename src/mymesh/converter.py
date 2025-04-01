@@ -2016,7 +2016,7 @@ def surf2voxel(SurfCoords,SurfConn,h,Octree='generate',mode='any'):
         Node connectivity of the surface mesh
     h : float
         Voxel size for the output mesh.
-    Octree : str, octree.OctreeNode, None, optional
+    Octree : str, tree.OctreeNode, None, optional
         Octree setting, by default 'generate'. 
         'generate' will construct an octree for use in creating the voxel mesh, None will not use an octree. Alternatively, if an existing 
         octree structure exists, that can be provided.

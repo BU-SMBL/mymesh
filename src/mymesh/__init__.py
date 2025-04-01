@@ -30,7 +30,7 @@ Submodules
     image
     implicit
     improvement
-    octree
+    tree
     primitives
     quality
     rays
@@ -129,7 +129,7 @@ def demo_image(name='bunny', normalize=True):
     return img
 
 from .mesh import mesh
-from . import booleans, contour, curvature, delaunay, image, implicit, improvement, octree, primitives, quality, utils, visualize
+from . import booleans, contour, curvature, delaunay, image, implicit, improvement, tree, primitives, quality, utils, visualize
 __all__ = ["check_numba", "use_numba", "try_njit", "mesh", "booleans", "contour", "converter",
-"curvature", "delaunay", "image", "implicit", "improvement", "octree", 
+"curvature", "delaunay", "image", "implicit", "improvement", "tree", 
 "primitives", "quality", "rays", "utils", "visualize"]

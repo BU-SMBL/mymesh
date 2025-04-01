@@ -29,7 +29,7 @@ import numpy as np
 from scipy import interpolate, ndimage
 import sys, os, copy, warnings, glob
 
-from . import utils, converter, contour, quality, improvement, rays, octree, mesh, primitives
+from . import utils, converter, contour, quality, improvement, rays, mesh, primitives
 
 # Mesh generators
 def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, return_nodedata=False):

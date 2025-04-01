@@ -26,7 +26,7 @@ Contouring
 #%%
 import time
 import sys
-from . import utils, octree, converter
+from . import utils, tree, converter
 import numpy as np
 import scipy
 import copy, warnings
@@ -87,6 +87,24 @@ MSMixed_Lookup = np.array([
             [[0,1,2,6],[6,7,0]], # 14-1110
             [[0,1,2,3]]   # 15-1111
         ],dtype=object)
+MSMixedSplit_Lookup = np.array([
+            [[0,1,2,3]],                                # 0-0000
+            [[7,6,3],[0,1,2,6],[6,7,0]],                # 1-0001
+            [[5,2,6],[0,1,6,3],[1,5,6]],                # 2-0010
+            [[7,5,2,3],[0,1,5,7]],                      # 3-0011
+            [[4,1,5],[0,5,2,3],[0,4,5]],                # 4-0100
+            [[4,1,5,6],[4,6,3,7],[0,4,5,7],[7,5,2,6]],  # 5-0101
+            [[1,2,6,4],[0,4,6,3]],                      # 6-0110
+            [[1,2,3,4],[4,3,7],[0,4,7]],                # 7-0111
+            [[1,2,3,4],[4,3,7],[0,4,7]],                # 8-1000
+            [[1,2,6,4],[0,4,6,3]],                      # 9-1001
+            [[4,1,5,6],[4,6,3,7],[0,4,5,7],[7,5,2,6]],  # 10-1010
+            [[4,1,5],[0,5,2,3],[0,4,5]],                # 11-1011
+            [[7,5,2,3],[0,1,5,7]],                      # 12-1100
+            [[5,2,6],[0,1,6,3],[1,5,6]],                # 13-1101
+            [[7,6,3],[0,1,2,6],[6,7,0]],                # 14-1110
+            [[0,1,2,3]]   # 15-1111
+        ],dtype=object)
 MSEdge_Lookup = np.array([
             [[]],           # 0-0000
             [[6,7]],        # 1-0001
@@ -105,6 +123,36 @@ MSEdge_Lookup = np.array([
             [[7,6]], # 14-1110
             [[]]   # 15-1111
         ],dtype=object)
+MTriEdge_Lookup = np.array([
+            [],                     # 0-000
+            [[2,1]],                # 1-001
+            [[1,0]],                # 2-010
+            [[2,0]],                # 3-011
+            [[0,2]],                # 4-100
+            [[0,1]],                # 5-101
+            [[1,2]],                # 6-110
+            [],                     # 7-111
+        ],dtype=object)
+MTriMixed_Lookup = np.array([
+        [],                     # 0-000
+        [[2,1,5]],              # 1-001
+        [[1,0,4]],              # 2-010
+        [[2,0,4,5]],            # 3-011
+        [[0,2,3]],              # 4-100
+        [[0,1,5,3]],            # 5-101
+        [[1,2,3,4]],            # 6-110
+        [[3,4,5]],              # 7-111
+    ],dtype=object)
+MTri_Lookup = np.array([
+        [],                     # 0-000
+        [[2,1,5]],              # 1-001
+        [[1,0,4]],              # 2-010
+        [[2,0,4],[2,4,5]],            # 3-011
+        [[0,2,3]],              # 4-100
+        [[0,1,5],[0,5,3]],            # 5-101
+        [[1,2,3],[1,3,4]],            # 6-110
+        [[3,4,5]],              # 7-111
+    ],dtype=object)
 MC_Lookup = np.array([
             [[]],
             [[7, 10, 11]],
@@ -3936,38 +3984,7 @@ def MarchingTriangles(TriNodeCoords, TriNodeConn, NodeValues, threshold=0, inter
     #   2     1
     #  /       \
     # 3----0----4
-    MTEdge_Lookup = np.array([
-            [],                     # 0-000
-            [[2,1]],                # 1-001
-            [[1,0]],                # 2-010
-            [[2,0]],                # 3-011
-            [[0,2]],                # 4-100
-            [[0,1]],                # 5-101
-            [[1,2]],                # 6-110
-            [],                     # 7-111
-        ],dtype=object)
-
-    MTTriMixed_Lookup = np.array([
-            [],                     # 0-000
-            [[2,1,5]],              # 1-001
-            [[1,0,4]],              # 2-010
-            [[2,0,4,5]],            # 3-011
-            [[0,2,3]],              # 4-100
-            [[0,1,5,3]],            # 5-101
-            [[1,2,3,4]],            # 6-110
-            [[3,4,5]],              # 7-111
-        ],dtype=object)
-
-    MTTri_Lookup = np.array([
-            [],                     # 0-000
-            [[2,1,5]],              # 1-001
-            [[1,0,4]],              # 2-010
-            [[2,0,4],[2,4,5]],            # 3-011
-            [[0,2,3]],              # 4-100
-            [[0,1,5],[0,5,3]],            # 5-101
-            [[1,2,3],[1,3,4]],            # 6-110
-            [[3,4,5]],              # 7-111
-        ],dtype=object)
+    
     
     if interpolation.lower() == 'midpoint' or interpolation.lower() == 'linear':
         edgeLookup = np.array([
@@ -4008,11 +4025,11 @@ def MarchingTriangles(TriNodeCoords, TriNodeConn, NodeValues, threshold=0, inter
     # Query lookup tables
     if Type.lower() == 'surf':
         if mixed_elements:
-            element_lists = MTTriMixed_Lookup[ints]
+            element_lists = MTriMixed_Lookup[ints]
         else:
-            element_lists = MTTri_Lookup[ints]
+            element_lists = MTri_Lookup[ints]
     elif Type.lower() == 'line':
-        element_lists = MTEdge_Lookup[ints]
+        element_lists = MTriEdge_Lookup[ints]
     else:
         raise ValueError('Invalid Type, Type must be "surf" or "line".')
 
@@ -4979,9 +4996,9 @@ def MarchingElements(NodeCoords, NodeConn, NodeValues, threshold=0, interpolatio
 def Adaptive(func, bounds, threshold=0, method=None, grad=None, mindepth=2, maxdepth=5, octree_strategy='EDerror', octree_eps=0.1, dualgrid_method='centroid', Type='surf'):
     """
     Adaptively contour an implicit function. Uses an octree 
-    (:func:`~mymesh.octree.Function2Octree`) to adaptively sample the function,
+    (:func:`~mymesh.tree.Function2Octree`) to adaptively sample the function,
     then uses the chosen method to contour the dual grid 
-    (:func:`~mymesh.octree.Octree2Dual`) of the octree.
+    (:func:`~mymesh.tree.Octree2Dual`) of the octree.
     
     Based on, but not an exact implementation of, Dual Marching Cubes
     :cite:p:`Schaefer2005`.
@@ -5014,14 +5031,14 @@ def Adaptive(func, bounds, threshold=0, method=None, grad=None, mindepth=2, maxd
     maxdepth : int, optional
         Maximum octree depth, by default 5
     octree_strategy : str, optional
-        Octree subdivision strategy (see :func:`~mymesh.octree.Function2Octree`), 
+        Octree subdivision strategy (see :func:`~mymesh.tree.Function2Octree`), 
         by default 'EDerror'.
     octree_eps : float, optional
         Error tolerance for octree subdivision 
-        (see :func:`~mymesh.octree.Function2Octree`), by default 0.1
+        (see :func:`~mymesh.tree.Function2Octree`), by default 0.1
     dualgrid_method : str, optional
         Method for placing dual grid vertices (see 
-        :func:`~mymesh.octree.Octree2Dual`), by default 'centroid'.
+        :func:`~mymesh.tree.Octree2Dual`), by default 'centroid'.
     Type : str, optional
         Specifies whether to generate a surface mesh ("surf") or a volume
         mesh ("vol"), by default 'surf'
@@ -5053,8 +5070,8 @@ def Adaptive(func, bounds, threshold=0, method=None, grad=None, mindepth=2, maxd
     elif Type == 'surf' and method is None:
         method = 'mc33'
 
-    root = octree.Function2Octree(func, bounds, threshold=threshold, grad=grad, mindepth=mindepth, maxdepth=maxdepth, strategy=octree_strategy, eps=octree_eps)
-    DualCoords, DualConn = octree.Octree2Dual(root,method=dualgrid_method)
+    root = tree.Function2Octree(func, bounds, threshold=threshold, grad=grad, mindepth=mindepth, maxdepth=maxdepth, strategy=octree_strategy, eps=octree_eps)
+    DualCoords, DualConn = tree.Octree2Dual(root,method=dualgrid_method)
     NodeValues = func(DualCoords[:,0],DualCoords[:,1],DualCoords[:,2])
     
     if method == 'mc':

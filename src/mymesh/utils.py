@@ -83,7 +83,7 @@ Miscellaneous
 import numpy as np
 import scipy
 import sys, warnings, copy, time, itertools, collections
-from . import converter, rays, octree, improvement, quality, mesh
+from . import converter, rays, tree, improvement, quality, mesh
 from . import try_njit
 
 def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
@@ -893,12 +893,12 @@ def Project2Surface(Points,Normals,NodeCoords,SurfConn,tol=np.inf,Octree='genera
         Nodal connectivity of the surface mesh that the point is being projected to.
     tol : float, optional
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
-        Octree : str (or octree.OctreeNode), optional
+        Octree : str (or tree.OctreeNode), optional
         octree options. An octree representation of the surface can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by octree.Surface2Octree(NodeCoords,SurfConn)
+        tree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by tree.Surface2Octree(NodeCoords,SurfConn)
     Returns
     -------
     MappingMatrix : np.ndarray
@@ -954,12 +954,12 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
     verbose : bool, optional
         If true, will print mapping statistics, by default False.
-    Octree : str (or octree.OctreeNode), optional
+    Octree : str (or tree.OctreeNode), optional
         octree options. An octree representation of surface 2 can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        octree.OctreeNode - Provide a precompute octree structure corresponding to surface 2. Should be created by octree.Surface2Octree(NodeCoords2,SurfConn2)
+        tree.OctreeNode - Provide a precompute octree structure corresponding to surface 2. Should be created by tree.Surface2Octree(NodeCoords2,SurfConn2)
     return_octree : bool, optional
         If true, will return the generated or provided octree, by default False.
     npts : int, optional
@@ -971,7 +971,7 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     MappingMatrix : list
         min(npts, len(NodeCoords1))x4 matrix of of barycentric coordinates, defining NodeCoords1 in terms
         of the triangular surface elements of Surface 2.
-    Octree : octree.OctreeNode, optional
+    Octree : tree.OctreeNode, optional
         The generated or provided octree structure corresponding to Surface 2.
 
     """
@@ -996,7 +996,7 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     NodeNormals1 = Face2NodeNormal(NodeCoords1, SurfConn1, ElemConn1, ElemNormals1, method='angle')
 
     
-    if Octree == 'generate': Octree = octree.Surface2Octree(NodeCoords2,SurfConn2)
+    if Octree == 'generate': Octree = tree.Surface2Octree(NodeCoords2,SurfConn2)
     
     MappingMatrix = -1*np.ones((len(NodeCoords1),4))
     MappingMatrix[NodeIds,:] = Project2Surface(NodeCoords1[NodeIds,:], NodeNormals1[NodeIds,:], NodeCoords2, SurfConn2, tol=tol, Octree=Octree)
@@ -1028,12 +1028,12 @@ def ValueMapping(NodeCoords1, SurfConn1, NodeVals1, NodeCoords2, SurfConn2, tol=
         Contains the nodal connectivity defining the surface elements.
     tol : float, optional
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf 
-    Octree : str (or octree.OctreeNode), optional
+    Octree : str (or tree.OctreeNode), optional
         octree options. An octree representation of surface 1 can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        octree.OctreeNode - Provide a precompute octree structure corresponding to surface 1. Should be created by octree.Surface2Octree(NodeCoords1,SurfConn1)
+        tree.OctreeNode - Provide a precompute octree structure corresponding to surface 1. Should be created by tree.Surface2Octree(NodeCoords1,SurfConn1)
     MappingMatrix : list
         len(NodeCoords2)x4 matrix of of barycentric coordinates, defining NodeCoords2 in terms
         of the triangular surface elements of Surface 1.

@@ -82,7 +82,7 @@ from scipy import optimize, interpolate, sparse
 from scipy.spatial import KDTree
 import sys, os, time, copy, warnings, bisect
 
-from . import utils, converter, contour, quality, improvement, rays, octree, mesh, primitives
+from . import utils, converter, contour, quality, improvement, rays, mesh, primitives
 
 # Mesh generators
 def PlanarMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation='linear', args=(), kwargs={}, Type='surf'):
