@@ -42,7 +42,7 @@ Convex Hull
 #%%
 import numpy as np
 import sys, copy, itertools, warnings, random
-from . import utils, rays, converter, mesh
+from . import utils, rays, converter, mesh, primitives, booleans, tree
 from . import try_njit, check_numba
 from scipy import spatial
 
@@ -214,6 +214,25 @@ def ConvexHull(NodeCoords,method='scipy'):
         raise ValueError('NodeCoords must contain two or three dimensional data with shape (n,2) or (n,3). Input NodeCoords has shape {str(np.shape(NodeCoords)):s}.')
     
     return Hull
+
+def TriangulateBoundary(Boundary, h=None, method='grid', ElemType='tri', quadtree_maxdepth=5):
+
+    if method == 'grid':
+        if h is None:
+            raise ValueError('Element size (h) must be provided when using method="grid".')
+        maxs = np.max(Boundary.NodeCoords,axis=0)
+        mins = np.min(Boundary.NodeCoords,axis=0)
+        grid = primitives.Grid2D([mins[0], maxs[0], mins[1], maxs[1]], h)
+
+
+    elif method == 'quadtree':
+        root = tree.Edges2Quadtree(Boundary.NodeCoords, Boundary.NodeConn, maxdepth=quadtree_maxdepth)
+        grid = tree.Quadtree2Dual(root)
+
+
+    trimesh = booleans.SurfaceBoundary(grid, Boundary, mode='intersection', ElemType=ElemType)
+    
+    return trimesh
 
 def SciPy(NodeCoords):
     """

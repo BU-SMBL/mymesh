@@ -472,7 +472,7 @@ class QuadtreeNode(TreeNode):
                     child.makeChildrenEdges(edgesInChild,minsize=minsize,maxsize=maxsize,maxdepth=maxdepth)
                     child.state = 'branch'
             elif len(edgesInChild) == 1:
-                if child.size > maxsize or child.level < maxdepth:
+                if child.size > maxsize:# or child.level < maxdepth:
                     child.makeChildrenEdges(edgesInChild,minsize=minsize,maxsize=maxsize,maxdepth=maxdepth)
                     child.state = 'branch'
                 else:

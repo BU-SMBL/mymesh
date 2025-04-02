@@ -2031,9 +2031,12 @@ class mesh:
             # Convert to unique edges
             Edges, UIdx, UInv = converter.edges2unique(edges,return_idx=True,return_inv=True)
             EdgeElem = np.asarray(edgeelem)[UIdx]
-            EdgeConn = UInv[utils.PadRagged(edgeconn)]
-            
-            rows = EdgeConn.flatten()
+            EdgeConn = np.append(UInv,-1)[utils.PadRagged(edgeconn)]
+            if np.any(EdgeConn == -1):
+                EdgeConn = utils.ExtractRagged(EdgeConn, -1)
+                rows = [e for conn in EdgeConn for e in conn]
+            else:
+                rows = EdgeConn.flatten()
             cols = np.repeat(np.arange(self.NElem),[len(x) for x in EdgeConn])
             data = np.ones(len(rows))
             

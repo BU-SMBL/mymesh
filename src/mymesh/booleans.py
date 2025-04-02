@@ -16,11 +16,12 @@ Operations
 
 import warnings
 import numpy as np
-from . import mesh, converter, utils, octree, rays, improvement, delaunay, primitives
+from . import mesh, contour, converter, utils, tree, rays, improvement, delaunay, primitives
+import itertools
 
 def MeshBooleans(Surf1, Surf2, tol=1e-8):
     """
-    Boolean (union, intersection, difference) for two meshes.
+    Boolean (union, intersection, difference) operations for two surface meshes.
     Currently operations are only supported on purely triangular meshes.
     If a volume or non-triangular mesh is given, it will be converted
     and the output will be purely triangular.
@@ -195,6 +196,122 @@ def SplitMesh(Surf1, Surf2, eps=1e-12):
 
     return Split1, Split2
     
+def SurfaceBoundary(Surf, Boundary, mode='intersection', ElemType=None, eps=0):
+    """
+    Boolean (union, intersection, difference) operations for coplanar surface
+    and boundary meshes.  
+
+    Parameters
+    ----------
+    Surf : mymesh.mesh
+        Surface mesh that will be cut by the boundary mesh. Surf.Type should
+        be 'surf'.
+    Boundary : mymesh.mesh
+        Boundary mesh that will cut the surface mesh. Boundary.Type should
+        be 'line'.
+    mode : str, optional
+        Boolean operation to perform, by default 'intersection'.
+
+        - 'intersection': returns a mesh of surface elements inside the boundary mesh
+
+        - 'difference': returns a mesh of surface elements outside the boundary mesh
+
+        - 'union': returns the surface mesh split by the boundary mesh
+
+    ElemType : str, NoneType, optional
+        Element type of the produced mesh. Either 'tri' to return a purely
+        triangular mesh or None for a mixed Element mesh, by default None.
+    eps : int, optional
+        Small tolerance value used by :func:`utils.DeleteDuplicateNodes`,
+        :func:`rays.PointInBoundary`, and 
+        :func:`rays.SegmentsSegmentsIntersection` by default 0.
+
+    Returns
+    -------
+    mnew : mymesh.mesh
+        New mesh
+
+    """
+    # Edge intersection
+    e1 = Boundary.NodeCoords[Boundary.Edges]
+    e2 = Surf.NodeCoords[Surf.Edges]
+    pairwise = np.array(list(zip(*itertools.product(range(len(e1)), range(len(e2))))))
+
+    edgeidx1 = pairwise[0]
+    edgeidx2 = pairwise[1]
+    s1 = e1[edgeidx1]
+    s2 = e2[edgeidx2]
+
+    ix, pts = rays.SegmentsSegmentsIntersection(s1, s2, return_intersection=True,eps=eps)
+
+    # upts, idx1 = np.unique(pts[ix],return_index=True, axis=0)
+    upts, _, idx1 = utils.DeleteDuplicateNodes(pts[ix], [[]], return_idx=True, tol=eps)
+    # cleanup intersections - use only one point per edge
+    Surf_edge_ix, idx2, c = np.unique(edgeidx2[ix][idx1], return_index=True, return_counts=True)
+    
+    ixpts = pts[ix][idx1][idx2]
+
+    # Define new node coordinates from intersections
+    NewCoords = ixpts
+    NewCoordIds = Surf.NNode + np.arange(len(ixpts), dtype=int)
+    NewCoords = np.vstack([Surf.NodeCoords, ixpts])
+    # Node IDs for new nodes created along edges
+    Surf_edge_ids = -1*np.ones(Surf.NEdge, dtype=int)
+    Surf_edge_ids[Surf_edge_ix] = NewCoordIds
+
+    # Node IDs for new nodes created along edges grouped by element
+    elem_edge_ids = np.append(Surf_edge_ids,-1)[utils.PadRagged(Surf.EdgeConn, -1)] 
+
+    In = np.array([rays.PointInBoundary(pt, Boundary.NodeCoords, Boundary.NodeConn, eps=eps, inclusive=False) for pt in Surf.NodeCoords])
+    if mode.lower() == 'difference':
+        In = ~In
+
+    # Split surface NodeConn into groups by element type to process with appropriate method 
+    SplitNodeConn, splitidx = utils.SplitRaggedByLength(Surf.NodeConn, return_idx=True)
+    NewConn = []
+    for group,NodeConn in enumerate(SplitNodeConn):
+
+        if np.shape(NodeConn)[1] == 4:
+            # marching squares lookup
+            quad_ints = np.sum(In[NodeConn] * 2**np.arange(0,4)[::-1], axis=1)
+            if ElemType is not None and ElemType.lower() == 'tri':
+                if mode == 'union':
+                    element_lists = contour.MSTriangleSplit_Lookup[quad_ints]
+                else:
+                    element_lists = contour.MSTriangle_Lookup[quad_ints]
+            else:
+                if mode == 'union':
+                    element_lists = contour.MSMixedSplit_Lookup[quad_ints]
+                else:
+                    element_lists = contour.MSMixed_Lookup[quad_ints]
+            element_point_lookup = np.hstack([NodeConn, elem_edge_ids[splitidx[group]]])
+
+        elif np.shape(NodeConn)[1] == 3:
+            # marching triangles lookup
+            tri_ints = np.sum(In[NodeConn] * 2**np.arange(0,3)[::-1], axis=1)
+            if ElemType is not None and ElemType.lower() == 'tri':
+                if mode == 'union':
+                    element_lists = contour.MTriSplit_Lookup[tri_ints]
+                else:
+                    element_lists = contour.MTri_Lookup[tri_ints]
+            else:
+                if mode == 'union':
+                    element_lists = contour.MTriMixedSplit_Lookup[tri_ints]
+                else:
+                    element_lists = contour.MTriMixed_Lookup[tri_ints]
+            element_point_lookup = np.hstack([elem_edge_ids[splitidx[group],:3], NodeConn])
+        else:
+            raise ValueError('Invalid element type.')
+        
+        NewConn += [element_point_lookup[i][element_lists[i][j]] for i in range(len(NodeConn)) for j in range(len(element_lists[i])) if (len(element_lists[i][j]) != 0) and not np.any(element_point_lookup[i][element_lists[i][j]] == -1)]
+
+    if 'mesh' in dir(mesh):
+        NewSurf = mesh.mesh(NewCoords, NewConn)
+    else:
+        NewSurf = mesh(NewCoords, NewConn)
+    
+    return NewSurf
+
 def _GetSharedNodes(NodeCoordsA, NodeCoordsB, eps=1e-10):
     
     RoundCoordsA = np.round(np.asarray(NodeCoordsA)/eps)*eps
