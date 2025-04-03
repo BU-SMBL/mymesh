@@ -249,8 +249,10 @@ def RaysTrianglesIntersection(pts, rays, Tris, bidirectional=False, eps=1e-14):
 
     Returns
     -------
-    _type_
-        _description_
+    intersections : np.ndarray
+        Array of indices indicating which pairs for rays/triangles had intersections (shape=(n,))
+    intersectionPts : np.ndarray
+        Array of coordinates for each intersection point (shape=(n,3))
     """
 
     with np.errstate(divide='ignore', invalid='ignore'):
@@ -1397,6 +1399,63 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     
     return True
 
+def TrianglesSegmentsIntersection(Tris, segments, eps=1e-14):
+    """
+    Vectorized Möller-Trumbore :cite:p:`Moller2005` intersection algorithm to detect intersections between a pairwise set of segments and a set of triangles. Adapted from RaysTrianglesIntersection.
+
+    Note that this test is inteded for 3D, non-planar intersections. The scenario
+    of coplanar segments and triangles evaluates to a non-intersection. 
+    :func:`SegmentsSegmentsIntersection` can be used, comparing the three 
+    segments of each triangle with the array segments if planar intersections
+    are required.
+    
+    Parameters
+    ----------
+    segments : np.ndarray
+        Coordinates of the two points of the line segments (shape=(n,2,3))
+    Tris : np.ndarray
+        Coordinates of triangle vertices for each triangle in the format
+        ``np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...)``.
+        Should have shape (n,3,3) for n triangles.
+    eps : float, optional
+        Small parameter used to determine if a value is sufficiently close to 0, by default 1e-14
+
+    Returns
+    -------
+    intersections : np.ndarray
+        Array of indices indicating which pairs for rays/triangles had intersections (shape=(n,))
+    intersectionPts : np.ndarray
+        Array of coordinates for each intersection point (shape=(n,3))
+    """
+    pts = segments[:,0]
+    rays = segments[:,1] - segments[:,0]
+    with np.errstate(divide='ignore', invalid='ignore'):
+        edge1 = Tris[:,1] - Tris[:,0]
+        edge2 = Tris[:,2] - Tris[:,0]
+        
+        p = np.cross(rays, edge2)
+        det = np.sum(edge1*p,axis=1)
+        
+        invdet = 1/det
+        tvec = pts - Tris[:,0]
+        u = np.sum(tvec*p,axis=1) * invdet
+        
+        q = np.cross(tvec,edge1)
+        v = np.sum(rays*q,axis=1) * invdet
+        
+        t = np.sum(edge2*q,axis=1) * invdet
+        
+        checks = ( # Failure conditions
+            ((det > -eps) & (det < eps)) |
+            ((u < 0) | (u > 1)) |
+            ((v < 0) | (u+v > 1)) |
+            ((t < 0) | (t > 1))
+            )
+        intersections = np.where(~checks)[0]
+        intersectionPts = pts[intersections] + rays[intersections]*t[intersections,None]
+        
+    return intersections, intersectionPts
+
 @try_njit(cache=True)
 def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=None):
     """
@@ -1706,7 +1765,7 @@ def SegmentsSegmentsIntersection(s1,s2,return_intersection=False,endpt_inclusive
 
 def SegmentBox2DIntersection(segment, xlim, ylim):
     """
-    Intersection algorithm for detecting intersections between a ray and an axis-aligned box.
+    Intersection algorithm for detecting intersections between a segment and an axis-aligned box in two dimensions.
     Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748
     :cite:p:`Williams2005`
 
@@ -1720,8 +1779,6 @@ def SegmentBox2DIntersection(segment, xlim, ylim):
         Two element list, array, or tuple with the upper and lower x-direction bounds for an axis-aligned box.
     ylim : array_like
         Two element list, array, or tuple with the upper and lower y-direction bounds for an axis-aligned box.
-    zlim : array_like
-        Two element list, array, or tuple with the upper and lower z-direction bounds for an axis-aligned box.
 
     Returns
     -------
@@ -1766,16 +1823,14 @@ def SegmentBox2DIntersection(segment, xlim, ylim):
 
 def SegmentBoxIntersection(segment, xlim, ylim, zlim):
     """
-    Intersection algorithm for detecting intersections between a ray and an axis-aligned box.
+    Intersection algorithm for detecting intersections between a segment and an axis-aligned box.
     Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748
     :cite:p:`Williams2005`
 
     Parameters
     ----------
-    pt : array_like
-        3D coordinates for the starting point of the ray.
-    ray : array_like
-        3D vector of ray direction. This should, in general, be a unit vector.
+    segment : array_like
+        Coordinates of line segment (shape=(2,3))
     xlim : array_like
         Two element list, array, or tuple with the upper and lower x-direction bounds for an axis-aligned box.
     ylim : array_like
@@ -1911,10 +1966,12 @@ def RaySegmentsIntersection(pt, ray, segments, return_intersection=False, endpt_
 
     Parameters
     ----------
-    s1 : array_like
-        Coordinates of the first set of n line segments (shape=(n,2,3))
-    s2 : array_like
-        Coordinates of the second set of n line segments (shape=(n,2,3))
+    pt : array_like
+        3D coordinates for the starting point of the ray.
+    ray : array_like
+        3D vector giving the orientation of the ray.
+    segments : array_like
+        Coordinates of the two points of the line segments (shape=(n,2,3))
     return_intersection : bool, optional
         If True, return the coordinates of the intersection point. If no 
         intersection, np.empty((0,3)) is returned. By default False
@@ -2566,7 +2623,11 @@ def PointInSurf(pt, NodeCoords, SurfConn, ElemNormals=None, Octree=None, eps=1e-
     zero = np.any(np.abs(distances)<eps)
     
     # Checking unique to not double count instances where ray intersects an edge
-    if len(np.unique(np.round(posDistances/eps)))%2 == 0 and not zero:
+    if eps > 0:
+        uposDistances = np.unique(np.round(posDistances/eps))
+    else:
+        uposDistances = np.unique(posDistances)
+    if len(uposDistances)%2 == 0 and not zero:
         # No intersection
         inside = False
         return inside
@@ -2621,7 +2682,11 @@ def PointsInSurf(pts, NodeCoords, SurfConn, ElemNormals=None, Octree='generate',
     for i in range(len(intersections)):
         posDistances = distances[i][distances[i] > eps]
         zero = np.any(np.abs(distances[i])<eps)
-        if len(np.unique(np.round(posDistances/eps)))%2 == 0 and not zero:
+        if eps > 0:
+            uposDistances = np.unique(np.round(posDistances/eps))
+        else:
+            uposDistances = np.unique(posDistances)
+        if len(uposDistances)%2 == 0 and not zero:
             Insides[i] = False
         else:
             dist = min(np.abs(distances[i]))

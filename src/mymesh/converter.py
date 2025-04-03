@@ -1499,9 +1499,9 @@ def tet2edges(NodeCoords,NodeConn):
         Edges[0::6] = ArrayConn[:,np.array([0,1])]
         Edges[1::6] = ArrayConn[:,np.array([1,2])]
         Edges[2::6] = ArrayConn[:,np.array([2,0])]
-        Edges[3::6] = ArrayConn[:,np.array([0,3])]
-        Edges[4::6] = ArrayConn[:,np.array([1,3])]
-        Edges[5::6] = ArrayConn[:,np.array([2,3])]
+        Edges[3::6] = ArrayConn[:,np.array([1,3])]
+        Edges[4::6] = ArrayConn[:,np.array([2,3])]
+        Edges[5::6] = ArrayConn[:,np.array([0,3])]
     else:
         Edges = np.empty((0,2),dtype=np.int64)
     return Edges

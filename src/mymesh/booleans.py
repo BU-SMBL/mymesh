@@ -244,7 +244,6 @@ def SurfaceBoundary(Surf, Boundary, mode='intersection', ElemType=None, eps=0):
 
     ix, pts = rays.SegmentsSegmentsIntersection(s1, s2, return_intersection=True,eps=eps)
 
-    # upts, idx1 = np.unique(pts[ix],return_index=True, axis=0)
     upts, _, idx1 = utils.DeleteDuplicateNodes(pts[ix], [[]], return_idx=True, tol=eps)
     # cleanup intersections - use only one point per edge
     Surf_edge_ix, idx2, c = np.unique(edgeidx2[ix][idx1], return_index=True, return_counts=True)
@@ -305,6 +304,118 @@ def SurfaceBoundary(Surf, Boundary, mode='intersection', ElemType=None, eps=0):
         
         NewConn += [element_point_lookup[i][element_lists[i][j]] for i in range(len(NodeConn)) for j in range(len(element_lists[i])) if (len(element_lists[i][j]) != 0) and not np.any(element_point_lookup[i][element_lists[i][j]] == -1)]
 
+    if 'mesh' in dir(mesh):
+        NewSurf = mesh.mesh(NewCoords, NewConn)
+    else:
+        NewSurf = mesh(NewCoords, NewConn)
+    
+    return NewSurf
+
+def VolumeSurf(Mesh, Surf, mode='intersection', ElemType=None, eps=0):
+    """
+    Boolean (union, intersection, difference) operations for a surface mesh with
+    a volume mesh
+
+    Parameters
+    ----------
+    Mesh : mymesh.mesh
+        Volume mesh that will be cut by the syrface mesh. Mesh.Type should
+        be 'vol'.
+    Surf : mymesh.mesh
+        Surface mesh that will cut the volume mesh. Surf.Type should
+        be 'surf'. If the mesh isn't a purely triangular surface, it will first
+        be converted to one.
+    mode : str, optional
+        Boolean operation to perform, by default 'intersection'.
+
+        - 'intersection': returns a mesh of elements inside the surface mesh
+
+        - 'difference': returns a mesh of surface elements outside the surface mesh
+
+        - 'union': returns the volume mesh split by the surface mesh
+
+    ElemType : str, NoneType, optional
+        Element type of the produced mesh. Either 'tet' to return a purely
+        tetrahedral mesh or None for a mixed element mesh, by default None.
+    eps : int, optional
+        Small tolerance value used by :func:`utils.DeleteDuplicateNodes`,
+        :func:`rays.PointInSurface`, and 
+        :func:`rays.TrianglesSegmentsIntersection` by default 0.
+
+    Returns
+    -------
+    mnew : mymesh.mesh
+        New mesh
+
+    """
+    try:
+        if np.shape(Surf.NodeConn)[1] == 3:
+            Surf.NodeCoords, Surf.NodeConn = converter.surf2tris(Surf.NodeCoords, Surf.NodeConn)
+    except ValueError:
+        Surf.NodeCoords, Surf.NodeConn = converter.surf2tris(Surf.NodeCoords, Surf.NodeConn)
+
+    # Edge intersection
+    tris = Surf.NodeCoords[Surf.NodeConn]
+    edges = Mesh.NodeCoords[Mesh.Edges]
+    pairwise = np.array(list(zip(*itertools.product(range(len(tris)), range(len(edges))))))
+
+
+    triidx = pairwise[0]
+    edgeidx = pairwise[1]
+    tris = tris[triidx]
+    edges = edges[edgeidx]
+
+    ix, pts = rays.TrianglesSegmentsIntersection(tris, edges, eps=eps)
+
+    upts, _, idx1 = utils.DeleteDuplicateNodes(pts, [[]], return_idx=True, tol=eps)
+    # cleanup intersections - use only one point per edge
+    Mesh_edge_ix, idx2, c = np.unique(edgeidx[ix][idx1], return_index=True, return_counts=True)
+    
+    ixpts = pts[idx1][idx2]
+
+    # Define new node coordinates from intersections
+    NewCoords = ixpts
+    NewCoordIds = Mesh.NNode + np.arange(len(ixpts), dtype=int)
+    NewCoords = np.vstack([Mesh.NodeCoords, ixpts])
+    # Node IDs for new nodes created along edges
+    Mesh_edge_ids = -1*np.ones(Mesh.NEdge, dtype=int)
+    Mesh_edge_ids[Mesh_edge_ix] = NewCoordIds
+
+    # Node IDs for new nodes created along edges grouped by element
+    elem_edge_ids = np.append(Mesh_edge_ids,-1)[utils.PadRagged(Mesh.EdgeConn, -1)] 
+
+    In = rays.PointsInSurf(Mesh.NodeCoords, Surf.NodeCoords, Surf.NodeConn, eps=eps)
+    if mode.lower() == 'difference':
+        In = ~In
+
+    # Split surface NodeConn into groups by element type to process with appropriate method 
+    SplitNodeConn, splitidx = utils.SplitRaggedByLength(Mesh.NodeConn, return_idx=True)
+    NewConn = []
+    for group,NodeConn in enumerate(SplitNodeConn):
+
+        if np.shape(NodeConn)[1] == 4:
+            # marching tetrahedra lookup
+            tet_ints = np.sum(In[NodeConn] * 2**np.arange(0,4)[::-1], axis=1)
+            
+            if ElemType is not None and ElemType.lower() == 'tet':
+                if mode == 'union':
+                    pass
+                    # element_lists = contour.MTSplit_Lookup[tet_ints]
+                else:
+                    element_lists = contour.MTVMixed_Lookup[tet_ints]
+            else:
+                if mode == 'union':
+                    pass
+                    # element_lists = contour.MTMixedSplit_Lookup[tet_ints]
+                else:
+                    pass
+                    # element_lists = contour.MTMixed_Lookup[tet_ints]
+            element_point_lookup = np.hstack([elem_edge_ids[splitidx[group],:6], NodeConn])
+        else:
+            raise ValueError('Invalid element type.')
+        
+        NewConn += [element_point_lookup[i][element_lists[i][j]] for i in range(len(NodeConn)) for j in range(len(element_lists[i])) if (len(element_lists[i][j]) != 0) and not np.any(element_point_lookup[i][element_lists[i][j]] == -1)]
+    
     if 'mesh' in dir(mesh):
         NewSurf = mesh.mesh(NewCoords, NewConn)
     else:
