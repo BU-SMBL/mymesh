@@ -4,7 +4,7 @@
 """
 Tree data structures and related methods. Tree structures are used to organize
 space into a hierarchy that makes it more efficient to search through them. This
-module currently includes an Octree data structure and it's two dimensional 
+module currently includes an Octree data structure and its two dimensional 
 analog the Quadtree. 
 
 These trees are based on uniform subdivision of an initial cube/square into 
@@ -942,7 +942,7 @@ def Voxel2Octree(VoxelCoords, VoxelConn):
         VoxelCoords = np.array(VoxelCoords)
     # Assumes (and requires) that all voxels are cubic and the same size
     VoxelSize = abs(sum(VoxelCoords[VoxelConn[0][0]] - VoxelCoords[VoxelConn[0][1]]))
-    centroids = [np.mean(VoxelCoords[elem],axis=0) for elem in VoxelConn]
+    centroids = utils.Centroids(VoxelCoords, VoxelConn)
     minx = min(VoxelCoords[:,0])
     maxx = max(VoxelCoords[:,0])
     miny = min(VoxelCoords[:,1])
@@ -1341,7 +1341,7 @@ def Function2Octree(func, bounds, threshold=0, grad=None, mindepth=2, maxdepth=5
 
     return root
 
-def Octree2Voxel(root, mode='sparse'):
+def Octree2Voxel(root, sparse=True):
     """
     Convert an octree to a voxel mesh
 
@@ -1349,10 +1349,10 @@ def Octree2Voxel(root, mode='sparse'):
     ----------
     root : tree.OctreeNode
         Octree node from which the mesh will be generated. 
-    mode : str, optional
-        Determines voxelization mode. If "sparse", only leaf nodes that contain
+    sparse : bool, optional
+        Determines voxelization mode. If sparse is True, only leaf nodes that contain
         data will be included, otherwise both leaf and empty nodes
-        will be include, by default 'sparse'. 
+        will be include, by default True. 
 
     Returns
     -------
@@ -1364,12 +1364,10 @@ def Octree2Voxel(root, mode='sparse'):
     """    
     VoxelConn = []
     VoxelCoords = []
-    if mode == 'sparse':
+    if sparse:
         condition = lambda node : node.state == 'leaf'
-    elif mode == 'full':
-        condition = lambda node : node.state == 'leaf' or node.state == 'empty' or len(node.children) == 0
     else:
-        raise ValueError(f'mode must be "sparse" or "full", not {str(mode):s}')
+        condition = lambda node : node.state == 'leaf' or node.state == 'empty' or len(node.children) == 0
 
     def recurSearch(node):
         if condition(node):
@@ -1708,7 +1706,7 @@ def Edges2Quadtree(NodeCoords, LineConn, minsize=None, maxdepth=5):
 
     return root
 
-def Quadtree2Pixel(root, mode='sparse'):
+def Quadtree2Pixel(root, sparse=True):
     """
     Convert an quadtree to a pixel mesh
 
@@ -1716,10 +1714,10 @@ def Quadtree2Pixel(root, mode='sparse'):
     ----------
     root : tree.QuadtreeNode
         Quadtree node from which the mesh will be generated. 
-    mode : str, optional
-        Determines pixelization mode. If "sparse", only leaf nodes that contain
+    sparse : bool, optional
+        Determines pixelization mode. If sparse is True, only leaf nodes that contain
         data will be included, otherwise both leaf and empty nodes
-        will be include, by default 'sparse'. 
+        will be include, by default True. 
 
     Returns
     -------
@@ -1731,12 +1729,10 @@ def Quadtree2Pixel(root, mode='sparse'):
     """    
     PixelConn = []
     PixelCoords = []
-    if mode == 'sparse':
+    if sparse:
         condition = lambda node : node.state == 'leaf'
-    elif mode == 'full':
-        condition = lambda node : node.state == 'leaf' or node.state == 'empty' or len(node.children) == 0
     else:
-        raise ValueError(f'mode must be "sparse" or "full", not {str(mode):s}')
+        condition = lambda node : node.state == 'leaf' or node.state == 'empty' or len(node.children) == 0
 
     def recurSearch(node):
         if condition(node):

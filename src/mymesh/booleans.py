@@ -16,7 +16,7 @@ Operations
 
 import warnings
 import numpy as np
-from . import mesh, converter, utils, octree, rays, improvement, delaunay, primitives
+from . import mesh, converter, utils, tree, rays, improvement, delaunay, primitives
 
 def MeshBooleans(Surf1, Surf2, tol=1e-8):
     """

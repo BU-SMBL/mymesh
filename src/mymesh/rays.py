@@ -29,8 +29,11 @@ Intersection Tests
     BoxBoxIntersection
     SegmentSegmentIntersection
     SegmentsSegmentsIntersection
+    SegmentBox2DIntersection
+    SegmentBoxIntersection
     RaySegmentIntersection
     RaySegmentsIntersection
+    RayBoundaryIntersection
     RaySurfIntersection
     RaysSurfIntersection
     RayOctreeIntersection
@@ -47,6 +50,7 @@ Inside/Outside Tests
     PointInBoundary
     PointInSurf
     PointsInSurf
+    PointInBox2D
     PointInBox
     PointsInVoxel
     PointInTri
@@ -1788,7 +1792,7 @@ def SegmentBoxIntersection(segment, xlim, ylim, zlim):
     intersection : bool
         True if there is an intersection between the ray and the box, otherwise False.
     """    
-    
+    pt = segment[0]
     ray = segment[1] - segment[0]
     if ray[0] > 0:
         divx = 1/ray[0]
@@ -2455,20 +2459,6 @@ def PlaneSurfIntersection(pt, Normal, NodeCoords, SurfConn, eps=1e-14):
 
     Intersections = PlaneTrianglesIntersection(pt, Normal, NodeCoords[SurfConn], eps=eps)
     return Intersections
-
-## Projection
-def SilhouetteProjection(pts, pt, Normal):
-    
-    # point (x,y,z), normal (nx,ny,nz), point on plane (px,py,pz)
-    # find t s.t. (x+t*nx, y+t*ny, z+tc), (x,y,z), (px,py,pz) form a right triangle
-    pts = np.asarray(pts)
-    x = pts[:,0]; y = pts[:,1]; z = pts[:,2]
-    nx, ny, nz = Normal
-    px, py, pz = pt
-
-    t = (nx*px - nx*x + ny*py - ny*y + nz*pz - nz*z)/(nx**2 + ny**2 + nz**2)
-    projected = np.column_stack([x+t*nx, y+t*ny, z+t*nz])
-    return projected
 
 ## Inside/Outside Tests
 def PointInBoundary(pt, NodeCoords, BoundaryConn, eps=1e-8, inclusive=True, ray=None):
