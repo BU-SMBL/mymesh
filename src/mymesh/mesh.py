@@ -1758,6 +1758,7 @@ class mesh:
                 celldata[4] = data[elemlengths==6]  # wdg
                 celldata[5] = data[elemlengths==8]  # hex
                 celldata[6] = data[elemlengths==10] # tet10
+                celldata[7] = data[elemlengths==20] # hex20
                 celldata = [c for c in celldata if len(c) > 0]
                 celldict[key] = celldata
         
@@ -1766,7 +1767,7 @@ class mesh:
         else:
             ArrayConn = np.array(self.NodeConn,dtype=object)
 
-        edges, tris, quads, tets, pyrs, wdgs, hexs, tet10 = [np.empty((0,0)) for i in range(8)]
+        edges, tris, quads, tets, pyrs, wdgs, hexs, tet10, hex20 = [np.empty((0,0)) for i in range(9)]
 
         if np.any(elemlengths == 2): edges = np.stack(ArrayConn[elemlengths==2])
         if np.any(elemlengths == 3): tris = np.stack(ArrayConn[elemlengths==3])
@@ -1780,9 +1781,9 @@ class mesh:
         if np.any(elemlengths == 6): wdgs = np.stack(ArrayConn[elemlengths==6])
         if np.any(elemlengths == 8): hexs = np.stack(ArrayConn[elemlengths==8])
         if np.any(elemlengths == 10): tet10 = np.stack(ArrayConn[elemlengths==10])
+        if np.any(elemlengths == 20): hex20 = np.stack(ArrayConn[elemlengths==20])
         
-        
-        elems = [e for e in [('line',edges),('triangle',tris),('quad',quads),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10)] if len(e[1]) > 0]
+        elems = [e for e in [('line',edges),('triangle',tris),('quad',quads),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10),('hexahedron20',hex20)] if len(e[1]) > 0]
         m = meshio.Mesh(self.NodeCoords, elems, point_data=self.NodeData, cell_data=celldict)
         return m
     def write(self,filename,binary=True):

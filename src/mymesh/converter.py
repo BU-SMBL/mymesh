@@ -54,8 +54,10 @@ Element type conversion
     pyramid2tet
     surf2tris
     quad2tri
-    tet102tet4
     tet42tet10
+    tet102tet4
+    hex82hex20
+    hex202hex8
     hexsubdivide
 
 """
@@ -1714,7 +1716,7 @@ def tet42tet10(NodeCoords, Tet4NodeConn):
     -------
     NodeCoords : np.ndarray
         New list of nodal coordinates. 
-    Tet4NodeConn : np.ndarray
+    Tet10NodeConn : np.ndarray
         Nodal connectivities for the 10-Node tetrahedral mesh
 
     """
@@ -1751,6 +1753,105 @@ def tet42tet10(NodeCoords, Tet4NodeConn):
 
     return NewCoords, Tet10NodeConn
  
+def hex202hex8(NodeCoords, Hex20NodeConn):
+    """
+    Converts a 20-node hexahedral mesh to an 8-node hexahedral mesh.
+    Assumes a 20-node hexahedral numbering scheme where the first 8 nodes define
+    the hexahedral vertices, the remaining nodes are thus neglected.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    Hex20NodeConn : array_like
+        Nodal connectivities for a 20-Node hexahedral mesh
+
+    Returns
+    -------
+    NodeCoords : array_like
+        List of nodal coordinates (unchanged from input). 
+    Hex8NodeConn : np.ndarray
+        Nodal connectivities for the equivalent 8-Node hexahedral mesh
+    """
+    if len(Hex20NodeConn) == 0:
+        return NodeCoords, np.empty((0,8),dtype=int)
+    Hex8NodeConn = np.asarray(Hex20NodeConn)[:, :8]
+    
+    return NodeCoords, Hex8NodeConn
+
+def hex82hex20(NodeCoords, Hex8NodeConn):
+    """
+    Converts a 4 node tetrahedral mesh to 10 node tetrahedral mesh. A new node 
+    is placed at the midpoint of each edge.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    Hex8NodeConn : array_like
+        Nodal connectivities for a 4-node tetrahedral mesh
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        New list of nodal coordinates. 
+    Hex20NodeConn : np.ndarray
+        Nodal connectivities for the 20-Node tetrahedral mesh
+
+    """
+    NodeCoords = np.asarray(NodeCoords)
+    Hex8NodeConn = np.asarray(Hex8NodeConn)
+    Nodes01 = (NodeCoords[Hex8NodeConn[:,0]] + NodeCoords[Hex8NodeConn[:,1]])/2
+    Nodes12 = (NodeCoords[Hex8NodeConn[:,1]] + NodeCoords[Hex8NodeConn[:,2]])/2
+    Nodes23 = (NodeCoords[Hex8NodeConn[:,2]] + NodeCoords[Hex8NodeConn[:,3]])/2
+    Nodes30 = (NodeCoords[Hex8NodeConn[:,3]] + NodeCoords[Hex8NodeConn[:,0]])/2
+
+    Nodes45 = (NodeCoords[Hex8NodeConn[:,4]] + NodeCoords[Hex8NodeConn[:,5]])/2
+    Nodes56 = (NodeCoords[Hex8NodeConn[:,5]] + NodeCoords[Hex8NodeConn[:,6]])/2
+    Nodes67 = (NodeCoords[Hex8NodeConn[:,6]] + NodeCoords[Hex8NodeConn[:,7]])/2
+    Nodes74 = (NodeCoords[Hex8NodeConn[:,7]] + NodeCoords[Hex8NodeConn[:,4]])/2
+
+    Nodes04 = (NodeCoords[Hex8NodeConn[:,0]] + NodeCoords[Hex8NodeConn[:,4]])/2
+    Nodes15 = (NodeCoords[Hex8NodeConn[:,1]] + NodeCoords[Hex8NodeConn[:,5]])/2
+    Nodes26 = (NodeCoords[Hex8NodeConn[:,2]] + NodeCoords[Hex8NodeConn[:,6]])/2
+    Nodes37 = (NodeCoords[Hex8NodeConn[:,3]] + NodeCoords[Hex8NodeConn[:,7]])/2
+
+    n = len(NodeCoords)
+    m = len(Hex8NodeConn)
+    ids01 = np.arange(    n, n+m)
+    ids12 = np.arange(  n+m, n+2*m)
+    ids23 = np.arange(n+2*m, n+3*m)
+    ids30 = np.arange(n+3*m, n+4*m)
+    ids45 = np.arange(n+4*m, n+5*m)
+    ids56 = np.arange(n+5*m, n+6*m)
+    ids67 = np.arange(n+6*m, n+7*m)
+    ids74 = np.arange(n+7*m, n+8*m)
+    ids04 = np.arange(n+8*m, n+9*m)
+    ids15 = np.arange(n+9*m, n+10*m)
+    ids26 = np.arange(n+10*m, n+11*m)
+    ids37 = np.arange(n+11*m, n+12*m)
+
+    Hex20NodeConn = np.empty((m, 20),dtype=int)
+    Hex20NodeConn[:, :8] = Hex8NodeConn
+    Hex20NodeConn[:, 8] = ids01
+    Hex20NodeConn[:, 9] = ids12
+    Hex20NodeConn[:,10] = ids23
+    Hex20NodeConn[:,11] = ids30
+    Hex20NodeConn[:,12] = ids45
+    Hex20NodeConn[:,13] = ids56
+    Hex20NodeConn[:,14] = ids67
+    Hex20NodeConn[:,15] = ids74
+    Hex20NodeConn[:,16] = ids04
+    Hex20NodeConn[:,17] = ids15
+    Hex20NodeConn[:,18] = ids26
+    Hex20NodeConn[:,19] = ids37
+
+    NewCoords = np.vstack([NodeCoords, Nodes01, Nodes12, Nodes23, Nodes30, Nodes45, Nodes56, Nodes67, Nodes74, Nodes04, Nodes15, Nodes26, Nodes37])
+
+    NewCoords, Hex20NodeConn = utils.DeleteDuplicateNodes(NewCoords, Hex20NodeConn)
+
+    return NewCoords, Hex20NodeConn
+
 def surf2edges(NodeCoords,NodeConn,ElemType='auto'):
     """
     Extract the edges of an unclosed surface mesh.
@@ -1860,7 +1961,6 @@ def hexsubdivide(NodeCoords, NodeConn):
     SubConn[7::8] = np.column_stack([Face4CentroidIds, CentroidIds, Face3CentroidIds, Edge37Ids, Edge74Ids, Face5CentroidIds, Edge67Ids, ArrayConn[:,7]])
 
     return NewCoords, SubConn
-
 
 def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
     """
