@@ -423,18 +423,6 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
         raise ValueError('Invalid transform model. Must be one of: "rigid", "similarity" or "affine".')
         
     assert len(x0) == nparam, f"The provided parameters for x0 don't match the transformation model ({transform:s})."
-    
-    if metric.lower() == 'symmetric_closest_point_mse':
-        tree1 = scipy.spatial.KDTree(points1) 
-        # Note: can't precommute tree for the moving points
-        obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)     
-    elif metric.lower() == 'hausdorff':
-        obj = hausdorff
-    elif metric.lower() == 'closest_point_mse':
-        tree1 = scipy.spatial.KDTree(points1)
-        obj = lambda p1, p2 : closest_point_MSE(p1, p2, tree1=tree1)
-    else:
-        raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Point2Point registration.')
 
     if 0 < decimation <= 1:
         rng = np.random.default_rng(0)
@@ -446,6 +434,18 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
     else:
         raise ValueError(f'decimation must be a scalar value in the range (0,1], not {str(decimation):s}.')
 
+
+    if metric.lower() == 'symmetric_closest_point_mse':
+        tree1 = scipy.spatial.KDTree(ref_points) 
+        # Note: can't precommute tree for the moving points
+        obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)     
+    elif metric.lower() == 'hausdorff':
+        obj = hausdorff
+    elif metric.lower() == 'closest_point_mse':
+        tree1 = scipy.spatial.KDTree(ref_points)
+        obj = lambda p1, p2 : closest_point_MSE(p1, p2, tree1=tree1)
+    else:
+        raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Point2Point registration.')
     
     def objective(x):
         objective.k += 1
@@ -821,6 +821,43 @@ def Image2Image2d(img1, img2, x0=None, bounds=None, transform='rigid', metric='m
 
 def Mesh2Image3d():
     return
+
+def Image2Mesh3d(img, M, h=1, threshold=None, scalefactor=1, decimation=1, center_mesh=False, interpolation_order=3, x0=None, bounds=None, transform='rigid', metric='symmetric_closest_point_MSE', method='direct', transform_args={}, optimizer_args=None, verbose=True):
+
+    if scalefactor != 1:
+        img =  scipy.ndimage.zoom(img, scalefactor, order=interpolation_order)
+    mesh_points = np.copy(M.NodeCoords)
+    if center_mesh:
+        mesh_points = np.copy(M.NodeCoords)
+        mesh_points[:,0] += -(np.max(mesh_points[:,0]) + np.min(mesh_points[:,0]))/2 + np.shape(img)[2]*h/scalefactor/2
+        mesh_points[:,1] += -(np.max(mesh_points[:,1]) + np.min(mesh_points[:,1]))/2 + np.shape(img)[1]*h/scalefactor/2
+        mesh_points[:,2] += -(np.max(mesh_points[:,2]) + np.min(mesh_points[:,2]))/2 + np.shape(img)[0]*h/scalefactor/2
+    if 0 < decimation <= 1:
+        rng = np.random.default_rng(0)
+        idx = rng.choice(len(mesh_points), size=int(len(mesh_points)*decimation), replace=False)
+        mesh_points = mesh_points[idx]
+    else:
+        raise ValueError(f'decimation must be a scalar value in the range (0,1], not {str(decimation):s}.')
+
+    if threshold is not None:
+        binarized = img > threshold
+    else:
+        binarized = img
+    
+    img_points = np.fliplr(np.column_stack(np.where(binarized)) * h/scalefactor) # flipping to make image coordinate system (z,y,x) match mesh coordinate system
+
+    new_points, T = Point2Point(mesh_points, img_points, x0=x0, bounds=bounds, transform=transform, metric=metric, method=method, transform_args=transform_args, optimizer_args=optimizer_args, verbose=verbose)
+
+    P = np.array([[0., 0., 1., 0.],
+       [0., 1., 0., 0.],
+       [1., 0., 0., 0.],
+       [0., 0., 0., 1.]])
+    T2 = P@T@P  # Reorder transformations to the image coordinate system
+    T2[:3,3] *= scalefactor/h # Scale translations back to units of voxels
+
+    new_image = transform_image(img, T)
+
+    return new_image, T
 
 ### Transformations
 def T2d(t0,t1,h=1):
@@ -1289,6 +1326,44 @@ def symmetric_closest_point_MSE(points1, points2, tree1=None, tree2=None):
     MSE = np.sum(distances**2)/len(distances)
     
     return MSE
+
+## Feature Detection
+def intrinsic_shape_signatures(points, r=None, tree=None, weighted=False):
+
+    if tree is None:
+        tree = scipy.spatial.KDTree(points)
+
+    d, i = tree.query(points,2)
+    nearest_distances = d[:,1] # Ignoring the zero distance to self
+    r = np.mean(nearest_distances) * 2
+    query = tree.query_ball_tree(tree, r)
+
+    # if weighted:
+    #     weights = [np.linalg.norm(points[i] - points[query[i]], axis=1) for i in range(len(points))]
+
+    # else:
+    COV = []
+    for i in range(len(points)):
+        diff = points[query[i]] - points[i]
+        COV.append((diff.T@diff)/len(diff))
+
+    COV = np.array(COV)
+    eigvals, eigvecs = np.linalg.eig(COV)
+    eigsort = np.argsort(eigvals,axis=1)[:, ::-1] # sort descending
+    eigvals = np.take_along_axis(np.real(eigvals), eigsort, 1)
+    eigvecs = np.take_along_axis(np.real(eigvecs), eigsort[:,None,:], 2)
+
+    gamma10 = eigvals[:,1]/eigvals[:,0]
+    gamma21 = eigvals[:,2]/eigvals[:,1]
+
+    thresh10 = thresh21 = 0.975
+
+    salience = eigvals[:,2].copy()
+    salience[(eigvals[:,1]/eigvals[:,0] >= thresh10) | (eigvals[:,2]/eigvals[:,1] >= thresh21)] = 0
+
+    
+
+    return
 
 ### Optimization
 def optimize(objective, method, x0=None, bounds=None, optimizer_args=None):
