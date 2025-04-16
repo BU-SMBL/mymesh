@@ -96,6 +96,27 @@ def Line(pt1, pt2, h=None, n=None):
     line.cleanup()
     return line
 
+def Multiline(points, h=None, n=None, connect_ends=False):
+    
+    if connect_ends:
+        points = np.append(points, [points[0]], axis=0)
+    else:
+        points = np.asarray(points)
+    if 'mesh' in dir(mesh):
+        line = mesh.mesh()
+    else:
+        line = mesh()
+        
+    for i in range(len(points)-1):
+        line.merge(Line(points[i], points[i+1], h=h, n=n))
+    
+    line.Type ='line'
+    line.cleanup()
+    
+    return line
+        
+    
+
 def Box(bounds, h, ElemType='quad'):
     """
     Generate a surface mesh of a rectangular box. 
