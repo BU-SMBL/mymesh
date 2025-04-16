@@ -57,7 +57,7 @@ Quality Calculation Helper Functions
 import numpy as np
 
 import sys, copy, warnings
-from . import utils, converter, mesh
+from . import utils, converter, mesh, try_njit, check_numba
 
 # Finite element modeling mesh quality, energy balance and validation methods: A review with recommendations associated with the modeling of bone tissue - Burkhart et al.
 
@@ -461,28 +461,48 @@ def MaxDihedral(NodeCoords,NodeConn,verbose=False):
     return MaxAngles
 
 def MeanRatio(NodeCoords,NodeConn,verbose=False):
+    """
+    Calculates mean ratios for each element. The mean ratio can be interpreted 
+    as the distance from an ideal tetrahedron with equal volume :cite:p:Liu1994,
+    :cite:p:Vartziotis2009. 
 
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        List of nodal connectivities.
+    verbose : bool, optional
+        If true, will print min, max, and mean element quality
+
+    Returns
+    -------
+    q : np.ndarray
+        Mean ratio element quality
+    """
+    NodeCoords = np.asarray(NodeCoords)
     NodeConn = np.asarray(NodeConn)
+
     D = np.empty((len(NodeConn),3,3))
     D[:,0,:] = NodeCoords[NodeConn[:,1]] - NodeCoords[NodeConn[:,0]]
     D[:,1,:] = NodeCoords[NodeConn[:,2]] - NodeCoords[NodeConn[:,0]]
     D[:,2,:] = NodeCoords[NodeConn[:,3]] - NodeCoords[NodeConn[:,0]]
 
-    W = np.array([
-        [1, 1/2, 1/2],
-        [0, np.sqrt(3)/2, np.sqrt(3)/6],
-        [0, 0, np.sqrt(2/3)]
-    ])            
+    # W = np.array([
+    #     [1, 1/2, 1/2],
+    #     [0, np.sqrt(3)/2, np.sqrt(3)/6],
+    #     [0, 0, np.sqrt(2/3)]
+    # ])            
+    Winv = np.array([[ 1.        , -0.57735027, -0.40824829],
+                    [ 0.        ,  1.15470054, -0.40824829],
+                    [ 0.        ,  0.        ,  1.22474487]])
     
     # Matrix multiplication in a numba-friendly style
-    S = np.dot(D.reshape(-1,3), np.linalg.inv(W)).reshape(D.shape)
+    S = np.dot(D.reshape(-1,3), Winv).reshape(D.shape)
 
     Sfrob = np.linalg.norm(S, ord='fro', axis=(1,2))
-    # Sfrob = np.sqrt(np.sum(np.sum(S ** 2, axis=1),axis=1))
     det = np.linalg.det(S)
-    inv = det < 0
-    q = 3*np.abs(det)**(2/3) / Sfrob**2
-    q[inv] = -1*q[inv]
+    q = 3*det**(2/3) / Sfrob**2
 
     if verbose:
         minq = min(q)
@@ -493,6 +513,26 @@ def MeanRatio(NodeCoords,NodeConn,verbose=False):
         print(f'Maximum Mean Ratio: {maxq:.3f} on Element {np.where(q==maxq)[0][0]:.0f}')
         print(f'Mean Mean Ratio: {meanq:.3f}')
         print('------------------------------------------')
+
+    return q
+
+@try_njit
+def _MeanRatio(NodeCoords, NodeConn):
+
+    W = np.array([
+        [1, 1/2, 1/2],
+        [0, np.sqrt(3)/2, np.sqrt(3)/6],
+        [0, 0, np.sqrt(2/3)]
+    ])            
+    Winv = np.linalg.inv(W)
+
+    q = np.zeros(len(NodeConn))
+    for i in range(len(NodeConn)):
+        D = NodeCoords[NodeConn[i,np.array([1,2,3])]] - NodeCoords[NodeConn[i,0]] 
+        S = D @ Winv
+        Sfrob = np.sqrt(np.sum(S ** 2)) # Frobenius norm
+        det = np.linalg.det(S)
+        q[i] = 3*det**(2/3) / Sfrob**2
 
     return q
 

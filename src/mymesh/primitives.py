@@ -15,6 +15,7 @@ Shapes
     :toctree: submodules/
     
     Line
+    Multiline
     Box
     Grid
     Grid2D
@@ -97,7 +98,32 @@ def Line(pt1, pt2, h=None, n=None):
     return line
 
 def Multiline(points, h=None, n=None, connect_ends=False):
-    
+    """
+    Create a multi-point line by connecting a series of points
+
+    Parameters
+    ----------
+    points : array_like
+        Point coordinates (shape=(n,3))
+    h : float, optional
+        Element size, by default None. If specified, each line segment
+        will be approximately divided into elements of size h. If neither h nor 
+        n are specified, each line segment will be represented by a single 
+        element. If both n and h are specified, n takes precedence.
+    n : _type_, optional
+        Number of elements for each segment, by default None. If specified, each 
+        line segment will be divided into n elements. If neither h nor n are
+        specified, each line segment will be represented by a single element. If 
+        both n and h are specified, n takes precedence.
+    connect_ends : bool, optional
+        If true, the last point will be connected to the first point (e.g. to 
+        create a closed loop), by default False.
+
+    Returns
+    -------
+    line : mymesh.mesh
+        Mesh of the multiline
+    """    
     if connect_ends:
         points = np.append(points, [points[0]], axis=0)
     else:

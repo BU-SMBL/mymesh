@@ -2,7 +2,11 @@
 # Created on Sun Aug  1 17:48:50 2021
 # @author: toj
 """
-Mesh conversion tools
+Mesh conversion tools.
+This module provides functions for converting between mesh types (e.g. a solid
+volumetric mesh to a surface mesh) element types (e.g. hexahedral to 
+tetrahedral), and connectivity representations (e.g. element node connectivities
+to element faces or edges).
 
 
 .. currentmodule:: mymesh.converter
@@ -2160,7 +2164,7 @@ def surf2voxel(SurfCoords,SurfConn,h,Octree='generate',mode='any'):
 
 def voxel2im(VoxelCoords, VoxelConn, Vals):
     """
-    Convert a rectilinear voxel mesh (grid) to an 3D image matrix.
+    Convert a rectilinear voxel mesh (grid) to a 3D image matrix.
 
     Parameters
     ----------
@@ -2190,44 +2194,6 @@ def voxel2im(VoxelCoords, VoxelConn, Vals):
     I = np.reshape(Vals,shape,order='F')
     
     return I
-
-def removeNodes(NodeCoords,NodeConn):
-    """
-    Removes nodes that aren't held by any element
-
-    Parameters
-    ----------
-    NodeCoords : array_like
-        Node coordinates
-    NodeConn : array_like
-        Node connectivity
-
-    Returns
-    -------
-    NewNodeCoords : list
-        New set of node coordinates where unused nodes have been removed
-    NewNodeConn : list
-        Renumbered set of node connectivities to be consistent with NewNodeCoords
-    OriginalIds : np.ndarray
-        The indices the original IDs of the nodes still in the mesh. This can be used
-        to remove entries in associated node data (ex. new_data = old_data[OriginalIds]).
-    """    
-    warnings.warn('Deprecation warning: converter.removeNodes should be replaced by utils.RemoveNodes.')
-    # removeNodes 
-    OriginalIds, inverse = np.unique([n for elem in NodeConn for n in elem],return_inverse=True)
-    NewNodeCoords = [NodeCoords[i] for i in OriginalIds]
-    
-    NewNodeConn = [[] for elem in NodeConn]
-    k = 0
-    for i,elem in enumerate(NodeConn):
-        temp = []
-        for e in elem:
-            temp.append(inverse[k])
-            k += 1
-        NewNodeConn[i] = temp
-    
-    
-    return NewNodeCoords, NewNodeConn, OriginalIds
 
 def surf2dual(NodeCoords,SurfConn,Centroids=None,ElemConn=None,NodeNormals=None,sort='ccw'):
     """
