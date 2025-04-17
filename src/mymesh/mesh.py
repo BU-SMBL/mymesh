@@ -1751,6 +1751,8 @@ class mesh:
             for key in keys:
                 celldata = [[],[],[],[],[],[],[],[]]
                 data = np.asarray(self.ElemData[key])
+                if data.dtype == bool:
+                    data = data.astype(int)
                 celldata[0] = data[elemlengths==2]  # line
                 celldata[1] = data[elemlengths==3]  # tri
                 celldata[2] = data[elemlengths==4]  # quad/tet
@@ -1761,7 +1763,12 @@ class mesh:
                 celldata[7] = data[elemlengths==20] # hex20
                 celldata = [c for c in celldata if len(c) > 0]
                 celldict[key] = celldata
-        
+        if len(self.NodeData) > 0:
+            for key in self.NodeData.keys():
+                data = np.asarray(self.NodeData[key])
+                if data.dtype == bool:
+                    data = data.astype(int)
+                self.NodeData[key] = data
         if np.all(elemlengths == elemlengths[0]):
             ArrayConn = np.array(self.NodeConn,dtype=int)
         else:
