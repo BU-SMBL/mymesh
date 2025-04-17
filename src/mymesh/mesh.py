@@ -1749,7 +1749,7 @@ class mesh:
         if len(self.ElemData) > 0:
             keys = self.ElemData.keys()
             for key in keys:
-                celldata = [[],[],[],[],[],[],[]]
+                celldata = [[],[],[],[],[],[],[],[]]
                 data = np.asarray(self.ElemData[key])
                 celldata[0] = data[elemlengths==2]  # line
                 celldata[1] = data[elemlengths==3]  # tri
