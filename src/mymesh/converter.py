@@ -645,7 +645,7 @@ def linear2quadratic(NodeCoords,NodeConn,Type=None):
     QuadCoords,fromwdg = wdg2quadratic(QuadCoords,wdgs, cleanup=False)
     QuadCoords,fromhex = hex2quadratic(QuadCoords,hexs, cleanup=False)
 
-    QuadConn = -1*np.ones((len(NodeConn),20))
+    QuadConn = -1*np.ones((len(NodeConn),20), dtype=int)
     QuadConn[edgeIdx,:3] = fromedge
     QuadConn[triIdx,:6] = fromtri
     QuadConn[quadIdx,:8] = fromquad
