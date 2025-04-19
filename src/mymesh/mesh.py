@@ -39,6 +39,18 @@ class mesh:
 
     Attributes
     ----------
+    NodeCoords : array_like, optional
+        Node coordinates, by default None. Node coordinates should be formatted 
+        as an nx3 or nx2 array of coordinates.
+    NodeConn : list, array_like, optional
+        Node connectivity of elements, by default None. Node connectivity
+        is formatted as a 2D array or list of lists where each row (or inner list)
+        is contains the node IDs of the nodes that make up the element. NodeConn
+        can contain a uniform element type or a mix of different element types.
+    Type : str or None, optional
+        Mesh type, 'surf' for surface, 'vol' for volume, 'line' for line. If not
+        provided, it will be determined automatically 
+        (:meth:`mesh.identify_type`), by default None
     NodeData
         Node data dictionary for storing scalar or vector data associated with 
         each node in the mesh. Each entry should be an array_like with the same
@@ -1749,7 +1761,7 @@ class mesh:
         if len(self.ElemData) > 0:
             keys = self.ElemData.keys()
             for key in keys:
-                celldata = [[],[],[],[],[],[],[],[]]
+                celldata = [[],[],[],[],[],[],[],[],[],[]]
                 data = np.asarray(self.ElemData[key])
                 if data.dtype == bool:
                     data = data.astype(int)
@@ -1757,10 +1769,12 @@ class mesh:
                 celldata[1] = data[elemlengths==3]  # tri
                 celldata[2] = data[elemlengths==4]  # quad/tet
                 celldata[3] = data[elemlengths==5]  # pyr
-                celldata[4] = data[elemlengths==6]  # wdg
-                celldata[5] = data[elemlengths==8]  # hex
+                celldata[4] = data[elemlengths==6]  # tri6/wdg
+                celldata[5] = data[elemlengths==8]  # quad8/hex
                 celldata[6] = data[elemlengths==10] # tet10
-                celldata[7] = data[elemlengths==20] # hex20
+                celldata[7] = data[elemlengths==13] # pyr13
+                celldata[8] = data[elemlengths==15] # wdg15
+                celldata[9] = data[elemlengths==20] # hex20
                 celldata = [c for c in celldata if len(c) > 0]
                 celldict[key] = celldata
         if len(self.NodeData) > 0:
@@ -1774,24 +1788,39 @@ class mesh:
         else:
             ArrayConn = np.array(self.NodeConn,dtype=object)
 
-        edges, tris, quads, tets, pyrs, wdgs, hexs, tet10, hex20 = [np.empty((0,0)) for i in range(9)]
+        edges, tris, tri6s, quads, quad8s, tets, tet10s, pyrs, pyr13s, wdgs, wdg15s, hexs, hex20s = [np.empty((0,0)) for i in range(13)]
 
         if np.any(elemlengths == 2): edges = np.stack(ArrayConn[elemlengths==2])
         if np.any(elemlengths == 3): tris = np.stack(ArrayConn[elemlengths==3])
         if self.Type == 'surf':
             if np.any(elemlengths == 4): quads = np.stack(ArrayConn[elemlengths==4])
+            if np.any(elemlengths == 6): tri6s = np.stack(ArrayConn[elemlengths==6])
+            if np.any(elemlengths == 8): quad8s = np.stack(ArrayConn[elemlengths==8])
             tets = []
+            wdgs = []
+            hexs = []
         else:
             quads = []
+            tri6s = []
+            quad8s = []
             if np.any(elemlengths == 4): tets = np.stack(ArrayConn[elemlengths==4])
+            if np.any(elemlengths == 6): wdgs = np.stack(ArrayConn[elemlengths==6])
+            if np.any(elemlengths == 8): hexs = np.stack(ArrayConn[elemlengths==8])
         if np.any(elemlengths == 5): pyrs = np.stack(ArrayConn[elemlengths==5])
-        if np.any(elemlengths == 6): wdgs = np.stack(ArrayConn[elemlengths==6])
-        if np.any(elemlengths == 8): hexs = np.stack(ArrayConn[elemlengths==8])
-        if np.any(elemlengths == 10): tet10 = np.stack(ArrayConn[elemlengths==10])
-        if np.any(elemlengths == 20): hex20 = np.stack(ArrayConn[elemlengths==20])
+        if np.any(elemlengths == 10): tet10s = np.stack(ArrayConn[elemlengths==10])
+        if np.any(elemlengths == 13): pyr13s = np.stack(ArrayConn[elemlengths==13])
+        if np.any(elemlengths == 15): wdg15s = np.stack(ArrayConn[elemlengths==15])
+        if np.any(elemlengths == 20): hex20s = np.stack(ArrayConn[elemlengths==20])
         
-        elems = [e for e in [('line',edges),('triangle',tris),('quad',quads),('tetra',tets),('pyramid',pyrs),('wedge',wdgs),('hexahedron',hexs),('tetra10',tet10),('hexahedron20',hex20)] if len(e[1]) > 0]
+        if np.any(elemlengths == 13) or np.any(elemlengths == 15):
+            raise Exception("meshio currently doesn't support quadratic (13-node) pyramids or quadratic (15-node) wedges.")
+
+        elems = [e for e in [('line',edges),('triangle',tris),('triangle6',tri6s),('quad',quads),('quad8',quad8s),('tetra',tets),('tetra10',tet10s),('pyramid',pyrs),('pyramid13',pyr13s),('wedge',wdgs),('wedge15',wdg15s),('hexahedron',hexs),('hexahedron20',hex20s)] if len(e[1]) > 0]
+        
         m = meshio.Mesh(self.NodeCoords, elems, point_data=self.NodeData, cell_data=celldict)
+
+        
+
         return m
     def write(self,filename,binary=True):
         """

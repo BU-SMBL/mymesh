@@ -2210,7 +2210,7 @@ def identify_type(NodeCoords, NodeConn):
 
         # Check element lengths
         lengths = (len(e) for e in NodeConn)
-        vol_elem_set = {5,6,8} # Set of unambiguous volume element lengths
+        vol_elem_set = {5,10,20} # Set of unambiguous volume element lengths
         for l in lengths:
             # NOTE: any mesh containing triangle and volume elements will be 
             # arbitrarily classified by whichever comes first.
@@ -2246,7 +2246,7 @@ def identify_type(NodeCoords, NodeConn):
 
 def identify_elem(NodeCoords, NodeConn, Type=None):
 
-    ambiguous_lengths = {4,} # Element lengths that are ambiguous
+    ambiguous_lengths = {4,6,8} # Element lengths that are ambiguous
     if type(NodeConn) is np.ndarray and NodeConn.dtype is not object:
         lengths = (np.shape(NodeConn)[1],)
     else:
@@ -2280,6 +2280,8 @@ def identify_elem(NodeCoords, NodeConn, Type=None):
             elems.append('hex')
         elif l == 10:
             elems.append('tet10')
+        elif l == 20:
+            elems.append('hex20')
         else:
             elems.append('unknown')
     return elems
