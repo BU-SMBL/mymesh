@@ -141,8 +141,6 @@ def Multiline(points, h=None, n=None, connect_ends=False):
     
     return line
         
-    
-
 def Box(bounds, h, ElemType='quad'):
     """
     Generate a surface mesh of a rectangular box. 
@@ -649,7 +647,7 @@ def Cylinder(center, radius, height, theta_resolution=20, axial_resolution=10, r
     if cap or Type.lower() == 'vol':
         if not cap:
             warnings.warn('Cannot create an un-capped cylinder with Type="vol".')
-        circle = Circle(center, radius[0], radial_resolution=radial_resolution, axis=axis, Type='surf')
+        circle = Circle(center, radius[0], theta_resolution=theta_resolution,  radial_resolution=radial_resolution, axis=axis, Type='surf')
         if Type.lower() == 'vol':
             cylinder = Extrude(circle, height, height/axial_resolution, axis=axis, ElemType=ElemType)
         elif Type.lower() == 'surf':
@@ -663,7 +661,7 @@ def Cylinder(center, radius, height, theta_resolution=20, axial_resolution=10, r
             raise ValueError('Type must be "vol" or "surf".')
     
     else:
-        circle = Circle(center, radius[0], radial_resolution=radial_resolution, axis=axis, Type='line')
+        circle = Circle(center, radius[0], theta_resolution=theta_resolution, radial_resolution=radial_resolution, axis=axis, Type='line')
         cylinder = Extrude(circle, height, height/axial_resolution, axis=axis, ElemType=ElemType)
 
     if radius[0] != radius[1]:
