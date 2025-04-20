@@ -43,7 +43,7 @@ Convex Hull
 import numpy as np
 import sys, copy, itertools, warnings, random
 from . import utils, rays, converter, mesh
-from . import try_njit, check_numba
+from . import try_njit, check_numba, _MYMESH_USE_NUMBA
 from scipy import spatial
 
 def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8):
@@ -197,7 +197,10 @@ def ConvexHull(NodeCoords,method='scipy'):
             hull = converter.surf2edges(NodeCoords, tri)
         else:
             raise Exception(f'Invalid method: "{method:s}" for 2D convex hull.')
-        Hull = mesh(NodeCoords, hull, Type='line')
+        if 'mesh' in dir(mesh):
+            Hull = mesh.mesh(NodeCoords, hull, Type='line')
+        else:
+            Hull = mesh(NodeCoords, hull, Type='line')
 
     elif nD == 3:
         if method.lower() == 'scipy':
@@ -209,7 +212,11 @@ def ConvexHull(NodeCoords,method='scipy'):
         else:
             raise Exception(f'Invalid method: "{method:s}" for 3D convex hull.')
 
-        Hull = mesh(NodeCoords, hull, Type='surf')
+        if 'mesh' in dir(mesh):
+            Hull = mesh.mesh(NodeCoords, hull, Type='surf')
+        else:
+            Hull = mesh(NodeCoords, hull, Type='surf')
+            
     else:
         raise ValueError('NodeCoords must contain two or three dimensional data with shape (n,2) or (n,3). Input NodeCoords has shape {str(np.shape(NodeCoords)):s}.')
     
@@ -283,6 +290,49 @@ def Triangle(NodeCoords,Constraints=None):
 
     return NodeConn
     
+def TetGen(NodeCoords, SurfConn, **kwargs):
+    """
+    Interface to Hang Si's Triangle via a python wrapper developed by the PyVista
+    Project :cite:p:`Sullivan2019`. To use, the python wrapper must be installed 
+    (`pip install tetgen`).
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Array of point coordinates
+    SurfConn : array_like
+        Node connectivity of the surface mesh to be tetrahedralized. If this 
+        surface isn't a triangular surface, it will be converted to one.
+    **kwargs : optional
+        Optional keyword arguments to tetgen's tetrahedralize function. See
+        https://tetgen.pyvista.org/api.html for details and options.
+        
+        One recommended option is ``nobisect=True`` (equivalent to the -Y 
+        command line switch) to preserve the surface of the input mesh. 
+        Another is ``switches='-a<vol>'`` where <vol> is the target volume for 
+        the tetrahedra (e.g. `switches='-a0.1'). By default, tetgen often 
+        creates tetrahedra that get significantly larger far away from the 
+        surface, so this option can help control the global element size.
+    Returns
+    -------
+    NewCoords : np.ndarray
+        mx3 array of node coordinates for the tetrahedralized mesh
+    NewConn : np.ndarray
+        mx4 array of node connectivities for the tetrahedralized mesh
+
+    """  
+    try:
+        import tetgen
+    except:
+        raise ImportError("This function interfaces with the PyVista python wrapper for Hang Si's TetGen. To install: pip install tetgen")
+
+    NodeCoords, SurfConn = converter.surf2tris(NodeCoords, SurfConn)
+
+    tet = tetgen.TetGen(NodeCoords, SurfConn)
+    NewCoords, NewConn = tet.tetrahedralize(**kwargs)
+
+    return NewCoords, NewConn
+
 def GiftWrapping(NodeCoords,IncludeCollinear=True):
     """
     Gift wrapping algorithm for computing the convex hull of a set of 2D points.
