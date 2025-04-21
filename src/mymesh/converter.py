@@ -161,7 +161,7 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
     
     Faces = edgs + tris + tet2faces([],tets).tolist() + tet102faces([],tet10s).tolist() + pyramid2faces([],pyrs) + wedge2faces([],wdgs) + hex2faces([],hexs).tolist()+ hex202faces([],hex20s).tolist()
     if return_FaceConn or return_FaceElem:
-        ElemIds_i = np.concatenate((edgIdx,triIdx,np.repeat(tetIdx,4),np.repeat(tet10Idx,4),np.repeat(pyrIdx,5),np.repeat(wdgIdx,5),np.repeat(hexIdx,6),np.repeat(hexIdx,20)))
+        ElemIds_i = np.concatenate((edgIdx,triIdx,np.repeat(tetIdx,4),np.repeat(tet10Idx,4),np.repeat(pyrIdx,5),np.repeat(wdgIdx,5),np.repeat(hexIdx,6),np.repeat(hex20Idx,6)))
         FaceElem = ElemIds_i
         ElemIds_j = np.concatenate((np.repeat(0,len(edgIdx)),np.repeat(0,len(triIdx)), 
                 np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
