@@ -68,6 +68,7 @@ Other Implicit Mesh Utilities
 .. autosummary::
     :toctree: submodules/
 
+    mesh2udf
     grid2fun
     grid2grad
 """
@@ -257,9 +258,9 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_direction=-1, mode='any', 
         NodeConn = GridConn
     
     if 'mesh' in dir(mesh):
-        voxel = mesh.mesh(NodeCoords, NodeConn)
+        voxel = mesh.mesh(NodeCoords, NodeConn, Type='vol')
     else:
-        voxel = mesh(NodeCoords, NodeConn)
+        voxel = mesh(NodeCoords, NodeConn, Type='vol')
     voxel.NodeData['func'] = Values
 
     return voxel
@@ -373,9 +374,9 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
 
     
     if 'mesh' in dir(mesh):
-        surface = mesh.mesh(SurfCoords, SurfConn)
+        surface = mesh.mesh(SurfCoords, SurfConn, Type='surf')
     else:
-        surface = mesh(SurfCoords, SurfConn)
+        surface = mesh(SurfCoords, SurfConn, Type='surf')
         
     return surface
 
@@ -481,9 +482,9 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
     
 
     if 'mesh' in dir(mesh):
-        tet = mesh.mesh(TetCoords, TetConn)
+        tet = mesh.mesh(TetCoords, TetConn, Type='vol')
     else:
-        tet = mesh(TetCoords, TetConn)
+        tet = mesh(TetCoords, TetConn, Type='vol')
         
     return tet
 
@@ -1727,30 +1728,30 @@ def wrapfunc(func):
     
 #     return NodeVals
 
-# def mesh2udf(M, points):
-#     """
-#     Generates an unsigned distance field for a mesh.
+def mesh2udf(M, points):
+    """
+    Generates an unsigned distance field for a mesh.
 
-#     Parameters
-#     ----------
-#     M : mesh.mesh
-#         Mesh object that will be used to define the distance field.
-#     points : array_like
-#         Points at which the signed distance field will be evaluated.
+    Parameters
+    ----------
+    M : mesh.mesh
+        Mesh object that will be used to define the distance field.
+    points : array_like
+        Points at which the signed distance field will be evaluated.
 
-#     Returns
-#     -------
-#     NodeVals : list
-#         List of signed distance values evaluated at each node in the voxel grid.
+    Returns
+    -------
+    NodeVals : list
+        List of signed distance values evaluated at each node in the voxel grid.
 
-#     """
-#     Coords = np.asarray(M.NodeCoords)
+    """
+    Coords = np.asarray(M.NodeCoords[M.SurfNodes])
 
-#     tree = KDTree(Coords)  
-#     Out = tree.query(points,1)
-#     NodeVals = Out[0].flatten()
+    tree = KDTree(Coords)  
+    Out = tree.query(points,1)
+    NodeVals = Out[0].flatten()
     
-#     return NodeVals
+    return NodeVals
 
 # def FastMarchingMethod(VoxelCoords, VoxelConn, NodeVals):
 #     """
