@@ -646,13 +646,14 @@ def tri_area(NodeCoords, NodeConn):
     area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2 
 
     return area
-    
+
+@try_njit(cache=True)
 def tet_volume(NodeCoords, NodeConn):
 
-    pt0 = NodeCoords[NodeConn][:,0]
-    pt1 = NodeCoords[NodeConn][:,1]
-    pt2 = NodeCoords[NodeConn][:,2]
-    pt3 = NodeCoords[NodeConn][:,3]
+    pt0 = NodeCoords[NodeConn[:,0]]
+    pt1 = NodeCoords[NodeConn[:,1]]
+    pt2 = NodeCoords[NodeConn[:,2]]
+    pt3 = NodeCoords[NodeConn[:,3]]
     vol = -np.sum((pt0-pt1)*np.cross((pt1-pt3),(pt2-pt3)),axis=1)/6
 
     return vol

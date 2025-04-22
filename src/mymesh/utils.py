@@ -84,7 +84,7 @@ import numpy as np
 import scipy
 import sys, warnings, copy, time, itertools, collections
 from . import converter, rays, tree, improvement, quality, mesh
-from . import try_njit
+from . import try_njit, check_numba
 
 def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     """
@@ -483,7 +483,17 @@ def CalcFaceNormal(NodeCoords,SurfConn):
     ArrayCoords = np.asarray(NodeCoords)
     _, TriConn, inv = converter.surf2tris(NodeCoords, SurfConn, return_inv=True)
     points = ArrayCoords[TriConn]
-    TriNormals = _tri_normals(points)
+    if check_numba():
+        TriNormals = _tri_normals(points)
+    else:
+        U = points[:,1,:]-points[:,0,:]
+        V = points[:,2,:]-points[:,0,:]
+        Nx = U[:,1]*V[:,2] - U[:,2]*V[:,1]
+        Ny = U[:,2]*V[:,0] - U[:,0]*V[:,2]
+        Nz = U[:,0]*V[:,1] - U[:,1]*V[:,0]
+        N = np.column_stack((Nx,Ny,Nz))
+        d = np.linalg.norm(N,axis=1)
+        TriNormals = np.divide(N, d[:,None], out=np.nan*np.ones(np.shape(N)), where=d[:,None]!=0)
 
     ElemNormals = np.zeros((len(SurfConn),3))
     np.add.at(ElemNormals, inv, TriNormals)
@@ -491,17 +501,25 @@ def CalcFaceNormal(NodeCoords,SurfConn):
 
     return ElemNormals
 
+@try_njit(cache=True)
 def _tri_normals(Tris):
     
-    U = Tris[:,1,:]-Tris[:,0,:]
-    V = Tris[:,2,:]-Tris[:,0,:]
-    Nx = U[:,1]*V[:,2] - U[:,2]*V[:,1]
-    Ny = U[:,2]*V[:,0] - U[:,0]*V[:,2]
-    Nz = U[:,0]*V[:,1] - U[:,1]*V[:,0]
-    N = np.vstack([Nx,Ny,Nz]).T
-    d = np.linalg.norm(N,axis=1)
-    with np.errstate(divide='ignore', invalid='ignore'):
-        ElemNormals = (N/d[:,None])
+    ElemNormals = np.empty((len(Tris),3))
+    for i,tri in enumerate(Tris):
+        U = tri[1] - tri[0]
+        V = tri[2] - tri[0]
+
+        Nx = U[1]*V[2] - U[2]*V[1]
+        Ny = U[2]*V[0] - U[0]*V[2]
+        Nz = U[0]*V[1] - U[1]*V[0]
+
+        norm = np.sqrt(Nx**2 + Ny**2 + Nz**2)
+        if norm != 0:
+            ElemNormals[i,0] = Nx/norm
+            ElemNormals[i,1] = Ny/norm
+            ElemNormals[i,2] = Nz/norm
+        else:
+            ElemNormals[i] = np.repeat(np.nan,3)
     
     return ElemNormals
 
