@@ -3536,7 +3536,7 @@ MC33_Signs = np.array([-1,
          1,
          -1])
 
-def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', Type='surf', flip=False, edgemode='constant', cleanup=True):
+def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', Type='surf', VertexValues=False, flip=False, edgemode='constant', cleanup=True):
     """
     Marching squares algorithm applied to 2D image data.
 
@@ -3563,6 +3563,10 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', Type=
     Type : str, optional
         Determines whether to generate a surface mesh ('surf') or volume mesh ('vol'), 
         by default 'surf'
+    VertexValues : bool, optional
+        If True, the values in the image array are treated as the vertices of 
+        the cubes, otherwise, they are treated as voxel values and vertices
+        are obtained through interpolation, by default, False.
     flip : bool, optional
         Flip the interior/exterior of the mesh, by default False. By default, values less than the threshold are assumed to be the “inside” of the mesh. If the inside is denoted by values greater than the threshold, set flip=True.
     edgemode : str, optional
@@ -3596,24 +3600,31 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', Type=
     if interpolation == "cubic":
         # I = np.pad(I,1,mode=edgemode)
         Padding = 1
-    
-    x1 = np.arange(0,I.shape[1]*h[0],h[0]) + h[0]/2
-    y1 = np.arange(0,I.shape[0]*h[1],h[1]) + h[1]/2
-    
-    X = np.repeat(np.atleast_2d(x1),I.shape[0],axis=0) - Padding*h[0]
-    Y = np.repeat(np.atleast_2d(y1).T,I.shape[1],axis=1) - Padding*h[1]
-    Z = np.zeros(X.shape)
-    
-    
-    Xv = np.repeat(np.atleast_2d(np.arange(-Padding,I.shape[1]+(1+Padding),1)),  I.shape[0]+1+2*Padding,axis=0) * h[0]
-    Yv = np.repeat(np.atleast_2d(np.arange(-Padding,I.shape[0]+(1+Padding),1)).T,I.shape[1]+1+2*Padding,axis=1) * h[1]
-    
-    # TODO: This is major bottleneck for cubic
-    interp = scipy.interpolate.RegularGridInterpolator((y1,x1),I,fill_value=None,method='linear',bounds_error=False)
-    Iv = interp((Yv.flatten(),Xv.flatten())).reshape(Xv.shape)
-    
-    X = Xv; Y = Yv; I = Iv; Z = np.zeros(Xv.shape)
-    
+
+    if not VertexValues:
+        x1 = np.arange(0,I.shape[1],1)*h[0] + h[0]/2
+        y1 = np.arange(0,I.shape[0],1)*h[1] + h[1]/2
+        
+        X = np.repeat(np.atleast_2d(x1),I.shape[0],axis=0) - Padding*h[0]
+        Y = np.repeat(np.atleast_2d(y1).T,I.shape[1],axis=1) - Padding*h[1]
+        Z = np.zeros(X.shape)
+        
+        
+        Xv = np.repeat(np.atleast_2d(np.arange(-Padding,I.shape[1]+(1+Padding),1)),  I.shape[0]+1+2*Padding,axis=0) * h[0]
+        Yv = np.repeat(np.atleast_2d(np.arange(-Padding,I.shape[0]+(1+Padding),1)).T,I.shape[1]+1+2*Padding,axis=1) * h[1]
+        
+        # TODO: This is major bottleneck for cubic
+        interp = scipy.interpolate.RegularGridInterpolator((y1,x1),I,fill_value=None,method='linear',bounds_error=False)
+        Iv = interp((Yv.flatten(),Xv.flatten())).reshape(Xv.shape)
+        
+        X = Xv; Y = Yv; I = Iv; #Z = np.zeros(Xv.shape)
+    else:
+        X, Y = np.meshgrid(np.arange(-Padding,I.shape[0]+(Padding)),
+                                 np.arange(-Padding,I.shape[1]+(Padding)),
+                                 indexing='ij'
+                                 )*np.asarray(h)[:,None,None]
+        I = np.pad(I,Padding,mode=edgemode)
+
     edgeLookup = np.array([
         [0, 0],  # Corner 0
         [1, 1],  # Corner 1
@@ -3746,7 +3757,7 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', Type=
                 ]).T
     else:
         raise Exception('Invalid input "{:s}" for interpolation. Must be one of "midpoint", "linear", or "cubic".'.format(interpolation))
-            
+    NewCoords[:,[0,1]] = NewCoords[:,[1,0]]  
     NewConn = np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F')
     if cleanup:
         NewCoords,NewConn,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
