@@ -44,9 +44,9 @@ def MeshBooleans(Surf1, Surf2, tol=1e-8):
     Difference : mesh.mesh
         Mesh object containing the difference of the two input surfaces
     """    
-    if (Surf1.BoundaryNodes) > 0:
+    if len(Surf1.BoundaryNodes) > 0:
         warnings.warn('Surf1 is not a fully closed surface - boolean operations may produce unexpected results.')
-    if (Surf2.BoundaryNodes) > 0:
+    if len(Surf2.BoundaryNodes) > 0:
         warnings.warn('Surf2 is not a fully closed surface - boolean operations may produce unexpected results.')
 
     eps = tol/100
