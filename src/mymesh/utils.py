@@ -139,12 +139,15 @@ def getElemConnectivity(NodeCoords,NodeConn):
     ElemConn : list
         List of elements connected to each node.
     """    
-    nodes,elems = zip(*[(n, i) for i, elem in enumerate(NodeConn) for n in elem])
-    NotInMesh = set(range(len(NodeCoords))).difference(nodes)
-    nodes += tuple(NotInMesh)
-    elems += tuple(itertools.repeat(-1,len(nodes)))
+    if len(NodeConn) > 0:
+        nodes,elems = zip(*[(n, i) for i, elem in enumerate(NodeConn) for n in elem])
+        NotInMesh = set(range(len(NodeCoords))).difference(nodes)
+        nodes += tuple(NotInMesh)
+        elems += tuple(itertools.repeat(-1,len(nodes)))
 
-    ElemConn = [list(set(elem for _, elem in group if elem != -1)) for node, group in itertools.groupby(sorted(zip(nodes,elems), key=lambda x: x[0]), key=lambda x: x[0])] 
+        ElemConn = [list(set(elem for _, elem in group if elem != -1)) for node, group in itertools.groupby(sorted(zip(nodes,elems), key=lambda x: x[0]), key=lambda x: x[0])] 
+    else:
+        ElemConn = []
 
     return ElemConn
 
@@ -1658,7 +1661,7 @@ def MergeMesh(NodeCoords1, NodeConn1, NodeCoords2, NodeConn2, NodeVals1=[], Node
         if cleanup:
             MergeCoords,MergeConn,inv = DeleteDuplicateNodes(MergeCoords,MergeConn,return_inv=True)
             for i in range(len(MergeVals)):
-                MergeVals[i] = [MergeVals[i][j] for j in idx]
+                MergeVals[i] = [MergeVals[i][j] for j in inv]
                 
             return MergeCoords, MergeConn, MergeVals
     
