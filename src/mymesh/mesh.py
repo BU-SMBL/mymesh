@@ -13,7 +13,7 @@ from . import utils, implicit, improvement, contour, converter, quality, rays, c
 from sys import getsizeof
 import scipy
 import numpy as np
-import copy, warnings, pickle, json
+import os, copy, warnings, pickle, json
 
 class mesh:  
     """
@@ -51,6 +51,9 @@ class mesh:
         Mesh type, 'surf' for surface, 'vol' for volume, 'line' for line. If not
         provided, it will be determined automatically 
         (:meth:`mesh.identify_type`), by default None
+    verbose : bool
+        Verbosity mode of the mesh. If True, some operations will print activity or other information, 
+        by default True
     NodeData
         Node data dictionary for storing scalar or vector data associated with 
         each node in the mesh. Each entry should be an array_like with the same
@@ -99,6 +102,7 @@ class mesh:
         else:
             self.Type = Type
 
+        # Mesh settings
         self.verbose = verbose
 
         # Properties:
@@ -761,52 +765,205 @@ class mesh:
         return M
     
     # Modification Methods
-    def addNodes(self,NewNodeCoords,NodeSet=None):
-        if type(NewNodeCoords) is np.ndarray:
-            NewNodeCoords = NewNodeCoords.tolist()
-        if type(self.NodeCoords) is np.ndarray:
-            self.NodeCoords = self.NodeCoords.tolist()
-        assert type(NewNodeCoords) is list, 'Supplied NodeCoords must be list or np.ndarray'
-        
+    def addNodes(self,NodeCoords,NodeSet=None):
+        """
+        Add nodes to the mesh. These nodes will be appended to the end of the 
+        coordinates array (:attr:`mesh.NodeCoords`).
+
+        Parameters
+        ----------
+        NodeCoords : array_like
+            Coordinates of the new node(s). This can either be a single node 
+            (shape=(3,)) or multiple nodes (shape=(n,3)).
+        NodeSet : str, optional
+            If provided, name of a node set that the new nodes will be added to 
+            in mesh.NodeSets[<NodeSet>], by default None.
+        """   
+
+        if len(np.shape(NodeCoords)) == 1:
+            NodeCoords = [NodeCoords]
         nnode = self.NNode
-        self.NodeCoords += NewNodeCoords
+        if type(self.NodeCoords) is np.ndarray:
+            self.NodeCoords = np.vstack([self.NodeCoords, NodeCoords])
+        else:
+            if type(NodeCoords) is np.ndarray:
+                NodeCoords = NodeCoords.tolist()
+            elif type(NodeCoords) is not list:
+                NodeCoords = list(NodeCoords)
+            self.NodeCoords += NewCoords
+
+        
         if NodeSet in self.NodeSets.keys():
-            self.NodeSets[NodeSet] = list(self.NodeSets[NodeSet]) + list(range(nnode,self.NNode))
+            self.NodeSets[NodeSet] = set(self.NodeSets[NodeSet]).union(range(nnode,self.NNode))
         elif NodeSet:
-            self.NodeSets[NodeSet] = range(nnode,self.NNode)            
+            self.NodeSets[NodeSet] = set(range(nnode,self.NNode))
+
     def addFaces(self,NewFaces,FaceSet=None):
-        if type(NewFaces) is np.ndarray:
-            NewFaces = NewFaces.tolist()
-        assert type(NewFaces) is list, 'Supplied Faces must be list or np.ndarray'
-        nface = self.NFace
-        self._Faces += NewFaces
+        """
+        Add new faces to the mesh. These faces will be appended to the end of
+        the list of faces (:meth:`mesh.Faces`). This should be done very carefully and
+        only used for advanced manipulation of the mesh, as added faces may not 
+        make sense with the rest of the mesh. If the mesh has been changed and
+        updated faces are desired, it's safest to use :meth:`mesh.reset` then
+        recompute the faces with (:meth:`mesh.Faces`). Note that if Faces hasn't
+        been referenced before (``mesh._Faces==[]``) they will be obtained in
+        this function, so if the new faces are already part of the mesh, this may 
+        produce redundant faces.
+        
+
+        Parameters
+        ----------
+        NewFaces : array_like
+            Node connectivities of the new face(s). This can either be a single 
+            face (shape=(1,m)) or multiple faces (shape=(n,m) or list of lists 
+            with length n for mixed element type faces). If a single face, it
+            must be a 2D array or list of a single list (i.e. [[a,b,c]]).
+        FaceSet : str, optional
+            If provided, name of a face set that the new faces will be added to 
+            in mesh.FaceSets[<FaceSet>], by default None.
+        """  
+        nface = self.NFace      
+        if type(self._Faces) is np.ndarray:
+            # If faces are an array, see if the new faces are compatible, if not convert to list of lists
+            try:
+                newshape = np.shape(NewFaces)
+            except:
+                self._Faces = self._Faces.tolist()
+                newshape = (len(NewFaces),-1)
+        else:
+            if type(NewFaces) is np.ndarray:
+                NewFaces = NewFaces.tolist()
+            elif type(NewFaces) is not list:
+                NewFaces = list(NewFaces)
+            newshape = (len(NewFaces),-1)
+
+        if len(newshape) != 2:
+            raise ValueError('NewFaces must be a 2D array or list of lists')
+        
+        if newshape[1] == -1:
+            # List concatenation
+            self._Faces += NewFaces
+        else:
+            self._Faces = np.vstack([self.Faces, NewFaces])
+        
+        
         if FaceSet in self.FaceSets.keys():
-            self.FaceSets[FaceSet] = list(self.FaceSets[FaceSet]) + list(range(nface,self.NFace))
+            self.FaceSets[FaceSet] = set(self.FaceSets[FaceSet]).union(range(nface,self.NFace))
         elif FaceSet:
-            self.FaceSets[FaceSet] = range(nface,self.NFace)            
+            self.FaceSets[FaceSet] = set(range(nface,self.NFace))
+
     def addEdges(self,NewEdges,EdgeSet=None):
-        if type(NewEdges) is np.ndarray:
-            NewEdges = NewEdges.tolist()
-        assert type(NewEdges) is list, 'Supplied Edges must be list or np.ndarray'
-        nedge = self.NEdge
-        self._Edges += NewEdges
+        """
+        Add new edges to the mesh. These edges will be appended to the end of
+        the list of edges (:meth:`mesh.Edges`). This should be done very carefully and
+        only used for advanced manipulation of the mesh, as added edges may not 
+        make sense with the rest of the mesh. If the mesh has been changed and
+        updated edges are desired, it's safest to use :meth:`mesh.reset` then
+        recompute the edges with (:meth:`mesh.Edges`). Note that if Edges hasn't
+        been referenced before (``mesh._Edges==[]``) they will be obtained in
+        this function, so if the new edges are already part of the mesh, this may 
+        produce redundant edges.
+        
+
+        Parameters
+        ----------
+        NewEdges : array_like
+            Node connectivities of the new edge(s). This can either be a single 
+            edge (shape=(1,m)) or multiple edges (shape=(n,m) or list of lists 
+            with length n for mixed element type edges). If a single edge, it
+            must be a 2D array or list of a single list (i.e. [[a,b,c]]).
+        EdgeSet : str, optional
+            If provided, name of a edge set that the new edges will be added to 
+            in mesh.EdgeSets[<EdgeSet>], by default None.
+        """  
+
+        nedge = self.NEdge   
+        if type(self._Edges) is np.ndarray:
+            # If edges are an array, see if the new edges are compatible, if not convert to list of lists
+            try:
+                newshape = np.shape(NewEdges)
+            except:
+                self._Edges = self._Edges.tolist()
+                newshape = (len(NewEdges),-1)
+        else:
+            if type(NewEdges) is np.ndarray:
+                NewEdges = NewEdges.tolist()
+            elif type(NewEdges) is not list:
+                NewEdges = list(NewEdges)
+            newshape = (len(NewEdges),-1)
+
+        if len(newshape) != 2:
+            raise ValueError('NewEdges must be a 2D array or list of lists')
+        
+        if newshape[1] == -1:
+            # List concatenation
+            self._Edges += NewEdges
+        else:
+            self._Edges = np.vstack([self.Edges, NewEdges])
+        
+        
         if EdgeSet in self.EdgeSets.keys():
-            self.EdgeSets[EdgeSet] = list(self.EdgeSets[EdgeSet]) + list(range(nedge,self.NEdge))
+            self.EdgeSets[EdgeSet] = set(self.EdgeSets[EdgeSet]).union(range(nedge,self.NEdge))
         elif EdgeSet:
-            self.EdgeSets[EdgeSet] = range(nedge,self.NEdge) 
-    def addElems(self,NewNodeConn,ElemSet=None):
-        if type(NewNodeConn) is np.ndarray:
-            NewNodeConn = NewNodeConn.tolist()
+            self.EdgeSets[EdgeSet] = set(range(nedge,self.NEdge))
+
+    def addElems(self,NodeConn,ElemSet=None,reset=True):
+        """
+        Add new elements to the mesh. These elements will be appended to the end 
+        of the list of elements (:attr:`mesh.NodeConn`) and should reference 
+        nodes that already exist in the mesh. Note that properties that are
+        calculated on demand are not updated by this operation - it's safest
+        to use the reset=True option or use :meth:`mesh.reset` after this 
+        operation
+
+        Parameters
+        ----------
+        NodeConn : array_like
+            Node connectivities of the new element(s). This can either be a 
+            single element (shape=(1,m)) or multiple elements (shape=(n,m) or 
+            list of lists with length n for mixed element type elements). If a 
+            single element, it must be a 2D array or list of a single list 
+            (i.e. [[a,b,c]]).
+        ElemSet : str, optional
+            If provided, name of a element set that the new elements will be 
+            added to in mesh.ElemSets[<ElemSet>], by default None.
+        reset : bool
+            If True, will reset all cached mesh properties (e.g. Faces, 
+            ElemNeighbors)
+        """  
+        nelem = self.NElem   
         if type(self.NodeConn) is np.ndarray:
-            self.NodeConn = self.NodeConn.tolist()
-        assert type(NewNodeConn) is list, 'Supplied NodeConn must be list or np.ndarray'
-        nelem = self.NElem
-        self.NodeConn += NewNodeConn
+            # If NodeConn is an array, see if the new elements are compatible, if not convert to list of lists
+            try:
+                newshape = np.shape(NodeConn)
+            except:
+                self.NodeConn = self.NodeConn.tolist()
+                newshape = (len(NodeConn),-1)
+        else:
+            if type(NodeConn) is np.ndarray:
+                NodeConn = NodeConn.tolist()
+            elif type(NodeConn) is not list:
+                NodeConn = list(NodeConn)
+            newshape = (len(NodeConn),-1)
+
+        if len(newshape) != 2:
+            raise ValueError('NodeConn must be a 2D array or list of lists')
+        
+        if newshape[1] == -1:
+            # List concatenation
+            self.NodeConn += NodeConn
+        else:
+            self.NodeConn = np.vstack([self.NodeConn, NodeConn])
+        
+        
         if ElemSet in self.ElemSets.keys():
-            self.ElemSets[ElemSet] = list(self.ElemSets[ElemSet]) + list(range(nelem,self.NElem))
+            self.ElemSets[ElemSet] = set(self.ElemSets[ElemSet]).union(range(nelem,self.NElem))
         elif ElemSet:
-            self.ElemSets[ElemSet] = range(nelem,self.NElem) 
+            self.ElemSets[ElemSet] = set(range(nelem,self.NElem))
         self._ElemType = [] # resetting, will be recalculated if requested
+        if reset:
+            self.reset()
+
     def removeElems(self, ElemIds):
         
         KeepSet = set(range(self.NElem)).difference(ElemIds)
@@ -941,7 +1098,7 @@ class mesh:
         NewFaceConn = newIds[utils.PadRagged(self.FaceConn)]
         
         self._Faces = utils.ExtractRagged(NewFaces,dtype=int)
-        self._FaceElemConn = NewFaceElemConn.tolist()
+        self._FaceElemConn = NewFaceElemConn
         self._FaceConn = utils.ExtractRagged(NewFaceConn,dtype=int)
     
     def CreateBoundaryLayer(self,nLayers,FixedNodes=set(),StiffnessFactor=1,Thickness=None,OptimizeTets=True,FaceSets='surf'):
@@ -1265,7 +1422,7 @@ class mesh:
             # NewCoords[NodeIds] = NewRelevantCoords
         self.reset()
     
-    def Contour(self, scalars, threshold, threshold_direction=1, mixed_elements=True, Type=None):
+    def Contour(self, scalars, threshold, threshold_direction=1, mixed_elements=True, Type=None, interpolation='linear'):
         """
         Contour the mesh to extract an isosurface/isoline based on nodal scalar values.
 
@@ -1308,7 +1465,7 @@ class mesh:
         NewCoords, NewConn = contour.MarchingElements(self.NodeCoords, self.NodeConn,
                                                       scalars, threshold=threshold, 
                                                       flip=flip, mixed_elements=mixed_elements, 
-                                                      Type=Type)
+                                                      Type=Type, interpolation=interpolation)
         M = mesh(NewCoords, NewConn)
         return M
 
@@ -1838,7 +1995,17 @@ class mesh:
         if self.NNode == 0:
             warnings.warn('Mesh empty - file not written.')
             return
-        m = self.mymesh2meshio()
+        if self.NElem == 0:
+            self.NodeConn = [[0,0,0]]
+        if os.path.splitext(filename)[1].lower() == '.stl':
+            if self.Type.lower() == 'vol':
+                M = self.Surface.copy()
+            else:
+                M = self.copy()
+            M.NodeCoords, M.NodeConn = converter.surf2tris(M.NodeCoords, M.NodeConn)
+        else:
+            M = self
+        m = M.mymesh2meshio()
         if binary is not None:
             m.write(filename,binary=binary)
         else:
@@ -2080,3 +2247,270 @@ class mesh:
             return Edges, EdgeConn, EdgeElemConn
         else:
             return [], [], []
+
+    def mesh2dmesh(self):
+        """
+        Convert to a dynamic mesh (dmesh)
+
+        Parameters
+        ----------
+        state : bool or NoneType, optional
+            If None, Topological Mode will be toggled, otherwise it will be set
+            to the state specified, by default None
+        """        
+
+        # Ensure relevant data is in properly typed numpy arrays
+        try:
+            NodeConn = np.asarray(self.NodeConn, dtype=np.int64)
+        except:
+            raise ValueError('Dynamic meshes are only valid for meshes with a single element type.')
+        
+        NodeCoords = np.asarray(self.NodeCoords, dtype=np.float64)
+
+        Edges = np.asarray(self.Edges, dtype=np.int64)
+
+        try:
+            Faces = np.asarray(self.Faces, dtype=np.int64)
+        except:
+            raise ValueError('Dynamic meshes are not valid for meshes with elements that have mixed faces (e.g. wedges or pyramids).')
+        
+        # ElemNeighbors = utils.PadRagged(self.ElemNeighbors. fillval=-1)
+        
+        ElemConn_head = np.full(self.NNode, -1, dtype=np.int64)
+        ElemConn_elem = np.array([e for elems in self.ElemConn for e in elems], dtype=np.int64)
+        ElemConn_next = np.full(len(ElemConn_elem), -1, dtype=np.int64)
+        ElemConn_prev = np.full(len(ElemConn_elem), -1, dtype=np.int64)
+        ElemConn_tail = np.full(self.NNode, -1, dtype=np.int64)
+        k = 0
+        for i,elems in enumerate(self.ElemConn):
+            if len(elems) == 0:
+                continue
+            ElemConn_head[i] = k
+            # ElemConn_prev[k] = -1 # Implied by initialization
+            for e in elems[:-1]:
+                ElemConn_next[k] = k+1
+                ElemConn_prev[k+1] = k
+                k += 1
+            # ElemConn_next[k] = -1 # Implied by initialization
+            ElemConn_tail[i] = k
+            k += 1
+        
+        # if self.Type == 'surf':
+        #     # Neighbors are connected by edges
+        #     NeighborConnection = len(Edges[0])
+        # elif self.Type == 'vol':
+        #     # Neighbors are connected by faces
+        #     NeighborConnection = len(Faces[0])
+
+        T = dmesh(NodeCoords, NodeConn, ElemConn_head, ElemConn_elem, ElemConn_next, ElemConn_prev, ElemConn_tail)
+
+        return T
+
+import numba
+from numba.experimental import jitclass
+@jitclass([
+    ('NodeCoords', numba.float64[:,:]),
+    ('NodeConn', numba.int64[:,:]),
+    ('ElemConn_head', numba.int64[:]),
+    ('ElemConn_elem', numba.int64[:]),
+    ('ElemConn_next', numba.int64[:]),
+    ('ElemConn_prev', numba.int64[:]),
+    ('ElemConn_tail', numba.int64[:]),
+    ('ElemConn_size', numba.int64),
+    ('NNode', numba.int64),
+    ('NElem', numba.int64),
+    ('Labels', numba.int64[:]),
+])
+class dmesh:
+
+    def __init__(self, NodeCoords, NodeConn, ElemConn_head, ElemConn_elem, ElemConn_next, ElemConn_prev, ElemConn_tail,):
+        self.NodeCoords = NodeCoords
+        self.NodeConn = NodeConn
+        # self.ElemNeighbors = ElemNeighbors
+        self.ElemConn_head = ElemConn_head # Points from a node to the first connected element
+        self.ElemConn_elem = ElemConn_elem # Element ids
+        self.ElemConn_next = ElemConn_next # Points to the next element id connected to the node
+        self.ElemConn_prev = ElemConn_prev # Points to the previous element id connected to the node
+        self.ElemConn_tail = ElemConn_tail # Points from a node to the last connected element
+        self.ElemConn_size = len(self.ElemConn_elem) # 
+        # self.ElemConn_slots = [] # E
+        # self.NeighborConnection = NeighborConnection # Number of shared nodes required to be considered an element neighbor. If Faces/Edges get added, this could be removed
+
+        self.NNode = len(self.NodeCoords)
+        self.NElem = len(self.NodeConn)
+        self.Labels = np.empty(0, np.int64)
+
+    def addNodes(self,NodeCoords,labels=np.array([], dtype=np.int64)):
+        """
+        Add nodes to the mesh.
+
+        Parameters
+        ----------
+        NodeCoords : array_like
+            Coordinates of the new node(s). This can either be a single node 
+            (shape=(3,)) or multiple nodes (shape=(n,3)).
+
+        """   
+
+        NodeCoords = np.atleast_2d(NodeCoords)
+        NewLength = self.NNode + len(NodeCoords)
+        if len(self.NodeCoords) < NewLength:
+            # Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.
+            # If the new addition is more than double the current length, the array will be extended 
+            # to exactly fit the new nodes
+            newsize = np.maximum(NewLength,len(self.NodeCoords)*2)
+            self.NodeCoords = np.resize(self.NodeCoords, (newsize,3))
+            
+            if len(self.Labels)>0:
+                self.Labels = np.resize(self.Labels, newsize)
+
+            # update the ElemConn structure as well
+            self.ElemConn_head = np.resize(self.ElemConn_head, newsize)
+            self.ElemConn_tail = np.resize(self.ElemConn_tail, newsize)
+        
+        if labels is not None and len(self.Labels)>0:
+            labels = np.atleast_1d(labels)
+            self.Labels[self.NNode:NewLength] = labels
+
+        self.NodeCoords[self.NNode:NewLength] = NodeCoords
+        self.ElemConn_head[self.NNode:NewLength] = -1
+        self.ElemConn_tail[self.NNode:NewLength] = -1
+        self.NNode = NewLength
+
+    def addElem(self,NodeConn):
+        """
+        Add a new element to the mesh. The element should reference 
+        nodes that already exist in the mesh.
+
+        Parameters
+        ----------
+        NodeConn : array_like
+            Node connectivity of the new element. This should be a single
+            element (shape=(m,))
+        """  
+
+        NewLength = self.NElem + 1
+        NewElemId = self.NElem
+        if len(self.NodeConn) < NewLength:
+            # Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.
+            # If the new addition is more than double the current length, the array will be extended 
+            # to exactly fit the new elements
+            self.NodeConn = np.resize(self.NodeConn, (int(np.maximum(NewLength,len(self.NodeConn)*2)),np.shape(self.NodeConn)[1]))
+
+        self.NodeConn[NewElemId] = NodeConn
+
+        # Update ElemConn with new connections
+        for node in self.NodeConn[NewElemId]:
+            self.addElemConn(node, NewElemId)
+
+
+
+        self.NElem += 1
+
+    def removeElem(self, ElemId):
+        # Remove an element from the mesh by swap removal
+        # Swaps the position of the element definition in NodeConn to the position
+        # of the last defined element. References to the last element are updated
+        # to refer to the swapped position
+        # NOTE: If removing multiple elements, be sure to remove them in reverse
+        # order (largest first)
+
+        LastId = self.NElem - 1
+        oldnodes = self.NodeConn[LastId].copy()
+
+        # Remove connections to the old element
+        for node in self.NodeConn[ElemId]:
+            self.removeElemConn(node,ElemId)
+
+        if ElemId != LastId:
+            # Swap element @ ElemId with the element in the last position
+            self.NodeConn[ElemId] = oldnodes
+            # Update ElemConn for each node in the element
+            for n in oldnodes:
+                i = self.ElemConn_head[n]
+                while i != -1:
+                    if self.ElemConn_elem[i] == LastId:
+                        self.ElemConn_elem[i] = ElemId
+                    i = self.ElemConn_next[i]
+
+        self.NElem -= 1
+
+    def swapNode(self, NodeId1, NodeId2):
+
+        # Swap all references of Node1 to Node2
+        elemconn1 = self.getElemConn(NodeId1)
+        elemconn2 = self.getElemConn(NodeId2)
+        for ElemId in elemconn1:
+            elem = self.NodeConn[ElemId]
+            elem[elem == NodeId1] = NodeId2
+            self.NodeConn[ElemId] = elem
+            self.removeElemConn(NodeId1, ElemId)
+            if ElemId not in elemconn2:
+                self.addElemConn(NodeId2, ElemId)
+    
+    def getElemConn(self, NodeId):
+        
+        i = self.ElemConn_head[NodeId]
+        ElemConn = []
+        while i != -1:
+            ElemConn.append(self.ElemConn_elem[i])
+            i = self.ElemConn_next[i]
+        return ElemConn
+
+    def addElemConn(self, NodeId, ElemId):
+        # Add a connection between an existing node and an element
+        
+        if len(self.ElemConn_elem) == self.ElemConn_size:
+            # Amortized O(1) insertion by doubling 
+            self.ElemConn_elem = np.resize(self.ElemConn_elem, np.maximum(len(self.ElemConn_elem)*2,1))
+            self.ElemConn_next = np.resize(self.ElemConn_next, np.maximum(len(self.ElemConn_next)*2,1))
+            self.ElemConn_prev = np.resize(self.ElemConn_prev, np.maximum(len(self.ElemConn_prev)*2,1))
+
+        i = self.ElemConn_tail[NodeId]
+        newIdx = self.ElemConn_size
+        self.ElemConn_elem[newIdx] = ElemId
+        if i == -1:
+            # If this is the first connection for the node
+            self.ElemConn_head[NodeId] = newIdx
+            self.ElemConn_prev[newIdx] = -1
+        else:
+            self.ElemConn_next[i] = newIdx
+            self.ElemConn_prev[newIdx] = i
+
+        self.ElemConn_tail[NodeId] = newIdx
+        self.ElemConn_next[newIdx] = -1
+
+        self.ElemConn_size += 1
+
+    def removeElemConn(self, NodeId, ElemId):
+        # Remove a connection between a node and an element
+
+        # Find the position of the element
+        i = self.ElemConn_head[NodeId]
+        while i != -1:
+            elem = self.ElemConn_elem[i]
+            if elem == ElemId:
+                # Remove
+                if self.ElemConn_prev[i] == -1:
+                    # this node is the head
+                    self.ElemConn_head[NodeId] = self.ElemConn_next[i]
+                else:
+                    self.ElemConn_next[self.ElemConn_prev[i]] = self.ElemConn_next[i]
+
+                if self.ElemConn_next[i] == -1:
+                    # this node is the tail
+                    self.ElemConn_tail[NodeId] = self.ElemConn_prev[i]
+                else:
+                    self.ElemConn_prev[self.ElemConn_next[i]] = self.ElemConn_prev[i]
+
+                self.ElemConn_elem[i] = -1
+                self.ElemConn_next[i] = -1
+                self.ElemConn_prev[i] = -1
+                break
+            else:
+                i = self.ElemConn_next[i]
+                
+
+        # NOTE: Not currently tracking freed slots so the remnants of old connections
+        # remain, taking up space. Could implement a tracker of free indices
+        # to all for reuse
