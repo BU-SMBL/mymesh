@@ -922,7 +922,7 @@ def diamond(x,y,z):
     """
     return sp.sin(2*np.pi*x)*sp.sin(2*np.pi*y)*sp.sin(2*np.pi*z) + sp.sin(2*np.pi*x)*sp.cos(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.cos(2*np.pi*x)*sp.sin(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.cos(2*np.pi*x)*sp.cos(2*np.pi*y)*sp.sin(2*np.pi*z)
 
-def cylinder(center, radius):
+def cylinder(center, radius, axis=2):
     """
     Implicit function of a cylinder.
 
@@ -933,6 +933,8 @@ def cylinder(center, radius):
         cylindrical cross section
     radius : float
         Radius of the cylinder
+    axis : int
+        Long axis of the cylinder (0=x, 1=y, 2=z)
 
     Returns
     -------
@@ -946,7 +948,14 @@ def cylinder(center, radius):
         surface = implicit.SurfaceMesh(implicit.cylinder([0,0,0], 1), [-1,1,-1,1,-1,1], 0.1)
         surface.plot(bgcolor='w')
     """    
-    func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 - radius**2
+
+    if axis == 2:
+        func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 - radius**2
+    elif axis == 1:
+        func = lambda x, y, z : (x-center[0])**2 + (z-center[2])**2 - radius**2
+    elif axis == 0:
+        func = lambda x, y, z : (z-center[2])**2 + (y-center[1])**2 - radius**2
+
     return func
 
 def box(x1,x2,y1,y2,z1,z2):    
@@ -1174,7 +1183,7 @@ def union(f1,f2):
         Union of the two sets of values
     """ 
     if callable(f1) and callable(f2):
-        Union = unionf(f1)
+        Union = unionf(f1, f2)
     elif type(f1) is sp.Basic and type(f2) is sp.Basic:
         Union = unions(f1, f2)
     else:
@@ -1204,7 +1213,7 @@ def diff(f1,f2):
         Difference of the two sets of values
     """ 
     if callable(f1) and callable(f2):
-        Diff = difff(f1)
+        Diff = difff(f1,f2)
     elif type(f1) is sp.Basic and type(f2) is sp.Basic:
         Diff = diffs(f1, f2)
     else:
@@ -1232,7 +1241,7 @@ def intersection(f1,f2):
         Intersection of the two sets of values
     """
     if callable(f1) and callable(f2):
-        Intersection = intersectionf(f1)
+        Intersection = intersectionf(f1, f2)
     elif type(f1) is sp.Basic and type(f2) is sp.Basic:
         Intersection = intersections(f1, f2)
     else:
