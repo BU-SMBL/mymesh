@@ -1493,6 +1493,8 @@ class mesh:
 
                 '==' - Keeping condition is `value == threshold`.
 
+                '!=' - Keeping condition is `value != threshold`.
+
             Double threshold options:
                 'in' - Inside bounds, inclusive of thresholds, default. 
 
@@ -1593,6 +1595,10 @@ class mesh:
                 lower = threshold
                 upper = threshold
                 mode = 'in'
+            elif mode == '!=':
+                lower = threshold
+                upper = threshold
+                mode = 'xout'
             else:
                 raise ValueError('For single-threshold inputs, mode must be ">=", ">", "<=", or "<".')
         
