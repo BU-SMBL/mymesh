@@ -1362,49 +1362,32 @@ def Octree2Voxel(root, sparse=True):
         Node connectivity of the hexahedral voxel mesh.
 
     """    
-    VoxelConn = []
-    VoxelCoords = []
-    if sparse:
-        condition = lambda node : node.state == 'leaf'
-    else:
-        condition = lambda node : node.state == 'leaf' or node.state == 'empty' or len(node.children) == 0
 
-    def recurSearch(node):
-        if condition(node):
-            VoxelConn.append([len(VoxelCoords)+0, len(VoxelCoords)+1, len(VoxelCoords)+2, len(VoxelCoords)+3,
-                            len(VoxelCoords)+4, len(VoxelCoords)+5, len(VoxelCoords)+6, len(VoxelCoords)+7])
-            VoxelCoords.append(
-                [node.centroid[0] - node.size/2, node.centroid[1] - node.size/2, node.centroid[2] - node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] + node.size/2, node.centroid[1] - node.size/2, node.centroid[2] - node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] + node.size/2, node.centroid[1] + node.size/2, node.centroid[2] - node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] - node.size/2, node.centroid[1] + node.size/2, node.centroid[2] - node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] - node.size/2, node.centroid[1] - node.size/2, node.centroid[2] + node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] + node.size/2, node.centroid[1] - node.size/2, node.centroid[2] + node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] + node.size/2, node.centroid[1] + node.size/2, node.centroid[2] + node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] - node.size/2, node.centroid[1] + node.size/2, node.centroid[2] + node.size/2]
-                )
-        elif node.state == 'branch' or node.state == 'root' or node.state == 'unknown':
-            for child in node.children:
-                recurSearch(child)
+    nodes = getAllLeaf(root, (not sparse))
+    N = len(nodes)
+    if N > np.iinfo(np.uint32).max:
+        itype = np.uint64
+    else:
+        itype = np.uint32
+
+    VoxelConn = np.empty((N, 8), dtype=itype)
+    VoxelCoords = np.empty((N*8, 3), dtype=np.float64)
+
+    for i,node in enumerate(nodes):
+        indices = np.arange(i*8, i*8 + 8)
+        VoxelConn[i] = indices
+        VoxelCoords[indices,:] = node.getVertices()
+
+    ###
+   
+    if 'mesh' in dir(mesh):
+        Voxel = mesh.mesh(VoxelCoords,VoxelConn,'vol')
+    else:
+        Voxel = mesh(VoxelCoords,VoxelConn,'vol')
     
-    recurSearch(root)
-    VoxelCoords = np.asarray(VoxelCoords)
-    VoxelConn = np.asarray(VoxelConn)
-    return VoxelCoords, VoxelConn
+    Voxel.cleanup()
+
+    return Voxel
 
 def Octree2Dual(root, method='centroid'):
     """
@@ -1868,7 +1851,7 @@ def Quadtree2Dual(root, method='centroid'):
     return Dual
 
 # Generic Tree Functions
-def getAllLeaf(root):
+def getAllLeaf(root, include_empty=False):
     """
     Retrieve a list of all leaf nodes of the tree
 
@@ -1876,6 +1859,9 @@ def getAllLeaf(root):
     ----------
     root : tree.TreeNode
         Root node of the tree of which the leaf nodes will be retrieved.
+    include_empty : bool, optional
+        Option to include "empty" nodes in the set of leaves, by default False. 
+        "empty" nodes are terminal nodes that contain no data.
 
     Returns
     -------
@@ -1888,6 +1874,8 @@ def getAllLeaf(root):
             leaves.append(node)
             return leaves
         elif node.state == 'empty':
+            if include_empty:
+                leaves.append(node)
             return leaves
         elif node.state == 'root' or node.state == 'branch':
             for child in node.children:

@@ -247,7 +247,7 @@ def Grid(bounds, h, exact_h=False, ElemType='hex'):
     else:
         itype = np.uint32
 
-    GridCoords = np.empty((N,3), dtype=np.float64)
+    GridCoords = np.empty((nX*nY*nZ,3), dtype=np.float64)
     GridCoords[:, 0] = np.repeat(xs,nY*nZ)
     GridCoords[:, 1] = np.tile(np.repeat(ys,nZ),nX)
     GridCoords[:, 2] = np.tile(np.tile(zs,nX),nY)
