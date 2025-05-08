@@ -84,7 +84,7 @@ import sys, os, time, copy, warnings, bisect
 from . import utils, converter, contour, quality, improvement, rays, mesh, primitives
 
 # Mesh generators
-def PlanarMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation='linear', args=(), kwargs={}, Type='surf'):
+def PlanarMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation='linear', mixed_elements=False, args=(), kwargs={}, Type='surf'):
     """
     Generate a surface mesh of an implicit function 
 
@@ -143,14 +143,23 @@ def PlanarMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolati
     else:
         flip = False
 
-    xs = np.arange(bounds[0],bounds[1]+h[0],h[0])
-    ys = np.arange(bounds[2],bounds[3]+h[1],h[1])
+    
 
-    X,Y = np.meshgrid(xs, ys, indexing='ij')
-    Z = np.zeros_like(X)
-    F = vector_func(X,Y,Z,*args,**kwargs).T
+    
 
-    NodeCoords, NodeConn = contour.MarchingSquaresImage(F, h=h, threshold=threshold, flip=flip, Type=Type, interpolation=interpolation,VertexValues=True)
+    if mixed_elements:
+        # mixed elements currently not supported for MarchingSquaresImage
+        # TODO: This should be replaced by a proper implementation of PlanarMesh
+        G = primitives.Grid2D(bounds, h)
+        NodeData = vector_func(*G.NodeCoords.T,*args,**kwargs)
+        NodeCoords, NodeConn = contour.MarchingSquares(G.NodeCoords, G.NodeConn, NodeData, mixed_elements=True)
+    else:
+        xs = np.arange(bounds[0],bounds[1]+h[0],h[0])
+        ys = np.arange(bounds[2],bounds[3]+h[1],h[1])
+        X,Y = np.meshgrid(xs, ys, indexing='ij')
+        Z = np.zeros_like(X)
+        F = vector_func(X,Y,Z,*args,**kwargs).T
+        NodeCoords, NodeConn = contour.MarchingSquaresImage(F, h=h, threshold=threshold, flip=flip, Type=Type, interpolation=interpolation,VertexValues=True,mixed_elements=mixed_elements)
     NodeCoords[:,0] += bounds[0]
     NodeCoords[:,1] += bounds[2]
     
