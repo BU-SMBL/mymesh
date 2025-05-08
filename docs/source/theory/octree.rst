@@ -1,5 +1,6 @@
 Octree
 ======
+See also: :func:`mymesh.tree.OctreeNode`
 
 Octree Definition
 -----------------

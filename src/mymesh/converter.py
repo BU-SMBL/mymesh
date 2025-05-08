@@ -2,7 +2,11 @@
 # Created on Sun Aug  1 17:48:50 2021
 # @author: toj
 """
-Mesh conversion tools
+Mesh conversion tools.
+This module provides functions for converting between mesh types (e.g. a solid
+volumetric mesh to a surface mesh) element types (e.g. hexahedral to 
+tetrahedral), and connectivity representations (e.g. element node connectivities
+to element faces or edges).
 
 
 .. currentmodule:: mymesh.converter
@@ -49,13 +53,27 @@ Element type conversion
     :toctree: submodules/
 
     solid2tets
+    surf2tris
+    linear2quadratic
+    quadratic2linear
     hex2tet
     wedge2tet
     pyramid2tet
-    surf2tris
-    quad2tri
-    tet102tet4
-    tet42tet10
+    quad2tri    
+    edge32linear
+    edge2quadratic
+    tri62linear
+    tri2quadratic
+    quad82linear
+    quad2quadratic
+    tet102linear
+    tet2quadratic
+    pyr132linear
+    pyr2quadratic
+    wdg152linear
+    wdg2quadratic
+    hex202linear
+    hex2quadratic
     hexsubdivide
 
 """
@@ -126,26 +144,32 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
     Ls = np.array(list(map(len, NodeConn)))
     edgIdx = np.where(Ls == 2)[0]
     triIdx = np.where(Ls == 3)[0]
-    tetIdx = np.where((Ls == 4) | (Ls == 10))[0]
+    tetIdx = np.where(Ls == 4)[0]
+    tet10Idx = np.where(Ls == 10)[0]
     pyrIdx = np.where(Ls == 5)[0]
     wdgIdx = np.where(Ls == 6)[0]
-    hexIdx = np.where(Ls == 8)[0]
+    hexIdx = np.where(Ls == 8)[0] 
+    hex20Idx = np.where(Ls == 20)[0]
     edgs = [NodeConn[i] for i in edgIdx]
     tris = [NodeConn[i] for i in triIdx]
     tets = [NodeConn[i] for i in tetIdx]
+    tet10s = [NodeConn[i] for i in tet10Idx]
     pyrs = [NodeConn[i] for i in pyrIdx]
     wdgs = [NodeConn[i] for i in wdgIdx]
     hexs = [NodeConn[i] for i in hexIdx]
+    hex20s = [NodeConn[i] for i in hex20Idx]
     
-    Faces = edgs + tris + tet2faces([],tets).tolist() + pyramid2faces([],pyrs) + wedge2faces([],wdgs) + hex2faces([],hexs).tolist()
+    Faces = edgs + tris + tet2faces([],tets).tolist() + tet102faces([],tet10s).tolist() + pyramid2faces([],pyrs) + wedge2faces([],wdgs) + hex2faces([],hexs).tolist()+ hex202faces([],hex20s).tolist()
     if return_FaceConn or return_FaceElem:
-        ElemIds_i = np.concatenate((edgIdx,triIdx,np.repeat(tetIdx,4),np.repeat(pyrIdx,5),np.repeat(wdgIdx,5),np.repeat(hexIdx,6)))
+        ElemIds_i = np.concatenate((edgIdx,triIdx,np.repeat(tetIdx,4),np.repeat(tet10Idx,4),np.repeat(pyrIdx,5),np.repeat(wdgIdx,5),np.repeat(hexIdx,6),np.repeat(hex20Idx,6)))
         FaceElem = ElemIds_i
         ElemIds_j = np.concatenate((np.repeat(0,len(edgIdx)),np.repeat(0,len(triIdx)), 
                 np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
+                np.repeat([[0,1,2,3]],len(tet10Idx),axis=0).reshape(len(tet10Idx)*4),  
                 np.repeat([[0,1,2,3,4]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*5),                   
                 np.repeat([[0,1,2,3,4]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*5),   
-                np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6),                    
+                np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6), 
+                np.repeat([[0,1,2,3,4,5]],len(hex20Idx),axis=0).reshape(len(hex20Idx)*6),                    
                 ))
         FaceConn = -1*np.ones((len(NodeConn),6))
         FaceConn[ElemIds_i,ElemIds_j] = np.arange(len(Faces))
@@ -476,7 +500,7 @@ def solid2tets(NodeCoords,NodeConn,return_ids=False,return_inv=False):
     TetCoords,fromhex = hex2tet(NodeCoords,hexs,method=hexmethod)
     TetCoords,fromwdg = wedge2tet(TetCoords,wdgs,method=wdgmethod)
     TetCoords,frompyr = pyramid2tet(TetCoords,pyrs,method=pyrmethod)
-    TetCoords,fromtet10 = tet102tet4(TetCoords,tet10)
+    TetCoords,fromtet10 = tet102linear(TetCoords,tet10)
     # TetConn = tets + frompyr + fromwdg + fromhex + fromtet10
     TetConn = np.vstack([tets, frompyr, fromwdg, fromhex, fromtet10]).astype(int)
     if return_ids or return_inv:
@@ -561,6 +585,148 @@ def surf2tris(NodeCoords,NodeConn,return_ids=False,return_inv=False):
     elif return_inv:
         return TriCoords, TriConn, inv
     return TriCoords, TriConn
+
+def linear2quadratic(NodeCoords,NodeConn,Type=None):
+    """
+    Convert linear (first-order) elements to quadratic (second-order) elements.
+    See also :ref:`Element Types`.    
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        Nodal connectivity list.
+    Type : str
+        Mesh Type ('surf' or 'vol'). This helps resolve ambiguities between
+        4-node quadrilaterals and 4-node tetrahedra. If not provided, Type
+        will be detected using :func:`mymesh.utils.identify_type`
+
+    Returns
+    -------
+    NewCoords : list
+        Nodal coordinates of the second order mesh
+    NewConn : list
+        Nodal connectivity list of the second order mesh
+    """    
+    if type(NodeConn) is np.ndarray:
+        Ls = np.repeat(NodeConn.shape[1], NodeConn.shape[0])
+    else:
+        Ls = np.array([len(elem) for elem in NodeConn])
+    
+    if Type is None:
+        Type = utils.identify_type(NodeCoords, NodeConn)
+    
+    edgeIdx = np.where(Ls == 2)[0]
+    triIdx = np.where(Ls == 3)[0]
+    if Type.lower() == 'surf':
+        quadIdx = np.where(Ls == 4)[0]
+        tetIdx = np.array([],dtype=int)
+    else:
+        quadIdx = np.array([],dtype=int)
+        tetIdx = np.where(Ls == 4)[0]
+    pyrIdx = np.where(Ls == 5)[0]
+    wdgIdx = np.where(Ls == 6)[0]
+    hexIdx = np.where(Ls == 8)[0]
+
+    edges = np.array([NodeConn[i] for i in edgeIdx])
+    tris = np.array([NodeConn[i] for i in triIdx])
+    quads = np.array([NodeConn[i] for i in quadIdx])
+    tets = np.array([NodeConn[i] for i in tetIdx])
+    pyrs = np.array([NodeConn[i] for i in pyrIdx])
+    wdgs = np.array([NodeConn[i] for i in wdgIdx])
+    hexs = np.array([NodeConn[i] for i in hexIdx])
+
+    QuadCoords,fromedge = edge2quadratic(NodeCoords,edges, cleanup=False)
+    QuadCoords,fromtri = tri2quadratic(QuadCoords,tris, cleanup=False)
+    QuadCoords,fromquad = quad2quadratic(QuadCoords,quads, cleanup=False)
+    QuadCoords,fromtet = tet2quadratic(QuadCoords,tets, cleanup=False)
+    QuadCoords,frompyr = pyr2quadratic(QuadCoords,pyrs, cleanup=False)
+    QuadCoords,fromwdg = wdg2quadratic(QuadCoords,wdgs, cleanup=False)
+    QuadCoords,fromhex = hex2quadratic(QuadCoords,hexs, cleanup=False)
+
+    QuadConn = -1*np.ones((len(NodeConn),20), dtype=int)
+    QuadConn[edgeIdx,:3] = fromedge
+    QuadConn[triIdx,:6] = fromtri
+    QuadConn[quadIdx,:8] = fromquad
+    QuadConn[tetIdx,:10] = fromtet
+    QuadConn[pyrIdx,:13] = frompyr
+    QuadConn[wdgIdx,:15] = fromwdg
+    QuadConn[hexIdx,:20] = fromhex
+    
+    QuadConn = utils.ExtractRagged(QuadConn, delval=-1)
+    QuadCoords, QuadConn = utils.DeleteDuplicateNodes(QuadCoords, QuadConn)
+
+    return QuadCoords, QuadConn
+
+def quadratic2linear(NodeCoords, NodeConn, cleanup=True):
+    """
+    Convert quadratic (second-order) elements to linear (first-order) elements.
+    See also :ref:`Element Types`.    
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        Nodal connectivity list.
+    cleanup : bool
+        Remove nodes that are no longer in the mesh. Note that this will renumber
+        the nodes and any external arrays that are assoviated with the nodes may
+        no longer match.
+
+    Returns
+    -------
+    NewCoords : list
+        Nodal coordinates of the second order mesh
+    NewConn : list
+        Nodal connectivity list of the second order mesh
+    """    
+    if type(NodeConn) is np.ndarray:
+        Ls = np.repeat(NodeConn.shape[1], NodeConn.shape[0])
+    else:
+        Ls = np.array([len(elem) for elem in NodeConn])
+    
+    
+    edgeIdx = np.where(Ls == 3)[0]
+    
+    triIdx = np.where(Ls == 6)[0]
+    quadIdx = np.where(Ls == 8)[0]
+    tetIdx = np.where(Ls == 10)[0]
+    pyrIdx = np.where(Ls == 13)[0]
+    wdgIdx = np.where(Ls == 15)[0]
+    hexIdx = np.where(Ls == 20)[0]
+
+    edges = np.array([NodeConn[i] for i in edgeIdx])
+    tris = np.array([NodeConn[i] for i in triIdx])
+    quads = np.array([NodeConn[i] for i in quadIdx])
+    tets = np.array([NodeConn[i] for i in tetIdx])
+    pyrs = np.array([NodeConn[i] for i in pyrIdx])
+    wdgs = np.array([NodeConn[i] for i in wdgIdx])
+    hexs = np.array([NodeConn[i] for i in hexIdx])
+
+    LinCoords,fromedge = edge32linear(NodeCoords, edges)
+    LinCoords,fromtri = tri62linear(LinCoords, tris)
+    LinCoords,fromquad = quad82linear(LinCoords, quads)
+    LinCoords,fromtet = tet102linear(LinCoords, tets)
+    LinCoords,frompyr = pyr132linear(LinCoords, pyrs)
+    LinCoords,fromwdg = wdg152linear(LinCoords, wdgs)
+    LinCoords,fromhex = hex202linear(LinCoords, hexs)
+
+    LinConn = -1*np.ones((len(NodeConn),8),dtype=int)
+    LinConn[edgeIdx,:2] = fromedge
+    LinConn[triIdx,:3] = fromtri
+    LinConn[quadIdx,:4] = fromquad
+    LinConn[tetIdx,:4] = fromtet
+    LinConn[pyrIdx,:5] = frompyr
+    LinConn[wdgIdx,:6] = fromwdg
+    LinConn[hexIdx,:8] = fromhex
+    
+    LinConn = utils.ExtractRagged(LinConn, delval=-1)
+    if cleanup:
+        LinCoords, LinConn, _ = utils.RemoveNodes(LinCoords, LinConn)
+
+    return LinCoords, LinConn
 
 def hex2tet(NodeCoords,NodeConn,method='1to6'):
     """
@@ -1267,25 +1433,51 @@ def tet2faces(NodeCoords,NodeConn):
     # from the outside, assuming the tetrahedral node numbering scheme
     # ref: https://abaqus-docs.mit.edu/2017/English/SIMACAETHERefMap/simathe-c-tritetwedge.htm#simathe-c-tritetwedge-t-Interpolation-sma-topic1__simathe-c-stmtritet-iso-master
     if len(NodeConn) > 0:
-        if len(NodeConn[0]) == 4:
-            ArrayConn = np.asarray(NodeConn)
-            Faces = -1*np.ones((len(NodeConn)*4,3),dtype=int)
-            # Faces = [None]*len(NodeConn)*4
-            Faces[0::4] = ArrayConn[:,[0,2,1]]
-            Faces[1::4] = ArrayConn[:,[0,1,3]]
-            Faces[2::4] = ArrayConn[:,[1,2,3]]
-            Faces[3::4] = ArrayConn[:,[0,3,2]]
-        elif len(NodeConn[0]) == 10:
-            ArrayConn = np.asarray(NodeConn)
-            Faces = -1*np.ones((len(NodeConn)*4,6),dtype=int)
-            Faces[0::4] = ArrayConn[:,[0,2,1,6,5,4]]
-            Faces[1::4] = ArrayConn[:,[0,1,3,4,8,7]]
-            Faces[2::4] = ArrayConn[:,[1,2,3,5,9,8]]
-            Faces[3::4] = ArrayConn[:,[0,3,2,7,9,6]]
-        else:
-            raise Exception('Must be 4 or 10 node tetrahedral mesh.')
+        ArrayConn = np.asarray(NodeConn)
+        Faces = -1*np.ones((len(NodeConn)*4,3),dtype=int)
+        # Faces = [None]*len(NodeConn)*4
+        Faces[0::4] = ArrayConn[:,[0,2,1]]
+        Faces[1::4] = ArrayConn[:,[0,1,3]]
+        Faces[2::4] = ArrayConn[:,[1,2,3]]
+        Faces[3::4] = ArrayConn[:,[0,3,2]]
     else:
         Faces = np.empty((0,3))
+
+    return Faces
+
+def tet102faces(NodeCoords,NodeConn):
+    """
+    Extract triangular faces from all elements of a purely 10-Node tetrahedral mesh.
+    All faces will be ordered such that the nodes are in counter-clockwise order when
+    viewed from outside of the element. Best practice is to use solid2faces, rather than 
+    using tet102faces directly.
+
+    Parameters
+    ----------
+    NodeCoords : list
+        List of nodal coordinates.
+    NodeConn : list
+        List of nodal connectivity.
+
+    Returns
+    -------
+    Faces : list
+        List of nodal connectivity of the mesh faces.
+    """
+    
+    # Explode volume tet mesh into triangles, 4 triangles per tet, ensuring
+    # that triangles are ordered in counter-clockwise order when viewed
+    # from the outside, assuming the tetrahedral node numbering scheme
+    # ref: https://abaqus-docs.mit.edu/2017/English/SIMACAETHERefMap/simathe-c-tritetwedge.htm#simathe-c-tritetwedge-t-Interpolation-sma-topic1__simathe-c-stmtritet-iso-master
+    if len(NodeConn) > 0:
+        ArrayConn = np.asarray(NodeConn)
+        Faces = -1*np.ones((len(NodeConn)*4,6),dtype=int)
+        Faces[0::4] = ArrayConn[:,[0,2,1,6,5,4]]
+        Faces[1::4] = ArrayConn[:,[0,1,3,4,8,7]]
+        Faces[2::4] = ArrayConn[:,[1,2,3,5,9,8]]
+        Faces[3::4] = ArrayConn[:,[0,3,2,7,9,6]]
+    else:
+        Faces = np.empty((0,6))
 
     return Faces
 
@@ -1323,6 +1515,39 @@ def hex2faces(NodeCoords,NodeConn):
         Faces = Faces.astype(int)
     else:
         Faces = np.empty((0,4))
+    return Faces
+
+def hex202faces(NodeCoords,NodeConn):
+    """
+    Extract quadrilateral faces from all elements of a purely 20-Node hexahedral mesh.
+    All faces will be ordered such that the nodes are in counter-clockwise order when
+    viewed from outside of the element. Best practice is to use solid2faces, rather than 
+    using hex202faces directly.
+
+    Parameters
+    ----------
+    NodeCoords : list
+        List of nodal coordinates.
+    NodeConn : list
+        List of nodal connectivity.
+
+    Returns
+    -------
+    Faces : list
+        List of nodal connectivity of the mesh faces.
+    """
+    if len(NodeConn) > 0:
+        ArrayConn = np.asarray(NodeConn)
+        Faces = -1*np.ones((len(NodeConn)*6,8))
+        Faces[0::6] = ArrayConn[:,[0,3,2,1,11,10,9,8]]
+        Faces[1::6] = ArrayConn[:,[0,1,5,4,8,17,12,16]]
+        Faces[2::6] = ArrayConn[:,[1,2,6,5,9,18,13,17]]
+        Faces[3::6] = ArrayConn[:,[2,3,7,6,10,19,14,18]]
+        Faces[4::6] = ArrayConn[:,[3,0,4,7,11,16,15,19]]
+        Faces[5::6] = ArrayConn[:,[4,5,6,7,12,13,14,15]]
+        Faces = Faces.astype(int)
+    else:
+        Faces = np.empty((0,8))
     return Faces
 
 def pyramid2faces(NodeCoords,NodeConn):
@@ -1671,8 +1896,232 @@ def quad2tri(NodeCoords,NodeConn):
     TriConn[1::2] = ArrayConn[:,[1,2,3,]]
     
     return NodeCoords, TriConn
-        
-def tet102tet4(NodeCoords, Tet10NodeConn):
+
+def edge32linear(NodeCoords, NodeConn):
+    """
+    Converts a 3-node edge mesh to a 2-node edge mesh.
+    Assumes a 3-node edge numbering scheme where the first and third nodes define
+    the end points, the remaining nodes are thus neglected.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    NodeConn : array_like
+        Nodal connectivities for a 3-Node edge mesh
+
+    Returns
+    -------
+    NodeCoords : array_like
+        List of nodal coordinates (unchanged from input). 
+    NewConn : np.ndarray
+        Nodal connectivities for the equivalent 2-Node edge mesh
+    """
+    if len(NodeConn) == 0:
+        return NodeCoords, np.empty((0,2),dtype=int)
+    NewConn = np.asarray(NodeConn)[:, [0,2]]
+    
+    return NodeCoords, NewConn
+
+def edge2quadratic(NodeCoords, NodeConn, cleanup=True):
+    """
+    Converts a 2 node edge mesh to 3 node edge mesh. A new node 
+    is placed at the midpoint of each edge.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    NodeConn : array_like
+        Nodal connectivities for a 2-node edge mesh
+    cleanup : bool
+        Cleanup/merge duplicate nodes created during the process, by default True
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        New list of nodal coordinates. 
+    NewConn : np.ndarray
+        Nodal connectivities for the 3-Node edge mesh
+
+    """
+    if len(NodeConn) > 0:
+        NodeCoords = np.asarray(NodeCoords)
+        NodeConn = np.asarray(NodeConn)
+        Nodes01 = (NodeCoords[NodeConn[:,0]] + NodeCoords[NodeConn[:,1]])/2
+
+        n = len(NodeCoords)
+        m = len(NodeConn)
+        ids01 = np.arange(    n, n+m)
+
+        NewConn = np.empty((m, 3),dtype=int)
+        NewConn[:, [0,2]] = NodeConn
+        NewConn[:, 1] = ids01
+
+        NewCoords = np.vstack([NodeCoords, Nodes01])
+        if cleanup:
+            NewCoords, NewConn = utils.DeleteDuplicateNodes(NewCoords, NewConn)
+    else:
+        NewCoords = NodeCoords
+        NewConn = np.empty((0,3), dtype=int)
+
+    return NewCoords, NewConn
+
+def tri62linear(NodeCoords, NodeConn):
+    """
+    Converts a 6-node triangular mesh to a 3-node triangular mesh.
+    Assumes a 6-node triangular numbering scheme where the first 3 nodes define
+    the triangular vertices, the remaining nodes are thus neglected.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    NodeConn : array_like
+        Nodal connectivities for a 6-Node triangular mesh
+
+    Returns
+    -------
+    NodeCoords : array_like
+        List of nodal coordinates (unchanged from input). 
+    NewConn : np.ndarray
+        Nodal connectivities for the equivalent 3-Node triangular mesh
+    """
+    if len(NodeConn) == 0:
+        return NodeCoords, np.empty((0,3),dtype=int)
+    NewConn = np.asarray(NodeConn)[:, :3]
+    
+    return NodeCoords, NewConn
+
+def tri2quadratic(NodeCoords, NodeConn, cleanup=True):
+    """
+    Converts a 3 node triangular mesh to 6 node triangular mesh. A new node 
+    is placed at the midpoint of each edge.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    NodeConn : array_like
+        Nodal connectivities for a 3-node triangular mesh
+    cleanup : bool
+        Cleanup/merge duplicate nodes created during the process, by default True
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        New list of nodal coordinates. 
+    NewConn : np.ndarray
+        Nodal connectivities for the 6-Node triangular mesh
+
+    """
+    if len(NodeConn) > 0:
+        NodeCoords = np.asarray(NodeCoords)
+        NodeConn = np.asarray(NodeConn)
+        Nodes01 = (NodeCoords[NodeConn[:,0]] + NodeCoords[NodeConn[:,1]])/2
+        Nodes12 = (NodeCoords[NodeConn[:,1]] + NodeCoords[NodeConn[:,2]])/2
+        Nodes20 = (NodeCoords[NodeConn[:,2]] + NodeCoords[NodeConn[:,0]])/2
+
+        n = len(NodeCoords)
+        m = len(NodeConn)
+        ids01 = np.arange(    n, n+m)
+        ids12 = np.arange(  n+m, n+2*m)
+        ids20 = np.arange(n+2*m, n+3*m)
+
+        NewConn = np.empty((m, 6),dtype=int)
+        NewConn[:, :3] = NodeConn
+        NewConn[:, 3] = ids01
+        NewConn[:, 4] = ids12
+        NewConn[:, 5] = ids20
+
+        NewCoords = np.vstack([NodeCoords, Nodes01, Nodes12, Nodes20])
+        if cleanup:
+            NewCoords, NewConn = utils.DeleteDuplicateNodes(NewCoords, NewConn)
+    else:
+        NewCoords = NodeCoords
+        NewConn = np.empty((0,6), dtype=int)
+
+    return NewCoords, NewConn
+
+def quad82linear(NodeCoords, NodeConn):
+    """
+    Converts a 8-node quadrilateral mesh to a 4-node quadrilateral mesh.
+    Assumes a 8-node quadrilateral numbering scheme where the first 4 nodes define
+    the quadrilateral vertices, the remaining nodes are thus neglected.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    NodeConn : array_like
+        Nodal connectivities for a 8-Node quadrilateral mesh
+
+    Returns
+    -------
+    NodeCoords : array_like
+        List of nodal coordinates (unchanged from input). 
+    NewConn : np.ndarray
+        Nodal connectivities for the equivalent 4-Node quadrilateral mesh
+    """
+    if len(NodeConn) == 0:
+        return NodeCoords, np.empty((0,4),dtype=int)
+    NewConn = np.asarray(NodeConn)[:, :4]
+    
+    return NodeCoords, NewConn
+
+def quad2quadratic(NodeCoords, NodeConn, cleanup=True):
+    """
+    Converts a 4 node quadrilateral mesh to 8 node quadrilateral mesh. A new node 
+    is placed at the midpoint of each edge.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    NodeConn : array_like
+        Nodal connectivities for a 4-node quadrilateral mesh
+    cleanup : bool
+        Cleanup/merge duplicate nodes created during the process, by default True
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        New list of nodal coordinates. 
+    NewConn : np.ndarray
+        Nodal connectivities for the 8-Node quadrilateral mesh
+
+    """
+    if len(NodeConn) > 0:
+        NodeCoords = np.asarray(NodeCoords)
+        NodeConn = np.asarray(NodeConn)
+        Nodes01 = (NodeCoords[NodeConn[:,0]] + NodeCoords[NodeConn[:,1]])/2
+        Nodes12 = (NodeCoords[NodeConn[:,1]] + NodeCoords[NodeConn[:,2]])/2
+        Nodes23 = (NodeCoords[NodeConn[:,2]] + NodeCoords[NodeConn[:,3]])/2
+        Nodes30 = (NodeCoords[NodeConn[:,3]] + NodeCoords[NodeConn[:,0]])/2
+
+        n = len(NodeCoords)
+        m = len(NodeConn)
+        ids01 = np.arange(    n, n+m)
+        ids12 = np.arange(  n+m, n+2*m)
+        ids23 = np.arange(n+2*m, n+3*m)
+        ids30 = np.arange(n+3*m, n+4*m)
+
+        NewConn = np.empty((m, 8),dtype=int)
+        NewConn[:, :4] = NodeConn
+        NewConn[:, 4] = ids01
+        NewConn[:, 5] = ids12
+        NewConn[:, 6] = ids23
+        NewConn[:, 7] = ids30
+
+        NewCoords = np.vstack([NodeCoords, Nodes01, Nodes12, Nodes23, Nodes30])
+        if cleanup:
+            NewCoords, NewConn = utils.DeleteDuplicateNodes(NewCoords, NewConn)
+    else:
+        NewCoords = NodeCoords
+        NewConn = np.empty((0,8), dtype=int)
+    return NewCoords, NewConn
+
+def tet102linear(NodeCoords, Tet10NodeConn):
     """
     Converts a 10-node tetradehdral mesh to a 4-node tetradehedral mesh.
     Assumes a 10-node tetrahedral numbering scheme where the first 4 nodes define
@@ -1698,7 +2147,7 @@ def tet102tet4(NodeCoords, Tet10NodeConn):
     
     return NodeCoords, Tet4NodeConn
 
-def tet42tet10(NodeCoords, Tet4NodeConn):
+def tet2quadratic(NodeCoords, Tet4NodeConn, cleanup=True):
     """
     Converts a 4 node tetrahedral mesh to 10 node tetrahedral mesh. A new node 
     is placed at the midpoint of each edge.
@@ -1709,48 +2158,345 @@ def tet42tet10(NodeCoords, Tet4NodeConn):
         List of nodal coordinates. 
     Tet4NodeConn : array_like
         Nodal connectivities for a 4-node tetrahedral mesh
+    cleanup : bool
+        Cleanup/merge duplicate nodes created during the process, by default True
 
     Returns
     -------
     NodeCoords : np.ndarray
         New list of nodal coordinates. 
-    Tet4NodeConn : np.ndarray
+    Tet10NodeConn : np.ndarray
         Nodal connectivities for the 10-Node tetrahedral mesh
 
     """
-    NodeCoords = np.asarray(NodeCoords)
-    Tet4NodeConn = np.asarray(Tet4NodeConn)
-    Nodes01 = (NodeCoords[Tet4NodeConn[:,0]] + NodeCoords[Tet4NodeConn[:,1]])/2
-    Nodes12 = (NodeCoords[Tet4NodeConn[:,1]] + NodeCoords[Tet4NodeConn[:,2]])/2
-    Nodes20 = (NodeCoords[Tet4NodeConn[:,2]] + NodeCoords[Tet4NodeConn[:,0]])/2
-    Nodes03 = (NodeCoords[Tet4NodeConn[:,0]] + NodeCoords[Tet4NodeConn[:,3]])/2
-    Nodes13 = (NodeCoords[Tet4NodeConn[:,1]] + NodeCoords[Tet4NodeConn[:,3]])/2
-    Nodes23 = (NodeCoords[Tet4NodeConn[:,2]] + NodeCoords[Tet4NodeConn[:,3]])/2
+    if len(Tet4NodeConn) > 0:
+        NodeCoords = np.asarray(NodeCoords)
+        Tet4NodeConn = np.asarray(Tet4NodeConn)
+        Nodes01 = (NodeCoords[Tet4NodeConn[:,0]] + NodeCoords[Tet4NodeConn[:,1]])/2
+        Nodes12 = (NodeCoords[Tet4NodeConn[:,1]] + NodeCoords[Tet4NodeConn[:,2]])/2
+        Nodes20 = (NodeCoords[Tet4NodeConn[:,2]] + NodeCoords[Tet4NodeConn[:,0]])/2
+        Nodes03 = (NodeCoords[Tet4NodeConn[:,0]] + NodeCoords[Tet4NodeConn[:,3]])/2
+        Nodes13 = (NodeCoords[Tet4NodeConn[:,1]] + NodeCoords[Tet4NodeConn[:,3]])/2
+        Nodes23 = (NodeCoords[Tet4NodeConn[:,2]] + NodeCoords[Tet4NodeConn[:,3]])/2
 
-    n = len(NodeCoords)
-    m = len(Tet4NodeConn)
-    ids01 = np.arange(    n, n+m)
-    ids12 = np.arange(  n+m, n+2*m)
-    ids20 = np.arange(n+2*m, n+3*m)
-    ids03 = np.arange(n+3*m, n+4*m)
-    ids13 = np.arange(n+4*m, n+5*m)
-    ids23 = np.arange(n+5*m, n+6*m)
+        n = len(NodeCoords)
+        m = len(Tet4NodeConn)
+        ids01 = np.arange(    n, n+m)
+        ids12 = np.arange(  n+m, n+2*m)
+        ids20 = np.arange(n+2*m, n+3*m)
+        ids03 = np.arange(n+3*m, n+4*m)
+        ids13 = np.arange(n+4*m, n+5*m)
+        ids23 = np.arange(n+5*m, n+6*m)
 
-    Tet10NodeConn = np.empty((m, 10),dtype=int)
-    Tet10NodeConn[:, :4] = Tet4NodeConn
-    Tet10NodeConn[:, 4] = ids01
-    Tet10NodeConn[:, 5] = ids12
-    Tet10NodeConn[:, 6] = ids20
-    Tet10NodeConn[:, 7] = ids03
-    Tet10NodeConn[:, 8] = ids13
-    Tet10NodeConn[:, 9] = ids23
+        Tet10NodeConn = np.empty((m, 10),dtype=int)
+        Tet10NodeConn[:, :4] = Tet4NodeConn
+        Tet10NodeConn[:, 4] = ids01
+        Tet10NodeConn[:, 5] = ids12
+        Tet10NodeConn[:, 6] = ids20
+        Tet10NodeConn[:, 7] = ids03
+        Tet10NodeConn[:, 8] = ids13
+        Tet10NodeConn[:, 9] = ids23
 
-    NewCoords = np.vstack([NodeCoords, Nodes01, Nodes12, Nodes20, Nodes03, Nodes13, Nodes23])
+        NewCoords = np.vstack([NodeCoords, Nodes01, Nodes12, Nodes20, Nodes03, Nodes13, Nodes23])
 
-    NewCoords, Tet10NodeConn = utils.DeleteDuplicateNodes(NewCoords, Tet10NodeConn)
-
+        if cleanup:
+            NewCoords, Tet10NodeConn = utils.DeleteDuplicateNodes(NewCoords, Tet10NodeConn)
+    else:
+        NewCoords = NodeCoords
+        Tet10NodeConn = np.empty((0,10), dtype=int)
     return NewCoords, Tet10NodeConn
- 
+
+def pyr132linear(NodeCoords, NodeConn):
+    """
+    Converts a 13-node pyramid mesh to a 5-node pyramid mesh.
+    Assumes a 13-node pyramid numbering scheme where the first 5 nodes define
+    the pyramid vertices, the remaining nodes are thus neglected.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    NodeConn : array_like
+        Nodal connectivities for a 13-Node pyramid mesh
+
+    Returns
+    -------
+    NodeCoords : array_like
+        List of nodal coordinates (unchanged from input). 
+    NodeConn : np.ndarray
+        Nodal connectivities for the equivalent 5-Node pyramid mesh
+    """
+    if len(NodeConn) == 0:
+        return NodeCoords, np.empty((0,5),dtype=int)
+    NewConn = np.asarray(NodeConn)[:, :5]
+    
+    return NodeCoords, NewConn
+
+def pyr2quadratic(NodeCoords, NodeConn, cleanup=True):
+    """
+    Converts a 5 node pyramid mesh to 13 node pyramid mesh. A new node 
+    is placed at the midpoint of each edge.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    NodeConn : array_like
+        Nodal connectivities for a 5-node pyramid mesh
+    cleanup : bool
+        Cleanup/merge duplicate nodes created during the process, by default True
+        
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        New list of nodal coordinates. 
+    NewConn : np.ndarray
+        Nodal connectivities for the 13-Node pyramid mesh
+
+    """
+    if len(NodeConn) > 0:
+        NodeCoords = np.asarray(NodeCoords)
+        NodeConn = np.asarray(NodeConn)
+        Nodes01 = (NodeCoords[NodeConn[:,0]] + NodeCoords[NodeConn[:,1]])/2
+        Nodes12 = (NodeCoords[NodeConn[:,1]] + NodeCoords[NodeConn[:,2]])/2
+        Nodes23 = (NodeCoords[NodeConn[:,2]] + NodeCoords[NodeConn[:,3]])/2
+        Nodes30 = (NodeCoords[NodeConn[:,3]] + NodeCoords[NodeConn[:,0]])/2
+        Nodes04 = (NodeCoords[NodeConn[:,0]] + NodeCoords[NodeConn[:,4]])/2
+        Nodes14 = (NodeCoords[NodeConn[:,1]] + NodeCoords[NodeConn[:,4]])/2
+        Nodes24 = (NodeCoords[NodeConn[:,2]] + NodeCoords[NodeConn[:,4]])/2
+        Nodes34 = (NodeCoords[NodeConn[:,3]] + NodeCoords[NodeConn[:,4]])/2
+
+        n = len(NodeCoords)
+        m = len(NodeConn)
+        ids01 = np.arange(    n, n+m)
+        ids12 = np.arange(  n+m, n+2*m)
+        ids23 = np.arange(n+2*m, n+3*m)
+        ids30 = np.arange(n+3*m, n+4*m)
+        ids04 = np.arange(n+4*m, n+5*m)
+        ids14 = np.arange(n+5*m, n+6*m)
+        ids24 = np.arange(n+6*m, n+7*m)
+        ids34 = np.arange(n+7*m, n+8*m)
+
+        NewConn = np.empty((m, 13),dtype=int)
+        NewConn[:, :5] = NodeConn
+        NewConn[:, 5] = ids01
+        NewConn[:, 6] = ids12
+        NewConn[:, 7] = ids23
+        NewConn[:, 8] = ids30
+        NewConn[:, 9] = ids04
+        NewConn[:, 10] = ids14
+        NewConn[:, 11] = ids24
+        NewConn[:, 12] = ids34
+
+        NewCoords = np.vstack([NodeCoords, Nodes01, Nodes12, Nodes23, Nodes30, Nodes04, Nodes14, Nodes24, Nodes34])
+
+        if cleanup:
+            NewCoords, NewConn = utils.DeleteDuplicateNodes(NewCoords, NewConn)
+    else:
+        NewCoords = NodeCoords
+        NewConn = np.empty((0,13), dtype=int)
+    return NewCoords, NewConn
+
+def wdg152linear(NodeCoords, NodeConn):
+    """
+    Converts a 15-node wedge mesh to a 6-node wedge mesh.
+    Assumes a 15-node wedge numbering scheme where the first 6 nodes define
+    the wedge vertices, the remaining nodes are thus neglected.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    NodeConn : array_like
+        Nodal connectivities for a 15-Node pyramid mesh
+
+    Returns
+    -------
+    NodeCoords : array_like
+        List of nodal coordinates (unchanged from input). 
+    NodeConn : np.ndarray
+        Nodal connectivities for the equivalent 6-Node wedge mesh
+    """
+    if len(NodeConn) == 0:
+        return NodeCoords, np.empty((0,6),dtype=int)
+    NewConn = np.asarray(NodeConn)[:, :6]
+    
+    return NodeCoords, NewConn
+
+def wdg2quadratic(NodeCoords, NodeConn, cleanup=True):
+    """
+    Converts a 6 node wedge mesh to 15 node wedge mesh. A new node 
+    is placed at the midpoint of each edge.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    NodeConn : array_like
+        Nodal connectivities for a 6-node wedge mesh
+    cleanup : bool
+        Cleanup/merge duplicate nodes created during the process, by default True
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        New list of nodal coordinates. 
+    NewConn : np.ndarray
+        Nodal connectivities for the 15-Node wedge mesh
+
+    """
+    if len(NodeConn) > 0:
+        NodeCoords = np.asarray(NodeCoords)
+        NodeConn = np.asarray(NodeConn)
+        Nodes01 = (NodeCoords[NodeConn[:,0]] + NodeCoords[NodeConn[:,1]])/2
+        Nodes12 = (NodeCoords[NodeConn[:,1]] + NodeCoords[NodeConn[:,2]])/2
+        Nodes20 = (NodeCoords[NodeConn[:,2]] + NodeCoords[NodeConn[:,0]])/2
+        Nodes34 = (NodeCoords[NodeConn[:,3]] + NodeCoords[NodeConn[:,4]])/2
+        Nodes45 = (NodeCoords[NodeConn[:,4]] + NodeCoords[NodeConn[:,5]])/2
+        Nodes53 = (NodeCoords[NodeConn[:,5]] + NodeCoords[NodeConn[:,3]])/2
+        Nodes03 = (NodeCoords[NodeConn[:,0]] + NodeCoords[NodeConn[:,3]])/2
+        Nodes14 = (NodeCoords[NodeConn[:,1]] + NodeCoords[NodeConn[:,4]])/2
+        Nodes25 = (NodeCoords[NodeConn[:,2]] + NodeCoords[NodeConn[:,5]])/2
+        
+
+        n = len(NodeCoords)
+        m = len(NodeConn)
+        ids01 = np.arange(    n, n+m)
+        ids12 = np.arange(  n+m, n+2*m)
+        ids20 = np.arange(n+2*m, n+3*m)
+        ids34 = np.arange(n+3*m, n+4*m)
+        ids45 = np.arange(n+4*m, n+5*m)
+        ids53 = np.arange(n+5*m, n+6*m)
+        ids03 = np.arange(n+6*m, n+7*m)
+        ids14 = np.arange(n+7*m, n+8*m)
+        ids25 = np.arange(n+8*m, n+9*m)
+
+        NewConn = np.empty((m, 15),dtype=int)
+        NewConn[:, :6] = NodeConn
+        NewConn[:, 6] = ids01
+        NewConn[:, 7] = ids12
+        NewConn[:, 8] = ids20
+        NewConn[:, 9] = ids34
+        NewConn[:, 10] = ids45
+        NewConn[:, 11] = ids53
+        NewConn[:, 12] = ids03
+        NewConn[:, 13] = ids14
+        NewConn[:, 14] = ids25
+
+        NewCoords = np.vstack([NodeCoords, Nodes01, Nodes12, Nodes20, Nodes34, Nodes45, Nodes53, Nodes03, Nodes14, Nodes25])
+
+        if cleanup:
+            NewCoords, NewConn = utils.DeleteDuplicateNodes(NewCoords, NewConn)
+    else:
+        NewCoords = NodeCoords
+        NewConn = np.empty((0,15), dtype=int)
+    return NewCoords, NewConn
+
+def hex202linear(NodeCoords, Hex20NodeConn):
+    """
+    Converts a 20-node hexahedral mesh to an 8-node hexahedral mesh.
+    Assumes a 20-node hexahedral numbering scheme where the first 8 nodes define
+    the hexahedral vertices, the remaining nodes are thus neglected.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    Hex20NodeConn : array_like
+        Nodal connectivities for a 20-Node hexahedral mesh
+
+    Returns
+    -------
+    NodeCoords : array_like
+        List of nodal coordinates (unchanged from input). 
+    Hex8NodeConn : np.ndarray
+        Nodal connectivities for the equivalent 8-Node hexahedral mesh
+    """
+    if len(Hex20NodeConn) == 0:
+        return NodeCoords, np.empty((0,8),dtype=int)
+    Hex8NodeConn = np.asarray(Hex20NodeConn)[:, :8]
+    
+    return NodeCoords, Hex8NodeConn
+
+def hex2quadratic(NodeCoords, Hex8NodeConn, cleanup=True):
+    """
+    Converts a 4 node tetrahedral mesh to 10 node tetrahedral mesh. A new node 
+    is placed at the midpoint of each edge.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates. 
+    Hex8NodeConn : array_like
+        Nodal connectivities for a 4-node tetrahedral mesh
+    cleanup : bool
+        Cleanup/merge duplicate nodes created during the process, by default True
+
+    Returns
+    -------
+    NodeCoords : np.ndarray
+        New list of nodal coordinates. 
+    Hex20NodeConn : np.ndarray
+        Nodal connectivities for the 20-Node tetrahedral mesh
+
+    """
+    if len(Hex8NodeConn) > 0:
+        NodeCoords = np.asarray(NodeCoords)
+        Hex8NodeConn = np.asarray(Hex8NodeConn)
+        Nodes01 = (NodeCoords[Hex8NodeConn[:,0]] + NodeCoords[Hex8NodeConn[:,1]])/2
+        Nodes12 = (NodeCoords[Hex8NodeConn[:,1]] + NodeCoords[Hex8NodeConn[:,2]])/2
+        Nodes23 = (NodeCoords[Hex8NodeConn[:,2]] + NodeCoords[Hex8NodeConn[:,3]])/2
+        Nodes30 = (NodeCoords[Hex8NodeConn[:,3]] + NodeCoords[Hex8NodeConn[:,0]])/2
+
+        Nodes45 = (NodeCoords[Hex8NodeConn[:,4]] + NodeCoords[Hex8NodeConn[:,5]])/2
+        Nodes56 = (NodeCoords[Hex8NodeConn[:,5]] + NodeCoords[Hex8NodeConn[:,6]])/2
+        Nodes67 = (NodeCoords[Hex8NodeConn[:,6]] + NodeCoords[Hex8NodeConn[:,7]])/2
+        Nodes74 = (NodeCoords[Hex8NodeConn[:,7]] + NodeCoords[Hex8NodeConn[:,4]])/2
+
+        Nodes04 = (NodeCoords[Hex8NodeConn[:,0]] + NodeCoords[Hex8NodeConn[:,4]])/2
+        Nodes15 = (NodeCoords[Hex8NodeConn[:,1]] + NodeCoords[Hex8NodeConn[:,5]])/2
+        Nodes26 = (NodeCoords[Hex8NodeConn[:,2]] + NodeCoords[Hex8NodeConn[:,6]])/2
+        Nodes37 = (NodeCoords[Hex8NodeConn[:,3]] + NodeCoords[Hex8NodeConn[:,7]])/2
+
+        n = len(NodeCoords)
+        m = len(Hex8NodeConn)
+        ids01 = np.arange(    n, n+m)
+        ids12 = np.arange(  n+m, n+2*m)
+        ids23 = np.arange(n+2*m, n+3*m)
+        ids30 = np.arange(n+3*m, n+4*m)
+        ids45 = np.arange(n+4*m, n+5*m)
+        ids56 = np.arange(n+5*m, n+6*m)
+        ids67 = np.arange(n+6*m, n+7*m)
+        ids74 = np.arange(n+7*m, n+8*m)
+        ids04 = np.arange(n+8*m, n+9*m)
+        ids15 = np.arange(n+9*m, n+10*m)
+        ids26 = np.arange(n+10*m, n+11*m)
+        ids37 = np.arange(n+11*m, n+12*m)
+
+        Hex20NodeConn = np.empty((m, 20),dtype=int)
+        Hex20NodeConn[:, :8] = Hex8NodeConn
+        Hex20NodeConn[:, 8] = ids01
+        Hex20NodeConn[:, 9] = ids12
+        Hex20NodeConn[:,10] = ids23
+        Hex20NodeConn[:,11] = ids30
+        Hex20NodeConn[:,12] = ids45
+        Hex20NodeConn[:,13] = ids56
+        Hex20NodeConn[:,14] = ids67
+        Hex20NodeConn[:,15] = ids74
+        Hex20NodeConn[:,16] = ids04
+        Hex20NodeConn[:,17] = ids15
+        Hex20NodeConn[:,18] = ids26
+        Hex20NodeConn[:,19] = ids37
+
+        NewCoords = np.vstack([NodeCoords, Nodes01, Nodes12, Nodes23, Nodes30, Nodes45, Nodes56, Nodes67, Nodes74, Nodes04, Nodes15, Nodes26, Nodes37])
+
+        if cleanup:
+            NewCoords, Hex20NodeConn = utils.DeleteDuplicateNodes(NewCoords, Hex20NodeConn)
+    else:
+        NewCoords = NodeCoords
+        Hex20NodeConn = np.empty((0,20), dtype=int)
+    return NewCoords, Hex20NodeConn
+
 def surf2edges(NodeCoords,NodeConn,ElemType='auto'):
     """
     Extract the edges of an unclosed surface mesh.
@@ -1794,14 +2540,14 @@ def hexsubdivide(NodeCoords, NodeConn):
     Returns
     -------
     NewCoords : np.ndarray
-        Node coordinates of the subdivided mesh. The node new nodes are 
+        Node coordinates of the subdivided mesh. The new nodes are 
         appended to the original nodes, so the node numbers of the original 
         mesh will refer to the same nodes in the new mesh.
     NewConn : np.ndarray
         Node connectivities of the subdivided mesh. The elements are ordered 
         so that the first element in the original mesh is subdivided into
         the first 8 elements in the new mesh, the second element in the mesh
-        is the next 8 elements, and so on.
+        becomes the next 8 elements, and so on.
     """
     ArrayCoords = np.asarray(NodeCoords)
     ArrayConn = np.asarray(NodeConn, dtype=int)
@@ -1860,7 +2606,6 @@ def hexsubdivide(NodeCoords, NodeConn):
     SubConn[7::8] = np.column_stack([Face4CentroidIds, CentroidIds, Face3CentroidIds, Edge37Ids, Edge74Ids, Face5CentroidIds, Edge67Ids, ArrayConn[:,7]])
 
     return NewCoords, SubConn
-
 
 def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
     """
@@ -2016,7 +2761,7 @@ def surf2voxel(SurfCoords,SurfConn,h,Octree='generate',mode='any'):
         Node connectivity of the surface mesh
     h : float
         Voxel size for the output mesh.
-    Octree : str, octree.OctreeNode, None, optional
+    Octree : str, tree.OctreeNode, None, optional
         Octree setting, by default 'generate'. 
         'generate' will construct an octree for use in creating the voxel mesh, None will not use an octree. Alternatively, if an existing 
         octree structure exists, that can be provided.
@@ -2060,7 +2805,7 @@ def surf2voxel(SurfCoords,SurfConn,h,Octree='generate',mode='any'):
 
 def voxel2im(VoxelCoords, VoxelConn, Vals):
     """
-    Convert a rectilinear voxel mesh (grid) to an 3D image matrix.
+    Convert a rectilinear voxel mesh (grid) to a 3D image matrix.
 
     Parameters
     ----------
@@ -2090,44 +2835,6 @@ def voxel2im(VoxelCoords, VoxelConn, Vals):
     I = np.reshape(Vals,shape,order='F')
     
     return I
-
-def removeNodes(NodeCoords,NodeConn):
-    """
-    Removes nodes that aren't held by any element
-
-    Parameters
-    ----------
-    NodeCoords : array_like
-        Node coordinates
-    NodeConn : array_like
-        Node connectivity
-
-    Returns
-    -------
-    NewNodeCoords : list
-        New set of node coordinates where unused nodes have been removed
-    NewNodeConn : list
-        Renumbered set of node connectivities to be consistent with NewNodeCoords
-    OriginalIds : np.ndarray
-        The indices the original IDs of the nodes still in the mesh. This can be used
-        to remove entries in associated node data (ex. new_data = old_data[OriginalIds]).
-    """    
-    warnings.warn('Deprecation warning: converter.removeNodes should be replaced by utils.RemoveNodes.')
-    # removeNodes 
-    OriginalIds, inverse = np.unique([n for elem in NodeConn for n in elem],return_inverse=True)
-    NewNodeCoords = [NodeCoords[i] for i in OriginalIds]
-    
-    NewNodeConn = [[] for elem in NodeConn]
-    k = 0
-    for i,elem in enumerate(NodeConn):
-        temp = []
-        for e in elem:
-            temp.append(inverse[k])
-            k += 1
-        NewNodeConn[i] = temp
-    
-    
-    return NewNodeCoords, NewNodeConn, OriginalIds
 
 def surf2dual(NodeCoords,SurfConn,Centroids=None,ElemConn=None,NodeNormals=None,sort='ccw'):
     """

@@ -26,10 +26,14 @@ Intersection Tests
     TrianglesTrianglesIntersectionPts
     TriangleBoxIntersection
     BoxTrianglesIntersection
+    BoxBoxIntersection
     SegmentSegmentIntersection
     SegmentsSegmentsIntersection
+    SegmentBox2DIntersection
+    SegmentBoxIntersection
     RaySegmentIntersection
     RaySegmentsIntersection
+    RayBoundaryIntersection
     RaySurfIntersection
     RaysSurfIntersection
     RayOctreeIntersection
@@ -46,13 +50,15 @@ Inside/Outside Tests
     PointInBoundary
     PointInSurf
     PointsInSurf
+    PointInBox2D
     PointInBox
     PointsInVoxel
     PointInTri
     PointsInTris
+    PointInTet
 """
 #%%
-from . import utils, octree, delaunay, try_njit
+from . import converter, utils, tree, delaunay, try_njit
 import numpy as np
 import itertools, random, sys, warnings
 import scipy
@@ -207,7 +213,7 @@ def RayTrianglesIntersection(pt, ray, Tris, bidirectional=False, eps=1e-14):
             ((det > -eps) & (det < eps)) |
             ((u < 0) | (u > 1)) |
             ((v < 0) | (u+v > 1)) |
-            ((abs(t) <= eps) & (not bidirectional))
+            ((t <= eps) & (not bidirectional))
             )
         intersections = np.where(~checks)[0]
         intersectionPts = pt + ray*t[intersections,None]
@@ -271,14 +277,14 @@ def RaysTrianglesIntersection(pts, rays, Tris, bidirectional=False, eps=1e-14):
             ((det > -eps) & (det < eps)) |
             ((u < 0) | (u > 1)) |
             ((v < 0) | (u+v > 1)) |
-            ((abs(t) <= eps) & (not bidirectional))
+            ((t <= eps) & (not bidirectional))
             )
         intersections = np.where(~checks)[0]
         intersectionPts = pts[intersections] + rays[intersections]*t[intersections,None]
         
     return intersections, intersectionPts
 
-def RayBoxIntersection(pt, ray, xlim, ylim, zlim):
+def RayBoxIntersection(pt, ray, xlim, ylim, zlim, bidirectional=False):
     """
     Intersection algorithm for detecting intersections between a ray and an axis-aligned box.
     Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748
@@ -296,6 +302,9 @@ def RayBoxIntersection(pt, ray, xlim, ylim, zlim):
         Two element list, array, or tuple with the upper and lower y-direction bounds for an axis-aligned box.
     zlim : array_like
         Two element list, array, or tuple with the upper and lower z-direction bounds for an axis-aligned box.
+    bidirectional : bool, optional
+        Determines whether to check for intersections only in the direction the 
+        ray is pointing, or in both directions (±ray), by default False.
 
     Returns
     -------
@@ -314,7 +323,8 @@ def RayBoxIntersection(pt, ray, xlim, ylim, zlim):
     else:
         tmin = np.sign(xlim[0] - pt[0])*np.inf
         tmax = np.sign(xlim[1] - pt[0])*np.inf
-    
+    if not bidirectional and (tmin < 0) and (tmax < 0):
+        return False
     
     if ray[1] > 0:
         divy = 1/ray[1]
@@ -327,6 +337,8 @@ def RayBoxIntersection(pt, ray, xlim, ylim, zlim):
     else:
         tymin = np.sign(ylim[0] - pt[1])*np.inf
         tymax = np.sign(ylim[1] - pt[1])*np.inf
+    if not bidirectional and (tymin < 0) and (tymax < 0):
+        return False
     
     if (tmin > tymax) or (tymin > tmax):
         return False
@@ -347,14 +359,15 @@ def RayBoxIntersection(pt, ray, xlim, ylim, zlim):
     else:
         tzmin = np.sign(zlim[0] - pt[2])*np.inf
         tzmax = np.sign(zlim[1] - pt[2])*np.inf
-        
+    if not bidirectional and (tzmin < 0) and (tzmax < 0):
+        return False
         
     if (tmin > tzmax) or (tzmin > tmax):
         return False
     
     return True
 
-def RayBoxesIntersection(pt, ray, xlims, ylims, zlims):
+def RayBoxesIntersection(pt, ray, xlims, ylims, zlims, bidirectional=False):
     """
     Vectorized intersection algorithm for detecting intersections between a ray and a set of axis-aligned boxes.
     Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748
@@ -372,6 +385,9 @@ def RayBoxesIntersection(pt, ray, xlims, ylims, zlims):
         2D array_like with the upper and lower y-direction bounds for each axis-aligned box. Should have shape (n,2).
     zlims : array_like
         2D array_like with the upper and lower z-direction bounds for each axis-aligned box. Should have shape (n,2).
+    bidirectional : bool, optional
+        Determines whether to check for intersections only in the direction the 
+        ray is pointing, or in both directions (±ray), by default False.
 
     Returns
     -------
@@ -392,9 +408,14 @@ def RayBoxesIntersection(pt, ray, xlims, ylims, zlims):
         tmin = (xlims[:,1] - pt[0]) * divx
         tmax = (xlims[:,0] - pt[0]) * divx
     else:
-        tmin = np.sign(xlims[:,0] - pt[0])*np.inf
-        tmax = np.sign(xlims[:,1] - pt[0])*np.inf
-    
+        with np.errstate(invalid='ignore'):
+            tmin = np.sign(xlims[:,0] - pt[0])*np.inf
+            tmax = np.sign(xlims[:,1] - pt[0])*np.inf
+            # tmin[np.isnan(tmin)] = 0
+            # tmax[np.isnan(tmax)] = 0
+    if not bidirectional:
+        intersections[(tmin<0) & (tmax<0)] = False
+
     if ray[1] > 0:
         divy = 1/ray[1]
         tymin = (ylims[:,0] - pt[1]) * divy
@@ -404,12 +425,17 @@ def RayBoxesIntersection(pt, ray, xlims, ylims, zlims):
         tymin = (ylims[:,1] - pt[1]) * divy
         tymax = (ylims[:,0] - pt[1]) * divy
     else:
-        tymin = np.sign(ylims[:,0] - pt[1])*np.inf
-        tymax = np.sign(ylims[:,1] - pt[1])*np.inf
-    
+        with np.errstate(invalid='ignore'):
+            tymin = np.sign(ylims[:,0] - pt[1])*np.inf
+            tymax = np.sign(ylims[:,1] - pt[1])*np.inf
+            # tymin[np.isnan(tymin)] = 0
+            # tymax[np.isnan(tymax)] = 0
+    if not bidirectional:
+        intersections[(tymin<0) & (tymax<0)] = False
     intersections[(tmin > tymax) | (tymin > tmax)] = False
-    tmin = np.maximum(tymin, tmin)
-    tmax = np.minimum(tymax, tmax)
+    # tmin = np.maximum(tymin, tmin)
+    tmin[tymin > tmin] = tymin[tymin > tmin]
+    tmax[tymax < tmax] = tymax[tymax < tmax] 
     
     # tzmin/tzmax only calculated for intersections not already found to be false
     if ray[2] > 0:
@@ -421,11 +447,19 @@ def RayBoxesIntersection(pt, ray, xlims, ylims, zlims):
         tzmin = (zlims[intersections,1] - pt[2]) * divz
         tzmax = (zlims[intersections,0] - pt[2]) * divz
     else:
-        tzmin = np.sign(zlims[intersections,0] - pt[2])*np.inf
-        tzmax = np.sign(zlims[intersections,1] - pt[2])*np.inf
+        with np.errstate(invalid='ignore'):
+            tzmin = np.sign(zlims[intersections,0] - pt[2])*np.inf
+            tzmax = np.sign(zlims[intersections,1] - pt[2])*np.inf
+            # tzmin[np.isnan(tzmin)] = 0
+            # tzmax[np.isnan(tzmax)] = 0
+    if not bidirectional:
+        zpositive = ~((tzmin<0) & (tzmax<0))
+        intersections[intersections] = zpositive
+    else:
+        zpositive = np.repeat(True, len(tzmin))
     
-    # TODO: Somethings wrong - probably here
-    intersections[intersections] = ~((tmin[intersections] > tzmax) | (tzmin > tmax[intersections]))
+    intersections[intersections] = ~((tmin[intersections] > tzmax[zpositive]) | (tzmin[zpositive] > tmax[intersections]))
+
     return intersections
 
 def PlaneBoxIntersection(pt, Normal, xlim, ylim, zlim):
@@ -1189,8 +1223,8 @@ def TrianglesTrianglesIntersectionPts(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
             p11s = es1[:,0]   # First point in the edges
             p12s = es1[:,1]   # Second point in the edges
             tris1 = Tri2s[coplanar_where[where1]]    # Corresponding triangle
-            In11 = PointsInTris(tris1,p11s,method='BaryArea') & (~np.any(np.all(np.abs(p11s[:,:,None] - edge1_ixpts[i][where1])<eps,axis=2),axis=1))
-            In12 = PointsInTris(tris1,p12s,method='BaryArea') & (~np.any(np.all(np.abs(p12s[:,:,None] - edge1_ixpts[i][where1])<eps,axis=2),axis=1))
+            In11 = PointsInTris(p11s,tris1) & (~np.any(np.all(np.abs(p11s[:,:,None] - edge1_ixpts[i][where1])<eps,axis=2),axis=1))
+            In12 = PointsInTris(p12s,tris1) & (~np.any(np.all(np.abs(p12s[:,:,None] - edge1_ixpts[i][where1])<eps,axis=2),axis=1))
 
             nanidx1 = np.where(np.all(np.isnan(edge1_ixpts[i][where1]),axis=2).cumsum(axis=1).cumsum(axis=1) == 1)
             edge1_ixpts[i][where1[nanidx1[0][In11]],nanidx1[1][In11]] = p11s[In11]
@@ -1202,8 +1236,8 @@ def TrianglesTrianglesIntersectionPts(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
             p21s = es2[:,0]   # First point in the edges
             p22s = es2[:,1]   # Second point in the edges
             tris2 = Tri1s[coplanar_where[where2]]    # Corresponding triangle
-            In21 = PointsInTris(tris2,p21s,method='BaryArea') & (~np.any(np.all(np.abs(p21s[:,:,None] - edge2_ixpts[i][where2])<eps,axis=2),axis=1))
-            In22 = PointsInTris(tris2,p22s,method='BaryArea') & (~np.any(np.all(np.abs(p22s[:,:,None] - edge2_ixpts[i][where2])<eps,axis=2),axis=1))
+            In21 = PointsInTris(p21s,tris2) & (~np.any(np.all(np.abs(p21s[:,:,None] - edge2_ixpts[i][where2])<eps,axis=2),axis=1))
+            In22 = PointsInTris(p22s,tris2) & (~np.any(np.all(np.abs(p22s[:,:,None] - edge2_ixpts[i][where2])<eps,axis=2),axis=1))
 
             nanidx2 = np.where(np.all(np.isnan(edge2_ixpts[i][where2]),axis=2).cumsum(axis=1).cumsum(axis=1) == 1)
             edge2_ixpts[i][where2[nanidx2[0][In21]],nanidx2[1][In21]] = p21s[In21]
@@ -1224,8 +1258,8 @@ def TrianglesTrianglesIntersectionPts(Tri1s,Tri2s,eps=1e-14,edgeedge=False):
 
         # Check triangles with no edge intersections to see if one is completely within the other
         PtInTriChecks = coplanar_where[~Intersections[coplanar_where]]
-        TwoInOne = PointsInTris(Tri1s[PtInTriChecks],Tri2s[PtInTriChecks,0],method='BaryArea',eps=eps,inclusive=False)
-        OneInTwo = PointsInTris(Tri2s[PtInTriChecks],Tri1s[PtInTriChecks,0],method='BaryArea',eps=eps,inclusive=False)
+        TwoInOne = PointsInTris(Tri2s[PtInTriChecks,0],Tri1s[PtInTriChecks],eps=eps,inclusive=False)
+        OneInTwo = PointsInTris(Tri1s[PtInTriChecks,0],Tri2s[PtInTriChecks],eps=eps,inclusive=False)
 
         Intersections[PtInTriChecks] = OneInTwo | TwoInOne
         IntersectionPts[PtInTriChecks[TwoInOne],:6,:] = Tri2s[PtInTriChecks[TwoInOne]][:,[0,1,1,2,2,0]]
@@ -1367,6 +1401,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
     
     return True
 
+@try_njit(cache=True)
 def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=None):
     """
     Intersection test for detecting intersections between a triangle and a box. A vectorized version of :func:`TriangleBoxIntersection` for one box and multiple triangles
@@ -1376,19 +1411,19 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
 
     Parameters
     ----------
-    Tris : array_like
+    Tris : np.ndarray
         Coordinates of triangle vertices for each triangle in the format
         np.array([[[a, b, c], [d, e, f], [g, h, i]], [[...],[...],[...]], ...).
         Should have shape (n,3,3) for n triangles.
-    xlim : array_like
+    xlim : np.ndarray
         2 element array of the lower and upper bounds of the box in the x direction ``[xmin, xmax]``
-    ylim : array_like
+    ylim : np.ndarray
         2 element array of the lower and upper bounds of the box in the y direction ``[ymin, ymax]``
-    zlim : array_like
+    zlim : np.ndarray
         2 element array of the lower and upper bounds of the box in the z direction ``[zmin, zmax]``
-    TriNormal : array_like, optional
+    TriNormal : np.ndarray, optional
         Triangle normal vector, by default None. Will be computed if not provided.
-    BoxCenter : array_like, optional
+    BoxCenter : np.ndarray, optional
         Coordinates of the center of the box, by default None. Will be computed if not provided.
 
     Returns
@@ -1396,9 +1431,9 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
     intersection : bool
         True if there is an intersection, otherwise False.
     """    
-    if BoxCenter is None: BoxCenter = np.mean([xlim,ylim,zlim],axis=1)
+    if BoxCenter is None: BoxCenter = np.array([np.mean(lim) for lim in (xlim,ylim,zlim)])
     
-    if type(Tris) is list: Tris = np.array(Tris)
+    # if type(Tris) is list: Tris = np.array(Tris)
         
     f0 = Tris[:,1]-Tris[:,0]
     f1 = Tris[:,2]-Tris[:,1]
@@ -1413,70 +1448,68 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
     
     if TriNormals is None: 
         TriNormals = np.cross(f0,f1)
-    elif type(TriNormals) is list:
-        TriNormals = np.array(TriNormals)
     
     dist = np.sum(TriNormals*v0,axis=1)
     r0 = hx*np.abs(TriNormals[:,0]) + hy*np.abs(TriNormals[:,1]) + hz*np.abs(TriNormals[:,2])
     
     # Test Axes
     # a00
-    a00 = np.vstack([np.zeros(len(f0)), -f0[:,2], f0[:,1]]).T
+    a00 = np.column_stack((np.zeros(len(f0)), -f0[:,2], f0[:,1]))
     p0 = np.sum(v0*a00,axis=1)
     p2 = np.sum(v2*a00,axis=1)
     r1 = hy*np.abs(a00[:,1]) + hz*np.abs(a00[:,2])
     ps1 = (p0,p2)
     
     # a01
-    a01 = np.vstack([np.zeros(len(f1)), -f1[:,2], f1[:,1]]).T
+    a01 = np.column_stack((np.zeros(len(f1)), -f1[:,2], f1[:,1]))
     p0 = np.sum(v0*a01,axis=1)
     p1 = np.sum(v1*a01,axis=1)
     r2 = hy*np.abs(a01[:,1]) + hz*np.abs(a01[:,2])
     ps2 = (p0,p1)
     
     # a02
-    a02 = np.vstack([np.zeros(len(f2)), -f2[:,2], f2[:,1]]).T
+    a02 = np.column_stack((np.zeros(len(f2)), -f2[:,2], f2[:,1]))
     p0 = np.sum(v0*a02,axis=1)
     p1 = np.sum(v1*a02,axis=1)
     r3 = hy*np.abs(a02[:,1]) + hz*np.abs(a02[:,2])
     ps3 = (p0,p1)
     
     # a10
-    a10 = np.vstack([f0[:,2], np.zeros(len(f0)), -f0[:,0]]).T
+    a10 = np.column_stack((f0[:,2], np.zeros(len(f0)), -f0[:,0]))
     p0 = np.sum(v0*a10,axis=1)
     p2 = np.sum(v2*a10,axis=1)
     r4 = hx*np.abs(a10[:,0]) + hz*np.abs(a10[:,2])
     ps4 = (p0,p2)
     
     # a11
-    a11 = np.vstack([f1[:,2], np.zeros(len(f1)), -f1[:,0]]).T
+    a11 = np.column_stack((f1[:,2], np.zeros(len(f1)), -f1[:,0]))
     p0 = np.sum(v0*a11,axis=1)
     p1 = np.sum(v1*a11,axis=1)
     r5 = hx*np.abs(a11[:,0]) + hz*np.abs(a11[:,2])
     ps5 = (p0,p1)
     
     # a12
-    a12 = np.vstack([f2[:,2], np.zeros(len(f2)), -f2[:,0]]).T
+    a12 = np.column_stack((f2[:,2], np.zeros(len(f2)), -f2[:,0]))
     p0 = np.sum(v0*a12,axis=1)
     p1 = np.sum(v1*a12,axis=1)
     r6 = hx*np.abs(a12[:,0]) + hz*np.abs(a12[:,2])
     ps6 = (p0,p1)
     # a20
-    a20 = np.vstack([-f0[:,1], f0[:,0], np.zeros(len(f0))]).T
+    a20 = np.column_stack((-f0[:,1], f0[:,0], np.zeros(len(f0))))
     p0 = np.sum(v0*a20,axis=1)
     p2 = np.sum(v2*a20,axis=1)
     r7 = hx*np.abs(a20[:,0]) + hy*np.abs(a20[:,1])
     ps7 = (p0,p2)
     
     # a21
-    a21 = np.vstack([-f1[:,1], f1[:,0], np.zeros(len(f1))]).T
+    a21 = np.column_stack((-f1[:,1], f1[:,0], np.zeros(len(f1))))
     p0 = np.sum(v0*a21,axis=1)
     p1 = np.sum(v1*a21,axis=1)
     r8 = hx*np.abs(a21[:,0]) + hy*np.abs(a21[:,1])
     ps8 = (p0,p1)
     
     # a22
-    a22 = np.vstack([-f2[:,1], f2[:,0], np.zeros(len(f2))]).T
+    a22 = np.column_stack((-f2[:,1], f2[:,0], np.zeros(len(f2))))
     p0 = np.sum(v0*a22,axis=1)
     p1 = np.sum(v1*a22,axis=1)
     r9 = hx*np.abs(a22[:,0]) + hy*np.abs(a22[:,1])
@@ -1487,12 +1520,12 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
     
     checks = (
         # Test the box against the minimal Axis Aligned Bounding Box (AABB) of the tri
-        (np.amax([v0[:,0],v1[:,0],v2[:,0]],axis=0) < -hx) | 
-        (np.amin([v0[:,0],v1[:,0],v2[:,0]],axis=0) >  hx) |
-        (np.amax([v0[:,1],v1[:,1],v2[:,1]],axis=0) < -hy) | 
-        (np.amin([v0[:,1],v1[:,1],v2[:,1]],axis=0) >  hy) |
-        (np.amax([v0[:,2],v1[:,2],v2[:,2]],axis=0) < -hz) | 
-        (np.amin([v0[:,2],v1[:,2],v2[:,2]],axis=0) >  hz) |
+        (np.maximum(np.maximum(v0[:,0],v1[:,0]),v2[:,0]) < -hx) | 
+        (np.minimum(np.minimum(v0[:,0],v1[:,0]),v2[:,0]) >  hx) |
+        (np.maximum(np.maximum(v0[:,1],v1[:,1]),v2[:,1]) < -hy) | 
+        (np.minimum(np.minimum(v0[:,1],v1[:,1]),v2[:,1]) >  hy) |
+        (np.maximum(np.maximum(v0[:,2],v1[:,2]),v2[:,2]) < -hz) | 
+        (np.minimum(np.minimum(v0[:,2],v1[:,2]),v2[:,2]) >  hz) |
         # Test normal of the triangle
         (dist > r0) |
         # Test Axes
@@ -1513,26 +1546,40 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
 
 @try_njit    
 def BoxBoxIntersection(box1, box2):
+    """
+    Intersection of two boxes.
 
+    Parameters
+    ----------
+    box1 : tuple, array_like
+        Bounds of the first box, formatted as ((xmin, xmax), (ymin, ymax), (zmin, zmax))
+    box2 : tuple, array_like
+        Bounds of the second box, formatted as ((xmin, xmax), (ymin, ymax), (zmin, zmax))
+
+    Returns
+    -------
+    Intersection : bool
+        True if the two boxes intersect.
+    """    
     x1lim, y1lim, z1lim = box1
     x2lim, y2lim, z2lim = box2
 
-    xIx = ((x1lim[0] < x2lim[0]) and (x1lim[1] > x2lim[0])) or \
-        ((x1lim[0] < x2lim[1]) and (x1lim[1] > x2lim[1])) or \
-        ((x2lim[0] < x1lim[0]) and (x2lim[1] > x1lim[0])) or \
-        ((x2lim[0] < x1lim[1]) and (x2lim[1] > x1lim[1]))
-    yIx = ((y1lim[0] < y2lim[0]) and (y1lim[1] > y2lim[0])) or \
-        ((y1lim[0] < y2lim[1]) and (y1lim[1] > y2lim[1])) or \
-        ((y2lim[0] < y1lim[0]) and (y2lim[1] > y1lim[0])) or \
-        ((y2lim[0] < y1lim[1]) and (y2lim[1] > y1lim[1]))
-    zIx = ((z1lim[0] < z2lim[0]) and (z1lim[1] > z2lim[0])) or \
-        ((z1lim[0] < z2lim[1]) and (z1lim[1] > z2lim[1])) or \
-        ((z2lim[0] < z1lim[0]) and (z2lim[1] > z1lim[0])) or \
-        ((z2lim[0] < z1lim[1]) and (z2lim[1] > z1lim[1]))
+    xIx = ((x1lim[0] <= x2lim[0]) and (x1lim[1] > x2lim[0])) or \
+        ((x1lim[0] < x2lim[1]) and (x1lim[1] >= x2lim[1])) or \
+        ((x2lim[0] <= x1lim[0]) and (x2lim[1] > x1lim[0])) or \
+        ((x2lim[0] < x1lim[1]) and (x2lim[1] >= x1lim[1]))
+    yIx = ((y1lim[0] <= y2lim[0]) and (y1lim[1] > y2lim[0])) or \
+        ((y1lim[0] < y2lim[1]) and (y1lim[1] >= y2lim[1])) or \
+        ((y2lim[0] <= y1lim[0]) and (y2lim[1] > y1lim[0])) or \
+        ((y2lim[0] < y1lim[1]) and (y2lim[1] >= y1lim[1]))
+    zIx = ((z1lim[0] <= z2lim[0]) and (z1lim[1] > z2lim[0])) or \
+        ((z1lim[0] < z2lim[1]) and (z1lim[1] >= z2lim[1])) or \
+        ((z2lim[0] <= z1lim[0]) and (z2lim[1] > z1lim[0])) or \
+        ((z2lim[0] < z1lim[1]) and (z2lim[1] >= z1lim[1]))
 
-    Ix = xIx and yIx and zIx
+    Intersection = xIx and yIx and zIx
 
-    return Ix
+    return Intersection
 
 def SegmentSegmentIntersection(s1,s2,return_intersection=False,endpt_inclusive=True,eps=0):
     """
@@ -1661,7 +1708,148 @@ def SegmentsSegmentsIntersection(s1,s2,return_intersection=False,endpt_inclusive
         return Intersections, pts
     return Intersections
 
-def RaySegmentIntersection(pt,ray,segment,return_intersection=False,endpt_inclusive=True,eps=0):
+def SegmentBox2DIntersection(segment, xlim, ylim):
+    """
+    Intersection algorithm for detecting intersections between a ray and an axis-aligned box.
+    Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748
+    :cite:p:`Williams2005`
+
+    Parameters
+    ----------
+    pt : array_like
+        3D coordinates for the starting point of the ray.
+    ray : array_like
+        3D vector of ray direction. This should, in general, be a unit vector.
+    xlim : array_like
+        Two element list, array, or tuple with the upper and lower x-direction bounds for an axis-aligned box.
+    ylim : array_like
+        Two element list, array, or tuple with the upper and lower y-direction bounds for an axis-aligned box.
+    zlim : array_like
+        Two element list, array, or tuple with the upper and lower z-direction bounds for an axis-aligned box.
+
+    Returns
+    -------
+    intersection : bool
+        True if there is an intersection between the ray and the box, otherwise False.
+    """    
+    
+    pt = segment[0]
+    ray = segment[1] - segment[0]
+    if ray[0] > 0:
+        divx = 1/ray[0]
+        tmin = (xlim[0] - pt[0]) * divx
+        tmax = (xlim[1] - pt[0]) * divx
+    elif ray[0] < 0:
+        divx = 1/ray[0]
+        tmin = (xlim[1] - pt[0]) * divx
+        tmax = (xlim[0] - pt[0]) * divx
+    else:
+        tmin = np.sign(xlim[0] - pt[0])*np.inf
+        tmax = np.sign(xlim[1] - pt[0])*np.inf
+    if ((tmin < 0) and (tmax < 0)) or ((tmin > 1) and (tmax > 1)):
+        return False
+    
+    if ray[1] > 0:
+        divy = 1/ray[1]
+        tymin = (ylim[0] - pt[1]) * divy
+        tymax = (ylim[1] - pt[1]) * divy
+    elif ray[1] < 0:
+        divy = 1/ray[1]
+        tymin = (ylim[1] - pt[1]) * divy
+        tymax = (ylim[0] - pt[1]) * divy
+    else:
+        tymin = np.sign(ylim[0] - pt[1])*np.inf
+        tymax = np.sign(ylim[1] - pt[1])*np.inf
+    if ((tymin < 0) and (tymax < 0)) or ((tymin > 1) and (tymax > 1)):
+        return False
+    
+    if (tmin > tymax) or (tymin > tmax):
+        return False
+    
+    return True
+
+def SegmentBoxIntersection(segment, xlim, ylim, zlim):
+    """
+    Intersection algorithm for detecting intersections between a ray and an axis-aligned box.
+    Williams, A., Barrus, S., Morley, R. K., & Shirley, P. (2005). An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1), 55-60. https://www.doi.org/10.1145/1198555.1198748
+    :cite:p:`Williams2005`
+
+    Parameters
+    ----------
+    pt : array_like
+        3D coordinates for the starting point of the ray.
+    ray : array_like
+        3D vector of ray direction. This should, in general, be a unit vector.
+    xlim : array_like
+        Two element list, array, or tuple with the upper and lower x-direction bounds for an axis-aligned box.
+    ylim : array_like
+        Two element list, array, or tuple with the upper and lower y-direction bounds for an axis-aligned box.
+    zlim : array_like
+        Two element list, array, or tuple with the upper and lower z-direction bounds for an axis-aligned box.
+
+    Returns
+    -------
+    intersection : bool
+        True if there is an intersection between the ray and the box, otherwise False.
+    """    
+    pt = segment[0]
+    ray = segment[1] - segment[0]
+    if ray[0] > 0:
+        divx = 1/ray[0]
+        tmin = (xlim[0] - pt[0]) * divx
+        tmax = (xlim[1] - pt[0]) * divx
+    elif ray[0] < 0:
+        divx = 1/ray[0]
+        tmin = (xlim[1] - pt[0]) * divx
+        tmax = (xlim[0] - pt[0]) * divx
+    else:
+        tmin = np.sign(xlim[0] - pt[0])*np.inf
+        tmax = np.sign(xlim[1] - pt[0])*np.inf
+    if ((tmin < 0) and (tmax < 0)) or ((tmin > 1) and (tmax > 1)):
+        return False
+    
+    if ray[1] > 0:
+        divy = 1/ray[1]
+        tymin = (ylim[0] - pt[1]) * divy
+        tymax = (ylim[1] - pt[1]) * divy
+    elif ray[1] < 0:
+        divy = 1/ray[1]
+        tymin = (ylim[1] - pt[1]) * divy
+        tymax = (ylim[0] - pt[1]) * divy
+    else:
+        tymin = np.sign(ylim[0] - pt[1])*np.inf
+        tymax = np.sign(ylim[1] - pt[1])*np.inf
+    if ((tymin < 0) and (tymax < 0)) or ((tymin > 1) and (tymax > 1)):
+        return False
+    
+    if (tmin > tymax) or (tymin > tmax):
+        return False
+    if (tymin > tmin):
+        tmin = tymin
+    if (tymax < tmax):
+        tmax = tymax
+    
+    
+    if ray[2] > 0:
+        divz = 1/ray[2]
+        tzmin = (zlim[0] - pt[2]) * divz
+        tzmax = (zlim[1] - pt[2]) * divz
+    elif ray[2] < 0:
+        divz = 1/ray[2]
+        tzmin = (zlim[1] - pt[2]) * divz
+        tzmax = (zlim[0] - pt[2]) * divz
+    else:
+        tzmin = np.sign(zlim[0] - pt[2])*np.inf
+        tzmax = np.sign(zlim[1] - pt[2])*np.inf
+    if ((tzmin < 0) and (tzmax < 0)) or ((tzmin > 1) and (tzmax > 1)):
+        return False
+        
+    if (tmin > tzmax) or (tzmin > tmax):
+        return False
+    
+    return True
+
+def RaySegmentIntersection(pt, ray, segment,return_intersection=False,endpt_inclusive=True,eps=0):
     """
     Detect intersections between a ray and a line segment.
 
@@ -1816,7 +2004,7 @@ def RayBoundaryIntersection(pt, ray, NodeCoords, BoundaryConn, eps=0):
 
     return intersections, distances, intersectionPts
 
-def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, Octree='generate'):
+def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, bidirectional=True, eps=1e-14, Octree=None):
     """
     Identify intersections between a ray and a triangular surface mesh. 
 
@@ -1831,17 +2019,20 @@ def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, Octree='genera
     SurfConn : array_like
         List of surface element connectivities. This should be a strictly
         triangular mesh. See :func:`~mymesh.converter.surf2tris` for conversion.
+    bidirectional : bool, optional
+        Determines whether to check for intersections only in the direction the 
+        ray is pointing, or in both directions (±ray), by default False.
     eps : float, optional
         Small tolerance parameter, by default 1e-14
-    Octree : str, octree.OctreeNode, or NoneType, optional
+    Octree : str, tree.OctreeNode, or NoneType, optional
         Specify whether to use an octree structure for acceleration of 
-        intersection tests. An octree previously constructed using 
-        :func:`~mymesh.octree.Surface2Octree` can be used, or one can be
-        generated by default 'generate'.
+        intersection tests. An octree previously contructed using 
+        :func:`~mymesh.tree.Surface2Octree` can be used, or one can be
+        generated by default None.
 
         - 'generate' : Create an octree
         - 'None' or None : Don't use an octree
-        - octree.OctreeNode : Use this octree
+        - tree.OctreeNode : Use this octree
 
     Returns
     -------
@@ -1854,39 +2045,41 @@ def RaySurfIntersection(pt, ray, NodeCoords, SurfConn, eps=1e-14, Octree='genera
     
     
     """    
-    def test(pt, ray, nodes):
-        iPt = RayTriangleIntersection(pt, ray, nodes, bidirectional=True)
-        return iPt
+    try:
+        if np.shape(SurfConn)[1] != 3:
+            _, TriConn, inv = converter.surf2tris(NodeCoords,SurfConn,return_inv=True)
+        else:
+            TriConn = SurfConn
+            inv = np.arange(len(TriConn))
+    except:
+        # mixed element surface
+        _, TriConn, inv = converter.surf2tris(NodeCoords,SurfConn,return_inv=True)
+
     ArrayCoords = np.array(NodeCoords)
     if type(pt) is list: pt = np.array(pt)
     if type(ray) is list: ray = np.array(ray)
-    if Octree == None or Octree == 'None' or Octree == 'none':
+
+    root = OctreeInputProcessor(NodeCoords, TriConn, Octree)
+    if root == None:
         # Won't use any octree structure to accelerate intersection tests
-        intersections,intersectionPts = RayTrianglesIntersection(pt, ray, ArrayCoords[SurfConn], bidirectional=True, eps=eps)
-        distances = np.sum(ray/np.linalg.norm(ray)*(intersectionPts-pt),axis=1)
-    elif Octree == 'generate' or type(Octree) == octree.OctreeNode:
-        if Octree == 'generate':
-            # Create an octree structure based on the provided structure
-            root = octree.Surface2Octree(NodeCoords,SurfConn)
-        else:
-            # Using an already generated octree structure
-            # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surface2Octree
-            root = Octree
-            
-        # Proceeding with octree-accelerated intersection test
-        intersection_leaves = RayOctreeIntersection(pt, ray, root) 
-        TriIds = [tri for node in intersection_leaves for tri in node.data]
-        
-        Tris = ArrayCoords[np.asarray(SurfConn)[TriIds]]
-        intersections,intersectionPts = RayTrianglesIntersection(pt, ray, Tris, bidirectional=True, eps=eps)
-        intersections = np.array(TriIds)[intersections]
+        intersections,intersectionPts = RayTrianglesIntersection(pt, ray, ArrayCoords[TriConn], bidirectional=bidirectional, eps=eps)
         distances = np.sum(ray/np.linalg.norm(ray)*(intersectionPts-pt),axis=1)
     else:
-        raise Exception('Invalid octree argument given')
+        # Proceeding with octree-accelerated intersection test
+        intersection_leaves = RayOctreeIntersection(pt, ray, root, bidirectional=bidirectional) 
+        TriIds = np.unique([tri for node in intersection_leaves for tri in node.data])
         
+        Tris = ArrayCoords[np.asarray(TriConn)[TriIds]]
+        intersections,intersectionPts = RayTrianglesIntersection(pt, ray, Tris, bidirectional=bidirectional, eps=eps)
+        intersections = np.array(TriIds)[intersections]
+        distances = np.sum(ray/np.linalg.norm(ray)*(intersectionPts-pt),axis=1)
+
+    intersections, idx = np.unique(inv[intersections], return_index=True) # get element indices from the original surface    
+    distances = distances[idx]
+    intersectionPts = intersectionPts[idx]
     return intersections, distances, intersectionPts
 
-def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, eps=1e-14, Octree='generate'):
+def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, eps=1e-14, Octree=None):
     """
     Identify intersections between rays and a triangular surface mesh. 
 
@@ -1906,15 +2099,15 @@ def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, ep
         ray is pointing, or in both directions (±ray), by default False.
     eps : float, optional
         Small tolerance parameter, by default 1e-14
-    Octree : str, octree.OctreeNode, or NoneType, optional
+    Octree : str, tree.OctreeNode, or NoneType, optional
         Specify whether to use an octree structure for acceleration of 
         intersection tests. An octree previously constructed using 
-        :func:`~mymesh.octree.Surface2Octree` can be used, or one can be
-        generated by default 'generate'.
+        :func:`~mymesh.tree.Surface2Octree` can be used, or one can be
+        generated by default None.
 
         - 'generate' : Create an octree
         - 'None' or None : Don't use an octree
-        - octree.OctreeNode : Use this octree
+        - tree.OctreeNode : Use this octree
 
     Returns
     -------
@@ -1927,35 +2120,47 @@ def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, ep
     
     
     """ 
+    try:
+        if np.shape(SurfConn)[1] != 3:
+            nontri = True
+            _, TriConn, inv = converter.surf2tris(NodeCoords,SurfConn,return_inv=True)
+        else:
+            nontri = False
+            TriConn = SurfConn
+            inv = np.arange(len(TriConn))
+    except:
+        # mixed element surface
+        nontri = True
+        _, TriConn, inv = converter.surf2tris(NodeCoords,SurfConn,return_inv=True)
     ArrayCoords = np.array(NodeCoords)
     if type(pts) is list: pts = np.array(pts)
     if type(rays) is list: rays = np.array(rays)
     if Octree == None or Octree == 'None' or Octree == 'none':
         # Won't use any octree structure to accelerate intersection tests
-        inpts = np.repeat(pts,len(SurfConn),axis=0)
-        inrays = np.repeat(rays,len(SurfConn),axis=0)
-        RayIds = np.repeat(np.arange(len(rays),dtype=int),len(SurfConn),axis=0)
+        inpts = np.repeat(pts,len(TriConn),axis=0)
+        inrays = np.repeat(rays,len(TriConn),axis=0)
+        RayIds = np.repeat(np.arange(len(rays),dtype=int),len(TriConn),axis=0)
 
-        Tris = np.tile(ArrayCoords[SurfConn], (len(pts),1,1))
-        TriIds = np.tile(np.arange(len(SurfConn),dtype=int), len(pts))
+        Tris = np.tile(ArrayCoords[TriConn], (len(pts),1,1))
+        TriIds = np.tile(np.arange(len(TriConn),dtype=int), len(pts))
         
         outintersections,outintersectionPts = RaysTrianglesIntersection(inpts, inrays, Tris, bidirectional=bidirectional, eps=eps)
         outdistances = np.sum(inrays[outintersections]*(outintersectionPts-inpts[outintersections]),axis=1)
 
-    elif Octree == 'generate' or type(Octree) == octree.OctreeNode:
+    elif Octree == 'generate' or type(Octree) == tree.OctreeNode:
         if Octree == 'generate':
             # Create an octree structure based on the provided structure
-            root = octree.Surface2Octree(NodeCoords,SurfConn)
+            root = tree.Surface2Octree(NodeCoords,TriConn)
         else:
             # Using an already generated octree structure
-            # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surface2Octree
+            # If this is the case, it should conform to the same structure and labeling as one generated with tree.Surface2Octree
             root = Octree
         # Proceeding with octree-accelerated intersection test
         # Assemble pairwise list of rays and tris
         TriIds = [[] for i in range(len(pts))]
         RayIds = [[] for i in range(len(pts))]
         for i in range(len(rays)):
-            intersection_leaves = RayOctreeIntersection(pts[i], rays[i], root) 
+            intersection_leaves = RayOctreeIntersection(pts[i], rays[i], root, bidirectional=bidirectional) 
             iTris = [tri for node in intersection_leaves for tri in node.data]
             TriIds[i] = iTris
             RayIds[i] = np.repeat(i,len(iTris))
@@ -1970,7 +2175,7 @@ def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, ep
 
             return intersections, distances, intersectionPts
 
-        Tris = ArrayCoords[np.asarray(SurfConn)[TriIds]]
+        Tris = ArrayCoords[np.asarray(TriConn)[TriIds]]
         inpts = pts[RayIds]
         inrays = rays[RayIds]
         outintersections,outintersectionPts = RaysTrianglesIntersection(inpts, inrays, Tris, bidirectional=bidirectional, eps=eps)
@@ -1979,11 +2184,11 @@ def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, ep
     else:
         raise Exception('Invalid octree argument given')
         
-    spintersections = scipy.sparse.lil_matrix((len(pts),len(SurfConn)),dtype=int)
-    spdistances = scipy.sparse.lil_matrix((len(pts),len(SurfConn)))
-    spintersectionPtsX = scipy.sparse.lil_matrix((len(pts),len(SurfConn)))
-    spintersectionPtsY = scipy.sparse.lil_matrix((len(pts),len(SurfConn)))
-    spintersectionPtsZ = scipy.sparse.lil_matrix((len(pts),len(SurfConn)))
+    spintersections = scipy.sparse.lil_matrix((len(pts),len(TriConn)),dtype=int)
+    spdistances = scipy.sparse.lil_matrix((len(pts),len(TriConn)))
+    spintersectionPtsX = scipy.sparse.lil_matrix((len(pts),len(TriConn)))
+    spintersectionPtsY = scipy.sparse.lil_matrix((len(pts),len(TriConn)))
+    spintersectionPtsZ = scipy.sparse.lil_matrix((len(pts),len(TriConn)))
 
     spintersections[RayIds[outintersections],TriIds[outintersections]] = TriIds[outintersections]+1 # +1 so that TriId = 0 doesn't get lost in sparse
     spdistances[RayIds[outintersections],TriIds[outintersections]] = outdistances+1e-32
@@ -1995,9 +2200,20 @@ def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, ep
     distances = [(x.toarray()[x.nonzero()]-1e-32) for x in spdistances.tocsr()]        
     intersectionPts = [np.vstack([x.toarray()[x.nonzero()],y.toarray()[y.nonzero()],z.toarray()[z.nonzero()]]).T-1e-32 for x,y,z in zip(spintersectionPtsX.tocsr(),spintersectionPtsY.tocsr(),spintersectionPtsZ.tocsr())]
 
+    if nontri:
+        # For non-tri input meshes, can end up with redundant intersections because of quad-to tet decomposition
+        # TODO: This may not be the most efficient way to deal with them
+        # NOTE: Handling in this way assumes that the elements are planar and 
+        # the redundant intersections are the same point - in theory non planar
+        # elements could have multiple unique intersections with the same element
+        for i in range(len(intersections)):
+            intersections[i], idx = np.unique(inv[intersections[i]], return_index=True) # get element indices from the original surface    
+            distances[i] = distances[i][idx]
+            intersectionPts[i] = intersectionPts[i][idx]
+
     return intersections, distances, intersectionPts
 
-def RayOctreeIntersection(pt, ray, Octree):
+def RayOctreeIntersection(pt, ray, Octree, bidirectional=False):
     """
     Test for identifying intersections between a ray and an octree.
 
@@ -2007,8 +2223,11 @@ def RayOctreeIntersection(pt, ray, Octree):
         3D point coordinate (shape = (3,))
     ray : array_like
         3D vector (shape = (3,))
-    Octree : octree.OctreeNode
+    Octree : tree.OctreeNode
         Root node of the octree data structure
+    bidirectional : bool, optional
+        Determines whether to check for intersections only in the direction the 
+        ray is pointing, or in both directions (±ray), by default False.
 
     Returns
     -------
@@ -2018,7 +2237,7 @@ def RayOctreeIntersection(pt, ray, Octree):
     root = Octree
     [xlim,ylim,zlim] = root.getLimits()
     intersection_leaves = []
-    if not RayBoxIntersection(pt, ray, xlim, ylim, zlim):
+    if not RayBoxIntersection(pt, ray, xlim, ylim, zlim, bidirectional=bidirectional):
         return intersection_leaves
     elif root.state == 'leaf':
         intersection_leaves.append(root)
@@ -2031,7 +2250,7 @@ def RayOctreeIntersection(pt, ray, Octree):
         ylims = limits[:,1,:]
         zlims = limits[:,2,:]
 
-        intersections = RayBoxesIntersection(pt, ray, xlims, ylims, zlims)
+        intersections = RayBoxesIntersection(pt, ray, xlims, ylims, zlims, bidirectional=bidirectional)
 
         nodes = children[intersections]
         intersection_leaves += [node for node in nodes if node.state == 'leaf']
@@ -2102,8 +2321,8 @@ def SurfSelfIntersection(NodeCoords, SurfConn, Octree='generate', eps=1e-14, ret
         Node coordinates
     SurfConn : array_like
         Node connectivity of a triangular surface mesh
-    Octree : str, octree.OctreeNode, optional
-        Octree node (generated by octree.Surf2Octree), 'generate',
+    Octree : str, tree.OctreeNode, optional
+        Octree node (generated by tree.Surf2Octree), 'generate',
         or None, by default 'generate'. 
     eps : float, optional
         Small tolerance parameter, by default 1e-14
@@ -2126,10 +2345,10 @@ def SurfSelfIntersection(NodeCoords, SurfConn, Octree='generate', eps=1e-14, ret
         root = None
     elif Octree == 'generate':
         # Create an octree structure based on the provided structure
-        root = octree.Surface2Octree(NodeCoords,SurfConn)
-    elif type(Octree) == octree.OctreeNode:
+        root = tree.Surface2Octree(NodeCoords,SurfConn)
+    elif type(Octree) == tree.OctreeNode:
         # Using an already generated octree structure
-        # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surface2Octree
+        # If this is the case, it should conform to the same structure and labeling as one generated with tree.Surface2Octree
         root = Octree
     else:
         raise Exception('Invalid Octree argument given: '+str(Octree))
@@ -2140,7 +2359,7 @@ def SurfSelfIntersection(NodeCoords, SurfConn, Octree='generate', eps=1e-14, ret
         idx1,idx2 = zip(*combinations)
         Tri1s = Points[np.array(idx1)]; Tri2s = Points[np.array(idx2)]
     else:
-        leaves = octree.getAllLeaf(root)
+        leaves = tree.getAllLeaf(root)
         combinations = []
         for leaf in leaves:
             combinations += list(itertools.combinations(leaf.data,2))
@@ -2188,8 +2407,9 @@ def SurfSurfIntersection(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, eps=1e-
     IntersectionPoints : list, optional
         Coordinates of intersections (returned if return_pts=True)
     """
+    # Merge the meshes to get create a single octree representing both
     MergeCoords,MergeConn = utils.MergeMesh(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, cleanup=False)
-    root = octree.Surface2Octree(MergeCoords,MergeConn)
+    root = tree.Surface2Octree(MergeCoords,MergeConn)
     
     Points = np.array(MergeCoords)[np.array(MergeConn)]   
     if root == None:
@@ -2197,10 +2417,15 @@ def SurfSurfIntersection(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, eps=1e-
         idx1,idx2 = zip(*combinations)
         Tri1s = Points[np.array(idx1)]; Tri2s = Points[np.array(idx2)]
     else:
-        leaves = octree.getAllLeaf(root)
+        leaves = tree.getAllLeaf(root)
         combinations = []
         for leaf in leaves:
-            combinations += list(itertools.combinations(leaf.data,2))
+            data = np.array(leaf.data)
+            labels = data >= len(SurfConn1) # 0 if from Surf1, 1 if from Surf2
+            if len(data) <= 1 or np.all(labels == 0) or np.all(labels == 1):
+                # If there's only one tri in the octree leaf or if all the triangles are from the same surface, no intersections
+                continue
+            combinations += list(itertools.product(data[~labels], data[labels]))
         
         idx1,idx2 = zip(*combinations)
         Tri1s = Points[np.array(idx1)]; Tri2s = Points[np.array(idx2)]
@@ -2210,34 +2435,18 @@ def SurfSurfIntersection(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, eps=1e-
         IntersectionPairs = np.array(combinations)[intersections].tolist()
         IPoints = intersectionPts[intersections]
         IPoints[np.isnan(IPoints)] = np.inf
-        IPoints = utils.ExtractRagged(IPoints, delval=np.inf)
-
-        # TODO: I'm being lazy here
-        Surf1Intersections = []; Surf2Intersections = []; IntersectionPoints = []
-        for i in range(len(IntersectionPairs)):
-            if IntersectionPairs[i][0] < len(SurfConn1) and IntersectionPairs[i][1] >= len(SurfConn1):
-                Surf1Intersections.append(IntersectionPairs[i][0])
-                Surf2Intersections.append(IntersectionPairs[i][1]-len(SurfConn1))
-                IntersectionPoints.append(IPoints[i])
-            elif IntersectionPairs[i][1] < len(SurfConn1) and IntersectionPairs[i][0] >= len(SurfConn1):
-                Surf1Intersections.append(IntersectionPairs[i][1])
-                Surf2Intersections.append(IntersectionPairs[i][0]-len(SurfConn1))
-                IntersectionPoints.append(IPoints[i])
-            # Ignoring self intersections
+        
+        IntersectionPoints = utils.ExtractRagged(IPoints, delval=np.inf)
+        Surf1Intersections = np.array(IntersectionPairs)[:,0]
+        Surf2Intersections = np.array(IntersectionPairs)[:,1] - len(SurfConn1)
+        
         return Surf1Intersections, Surf2Intersections, IntersectionPoints
         
     else:
         intersections = TrianglesTrianglesIntersection(Tri1s,Tri2s,eps=eps,edgeedge=True)
         IntersectionPairs = np.array(combinations)[intersections].tolist()
-        # TODO: I'm being lazy here
-        Surf1Intersections = []; Surf2Intersections = []
-        for i in range(len(IntersectionPairs)):
-            if IntersectionPairs[i][0] < len(SurfConn1) and IntersectionPairs[i][1] >= len(SurfConn1):
-                Surf1Intersections.append(IntersectionPairs[i][0])
-                Surf2Intersections.append(IntersectionPairs[i][1]-len(SurfConn1))
-            elif IntersectionPairs[i][1] < len(SurfConn1) and IntersectionPairs[i][0] >= len(SurfConn1):
-                Surf1Intersections.append(IntersectionPairs[i][1])
-                Surf2Intersections.append(IntersectionPairs[i][0]-len(SurfConn1))
+        Surf1Intersections = np.array(IntersectionPairs)[:,0]
+        Surf2Intersections = np.array(IntersectionPairs)[:,1] - len(SurfConn1)
             
     return Surf1Intersections, Surf2Intersections
 
@@ -2251,22 +2460,8 @@ def PlaneSurfIntersection(pt, Normal, NodeCoords, SurfConn, eps=1e-14):
     Intersections = PlaneTrianglesIntersection(pt, Normal, NodeCoords[SurfConn], eps=eps)
     return Intersections
 
-## Projection
-def SilhouetteProjection(pts, pt, Normal):
-    
-    # point (x,y,z), normal (nx,ny,nz), point on plane (px,py,pz)
-    # find t s.t. (x+t*nx, y+t*ny, z+tc), (x,y,z), (px,py,pz) form a right triangle
-    pts = np.asarray(pts)
-    x = pts[:,0]; y = pts[:,1]; z = pts[:,2]
-    nx, ny, nz = Normal
-    px, py, pz = pt
-
-    t = (nx*px - nx*x + ny*py - ny*y + nz*pz - nz*z)/(nx**2 + ny**2 + nz**2)
-    projected = np.column_stack([x+t*nx, y+t*ny, z+t*nz])
-    return projected
-
 ## Inside/Outside Tests
-def PointInBoundary(pt, NodeCoords, BoundaryConn, eps=1e-8, ray=None):
+def PointInBoundary(pt, NodeCoords, BoundaryConn, eps=1e-8, inclusive=True, ray=None):
     """
     Test to determine whether a point is inside a boundary mesh. By default, 
     this test assumes a 2D mesh parallel to the xy plane. For a boundary mesh in
@@ -2284,6 +2479,9 @@ def PointInBoundary(pt, NodeCoords, BoundaryConn, eps=1e-8, ray=None):
         Element normal vectors 
     eps : float, optional
         Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8
+    inclusive : bool, optional
+        If True, include points on the boundary (within tolerance `eps`) as 
+        inside the boundary.
     ray : array_like, optional
         Ray that will be cast to determine whether the point is inside or outside 
         the boundary, by default a random unit vector parallel to the xy plane will be 
@@ -2304,19 +2502,21 @@ def PointInBoundary(pt, NodeCoords, BoundaryConn, eps=1e-8, ray=None):
     zero = np.any(np.abs(distances)<eps)
     
     # Checking unique to not double count instances where ray intersects an edge
-    if len(np.unique(np.round(posDistances/eps)))%2 == 0 and not zero:
+    if eps > 0:
+        uposDistances = np.unique(np.round(posDistances/eps))
+    else:
+        uposDistances = np.unique(posDistances)
+    if len(uposDistances)%2 == 0 and not zero:
         # No intersection
         inside = False
         return inside
     else:
-        # dist = min(np.abs(distances))
-        # if dist < eps:
-        #     closest = np.array(intersections)[np.abs(distances)==dist][0]
-        #     dot = np.dot(ray,ElemNormals[closest])
-        #     return dot
-        # else:
-        # Inside
-        inside = True
+        dist = min(np.abs(distances))
+        if (zero or dist < eps) and not inclusive:
+            inside = False
+        else:
+            inside = True
+        
         return inside
 
 def PointInSurf(pt, NodeCoords, SurfConn, ElemNormals=None, Octree=None, eps=1e-8, ray=np.random.rand(3)):
@@ -2333,11 +2533,11 @@ def PointInSurf(pt, NodeCoords, SurfConn, ElemNormals=None, Octree=None, eps=1e-
         Node connectivity of elements. This function is only valid for triangular surface meshes.
     ElemNormals : array_like
         Element normal vectors 
-    Octree : None, str, or octree.octreeNode, optional
+    Octree : None, str, or tree.octreeNode, optional
         Determines whether to use/generate an octree data structure for acceleration of the intersection testing, by default None. 
         'generate' - Will generate an octree structure of the surface
         None - Will not use an octree structure
-        octree.octreeNode - Octree data structure precomputed using :func:`mymesh.octree.Surface2Octree`
+        tree.octreeNode - Octree data structure precomputed using :func:`mymesh.tree.Surface2Octree`
     eps : float, optional
         Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8
     ray : array_like, optional
@@ -2352,7 +2552,7 @@ def PointInSurf(pt, NodeCoords, SurfConn, ElemNormals=None, Octree=None, eps=1e-
     if ElemNormals is None:
         ElemNormals = utils.CalcFaceNormal(NodeCoords, SurfConn)
     intersections, distances, _ = RaySurfIntersection(pt,ray,NodeCoords,SurfConn,Octree=root)
-    posDistances = np.array([d for d in distances if d > eps])
+    posDistances = distances[distances > eps] #np.array([d for d in distances if d > eps])
     zero = np.any(np.abs(distances)<eps)
     
     # Checking unique to not double count instances where ray intersects an edge
@@ -2385,11 +2585,11 @@ def PointsInSurf(pts, NodeCoords, SurfConn, ElemNormals=None, Octree='generate',
         Node connectivity of elements. This function is only valid for triangular surface meshes.
     ElemNormals : array_like, NoneType, optional
         Element normal vectors. If None are provided, they will be calculated.
-    Octree : None, str, or octree.octreeNode, optional
+    Octree : None, str, or tree.octreeNode, optional
         Determines whether to use/generate an octree data structure for acceleration of the intersection testing, by default None. 
         'generate' - Will generate an octree structure of the surface
         None - Will not use an octree structure
-        octree.octreeNode - Octree data structure precomputed using :func:`mymesh.octree.Surface2Octree`
+        tree.octreeNode - Octree data structure precomputed using :func:`mymesh.tree.Surface2Octree`
     eps : float, optional
         Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8
     rays : array_like, optional
@@ -2425,58 +2625,37 @@ def PointsInSurf(pts, NodeCoords, SurfConn, ElemNormals=None, Octree='generate',
                 Insides[i] = True
     return Insides
 
-# def PointInBoundary(pt, NodeCoords, BoundaryConn, ElemNormals, Octree=None, eps=1e-8, ray=np.random.rand(2), validate_mesh=False):
-#     """
-#     Test to determine whether a point is inside a closed 2D boundary mesh of
-#     line elements.
+@try_njit
+def PointInBox2D(pt, xlim, ylim, inclusive=True):
+    """
+    Test whether a point is inside a 2 dimensional box
 
-#     Parameters
-#     ----------
-#     pt : array_like
-#         2D or 3D coordinates for point shape=(2,) or shape=(3,). If given, the
-#         third dimension will be ignored.
-#     NodeCoords : array_like
-#         List of node coordinates of the surface
-#     BoundaryConn : array_like
-#         Node connectivity of elements. This function is only valid for line meshes.
-#     ElemNormals : array_like
-#         Element normal vectors 
-#     Octree : None, str, or octree.octreeNode, optional
-#         Determines whether to use/generate an octree data structure for acceleration of the intersection testing, by default None. 
-#         'generate' - Will generate an octree structure of the surface
-#         None - Will not use an octree structure
-#         octree.octreeNode - Octree data structure precomputed using :func:`mymesh.octree.Surface2Octree`
-#     eps : float, optional
-#         Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8
-#     ray : array_like, optional
-#         Ray that will be cast to determine whether the point is inside or outside the surface, by default np.random.rand(3). For a closed, manifold surface, the choice of ray shouldn't matter.
+    Parameters
+    ----------
+    pt : array_like
+        3D coordinates of a point, shape=(3,)
+    xlim : array_like
+        Lower and upper x limits (e.g. [xmin, xmax])
+    ylim : array_like
+        Lower and upper y limits (e.g. [ymin, ymax])
 
-#     Returns
-#     -------
-#     inside : bool
-#         True if the point is inside the surface, otherwise False.
-#     """    
-#     # root = OctreeInputProcessor(NodeCoords, SurfConn, Octree)
-#     segments = np.asarray(NodeCoords)[BoundaryConn]
-#     intersections, distances, _ = RaySegmentsIntersection(pt,ray,segments)
-#     posDistances = np.array([d for d in distances if d > eps])
-#     zero = np.any(np.abs(distances)<eps)
-    
-#     # Checking unique to not double count instances where ray intersects an edge
-#     if len(np.unique(np.round(posDistances/eps)))%2 == 0 and not zero:
-#         # No intersection
-#         inside = False
-#         return inside
-#     else:
-#         dist = min(np.abs(distances))
-#         if dist < eps:
-#             closest = np.array(intersections)[np.abs(distances)==dist][0]
-#             dot = np.dot(ray,ElemNormals[closest])
-#             return dot
-#         else:
-#             # Inside
-#             inside = True
-#             return inside
+    Returns
+    -------
+    inside : bool
+        True if the point is in the box.
+    """    
+    lims = [xlim,ylim]
+    inside = True
+    for d in range(2):
+        if inclusive:
+            if not lims[d][0] <= pt[d] <= lims[d][1]:
+                inside = False
+                break
+        else:
+            if not lims[d][0] < pt[d] < lims[d][1]:
+                inside = False
+                break
+    return inside
 
 @try_njit
 def PointInBox(pt, xlim, ylim, zlim, inclusive=True):
@@ -2533,89 +2712,130 @@ def PointsInVoxel(pts, VoxelCoords, VoxelConn, inclusive=True):
     inside : list
         List of bools specifying whether each point is inside the mesh.
     """    
-    Root = octree.Voxel2Octree(VoxelCoords, VoxelConn)
+    Root = tree.Voxel2Octree(VoxelCoords, VoxelConn)
     inside = [False for i in range(len(pts))]
     for i,pt in enumerate(pts):
-        inside[i] = octree.isInsideOctree(pt, Root, inclusive=inclusive)    
+        inside[i] = tree.isInsideOctree(pt, Root, inclusive=inclusive)    
     
     return inside
         
-def PointInTri(Tri,pt,method='BaryArea',eps=1e-12,inclusive=True):
+def PointInTri(pt,Tri,eps=1e-12,inclusive=True):
+    """
+    Test to determine whether a point is inside a triangle
 
-    if method == 'Normal':
-        pts = np.vstack([Tri,pt])
-        conn = [[0,1,3],[1,2,3],[2,0,3]]
-        normals = utils.CalcFaceNormal(pts,conn)
-        if np.dot(normals[0],normals[1]) < 0:
-            In = False
-        elif np.dot(normals[1],normals[2]) < 0:
-            In = False
-        else:
-            In = True
-    elif method == 'Bary':
-        alpha,beta,gamma = utils.BaryTri(Tri,pt)
-        In = all([alpha>=0,beta>=0,gamma>=0])
-    elif method == 'BaryArea':
-        A = Tri[0]
-        B = Tri[1]
-        C = Tri[2]
-        AB = np.subtract(A,B)
-        AC = np.subtract(A,C)
-        PA = np.subtract(pt,A)
-        PB = np.subtract(pt,B)
-        PC = np.subtract(pt,C)
+    Parameters
+    ----------
+    Tri : array_like
+        Coordinates of the three vertices of the triangle in the format
+        ``np.array([[x0, y0, z0], [x1, y1, z1], [x2, y2, z2]])`` 
+    pt : array_like
+        Coordinates of the point to test 
+    eps : float, optional
+        Small tolerance parameter when points are on the edge of a triangle, by default 1e-12
+    inclusive : bool, optional
+        Specifies whether a point on the edge of the triangle should be considered 
+        inside, by default True
 
-        Area2 = np.linalg.norm(np.cross(AB,AC))
-        
-        denom = 1/Area2
-        alpha = np.linalg.norm(np.cross(PB,PC))*denom
-        beta = np.linalg.norm(np.cross(PC,PA))*denom
-        gamma = np.linalg.norm(np.cross(PA,PB))*denom
-        if inclusive:
-            In = all([alpha>=0,beta>=0,gamma>=0]) and np.abs(alpha+beta+gamma-1) < eps
-        else:
-            In = all([alpha>=eps,beta>=eps,gamma>=eps]) and np.abs(alpha+beta+gamma-1) < eps
+    Returns
+    -------
+    In : bool
+        True if the point is inside the triangle
+    """
+    A = Tri[0]
+    B = Tri[1]
+    C = Tri[2]
+    AB = np.subtract(A,B)
+    AC = np.subtract(A,C)
+    PA = np.subtract(pt,A)
+    PB = np.subtract(pt,B)
+    PC = np.subtract(pt,C)
+
+    Area2 = np.linalg.norm(np.cross(AB,AC))
+    
+    denom = 1/Area2
+    alpha = np.linalg.norm(np.cross(PB,PC))*denom
+    beta = np.linalg.norm(np.cross(PC,PA))*denom
+    gamma = np.linalg.norm(np.cross(PA,PB))*denom
+    if inclusive:
+        In = all([alpha>=0,beta>=0,gamma>=0]) and np.abs(alpha+beta+gamma-1) <= eps
+    else:
+        In = all([alpha>=eps,beta>=eps,gamma>=eps]) and np.abs(alpha+beta+gamma-1) <= eps
     return In
 
-def PointsInTris(Tris,pts,method='BaryArea',eps=1e-12,inclusive=True):
-    # Pairwise comparisons between each triangle in tris and its corresponding point in pts
-    if method == 'BaryArea':
-        A = Tris[:,0]
-        B = Tris[:,1]
-        C = Tris[:,2]
-        AB = np.subtract(A,B)
-        AC = np.subtract(A,C)
-        PA = np.subtract(pts,A)
-        PB = np.subtract(pts,B)
-        PC = np.subtract(pts,C)
+def PointsInTris(pts,Tris,eps=1e-12,inclusive=True):
+    """
+    Pairwise inclusion tests between an array of points and an array of triangles.
 
-        Area2 = np.linalg.norm(np.cross(AB,AC),axis=1)
+    Parameters
+    ----------
+    Tri : array_like
+        Coordinates of the vertices of the triangles in the format
+        ``np.array([[[x0, y0, z0], [x1, y1, z1], [x2, y2, z2]], ..., ])`` 
+    pt : array_like
+        Coordinates of the points to test (shape=(n,3))
+    eps : float, optional
+        Small tolerance parameter when points are on the edge of a triangle, by default 1e-12
+    inclusive : bool, optional
+        Specifies whether a point on the edge of the triangle should be considered 
+        inside, by default True
 
-        
-        denom = 1/Area2
-        alpha = np.linalg.norm(np.cross(PB,PC),axis=1)*denom
-        beta = np.linalg.norm(np.cross(PC,PA),axis=1)*denom
-        gamma = np.linalg.norm(np.cross(PA,PB),axis=1)*denom
-        # print(alpha,beta,gamma)
-        if inclusive:
-            In = np.all([alpha>=0,beta>=0,gamma>=0],axis=0) & (np.abs(alpha+beta+gamma-1) <= eps)
-        else:
-            In = np.all([alpha>=eps,beta>=eps,gamma>=eps],axis=0) & (np.abs(alpha+beta+gamma-1) <= eps)
+    Returns
+    -------
+    In : np.ndarray
+        True if the point is inside the triangle
+    """
+    Tris = np.asarray(Tris)
+    A = Tris[:,0]
+    B = Tris[:,1]
+    C = Tris[:,2]
+    AB = np.subtract(A,B)
+    AC = np.subtract(A,C)
+    PA = np.subtract(pts,A)
+    PB = np.subtract(pts,B)
+    PC = np.subtract(pts,C)
+
+    Area2 = np.linalg.norm(np.cross(AB,AC),axis=1)
+
+    
+    denom = 1/Area2
+    alpha = np.linalg.norm(np.cross(PB,PC),axis=1)*denom
+    beta = np.linalg.norm(np.cross(PC,PA),axis=1)*denom
+    gamma = np.linalg.norm(np.cross(PA,PB),axis=1)*denom
+    # print(alpha,beta,gamma)
+    if inclusive:
+        In = np.all([alpha>=0,beta>=0,gamma>=0],axis=0) & (np.abs(alpha+beta+gamma-1) <= eps)
+    else:
+        In = np.all([alpha>=eps,beta>=eps,gamma>=eps],axis=0) & (np.abs(alpha+beta+gamma-1) <= eps)
     return In
 
 @try_njit
-def PointInTet(pt,Tet):
+def PointInTet(pt,Tet,eps=1e-12,inclusive=True):
+    """
+    Test to determine whether a point is inside a tetrahedron
 
+    Parameters
+    ----------
+    Tri : np.ndarray
+        Coordinates of the three vertices of the triangle in the format
+        ``np.array([[x0, y0, z0], [x1, y1, z1], [x2, y2, z2], [x3, y3, z3]],dtype=float)``
+    pt : np.ndarray
+        Coordinates of the point to test 
+    eps : float, optional
+        Small tolerance parameter when points are on the face/edge of the tet, by default 1e-12
+    inclusive : bool, optional
+        Specifies whether a point on the edge/face of the tet should be considered 
+        inside, by default True
+
+    Returns
+    -------
+    In : bool
+        True if the point is inside the tetrahedron
+    """
     alpha,beta,gamma,delta = utils.BaryTet(Tet,pt)
-    In = True
-    if alpha < 0:
-        In = False
-    elif beta < 0:
-        In = False
-    elif gamma < 0:
-        In = False
-    elif delta < 0:
-        In = False
+    if inclusive:
+      In = (alpha>=0)&(beta>=0)&(gamma>=0)&(delta>=0) and np.abs(alpha+beta+gamma+delta-1) <= eps
+    else:
+        In = (alpha>=eps)&(beta>=eps)&(gamma>=eps)&(delta>=eps) and np.abs(alpha+beta+gamma+delta-1) <= eps
 
     return In
 
@@ -2626,8 +2846,8 @@ def OctreeInputProcessor(NodeCoords, SurfConn, Octree):
         root = None
     elif Octree == 'generate':
         # Create an octree structure based on the provided structure
-        root = octree.Surface2Octree(NodeCoords,SurfConn)
-    elif type(Octree) == octree.OctreeNode:
+        root = tree.Surface2Octree(NodeCoords,SurfConn)
+    elif type(Octree) == tree.OctreeNode:
         # Using an already generated octree structure
         # If this is the case, it should conform to the same structure and labeling as one generated with octree.Surface2Octree
         root = Octree

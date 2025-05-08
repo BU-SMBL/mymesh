@@ -35,6 +35,7 @@ Implicit Functions
     diamond
     cylinder
     box
+    plane
     xplane
     yplane
     zplane
@@ -67,7 +68,6 @@ Other Implicit Mesh Utilities
 .. autosummary::
     :toctree: submodules/
 
-    mesh2sdf
     mesh2udf
     grid2fun
     grid2grad
@@ -81,10 +81,10 @@ from scipy import optimize, interpolate, sparse
 from scipy.spatial import KDTree
 import sys, os, time, copy, warnings, bisect
 
-from . import utils, converter, contour, quality, improvement, rays, octree, mesh, primitives
+from . import utils, converter, contour, quality, improvement, rays, mesh, primitives
 
 # Mesh generators
-def PlanarMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation='linear', args=(), kwargs={}, Type='surf'):
+def PlanarMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation='linear', mixed_elements=False, args=(), kwargs={}, Type='surf'):
     """
     Generate a surface mesh of an implicit function 
 
@@ -127,7 +127,7 @@ def PlanarMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolati
     """
     
     if not isinstance(h, (list, tuple, np.ndarray)):
-        h = (h,h,h)
+        h = (h,h)
 
     if isinstance(func, sp.Basic):
         x, y, z = sp.symbols('x y z', real=True)
@@ -143,19 +143,23 @@ def PlanarMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolati
     else:
         flip = False
 
-    xs = np.arange(bounds[0],bounds[1]+h[0],h[0])
-    ys = np.arange(bounds[2],bounds[3]+h[1],h[1])
+    
 
-    X,Y = np.meshgrid(xs, ys, indexing='ij')
-    Z = np.zeros_like(X)
-    F = vector_func(X,Y,Z,*args,**kwargs).T
-    if Type.lower() == 'surf':
-        method = 'triangle'
-    elif Type.lower() == 'line':
-        method = 'edge'
+    
+
+    if mixed_elements:
+        # mixed elements currently not supported for MarchingSquaresImage
+        # TODO: This should be replaced by a proper implementation of PlanarMesh
+        G = primitives.Grid2D(bounds, h)
+        NodeData = vector_func(*G.NodeCoords.T,*args,**kwargs)
+        NodeCoords, NodeConn = contour.MarchingSquares(G.NodeCoords, G.NodeConn, NodeData, mixed_elements=True)
     else:
-        raise ValueError('Invalid Type.')
-    NodeCoords, NodeConn = contour.MarchingSquaresImage(F, h=h, threshold=threshold, flip=flip, method=method, interpolation=interpolation)
+        xs = np.arange(bounds[0],bounds[1]+h[0],h[0])
+        ys = np.arange(bounds[2],bounds[3]+h[1],h[1])
+        X,Y = np.meshgrid(xs, ys, indexing='ij')
+        Z = np.zeros_like(X)
+        F = vector_func(X,Y,Z,*args,**kwargs).T
+        NodeCoords, NodeConn = contour.MarchingSquaresImage(F, h=h, threshold=threshold, flip=flip, Type=Type, interpolation=interpolation,VertexValues=True,mixed_elements=mixed_elements)
     NodeCoords[:,0] += bounds[0]
     NodeCoords[:,1] += bounds[2]
     
@@ -263,9 +267,9 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_direction=-1, mode='any', 
         NodeConn = GridConn
     
     if 'mesh' in dir(mesh):
-        voxel = mesh.mesh(NodeCoords, NodeConn)
+        voxel = mesh.mesh(NodeCoords, NodeConn, Type='vol')
     else:
-        voxel = mesh(NodeCoords, NodeConn)
+        voxel = mesh(NodeCoords, NodeConn, Type='vol')
     voxel.NodeData['func'] = Values
 
     return voxel
@@ -379,9 +383,9 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
 
     
     if 'mesh' in dir(mesh):
-        surface = mesh.mesh(SurfCoords, SurfConn)
+        surface = mesh.mesh(SurfCoords, SurfConn, Type='surf')
     else:
-        surface = mesh(SurfCoords, SurfConn)
+        surface = mesh(SurfCoords, SurfConn, Type='surf')
         
     return surface
 
@@ -468,7 +472,7 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
         NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
         
         if interpolation == 'quadratic':
-            NodeCoords, NodeConn = converter.tet42tet10(NodeCoords, NodeConn)
+            NodeCoords, NodeConn = converter.tet2quadratic(NodeCoords, NodeConn)
             NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
         else:
             NodeVals = voxel.NodeData['func']
@@ -481,15 +485,15 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
 
         if interpolation == 'quadratic':
             if np.shape(NodeConn)[1] == 4:
-                NodeCoords, NodeConn = converter.tet42tet10(NodeCoords, NodeConn)
+                NodeCoords, NodeConn = converter.tet2quadratic(NodeCoords, NodeConn)
             NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
     TetCoords, TetConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, NodeVals, Type='vol', threshold=threshold, flip=flip, interpolation=interpolation, cleanup=True)
     
 
     if 'mesh' in dir(mesh):
-        tet = mesh.mesh(TetCoords, TetConn)
+        tet = mesh.mesh(TetCoords, TetConn, Type='vol')
     else:
-        tet = mesh(TetCoords, TetConn)
+        tet = mesh(TetCoords, TetConn, Type='vol')
         
     return tet
 
@@ -652,7 +656,42 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
     M.NodeCoords = M.NodeCoords[:-1]
     return M
 
-def SurfaceReconstruction(M, decimate=1, method='compact',R=None):
+def SurfaceReconstruction(M, decimate=1, method='compact', Radius=None):
+    """
+    Implicit surface reconstruction to convert a mesh into an implicit function
+
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Input mesh to reconstruct (can be a volume (Type='vol') or surface 
+        (Type='surf')).
+    decimate : float, optional
+        Downsampling factor to select a random subset of points to use for the 
+        reconstruction, by default 1
+    method : str, optional
+        Method to use , by default 'compact'
+    Radius : float, optional
+        Radius of support to use for radial basis functions, by default None
+
+    Returns
+    -------
+    func : callable
+        Implicit function representation of the input surface
+    """
+    
+    # Get offset distance based on edge lengths
+    SurfEdgeLengths = np.linalg.norm(M.NodeCoords[M.Surface.Edges[0,:]] - M.NodeCoords[M.Surface.Edges[1,:]],axis=1)
+    MeanEdge = np.mean(SurfEdgeLengths)
+    OffsetDistance =  1*MeanEdge # np.percentile(SurfEdgeLengths, 10)
+    if Radius is None:
+        SupportRadius = 10*(MeanEdge/decimate)
+    else:
+        SupportRadius = Radius
+
+    gaussian = lambda r : np.exp(r**2 * SupportRadius**2)
+    biharmonic = lambda r : r
+    triharmonic = lambda r : r**3
+    compact = lambda r : np.maximum(0, (SupportRadius-r))**4 * (4*r + SupportRadius)
 
     if decimate != 1:
         nodeset = np.random.choice(M.SurfNodes, int(len(M.SurfNodes)*decimate),replace=False)
@@ -661,27 +700,12 @@ def SurfaceReconstruction(M, decimate=1, method='compact',R=None):
     SurfCoords = np.asarray(M.NodeCoords)[nodeset] # won't work for mixed-element surfaces
     SurfNormals = M.NodeNormals[nodeset]
 
-    # Get offset distance based on edge lengths
-    SurfEdgeLengths = np.linalg.norm(M.NodeCoords[M.Surface.Edges[0,:]] - M.NodeCoords[M.Surface.Edges[1,:]],axis=1)
-    MeanEdge = np.mean(SurfEdgeLengths)
-    OffsetDistance =  1*MeanEdge # np.percentile(SurfEdgeLengths, 10)
-    if R is None:
-        SupportRadius = 10*(MeanEdge/decimate)
-    else:
-        SupportRadius = R    
-
     PosOffset = SurfCoords + OffsetDistance*SurfNormals
     NegOffset = SurfCoords - OffsetDistance*SurfNormals
     Coords = np.vstack([SurfCoords, PosOffset, NegOffset])
 
-    gaussian = lambda r : np.exp(r**2 * SupportRadius**2)
-    biharmonic = lambda r : r
-    triharmonic = lambda r : r**3
-    compact = lambda r : np.maximum(0, (SupportRadius-r))**4 * (4*r + SupportRadius)
-
-    rbf = compact
-    method = 'rbf'
     if method.lower() == 'compact':
+        rbf = compact
         tree = KDTree(Coords)
         neighbors = tree.query_ball_point(Coords, SupportRadius)
         nneighbors = [len(n) for n in neighbors]
@@ -699,9 +723,8 @@ def SurfaceReconstruction(M, decimate=1, method='compact',R=None):
             z = np.asarray(z)
 
             neighbors = tree.query_ball_point(np.column_stack([x,y,z]), SupportRadius)
-            uneighbors = np.unqiue(neighbors)
 
-            rbf_sum = np.sum(Lambda*rbf(np.sqrt((x[...,None]-Coords[uneighbors,0])**2 + (y[...,None]-Coords[uneighbors,1])**2 + (z[...,None]-Coords[uneighbors,2])**2)),axis=-1)
+            rbf_sum = np.array([Lambda[neighbors[i]] @ rbf(np.sqrt((x[i] - Coords[neighbors[i],0])**2 + (y[i] - Coords[neighbors[i],1])**2 + (z[i] - Coords[neighbors[i],2])**2))[:,None] for i in range(len(x))])
 
             f = rbf_sum
             return f 
@@ -908,7 +931,7 @@ def diamond(x,y,z):
     """
     return sp.sin(2*np.pi*x)*sp.sin(2*np.pi*y)*sp.sin(2*np.pi*z) + sp.sin(2*np.pi*x)*sp.cos(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.cos(2*np.pi*x)*sp.sin(2*np.pi*y)*sp.cos(2*np.pi*z) + sp.cos(2*np.pi*x)*sp.cos(2*np.pi*y)*sp.sin(2*np.pi*z)
 
-def cylinder(center, radius):
+def cylinder(center, radius, axis=2):
     """
     Implicit function of a cylinder.
 
@@ -919,6 +942,8 @@ def cylinder(center, radius):
         cylindrical cross section
     radius : float
         Radius of the cylinder
+    axis : int
+        Long axis of the cylinder (0=x, 1=y, 2=z)
 
     Returns
     -------
@@ -932,7 +957,14 @@ def cylinder(center, radius):
         surface = implicit.SurfaceMesh(implicit.cylinder([0,0,0], 1), [-1,1,-1,1,-1,1], 0.1)
         surface.plot(bgcolor='w')
     """    
-    func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 - radius**2
+
+    if axis == 2:
+        func = lambda x, y, z : (x-center[0])**2 + (y-center[1])**2 - radius**2
+    elif axis == 1:
+        func = lambda x, y, z : (x-center[0])**2 + (z-center[2])**2 - radius**2
+    elif axis == 0:
+        func = lambda x, y, z : (z-center[2])**2 + (y-center[1])**2 - radius**2
+
     return func
 
 def box(x1,x2,y1,y2,z1,z2):    
@@ -1111,7 +1143,146 @@ def torus(center, R, r):
     return func
 
 # Implicit Function Operators
-def offset(fval,value):
+###
+def offset(f,value):
+    """
+    Offset an implicit surface by a prescribed amount. For a signed 
+    distance function, this offsets the isosurface by a specified distance.
+
+    This is the generic interface to :func:`offsetv`, :func:`offsetf`
+
+    Parameters
+    ----------
+    f : scalar, np.ndarray, or callable
+        Function value(s) to be offset
+    value : scalar
+        Offset value
+
+    Returns
+    -------
+    offset_val : scalar, np.ndarray, or callable
+        Offset value(s)
+    """    
+
+    if callable(f):
+        Offset = offsetf(f, value)
+    else:
+        Offset = offsetv(f, value)
+
+    return Offset
+
+def union(f1,f2):
+    """
+    Boolean union of two implicit functions. Negative values are assumed
+    to be "inside". An R-function :func:`rMin` minimum is used to obtain a 
+    continuously differentiable output.
+
+    This is the generic interface to :func:`unionv`, :func:`unionf`, :func:`unions` 
+
+    Parameters
+    ----------
+    f1 : scalar, np.ndarray, sp.Basic, or callable
+        Value(s) of the first function
+    f2 : scalar, np.ndarray, sp.Basic, or callable
+        Value(s) of the second function
+
+    Returns
+    -------
+    union_val : scalar, np.ndarray, or callable
+        Union of the two sets of values
+    """ 
+    if callable(f1) and callable(f2):
+        Union = unionf(f1, f2)
+    elif type(f1) is sp.Basic and type(f2) is sp.Basic:
+        Union = unions(f1, f2)
+    else:
+        Union = unionv(f1, f2)
+
+    return Union
+
+def diff(f1,f2):
+    """
+    Boolean difference of two values or sets of values. Negative values are assumed
+    to be "inside". An R-function :func:`rMax` maximum is used to obtain a 
+    continuously differentiable output. Note that this operation is not 
+    symmetric so the order of inputs matters.
+
+    This is the generic interface to :func:`diffv`, :func:`difff`, :func:`diffs` 
+
+    Parameters
+    ----------
+    f1 : scalar, np.ndarray, sp.Basic, or callable
+        Value(s) of the first function
+    f2 : scalar, np.ndarray, sp.Basic, or callable
+        Value(s) of the second function
+
+    Returns
+    -------
+    Diff : scalar, np.ndarray, sp.Basic, or callable
+        Difference of the two sets of values
+    """ 
+    if callable(f1) and callable(f2):
+        Diff = difff(f1,f2)
+    elif type(f1) is sp.Basic and type(f2) is sp.Basic:
+        Diff = diffs(f1, f2)
+    else:
+        Diff = diffv(f1, f2)
+    return Diff
+    
+def intersection(f1,f2):
+    """
+    Boolean intersection of two values or sets of values. Negative values are 
+    assumed to be "inside". An R-function :func:`rMax` maximum is used to 
+    obtain a continuously differentiable output. 
+
+    This is the generic interface to :func:`intersectionv`, :func:`intersectionf`, :func:`intersections` 
+
+    Parameters
+    ----------
+    f1 : scalar or np.ndarray
+        Value(s) of the first function
+    f2 : scalar or np.ndarray
+        Value(s) of the second function
+
+    Returns
+    -------
+    intersection_val : scalar or np.ndarray
+        Intersection of the two sets of values
+    """
+    if callable(f1) and callable(f2):
+        Intersection = intersectionf(f1, f2)
+    elif type(f1) is sp.Basic and type(f2) is sp.Basic:
+        Intersection = intersections(f1, f2)
+    else:
+        Intersection = intersectionv(f1, f2)
+    return Intersection
+
+def thicken(f, t):
+    """
+    Thicken an isosurface by offsetting in both directions. The surface
+    is offset in both directions by t/2.
+
+    Parameters
+    ----------
+    f : scalar or np.ndarray
+        Function value(s) to be offset
+    t : scalar
+        Thickness value. For a signed distance function, this will correspond
+        to an actual thickness, for other implicit functions, the offset distance
+        depends on the function.
+
+    Returns
+    -------
+    thick : scalar or np.ndarray
+        Thickened value(s)
+    """
+    offp = offset(f, t/2)
+    offn = offset(f, -t/2)
+    thick = diff(offp, offn)
+    return thick
+
+###
+def offsetv(fval,value):
     """
     Offset function values by a prescribed amount. For a signed 
     distance function, this offsets the isosurface by a specified distance.
@@ -1131,7 +1302,7 @@ def offset(fval,value):
     offset_val = fval-value
     return offset_val
 
-def union(fval1,fval2):
+def unionv(fval1,fval2):
     """
     Boolean union of two values or sets of values. Negative values are assumed
     to be "inside". An R-function :func:`rMin` minimum is used to obtain a 
@@ -1152,7 +1323,7 @@ def union(fval1,fval2):
     union_val = rMin(fval1,fval2)
     return union_val
 
-def diff(fval1,fval2):
+def diffv(fval1,fval2):
     """
     Boolean difference of two values or sets of values. Negative values are assumed
     to be "inside". An R-function :func:`rMax` maximum is used to obtain a 
@@ -1173,12 +1344,8 @@ def diff(fval1,fval2):
     """ 
     diff_val = rMax(fval1,-fval2)
     return diff_val
-
-def diff_old(fval1, fval2):
-    # warnings.warn('This function will be removed in the future.')
-    return rMin(fval1,-fval2)
     
-def intersection(fval1,fval2):
+def intersectionv(fval1,fval2):
     """
     Boolean intersection of two values or sets of values. Negative values are 
     assumed to be "inside". An R-function :func:`rMax` maximum is used to 
@@ -1199,7 +1366,7 @@ def intersection(fval1,fval2):
     intersection_val = rMax(fval1,fval2)
     return intersection_val
 
-def thicken(fval, t):
+def thickenv(fval, t):
     """
     Thicken an isosurface by offsetting in both directions. The surface
     is offset in both directions by t/2.
@@ -1218,9 +1385,9 @@ def thicken(fval, t):
     thick : scalar or np.ndarray
         Thickened value(s)
     """
-    offp = offset(fval, t/2)
-    offn = offset(fval, -t/2)
-    thick = diff(offp, offn)
+    offp = offsetv(fval, t/2)
+    offn = offsetv(fval, -t/2)
+    thick = diffv(offp, offn)
     return thick
 
 def offsetf(f,value):
@@ -1504,53 +1671,80 @@ def grid2grad(VoxelCoords,VoxelConn,NodeVals,method='linear'):
     
     return grad
 
-def mesh2sdf(M, points, method='nodes+centroids'):
+def wrapfunc(func):
     """
-    Generates a signed distance field for a mesh.
+    Attempt to ensure that an implicit function is vectorized and suitable for 
+    use as an implicit function. Sympy symbolic functions will be converted to
+    vectorized numpy functions.
 
     Parameters
     ----------
-    M : mesh.mesh
-        Mesh object that will be used to define the distance field.
-    points : array_like
-        Points at which the signed distance field will be evaluated.
-    method : str
-        Method to be used 
-        nodes 
-        nodes+centroids
-        centroids
+    func : callable or sp.Basic
+        Symbolic function
 
     Returns
     -------
-    NodeVals : list
-        List of signed distance values evaluated at each node in the voxel grid.
-
-    """
-    if method == 'nodes':
-        Normals = np.asarray(M.NodeNormals)
-        SurfNodes = set(M.SurfNodes)
-        Coords = np.array([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)])
-    elif method == 'centroids':
-        Normals = np.asarray(M.ElemNormals)
-        NodeCoords = np.array(M.NodeCoords)
-        Coords = utils.Centroids(M.NodeCoords,M.NodeConn) #np.array([np.mean(NodeCoords[elem],axis=0) for elem in M.SurfConn])
-    elif method == 'nodes+centroids':
-        Normals = np.array(list(M.NodeNormals) + list(M.ElemNormals))
-        NodeCoords = np.array(M.NodeCoords)
-        SurfNodes = set(M.SurfNodes)
-        Coords = np.append([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)], utils.Centroids(M.NodeCoords,M.SurfConn),axis=0).astype(float)
+    vector_func
+        Vectorized function
+    """    
+    if isinstance(func, sp.Basic):
+        x, y, z = sp.symbols('x y z', real=True)
+        vector_func = sp.lambdify((x, y, z), func, 'numpy')
+    elif isinstance(func(0,0,0), sp.Basic):
+        x, y, z = sp.symbols('x y z', real=True)
+        vector_func = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
     else:
-        raise Exception('Invalid method - use "nodes", "centroids", or "nodes+centroids"')
+        vector_func = func
+
+    return vector_func
+
+# def mesh2sdf(M, points, method='nodes+centroids'):
+#     """
+#     Generates a signed distance field for a mesh.
+
+#     Parameters
+#     ----------
+#     M : mesh.mesh
+#         Mesh object that will be used to define the distance field.
+#     points : array_like
+#         Points at which the signed distance field will be evaluated.
+#     method : str
+#         Method to be used 
+#         nodes 
+#         nodes+centroids
+#         centroids
+
+#     Returns
+#     -------
+#     NodeVals : list
+#         List of signed distance values evaluated at each node in the voxel grid.
+
+#     """
+#     if method == 'nodes':
+#         Normals = np.asarray(M.NodeNormals)
+#         SurfNodes = set(M.SurfNodes)
+#         Coords = np.array([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)])
+#     elif method == 'centroids':
+#         Normals = np.asarray(M.ElemNormals)
+#         NodeCoords = np.array(M.NodeCoords)
+#         Coords = utils.Centroids(M.NodeCoords,M.NodeConn) #np.array([np.mean(NodeCoords[elem],axis=0) for elem in M.SurfConn])
+#     elif method == 'nodes+centroids':
+#         Normals = np.array(list(M.NodeNormals) + list(M.ElemNormals))
+#         NodeCoords = np.array(M.NodeCoords)
+#         SurfNodes = set(M.SurfNodes)
+#         Coords = np.append([n if i in SurfNodes else [10**32,10**32,10**32] for i,n in enumerate(M.NodeCoords)], utils.Centroids(M.NodeCoords,M.SurfConn),axis=0).astype(float)
+#     else:
+#         raise Exception('Invalid method - use "nodes", "centroids", or "nodes+centroids"')
     
-    tree = KDTree(Coords)  
-    Out = tree.query(points,1)
-    ds = Out[0].flatten()
-    cs = Out[1].flatten()
-    rs = points - Coords[cs]
-    signs = np.sign(np.sum(rs*Normals[cs,:],axis=1))# [np.sign(np.dot(rs[i],Normals[cs[i]])) for i in range(len(ds))]
-    NodeVals = signs*ds
+#     tree = KDTree(Coords)  
+#     Out = tree.query(points,1)
+#     ds = Out[0].flatten()
+#     cs = Out[1].flatten()
+#     rs = points - Coords[cs]
+#     signs = np.sign(np.sum(rs*Normals[cs,:],axis=1))# [np.sign(np.dot(rs[i],Normals[cs[i]])) for i in range(len(ds))]
+#     NodeVals = signs*ds
     
-    return NodeVals
+#     return NodeVals
 
 def mesh2udf(M, points):
     """
@@ -1569,7 +1763,7 @@ def mesh2udf(M, points):
         List of signed distance values evaluated at each node in the voxel grid.
 
     """
-    Coords = np.asarray(M.NodeCoords)
+    Coords = np.asarray(M.NodeCoords[M.SurfNodes])
 
     tree = KDTree(Coords)  
     Out = tree.query(points,1)

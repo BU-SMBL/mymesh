@@ -15,6 +15,7 @@ Shapes
     :toctree: submodules/
     
     Line
+    Multiline
     Box
     Grid
     Grid2D
@@ -96,6 +97,50 @@ def Line(pt1, pt2, h=None, n=None):
     line.cleanup()
     return line
 
+def Multiline(points, h=None, n=None, connect_ends=False):
+    """
+    Create a multi-point line by connecting a series of points
+
+    Parameters
+    ----------
+    points : array_like
+        Point coordinates (shape=(n,3))
+    h : float, optional
+        Element size, by default None. If specified, each line segment
+        will be approximately divided into elements of size h. If neither h nor 
+        n are specified, each line segment will be represented by a single 
+        element. If both n and h are specified, n takes precedence.
+    n : _type_, optional
+        Number of elements for each segment, by default None. If specified, each 
+        line segment will be divided into n elements. If neither h nor n are
+        specified, each line segment will be represented by a single element. If 
+        both n and h are specified, n takes precedence.
+    connect_ends : bool, optional
+        If true, the last point will be connected to the first point (e.g. to 
+        create a closed loop), by default False.
+
+    Returns
+    -------
+    line : mymesh.mesh
+        Mesh of the multiline
+    """    
+    if connect_ends:
+        points = np.append(points, [points[0]], axis=0)
+    else:
+        points = np.asarray(points)
+    if 'mesh' in dir(mesh):
+        line = mesh.mesh()
+    else:
+        line = mesh()
+        
+    for i in range(len(points)-1):
+        line.merge(Line(points[i], points[i+1], h=h, n=n))
+    
+    line.Type ='line'
+    line.cleanup()
+    
+    return line
+        
 def Box(bounds, h, ElemType='quad'):
     """
     Generate a surface mesh of a rectangular box. 
@@ -196,17 +241,20 @@ def Grid(bounds, h, exact_h=False, ElemType='hex'):
         xs = np.linspace(bounds[0],bounds[1],nX)
         ys = np.linspace(bounds[2],bounds[3],nY)
         zs = np.linspace(bounds[4],bounds[5],nZ)
-        
 
-    GridCoords = np.hstack([
-        np.repeat(xs,len(ys)*len(zs))[:,None],
-        np.tile(np.repeat(ys,len(zs)),len(xs)).flatten()[:,None],
-        np.tile(np.tile(zs,len(xs)).flatten(),len(ys)).flatten()[:,None]
-    ])
+    if nX*nY*nZ > np.iinfo(np.uint32).max:
+        itype = np.uint64
+    else:
+        itype = np.uint32
 
-    Ids = np.reshape(np.arange(len(GridCoords)),(nX,nY,nZ))
+    GridCoords = np.empty((nX*nY*nZ,3), dtype=np.float64)
+    GridCoords[:, 0] = np.repeat(xs,nY*nZ)
+    GridCoords[:, 1] = np.tile(np.repeat(ys,nZ),nX)
+    GridCoords[:, 2] = np.tile(np.tile(zs,nX),nY)
+
+    Ids = np.reshape(np.arange(nX*nY*nZ),(nX,nY,nZ))
     
-    GridConn = np.zeros(((nX-1)*(nY-1)*(nZ-1),8),dtype=int)
+    GridConn = np.empty(((nX-1)*(nY-1)*(nZ-1),8),dtype=itype)
 
     GridConn[:,0] = Ids[:-1,:-1,:-1].flatten()
     GridConn[:,1] = Ids[1:,:-1,:-1].flatten()
@@ -602,7 +650,7 @@ def Cylinder(center, radius, height, theta_resolution=20, axial_resolution=10, r
     if cap or Type.lower() == 'vol':
         if not cap:
             warnings.warn('Cannot create an un-capped cylinder with Type="vol".')
-        circle = Circle(center, radius[0], radial_resolution=radial_resolution, axis=axis, Type='surf')
+        circle = Circle(center, radius[0], theta_resolution=theta_resolution,  radial_resolution=radial_resolution, axis=axis, Type='surf')
         if Type.lower() == 'vol':
             cylinder = Extrude(circle, height, height/axial_resolution, axis=axis, ElemType=ElemType)
         elif Type.lower() == 'surf':
@@ -616,7 +664,7 @@ def Cylinder(center, radius, height, theta_resolution=20, axial_resolution=10, r
             raise ValueError('Type must be "vol" or "surf".')
     
     else:
-        circle = Circle(center, radius[0], radial_resolution=radial_resolution, axis=axis, Type='line')
+        circle = Circle(center, radius[0], theta_resolution=theta_resolution, radial_resolution=radial_resolution, axis=axis, Type='line')
         cylinder = Extrude(circle, height, height/axial_resolution, axis=axis, ElemType=ElemType)
 
     if radius[0] != radius[1]:
@@ -811,8 +859,10 @@ def Torus(center, R, r, axis=2, theta_resolution=20, phi_resolution=20, radial_r
         circle_axis = 1
 
     circle = Circle(circle_center, r, theta_resolution=theta_resolution, axis=circle_axis, Type=circle_type)
-
-    torus = Revolve(circle, 2*np.pi, 2*np.pi/(phi_resolution), center=center, axis=axis, ElemType=ElemType)
+    if Type == 'vol':
+        torus = Revolve(circle, 2*np.pi, 2*np.pi/(phi_resolution), center=center, axis=axis, ElemType=ElemType)
+    else:
+        torus = Revolve(circle, -2*np.pi, -2*np.pi/(phi_resolution), center=center, axis=axis, ElemType=ElemType)
     torus.cleanup()
     return torus
 

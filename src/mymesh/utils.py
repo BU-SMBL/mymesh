@@ -83,8 +83,8 @@ Miscellaneous
 import numpy as np
 import scipy
 import sys, warnings, copy, time, itertools, collections
-from . import converter, rays, octree, improvement, quality, mesh
-from . import try_njit
+from . import converter, rays, tree, improvement, quality, mesh
+from . import try_njit, check_numba
 
 def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
     """
@@ -139,12 +139,15 @@ def getElemConnectivity(NodeCoords,NodeConn):
     ElemConn : list
         List of elements connected to each node.
     """    
-    nodes,elems = zip(*[(n, i) for i, elem in enumerate(NodeConn) for n in elem])
-    NotInMesh = set(range(len(NodeCoords))).difference(nodes)
-    nodes += tuple(NotInMesh)
-    elems += tuple(itertools.repeat(-1,len(nodes)))
+    if len(NodeConn) > 0:
+        nodes,elems = zip(*[(n, i) for i, elem in enumerate(NodeConn) for n in elem])
+        NotInMesh = set(range(len(NodeCoords))).difference(nodes)
+        nodes += tuple(NotInMesh)
+        elems += tuple(itertools.repeat(-1,len(nodes)))
 
-    ElemConn = [list(set(elem for _, elem in group if elem != -1)) for node, group in itertools.groupby(sorted(zip(nodes,elems), key=lambda x: x[0]), key=lambda x: x[0])] 
+        ElemConn = [list(set(elem for _, elem in group if elem != -1)) for node, group in itertools.groupby(sorted(zip(nodes,elems), key=lambda x: x[0]), key=lambda x: x[0])] 
+    else:
+        ElemConn = []
 
     return ElemConn
 
@@ -483,7 +486,17 @@ def CalcFaceNormal(NodeCoords,SurfConn):
     ArrayCoords = np.asarray(NodeCoords)
     _, TriConn, inv = converter.surf2tris(NodeCoords, SurfConn, return_inv=True)
     points = ArrayCoords[TriConn]
-    TriNormals = _tri_normals(points)
+    if check_numba():
+        TriNormals = _tri_normals(points)
+    else:
+        U = points[:,1,:]-points[:,0,:]
+        V = points[:,2,:]-points[:,0,:]
+        Nx = U[:,1]*V[:,2] - U[:,2]*V[:,1]
+        Ny = U[:,2]*V[:,0] - U[:,0]*V[:,2]
+        Nz = U[:,0]*V[:,1] - U[:,1]*V[:,0]
+        N = np.column_stack((Nx,Ny,Nz))
+        d = np.linalg.norm(N,axis=1)
+        TriNormals = np.divide(N, d[:,None], out=np.nan*np.ones(np.shape(N)), where=d[:,None]!=0)
 
     ElemNormals = np.zeros((len(SurfConn),3))
     np.add.at(ElemNormals, inv, TriNormals)
@@ -491,17 +504,25 @@ def CalcFaceNormal(NodeCoords,SurfConn):
 
     return ElemNormals
 
+@try_njit(cache=True)
 def _tri_normals(Tris):
     
-    U = Tris[:,1,:]-Tris[:,0,:]
-    V = Tris[:,2,:]-Tris[:,0,:]
-    Nx = U[:,1]*V[:,2] - U[:,2]*V[:,1]
-    Ny = U[:,2]*V[:,0] - U[:,0]*V[:,2]
-    Nz = U[:,0]*V[:,1] - U[:,1]*V[:,0]
-    N = np.vstack([Nx,Ny,Nz]).T
-    d = np.linalg.norm(N,axis=1)
-    with np.errstate(divide='ignore', invalid='ignore'):
-        ElemNormals = (N/d[:,None])
+    ElemNormals = np.empty((len(Tris),3))
+    for i,tri in enumerate(Tris):
+        U = tri[1] - tri[0]
+        V = tri[2] - tri[0]
+
+        Nx = U[1]*V[2] - U[2]*V[1]
+        Ny = U[2]*V[0] - U[0]*V[2]
+        Nz = U[0]*V[1] - U[1]*V[0]
+
+        norm = np.sqrt(Nx**2 + Ny**2 + Nz**2)
+        if norm != 0:
+            ElemNormals[i,0] = Nx/norm
+            ElemNormals[i,1] = Ny/norm
+            ElemNormals[i,2] = Nz/norm
+        else:
+            ElemNormals[i] = np.repeat(np.nan,3)
     
     return ElemNormals
 
@@ -893,12 +914,12 @@ def Project2Surface(Points,Normals,NodeCoords,SurfConn,tol=np.inf,Octree='genera
         Nodal connectivity of the surface mesh that the point is being projected to.
     tol : float, optional
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
-        Octree : str (or octree.OctreeNode), optional
+        Octree : str (or tree.OctreeNode), optional
         octree options. An octree representation of the surface can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by octree.Surface2Octree(NodeCoords,SurfConn)
+        tree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by tree.Surface2Octree(NodeCoords,SurfConn)
     Returns
     -------
     MappingMatrix : np.ndarray
@@ -954,12 +975,12 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
     verbose : bool, optional
         If true, will print mapping statistics, by default False.
-    Octree : str (or octree.OctreeNode), optional
+    Octree : str (or tree.OctreeNode), optional
         octree options. An octree representation of surface 2 can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        octree.OctreeNode - Provide a precompute octree structure corresponding to surface 2. Should be created by octree.Surface2Octree(NodeCoords2,SurfConn2)
+        tree.OctreeNode - Provide a precompute octree structure corresponding to surface 2. Should be created by tree.Surface2Octree(NodeCoords2,SurfConn2)
     return_octree : bool, optional
         If true, will return the generated or provided octree, by default False.
     npts : int, optional
@@ -971,7 +992,7 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     MappingMatrix : list
         min(npts, len(NodeCoords1))x4 matrix of of barycentric coordinates, defining NodeCoords1 in terms
         of the triangular surface elements of Surface 2.
-    Octree : octree.OctreeNode, optional
+    Octree : tree.OctreeNode, optional
         The generated or provided octree structure corresponding to Surface 2.
 
     """
@@ -996,7 +1017,7 @@ def SurfMapping(NodeCoords1, SurfConn1, NodeCoords2, SurfConn2, tol=np.inf, verb
     NodeNormals1 = Face2NodeNormal(NodeCoords1, SurfConn1, ElemConn1, ElemNormals1, method='angle')
 
     
-    if Octree == 'generate': Octree = octree.Surface2Octree(NodeCoords2,SurfConn2)
+    if Octree == 'generate': Octree = tree.Surface2Octree(NodeCoords2,SurfConn2)
     
     MappingMatrix = -1*np.ones((len(NodeCoords1),4))
     MappingMatrix[NodeIds,:] = Project2Surface(NodeCoords1[NodeIds,:], NodeNormals1[NodeIds,:], NodeCoords2, SurfConn2, tol=tol, Octree=Octree)
@@ -1028,12 +1049,12 @@ def ValueMapping(NodeCoords1, SurfConn1, NodeVals1, NodeCoords2, SurfConn2, tol=
         Contains the nodal connectivity defining the surface elements.
     tol : float, optional
         Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf 
-    Octree : str (or octree.OctreeNode), optional
+    Octree : str (or tree.OctreeNode), optional
         octree options. An octree representation of surface 1 can significantly
         improve mapping speeds, by default 'generate'.
         'generate' - Will generate an octree for use in surface mapping.
         'none' or None - Won't generate an octree and will use a brute force approach.
-        octree.OctreeNode - Provide a precompute octree structure corresponding to surface 1. Should be created by octree.Surface2Octree(NodeCoords1,SurfConn1)
+        tree.OctreeNode - Provide a precompute octree structure corresponding to surface 1. Should be created by tree.Surface2Octree(NodeCoords1,SurfConn1)
     MappingMatrix : list
         len(NodeCoords2)x4 matrix of of barycentric coordinates, defining NodeCoords2 in terms
         of the triangular surface elements of Surface 1.
@@ -1156,13 +1177,22 @@ def DeleteDuplicateNodes(NodeCoords,NodeConn,tol=1e-12,return_idx=False,return_i
         arrayCoords = np.array(NodeCoords)
     unq,idx,inv = np.unique(arrayCoords, return_index=True, return_inverse=True, axis=0)
     if type(NodeCoords) is list:
-        NewCoords = np.asarray(NodeCoords)[idx].tolist()
+        NewCoords = [NodeCoords[i] for i in idx]
     else:
-        NewCoords = np.asarray(NodeCoords)[idx]
+        NewCoords = NodeCoords[idx]
     if len(NodeConn) > 0:
-        tempIds = np.append(inv,-1)
-        R = PadRagged(NodeConn,fillval=-1)
-        NewConn = ExtractRagged(tempIds[R],delval=-1)
+        if type(NodeConn) is np.ndarray:
+            # NodeConn already an array
+            NewConn = inv[NodeConn]
+        else:
+            try:
+                # Try to index with NodeConn, assuming it's rectangular (uniform element type)
+                NewConn = inv[NodeConn]
+            except ValueError:
+                # If NodeConn is a ragged list of lists (mixed element types), pad ragged
+                tempIds = np.append(inv,-1)
+                R = PadRagged(NodeConn,fillval=-1)
+                NewConn = ExtractRagged(tempIds[R],delval=-1)
     else:
         NewConn = NodeConn
 
@@ -1465,9 +1495,12 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='auto', return_idx=Fals
             wdgints = np.sum((uConn[hex2wdg, :8] == -1) * 2**np.arange(0,8)[::-1], axis=1)
 
             # Wedge cases: TODO: Not all cases accounted for
-            # Case 3 : Face 1 vertical collapse (2==6, 3==7)
+            # Case 3 : Face 3 vertical collapse (2==6, 3==7)
             uConn[hex2wdg[wdgints == 3], :8] = uConn[hex2wdg[wdgints == 3]][:,[0,3,4,1,2,5,6,7]]
             
+            # Case 9 : Face 4 vertical collapse (0==5, 3==7)
+            uConn[hex2wdg[wdgints == 9], :8] = uConn[hex2wdg[wdgints == 9]][:,[0,5,1,3,6,2,4,7]]
+
             # Case 12 : Face 1 vertical collapse (0==4, 1==5)
             uConn[hex2wdg[wdgints == 12], :8] = uConn[hex2wdg[wdgints == 12]][:,[0,3,7,1,2,6,4,5]]
 
@@ -1490,7 +1523,7 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='auto', return_idx=Fals
             # Case 7 : Face 5 collapse (4==5==6==7)
             uConn[hex2pyr[pyrints == 7], :8] = uConn[hex2pyr[pyrints == 7]][:,[0,1,2,3,4,5,6,7]]
 
-            if np.any((wdgints != 3) & (wdgints != 12)):
+            if np.any((wdgints != 3) & (wdgints != 9) & (wdgints != 12)):
                 warnings.warn(f'Unaccounted for hex-to-wedge case(s) in CleanupDegenerateElements. This is a bug, please report.')
             if np.any((pyrints != 7) & (pyrints != 19) & (pyrints != 25) & (pyrints != 38) & (pyrints != 76) & (pyrints != 112)):
                 warnings.warn(f'Unaccounted for hex-to-pyr case(s) in CleanupDegenerateElements. This is a bug, please report.')
@@ -1593,22 +1626,45 @@ def MergeMesh(NodeCoords1, NodeConn1, NodeCoords2, NodeConn2, NodeVals1=[], Node
         NodeVals1 = NodeVals1.tolist()
     if type(NodeVals2) == np.ndarray:
         NodeVals2 = NodeVals2.tolist()
-        
-    MergeCoords = NodeCoords1 + NodeCoords2
 
-    MergeConn = NodeConn1 + [[node+len(NodeCoords1) for node in elem] for elem in NodeConn2]
+    if isinstance(NodeCoords1, (list, tuple)) and isinstance(NodeCoords2, (list, tuple)):
+        MergeCoords = NodeCoords1 + NodeCoords2 
+    else:
+        MergeCoords = np.vstack([NodeCoords1, NodeCoords2])
+    
+    if type(NodeConn1) is np.ndarray and type(NodeConn2) is np.ndarray and np.shape(NodeConn1)[1] == np.shape(NodeConn2)[1]:
+        # Use vstack if NodeConns are arrays and compatible sizes
+        MergeConn = np.vstack([NodeConn1, NodeConn2+len(NodeCoords1)])
+    else:
+        # Handle as lists
+        if type(NodeConn2) is np.ndarray:
+            NodeConn2 = (NodeConn2 + len(NodeCoords1)).tolist()
+        else:
+            NodeConn2 = [[node+len(NodeCoords1) for node in elem] for elem in NodeConn2]
+        
+        if type(NodeConn1) is np.ndarray:
+            NodeConn1 = NodeConn1.tolist()
+        
+        MergeConn = NodeConn1 + NodeConn2
     
     if len(NodeVals1) > 0:
         assert len(NodeVals1) == len(NodeCoords1), 'NodeVals lists must contain the number of entries as nodes.'
         assert len(NodeVals2) == len(NodeCoords2), 'NodeVals lists must contain the number of entries as nodes.'
 
-        MergeVals = [[] for i in range(len(NodeVals1))]
-        for i in range(len(NodeVals1)):
-            MergeVals[i] = NodeVals1[i] + NodeVals2[i]
+        if isinstance(NodeVals1, (list, tuple)) and isinstance(NodeVals2, (list, tuple)):
+            MergeVals = NodeVals1 + NodeVals2 
+        else:
+            if len(np.shape(NodeVals1)) == 2 and len(np.shape(NodeVals2)) == 2:
+                MergeVals = np.vstack([NodeVals1, NodeVals2])
+            elif len(np.shape(NodeVals1)) == 1 and len(np.shape(NodeVals2)) == 1:
+                MergeVals = np.concatenate([NodeVals1, NodeVals2])
+            else:
+                raise ValueError('Dimensions of NodeVals1 and NodeVals2 are incompatible')
+        
         if cleanup:
             MergeCoords,MergeConn,inv = DeleteDuplicateNodes(MergeCoords,MergeConn,return_inv=True)
             for i in range(len(MergeVals)):
-                MergeVals[i] = [MergeVals[i][j] for j in idx]
+                MergeVals[i] = [MergeVals[i][j] for j in inv]
                 
             return MergeCoords, MergeConn, MergeVals
     
@@ -2178,7 +2234,7 @@ def identify_type(NodeCoords, NodeConn):
 
         # Check element lengths
         lengths = (len(e) for e in NodeConn)
-        vol_elem_set = {5,6,8} # Set of unambiguous volume element lengths
+        vol_elem_set = {5,10,20} # Set of unambiguous volume element lengths
         for l in lengths:
             # NOTE: any mesh containing triangle and volume elements will be 
             # arbitrarily classified by whichever comes first.
@@ -2210,4 +2266,104 @@ def identify_type(NodeCoords, NodeConn):
         else:
             Type = 'surf'
 
-        return Type
+        return Type    
+
+def identify_elem(NodeCoords, NodeConn, Type=None):
+
+    ambiguous_lengths = {4,6,8} # Element lengths that are ambiguous
+    if type(NodeConn) is np.ndarray and NodeConn.dtype is not object:
+        lengths = (np.shape(NodeConn)[1],)
+    else:
+        try:
+            NodeConn = np.array(NodeConn)
+            lengths = (np.shape(NodeConn)[1],)
+        except ValueError:
+            # ragged list of lists, check all lengths
+            lengths = tuple(set(map(len, NodeConn)))
+    
+    lengths
+    if any(l in ambiguous_lengths for l in lengths) and Type is None:
+        Type = identify_type(NodeCoords, NodeConn)
+
+    
+    elems = []
+    for l in lengths:
+        if l == 2:
+            elems.append('line')
+        elif l == 3:
+            elems.append('tri')
+        elif l == 4 and Type == 'surf':
+            elems.append('quad')
+        elif l == 4 and Type == 'vol':
+            elems.append('tet')
+        elif l == 5:
+            elems.append('pyr')
+        elif l == 6:
+            elems.append('wdg')
+        elif l == 8:
+            elems.append('hex')
+        elif l == 10:
+            elems.append('tet10')
+        elif l == 20:
+            elems.append('hex20')
+        else:
+            elems.append('unknown')
+    return elems
+
+@try_njit(cache=True)
+def RotateNormalToVector(NodeCoords, Normal, Vector):
+    """
+    Reorient nodes to align an asociated normal vector with a chosen vector.
+    This can be used to reorient a mesh so that a particular element is facing
+    in a certain direction
+
+    Parameters
+    ----------
+    NodeCoords : np.ndarray(dtype=np.float64)
+        Array of node coordinates (shape=(n,3))
+    Normal : np.ndarray(dtype=np.float64)
+        Normal vector associated with the nodes (shape=(3,)). This could 
+        be the normal vector of a particular node or element of the mesh, or 
+        some other vector related to the nodes that is the basis of reorientation.
+    Vector : np.ndarray(dtype=np.float64)
+        Vector which the nodes will be rotated so that Normal is aligned with it (shape=(3,)).
+
+    Returns
+    -------
+    RotCoords : np.ndarray
+        Coordinates of the rotated nodes. These will be positioned arbitrarily
+        in space, but will be rotated so that Normal is parallel with Vector
+    R : np.ndarray
+        3x3 rotation matrix. RotCoords = (R @ NodeCoords.T).T
+    """    
+    Normal = Normal / np.linalg.norm(Normal)
+    Vector = Vector / np.linalg.norm(Vector)
+    Cross = np.cross(Normal,Vector) 
+    CrossNorm = np.linalg.norm(Cross)
+    if CrossNorm == 0:
+        pass
+        # RotAxis = np.array([[0,0,1],[1,0,0],[0,1,0]],dtype=np.float64) @ Normal[:,None]
+        RotAxis = Normal[np.array([2,0,1])]
+    else:
+        RotAxis = Cross/CrossNorm
+
+    if np.array_equal(Normal, Vector):
+        Angle = 0
+    else:
+        Angle = np.arccos(np.dot(Vector, Normal))
+    
+    outer_prod = np.outer(RotAxis, RotAxis)
+    cross_prod_matrix = np.zeros((3, 3))
+    cross_prod_matrix[0,1] = -RotAxis[2]
+    cross_prod_matrix[1,0] =  RotAxis[2]
+    cross_prod_matrix[0,2] =  RotAxis[1]
+    cross_prod_matrix[2,0] = -RotAxis[1]
+    cross_prod_matrix[1,2] = -RotAxis[0]
+    cross_prod_matrix[2,1] =  RotAxis[0]
+    R = np.cos(Angle)*np.eye(3) + np.sin(Angle)*cross_prod_matrix + (1 - np.cos(Angle))*outer_prod
+
+    RotCoords = (R @ NodeCoords.T).T
+
+    return RotCoords, R
+
+    

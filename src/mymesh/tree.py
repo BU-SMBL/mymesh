@@ -2,11 +2,68 @@
 # Created on Mon Jan 31 22:52:03 2022
 # @author: toj
 """
-Octree data structure and related methods.
+Tree data structures and related methods. Tree structures are used to organize
+space into a hierarchy that makes it more efficient to search through them. This
+module currently includes an Octree data structure and its two dimensional 
+analog the Quadtree. 
 
+These trees are based on uniform subdivision of an initial cube/square into 
+eight/four smaller cubes/squares. The main principal is that if you know an 
+entity (point, triangle, etc.) isn't in a particular node of the tree, you know 
+it's not in any of the branches of that node and they don't need to be searched. 
+This can lead to significant efficiency improvements in a variety of operations, 
+for example if searching for intersections between a ray and a surface mesh 
+(:func:`mymesh.rays.RaySurfIntersection`), by testing for intersections between 
+a ray and the cube represented by an octree node, you can eliminate the need to 
+test for intersections between the ray and any of the triangles within that node. 
+
+Tree
+====
+.. autosummary::
+    :toctree: submodules/
+
+    TreeNode
+
+Tree Utilities
+----------------
+.. autosummary::
+    :toctree: submodules/
+
+    Print
+    getAllLeaf
+
+Quadtree
+========
+.. autosummary::
+    :toctree: submodules/
+
+    QuadtreeNode
+
+Quadtree Creation
+---------------
+.. autosummary::
+    :toctree: submodules/
+
+    Points2Quadtree
+    Edges2Quadtree  
+
+Conversion From Quadtree
+----------------------
+.. autosummary::
+    :toctree: submodules/
+
+    Quadtree2Pixel
+    Quadtree2Dual
+
+Octree
+======
+.. autosummary::
+    :toctree: submodules/
+
+    OctreeNode
 
 Octree Creation
-===============
+---------------
 .. autosummary::
     :toctree: submodules/
 
@@ -16,7 +73,7 @@ Octree Creation
     Voxel2Octree
 
 Conversion From Octree
-======================
+----------------------
 .. autosummary::
     :toctree: submodules/
 
@@ -24,48 +81,36 @@ Conversion From Octree
     Octree2Dual
 
 Octree Querying
-===============
+---------------
 .. autosummary::
     :toctree: submodules/
 
-    getAllLeaf
     SearchOctree
     SearchOctreeTri
 
-Octree Utilities
-================
-.. autosummary::
-    :toctree: submodules/
-
-    Print
-
-
 """
 import numpy as np
-import scipy
-import sys, copy
-from . import rays, utils
+from . import rays, utils, mesh
 import sympy as sp
 
-class OctreeNode:
-          
-    def __init__(self,centroid,size,parent=None,data=None,level=0,state='unknown'):
+class TreeNode:
+    def __init__(self,parent=None,data=None,level=0,state='unknown'):
         """
+        .. autoclass:: TreeNode
+            :members:
+            :inherited-members:
+
         The OctreeNode is the basic unit of the octree data structure. The structure
         consists of a series of nodes that reference their parent and child nodes, 
         allowing for traversal of the tree structure.
 
         Parameters
         ----------
-        centroid : array_like
-            Location of the center of the octree node
-        size : float
-            Side length of the cube associated with the octree node
-        parent : octree.OctreeNode, optional
-            The octree node that contains this node, by default None
+        parent : tree.TreeNode, optional
+            The tree node that contains this node, by default None
         data : list or dict, optional
-            Data associated with the octree node. The type of data depends on 
-            the how the octree was created, by default None.
+            Data associated with the tree node. The type of data depends on 
+            the how the tree was created, by default None.
         level : int, optional
             Depth within the tree structure, by default 0.
             The root node is at level 0, the root's children are at level 1, etc.
@@ -74,26 +119,24 @@ class OctreeNode:
             'unknown'.
 
             Possible states are:
-            - 'root': This node is the root of the octree
+
+            - 'root': This node is the root of the tree
+
             - 'branch': This is node is an intermediate node between the root and leaves
+
             - 'leaf': This is node is a terminal end and has no children.
+
             - 'empty': No data is contained within this node, and it has no children
+
             - 'unknown': State hasn't been specified.
+
         """  
-        self.centroid = centroid
-        self.size = size
         self.children = []
         self.parent = parent
         self.state = state
         self.data = data
-        self.limits = None
-        self.vertices = None
         self.level = level
 
-    def __repr__(self):
-        out = f'Octree Node ({self.state:s})\nCentroid: {str(self.centroid):s}\nSize: {self.size:f} \n'
-        return out
-    
     def getMaxDepth(self):
         """
         Get the maximum depth of the octree. The depth is the highest level
@@ -123,8 +166,8 @@ class OctreeNode:
 
         Parameters
         ----------
-        level : _type_
-            _description_
+        level : int
+            Octree level, 0 refers to the root node
         """        
         def recur(node,nodes):
             if node.level == level:
@@ -140,6 +183,361 @@ class OctreeNode:
         nodes = []
         return recur(self,nodes)
 
+    def clearData(self,clearChildren=True):
+        """
+        Reset the data attribute for this node, and optionally all children
+
+        Parameters
+        ----------
+        clearChildren : bool, optional
+            If True, data from child nodes will be recursively cleared, by default True
+        """        
+        self.data = None
+        if clearChildren:
+            for child in self.children:
+                child.clearData()  
+    
+    def hasChildren(self):
+        """
+        Check if the node has any child nodes
+
+        Returns
+        -------
+        bool
+        """        
+        # includes both "leaf" and "empty" nodes
+        return len(self.children) == 0
+
+class QuadtreeNode(TreeNode):
+          
+    def __init__(self,centroid,size,parent=None,data=None,level=0,state='unknown'):
+        """
+
+        The QuadtreeNode is the basic unit of the quadtree data structure. The structure
+        consists of a series of nodes that reference their parent and child nodes, 
+        allowing for traversal of the tree structure.
+
+        Parameters
+        ----------
+        parent : tree.QuadtreeNode, optional
+            The quadtree node that contains this node, by default None
+        data : list or dict, optional
+            Data associated with the quadtree node. The type of data depends on 
+            the how the quadtree was created, by default None.
+        level : int, optional
+            Depth within the tree structure, by default 0.
+            The root node is at level 0, the root's children are at level 1, etc.
+        state : str, optional
+            Specifies whether the node's place in the tree structure, by default
+            'unknown'.
+
+            Possible states are:
+
+            - 'root': This node is the root of the quadtree
+
+            - 'branch': This is node is an intermediate node between the root and leaves
+
+            - 'leaf': This is node is a terminal end and has no children.
+
+            - 'empty': No data is contained within this node, and it has no children
+
+            - 'unknown': State hasn't been specified.
+        
+        centroid : array_like
+            Location of the center of the quadtree node
+        size : float
+            Side length of the cube associated with the quadtree node
+        limits : list
+            bounds of the quadtree node
+        vertices : np.ndarray
+            Coordinates of the vertices of the quadtree node
+
+        """  
+        self.children = []
+        self.parent = parent
+        self.state = state
+        self.data = data
+        self.level = level
+        self.centroid = centroid
+        self.size = size
+        self.limits = None
+        self.vertices = None
+
+    def __repr__(self):
+        out = f'Quadtree Node ({self.state:s})\nCentroid: {str(self.centroid):s}\nSize: {self.size:f} \n'
+        return out
+    
+    def getLimits(self):
+        """
+        Get the spatial bounds of the current quadtree node. Limits are formatted
+        as [[xmin, xmax], [ymin, ymax]]. These are equivalent 
+        to node.centroid +/- (node.size/2).
+
+        Returns
+        -------
+        limits : list
+            list of x, y bounds of the quadtree node
+        """        
+        if self.limits is None:
+            self.limits = np.array([[self.centroid[d]-self.size/2,self.centroid[d]+self.size/2] for d in range(2)])
+        return self.limits
+    
+    def getVertices(self):
+        """
+        Get the coordinates of the 4 vertices of the square that correspond to the
+        quadtree node. 
+
+        Returns
+        -------
+        vertices : np.ndarray
+            Array of vertex coordinates
+        """        
+        if self.vertices is None:
+            [x0,x1],[y0,y1] = self.getLimits()
+            self.vertices = np.array([[x0,y0],[x1,y0],[x1,y1],[x0,y1]])
+        return self.vertices
+
+    def PointInNode(self,point,inclusive=True):
+        """
+        Check if a point is within the bounds of the current node.
+
+        Parameters
+        ----------
+        point : np.ndarray
+            Three element coordinate array
+        inclusive : bool, optional
+            Specify whether a point exactly on the boundary is include as in
+            the node, by default True.
+
+        Returns
+        -------
+        inside : bool
+            True if the point is inside the node, otherwise False.
+        """        
+        inside = rays.PointInBox2D(point, *self.getLimits(), inclusive=inclusive)
+        return inside
+    
+    def PointsInNode(self,points,inclusive=True):
+        """
+        Check if a set of points is within the bounds of the current node.
+
+        Parameters
+        ----------
+        points : array_like
+            nx3 coordinate array
+        inclusive : bool, optional
+            Specify whether a point exactly on the boundary is include as in
+            the node, by default True.
+
+        Returns
+        -------
+        inside : np.ndarray
+            Array of bools for each point in points. True if the point is inside 
+            the node, otherwise False.
+        """
+        limits = self.getLimits()
+        inside =  np.array([rays.PointInBox2D(point, *limits, inclusive=inclusive) for point in points])
+        
+        return inside
+    
+    def ContainsPts(self,points):
+        """
+        Identify which of a set of a points is contained in the node
+
+        Parameters
+        ----------
+        points : array_like
+            Coordinates of the points (shape=(n,3))
+
+        Returns
+        -------
+        out : list
+            List of indices of the points that are contained within the node
+        """
+        out = [idx for idx,point in enumerate(points) if self.PointInNode(point)]
+
+        return out
+     
+    def ContainsEdges(self,edges):
+        """
+        Identify which of a set of a edges is contained in the node
+
+        Parameters
+        ----------
+        edges : array_like
+            Coordinates of the points of the edges (shape=(n,2,2))
+
+        Returns
+        -------
+        Intersections : np.ndarray
+            List of indices of the edges that are contained within the node
+        """
+        lims = self.getLimits()
+        Intersections = np.array([i for i in range(len(edges)) if rays.SegmentBox2DIntersection(edges[i], lims[0], lims[1])],dtype=int)
+        return Intersections
+    
+    def makeChildren(self, childstate='unknown'):
+        """
+        Initialize child nodes for the current node
+
+        Parameters
+        ----------
+        childstate : str, optional
+            state to be given to the children, by default 'unknown'.
+
+            Other options are
+
+            - 'branch': This is node is an intermediate node between the root and leaves
+
+            - 'leaf': This is node is a terminal end and has no children.
+
+            - 'empty': No data is contained within this node, and it has no children
+
+        """        
+        childSize = self.size/2
+        self.children = []
+        for xSign,ySign in [(-1,-1),(1,-1),(1,1),(-1,1)]:
+            centroid = np.array([self.centroid[0]+xSign*self.size/4, self.centroid[1]+ySign*self.size/4])
+            self.children.append(QuadtreeNode(centroid,childSize,parent=self,data=[],level=self.level+1,state=childstate))
+            
+    def makeChildrenPts(self,points,minsize=0,maxsize=np.inf,maxdepth=np.inf):
+        """
+        Make child nodes based on points.
+
+        Parameters
+        ----------
+        points : array_like
+            Coordinates of the points (shape=(n,3))
+        minsize : float, optional
+            Minimum size for octree subdivision, by default 0
+        maxsize : float, optional
+            Maximum size of a leaf node, nodes large than this must be further subdivided, by default np.inf
+        maxdepth : int, optional
+            Maximum depth of the occur tree, by default np.inf
+        """        
+        if self.size > minsize and self.level<maxdepth:
+            self.makeChildren()
+            
+            for child in self.children:
+                ptIds = child.ContainsPts(points)
+                ptsInChild = points[ptIds]#[points[idx] for idx in ptIds]
+                if self.data:
+                    child.data = [self.data[idx] for idx in ptIds]
+                if len(ptsInChild) > 1: 
+                    if child.size/2 <= minsize:
+                        child.state = 'leaf'
+                    else:
+                        child.makeChildrenPts(ptsInChild,minsize=minsize,maxsize=maxsize)
+                        child.state = 'branch'
+                elif len(ptsInChild) == 1:
+                    if child.size <= maxsize:
+                        child.state = 'leaf'
+                    else:
+                        child.makeChildrenPts(ptsInChild,minsize=minsize,maxsize=maxsize)
+                        child.state = 'branch'
+                else:
+                    child.state = 'empty'
+        else:
+            self.state = 'leaf'
+            
+    def makeChildrenEdges(self, edges, minsize=0, maxsize=np.inf, maxdepth=np.inf):
+        """
+        Make child nodes based on edges.
+
+        Parameters
+        ----------
+        edges : array_like
+            Coordinates of the points of the triangles (shape=(n,2,2))
+        minsize : float, optional
+            Minimum size for quadtree subdivision, by default 0
+        maxsize : float, optional
+            Maximum size of a leaf node, nodes large than this must be further subdivided, by default np.inf
+        maxdepth : int, optional
+            Maximum depth of the occur tree, by default np.inf
+        """  
+        self.makeChildren()
+                    
+        for child in self.children:
+            edgeIds = child.ContainsEdges(edges)
+            try:
+                edgesInChild = edges[edgeIds]
+            except:
+                a = 2
+            if self.data is not None:
+                child.data = [self.data[idx] for idx in edgeIds]
+            if len(edgesInChild) > 1: 
+                if child.size/2 <= minsize or child.level >= maxdepth:
+                    child.state = 'leaf'
+                else:
+                    child.makeChildrenEdges(edgesInChild,minsize=minsize,maxsize=maxsize,maxdepth=maxdepth)
+                    child.state = 'branch'
+            elif len(edgesInChild) == 1:
+                if child.size > maxsize or child.level < maxdepth:
+                    child.makeChildrenEdges(edgesInChild,minsize=minsize,maxsize=maxsize,maxdepth=maxdepth)
+                    child.state = 'branch'
+                else:
+                    child.state = 'leaf'
+            elif len(edgesInChild) == 0:
+                child.state = 'empty'
+
+class OctreeNode(TreeNode):
+          
+    def __init__(self,centroid,size,parent=None,data=None,level=0,state='unknown'):
+        """
+        The OctreeNode is the basic unit of the octree data structure. The structure
+        consists of a series of nodes that reference their parent and child nodes, 
+        allowing for traversal of the tree structure.
+
+        Parameters
+        ----------
+        parent : tree.OctreeNode, optional
+            The octree node that contains this node, by default None
+        data : list or dict, optional
+            Data associated with the octree node. The type of data depends on 
+            the how the octree was created, by default None.
+        level : int, optional
+            Depth within the tree structure, by default 0.
+            The root node is at level 0, the root's children are at level 1, etc.
+        state : str, optional
+            Specifies whether the node's place in the tree structure, by default
+            'unknown'.
+
+            Possible states are:
+
+            - 'root': This node is the root of the octree
+
+            - 'branch': This is node is an intermediate node between the root and leaves
+
+            - 'leaf': This is node is a terminal end and has no children.
+
+            - 'empty': No data is contained within this node, and it has no children
+
+            - 'unknown': State hasn't been specified.
+        
+        centroid : array_like
+            Location of the center of the octree node
+        size : float
+            Side length of the cube associated with the octree node
+        limits : list
+            bounds of the octree node
+        vertices : np.ndarray
+            Coordinates of the vertices of the octree node
+
+        """  
+        self.children = []
+        self.parent = parent
+        self.state = state
+        self.data = data
+        self.level = level
+        self.centroid = centroid
+        self.size = size
+        self.limits = None
+        self.vertices = None
+
+    def __repr__(self):
+        out = f'Octree Node ({self.state:s})\nCentroid: {str(self.centroid):s}\nSize: {self.size:f} \n'
+        return out
+    
     def getLimits(self):
         """
         Get the spatial bounds of the current octree node. Limits are formatted
@@ -211,46 +609,111 @@ class OctreeNode:
             Array of bools for each point in points. True if the point is inside 
             the node, otherwise False.
         """
-        if inclusive:
-            return np.all([((self.centroid[d]-self.size/2) <= points[:,d]) & ((self.centroid[d]+self.size/2) >= points[:,d]) for d in range(3)], axis=0)
-        else:
-            return np.all([(self.centroid[d]-self.size/2) < points[:,d] and (self.centroid[d]+self.size/2) > points[:,d] for d in range(3)], axis=0)
-
-    def TriInNode(self,tri,TriNormal,inclusive=True):
+        limits = self.getLimits()
+        inside =  np.array([rays.PointInBox(point, *limits, inclusive=inclusive) for point in points])
         
-        lims = self.getLimits()
-        return rays.TriangleBoxIntersection(tri, lims[0], lims[1], lims[2], BoxCenter=self.centroid,TriNormal=TriNormal)
-        
-        # return (any([self.PointInNode(pt,inclusive=inclusive) for pt in tri]) or rays.TriangleBoxIntersection(tri, lims[0], lims[1], lims[2]))
+        return inside
     
-    def Contains(self,points):
+    def ContainsPts(self,points):
+        """
+        Identify which of a set of a points is contained in the node
+
+        Parameters
+        ----------
+        points : array_like
+            Coordinates of the points (shape=(n,3))
+
+        Returns
+        -------
+        out : list
+            List of indices of the points that are contained within the node
+        """
         out = [idx for idx,point in enumerate(points) if self.PointInNode(point)]
-        # out = np.where(self.PointsInNode(points))[0]
+
         return out
     
-    def ContainsTris(self,tris,TriNormals):
-        
+    def ContainsTris(self,tris,TriNormals=None):
+        """
+        Identify which of a set of a triangles is contained in the node
+
+        Parameters
+        ----------
+        tris : array_like
+            Coordinates of the points of the triangles (shape=(n,3,3))
+        TriNormals : array_like, optional
+            Normal vectors of the triangles (shape=(n,3))
+
+        Returns
+        -------
+        Intersections : np.ndarray
+            List of indices of the triangles that are contained within the node
+        """
         lims = self.getLimits()
         Intersections = np.where(rays.BoxTrianglesIntersection(tris, lims[0], lims[1], lims[2], TriNormals=TriNormals, BoxCenter=self.centroid))[0]
         return Intersections
     
     def ContainsBoxes(self, boxes):
+        """
+        Identify which of a set of a boxes is contained in the node
+
+        Parameters
+        ----------
+        boxes : list
+            List of box bounds, formatted as [((xmin, xmax), (ymin, ymax), (zmin, zmax)), ...]
+
+        Returns
+        -------
+        Intersections : np.ndarray
+            List of indices of the boxes that are contained within the node
+        """
         Intersections = np.where([rays.BoxBoxIntersection(self.getLimits(), box) for box in boxes])[0]
         return Intersections
     
-    def isEmpty(self,points):
-        return any([self.PointInNode(point) for point in points])
-    
-    def hasChildren(self):
-        # includes both "leaf" and "empty" nodes
-        return len(self.children) == 0
-    
-    def makeChildrenPts(self,points,minsize=0,maxsize=np.inf,maxdepth=np.inf):
+    def makeChildren(self, childstate='unknown'):
+        """
+        Initialize child nodes for the current node
+
+        Parameters
+        ----------
+        childstate : str, optional
+            state to be given to the children, by default 'unknown'.
+
+            Other options are
+
+            - 'branch': This is node is an intermediate node between the root and leaves
+
+            - 'leaf': This is node is a terminal end and has no children.
+
+            - 'empty': No data is contained within this node, and it has no children
+
+        """        
+        childSize = self.size/2
+        self.children = []
+        # Note other things (e.g. Function2Octree) depend on this ordering not changing 
+        for xSign,ySign,zSign in [(-1,-1,-1),(1,-1,-1),(1,1,-1),(-1,1,-1),(-1,-1,1),(1,-1,1),(1,1,1),(-1,1,1)]:
+            centroid = np.array([self.centroid[0]+xSign*self.size/4, self.centroid[1]+ySign*self.size/4, self.centroid[2]+zSign*self.size/4])
+            self.children.append(OctreeNode(centroid,childSize,parent=self,data=[],level=self.level+1,state=childstate))
+            
+    def makeChildrenPts(self, points, minsize=0, maxsize=np.inf, maxdepth=np.inf):
+        """
+        Make child nodes based on points.
+
+        Parameters
+        ----------
+        points : array_like
+            Coordinates of the points (shape=(n,3))
+        minsize : float, optional
+            Minimum size for octree subdivision, by default 0
+        maxsize : float, optional
+            Maximum size of a leaf node, nodes large than this must be further subdivided, by default np.inf
+        maxdepth : int, optional
+            Maximum depth of the occur tree, by default np.inf
+        """        
         if self.size > minsize and self.level<maxdepth:
             self.makeChildren()
             
             for child in self.children:
-                ptIds = child.Contains(points)
+                ptIds = child.ContainsPts(points)
                 ptsInChild = points[ptIds]#[points[idx] for idx in ptIds]
                 if self.data:
                     child.data = [self.data[idx] for idx in ptIds]
@@ -268,12 +731,26 @@ class OctreeNode:
                         child.state = 'branch'
                 else:
                     child.state = 'empty'
-                # self.children.append(child)  
         else:
             self.state = 'leaf'
             
-    def makeChildrenTris(self,tris,TriNormals,minsize=0,maxsize=np.inf,maxdepth=np.inf):
-        # tris is a list of Triangular vertices [tri1,tri2,...] where tri1 = [pt1,pt2,pt3]
+    def makeChildrenTris(self, tris, TriNormals, minsize=0, maxsize=np.inf, maxdepth=np.inf):
+        """
+        Make child nodes based on triangles.
+
+        Parameters
+        ----------
+        tris : array_like
+            Coordinates of the points of the triangles (shape=(n,3,3))
+        TriNormals : array_like, optional
+            Normal vectors of the triangles (shape=(n,3))
+        minsize : float, optional
+            Minimum size for octree subdivision, by default 0
+        maxsize : float, optional
+            Maximum size of a leaf node, nodes large than this must be further subdivided, by default np.inf
+        maxdepth : int, optional
+            Maximum depth of the occur tree, by default np.inf
+        """  
         self.makeChildren()
                     
         for child in self.children:
@@ -298,7 +775,20 @@ class OctreeNode:
                 child.state = 'empty'
 
     def makeChildrenBoxes(self,boxes,minsize=0,maxsize=np.inf,maxdepth=np.inf):
-        
+        """
+        Make child nodes based on boxes.
+
+        Parameters
+        ----------
+        boxes : list
+            List of box bounds, formatted as [((xmin, xmax), (ymin, ymax), (zmin, zmax)), ...]
+        minsize : float, optional
+            Minimum size for octree subdivision, by default 0
+        maxsize : float, optional
+            Maximum size of a leaf node, nodes large than this must be further subdivided, by default np.inf
+        maxdepth : int, optional
+            Maximum depth of the occur tree, by default np.inf
+        """ 
         self.makeChildren()
                     
         for child in self.children:
@@ -321,51 +811,9 @@ class OctreeNode:
             elif len(boxesInChild) == 0:
                 child.state = 'empty'
 
-    def makeChildren(self, childstate='unknown'):
-        childSize = self.size/2
-        self.children = []
-        # Note other things (e.g. Function2Octree) depend on this ordering not changing 
-        for xSign,ySign,zSign in [(-1,-1,-1),(1,-1,-1),(1,1,-1),(-1,1,-1),(-1,-1,1),(1,-1,1),(1,1,1),(-1,1,1)]:
-            centroid = np.array([self.centroid[0]+xSign*self.size/4, self.centroid[1]+ySign*self.size/4, self.centroid[2]+zSign*self.size/4])
-            self.children.append(OctreeNode(centroid,childSize,parent=self,data=[],level=self.level+1,state=childstate))
-
-    def addTri(self,tri,triId=None,minsize=None):
-            # triId can be an identifier for the element corresponding to the given triangle
-            # If given, triId will be stored in the octree node data instead of the tri itself
-            if not minsize:
-                # By default creates octree with a minimum node size equal to the max edge length of a triangle
-                minsize = max([max([pt[0] for pt in tri])-min([pt[0] for pt in tri]),
-                            max([pt[1] for pt in tri])-min([pt[1] for pt in tri]),
-                            max([pt[2] for pt in tri])-min([pt[2] for pt in tri]),
-                            ])
-            def recur(node,tri,triId,minsize):
-                if node.TriInNode(tri):
-                    if node.state == 'unknown' or node.state == 'empty':
-                        node.state = 'branch'
-                    if node.size/2 <= minsize:
-                        node.state = 'leaf'
-                        if triId:
-                            node.data.append(triId)
-                        else:
-                            node.data.append(tri)
-                    else:
-                        if node.state == 'leaf':
-                            node.state = 'branch'
-                        if len(node.children) == 0:
-                            node.makeChildren()
-                        for child in node.children:
-                            recur(child,tri,triId,minsize)
-                elif node.state == 'unknown':
-                    node.state = 'empty'
-            recur(self,tri,triId,minsize)
-            
-    def clearData(self,clearChildren=True):
-        self.data = []
-        if clearChildren:
-            for child in self.children:
-                child.clearData()                 
-
-def isInsideOctree(pt,node,inclusive=True):   
+# Octree Functions               
+def isInsideOctree(pt,node,inclusive=True):  
+    # This might not be necessary - possibly redundant with OctreeNode.PointInNode - need to verify, then adjust usage in rays
     if node.PointInNode(pt,inclusive=inclusive):
         if node.state == 'leaf':
             return True
@@ -385,12 +833,12 @@ def SearchOctree(pt,root):
     ----------
     pt : array_like
         3D coordinate ([x,y,z])
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root of the octree to be searched
 
     Returns
     -------
-    node : octree.OctreeNode or NoneType
+    node : tree.OctreeNode or NoneType
         Octree node containing the point. If the no node can be found to contain the point, None will be returned.
     """    
     if rays.PointInBox(pt, *root.getLimits(), inclusive=True): #root.PointInNode(pt,inclusive=True):
@@ -415,7 +863,7 @@ def SearchOctreeTri(tri,root,inclusive=True):
     tri : array_like
         3x3 list or np.ndarray containing the coordinates of the three vertices
         of a triangle.
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root node of the octree to be searched
     inclusive : bool, optional
         Specifies whether to include leaf nodes that the triangle is exactly
@@ -438,34 +886,6 @@ def SearchOctreeTri(tri,root,inclusive=True):
     nodes = recur(tri, root, [], inclusive)
     return nodes
     
-def getAllLeaf(root):
-    """
-    Retrieve a list of all leaf nodes of the octree
-
-    Parameters
-    ----------
-    root : octree.OctreeNode
-        Root node of the octree of which the leaf nodes will be retrieved.
-
-    Returns
-    -------
-    leaves : list
-        List of octree leaf nodes.
-    """    
-    # Return a list of all terminal(leaf) nodes in the octree
-    def recur(node,leaves):
-        if node.state == 'leaf':
-            leaves.append(node)
-            return leaves
-        elif node.state == 'empty':
-            return leaves
-        elif node.state == 'root' or node.state == 'branch':
-            for child in node.children:
-                leaves = recur(child,leaves)
-        return leaves
-    leaves = []
-    return recur(root,leaves)
-
 def Points2Octree(Points, maxdepth=10):
     """
     Generate an octree structure from a set of points. The octree will be 
@@ -481,7 +901,7 @@ def Points2Octree(Points, maxdepth=10):
 
     Returns
     -------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root node of the generated octree structure.
     """    
     if type(Points) is list:
@@ -515,14 +935,14 @@ def Voxel2Octree(VoxelCoords, VoxelConn):
 
     Returns
     -------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root node of the generated octree structure
     """    
     if type(VoxelCoords) is list:
         VoxelCoords = np.array(VoxelCoords)
     # Assumes (and requires) that all voxels are cubic and the same size
     VoxelSize = abs(sum(VoxelCoords[VoxelConn[0][0]] - VoxelCoords[VoxelConn[0][1]]))
-    centroids = [np.mean(VoxelCoords[elem],axis=0) for elem in VoxelConn]
+    centroids = utils.Centroids(VoxelCoords, VoxelConn)
     minx = min(VoxelCoords[:,0])
     maxx = max(VoxelCoords[:,0])
     miny = min(VoxelCoords[:,1])
@@ -566,7 +986,7 @@ def Surface2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=5):
 
     Returns
     -------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root node of the generate octree
     """    
     if type(NodeCoords) is list:
@@ -601,7 +1021,27 @@ def Surface2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=5):
     return root
 
 def Mesh2Octree(NodeCoords, NodeConn, minsize=None, mindepth=2, maxdepth=5):
-    
+    """
+    Generate an octree representation of a volumetric mesh. The octree
+    will be generated based on bounding boxes for each element in the mesh
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates of the surface mesh
+    NodeConn : array_like
+        Node connectivity of the triangular surface mesh. This must be an nx3
+        array or list.
+    mindepth : float, optional
+        Minimum depth of the octree, by default 2.
+    maxdepth : int, optional
+        Maximum depth of the octree, by default 5
+
+    Returns
+    -------
+    root : tree.OctreeNode
+        Root node of the generate octree
+    """   
     NodeCoords = np.asarray(NodeCoords)
     # Bounds of each element (minx, maxx, miny, maxy, minz, maxz)
     elembounds = np.array([[[NodeCoords[:,0][elem].min(), NodeCoords[:,0][elem].max()], [NodeCoords[:,1][elem].min(), NodeCoords[:,1][elem].max()], [NodeCoords[:,2][elem].min(), NodeCoords[:,2][elem].max()]] for elem in NodeConn])
@@ -667,7 +1107,7 @@ def Function2Octree(func, bounds, threshold=0, grad=None, mindepth=2, maxdepth=5
 
     Returns
     -------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         The root node of the generated octree.
 
     """    
@@ -901,18 +1341,18 @@ def Function2Octree(func, bounds, threshold=0, grad=None, mindepth=2, maxdepth=5
 
     return root
 
-def Octree2Voxel(root, mode='sparse'):
+def Octree2Voxel(root, sparse=True):
     """
     Convert an octree to a voxel mesh
 
     Parameters
     ----------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Octree node from which the mesh will be generated. 
-    mode : str, optional
-        Determines voxelization mode. If "sparse", only leaf nodes that contain
+    sparse : bool, optional
+        Determines voxelization mode. If sparse is True, only leaf nodes that contain
         data will be included, otherwise both leaf and empty nodes
-        will be include, by default 'sparse'. 
+        will be include, by default True. 
 
     Returns
     -------
@@ -922,51 +1362,32 @@ def Octree2Voxel(root, mode='sparse'):
         Node connectivity of the hexahedral voxel mesh.
 
     """    
-    VoxelConn = []
-    VoxelCoords = []
-    if mode == 'sparse':
-        condition = lambda node : node.state == 'leaf'
-    elif mode == 'full':
-        condition = lambda node : node.state == 'leaf' or node.state == 'empty' or len(node.children) == 0
-    else:
-        raise ValueError(f'mode must be "sparse" or "full", not {str(mode):s}')
 
-    def recurSearch(node):
-        if condition(node):
-            VoxelConn.append([len(VoxelCoords)+0, len(VoxelCoords)+1, len(VoxelCoords)+2, len(VoxelCoords)+3,
-                            len(VoxelCoords)+4, len(VoxelCoords)+5, len(VoxelCoords)+6, len(VoxelCoords)+7])
-            VoxelCoords.append(
-                [node.centroid[0] - node.size/2, node.centroid[1] - node.size/2, node.centroid[2] - node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] + node.size/2, node.centroid[1] - node.size/2, node.centroid[2] - node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] + node.size/2, node.centroid[1] + node.size/2, node.centroid[2] - node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] - node.size/2, node.centroid[1] + node.size/2, node.centroid[2] - node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] - node.size/2, node.centroid[1] - node.size/2, node.centroid[2] + node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] + node.size/2, node.centroid[1] - node.size/2, node.centroid[2] + node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] + node.size/2, node.centroid[1] + node.size/2, node.centroid[2] + node.size/2]
-                )
-            VoxelCoords.append(
-                [node.centroid[0] - node.size/2, node.centroid[1] + node.size/2, node.centroid[2] + node.size/2]
-                )
-        elif node.state == 'branch' or node.state == 'root' or node.state == 'unknown':
-            for child in node.children:
-                recurSearch(child)
+    nodes = getAllLeaf(root, (not sparse))
+    N = len(nodes)
+    if N > np.iinfo(np.uint32).max:
+        itype = np.uint64
+    else:
+        itype = np.uint32
+
+    VoxelConn = np.empty((N, 8), dtype=itype)
+    VoxelCoords = np.empty((N*8, 3), dtype=np.float64)
+
+    for i,node in enumerate(nodes):
+        indices = np.arange(i*8, i*8 + 8)
+        VoxelConn[i] = indices
+        VoxelCoords[indices,:] = node.getVertices()
+
+    ###
+   
+    if 'mesh' in dir(mesh):
+        Voxel = mesh.mesh(VoxelCoords,VoxelConn,'vol')
+    else:
+        Voxel = mesh(VoxelCoords,VoxelConn,'vol')
     
-    recurSearch(root)
-    VoxelCoords = np.asarray(VoxelCoords)
-    VoxelConn = np.asarray(VoxelConn)
-    return VoxelCoords, VoxelConn
+    Voxel.cleanup()
+
+    return Voxel
 
 def Octree2Dual(root, method='centroid'):
     """
@@ -979,7 +1400,7 @@ def Octree2Dual(root, method='centroid'):
 
     Parameters
     ----------
-    root : octree.OctreeNode
+    root : tree.OctreeNode
         Root node of the octree
     method : str, optional
         Method used for placing the dual vertices within the octree nodes, by 
@@ -1180,16 +1601,299 @@ def Octree2Dual(root, method='centroid'):
     DualConn = np.asarray(DualConn)
     return DualCoords, DualConn
 
-def Print(root, show_empty=False):
+# Quadtree Functions
+def Points2Quadtree(Points, maxdepth=10):
     """
-    Prints a formatted list of all nodes in the octree.
+    Generate an quadtree structure from a set of points. The quadtree will be 
+    subdivided until each node contains only one point or the maximum depth
+    is met. 
 
     Parameters
     ----------
-    root : octree.OctreeNode
-        Root node of the octree
+    Points : array_like
+        Point coordinates (shape=(n,3) or (n,2). If (n,3), the third dimension is ignored).
+    maxdepth : int, optional
+        Maximum depth of the quadtree, by default 10
+
+    Returns
+    -------
+    root : tree.Quadtree
+        Root node of the generated octree structure.
+    """    
+    if type(Points) is list:
+        Points = np.array(Points)
+    minx = np.min(Points[:,0])
+    maxx = np.max(Points[:,0])
+    miny = np.min(Points[:,1])
+    maxy = np.max(Points[:,1])
+    size = np.max([maxx-minx,maxy-miny])
+    
+    centroid = np.array([minx + size/2, miny+size/2])
+    
+    root = QuadtreeNode(centroid,size,data=[])
+    root.state = 'root'
+    root.makeChildrenPts(Points, maxdepth=maxdepth)    
+    
+    return root
+
+def Edges2Quadtree(NodeCoords, LineConn, minsize=None, maxdepth=5):
+    """
+    Generate an octree representation of a line mesh. The quad
+    will be refined until each node contains only one line or the maximum
+    depth or minimum size criteria are met. Each node contains a list of 
+    element ids corresponding to the elements that are contained within that 
+    node in the OctreeNode.data field.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates of the line mesh
+    LineConn : array_like
+        Node connectivity of the line mesh. This must have shape (n,2)
+        array or list.
+    minsize : float, optional
+        Minimum size for an octree node, by default None.
+        If supplied, octree nodes will not be divided to be smaller than this
+        size.
+    maxdepth : int, optional
+        Maximum depth of the octree, by default 5
+
+    Returns
+    -------
+    root : tree.QuadtreeNode
+        Root node of the generate quadtree
+    """    
+    if type(NodeCoords) is list:
+        NodeCoords = np.array(NodeCoords)          
+    
+    ArrayConn = np.asarray(LineConn).astype(int)
+    defaultmin = np.mean(np.linalg.norm(NodeCoords[ArrayConn][:,0] - NodeCoords[ArrayConn][:,1],axis=1),axis=0)
+    if minsize is None and maxdepth is None:
+        # By default creates octree with a minimum node size equal to the mean edge length
+        minsize =defaultmin
+    elif minsize is None and maxdepth is not None:
+        minsize = 0
+        
+    minx = min(NodeCoords[:,0]) - defaultmin
+    maxx = max(NodeCoords[:,0]) + defaultmin
+    miny = min(NodeCoords[:,1]) - defaultmin
+    maxy = max(NodeCoords[:,1]) + defaultmin
+    
+    size = max([maxx-minx,maxy-miny])
+    centroid = np.array([minx + size/2, miny+size/2])
+    ElemIds = list(range(len(LineConn)))
+    root = QuadtreeNode(centroid,size,data=ElemIds)
+    root.state = 'root'
+
+    root.makeChildrenEdges(NodeCoords[ArrayConn], maxsize=size, minsize=minsize,  maxdepth=maxdepth)
+
+    return root
+
+def Quadtree2Pixel(root, sparse=True):
+    """
+    Convert an quadtree to a pixel mesh
+
+    Parameters
+    ----------
+    root : tree.QuadtreeNode
+        Quadtree node from which the mesh will be generated. 
+    sparse : bool, optional
+        Determines pixelization mode. If sparse is True, only leaf nodes that contain
+        data will be included, otherwise both leaf and empty nodes
+        will be include, by default True. 
+
+    Returns
+    -------
+    PixelCoords : np.ndarray
+        Node coordinates of the pixel mesh.
+    PixelConn : np.ndarray
+        Node connectivity of the hexahedral pixel mesh.
+
+    """    
+    PixelConn = []
+    PixelCoords = []
+    if sparse:
+        condition = lambda node : node.state == 'leaf'
+    else:
+        condition = lambda node : node.state == 'leaf' or node.state == 'empty' or len(node.children) == 0
+
+    def recurSearch(node):
+        if condition(node):
+            PixelConn.append([len(PixelCoords)+0, len(PixelCoords)+1, len(PixelCoords)+2, len(PixelCoords)+3])
+            PixelCoords.append(
+                [node.centroid[0] - node.size/2, node.centroid[1] - node.size/2, 0]
+                )
+            PixelCoords.append(
+                [node.centroid[0] + node.size/2, node.centroid[1] - node.size/2, 0]
+                )
+            PixelCoords.append(
+                [node.centroid[0] + node.size/2, node.centroid[1] + node.size/2, 0]
+                )
+            PixelCoords.append(
+                [node.centroid[0] - node.size/2, node.centroid[1] + node.size/2, 0]
+                )
+        elif node.state == 'branch' or node.state == 'root' or node.state == 'unknown':
+            for child in node.children:
+                recurSearch(child)
+    
+    recurSearch(root)
+    PixelCoords = np.asarray(PixelCoords)
+    PixelConn = np.asarray(PixelConn)
+    if 'mesh' in dir(mesh):
+        Pixel = mesh.mesh(PixelCoords, PixelConn)
+    else:
+        Pixel = mesh(PixelCoords, PixelConn)
+    
+    Pixel.cleanup()
+    return Pixel
+
+def Quadtree2Dual(root, method='centroid'):
+    """
+    Converts an quadtree to a mesh that is dual to the quadtree structure. This mesh
+    contains quadrilateral elements with nodes contained inside quadtree nodes, rather
+    than at the quadtree vertices. At transitions between quadtree node levels,
+    some quads may be partially degenerate (i.e. form tris rather than
+    quads). Based on the algorithm proposed by :cite:`Schaefer2005` and
+    explained by :cite:`Holmlid2010`. 
+
+    Parameters
+    ----------
+    root : tree.QuadNode
+        Root node of the quadtree
+    method : str, optional
+        Method used for placing the dual vertices within the quadtree nodes, by 
+        default 'centroid'.
+        
+        Currently the only implemented option is to place the vertices at 
+        the centroids of the octree nodes.
+
+    Returns
+    -------
+    DualCoords : np.ndarray
+        Array of nodal coordinates.
+    DualConn : np.ndarray
+        List of node connectivities for the dual mesh.
+    """    
+    def nodeProc(node, DualCoords, DualConn):
+        if not node.hasChildren():
+            for child in node.children:
+                nodeProc(child, DualCoords, DualConn)
+
+            for idx in [(0,3), (1,2)]:
+                faceProcX(node.children[idx[0]],node.children[idx[1]], DualCoords, DualConn)
+            for idx in [(0,1), (3,2)]:
+                faceProcY(node.children[idx[0]],node.children[idx[1]], DualCoords, DualConn)
+
+            vertProc(*node.children, DualCoords, DualConn)
+ 
+    def faceProcX(n0, n1, DualCoords, DualConn):
+        # Nodes should be ordered bottom-top (n0 is below n1)
+        if not (n0.hasChildren() and n1.hasChildren()):    
+            # c0, c1 are the *top* nodes of n0 and c2, c3, are the *bottom* nodes of n1
+            c0 = n0 if n0.hasChildren() else n0.children[3]
+            c1 = n0 if n0.hasChildren() else n0.children[2]
+        
+            c2 = n1 if n1.hasChildren() else n1.children[1]
+            c3 = n1 if n1.hasChildren() else n1.children[0]
+
+            faceProcX(c0,c3, DualCoords, DualConn)
+            faceProcX(c1,c2, DualCoords, DualConn)
+
+            vertProc(c0,c1,c2,c3, DualCoords, DualConn)
+
+    def faceProcY(n0, n1, DualCoords, DualConn):
+        # Nodes should be ordered left-right (n0 is left of n1)
+        if not (n0.hasChildren() and n1.hasChildren()):    
+            # c0, c3,  are the *right* nodes of n0 and c1, c2, are the *left* nodes of n1
+            # The 2x2 of adjacent children is thus [c0,c1,c2,c3]
+            c0 = n0 if n0.hasChildren() else n0.children[1]
+            c3 = n0 if n0.hasChildren() else n0.children[2]
+        
+            c1 = n1 if n1.hasChildren() else n1.children[0]
+            c2 = n1 if n1.hasChildren() else n1.children[3]
+
+            faceProcY(c0,c1, DualCoords, DualConn)
+            faceProcY(c3,c2, DualCoords, DualConn)
+
+            vertProc(c0,c1,c2,c3, DualCoords, DualConn)
+
+
+    def vertProc(n0, n1, n2, n3, DualCoords, DualConn):
+        ns = [n0, n1, n2, n3]
+        
+        if not all([n.hasChildren() for n in ns]):
+            # 4 child nodes that share the same central vertex
+            c0 = n0 if n0.hasChildren() else n0.children[2]
+            c1 = n1 if n1.hasChildren() else n1.children[3]
+            c2 = n2 if n2.hasChildren() else n2.children[0]
+            c3 = n3 if n3.hasChildren() else n3.children[1]
+
+            vertProc(c0,c1,c2,c3,DualCoords,DualConn)
+
+        else:
+            # create a dual grid element
+            if method=='centroid':
+                coord = [n.centroid for n in ns]
+            DualConn.append(list(range(len(DualCoords),len(DualCoords)+4)))
+            DualCoords += coord
+    
+    DualConn = []
+    DualCoords = []     
+    nodeProc(root, DualCoords, DualConn)
+    DualCoords = np.column_stack([DualCoords, np.zeros(len(DualCoords))])
+    DualConn = np.asarray(DualConn)
+
+    if 'mesh' in dir(mesh):
+       Dual = mesh.mesh(DualCoords, DualConn)
+    else:
+        Dual = mesh(DualCoords, DualConn)
+    Dual.cleanup()
+    return Dual
+
+# Generic Tree Functions
+def getAllLeaf(root, include_empty=False):
+    """
+    Retrieve a list of all leaf nodes of the tree
+
+    Parameters
+    ----------
+    root : tree.TreeNode
+        Root node of the tree of which the leaf nodes will be retrieved.
+    include_empty : bool, optional
+        Option to include "empty" nodes in the set of leaves, by default False. 
+        "empty" nodes are terminal nodes that contain no data.
+
+    Returns
+    -------
+    leaves : list
+        List of tree leaf nodes.
+    """    
+    # Return a list of all terminal(leaf) nodes in the tree
+    def recur(node,leaves):
+        if node.state == 'leaf':
+            leaves.append(node)
+            return leaves
+        elif node.state == 'empty':
+            if include_empty:
+                leaves.append(node)
+            return leaves
+        elif node.state == 'root' or node.state == 'branch':
+            for child in node.children:
+                leaves = recur(child,leaves)
+        return leaves
+    leaves = []
+    return recur(root,leaves)
+
+def Print(root, show_empty=False):
+    """
+    Prints a formatted list of all nodes in the tree.
+
+    Parameters
+    ----------
+    root : tree.TreeNode
+        Root node of the tree
     show_empty : bool, optional
-        Option to include 'empty' nodes in the printed octree, by default False.
+        Option to include 'empty' nodes in the printed tree, by default False.
     """    
     def recur(node):
         if show_empty or node.state != 'empty':

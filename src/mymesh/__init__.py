@@ -30,7 +30,7 @@ Submodules
     image
     implicit
     improvement
-    octree
+    tree
     primitives
     quality
     rays
@@ -39,7 +39,8 @@ Submodules
 
 """
 from functools import wraps
-import warnings
+import warnings, urllib, tarfile, io, re
+import numpy as np
 
 try: 
     from numba import njit
@@ -63,7 +64,8 @@ def check_numba():
     return check
 
 def try_njit(func=None, *njit_args, **njit_kwargs):
-
+    # TODO: Set up type processing wrapper (see numpy.typing for input annotation and typing.get_type_hints) to handle flexible inputs on functions that get JITed 
+    @wraps(func)
     def decorator(func):
         if check_numba():
             jit_func = njit(*njit_args, **njit_kwargs)(func)
@@ -74,8 +76,60 @@ def try_njit(func=None, *njit_args, **njit_kwargs):
     
     return decorator(func) if func else decorator
 
+def demo_image(name='bunny', normalize=True):
+    """
+    Access example image data. Data is obtained from online sources, requires
+    internet connectivity.
+
+    Parameters
+    ----------
+    name : str, optional
+        Name of the image to access, by default 'bunny'.
+        Available options are:
+
+        - "bunny" - CT scan of the Stanford Bunny from the Stanford volume data archive
+
+    normalize : bool, optional
+        Normalize image data to the range 0-255 in uint8 format, by default True
+
+    Returns
+    -------
+    img : np.ndarray
+        Image array
+
+    """    
+
+    if name == 'bunny':
+        # CT scan of "Stanford Bunny" from the Stanford volume data archive
+        # https://graphics.stanford.edu/data/voldata/voldata.html
+        url = 'https://graphics.stanford.edu/data/voldata/bunny-ctscan.tar.gz'
+
+        # Get data and extract archive
+        response = urllib.request.urlopen(url)
+        tar_bytes = response.read()
+        tar_file = tarfile.open(fileobj=io.BytesIO(tar_bytes), mode="r:gz")
+
+        # Parse file names
+        file_names = np.array([name for name in tar_file.getnames() if re.match('bunny/[0-9]', name)], dtype=object)
+        file_numbers = [int(name.split('/')[1]) for name in file_names]
+        file_names = file_names[np.argsort(file_numbers)]
+
+        # Load image data - "The data is raw 512x512 slices, unsigned, 12 bit data stored as 16bit (2-byte) pixels."
+        # Binary data stored in big-endian ">u2" format
+        img = np.array([np.frombuffer(tar_file.extractfile(file).read(),dtype='>u2').reshape((512,512)) for file in file_names])
+        img[img == np.max(img)] = 0 # Set the outer boundary to 0 ("black")
+    else:
+        raise ValueError(f'Unknown image option: {name:s}')
+
+    
+    if normalize:
+        # normalize the image to 0-255, unit8
+        img = (img/np.max(img)*255).astype(dtype=np.uint8)
+
+    return img
+
 from .mesh import mesh
-from . import booleans, contour, curvature, delaunay, image, implicit, improvement, octree, primitives, quality, utils, visualize
+from . import booleans, contour, curvature, delaunay, image, implicit, improvement, tree, primitives, quality, utils, visualize
 __all__ = ["check_numba", "use_numba", "try_njit", "mesh", "booleans", "contour", "converter",
-"curvature", "delaunay", "image", "implicit", "improvement", "octree", 
+"curvature", "delaunay", "image", "implicit", "improvement", "tree", 
 "primitives", "quality", "rays", "utils", "visualize"]

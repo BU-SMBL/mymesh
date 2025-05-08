@@ -29,7 +29,7 @@ import numpy as np
 from scipy import interpolate, ndimage
 import sys, os, copy, warnings, glob
 
-from . import utils, converter, contour, quality, improvement, rays, octree, mesh, primitives
+from . import utils, converter, contour, quality, improvement, rays, mesh, primitives
 
 # Mesh generators
 def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, return_nodedata=False):
@@ -237,7 +237,7 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
     tet.NodeData['Image Data'] = Values
     return tet
 
-def read(img, scalefactor=1, scaleorder=1):
+def read(img, scalefactor=1, scaleorder=1, verbose=True):
     """
     Read image data into a numpy array format. Data can be input as an existing
     image array (in which case the only operation will be scaling), a file path
@@ -257,6 +257,8 @@ def read(img, scalefactor=1, scaleorder=1):
     scaleorder : int, optional
         Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
         Must be 0-5.
+    verbose : bool, optional
+        If Tru, will print status message for loading the image.
 
     Returns
     -------
@@ -287,7 +289,7 @@ def read(img, scalefactor=1, scaleorder=1):
 
         if os.path.isdir(path):
             # Image directory
-            tiffs = glob.glob(os.path.join(path,'*.TIF*')) + glob.glob(os.path.join(path,'*.tif*')) + glob.glob(os.path.join(path,'*.jpg*')) + glob.glob(os.path.join(path,'*.JPG*')) + glob.glob(os.path.join(path,'*.jpeg*')) + glob.glob(os.path.join(path,'*.JPEG*')) + glob.glob(os.path.join(path,'*.png*')) + glob.glob(os.path.join(path,'*.PNG*'))
+            tiffs = glob.glob(os.path.join(path,'*.TIF*')) + glob.glob(os.path.join(path,'*.tif*'))
             tiffs = np.unique(tiffs).tolist() # This catches double reads on Windows due to case insensitive glob
             tiffs.sort()
 
@@ -296,27 +298,35 @@ def read(img, scalefactor=1, scaleorder=1):
                 dicoms = glob.glob(os.path.join(path,'*.DCM*'))
             dicoms.sort()
 
-            if len(tiffs) > 0 & len(dicoms) > 0:
-                warnings.warn('Image directory: "{:s}" contains .dcm files as well as other image file types - only loading dcm files.')
-                files = dicoms
-                ftype = 'dcm'
+            cv2s = glob.glob(os.path.join(path,'*.jpg*')) + glob.glob(os.path.join(path,'*.JPG*')) + glob.glob(os.path.join(path,'*.jpeg*')) + glob.glob(os.path.join(path,'*.JPEG*')) + glob.glob(os.path.join(path,'*.png*')) + glob.glob(os.path.join(path,'*.PNG*'))
+            cv2s = np.unique(cv2s).tolist()
+            cv2s.sort()
+
+            if len(tiffs) > 0 & len(dicoms) > 0 & len(cv2s) > 0:
+                raise Exception('Image directory: "{:s}" contains multiple image file types.')
             elif len(tiffs) > 0:
                 files = tiffs
                 ftype = 'tiff'
             elif len(dicoms) > 0:
                 files = dicoms
                 ftype = 'dcm'
+            elif len(cv2s) > 0:
+                files = cv2s
+                ftype = 'cv2_type'
             else:
                 raise Exception('Image directory empty.')
 
         else:
             # Single file
             ext = os.path.splitext(path)[1]
-            if ext.lower() in ('.tiff', '.tif', '.jpg', '.jpeg', '.png'):
+            if ext.lower() in ('.tiff', '.tif'):
                 ftype = 'tiff'
                 files = [path]
             elif ext.lower() in ('.dcm'):
                 ftype = 'dcm'
+                files = [path]
+            elif ext.lower() in ('.jpg', '.jpeg', '.png'):
+                ftype = 'cv2_type'
                 files = [path]
             else:
                 raise ValueError('Image file must have one of the following extensions: .tiff, .tif, .jpg, .jpeg, .png, .dcm')
@@ -325,11 +335,14 @@ def read(img, scalefactor=1, scaleorder=1):
         # If img is a list, treat it as a list of file paths
         if type(img[0]) == str:
             ext = os.path.splitext(img[0])
-            if ext.lower() in ('.tiff', '.tif', '.jpg', '.jpeg', '.png'):
+            if ext.lower() in ('.tiff', '.tif'):
                 ftype = 'tiff'
                 files = img
             elif ext.lower() in ('.dcm'):
                 ftype = 'dcm'
+                files = img
+            elif ext.lower() in ('.jpg', '.jpeg', '.png'):
+                ftype = 'cv2_type'
                 files = img
             else:
                 raise ValueError('Image file must have one of the following extensions: .tiff, .tif, .jpg, .jpeg, .png, .dcm')
@@ -352,31 +365,52 @@ def read(img, scalefactor=1, scaleorder=1):
             raise ImportError('opencv-python (cv2) must be installed to load tiff, jpg, or png files. Install with: pip install opencv-python')
 
     # Load data
-    print('Loading image data from {:s} ...'.format(img), end='')
+    if verbose: print('Loading image data from {:s} ...'.format(img), end='')
     if ftype == 'tiff':
         try:
             import tifffile
         except:
-            if len(files) == 1:
-                warnings.warn('tifffile recommended for reading single-file 3D tiff images. Install with: pip install tifffile')
-                tifffile is None
-        
-        if len(files) == 1 and tifffile is not None:
-            imgs = tifffile.imread(files[0])
+            raise ImportError('tifffile needed for reading tiff images. Install with: pip install tifffile')
             
+        if len(files) == 1:
+            imgs = tifffile.imread(files[0])
+            if len(imgs.shape) > 2:
+                multichannel = True
+                multiimgs = np.array([imgs[...,i] for i in range(np.shape(imgs)[-1])])
+            
+        else:
+            temp = tifffile.imread(files[0])
+            
+            if len(temp.shape) > 2:
+                multichannel = True
+                multiimgs = tuple([np.array([tifffile.imread(file)[...,i] for file in files]) for i in range(temp.shape[-1])])
+            else:
+                multichannel = False
+                imgs = np.array([tifffile.imread(file) for file in files])
+    elif ftype == 'cv2_type':
+        if len(files) == 1:
+            imgs = cv2.imread(files[0])
+            if len(imgs.shape) > 2:
+                multichannel = True
+                multiimgs = np.array([imgs[...,i] for i in range(np.shape(imgs)[-1])])
         else:
             temp = cv2.imread(files[0])
             
             if len(temp.shape) > 2:
                 multichannel = True
-                multiimgs = tuple([np.array([cv2.imread(file)[:,:,i] for file in files]) for i in range(temp.shape[2])])
+                multiimgs = tuple([np.array([cv2.imread(file)[...,i] for file in files]) for i in range(temp.shape[-1])])
             else:
                 multichannel = False
                 imgs = np.array([cv2.imread(file) for file in files])
     else:
         # temp = pydicom.dcmread(files[0]).pixel_array
         imgs = np.array([pydicom.dcmread(file).pixel_array for file in files])
-    
+    # Check if true multichannel
+    if multichannel:
+        if np.all([np.all(channel == multiimgs[0]) for channel in multiimgs[1:]]):
+            # data is the same in every channel, converting to single channel
+            imgs = multiimgs[0]
+            multichannel = False
     if scalefactor != 1:
         if multichannel:
             imgs = tuple([ndimage.zoom(I,scalefactor,order=scaleorder) for I in multiimgs])
@@ -386,13 +420,18 @@ def read(img, scalefactor=1, scaleorder=1):
         if multichannel:
             imgs = multiimgs
     
-    print(' done.')
+    if verbose: print(' done.')
     return imgs
 
-def write(impath, I, filetype=None,verbose=True, dtype=np.int16):
+def write(impath, I, filetype=None, verbose=True, dtype=np.int16):
     """
     Write an image array to an image file or stack of image files
     
+    .. note:: 
+        When writing a jpg, png, or tiff, if the input image data has a maximum
+        value greater than 255 or less than or equal to 1, the data will be 
+        automatically scaled to be in the range from, 0-255
+
     Parameters
     ----------
     impath : str
@@ -502,6 +541,9 @@ def write(impath, I, filetype=None,verbose=True, dtype=np.int16):
             #     tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), np.stack(I,axis=-1))
             # else:
             tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), I)
+        elif filetype == 'jpeg' or filetype == 'png':
+            img = I*255/np.max(I).astype(dtype)
+            cv2.imwrite(os.path.join(imdir, filename_prefix+ext), img)
     
     if not singlefile:
         if multichannel:
@@ -521,12 +563,10 @@ def write(impath, I, filetype=None,verbose=True, dtype=np.int16):
                     img = np.stack([channel[i] for channel in I], axis=-1)
                 else:
                     img = I[i]
-                if np.max(img) > 255:
+                if np.max(img) > 255 or np.max(img) <= 1:
                     img = img*255/np.max(I).astype(dtype)
                 cv2.imwrite(os.path.join(imdir, filename_prefix+f'_{str(i).zfill(ndigits):s}{ext:s}'), img)
-
-                
-
+             
 def _writedcm(imdir, filename, I, dtype):
     # I should be a 2D image at this point
     import datetime
@@ -561,8 +601,7 @@ def _writedcm(imdir, filename, I, dtype):
         ds.PixelRepresentation = 1
     ds.PixelData = I.astype(dtype).tobytes()
     ds.save_as(os.path.join(imdir,file))
-    
-    
+       
 def SurfaceNodeOptimization(M, img, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, gaussian_sigma=1, smooth=True, copy=True, interpolation='linear', 
 springs=True):
     """
@@ -635,14 +674,14 @@ springs=True):
     Fy = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,1,0))
     Fz = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,0,1))
     
-    X = np.arange(img.shape[2])*h[2] 
-    Y = np.arange(img.shape[1])*h[1]
-    Z = np.arange(img.shape[0])*h[0]
+    Ximg = np.arange(img.shape[2])*h[2] 
+    Yimg = np.arange(img.shape[1])*h[1]
+    Zimg = np.arange(img.shape[0])*h[0]
 
-    F = lambda x,y,z : interpolate.RegularGridInterpolator((X,Y,Z),img.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
-    gradFx = lambda x,y,z : interpolate.RegularGridInterpolator((X,Y,Z),Fx.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
-    gradFy = lambda x,y,z : interpolate.RegularGridInterpolator((X,Y,Z),Fy.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
-    gradFz = lambda x,y,z : interpolate.RegularGridInterpolator((X,Y,Z),Fx.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
+    F = lambda x,y,z : interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),img.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
+    gradFx = lambda x,y,z : interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),Fx.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
+    gradFy = lambda x,y,z : interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),Fy.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
+    gradFz = lambda x,y,z : interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),Fx.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
 
     gradF = lambda x,y,z : np.column_stack([gradFx(x,y,z), gradFy(x,y,z), gradFz(x,y,z)])
 
@@ -660,16 +699,17 @@ springs=True):
         X = points[:,0]; Y = points[:,1]; Z = points[:,2]
         f = F(X,Y,Z) - threshold
         g = np.squeeze(gradF(X,Y,Z))
-        fg = (f*g).T
-        tau = h/(100*np.max(np.linalg.norm(fg,axis=1)))
+        fg = (f[:,None]*g)
+        tau = h/(100*np.max(np.linalg.norm(fg,axis=0)))
 
         Zflow = -2*tau*fg
 
         # Rflow = np.zeros((len(NodeCoords),3))
         if smooth == 'tangential':
-            Q = M.NodeCoords[r]
+            Q = NodeCoords[r]
             U = (1/lengths)[:,None] * np.nansum(Q - points[:,None,:],axis=1)
-            NodeNormals = (g/np.linalg.norm(g,axis=0)).T
+            gnorm = np.linalg.norm(g,axis=1)[:,None]
+            NodeNormals = np.divide(g, gnorm, out=np.zeros_like(g), where=gnorm!=0)
             Rflow = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
         elif smooth == 'local':
             Q = NodeCoords[r]

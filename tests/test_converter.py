@@ -89,8 +89,7 @@ def test_solid2surface(NodeCoords, NodeConn, return_SurfElem, expected):
     [3, 0, 4, 7],
     [4, 5, 6, 7]],
     np.array([0, 0, 0, 0, 0, 0]))
-    )
-    
+    )   
 ])
 def test_solid2faces(NodeCoords, NodeConn, return_FaceConn, return_FaceElem, expected):
 
@@ -232,3 +231,75 @@ def test_quad2tri(NodeCoords, NodeConn, n_expected):
     assert not np.any(np.isnan(NewCoords)), 'NaN introduced to NodeCoords.'
     assert np.min(quality.Area(NewCoords,NewConn)) > 0, 'Inverted Elements.'
     assert np.shape(NewConn)[1] == 3, 'Tris not created properly.'
+
+@pytest.mark.parametrize("NodeCoords, NodeConn", [
+    # Case 1: single tet
+    (np.array([[0,0,0],[1,0,0],[1,1,0],[0,0,1]]),[[0,1,2,3]]),
+])
+def test_tet42tet10(NodeCoords, NodeConn):
+
+    NewCoords, NewConn = converter.tet42tet10(NodeCoords, NodeConn)
+    
+    assert np.shape(NewConn)[1] == 10, 'Incorrect number of nodes per element' 
+
+@pytest.mark.parametrize("NodeCoords, NodeConn", [
+    # Case 1: single tet
+    (np.array([[0. , 0. , 0. ],
+       [0. , 0. , 0.5],
+       [0. , 0. , 1. ],
+       [0.5, 0. , 0. ],
+       [0.5, 0. , 0.5],
+       [0.5, 0.5, 0. ],
+       [0.5, 0.5, 0.5],
+       [1. , 0. , 0. ],
+       [1. , 0.5, 0. ],
+       [1. , 1. , 0. ]]),
+     [[0, 7, 9, 2, 3, 8, 5, 1, 4, 6]]),
+])
+def test_tet102tet4(NodeCoords, NodeConn):
+
+    NewCoords, NewConn = converter.tet102tet4(NodeCoords, NodeConn)
+    
+    assert np.shape(NewConn)[1] == 4, 'Incorrect number of nodes per element' 
+    assert np.all(quality.Volume(NewCoords, NewConn) > 0), 'Inverted elements'
+
+@pytest.mark.parametrize("NodeCoords, NodeConn", [
+    # Case 1: single hex
+    (np.array([[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]]),[[0,1,2,3,4,5,6,7]]),
+])
+def test_hex82hex20(NodeCoords, NodeConn):
+
+    NewCoords, NewConn = converter.hex82hex20(NodeCoords, NodeConn)
+    
+    assert np.shape(NewConn)[1] == 20, 'Incorrect number of nodes per element' 
+
+@pytest.mark.parametrize("NodeCoords, NodeConn", [
+    # Case 1: single hex
+    (np.array([[0. , 0. , 0. ],
+       [0. , 0. , 0.5],
+       [0. , 0. , 1. ],
+       [0. , 0.5, 0. ],
+       [0. , 0.5, 1. ],
+       [0. , 1. , 0. ],
+       [0. , 1. , 0.5],
+       [0. , 1. , 1. ],
+       [0.5, 0. , 0. ],
+       [0.5, 0. , 1. ],
+       [0.5, 1. , 0. ],
+       [0.5, 1. , 1. ],
+       [1. , 0. , 0. ],
+       [1. , 0. , 0.5],
+       [1. , 0. , 1. ],
+       [1. , 0.5, 0. ],
+       [1. , 0.5, 1. ],
+       [1. , 1. , 0. ],
+       [1. , 1. , 0.5],
+       [1. , 1. , 1. ]]),
+     np.array([[ 0, 12, 17,  5,  2, 14, 19,  7,  8, 15, 10,  3,  9, 16, 11,  4, 1, 13, 18,  6]])),
+])
+def test_hex202hex8(NodeCoords, NodeConn):
+
+    NewCoords, NewConn = converter.hex202hex8(NodeCoords, NodeConn)
+    
+    assert np.shape(NewConn)[1] == 8, 'Incorrect number of nodes per element' 
+    assert np.all(quality.Volume(NewCoords, NewConn) > 0), 'Inverted elements'
