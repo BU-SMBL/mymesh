@@ -237,7 +237,7 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
     tet.NodeData['Image Data'] = Values
     return tet
 
-def read(img, scalefactor=1, scaleorder=1):
+def read(img, scalefactor=1, scaleorder=1, verbose=True):
     """
     Read image data into a numpy array format. Data can be input as an existing
     image array (in which case the only operation will be scaling), a file path
@@ -257,6 +257,8 @@ def read(img, scalefactor=1, scaleorder=1):
     scaleorder : int, optional
         Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
         Must be 0-5.
+    verbose : bool, optional
+        If Tru, will print status message for loading the image.
 
     Returns
     -------
@@ -363,7 +365,7 @@ def read(img, scalefactor=1, scaleorder=1):
             raise ImportError('opencv-python (cv2) must be installed to load tiff, jpg, or png files. Install with: pip install opencv-python')
 
     # Load data
-    print('Loading image data from {:s} ...'.format(img), end='')
+    if verbose: print('Loading image data from {:s} ...'.format(img), end='')
     if ftype == 'tiff':
         try:
             import tifffile
@@ -418,7 +420,7 @@ def read(img, scalefactor=1, scaleorder=1):
         if multichannel:
             imgs = multiimgs
     
-    print(' done.')
+    if verbose: print(' done.')
     return imgs
 
 def write(impath, I, filetype=None, verbose=True, dtype=np.int16):
