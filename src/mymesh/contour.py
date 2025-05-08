@@ -3843,7 +3843,7 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
     
     for e in range(len(NodeConn)):
         vals = np.array([NodeValues[node] for node in NodeConn[e]])
-        inside = [1 if v <= 0 else 0 for v in vals]
+        inside = [1 if v < 0 else 0 for v in vals]
         i = int("".join(str(j) for j in inside), 2)
         if Type.lower() == 'surf':
             if mixed_elements:
@@ -3907,6 +3907,7 @@ def MarchingSquares(NodeCoords, NodeConn, NodeValues, threshold=0, interpolation
                     
                 if len(elem) > 0:
                     NewConn.append(elem)  
+    NewCoords = np.asarray(NewCoords)
     if cleanup:                  
         NewCoords,NewConn,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
         if interpolation=='linear' and Type.lower()=='surf':
