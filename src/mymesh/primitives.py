@@ -241,17 +241,20 @@ def Grid(bounds, h, exact_h=False, ElemType='hex'):
         xs = np.linspace(bounds[0],bounds[1],nX)
         ys = np.linspace(bounds[2],bounds[3],nY)
         zs = np.linspace(bounds[4],bounds[5],nZ)
-        
 
-    GridCoords = np.hstack([
-        np.repeat(xs,len(ys)*len(zs))[:,None],
-        np.tile(np.repeat(ys,len(zs)),len(xs)).flatten()[:,None],
-        np.tile(np.tile(zs,len(xs)).flatten(),len(ys)).flatten()[:,None]
-    ])
+    if nX*nY*nZ > np.iinfo(np.uint32).max:
+        itype = np.uint64
+    else:
+        itype = np.uint32
 
-    Ids = np.reshape(np.arange(len(GridCoords)),(nX,nY,nZ))
+    GridCoords = np.empty((N,3), dtype=np.float64)
+    GridCoords[:, 0] = np.repeat(xs,nY*nZ)
+    GridCoords[:, 1] = np.tile(np.repeat(ys,nZ),nX)
+    GridCoords[:, 2] = np.tile(np.tile(zs,nX),nY)
+
+    Ids = np.reshape(np.arange(nX*nY*nZ),(nX,nY,nZ))
     
-    GridConn = np.empty(((nX-1)*(nY-1)*(nZ-1),8),dtype=int)
+    GridConn = np.empty(((nX-1)*(nY-1)*(nZ-1),8),dtype=itype)
 
     GridConn[:,0] = Ids[:-1,:-1,:-1].flatten()
     GridConn[:,1] = Ids[1:,:-1,:-1].flatten()
