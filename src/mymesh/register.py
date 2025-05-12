@@ -159,7 +159,7 @@ def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=
         return transform
     return
 
-def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', transform_options=dict(), return_transformed=True, return_transform=False):
+def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', scale=1, interpolation_order=1, transform_options=dict(), return_transformed=True, return_transform=False):
     """
     Align an object in an image to the x, y, z axes. This works by identifying
     the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and 
@@ -189,6 +189,16 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', tran
         - `[x,y,z]`: A three element list or array specifies the location, in
         voxels, of where to place to place the center of the bounding box of the 
         object after transformation. 
+    scale : float, optional
+        Scale factor used to resample the image to either reduce (scale < 1) 
+        or increase (scale > 1) the size/resolution of the image used for
+        alignment, by default 1. The returned image will still be of the 
+        original resolution.
+    interpolation_order : int, optional
+        Interpolation order used in image scaling and transformation (see 
+        `scipy.ndimage.zoom <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.zoom.html#scipy.ndimage.zoom>`_)
+        and scaling (if used). Must be an integer in the range 0-5. Lower order
+        is more efficient at the cost of quality. By default, 1. 
     transform_options : dict, optional
         Optional input arguments passed to `scipy.ndimage.affine_transform <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html>`_, by 
         default dict().
@@ -208,12 +218,17 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', tran
     """
     assert ValueError(len(axis_order) == 3 and np.array_equal([0,1,2], np.sort(axis_order))), 'axis_order must contain only 0, 1, and 2.'
     img = np.asarray(img)
+    if scale != 1:
+        transform_options['order'] = interpolation_order
+        imgS = scipy.ndimage.zoom(img, scale, order=interpolation_order)
+    else:
+        imgS = img
     if threshold is not None:
         # TODO: Should have other thresholding options
-        binarized = img > threshold 
+        binarized = imgS > threshold 
     else:
-        if img.dtype is np.dtype(bool) or np.all(np.isin(img, [np.min(img), np.max(img)])):
-            binarized = img
+        if img.dtype is np.dtype(bool) or np.all(np.isin(imgS, [np.min(imgS), np.max(imgS)])):
+            binarized = imgS
             raise ValueError('For non-binary images, a threshold must be given.')
 
     if type(center) is str:
@@ -225,7 +240,7 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', tran
         assert isinstance(center, (tuple, list, np.ndarray)) and len(center) == 3, 'If provided as coordinates, center must be be a three element list or array.'
 
     
-    points = np.column_stack(np.where(binarized))
+    points = np.column_stack(np.where(binarized)).astype(np.float64)/scale # Dividing by scale puts points back to the original coordinate system (`center` uses the original image so is consistent with this coordinate system)
 
     axis_order = np.asarray(axis_order)[[2,1,0]] # Flip axes to correspond to image axis order (z,y,x)
     transform = AxisAlignPoints(points, axis_order=axis_order, center=center, return_transformed=False, return_transform=True)
@@ -245,8 +260,7 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', tran
         return transform
     return
 
-
-def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metric='symmetric_closest_point_MSE', 
+def Point2Point(points1, points2, T0=None, bounds=None, transform='rigid', metric='symmetric_closest_point_MSE', 
     method='direct', decimation=1, transform_args={}, optimizer_args=None, verbose=True):
     """
     Point cloud-to-point cloud alignment. points2 will be aligned to points1.
@@ -257,9 +271,9 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
     Parameters
     ----------
     points1 : array_like
-        Fixed points
+        Fixed points that points2 will be registered to
     points2 : array_like
-        Moving points 
+        Moving points that will be registered to points1
     x0 : array_like or NoneType, optional
         Initial guess of transformation parameters. This array should be 
         consistent with the selected transformation model (``transform``). If
@@ -305,18 +319,33 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
     -------
     new_points : np.ndarray
         Transformed coordinate array of points2 registered to points1.
-    x : np.ndarray
-        Transformation parameters for the transformation that registers points2
-        to points1.
-
+    T : np.ndarray
+        Affine transformation matrix (shape=(4,4)) to transform points2 to new_points.
+        `new_points = transform_points(points2, T)`
     """
+    
+    if T0 is not None:
+        points2T0 = transform_points(points2, T0)
+    else:
+        points2T0 = points2
+        T0 = np.eye(np.shape(points2)[1] + 1)
+    if 0 < decimation <= 1:
+        rng = np.random.default_rng(0)
+        idx1 = rng.choice(len(points1), size=int(len(points1)*decimation), replace=False)
+        idx2 = rng.choice(len(points2), size=int(len(points2)*decimation), replace=False)
+        ref_points = points1[idx1]
+        moving_points = points2T0[idx2]
+        moving_points = np.column_stack([moving_points, np.ones(len(moving_points))])
+    else:
+        raise ValueError(f'decimation must be a scalar value in the range (0,1], not {str(decimation):s}.')
+
+    
     if 'center' not in transform_args:
         transform_args['center'] = np.mean(points1,axis=0)
     if transform.lower() == 'rigid':
         nparam = 6
         transformation = lambda x : rigid(x, **transform_args)
-        if x0 is None:
-            x0 = np.zeros(nparam)
+        x0 = np.zeros(nparam)
         if bounds is None:
             eps = 1e-10
             bounds = [
@@ -334,9 +363,8 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
     elif transform.lower() == 'similarity':
         nparam = 7
         transformation = lambda x : similarity(x, **transform_args)
-        if x0 is None:
-            x0 = np.zeros(nparam)
-            x0[6] = 1
+        x0 = np.zeros(nparam)
+        x0[6] = 1
         if bounds is None:
             eps = 1e-10
             xbounds = sorted([np.min(points2[:,0]) - np.max(points1[:,0])-eps, np.max(points2[:,0]) - np.min(points1[:,0])+eps])
@@ -357,9 +385,8 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
     elif transform.lower() == 'affine':
         nparam = 15
         transformation = lambda x : affine(x, **transform_args)
-        if x0 is None:
-            x0 = np.zeros(nparam)
-            x0[6:9] = 1
+        x0 = np.zeros(nparam)
+        x0[6:9] = 1
         if bounds is None:
             eps = 1e-10
             xbounds = sorted([np.min(points2[:,0]) - np.max(points1[:,0])-eps, np.max(points2[:,0]) - np.min(points1[:,0])+eps])
@@ -388,8 +415,7 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
     elif transform.lower() == 'rigid2d':
         nparam = 3
         transformation = lambda x : rigid2d(x, **transform_args)
-        if x0 is None:
-            x0 = np.zeros(nparam)
+        x0 = np.zeros(nparam)
         if bounds is None:
             eps = 1e-10
             bounds = [
@@ -404,18 +430,16 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
     elif transform.lower() == 'similarity2d':
         nparam = 4
         transformation = lambda x : similarity2d(x, **transform_args)
-        if x0 is None:
-            x0 = np.zeros(nparam)
-            x0[3] = 1
+        x0 = np.zeros(nparam)
+        x0[3] = 1
         if verbose:
             print('iter.|| score||       tx |       ty |    theta |        s ')
             print('-----||------||----------|----------|----------|----------')
     elif transform.lower() == 'affine2d':
         nparam = 7
         transformation = lambda x : affine2d(x, **transform_args)
-        if x0 is None:
-            x0 = np.zeros(nparam)
-            x0[3:5] = 1
+        x0 = np.zeros(nparam)
+        x0[3:5] = 1
         if verbose:
             print('iter.||      score||       tx |       ty |    theta |       s1 |       s2 |     sh01 |     sh10 ')
             print('-----||-----------||----------|----------|----------|----------|----------|----------|----------')
@@ -423,17 +447,6 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
         raise ValueError('Invalid transform model. Must be one of: "rigid", "similarity" or "affine".')
         
     assert len(x0) == nparam, f"The provided parameters for x0 don't match the transformation model ({transform:s})."
-
-    if 0 < decimation <= 1:
-        rng = np.random.default_rng(0)
-        idx1 = rng.choice(len(points1), size=int(len(points1)*decimation), replace=False)
-        idx2 = rng.choice(len(points2), size=int(len(points2)*decimation), replace=False)
-        ref_points = points1[idx1]
-        moving_points = points2[idx2]
-        moving_points = np.column_stack([moving_points, np.ones(len(moving_points))])
-    else:
-        raise ValueError(f'decimation must be a scalar value in the range (0,1], not {str(decimation):s}.')
-
 
     if metric.lower() == 'symmetric_closest_point_mse':
         tree1 = scipy.spatial.KDTree(ref_points) 
@@ -444,34 +457,40 @@ def Point2Point(points1, points2, x0=None, bounds=None, transform='rigid', metri
     elif metric.lower() == 'closest_point_mse':
         tree1 = scipy.spatial.KDTree(ref_points)
         obj = lambda p1, p2 : closest_point_MSE(p1, p2, tree1=tree1)
+    elif metric.lower() == 'icp':
+        pass
     else:
         raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Point2Point registration.')
     
-    def objective(x):
-        objective.k += 1
-        if verbose: print('{:5d}'.format(objective.k),end='')
-        T = transformation(x)
-        pointsT = (T@moving_points.T).T
+    if metric.lower() == 'icp':
+        new_points, T = ICP(points1, points2, T0=T0)
+    else:
+        def objective(x):
+            objective.k += 1
+            if verbose: print('{:5d}'.format(objective.k),end='')
+            T = transformation(x)
+            pointsT = (T@moving_points.T).T
 
-        f = obj(points1, pointsT[:,:-1])
+            f = obj(points1, pointsT[:,:-1])
+            if verbose: 
+                print(f'||{f:11.4f}|',end='')
+                print(('|{:10.4f}'*len(x)).format(*x))
+            return f
+        objective.k = 0
+        x,f = optimize(objective, method, x0, bounds, optimizer_args=optimizer_args)
+        
+        T = transformation(x) @ T0
+        # pointsT = (T@np.column_stack([points2, np.ones(len(points2))]).T).T
+        # new_points = pointsT[:,:-1]
+        new_points = transform_points(points2, T)
+        f = obj(points1, new_points)
         if verbose: 
-            print(f'||{f:11.4f}|',end='')
+            print('-----||-----------|', end='')
+            for i in x:
+                print('|----------',end = '')
+            print('')
+            print(f'final||{f:11.4f}|',end='')
             print(('|{:10.4f}'*len(x)).format(*x))
-        return f
-    objective.k = 0
-    x,f = optimize(objective, method, x0, bounds, optimizer_args=optimizer_args)
-    
-    T = transformation(x)
-    pointsT = (T@np.column_stack([points2, np.ones(len(points2))]).T).T
-    new_points = pointsT[:,:-1]
-    f = obj(points1, new_points)
-    if verbose: 
-        print('-----||-----------|', end='')
-        for i in x:
-            print('|----------',end = '')
-        print('')
-        print(f'final||{f:11.4f}|',end='')
-        print(('|{:10.4f}'*len(x)).format(*x))
 
     return new_points, T
 
@@ -486,8 +505,8 @@ def Mesh2Mesh(M1, M2, x0=None, bounds=None, transform='rigid', metric='symmetric
     Mnew.NodeCoords = new_points2
     return Mnew, T
 
-def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='dice', 
-        method='direct', scalefactor=1, interpolation_order=3, threshold=None, transform_args={}, optimizer_args=None, decimation=1, verbose=True):
+def Image2Image(img1, img2, T0=None, bounds=None, transform='rigid', metric='dice', 
+        method='direct', scale=1, interpolation_order=1, threshold=None, transform_args={}, optimizer_args=None, decimation=1, verbose=True):
         """
         3-dimensional image registration. img2 will be registered to img1
 
@@ -497,12 +516,9 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
             3 dimensional image array of the fixed image
         img2 : array_like
             3 dimensional image array of the moving image
-        x0 : array_like or NoneType, optional
-            Initial guess of transformation parameters. This array should be 
-            consistent with the selected transformation model (``transform``). If
-            None, the initial guess will be 0s for all parameters other than scaling
-            and 1s for scaling parameters, by default None. Not used by all
-            optimizers.
+        T0 : array_like or NoneType, optional
+            Initial transformation to apply to img2, by default, None. This can 
+            serve as an 'initial guess' of the alignment.
         bounds : array_like or NoneType, optional
             Optimization bounds, formatted as [(min,max),...] for each parameter.
             If None, bounds are selected that should cover most possible 
@@ -519,14 +535,15 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
         method : str, optional
             Optimization method, by default 'direct'. See 
             :func:`~mymesh.register.optimize` for details.
-        scalefactor : float, optional
-            Scalar factor in the range (0,1] used to reduce the size of the point set,
-            by default 1.
+        scale : float, optional
+            Scale factor used to resample the image to either reduce (scale < 1) 
+            or increase (scale > 1) the size/resolution of the image, by default
+            1. The returned image will still be of the original resolution.
         interpolation_order : int, optional
             Interpolation order used in image transformation (see 
             `scipy.ndimage.affine_transform <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html#affine-transform>`_)
             and scaling (if used). Must be an integer in the range 0-5. Lower order
-            is more efficient at the cost of quality. By default, 3. 
+            is more efficient at the cost of quality. By default, 1. 
         threshold : NoneType, float, or tuple, optional
 
 
@@ -549,18 +566,22 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
             to img1.
 
         """
-        if scalefactor != 1:
-            moving_img = scipy.ndimage.zoom(img2, scalefactor, order=interpolation_order)
-            fixed_img =  scipy.ndimage.zoom(img1, scalefactor, order=interpolation_order)
+        if T0 is not None:
+            img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))
         else:
-            moving_img = img2
+            img2T0 = img2
+            T0 = np.eye(4)
+        if scale != 1:
+            moving_img = scipy.ndimage.zoom(img2T0, scale, order=interpolation_order)
+            fixed_img =  scipy.ndimage.zoom(img1, scale, order=interpolation_order)
+        else:
+            moving_img = img2T0
             fixed_img = img1
             
         if transform.lower() == 'rigid':
             nparam = 6
             transformation = lambda x : rigid(x, **transform_args)
-            if x0 is None:
-                x0 = np.zeros(nparam)
+            x0 = np.zeros(nparam)
             if bounds is None:
                 bounds = [
                     (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
@@ -577,9 +598,8 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
         elif transform.lower() == 'similarity':
             nparam = 7
             transformation = lambda x : similarity(x, **transform_args)
-            if x0 is None:
-                x0 = np.zeros(nparam)
-                x0[6] = 1
+            x0 = np.zeros(nparam)
+            x0[6] = 1
             if bounds is None:
                 bounds = [
                     (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
@@ -596,9 +616,8 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
         elif transform.lower() == 'affine':
             nparam = 15
             transformation = lambda x : affine(x, **transform_args)
-            if x0 is None:
-                x0 = np.zeros(nparam)
-                x0[6:9] = 1
+            x0 = np.zeros(nparam)
+            x0[6:9] = 1
             if bounds is None:
                 bounds = [
                     (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
@@ -618,34 +637,51 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
                     np.divide((0.25*np.shape(fixed_img)[2],0.75*np.shape(fixed_img)[2]),10),
                 ]
             if verbose:
-                print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma |       sx |       sy |       sz |    shxy |')
-                print('-----||-----------||----------|----------|----------|----------|----------|----------|----------|----------|----------|----------')
+                print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma |        s |')
+                print('-----||-----------||----------|----------|----------|----------|----------|----------|----------|')
         else:
             raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Image2Image3d registration.')       
+        
+        if isinstance(threshold, (list, tuple, np.ndarray)):
+            assert len(threshold) == 2, 'threshold must be defined as a single value or a list/tuple/array of two values (one for each image).'
+            threshold1, threshold2 = threshold
+        else:
+            threshold1 = threshold2 = threshold
             
         point_based = False
         if metric.lower() == 'mutual_information' or metric.lower() == 'MI':
             obj = mutual_information
         elif metric.lower() == 'dice':
-            obj = lambda img1, img2 : -dice(img1 > threshold, img2 > threshold)
+            obj = lambda img1, img2 : -dice(img1 > threshold1, img2 > threshold2)
         elif metric.lower() == 'symmetric_closest_point_mse':
             if threshold is not None:
-                binarized1 = fixed_img > threshold
-                binarized2 = moving_img > threshold
+                binarized1 = fixed_img > threshold1
+                binarized2 = moving_img > threshold2
             else:
                 binarized1 = fixed_img
                 binarized2 = moving_img
             point_based = True
             points1 = np.column_stack(np.where(binarized1))
             points2 = np.column_stack(np.where(binarized2))
-            tree1 = scipy.spatial.KDTree(points1) 
+            # tree1 = scipy.spatial.KDTree(points1) 
             # Note: can't precommute tree for the moving points
-            obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)
+            # obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)
+        elif metric.lower() == 'icp':
+            if threshold is not None:
+                binarized1 = fixed_img > threshold1
+                binarized2 = moving_img > threshold2
+            else:
+                binarized1 = fixed_img
+                binarized2 = moving_img
+            point_based = True
+            points1 = np.column_stack(np.where(binarized1))
+            points2 = np.column_stack(np.where(binarized2))
+
         else:
             raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Image2Image3d registration.')
 
         if point_based:
-            _, T = Point2Point(points1, points2, x0=x0, bounds=bounds, transform=transform, metric=metric, method=method, transform_args=transform_args, decimation=decimation, optimizer_args=optimizer_args, verbose=verbose)
+            _, T = Point2Point(points1, points2, T0=T0, bounds=bounds, transform=transform, metric=metric, method=method, transform_args=transform_args, decimation=decimation, optimizer_args=optimizer_args, verbose=verbose)
             new_img = transform_image(img2, T)
         else:
             if np.shape(img1) != np.shape(img2):
@@ -656,7 +692,7 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
                     print('{:5d}'.format(objective.k),end='')
                 T = transformation(x)
                 
-                imgT = transform_image(moving_img, T)
+                imgT = transform_image(moving_img, T, options=dict(order=interpolation_order))
 
                 f = obj(fixed_img, imgT)
                 if verbose: 
@@ -666,7 +702,14 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
             objective.k = 0
             x,f = optimize(objective, method, x0, bounds, optimizer_args=optimizer_args)
             
-            T = transformation(x)
+            T1 = transformation(x)
+            if scale != 1:
+                # Account for scaling so that the transformation matrix refers to the original image size
+                D = np.eye(4)
+                D[:3,:3] =  np.diag([scale, scale, scale])
+                T1 = np.linalg.inv(D) @ T1 @ D
+            
+            T = T1 @ T0 # include T0 so that img is transformed first by T0, then by the new transform
             new_img = transform_image(img2, T)
             f = obj(img1, new_img)
             if verbose: 
@@ -679,8 +722,8 @@ def Image2Image3d(img1, img2, x0=None, bounds=None, transform='rigid', metric='d
 
         return new_img, T
 
-def Image2Image2d(img1, img2, x0=None, bounds=None, transform='rigid', metric='mutual_information', 
-    method='direct', scalefactor=1, interpolation_order=3, threshold=None, transform_args={}, optimizer_args=None, verbose=True):
+def Image2Image2d(img1, img2, T0=None, bounds=None, transform='rigid', metric='mutual_information', 
+    method='direct', scale=1, interpolation_order=3, threshold=None, transform_args={}, optimizer_args=None, verbose=True):
     """
     2-dimensional image registration. img2 will be registered to img1
 
@@ -712,7 +755,7 @@ def Image2Image2d(img1, img2, x0=None, bounds=None, transform='rigid', metric='m
     method : str, optional
         Optimization method, by default 'direct'. See 
         :func:`~mymesh.register.optimize` for details.
-    scalefactor : float, optional
+    scale : float, optional
         Scalar factor in the range (0,1] used to reduce the size of the point set,
         by default 1. 
     interpolation_order : int, optional
@@ -782,12 +825,17 @@ def Image2Image2d(img1, img2, x0=None, bounds=None, transform='rigid', metric='m
         obj = dice
     else:
         raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Image2Image2d registration.')
-
-    if scalefactor != 1:
-        moving_img = scipy.ndimage.zoom(img2, scalefactor, order=interpolation_order)
-        fixed_img =  scipy.ndimage.zoom(img1, scalefactor, order=interpolation_order)
+        
+    if T0 is not None:
+        img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))
     else:
-        moving_img = img2
+        img2T0 = img2
+        T0 = np.eye(3)
+    if scale != 1:
+        moving_img = scipy.ndimage.zoom(img2T0, scale, order=interpolation_order)
+        fixed_img =  scipy.ndimage.zoom(img1, scale, order=interpolation_order)
+    else:
+        moving_img = img2T0
         fixed_img = img1
 
     
@@ -806,8 +854,19 @@ def Image2Image2d(img1, img2, x0=None, bounds=None, transform='rigid', metric='m
     objective.k = 0
     x,f = optimize(objective, method, x0, bounds, optimizer_args=optimizer_args)
     
-    T = np.linalg.inv(transformation(x))
-    new_img = scipy.ndimage.affine_transform(img2, T, order=interpolation_order)
+    # T = np.linalg.inv(transformation(x))
+    # new_img = scipy.ndimage.affine_transform(img2, T, order=interpolation_order)
+    
+    T1 = transformation(x)
+    if scale != 1:
+        # Account for scaling so that the transformation matrix refers to the original image size
+        D = np.eye(3)
+        D[:2,:2] =  np.diag([scale, scale, scale])
+        T1 = np.linalg.inv(D) @ T1 @ D
+    
+    T = T1 @ T0 # include T0 so that img is transformed first by T0, then by the new transform
+    new_img = transform_image(img2, T)
+    
     f = obj(img1, new_img)
     if verbose: 
         print('-----||------|', end='')
@@ -822,16 +881,16 @@ def Image2Image2d(img1, img2, x0=None, bounds=None, transform='rigid', metric='m
 def Mesh2Image3d():
     return
 
-def Image2Mesh3d(img, M, h=1, threshold=None, scalefactor=1, decimation=1, center_mesh=False, interpolation_order=3, x0=None, bounds=None, transform='rigid', metric='symmetric_closest_point_MSE', method='direct', transform_args={}, optimizer_args=None, verbose=True):
+def Image2Mesh3d(img, M, h=1, threshold=None, scale=1, decimation=1, center_mesh=False, interpolation_order=3, x0=None, bounds=None, transform='rigid', metric='symmetric_closest_point_MSE', method='direct', transform_args={}, optimizer_args=None, verbose=True):
 
-    if scalefactor != 1:
-        img =  scipy.ndimage.zoom(img, scalefactor, order=interpolation_order)
+    if scale != 1:
+        img =  scipy.ndimage.zoom(img, scale, order=interpolation_order)
     mesh_points = np.copy(M.NodeCoords)
     if center_mesh:
         mesh_points = np.copy(M.NodeCoords)
-        mesh_points[:,0] += -(np.max(mesh_points[:,0]) + np.min(mesh_points[:,0]))/2 + np.shape(img)[2]*h/scalefactor/2
-        mesh_points[:,1] += -(np.max(mesh_points[:,1]) + np.min(mesh_points[:,1]))/2 + np.shape(img)[1]*h/scalefactor/2
-        mesh_points[:,2] += -(np.max(mesh_points[:,2]) + np.min(mesh_points[:,2]))/2 + np.shape(img)[0]*h/scalefactor/2
+        mesh_points[:,0] += -(np.max(mesh_points[:,0]) + np.min(mesh_points[:,0]))/2 + np.shape(img)[2]*h/scale/2
+        mesh_points[:,1] += -(np.max(mesh_points[:,1]) + np.min(mesh_points[:,1]))/2 + np.shape(img)[1]*h/scale/2
+        mesh_points[:,2] += -(np.max(mesh_points[:,2]) + np.min(mesh_points[:,2]))/2 + np.shape(img)[0]*h/scale/2
     if 0 < decimation <= 1:
         rng = np.random.default_rng(0)
         idx = rng.choice(len(mesh_points), size=int(len(mesh_points)*decimation), replace=False)
@@ -844,7 +903,7 @@ def Image2Mesh3d(img, M, h=1, threshold=None, scalefactor=1, decimation=1, cente
     else:
         binarized = img
     
-    img_points = np.fliplr(np.column_stack(np.where(binarized)) * h/scalefactor) # flipping to make image coordinate system (z,y,x) match mesh coordinate system
+    img_points = np.fliplr(np.column_stack(np.where(binarized)) * h/scale) # flipping to make image coordinate system (z,y,x) match mesh coordinate system
 
     new_points, T = Point2Point(mesh_points, img_points, x0=x0, bounds=bounds, transform=transform, metric=metric, method=method, transform_args=transform_args, optimizer_args=optimizer_args, verbose=verbose)
 
@@ -853,14 +912,104 @@ def Image2Mesh3d(img, M, h=1, threshold=None, scalefactor=1, decimation=1, cente
        [1., 0., 0., 0.],
        [0., 0., 0., 1.]])
     T2 = P@T@P  # Reorder transformations to the image coordinate system
-    T2[:3,3] *= scalefactor/h # Scale translations back to units of voxels
+    T2[:3,3] *= scale/h # Scale translations back to units of voxels
 
     new_image = transform_image(img, T)
 
     return new_image, T
 
+def ICP(points1, points2, T0=None, tol=1e-8, maxIter=100):
+    """
+    Iterative Closest Point (ICP) algorithm for registering two point sets
+
+    Parameters
+    ----------
+    points1 : array_like
+        Fixed points that points2 will be registered to
+    points2 : array_like
+        Moving points that will be registered to points1
+
+    Returns
+    -------
+    new_points : np.ndarray
+        Transformed coordinate array of points2 registered to points1.
+    T : np.ndarray
+        Affine transformation matrix (shape=(4,4)) to transform points2 to new_points.
+        `new_points = transform_points(points2, T)`
+    """
+
+    if T0 is not None:
+        points2T0 = transform_points(points2, T0)
+    else:
+        points2T0 = points2
+        T0 = np.eye(np.shape(points2)[1] + 1)
+    
+    center_of_mass1 = np.mean(points1, axis=0)
+    center_of_mass2 = np.mean(points2T0, axis=0)
+
+    # center both point clouds
+    fixed_points = points1 - center_of_mass1
+    moving_points = points2T0 - (center_of_mass2)
+
+    tree1 = scipy.spatial.KDTree(fixed_points)
+
+    if np.shape(moving_points)[1] == 3:
+        T = np.eye(4)
+        T[:3,3] = -center_of_mass2
+        I = np.eye(3)
+        Z = np.zeros(3)
+        O = np.array([1])
+    elif np.shape(moving_points)[1] == 2:
+        T = np.eye(3)
+        T[:2,2] = -center_of_mass2
+        I = np.eye(2)
+        Z = np.zeros(2)
+        O = np.array([1])
+    else:
+        raise ValueError('Points must be either 2D or 3D')
+
+    # Convergence checks when the rotation and translation for the current iteration are close to zero
+    convergence = lambda R : np.allclose(R, I, rtol=0, atol=tol)
+    
+    R = np.zeros_like(I)
+    # t = np.zeros_like(Z)
+
+    Rtotal = np.eye(len(R))
+
+    i = 0
+    while not convergence(R) and i < maxIter:
+        # Distances for each pt in moving_points to the closest point in fixed_points
+        distances21, idx1 = tree1.query(moving_points) 
+        
+        # Cross covariance matrix
+        H = moving_points.T @ fixed_points[idx1] 
+
+        # Singular Value Decomposition to determine rotation matrix
+        U, S, Vt = np.linalg.svd(H)
+        R = Vt.T @ U.T
+        print(np.linalg.det(R))
+        if np.linalg.det(R) < 0:
+            Vt[-1, :] *= -1
+            R = Vt.T @ U.T
+        
+        # Update moving points
+        moving_points = (R @ moving_points.T).T # + t
+        
+        # Accumulate transformations
+        Rtotal = R @ Rtotal
+
+        i += 1
+    
+    if i == maxIter:
+        warnings.warn('ICP did not converge to the specified tolerance within the maximum number of iterations.', RuntimeWarning)
+    # Perform final translation to center and include T0
+    T = np.block([[Rtotal, (center_of_mass1)[:,None]], [Z, O]]) @ np.block([[I, (-center_of_mass2)[:,None]], [Z, O]]) @ T0
+
+    new_points = transform_points(points2, T)
+    return new_points, T
+
 ### Transformations
-def T2d(t0,t1,h=1):
+def T2d(t0,t1):
     """
     T Generates a translation matrix
 
@@ -876,8 +1025,8 @@ def T2d(t0,t1,h=1):
     t : np.ndarray
         3x3 translation matrix
     """    
-    t = np.array([[1,0,t0/h],
-                [0,1,t1/h],
+    t = np.array([[1,0,t0],
+                [0,1,t1],
                 [0,0,1]])
     return t
     
@@ -963,7 +1112,7 @@ def Sh2d(sh01,sh10,reference=np.array([0,0])):
     sh = np.linalg.multi_dot([T1,sh,T2]) 
     return sh
 
-def T3d(t0,t1,t2,h=1):
+def T3d(t0,t1,t2):
     """
     T Generates a translation matrix
 
@@ -1213,7 +1362,7 @@ def transform_points(points, T):
     points : array_like
         Array of point coordinates (shape=(n,3)).
     T : array_like
-        Transformation matrix (either 3x3 or 4x4).
+        Transformation matrix (either (2,2), (3,3), or (4,4)).
 
     Returns
     -------
@@ -1221,15 +1370,35 @@ def transform_points(points, T):
         Transformed point coordinates
 
     """    
+    
+    if np.shape(points)[1] == 2:
+        TwoD = True
+    elif np.shape(points)[1] == 3:
+        TwoD = False
+    else:
+        raise ValueError('Points must be 2D or 3D, with shape=(n,2) or (n,3).')
+        
     if np.shape(T) == (4,4):
-        # Affine matrix
+        # Affine matrix for 3D
+        if TwoD:
+            raise ValueError('Transformation matrix for 3D point set must have shape (3,3), (4,4).')
         pointsT = (T@np.column_stack([points, np.ones(len(points))]).T).T
         new_points = pointsT[:,:-1]
     elif np.shape(T) == (3,3):
-        # non-affine transfomration matirx
+        if TwoD:
+            # Affine matrix for 2D
+            pointsT = (T@np.column_stack([points, np.ones(len(points))]).T).T
+            new_points = pointsT[:,:-1]
+        else:
+            # Non-affine matrix for 3D
+            new_points = (T@np.asarray(points).T).T
+    elif np.shape(T) == (2,2):
+        # Non-affine matrix for 2D
+        if not TwoD:
+            raise ValueError('Transformation matrix for 2D point set must have shape (2,2), (3,3).')
         new_points = (T@np.asarray(points).T).T
     else:
-        raise Exception("I haven't set up handling of any other cases yet.")
+        raise ValueError('Transformation matrix must have shape (2,2), (3,3), or (4,4).')
         
     return new_points
 
@@ -1398,4 +1567,29 @@ def optimize(objective, method, x0=None, bounds=None, optimizer_args=None):
     x = res['x']
     f = res['fun']
     return x, f
+ 
+def ImageOverlay(img1, img2, threshold=None):
     
+    assert np.shape(img1) == np.shape(img2), 'Images must be the same size.'
+    if isinstance(threshold, (list, tuple, np.ndarray)):
+        assert len(threshold) == 2, 'threshold must be defined as a single value or a list/tuple/array of two values (one for each image).'
+        threshold1, threshold2 = threshold
+    else:
+        threshold1 = threshold2 = threshold
+    
+    if threshold1 is not None:
+        bw1 = img1 > threshold1
+    else:
+        bw1 = img1
+        
+    if threshold2 is not None:
+        bw2 = img2 > threshold2
+    else:
+        bw2 = img2
+    
+    overlay = np.zeros_like(bw1, dtype=np.int32)
+    overlay[bw1] = 1
+    overlay[bw2] = 2
+    overlay[bw1 & bw2] = 3
+    return overlay
+   
