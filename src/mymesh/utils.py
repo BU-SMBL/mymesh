@@ -83,7 +83,7 @@ Miscellaneous
 import numpy as np
 import scipy
 import sys, warnings, copy, time, itertools, collections
-from . import converter, rays, tree, improvement, quality, mesh
+from . import converter, delaunay, rays, tree, improvement, quality, mesh
 from . import try_njit, check_numba
 
 def getNodeNeighbors(NodeCoords,NodeConn,ElemType='auto'):
@@ -1934,12 +1934,15 @@ def MVBB(Points, return_matrix=False):
     
     """    
 
-    hull = scipy.spatial.ConvexHull(Points)
-    hull_points, hull_facets,_ = RemoveNodes(Points, hull.simplices)
-    hull_points = np.asarray(hull_points)
+    # hull = scipy.spatial.ConvexHull(Points)
+    # hull_points, hull_facets,_ = RemoveNodes(Points, hull.simplices)
+    # hull_points = np.asarray(hull_points)
+    hull = delaunay.ConvexHull(Points)
+    hull.verbose = False
+    hull.NodeCoords, hull.NodeConn, _ = RemoveNodes(*hull) # removes nodes that aren't in the hull
 
     # Calculate rotation matrices to align each hull facet with [0,0,-1] (so that it's rotated to the minimal z plane)
-    normals = np.asarray(CalcFaceNormal(hull_points, hull_facets))
+    normals = hull.ElemNormals
     rot_axes = np.cross(normals, [0,0,-1])
     rot_axes[np.all(normals == [0,0,-1], axis=1)] = [0,0,-1]
     rot_axes[np.all(normals == [0,0,1], axis=1)] = [1,0,0]
@@ -1947,19 +1950,19 @@ def MVBB(Points, return_matrix=False):
     thetas = np.arccos(np.sum(normals*[0,0,-1],axis=1))
     thetas[np.all(normals == [0,0,1], axis=1)] = np.pi
     outer_prod = rot_axes[:, np.newaxis, :] * rot_axes[:, :, np.newaxis]
-    cross_prod_matrices = np.zeros((len(hull_facets), 3, 3))
+    cross_prod_matrices = np.zeros((len(hull.NodeConn), 3, 3))
     cross_prod_matrices[:,0,1] = -rot_axes[:,2]
     cross_prod_matrices[:,1,0] =  rot_axes[:,2]
     cross_prod_matrices[:,0,2] =  rot_axes[:,1]
     cross_prod_matrices[:,2,0] = -rot_axes[:,1]
     cross_prod_matrices[:,1,2] = -rot_axes[:,0]
     cross_prod_matrices[:,2,1] =  rot_axes[:,0]
-    rot_matrices = np.cos(thetas)[:,None,None]*np.repeat([np.eye(3)],len(hull_facets),axis=0) + np.sin(thetas)[:,None,None]*cross_prod_matrices + (1 - np.cos(thetas))[:,None,None]*outer_prod
+    rot_matrices = np.cos(thetas)[:,None,None]*np.repeat([np.eye(3)],len(hull.NodeConn),axis=0) + np.sin(thetas)[:,None,None]*cross_prod_matrices + (1 - np.cos(thetas))[:,None,None]*outer_prod
 
     # NOTE: might be able to reduce memory usage by not explicitly obtaining the rotation matrices (see https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle)
 
     # For each possible rotation, rotate all of the points
-    rotated_points = rot_matrices @ hull_points.T[None, :, :]
+    rotated_points = rot_matrices @ hull.NodeCoords.T[None, :, :]
 
     # Get the local coordinate system axis-aligned bounding boxes for each rotation
     mins = np.min(rotated_points, axis=2)
