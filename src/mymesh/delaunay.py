@@ -190,7 +190,7 @@ def ConvexHull(NodeCoords,method='scipy'):
         if method.lower() == 'giftwrapping':
             hull = GiftWrapping(NodeCoords,IncludeCollinear=True)
         elif method.lower() == 'scipy':
-            qhull = spatial.ConvexHull(NodeCoords)
+            qhull = spatial.ConvexHull(np.asarray(NodeCoords, dtype=np.float64))
             hull = qhull.simplices
         elif method.lower() == 'bowyerwatson':
             tri = BowyerWatson2d(NodeCoords)
@@ -204,7 +204,7 @@ def ConvexHull(NodeCoords,method='scipy'):
 
     elif nD == 3:
         if method.lower() == 'scipy':
-            qhull = spatial.ConvexHull(NodeCoords)
+            qhull = spatial.ConvexHull(np.asarray(NodeCoords, dtype=np.float64))
             hull = qhull.simplices
         elif method.lower() == 'bowyerwatson':
             tet = BowyerWatson3d(NodeCoords)
