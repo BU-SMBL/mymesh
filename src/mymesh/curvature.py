@@ -477,6 +477,9 @@ def _CubicFit(NodeCoords, neighborhood, normals, return_directions=False):
     if np.any(np.isnan(Amat)) or np.any(np.isnan(Bmat)):
         MaxPrincipal = np.nan
         MinPrincipal = np.nan
+        if return_directions:
+                MaxPrincipalDirection = np.repeat(np.nan, 3)
+                MinPrincipalDirection = np.repeat(np.nan, 3)
     else:
         A = Amat.T@Amat
         B = Amat.T@Bmat
