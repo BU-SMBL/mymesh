@@ -257,6 +257,10 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,jit=True,return_d
     From Goldfeather & Interrante (2004).
     :cite:p:`Goldfeather2004`
 
+    If Principal Directions are returned (return_directions=True), the directions
+    are defined such that np.cross(MaxPrincipalDirection, MinPrincipalDirection)
+    is oriented consistently with the normal vectors of the surface.
+
     Parameters
     ----------
     NodeCoords : list, np.ndarray
@@ -408,10 +412,12 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,jit=True,return_d
                         MinPrincipalDirection[idx] = np.matmul(np.append(x[:,np.argmin(v)],0), np.linalg.inv(R[i,:3,:3]))
 
     if return_directions:
+        # Orient MaxPrinxipalDirection to ensure consistency with normal vectors
+        MaxPrincipalDirection[np.sum(NodeNormals * np.cross(MaxPrincipalDirection, MinPrincipalDirection),axis=1) < 0] *= -1
         return MaxPrincipal, MinPrincipal, MaxPrincipalDirection, MinPrincipalDirection
     return MaxPrincipal,MinPrincipal
 
-@try_njit#(cache=True)
+#@try_njit#(cache=True)
 def _CubicFit(NodeCoords, neighborhood, normals, return_directions=False):
     """
     Calculate cubic fit curvatures for a single node neighborhood. This is for 
@@ -487,6 +493,8 @@ def _CubicFit(NodeCoords, neighborhood, normals, return_directions=False):
                 # MinPrincipalDirection = x[:,np.argmin(v)]
                 MaxPrincipalDirection = np.dot(np.linalg.inv(R[:3,:3]), np.append(x[:,np.argmax(v)],0)[:,None])[:,0]
                 MinPrincipalDirection = np.dot(np.linalg.inv(R[:3,:3]), np.append(x[:,np.argmin(v)],0)[:,None])[:,0]
+                if np.dot(normals[0], np.cross(MaxPrincipalDirection, MinPrincipalDirection)) < 0:
+                    MaxPrincipalDirection *= -1
             else:
                 MaxPrincipalDirection = np.zeros(3)
                 MinPrincipalDirection = np.zeros(3)
