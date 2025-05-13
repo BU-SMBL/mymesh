@@ -417,7 +417,7 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,jit=True,return_d
         return MaxPrincipal, MinPrincipal, MaxPrincipalDirection, MinPrincipalDirection
     return MaxPrincipal,MinPrincipal
 
-#@try_njit#(cache=True)
+@try_njit#(cache=True)
 def _CubicFit(NodeCoords, neighborhood, normals, return_directions=False):
     """
     Calculate cubic fit curvatures for a single node neighborhood. This is for 
