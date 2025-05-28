@@ -257,9 +257,13 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,jit=True,return_d
     From Goldfeather & Interrante (2004).
     :cite:p:`Goldfeather2004`
 
-    If Principal Directions are returned (return_directions=True), the directions
-    are defined such that np.cross(MaxPrincipalDirection, MinPrincipalDirection)
-    is oriented consistently with the normal vectors of the surface.
+    If Principal Directions are returned (return_directions=True), the signs
+    of the the directions vectors are not well defined and some may be flipped
+    relative to other adjacent points. Despite this ambiguity, the directions
+    are defined such that cross product of the maximum principal directions
+    with the mininum principal directions 
+    (`np.cross(MaxPrincipalDirection, MinPrincipalDirection)`)
+    are oriented consistently with the normal vectors of the surface. 
 
     Parameters
     ----------
