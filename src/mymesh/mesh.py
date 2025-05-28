@@ -107,6 +107,7 @@ class mesh:
 
         # Properties:
         self._ElemType = []
+        self._MeshNodes = None
         self._Surface = None
         self._SurfConn = []
         self._SurfNodes = None
@@ -332,6 +333,24 @@ class mesh:
                 self._printlevel-=1
                 print('Done', end='\n'+'\t'*self._printlevel)
         return self._EdgeElemConn
+    @property
+    def MeshNodes(self):
+        """
+        Array of node IDs contained within the mesh. If all nodes 
+        are connected to elements, this will just be equivalent to
+        `np.arange(m.NNode)`,  but if there are free nodes disconnected 
+        from any elements, those nodes will be excluded.
+        """ 
+        if self._MeshNodes is None:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying surface nodes...',end='')
+                self._printlevel += 1
+            self._MeshNodes = np.array(list({i for elem in self.NodeConn for i in elem}))
+            if self.verbose: 
+                print('Done', end='\n'+'\t'*self._printlevel)
+                self._printlevel -= 1
+        MeshNodes = self._MeshNodes
+        return MeshNodes    
     @property
     def SurfConn(self):
         """
