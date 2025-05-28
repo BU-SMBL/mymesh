@@ -328,6 +328,8 @@ def TetGen(NodeCoords, SurfConn, **kwargs):
 
     NodeCoords, SurfConn = converter.surf2tris(NodeCoords, SurfConn)
 
+    assert len(mesh(NodeCoords, SurfConn, verbose=False).BoundaryNodes) == 0, 'The input mesh has unclosed boundary edges - TetGen will fail to tetrahedralize this input.'
+
     tet = tetgen.TetGen(NodeCoords, SurfConn)
     NewCoords, NewConn = tet.tetrahedralize(**kwargs)
 
