@@ -137,31 +137,34 @@ def LocalLaplacianSmoothing(M, options=dict()):
     maxIter = SmoothOptions['maxIter']
     method = SmoothOptions['method']
 
-    lens = np.array([len(n) for n in NodeNeighbors])
-    len_inv = np.divide(1,lens,out=np.zeros_like(lens,dtype=float),where=lens!=0)
-    r = utils.PadRagged(NodeNeighbors,fillval=-1)
-    ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
+    if len(FreeNodes) > 0:
+        lens = np.array([len(n) for n in NodeNeighbors])
+        len_inv = np.divide(1,lens,out=np.zeros_like(lens,dtype=float),where=lens!=0)
+        r = utils.PadRagged(NodeNeighbors,fillval=-1)
+        ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
+        
+        if SmoothOptions['iterate'] == 'converge':
+            condition = lambda i, U : ((i == 0) | (np.max(U) > tolerance)) & (i < maxIter) 
+        elif isinstance(SmoothOptions['iterate'], (int, np.integer)):
+            condition = lambda i, U : i < SmoothOptions['iterate']
+        else:
+            raise ValueError('options["iterate"] must be "converge" or an integer.')
+        
+        i = 0
+        U = np.zeros((len(NodeCoords),3))
+        Utotal = np.zeros((len(NodeCoords),3))
+        while condition(i, U[FreeNodes]):
+            i += 1
+            Q = ArrayCoords[r]
+            U = len_inv[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
+            Utotal[FreeNodes] += U[FreeNodes]
+            Unorm = np.linalg.norm(Utotal[FreeNodes], axis=1)
+            Utotal[FreeNodes[Unorm > SmoothOptions['limit']]] = Utotal[FreeNodes[Unorm > SmoothOptions['limit']]]/Unorm[Unorm > SmoothOptions['limit']][:,None] * SmoothOptions['limit']
+            ArrayCoords[FreeNodes] = NodeCoords[FreeNodes] + Utotal[FreeNodes]
     
-    if SmoothOptions['iterate'] == 'converge':
-        condition = lambda i, U : ((i == 0) | (np.max(U) > tolerance)) & (i < maxIter) 
-    elif isinstance(SmoothOptions['iterate'], (int, np.integer)):
-        condition = lambda i, U : i < SmoothOptions['iterate']
+        NewCoords = ArrayCoords[:-1]
     else:
-        raise ValueError('options["iterate"] must be "converge" or an integer.')
-    
-    i = 0
-    U = np.zeros((len(NodeCoords),3))
-    Utotal = np.zeros((len(NodeCoords),3))
-    while condition(i, U[FreeNodes]):
-        i += 1
-        Q = ArrayCoords[r]
-        U = len_inv[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
-        Utotal[FreeNodes] += U[FreeNodes]
-        Unorm = np.linalg.norm(Utotal[FreeNodes], axis=1)
-        Utotal[FreeNodes[Unorm > SmoothOptions['limit']]] = Utotal[FreeNodes[Unorm > SmoothOptions['limit']]]/Unorm[Unorm > SmoothOptions['limit']][:,None] * SmoothOptions['limit']
-        ArrayCoords[FreeNodes] = NodeCoords[FreeNodes] + Utotal[FreeNodes]
-
-    NewCoords = ArrayCoords[:-1]
+        NewCoords = NodeCoords
 
     if 'mesh' in dir(mesh):
         Mnew = mesh.mesh(NewCoords, NodeConn, Type=M.Type)
