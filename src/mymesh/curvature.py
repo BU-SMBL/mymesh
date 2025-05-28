@@ -799,14 +799,9 @@ def MeanCurvature(MaxPrincipal,MinPrincipal):
     mean : list, float
         Single value or list of mean curvatures.
     """    
-    if type(MaxPrincipal) == np.ndarray:
-        MaxPrincipal = MaxPrincipal.tolist()
-    if type(MinPrincipal) == np.ndarray:
-        MinPrincipal = MinPrincipal.tolist()
-    if type(MaxPrincipal) == list and type(MinPrincipal) == list and len(MaxPrincipal) == len(MinPrincipal):
-        mean = [(MaxPrincipal[i] + MinPrincipal[i])/2 for i in range(len(MaxPrincipal))]
-    elif (type(MaxPrincipal) == int or type(MaxPrincipal) == float) and (type(MinPrincipal) == int or type(MinPrincipal) == float):
-        mean = (MaxPrincipal + MinPrincipal)/2
+    
+    mean = (np.asarray(MaxPrincipal) + np.asarray(MinPrincipal))/2
+    
     return mean
 
 def GaussianCurvature(MaxPrincipal,MinPrincipal):
@@ -826,14 +821,9 @@ def GaussianCurvature(MaxPrincipal,MinPrincipal):
     gaussian : list, float
         Single value or list of Gaussian curvatures.
     """  
-    if type(MaxPrincipal) == np.ndarray:
-        MaxPrincipal = MaxPrincipal.tolist()
-    if type(MinPrincipal) == np.ndarray:
-        MinPrincipal = MinPrincipal.tolist()
-    if type(MaxPrincipal) == list and type(MinPrincipal) == list and len(MaxPrincipal) == len(MinPrincipal):
-        gaussian = [MaxPrincipal[i] * MinPrincipal[i] for i in range(len(MaxPrincipal))]
-    elif (type(MaxPrincipal) == int or type(MaxPrincipal) == float) and (type(MinPrincipal) == int or type(MinPrincipal) == float):
-        gaussian = MaxPrincipal * MinPrincipal
+        
+    gaussian = np.asarray(MaxPrincipal) * np.asarray(MinPrincipal)
+    
     return gaussian
 
 def Curvedness(MaxPrincipal,MinPrincipal):
