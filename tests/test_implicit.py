@@ -2,6 +2,29 @@ import pytest
 import numpy as np
 from mymesh import implicit
 
+@pytest.mark.parametrize("func, bounds, h, threshold, threshold_direction", [
+    # unit sphere
+    (implicit.sphere([0,0,0],1), 
+    [-1,1,-1,1],
+    0.1,
+    0,
+    -1,
+    ),
+    # gyroid
+    (implicit.gyroid, 
+    [0,1,0,.5],
+    0.1,
+    0,
+    1,
+    ),
+])
+def test_PlanarMesh(func, bounds, h, threshold, threshold_direction):
+    M = implicit.PlanarMesh(func, bounds, h, threshold=threshold, threshold_direction=threshold_direction)
+
+    X, Y, Z = M.NodeCoords.T
+
+    assert np.all((X >= bounds[0]) & (X <= bounds[1]) & (Y >= bounds[2]) & (Y <= bounds[3])), 'Incorrect Bounds'
+
 @pytest.mark.parametrize("func, bounds, h, threshold, threshold_direction, mode", [
     # unit sphere
     (implicit.sphere([0,0,0],1), 
@@ -13,7 +36,7 @@ from mymesh import implicit
     ),
     # gyroid
     (implicit.gyroid, 
-    [0,1,0,.5,0,75],
+    [0,1,0,.5,0,.75],
     0.1,
     0,
     1,
@@ -39,7 +62,7 @@ def test_VoxelMesh(func, bounds, h, threshold, threshold_direction, mode):
     ),
     # gyroid
     (implicit.gyroid, 
-    [0,1,0,.5,0,75],
+    [0,1,0,.5,0,.75],
     0.1,
     0,
     1,
@@ -74,7 +97,7 @@ def test_SurfaceMesh(func, bounds, h, threshold, threshold_direction, method, in
     ),
     # gyroid
     (implicit.gyroid, 
-    [0,1,0,.5,0,75],
+    [0,1,0,.5,0,.75],
     0.1,
     0,
     1,
@@ -87,7 +110,6 @@ def test_TetMesh(func, bounds, h, threshold, threshold_direction, interpolation)
     X, Y, Z = M.NodeCoords.T
 
     assert np.all((X >= bounds[0]) & (X <= bounds[1]) & (Y >= bounds[2]) & (Y <= bounds[3]) & (Z >= bounds[4]) & (Z <= bounds[5])), 'Incorrect Bounds'
-
 
 @pytest.mark.parametrize("func, bounds, h, threshold, threshold_direction, interpolation", [
     # unit sphere
@@ -118,4 +140,3 @@ def test_SurfaceNodeOptimization(func, bounds, h, threshold, threshold_direction
         springs=False)
 
     assert ~np.any(np.all(np.isnan(M.NodeCoords)))
-

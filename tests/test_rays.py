@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import mymesh
 from mymesh import rays, primitives
 
 @pytest.mark.parametrize("pt, ray, TriCoords, bidirectional, Intersection", [
@@ -295,6 +296,14 @@ def test_PlaneTrianglesIntersection(pt, Normal, Tris, Intersection):
         [-1,2],[-1,2],[-1,2],
         True
     ),
+    # Case 4: non-intersection 
+    (
+        np.array([[0.318182  , 0.07572782, 0.21592617],
+        [0.25656796, 0.07572782, 0.13740134],
+        [0.258389  , 0.        , 0.21312928]], dtype=np.float64),
+        np.array([0.252, 0.26 ]), np.array([0.068, 0.076]), np.array([0.212, 0.22 ]),
+        False
+    ),
 ])
 def test_TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, Intersection):
 
@@ -313,11 +322,20 @@ def test_TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, Intersection):
         np.array([0.,1.]),
         np.array([0.,1.]),
         [True, False]
-    )
+    ),
+    # Case 2: non-intersection 
+    (
+        np.array([[0.318182  , 0.07572782, 0.21592617],
+        [0.25656796, 0.07572782, 0.13740134],
+        [0.258389  , 0.        , 0.21312928]], dtype=np.float64)[None,:,:],
+        np.array([0.252, 0.26 ]), np.array([0.068, 0.076]), np.array([0.212, 0.22 ]),
+        [False]
+    ),
 ])
 def test_BoxTrianglesIntersection(Tris, xlim, ylim, zlim, Intersection):
-
     ix = rays.BoxTrianglesIntersection(Tris, xlim, ylim, zlim)
+    if mymesh.check_numba():
+        ix = rays.BoxTrianglesIntersection.py_func(Tris, xlim, ylim, zlim)
 
     assert np.all(np.array_equal(ix, Intersection)), 'Incorrect intersection.'
 
@@ -366,8 +384,9 @@ def test_BoxTrianglesIntersection(Tris, xlim, ylim, zlim, Intersection):
     ),
 ])
 def test_BoxBoxIntersection(box1, box2, Intersection):
-
     ix = rays.BoxBoxIntersection(box1, box2)
+    if mymesh.check_numba():
+        ix = rays.BoxBoxIntersection.py_func(box1, box2)
 
     assert ix == Intersection, 'Incorrect intersection.'
 
@@ -468,6 +487,71 @@ def test_SegmentsSegmentsIntersection(s1, s2, endpt_inclusive, expected_ix, expe
         print(expected_pt[i], pt[i])
         assert expected_ix[i] == intersection[i], 'Incorrect intersection classification'
         assert np.all(np.isclose(expected_pt[i], pt[i], equal_nan=True)), 'Incorrect intersection point'
+
+@pytest.mark.parametrize("segment, xlim, ylim, intersection", [
+    # case 1: intersection
+    (
+        np.array([[-2,0,0],[2,0,0]]),
+        np.array([-1,1]), 
+        np.array([-1,1]),
+        True
+    ),
+    # case 2: no intersection
+    (
+        np.array([[-2,2,0],[2,1,0]]),
+        np.array([-1,1]), 
+        np.array([-1,1]),
+        False
+    ),
+    # case 2: no intersection
+    (
+        np.array([[-2,2,0],[3,1,0]]),
+        np.array([-1,1]), 
+        np.array([-1,1]),
+        False
+    )
+])
+def test_SegmentBox2DIntersection(segment, xlim, ylim, intersection):
+
+    ix = rays.SegmentBox2DIntersection(segment, xlim, ylim)
+    assert intersection == ix, 'Incorrect intersection'
+
+@pytest.mark.parametrize("segment, xlim, ylim, zlim, intersection", [
+    # case 1: intersection
+    (
+        np.array([[-2,0,0],[2,0,0]]),
+        np.array([-1,1]), 
+        np.array([-1,1]),
+        np.array([-1,1]),
+        True
+    ),
+    # case 2: no intersection
+    (
+        np.array([[-2,2,0],[2,1,0]]),
+        np.array([-1,1]), 
+        np.array([-1,1]),
+        np.array([-1,1]),
+        False
+    ),
+    (
+        np.array([[-2,2,0],[2,3,0]]),
+        np.array([-1,1]), 
+        np.array([-1,1]),
+        np.array([-1,1]),
+        False
+    ),
+    (
+        np.array([[-2,2,1],[2,1,2]]),
+        np.array([-1,1]), 
+        np.array([-1,1]),
+        np.array([-1,1]),
+        False
+    )
+])
+def test_SegmentBoxIntersection(segment, xlim, ylim, zlim, intersection):
+
+    ix = rays.SegmentBoxIntersection(segment, xlim, ylim, zlim)
+    assert intersection == ix, 'Incorrect intersection'
 
 @pytest.mark.parametrize("pt, ray, segment, endpt_inclusive, expected_ix, expected_pt", [
     # case 1: 2d orthogonal intersection
@@ -899,6 +983,23 @@ def test_RaysSurfIntersection(pt, ray, NodeCoords, SurfConn, bidirectional, inte
     assert np.all(np.isclose(dist, distances)), 'Incorrect distances'
     assert np.all(np.isclose(pts, intersectionPts)), 'Incorrect intersection points'
 
+@pytest.mark.parametrize("boundary1, boundary2, nIx", [
+    # Case 1: 
+    (
+        primitives.Circle([-.5, 0, 0], 1, Type='line'),
+        primitives.Circle([.5, 0, 0], 1, Type='line'),
+        2
+    ),
+])
+def test_BoundaryBoundaryIntersection(boundary1, boundary2, nIx):
+
+    ix1, ix2, pts = rays.BoundaryBoundaryIntersection(
+        boundary1.NodeCoords, boundary1.NodeConn,
+        boundary2.NodeCoords, boundary2.NodeConn,
+        return_pts=True
+    )
+
+    assert len(ix1) == nIx, 'Incorrect number of intersections detected' 
 
 @pytest.mark.parametrize("pt, NodeCoords, BoundaryConn, Inside", [
     # case 1 : point inside circle 
@@ -1038,7 +1139,10 @@ def test_PointsInSurf(pts, NodeCoords, SurfConn, Inside):
 ])
 def test_PointInBox(pt, xlim, ylim, zlim, inclusive, Inside):
 
+    
     inside = rays.PointInBox(pt, xlim, ylim, zlim, inclusive=inclusive)
+    if mymesh.check_numba():
+        inside = rays.PointInBox.py_func(pt, xlim, ylim, zlim, inclusive=inclusive)
 
     assert inside == Inside, 'Incorrect inclusion.'
 
@@ -1189,5 +1293,6 @@ def test_PointsInTri(pts, Tris, inclusive, Inside):
 def test_PointInTet(pt, Tet, inclusive, Inside):
 
     inside = rays.PointInTet(pt, Tet, inclusive=inclusive)
-
+    if mymesh.check_numba():
+        inside = rays.PointInTet.py_func(pt, Tet, inclusive=inclusive)
     assert inside == Inside, 'Incorrect inclusion.'

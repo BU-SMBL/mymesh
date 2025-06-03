@@ -221,14 +221,14 @@ def test_MarchingCubesImage(I, interpolation, flip):
     ),
     (
         *primitives.Grid([-1.5,1.5,-1.5,1.5,-1.5,1.5],0.2),
-        implicit.sp2np(implicit.lidinoid)(*primitives.Grid([-1.5,1.5,-1.5,1.5,-1.5,1.5],0.2).NodeCoords.T),
+        implicit.wrapfunc(implicit.lidinoid)(*primitives.Grid([-1.5,1.5,-1.5,1.5,-1.5,1.5],0.2).NodeCoords.T),
         'linear',
         '33',
         False
     ),
     (
         *primitives.Grid([-1.5,1.5,-1.5,1.5,-1.5,1.5],0.2),
-        implicit.sp2np(implicit.thickenf(implicit.gyroid,1))(*primitives.Grid([-1.5,1.5,-1.5,1.5,-1.5,1.5],0.2).NodeCoords.T),
+        implicit.wrapfunc(implicit.thickenf(implicit.gyroid,1))(*primitives.Grid([-1.5,1.5,-1.5,1.5,-1.5,1.5],0.2).NodeCoords.T),
         'linear',
         '33',
         False
