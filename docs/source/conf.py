@@ -20,7 +20,25 @@ release = version
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.mathjax', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode', 'sphinx.ext.githubpages', 'sphinx.ext.napoleon', 'sphinx.ext.autosectionlabel', 'sphinx.ext.autosummary', 'matplotlib.sphinxext.plot_directive','sphinx_design','sphinx.ext.graphviz','sphinx_copybutton','sphinxcontrib.bibtex','jupyter_sphinx','sphinx_gallery.gen_gallery']
+extensions = ['sphinx.ext.autodoc', 
+            'sphinx.ext.doctest', 
+            'sphinx.ext.todo', 
+            'sphinx.ext.mathjax', 
+            'sphinx.ext.ifconfig', 
+            'sphinx.ext.viewcode', 
+            'sphinx.ext.githubpages', 
+            'sphinx.ext.napoleon', 
+            'sphinx.ext.autosectionlabel', 
+            'sphinx.ext.autosummary', 
+            'matplotlib.sphinxext.plot_directive',
+            'sphinx_design',
+            'sphinx.ext.graphviz',
+            'sphinx_copybutton',
+            'sphinxcontrib.bibtex',
+            'jupyter_sphinx',
+            'sphinx_gallery.gen_gallery', 
+            # 'jupyterlite_sphinx', 
+            'sphinx.ext.intersphinx']
 autodoc_mock_imports = []
 autodoc_member_order = 'bysource'
 autosummary_generate = True
@@ -36,6 +54,10 @@ sphinx_gallery_conf = {
      'capture_repr': (),
 }  
 
+# jupyterlite_contents = ['interactive']
+# jupyterlite_ignore = ['examples']
+# jupyterlite_kernels = ["python"]
+# jupyterlite_bind_ipynb_suffix = True  
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 html_title = f"{project} v{release} Manual"
@@ -60,6 +82,13 @@ html_theme_options = dict(collapse_navigation=True,
 html_context = {
    "default_mode": "light"
 }
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+}
+
 # Plotting options
 plot_include_source = True
 plot_html_show_source_link = False
