@@ -718,7 +718,7 @@ class OctreeNode(TreeNode):
                 if self.data:
                     child.data = [self.data[idx] for idx in ptIds]
                 if len(ptsInChild) > 1: 
-                    if child.size/2 <= minsize:
+                    if child.size/2 < minsize:
                         child.state = 'leaf'
                     else:
                         child.makeChildrenPts(ptsInChild,minsize=minsize,maxsize=maxsize)
@@ -759,8 +759,8 @@ class OctreeNode(TreeNode):
             normalsInChild = TriNormals[triIds]#[TriNormals[idx] for idx in triIds]
             if self.data is not None:
                 child.data = [self.data[idx] for idx in triIds]
-            if len(trisInChild) > 1: 
-                if child.size/2 <= minsize or child.level >= maxdepth:
+            if len(trisInChild) >= 1: 
+                if child.size/2 < minsize or child.level >= maxdepth:
                     child.state = 'leaf'
                 else:
                     child.makeChildrenTris(trisInChild,normalsInChild,minsize=minsize,maxsize=maxsize,maxdepth=maxdepth)
@@ -797,7 +797,7 @@ class OctreeNode(TreeNode):
             if self.data is not None:
                 child.data = [self.data[idx] for idx in boxIds]
             if len(boxesInChild) > 1: 
-                if child.size/2 <= minsize or child.level >= maxdepth:
+                if child.size/2 < minsize or child.level >= maxdepth:
                     child.state = 'leaf'
                 else:
                     child.makeChildrenBoxes(boxesInChild,minsize=minsize,maxsize=maxsize,maxdepth=maxdepth)
@@ -989,10 +989,10 @@ def Surface2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=None, exact_mins
     root : tree.OctreeNode
         Root node of the generate octree
     """    
-    if type(NodeCoords) is list:
-        NodeCoords = np.array(NodeCoords)          
+    # if type(NodeCoords) is list:
+    NodeCoords = np.asarray(NodeCoords, dtype=np.float64)          
     
-    ArrayConn = np.asarray(SurfConn).astype(int)
+    ArrayConn = np.asarray(SurfConn, dtype=np.int64)
 
     minx = min(NodeCoords[:,0])
     maxx = max(NodeCoords[:,0])
@@ -1026,7 +1026,7 @@ def Surface2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=None, exact_mins
     root.state = 'root'
 
     TriNormals = np.array(utils.CalcFaceNormal(NodeCoords,SurfConn))
-    root.makeChildrenTris(NodeCoords[ArrayConn], TriNormals, maxsize=size, minsize=minsize,  maxdepth=maxdepth)
+    root.makeChildrenTris(NodeCoords[ArrayConn], TriNormals, maxsize=size, minsize=minsize, maxdepth=maxdepth)
 
     return root
 
