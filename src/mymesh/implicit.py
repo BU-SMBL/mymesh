@@ -141,11 +141,7 @@ def PlanarMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolati
     if np.sign(threshold_direction) == 1:
         flip = True
     else:
-        flip = False
-
-    
-
-    
+        flip = False   
 
     if mixed_elements:
         # mixed elements currently not supported for MarchingSquaresImage
@@ -656,7 +652,7 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
     M.NodeCoords = M.NodeCoords[:-1]
     return M
 
-def SurfaceReconstruction(M, decimate=1, method='compact', Radius=None):
+def SurfaceReconstruction(M, decimate=1, method='compact', Radius=None, regularization=1e-8, max_points=200):
     """
     Implicit surface reconstruction to convert a mesh into an implicit function
 
@@ -684,13 +680,14 @@ def SurfaceReconstruction(M, decimate=1, method='compact', Radius=None):
     MeanEdge = np.mean(SurfEdgeLengths)
     OffsetDistance =  1*MeanEdge # np.percentile(SurfEdgeLengths, 10)
     if Radius is None:
-        SupportRadius = 10*(MeanEdge/decimate)
+        SupportRadius = 3*(MeanEdge/decimate)
     else:
         SupportRadius = Radius
 
     gaussian = lambda r : np.exp(r**2 * SupportRadius**2)
     biharmonic = lambda r : r
     triharmonic = lambda r : r**3
+    # compact = lambda r : np.maximum(0, (SupportRadius-r))**4 * (4*r + SupportRadius)
     compact = lambda r : np.maximum(0, (SupportRadius-r))**4 * (4*r + SupportRadius)
 
     if decimate != 1:
@@ -699,58 +696,75 @@ def SurfaceReconstruction(M, decimate=1, method='compact', Radius=None):
         nodeset = M.SurfNodes
     SurfCoords = np.asarray(M.NodeCoords)[nodeset] # won't work for mixed-element surfaces
     SurfNormals = M.NodeNormals[nodeset]
-
+    
     PosOffset = SurfCoords + OffsetDistance*SurfNormals
     NegOffset = SurfCoords - OffsetDistance*SurfNormals
-    Coords = np.vstack([SurfCoords, PosOffset, NegOffset])
 
+    Coords = np.vstack([SurfCoords, PosOffset, NegOffset])#, RandCoords])
+    Dists = np.hstack([np.zeros(len(SurfCoords)), np.repeat(OffsetDistance, len(PosOffset)), np.repeat(-OffsetDistance, len(NegOffset))])#, RandDist])
     if method.lower() == 'compact':
         rbf = compact
         tree = KDTree(Coords)
         neighbors = tree.query_ball_point(Coords, SupportRadius)
+        neighbors = [n[:max_points] for n in neighbors]
+        # dists, neighbors = tree.query(Coords, k=k)
         nneighbors = [len(n) for n in neighbors]
         rows = np.repeat(np.arange(len(Coords)), nneighbors)
         cols = np.hstack(neighbors)
-        vals = compact(np.linalg.norm(Coords[rows] - Coords[cols],axis=1))
-        A = sparse.coo_matrix((vals,(rows,cols)), shape=(len(Coords),len(Coords))).tocsr()
-        b = np.hstack([np.zeros(len(SurfCoords)), np.repeat(OffsetDistance, len(PosOffset)), np.repeat(-OffsetDistance, len(NegOffset))])[:,None]
+        vals = rbf(np.linalg.norm(Coords[rows] - Coords[cols],axis=1))
+        A = sparse.coo_matrix((vals,(rows,cols)), shape=(len(Coords),len(Coords)))#.tocsr()
+        b = Dists[:,None]
+
+        A += regularization * sparse.identity(len(Coords))
+        
+        # # Add an additional polynomial term
+        # # p(x,y,z) = c1 + c2*x + c3*y + c4*z
+        # P = np.column_stack([np.ones(len(Coords)), Coords[:,0], Coords[:,1], Coords[:,2]])
+        # Ap = sparse.bmat([[A, P],[P.T, np.zeros((4,4))]]).tocsr()
+
+        # b = np.hstack([Dists, np.zeros(4)])[:,None]
 
         Lambda = sparse.linalg.spsolve(A,b)
 
         def func(x,y,z):
-            x = np.asarray(x)
-            y = np.asarray(y)
-            z = np.asarray(z)
+            x = np.atleast_1d(x)
+            y = np.atleast_1d(y)
+            z = np.atleast_1d(z)
 
-            neighbors = tree.query_ball_point(np.column_stack([x,y,z]), SupportRadius)
-
+            points = np.column_stack([x.ravel(),y.ravel(),z.ravel()])
+            neighbors = tree.query_ball_point(points, SupportRadius)
+            neighbors = [n[:max_points] for n in neighbors]
+            
             rbf_sum = np.array([Lambda[neighbors[i]] @ rbf(np.sqrt((x[i] - Coords[neighbors[i],0])**2 + (y[i] - Coords[neighbors[i],1])**2 + (z[i] - Coords[neighbors[i],2])**2))[:,None] for i in range(len(x))])
 
-            f = rbf_sum
+            # c1, c2, c3, c4 = Lambda[-4:]
+            # poly =  c2*x + c3*y + c4*z
+
+            f = rbf_sum.ravel()# + poly
             return f 
 
-    else:
+    # else:
 
-        A = rbf(np.linalg.norm(Coords - Coords[:, None, :], axis=2))
-        # p(x,y,z) = c1 + c2*x + c3*y + c4*z
-        P = np.column_stack([np.ones(len(Coords)), Coords[:,0], Coords[:,1], Coords[:,2]])
-        Mat = np.block([[A, P],[P.T, np.zeros((4,4))]])
+    #     A = rbf(np.linalg.norm(Coords - Coords[:, None, :], axis=2))
+    #     # p(x,y,z) = c1 + c2*x + c3*y + c4*z
+    #     P = np.column_stack([np.ones(len(Coords)), Coords[:,0], Coords[:,1], Coords[:,2]])
+    #     Mat = np.block([[A, P],[P.T, np.zeros((4,4))]])
 
-        b = np.hstack([np.zeros(len(SurfCoords)), np.repeat(OffsetDistance, len(PosOffset)), np.repeat(-OffsetDistance, len(NegOffset)), np.zeros(4)])[:,None]
+    #     b = np.hstack([np.zeros(len(SurfCoords)), np.repeat(OffsetDistance, len(PosOffset)), np.repeat(-OffsetDistance, len(NegOffset)), np.zeros(4)])[:,None]
 
-        sol = np.linalg.solve(Mat, b)
-        Lambda = sol[:-4,0]
-        cs = sol[-4:,0]
+    #     sol = np.linalg.solve(Mat, b)
+    #     Lambda = sol[:-4,0]
+    #     cs = sol[-4:,0]
 
-        def func(x,y,z):
-            x = np.asarray(x)
-            y = np.asarray(y)
-            z = np.asarray(z)
+    #     def func(x,y,z):
+    #         x = np.asarray(x)
+    #         y = np.asarray(y)
+    #         z = np.asarray(z)
 
-            rbf_sum = np.sum(Lambda*rbf(np.sqrt((x[...,None]-Coords[:,0])**2 + (y[...,None]-Coords[:,1])**2 + (z[...,None]-Coords[:,2])**2)),axis=-1)
+    #         rbf_sum = np.sum(Lambda*rbf(np.sqrt((x[...,None]-Coords[:,0])**2 + (y[...,None]-Coords[:,1])**2 + (z[...,None]-Coords[:,2])**2)),axis=-1)
 
-            f = cs[0] + cs[1]*x + cs[2]*y + cs[3]*z + rbf_sum
-            return f 
+    #         f = cs[0] + cs[1]*x + cs[2]*y + cs[3]*z + rbf_sum
+    #         return f 
 
     return func
 

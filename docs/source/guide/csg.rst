@@ -117,7 +117,7 @@ Explicit CSG
 
 Explicit CSG operates directly on existing meshes, rather than functions or 
 values. This involves calculating intersections between meshes (utilizing 
-:mod:`mymesh.rays` and :mod:`mymesh.octree`) and then splitting and joining 
+:mod:`mymesh.rays` and :mod:`mymesh.tree`) and then splitting and joining 
 elements to create the new mesh. These operations are more computationally 
 demanding and generally slower than implicit CSG, especially for large meshes, 
 but and can be used when no functional representation of a mesh exists. 

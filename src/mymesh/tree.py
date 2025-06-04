@@ -718,7 +718,7 @@ class OctreeNode(TreeNode):
                 if self.data:
                     child.data = [self.data[idx] for idx in ptIds]
                 if len(ptsInChild) > 1: 
-                    if child.size/2 <= minsize:
+                    if child.size/2 < minsize:
                         child.state = 'leaf'
                     else:
                         child.makeChildrenPts(ptsInChild,minsize=minsize,maxsize=maxsize)
@@ -759,8 +759,8 @@ class OctreeNode(TreeNode):
             normalsInChild = TriNormals[triIds]#[TriNormals[idx] for idx in triIds]
             if self.data is not None:
                 child.data = [self.data[idx] for idx in triIds]
-            if len(trisInChild) > 1: 
-                if child.size/2 <= minsize or child.level >= maxdepth:
+            if len(trisInChild) >= 1: 
+                if child.size/2 < minsize or child.level >= maxdepth:
                     child.state = 'leaf'
                 else:
                     child.makeChildrenTris(trisInChild,normalsInChild,minsize=minsize,maxsize=maxsize,maxdepth=maxdepth)
@@ -797,7 +797,7 @@ class OctreeNode(TreeNode):
             if self.data is not None:
                 child.data = [self.data[idx] for idx in boxIds]
             if len(boxesInChild) > 1: 
-                if child.size/2 <= minsize or child.level >= maxdepth:
+                if child.size/2 < minsize or child.level >= maxdepth:
                     child.state = 'leaf'
                 else:
                     child.makeChildrenBoxes(boxesInChild,minsize=minsize,maxsize=maxsize,maxdepth=maxdepth)
@@ -962,7 +962,7 @@ def Voxel2Octree(VoxelCoords, VoxelConn):
     
     return Root
 
-def Surface2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=5):
+def Surface2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=None, exact_minsize=True):
     """
     Generate an octree representation of a triangular surface mesh. The octree
     will be refined until each node contains only one triangle or the maximum
@@ -982,26 +982,18 @@ def Surface2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=5):
         If supplied, octree nodes will not be divided to be smaller than this
         size.
     maxdepth : int, optional
-        Maximum depth of the octree, by default 5
+        Maximum depth of the octree, by default 5 unless minsize is set
 
     Returns
     -------
     root : tree.OctreeNode
         Root node of the generate octree
     """    
-    if type(NodeCoords) is list:
-        NodeCoords = np.array(NodeCoords)          
+    # if type(NodeCoords) is list:
+    NodeCoords = np.asarray(NodeCoords, dtype=np.float64)          
     
-    ArrayConn = np.asarray(SurfConn).astype(int)
-    if minsize is None and maxdepth is None:
-        # By default creates octree with a minimum node size equal to the mean size of a triangle
-        minsize = np.nanmean(np.nanmax([np.linalg.norm(NodeCoords[ArrayConn][:,0] - NodeCoords[ArrayConn][:,1],axis=1),
-            np.linalg.norm(NodeCoords[ArrayConn][:,1] - NodeCoords[ArrayConn][:,2],axis=1),
-            np.linalg.norm(NodeCoords[ArrayConn][:,2] - NodeCoords[ArrayConn][:,0],axis=1)],axis=0
-            ))
-    elif minsize is None and maxdepth is not None:
-        minsize = 0
-        
+    ArrayConn = np.asarray(SurfConn, dtype=np.int64)
+
     minx = min(NodeCoords[:,0])
     maxx = max(NodeCoords[:,0])
     miny = min(NodeCoords[:,1])
@@ -1010,13 +1002,31 @@ def Surface2Octree(NodeCoords, SurfConn, minsize=None, maxdepth=5):
     maxz = max(NodeCoords[:,2])
     
     size = max([maxx-minx,maxy-miny,maxz-minz])
-    centroid = np.array([minx + size/2, miny+size/2, minz+size/2])
+
+    if minsize is not None and exact_minsize:
+        n = np.ceil(np.log2(size/minsize))
+        size = minsize * 2**n
+
+    if minsize is None and maxdepth is None:
+        maxdepth = 5
+        # By default creates octree with a minimum node size equal to the mean size of a triangle
+        # minsize = np.nanmean(np.nanmax([np.linalg.norm(NodeCoords[ArrayConn][:,0] - NodeCoords[ArrayConn][:,1],axis=1),
+        #     np.linalg.norm(NodeCoords[ArrayConn][:,1] - NodeCoords[ArrayConn][:,2],axis=1),
+        #     np.linalg.norm(NodeCoords[ArrayConn][:,2] - NodeCoords[ArrayConn][:,0],axis=1)],axis=0
+        #     ))
+        minsize = size/2**maxdepth
+    elif minsize is None and maxdepth is not None:
+        minsize = size/2**maxdepth
+    elif minsize is not None and maxdepth is None:
+        maxdepth = np.ceil(np.log2(size/minsize))
+    
+    centroid = np.array([(minx + maxx)/2, (miny+maxy)/2, (minz+maxz)/2])
     ElemIds = list(range(len(SurfConn)))
     root = OctreeNode(centroid,size,data=ElemIds)
     root.state = 'root'
 
     TriNormals = np.array(utils.CalcFaceNormal(NodeCoords,SurfConn))
-    root.makeChildrenTris(NodeCoords[ArrayConn], TriNormals, maxsize=size, minsize=minsize,  maxdepth=maxdepth)
+    root.makeChildrenTris(NodeCoords[ArrayConn], TriNormals, maxsize=size, minsize=minsize, maxdepth=maxdepth)
 
     return root
 

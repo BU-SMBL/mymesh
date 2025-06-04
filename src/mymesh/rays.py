@@ -1322,7 +1322,7 @@ def TriangleBoxIntersection(TriCoords, xlim, ylim, zlim, TriNormal=None, BoxCent
         TriNormal = np.array(TriNormal)
     dist = np.dot(TriNormal,v0)
     r = hx*np.abs(TriNormal[0]) + hy*np.abs(TriNormal[1]) + hz*np.abs(TriNormal[2])
-    if dist > r:
+    if abs(dist) > r:
         return False
     
     # Test Axes
@@ -1527,7 +1527,7 @@ def BoxTrianglesIntersection(Tris, xlim, ylim, zlim, TriNormals=None, BoxCenter=
         (np.maximum(np.maximum(v0[:,2],v1[:,2]),v2[:,2]) < -hz) | 
         (np.minimum(np.minimum(v0[:,2],v1[:,2]),v2[:,2]) >  hz) |
         # Test normal of the triangle
-        (dist > r0) |
+        (np.abs(dist) > r0) |
         # Test Axes
         (np.minimum(*ps1) > r1) | (np.maximum(*ps1) < -r1) |
         (np.minimum(*ps2) > r2) | (np.maximum(*ps2) < -r2) |
@@ -2603,8 +2603,10 @@ def PointsInSurf(pts, NodeCoords, SurfConn, ElemNormals=None, Octree='generate',
     if rays is None: 
         rays = np.random.rand(len(pts),3)
         rays /= np.linalg.norm(rays,axis=1)[:,None]
-    if ElemNormals is None:
-        ElemNormals = utils.CalcFaceNormal(NodeCoords, SurfConn)
+        if len(SurfConn[0]) != 3 or not np.all([len(elem)==3 for elem in SurfConn]):
+            NodeCoords, SurfConn = converter.surf2tris(NodeCoords, SurfConn)
+    # if ElemNormals is None:
+    #     ElemNormals = utils.CalcFaceNormal(NodeCoords, SurfConn)
     root = OctreeInputProcessor(NodeCoords, SurfConn, Octree)
     intersections, distances, _ = RaysSurfIntersection(pts,rays,NodeCoords,SurfConn,Octree=root) 
     Insides = np.repeat(False,len(pts))
@@ -2617,9 +2619,10 @@ def PointsInSurf(pts, NodeCoords, SurfConn, ElemNormals=None, Octree='generate',
             dist = min(np.abs(distances[i]))
             if dist < eps:
                 # On surface
-                closest = intersections[i][np.abs(distances[i])==dist][0]
-                dot = np.dot(rays[i],ElemNormals[closest])
-                Insides[i] = dot
+                # closest = intersections[i][np.abs(distances[i])==dist][0]
+                # dot = np.dot(rays[i],ElemNormals[closest])
+                # Insides[i] = dot
+                Insides[i] = False
             else:
                 # Inside
                 Insides[i] = True

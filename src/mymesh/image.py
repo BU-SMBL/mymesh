@@ -533,9 +533,9 @@ def write(impath, I, filetype=None, verbose=True, dtype=np.int16):
         elif filetype == 'tiff':
             try:
                 import tifffile
-                tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), I)
             except:
                 raise ImportError('tifffile needed to write tiffs. Install with `pip install tifffile`.')
+            tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), I)
                     
             # if multichannel:
             #     tifffile.imwrite(os.path.join(imdir, filename_prefix+ext), np.stack(I,axis=-1))

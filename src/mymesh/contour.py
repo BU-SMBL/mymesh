@@ -3536,7 +3536,7 @@ MC33_Signs = np.array([-1,
          1,
          -1])
 
-def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', Type='surf', VertexValues=False, flip=False, edgemode='constant', cleanup=True):
+def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', Type='surf', VertexValues=False, flip=False, mixed_elements=False, edgemode='constant', cleanup=True):
     """
     Marching squares algorithm applied to 2D image data.
 
@@ -3571,6 +3571,10 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', Type=
         Flip the interior/exterior of the mesh, by default False. By default, values less than the threshold are assumed to be the “inside” of the mesh. If the inside is denoted by values greater than the threshold, set flip=True.
     edgemode : str, optional
         For interpolation='cubic', edgemode specifies how to handle boundary nodes. The image matrix will be padded using ``np.pad(I, 1, mode=edgemode)``, by default 'constant'
+    mixed_elements : bool, optional
+        If True and Type='surf', the generated mesh will have mixed element types 
+        (triangles/quadrilateral otherwise a single element type (triangles), by 
+        default False.
     cleanup : bool, optional
         Determines whether or not to perform mesh cleanup, removing degenerate elements and duplicate nodes, by default True
 
@@ -3586,7 +3590,10 @@ def MarchingSquaresImage(I, h=1, threshold=0, z=0, interpolation='linear', Type=
     assert len(I.shape) == 2, 'I must be a 2D numpy array of image data. For 3D, use MarchingCubesImage.'
     I = I - threshold  
     if Type.lower() == 'surf':
-        LookupTable = MSTriangle_Lookup
+        if mixed_elements:
+            LookupTable = MSMixed_Lookup
+        else:
+            LookupTable = MSTriangle_Lookup
     elif Type.lower() == 'line':
         LookupTable = MSEdge_Lookup
     else:

@@ -249,13 +249,21 @@ def QuadFit(NodeCoords,SurfConn,NodeNeighbors,NodeNormals):
                 MinPrincipal[idx] = min(v)
     return MaxPrincipal,MinPrincipal
 
-def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,jit=True):
+def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,jit=True,return_directions=False):
     """
     Mesh based curvatures by cubic surface fitting. Curvatures calculated
     in this way are sensitive to triangulation, with highly skewed triangles
     contributing error.
     From Goldfeather & Interrante (2004).
     :cite:p:`Goldfeather2004`
+
+    If Principal Directions are returned (return_directions=True), the signs
+    of the the directions vectors are not well defined and some may be flipped
+    relative to other adjacent points. Despite this ambiguity, the directions
+    are defined such that cross product of the maximum principal directions
+    with the mininum principal directions 
+    (`np.cross(MaxPrincipalDirection, MinPrincipalDirection)`)
+    are oriented consistently with the normal vectors of the surface. 
 
     Parameters
     ----------
@@ -276,12 +284,21 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,jit=True):
         to the non-rectangular nature of the neighborhoods list. Numba must
         be installed for this option to work, and mymesh.check_numba() should
         return True. 
+    return_directions : bool, optional
+        If True, will return the principal curvature directions as well as 
+        magnitudes
     Returns
     -------
     MaxPrincipal : list
         List of maximum principal curvatures for each node.
     MinPrincipal : list
         List of minimum principal curvatures for each node.
+    MaxPrincipalDirection : np.ndarray, optional
+        Unit vector associated with the maximum principal curvature. Returned if
+        return_directions is True.
+    MinPrincipalDirection : np.ndarray, optional
+        Unit vector associated with the minimum principal curvature. Returned if
+        return_directions is True.
     """    
      # Get nodes to evaluate curvature
     SurfNodes = np.array(list({i for elem in SurfConn for i in elem}))
@@ -290,10 +307,16 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,jit=True):
         NodeNormals = np.asarray(NodeNormals, dtype=np.float64)
         MaxPrincipal = np.repeat(np.nan,len(NodeCoords))
         MinPrincipal = np.repeat(np.nan,len(NodeCoords))
+        if return_directions:
+            MaxPrincipalDirection = np.full_like(NodeCoords, np.nan)
+            MinPrincipalDirection = np.full_like(NodeCoords, np.nan)
         for i in SurfNodes:
             neighborhood = np.append([i],NodeNeighborhoods[i]).astype(np.int64)
             normals = NodeNormals[neighborhood]
-            MaxPrincipal[i], MinPrincipal[i] = _CubicFit(NodeCoords, neighborhood, normals)
+            if return_directions:
+                MaxPrincipal[i], MinPrincipal[i], MaxPrincipalDirection[i], MinPrincipalDirection[i] = _CubicFit(NodeCoords, neighborhood, normals, True)
+            else:
+                MaxPrincipal[i], MinPrincipal[i], _, _ = _CubicFit(NodeCoords, neighborhood, normals, False)
     else:
         # Pad node neighborhoods to be a rectangular array
         if len(SurfNodes) != len(NodeCoords):
@@ -370,6 +393,8 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,jit=True):
 
         MaxPrincipal = np.repeat(np.nan,len(NodeCoords))
         MinPrincipal = np.repeat(np.nan,len(NodeCoords))
+        MaxPrincipalDirection = np.full((len(NodeCoords),3), np.nan)
+        MinPrincipalDirection = np.full((len(NodeCoords),3), np.nan)
         for i,idx in enumerate(SurfNodes):
             amat = Amat[i,~np.any(np.isnan(Amat[i]),axis=1) & ~np.any(np.isnan(Bmat[i]),axis=1)]
             bmat = Bmat[i,~np.any(np.isnan(Amat[i]),axis=1) & ~np.any(np.isnan(Bmat[i]),axis=1)]
@@ -385,12 +410,19 @@ def CubicFit(NodeCoords,SurfConn,NodeNeighborhoods,NodeNormals,jit=True):
                 else:
                     [v,x] = np.linalg.eig(W)
                     MaxPrincipal[idx] = max(v)
-                    MinPrincipal[idx] = min(v)       
+                    MinPrincipal[idx] = min(v)     
+                    if return_directions:
+                        MaxPrincipalDirection[idx] = np.matmul(np.append(x[:,np.argmax(v)],0), np.linalg.inv(R[i,:3,:3]))
+                        MinPrincipalDirection[idx] = np.matmul(np.append(x[:,np.argmin(v)],0), np.linalg.inv(R[i,:3,:3]))
 
+    if return_directions:
+        # Orient MaxPrinxipalDirection to ensure consistency with normal vectors
+        MaxPrincipalDirection[np.sum(NodeNormals * np.cross(MaxPrincipalDirection, MinPrincipalDirection),axis=1) < 0] *= -1
+        return MaxPrincipal, MinPrincipal, MaxPrincipalDirection, MinPrincipalDirection
     return MaxPrincipal,MinPrincipal
 
-@try_njit(cache=True)
-def _CubicFit(NodeCoords, neighborhood, normals):
+@try_njit#(cache=True)
+def _CubicFit(NodeCoords, neighborhood, normals, return_directions=False):
     """
     Calculate cubic fit curvatures for a single node neighborhood. This is for 
     internal use by :func:`CubicFit` only.
@@ -404,6 +436,9 @@ def _CubicFit(NodeCoords, neighborhood, normals):
         first entry in the array.
     normals : np.ndarray(dtype=np.float64)
         Node normal vectors of the nodes in the neighborhood.
+    return_directions : bool, optional
+        If True, will return the principal curvature directions as well as 
+        magnitudes
 
     Returns
     -------
@@ -411,6 +446,12 @@ def _CubicFit(NodeCoords, neighborhood, normals):
         Maximum principal curvature for the first node specified in the neighborhood
     MinPrincipal : np.float64
         Minimum principal curvature for the first node specified in the neighborhood
+    MaxPrincipalDirection : np.ndarray, optional
+        Unit vector associated with the maximum principal curvature. Returned if
+        return_directions is True.
+    MinPrincipalDirection : np.ndarray, optional
+        Unit vector associated with the minimum principal curvature. Returned if
+        return_directions is True.
     """
 
     LocalCoords, R = utils.RotateNormalToVector(NodeCoords[neighborhood], normals[0], np.array([0.,0.,-1.]))
@@ -440,6 +481,9 @@ def _CubicFit(NodeCoords, neighborhood, normals):
     if np.any(np.isnan(Amat)) or np.any(np.isnan(Bmat)):
         MaxPrincipal = np.nan
         MinPrincipal = np.nan
+        if return_directions:
+                MaxPrincipalDirection = np.repeat(np.nan, 3)
+                MinPrincipalDirection = np.repeat(np.nan, 3)
     else:
         A = Amat.T@Amat
         B = Amat.T@Bmat
@@ -449,15 +493,26 @@ def _CubicFit(NodeCoords, neighborhood, normals):
                             [X[1],X[2]]])
             
             [v,x] = np.linalg.eig(W)
-            MaxPrincipal= np.max(v)
+            MaxPrincipal = np.max(v)
             MinPrincipal = np.min(v)
-            
+            if return_directions:
+                # MaxPrincipalDirection = x[:,np.argmax(v)]
+                # MinPrincipalDirection = x[:,np.argmin(v)]
+                MaxPrincipalDirection = np.dot(np.linalg.inv(R[:3,:3]), np.append(x[:,np.argmax(v)],0)[:,None])[:,0]
+                MinPrincipalDirection = np.dot(np.linalg.inv(R[:3,:3]), np.append(x[:,np.argmin(v)],0)[:,None])[:,0]
+                if np.dot(normals[0], np.cross(MaxPrincipalDirection, MinPrincipalDirection)) < 0:
+                    MaxPrincipalDirection *= -1
+            else:
+                MaxPrincipalDirection = np.zeros(3)
+                MinPrincipalDirection = np.zeros(3)
         except:
             # For singular matrix errors
             MaxPrincipal = np.nan
             MinPrincipal = np.nan
-    
-    return MaxPrincipal, MinPrincipal
+            if return_directions:
+                MaxPrincipalDirection = np.repeat(np.nan, 3)
+                MinPrincipalDirection = np.repeat(np.nan, 3)
+    return MaxPrincipal, MinPrincipal, MaxPrincipalDirection, MinPrincipalDirection
 
 def AnalyticalCurvature(func,NodeCoords):
     """
@@ -748,14 +803,9 @@ def MeanCurvature(MaxPrincipal,MinPrincipal):
     mean : list, float
         Single value or list of mean curvatures.
     """    
-    if type(MaxPrincipal) == np.ndarray:
-        MaxPrincipal = MaxPrincipal.tolist()
-    if type(MinPrincipal) == np.ndarray:
-        MinPrincipal = MinPrincipal.tolist()
-    if type(MaxPrincipal) == list and type(MinPrincipal) == list and len(MaxPrincipal) == len(MinPrincipal):
-        mean = [(MaxPrincipal[i] + MinPrincipal[i])/2 for i in range(len(MaxPrincipal))]
-    elif (type(MaxPrincipal) == int or type(MaxPrincipal) == float) and (type(MinPrincipal) == int or type(MinPrincipal) == float):
-        mean = (MaxPrincipal + MinPrincipal)/2
+    
+    mean = (np.asarray(MaxPrincipal) + np.asarray(MinPrincipal))/2
+    
     return mean
 
 def GaussianCurvature(MaxPrincipal,MinPrincipal):
@@ -775,14 +825,9 @@ def GaussianCurvature(MaxPrincipal,MinPrincipal):
     gaussian : list, float
         Single value or list of Gaussian curvatures.
     """  
-    if type(MaxPrincipal) == np.ndarray:
-        MaxPrincipal = MaxPrincipal.tolist()
-    if type(MinPrincipal) == np.ndarray:
-        MinPrincipal = MinPrincipal.tolist()
-    if type(MaxPrincipal) == list and type(MinPrincipal) == list and len(MaxPrincipal) == len(MinPrincipal):
-        gaussian = [MaxPrincipal[i] * MinPrincipal[i] for i in range(len(MaxPrincipal))]
-    elif (type(MaxPrincipal) == int or type(MaxPrincipal) == float) and (type(MinPrincipal) == int or type(MinPrincipal) == float):
-        gaussian = MaxPrincipal * MinPrincipal
+        
+    gaussian = np.asarray(MaxPrincipal) * np.asarray(MinPrincipal)
+    
     return gaussian
 
 def Curvedness(MaxPrincipal,MinPrincipal):

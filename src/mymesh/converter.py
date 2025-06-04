@@ -82,7 +82,7 @@ import numpy as np
 
 from scipy import ndimage, sparse
 import sys, os, warnings, glob, gc, tempfile
-from . import utils, rays, primitives, image
+from . import utils, rays, primitives, image, tree
 
 def solid2surface(NodeCoords,NodeConn,return_SurfElem=False):
     """
@@ -2835,6 +2835,77 @@ def voxel2im(VoxelCoords, VoxelConn, Vals):
     I = np.reshape(Vals,shape,order='F')
     
     return I
+
+def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None):
+    """
+    Convert a mesh to a binarized image. 
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Coordinates of the nodes in the mesh
+    NodeConn : array_like, list
+        Elements in the mesh, defined by the connectivity of nodes
+    voxelsize : float
+        Voxel size of the image, i.e. image resolution in units/voxel
+    fill : bool, optional
+        Option to fill in the volume of the mesh, by default True.
+        If False, only the boundary will be present in the binarized image.
+        The image will only be able to be filled if the surface mesh is closed
+        to the resolution of the image (i.e. if defects/holes in the mesh are
+        sufficiently smaller than the `voxelsize` such that they aren't 
+        resolved by the voxelization, then the image will still be able to be
+        filled).
+    sdf : bool, optional
+        Option make the image a signed distance field using a Euclidean distance
+        transform (:func:`scipy.ndimage.distance_transform_edt`)
+        on the binarized image. The returned image will have values
+        less than zero inside the surface and greater than zero outside the 
+        surface. The magnitude of the values is equal to the distance from the
+        surface. This is intended for use with `fill=True`.
+    Type : str, NoneType, optional
+        Mesh Type ('surf', 'vol'), by default None.
+        If not provided, the Type will be inferred using :func:`~mymesh.utils.identify_type`.
+
+    Returns
+    -------
+    img : np.ndarray
+        Three dimensional binarized (0,1) image of the mesh
+    """
+    if Type is None:
+        Type = utils.identify_type(NodeCoords, NodeConn)    
+        
+    if Type.lower() == 'surf':
+        ElemTypes = utils.identify_elem(NodeCoords, NodeConn)
+        if len(ElemTypes) > 1 or 'tri' not in ElemTypes:
+            TriCoords, TriConn = surf2tris(NodeCoords, NodeConn)
+        else:
+            TriCoords, TriConn = NodeCoords, NodeConn
+
+        root = tree.Surface2Octree(TriCoords, TriConn, minsize=voxelsize)
+        leaves = tree.getAllLeaf(root)
+        # flipping so x,y,z -> 2,1,0
+        centroids = np.array([leaf.centroid for leaf in leaves])[:,::-1] 
+        mins = np.min(centroids, axis=0)
+        maxs = np.max(centroids, axis=0)
+
+        indices = np.round((centroids - mins)/voxelsize).astype(int)
+        shape = np.round((maxs-mins)/voxelsize).astype(int)
+        img = np.zeros(shape+1)
+        img[indices[:,0],indices[:,1],indices[:,2]] = 1
+
+    if fill:
+        img = ndimage.binary_fill_holes(img)
+
+    if sdf:
+        edt = -ndimage.distance_transform_edt(img==1)*voxelsize
+        edt2 = (ndimage.distance_transform_edt(img==0)-1)*voxelsize
+        edt[img==0] = edt2[img==0]
+        return edt
+    
+    return img
+
+
 
 def surf2dual(NodeCoords,SurfConn,Centroids=None,ElemConn=None,NodeNormals=None,sort='ccw'):
     """

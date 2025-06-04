@@ -137,31 +137,34 @@ def LocalLaplacianSmoothing(M, options=dict()):
     maxIter = SmoothOptions['maxIter']
     method = SmoothOptions['method']
 
-    lens = np.array([len(n) for n in NodeNeighbors])
-    len_inv = np.divide(1,lens,out=np.zeros_like(lens,dtype=float),where=lens!=0)
-    r = utils.PadRagged(NodeNeighbors,fillval=-1)
-    ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
+    if len(FreeNodes) > 0:
+        lens = np.array([len(n) for n in NodeNeighbors])
+        len_inv = np.divide(1,lens,out=np.zeros_like(lens,dtype=float),where=lens!=0)
+        r = utils.PadRagged(NodeNeighbors,fillval=-1)
+        ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
+        
+        if SmoothOptions['iterate'] == 'converge':
+            condition = lambda i, U : ((i == 0) | (np.max(U) > tolerance)) & (i < maxIter) 
+        elif isinstance(SmoothOptions['iterate'], (int, np.integer)):
+            condition = lambda i, U : i < SmoothOptions['iterate']
+        else:
+            raise ValueError('options["iterate"] must be "converge" or an integer.')
+        
+        i = 0
+        U = np.zeros((len(NodeCoords),3))
+        Utotal = np.zeros((len(NodeCoords),3))
+        while condition(i, U[FreeNodes]):
+            i += 1
+            Q = ArrayCoords[r]
+            U = len_inv[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
+            Utotal[FreeNodes] += U[FreeNodes]
+            Unorm = np.linalg.norm(Utotal[FreeNodes], axis=1)
+            Utotal[FreeNodes[Unorm > SmoothOptions['limit']]] = Utotal[FreeNodes[Unorm > SmoothOptions['limit']]]/Unorm[Unorm > SmoothOptions['limit']][:,None] * SmoothOptions['limit']
+            ArrayCoords[FreeNodes] = NodeCoords[FreeNodes] + Utotal[FreeNodes]
     
-    if SmoothOptions['iterate'] == 'converge':
-        condition = lambda i, U : ((i == 0) | (np.max(U) > tolerance)) & (i < maxIter) 
-    elif isinstance(SmoothOptions['iterate'], (int, np.integer)):
-        condition = lambda i, U : i < SmoothOptions['iterate']
+        NewCoords = ArrayCoords[:-1]
     else:
-        raise ValueError('options["iterate"] must be "converge" or an integer.')
-    
-    i = 0
-    U = np.zeros((len(NodeCoords),3))
-    Utotal = np.zeros((len(NodeCoords),3))
-    while condition(i, U[FreeNodes]):
-        i += 1
-        Q = ArrayCoords[r]
-        U = len_inv[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
-        Utotal[FreeNodes] += U[FreeNodes]
-        Unorm = np.linalg.norm(Utotal[FreeNodes], axis=1)
-        Utotal[FreeNodes[Unorm > SmoothOptions['limit']]] = Utotal[FreeNodes[Unorm > SmoothOptions['limit']]]/Unorm[Unorm > SmoothOptions['limit']][:,None] * SmoothOptions['limit']
-        ArrayCoords[FreeNodes] = NodeCoords[FreeNodes] + Utotal[FreeNodes]
-
-    NewCoords = ArrayCoords[:-1]
+        NewCoords = NodeCoords
 
     if 'mesh' in dir(mesh):
         Mnew = mesh.mesh(NewCoords, NodeConn, Type=M.Type)
@@ -1347,7 +1350,7 @@ def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='invert
     return NewCoords, NodeConn
 
 ## Local Mesh Topology Operations
-def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, FeatureAngle=25, sizing=None, jit=True):
+def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, FeatureAngle=25, sizing=None):
     """
     Edge contraction for tetrahedral mesh coarsening and quality improvement. 
     Edges with edge length less than `h` will attempt to be contracted. Surfaces
@@ -1398,21 +1401,8 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
     Mnew : mymesh.mesh
         Coarsened tetrahedral mesh
 
-    """
-    # Data structure:
-    #   heap (heapq)
-    #   ElemConnTable (dict)
-    #   EdgeStatus (dict)
-    #   FeatureRank (np.ndarray)
-    #   label_nodes
-
-    import time
-    NewCoords = np.array(M.NodeCoords)
-    NewConn = np.array(M.NodeConn, dtype=np.int64)
-    
+    """    
     Edges = np.sort(M.Edges,axis=1).astype(np.int64)
-    EdgeConn = M.EdgeConn
-    EdgeElemConn = M.EdgeElemConn
     if labels is None:
         SurfConn = np.array(M.SurfConn, dtype=np.int64)
         SurfEdges = np.sort(M.Surface.Edges)
@@ -1437,13 +1427,13 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
         mesh_nodes = np.arange(M.NNode)
         for i,label in enumerate(ulabels):
             if 'mesh' in dir(mesh):
-                m = mesh.mesh(NewCoords, NewConn[labels == label], verbose=False)
+                m = mesh.mesh(M.NodeCoords, M.NodeConn[labels == label], verbose=False)
             else:
-                m = mesh(NewCoords, NewConn[labels == label], verbose=False)
+                m = mesh(M.NodeCoords, M.NodeConn[labels == label], verbose=False)
             
             MultiSurface.addElems(m.SurfConn)
             label_nodes[i,np.unique(m.NodeConn)] = 1
-        MultiSurface.NodeCoords = NewCoords    
+        MultiSurface.NodeCoords = M.NodeCoords    
         MultiSurface.Type = 'surf'
         MultiSurface.NodeConn = MultiSurface.Faces  # This prevents doubling of surface elements at interfaces
         SurfConn = MultiSurface.NodeConn
@@ -1451,7 +1441,6 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
         JunctionEdges = MultiSurface.Edges[np.array([len(conn) > 2 for conn in MultiSurface.EdgeElemConn])]
         JunctionNodes = np.unique(JunctionEdges)
 
-    
     if type(sizing) is str and sizing == 'auto':
         sizing = 2*h
 
@@ -1479,31 +1468,20 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
     surface_nodes = np.unique(SurfEdges)
     surfnodeset = set(surface_nodes)
     fixed_nodes = np.array(list(FixedNodes),dtype=int)
-    feat_edges, feat_corners = utils.DetectFeatures(NewCoords,SurfConn,angle=FeatureAngle)
+    feat_edges, feat_corners = utils.DetectFeatures(M.NodeCoords,SurfConn,angle=FeatureAngle)
 
     # 0 : interior; 1 : surface; 2 : feature edge; 3 : feature corner; 4 : fixed node
-    FeatureRank = np.zeros(len(NewCoords))
+    FeatureRank = np.zeros(len(M.NodeCoords))
     FeatureRank[surface_nodes] = 1
     FeatureRank[feat_edges]    = 2
     FeatureRank[JunctionNodes] = 2
     FeatureRank[feat_corners]  = 3
     FeatureRank[fixed_nodes]   = 4
-    ElemConn = utils.getElemConnectivity(NewCoords, NewConn)
 
     EdgeTuple = list(map(tuple,Edges))
-    if not jit or not check_numba():
-        ElemConnTable = {i : [tuple(NewConn[e]) for e in ElemConn[i]] for i in range(len(ElemConn))}
-    else:
-        tuple4_type = numba.types.UniTuple(numba.int64, 4)
-        ElemConnTable = numba.typed.Dict.empty(key_type=numba.int64, value_type=numba.types.ListType(tuple4_type))
-        for i, elemconn in enumerate(ElemConn):
-            connlist = numba.typed.List.empty_list(tuple4_type)
-            for e in elemconn:
-                connlist.append(tuple(NewConn[e]))
-            
-            ElemConnTable[i] = connlist
+
     # Get edge lengths
-    EdgeDiff = NewCoords[Edges[:,0]] - NewCoords[Edges[:,1]]
+    EdgeDiff = M.NodeCoords[Edges[:,0]] - M.NodeCoords[Edges[:,1]]
     EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
 
     # Create edge heap
@@ -1511,7 +1489,7 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
 
     # EdgeStatus tracks if the edge is in the heap and if the edge is a surface edge, respectively
     # e.g. EdgeStatus[edge] = (True, False)
-    if not jit or not check_numba():
+    if not check_numba():
         EdgeStatus = {edge:((EdgeLengths[i] < emin[edge[0]]) and (EdgeLengths[i] > 0), edge in SurfEdgeSet) for i,edge in enumerate(EdgeTuple)}
     else:
         EdgeStatus = numba.typed.Dict.empty(key_type=numba.types.UniTuple(numba.int64, 2), value_type=numba.types.UniTuple(numba.boolean, 2))
@@ -1530,29 +1508,19 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
     if verbose and tqdm_loaded:
         progress = tqdm.tqdm(total=len(heap))
 
-    tic = time.time()
-    t = 0
+    D = M.mesh2dmesh()
     while len(heap) > 0:
         l, edge = heapq.heappop(heap)
-
         
         if verbose and tqdm_loaded:
             progress.update(1)
             L1 = len(heap)
 
         # Check if collapse is valid:
-        TIC = time.time()
-        if jit:
-            success, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add = _do_collapse(edge, FeatureRank, emin, emax, ElemConnTable, EdgeStatus, NewCoords, label_nodes)
-        else:
-            success, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add = _do_collapse_np(edge, FeatureRank, emin, emax, ElemConnTable, EdgeStatus, NewCoords, label_nodes)
-        t += time.time() - TIC
+        success, D, EdgeStatus, to_add = _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax)
         if success:
             for entry in to_add:
                 heapq.heappush(heap, entry)
-        # If rank is equal, try the other node of the edge
-        # if equal_rank and not success:
-        #     success = do_collapse(collapsenode, targetnode)
         
         if success:
             valid += 1
@@ -1562,247 +1530,9 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
         if verbose and tqdm_loaded:
             L2 = len(heap)
             progress.total += max(0, L2-L1)
-    print(time.time()-tic, t)
     if verbose and tqdm_loaded: print('\n')
-    NewConn = np.array(list(set([elem for i in ElemConnTable.keys() for elem in ElemConnTable[i]])))
-    
-    if labels is not None:
-        # Apply labels to the coarsened mesh
-        filler = np.max(labels) + 1
-        new_labels = np.repeat(filler, len(NewConn))
-        for i,label in enumerate(ulabels):
-            new_labels[np.all(label_nodes[i][NewConn],axis=1)] = label
-
-    if cleanup:
-        NewCoords, NewConn,_ = utils.RemoveNodes(NewCoords, NewConn)
-     
-    if 'mesh' in dir(mesh):
-        Mnew = mesh.mesh(NewCoords, NewConn, verbose=M.verbose, Type='vol')
-    else:
-        Mnew = mesh(NewCoords, NewConn, verbose=M.verbose, Type='vol')
-    if labels is not None:
-        Mnew.ElemData[label_str] = new_labels
-    return Mnew
-
-def TetContract2(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, FeatureAngle=25, sizing=None, jit=True):
-    """
-    Edge contraction for tetrahedral mesh coarsening and quality improvement. 
-    Edges with edge length less than `h` will attempt to be contracted. Surfaces
-    and features are preserved by prioritizing surface/feature nodes over 
-    interior nodes when deciding which node to remove in the edge collapse
-    operation. Features (edges, corners), as determined by 
-    :func:`~mymesh.utils.DetectFeatures`, are held fixed. An edge is only 
-    contracted if doing so doesn't invert any elements or reduce the quality
-    by creating a new element with a lower quality than was present in the 
-    local edge neighborhood before the contraction. Edges are processed in a
-    heap sorted by edge length, with shorter edges being contracted first. New
-    edges created in the edge contraction process are added to the heap, thus 
-    most edges are contracted in the first iteration, however some non-viable
-    contractions may become viable after the first pass, thus multiple iterations
-    can be performed until all possible edges are contracted.
-
-    Parameters
-    ----------
-    M : mymesh.mesh
-        Tetrahedral mesh to be contracted
-    h : float
-        Edge length below which wil be contracted. Using 4/5 of the target
-        edge length is often recommended.
-    FixedNodes : set or array_like, optional
-        Indices of nodes to be held fixed, by default {}
-    verbose : bool, optional
-        If true, will display progress, by default True
-    cleanup : bool, optional
-        If true, unused nodes will be removed from the mesh and nodes will be
-        renumbered, by default True. 
-    labels : str or array_like, optional
-        Element labels used to identify separate regions (e.g. materials) within
-        a mesh, by default None. If provided as a string, the string must
-        refer to an entry in `M.ElemData`, otherwise must be an array_like with
-        the number of entries equal to the number of elements (`M.NElem`).
-        Providing labels will preserve the interface and interface features
-        between regions of differening labels. The labels of the new mesh will
-        be stored in the ElemData of the returned mesh, either in 
-        ElemData['labels'] (if labels were provided as an array), or the entry
-        matching the original ElemData entry (if labels were provided as a 
-        string).
-    FeatureAngle : int, optional
-        Angle (in degrees) used to identify features, by default 25. See
-        :func:`~mymesh.utils.DetectFeatures` for more information.
-
-    Returns
-    -------
-    Mnew : mymesh.mesh
-        Coarsened tetrahedral mesh
-
-    """
-    # Data structure:
-    #   heap (heapq)
-    #   ElemConnTable (dict)
-    #   EdgeStatus (dict)
-    #   FeatureRank (np.ndarray)
-    #   label_nodes
-
-    import time
-    
-    T = M.mesh2dmesh()
-
-    Edges = np.sort(M.Edges,axis=1).astype(np.int64)
-    if labels is None:
-        SurfConn = np.array(M.SurfConn, dtype=np.int64)
-        SurfEdges = np.sort(M.Surface.Edges)
-        JunctionNodes = np.array([],dtype=np.int64)
-        label_nodes = None
-    else:
-        if isinstance(labels, str):
-            if labels in M.ElemData.keys():
-                label_str = labels
-                labels = M.ElemData[label_str]
-            else:
-                raise ValueError('If provided as a string, labels must correspond to an entry in M.ElemData')
-        else:
-            label_str = 'labels'
-        assert len(labels) == M.NElem, 'labels must correspond to the number of elements.'
-        if 'mesh' in dir(mesh):
-            MultiSurface = mesh.mesh(verbose=False)
-        else:
-            MultiSurface = mesh(verbose=False)
-        ulabels = np.unique(labels)
-        label_nodes = np.zeros((len(ulabels),M.NNode),dtype=int) # For each label, boolean indicator of whether each node is touching an element with that label
-        mesh_nodes = np.arange(M.NNode)
-        for i,label in enumerate(ulabels):
-            if 'mesh' in dir(mesh):
-                m = mesh.mesh(T.NodeCoords, T.NodeConn[labels == label], verbose=False)
-            else:
-                m = mesh(T.NodeCoords, T.NodeConn[labels == label], verbose=False)
-            
-            MultiSurface.addElems(m.SurfConn)
-            label_nodes[i,np.unique(m.NodeConn)] = 1
-        MultiSurface.NodeCoords = T.NodeCoords    
-        MultiSurface.Type = 'surf'
-        MultiSurface.NodeConn = MultiSurface.Faces  # This prevents doubling of surface elements at interfaces
-        SurfConn = MultiSurface.NodeConn
-        SurfEdges = np.sort(MultiSurface.Edges)
-        JunctionEdges = MultiSurface.Edges[np.array([len(conn) > 2 for conn in MultiSurface.EdgeElemConn])]
-        JunctionNodes = np.unique(JunctionEdges)
-
-    
-    if type(sizing) is str and sizing == 'auto':
-        sizing = 2*h
-
-    if sizing is None:
-        emin = np.repeat(4*h/5, M.NNode)
-        emax = np.repeat(4*h/3, M.NNode)
-    elif isinstance(sizing, (float, int)):
-        if labels is None:
-            Surface = M.Surface
-        else:
-            Surface = MultiSurface
-
-        udf = implicit.mesh2udf(Surface, M.NodeCoords)
-        sizing = (sizing - h)*udf + h
-        emin = 4*sizing/5
-        emax = 4*sizing/3
-    else:
-        emin = 4*sizing/5
-        emax = 4*sizing/3
-    
-    SurfEdgeSet = set(tuple(e) for e in SurfEdges)
-        
-    # Detect Features
-    # TODO: Some redundant calculation (edges) occurs in DetectFeatures
-    surface_nodes = np.unique(SurfEdges)
-    surfnodeset = set(surface_nodes)
-    fixed_nodes = np.array(list(FixedNodes),dtype=int)
-    feat_edges, feat_corners = utils.DetectFeatures(T.NodeCoords,SurfConn,angle=FeatureAngle)
-
-    # 0 : interior; 1 : surface; 2 : feature edge; 3 : feature corner; 4 : fixed node
-    FeatureRank = np.zeros(len(T.NodeCoords))
-    FeatureRank[surface_nodes] = 1
-    FeatureRank[feat_edges]    = 2
-    FeatureRank[JunctionNodes] = 2
-    FeatureRank[feat_corners]  = 3
-    FeatureRank[fixed_nodes]   = 4
-
-    # ElemConn = utils.getElemConnectivity(NewCoords, NewConn)
-
-    EdgeTuple = list(map(tuple,Edges))
-    # if not jit or not check_numba():
-    #     ElemConnTable = {i : [tuple(NewConn[e]) for e in ElemConn[i]] for i in range(len(ElemConn))}
-    # else:
-    #     tuple4_type = numba.types.UniTuple(numba.int64, 4)
-    #     ElemConnTable = numba.typed.Dict.empty(key_type=numba.int64, value_type=numba.types.ListType(tuple4_type))
-    #     for i, elemconn in enumerate(ElemConn):
-    #         connlist = numba.typed.List.empty_list(tuple4_type)
-    #         for e in elemconn:
-    #             connlist.append(tuple(NewConn[e]))
-            
-    #         ElemConnTable[i] = connlist
-
-
-
-    # Get edge lengths
-    EdgeDiff = T.NodeCoords[Edges[:,0]] - T.NodeCoords[Edges[:,1]]
-    EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
-
-    # Create edge heap
-    heap = [(EdgeLengths[i], edge) for i,edge in enumerate(EdgeTuple) if (EdgeLengths[i] < emin[edge[0]]) and (EdgeLengths[i] > 0)]
-
-    # EdgeStatus tracks if the edge is in the heap and if the edge is a surface edge, respectively
-    # e.g. EdgeStatus[edge] = (True, False)
-    if not jit or not check_numba():
-        EdgeStatus = {edge:((EdgeLengths[i] < emin[edge[0]]) and (EdgeLengths[i] > 0), edge in SurfEdgeSet) for i,edge in enumerate(EdgeTuple)}
-    else:
-        EdgeStatus = numba.typed.Dict.empty(key_type=numba.types.UniTuple(numba.int64, 2), value_type=numba.types.UniTuple(numba.boolean, 2))
-        for i,edge in enumerate(EdgeTuple):
-            EdgeStatus[edge] = ((EdgeLengths[i] < emin[edge[0]]) and (EdgeLengths[i] > 0), edge in SurfEdgeSet)
-
-    heapq.heapify(heap)
-    loop = 0; valid = 1;
-    if verbose and 'tqdm' in sys.modules:
-        tqdm_loaded = True
-    else:
-        tqdm_loaded = False
-    if verbose: print(f'TetContract:', end='')
-    valid = 0
-    invalid = 0
-    if verbose and tqdm_loaded:
-        progress = tqdm.tqdm(total=len(heap))
-
-    tic = time.time()
-    t = 0
-    while len(heap) > 0:
-        l, edge = heapq.heappop(heap)
-
-        
-        if verbose and tqdm_loaded:
-            progress.update(1)
-            L1 = len(heap)
-
-        # Check if collapse is valid:
-        TIC = time.time()
-        success, T, EdgeStatus, to_add = _do_collapse_tm(T, EdgeStatus, edge, FeatureRank, emin, emax)
-        t += time.time() - TIC
-        if success:
-            for entry in to_add:
-                heapq.heappush(heap, entry)
-        # If rank is equal, try the other node of the edge
-        # if equal_rank and not success:
-        #     success = do_collapse(collapsenode, targetnode)
-        
-        if success:
-            valid += 1
-        else:
-            invalid += 1
-        
-        if verbose and tqdm_loaded:
-            L2 = len(heap)
-            progress.total += max(0, L2-L1)
-    print(time.time()-tic, t)
-    if verbose and tqdm_loaded: print('\n')
-    # NewConn = np.array(list(set([elem for i in ElemConnTable.keys() for elem in ElemConnTable[i]])))
-    NewCoords = T.NodeCoords[:T.NNode]
-    NewConn = T.NodeConn[:T.NElem]
+    NewCoords = D.NodeCoords
+    NewConn = D.NodeConn
     if labels is not None:
         # Apply labels to the coarsened mesh
         filler = np.max(labels) + 1
@@ -1822,194 +1552,7 @@ def TetContract2(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None
     return Mnew
 
 @try_njit(cache=True)
-def _do_collapse(edge, FeatureRank, emin, emax, ElemConnTable, EdgeStatus, NewCoords, label_nodes):
-
-    # to_add = []
-    to_add = numba.typed.List()
-    node1 = edge[0]
-    node2 = edge[1]
-    EdgeStatus[edge] = (False, EdgeStatus[edge][1])
-    # Validity checks
-    if len(ElemConnTable[node1]) == 0 or len(ElemConnTable[node2]) == 0:
-        # Edge has already been removed
-        return False, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-    elif FeatureRank[node1] == FeatureRank[node2] == 4:
-        # Both nodes are fixed, can't collapse this edge
-        return False, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-    elif FeatureRank[node1] > 0 and FeatureRank[node2] > 0 and not EdgeStatus[edge][1]:
-        # Both nodes are on the surface, but they're not connected by a
-        # surface edge -> connected through the body -> invalid
-        return False, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-    elif FeatureRank[node1] > 1 and FeatureRank[node2] > 1:
-        # This holds all edges and corners fixed
-        # TODO: I'd prefer not to have this test, but another one that 
-        # prevents that inconsistencies that this prevents
-        return False, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-
-    # Determine which node to collapse
-    if FeatureRank[node1] < FeatureRank[node2]:
-        collapsenode = node1
-        targetnode = node2
-        equal_rank = False
-    elif FeatureRank[node1] > FeatureRank[node2]:
-        collapsenode = node2
-        targetnode = node1
-        equal_rank = False
-    else:
-        collapsenode = node1
-        targetnode = node2
-        equal_rank = True 
-
-    
-    # Get affected elements
-    affectedelems = set([elem for elem in ElemConnTable[collapsenode]]).union(set([elem for elem in ElemConnTable[targetnode]]))
-    # AffectedConn = np.empty((len(ElemConnTable[collapsenode]), 4),dtype=np.int64)
-    AffectedConn = np.empty((len(affectedelems), 4),dtype=np.int64)
-    collapsed = np.repeat(False, len(AffectedConn))
-    for i, elem in enumerate(affectedelems):
-        AffectedConn[i] = elem
-        if targetnode in elem and collapsenode in elem:
-            collapsed[i] = True
-
-    UpdatedConn = AffectedConn[~collapsed]
-    if len(UpdatedConn) == 0:
-        success = False
-        return success, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-        
-    for i, elem in enumerate(UpdatedConn):
-        for j, node in enumerate(elem):
-            if node == collapsenode:
-                UpdatedConn[i,j] = targetnode
-
-    if FeatureRank[targetnode] == FeatureRank[collapsenode]:
-        coordbk = np.copy(NewCoords[targetnode])
-        NewCoords[targetnode] = (NewCoords[targetnode] + NewCoords[collapsenode])/2
-    else:
-        coordbk = None
-
-    # Check for creation of edges that are too long
-    newedges = []
-    Ls = []
-    edgenodes = list(set([n for n in UpdatedConn.flatten() if n!=targetnode]))
-    for edgenode in edgenodes:
-        newedge = sorted((edgenode, targetnode))
-        L = np.linalg.norm(NewCoords[newedge[0]]-NewCoords[newedge[1]])
-        if L > (emax[newedge[0]]+emax[newedge[1]])/2:
-            if coordbk is not None:
-                NewCoords[targetnode] = coordbk
-            success = False
-            return success, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-        newedges.append(newedge)
-        Ls.append(L)
-
-    # Check volume
-    new_vol = quality.tet_volume(NewCoords, UpdatedConn)
-    if np.any(new_vol <= 0):
-        if coordbk is not None:
-            NewCoords[targetnode] = coordbk
-        success = False
-        return success, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-
-    # Check for inversion of normals (leads to folds on the surface)
-    if FeatureRank[targetnode] >= 1:        
-        for i, elem in enumerate(UpdatedConn):
-            faces = np.array([[elem[0], elem[2], elem[1]],
-                [elem[0], elem[1], elem[3]],
-                [elem[1], elem[2], elem[3]],
-                [elem[0], elem[3], elem[2]]])
-            surface_indicators = np.array([FeatureRank[elem[0]] >= 1 and FeatureRank[elem[2]] >= 1 and FeatureRank[elem[1]] >= 1,
-                                        FeatureRank[elem[0]] >= 1 and FeatureRank[elem[1]] >= 1 and FeatureRank[elem[3]] >= 1,
-                                        FeatureRank[elem[1]] >= 1 and FeatureRank[elem[2]] >= 1 and FeatureRank[elem[3]] >= 1,
-                                        FeatureRank[elem[0]] >= 1 and FeatureRank[elem[3]] >= 1 and FeatureRank[elem[2]] >= 1])
-
-            if np.any(surface_indicators):
-                faces = faces[surface_indicators]
-                if len(faces) > 0:
-                    points = np.empty((faces.shape[0], faces.shape[1], 3), dtype=np.float64)
-                    for i, face in enumerate(faces):
-                        points[i] = NewCoords[face]
-                    n2 = utils._tri_normals(points)
-
-                    for i, face in enumerate(faces):
-                        face[face == targetnode] = collapsenode
-                        points[i] = NewCoords[face]
-                    n1 = utils._tri_normals(points)
-                    
-                    dots = np.array([n1[i][0]*n2[i][0] + n1[i][1]*n2[i][1] + n1[i][2]*n2[i][2] for i in range(len(n1))])
-                    # if np.any(np.sum(n1*n2, axis=1) < np.cos(np.pi/12)):
-                    if np.any(dots < 0.9659): #np.cos(np.pi/12))
-                        # if the angle of the normal vector changes by more than 15 degrees, reject the collapse
-                        if coordbk is not None:
-                            NewCoords[targetnode] = coordbk
-                        success = False
-                        return success, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-    
-    # Flip is valid, update data structures
-    new_elems = set([(e[0], e[1], e[2], e[3]) for e in UpdatedConn])
-
-    
-    old_elems = set()
-    old_nodes = set()
-    for i in range(len(AffectedConn)):
-        elem = AffectedConn[i]
-        old_elems.add((elem[0], elem[1], elem[2], elem[3]))
-        old_nodes.update(elem)
-        
-    for node in old_nodes:
-        
-        # Remove references to old elements from table  
-        # elems = numba.typed.List([elem for elem in ElemConnTable[node] if elem not in old_elems])
-        elems = numba.typed.List(set(ElemConnTable[node]).difference(old_elems))
-
-        if len(elems) > 0:
-            ElemConnTable[node] = elems
-        else:
-            ElemConnTable[node].clear()
-
-        for elem in new_elems:
-            if node in elem:
-                ElemConnTable[node].append(elem)
-
-    for elem in new_elems:
-        if elem not in ElemConnTable[targetnode]:
-            ElemConnTable[targetnode].append(elem)
-    # ElemConnTable[targetnode] = numba.typed.List(numba.typed.Set(ElemConnTable[targetnode]).union(new_elems)) 
-    # Add new elements to the target node
-    if label_nodes is not None:
-        label_nodes[:,targetnode] = label_nodes[:,collapsenode] | label_nodes[:,targetnode]
-
-    # Remove all elements from the collapsed node
-    ElemConnTable[collapsenode].clear()
-    
-    # Add new edges to the heap
-    for newedge, L, edgenode in zip(newedges,Ls,edgenodes):
-        newedge = sorted((edgenode, targetnode))
-        newedge = (newedge[0], newedge[1])
-        if newedge in EdgeStatus:
-            if EdgeStatus[newedge][0]:
-                # skip if edge is already in the heap
-                continue
-        
-        if L < (emin[newedge[0]]+emin[newedge[1]])/2:
-            to_add.append((L, newedge))
-            added = True
-        else:
-            added = False
-
-        # All nodes that are newly connected to the target node
-        # if SurfEdgeTable[tuple(sorted((edgenode, collapsenode)))]:
-        oldedge = sorted((edgenode, collapsenode))
-        oldedge = (oldedge[0], oldedge[1])
-        if oldedge in EdgeStatus and EdgeStatus[oldedge][1]:
-            EdgeStatus[newedge] = (added, True)
-        else:
-            EdgeStatus[newedge] = (added, False)
-        
-    success = True
-    return success, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-
-@try_njit(cache=True)
-def _do_collapse_tm(T, EdgeStatus, edge, FeatureRank, emin, emax):
+def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax):
     
     to_add = []
     # to_add = numba.typed.List()
@@ -2017,23 +1560,23 @@ def _do_collapse_tm(T, EdgeStatus, edge, FeatureRank, emin, emax):
     node2 = edge[1]
     EdgeStatus[edge] = (False, EdgeStatus[edge][1])
     # Validity checks
-    elemconn1 = T.getElemConn(node1)
-    elemconn2 = T.getElemConn(node2)
+    elemconn1 = D.getElemConn(node1)
+    elemconn2 = D.getElemConn(node2)
     if len(elemconn1) == 0 or len(elemconn2) == 0:
         # Edge has already been removed
-        return False, T, EdgeStatus, to_add
+        return False, D, EdgeStatus, to_add
     elif FeatureRank[node1] == FeatureRank[node2] == 4:
         # Both nodes are fixed, can't collapse this edge
-        return False, T, EdgeStatus, to_add
+        return False, D, EdgeStatus, to_add
     elif FeatureRank[node1] > 0 and FeatureRank[node2] > 0 and not EdgeStatus[edge][1]:
         # Both nodes are on the surface, but they're not connected by a
         # surface edge -> connected through the body -> invalid
-        return False, T, EdgeStatus, to_add
+        return False, D, EdgeStatus, to_add
     elif FeatureRank[node1] > 1 and FeatureRank[node2] > 1:
         # This holds all edges and corners fixed
         # TODO: I'd prefer not to have this test, but another one that 
         # prevents that inconsistencies that this prevents
-        return False, T, EdgeStatus, to_add
+        return False, D, EdgeStatus, to_add
 
     # Determine which node to collapse
     if FeatureRank[node1] < FeatureRank[node2]:
@@ -2059,17 +1602,17 @@ def _do_collapse_tm(T, EdgeStatus, edge, FeatureRank, emin, emax):
     affectedelems = np.array(list(set(elemconn1).union(set(elemconn2))))
     collapsed = np.repeat(False, len(affectedelems))
     for i, elem in enumerate(affectedelems):
-        if targetnode in T.NodeConn[elem] and collapsenode in T.NodeConn[elem]:
+        if targetnode in D.NodeConn[elem] and collapsenode in D.NodeConn[elem]:
             collapsed[i] = True
     
     if np.all(collapsed):
-        return False, T, EdgeStatus, to_add
+        return False, D, EdgeStatus, to_add
     
     # construct the updated local mesh
     updatedelems = affectedelems[~collapsed]
     UpdatedConn = np.empty((len(updatedelems),4), dtype=np.int64)
     for i, elem in enumerate(updatedelems):
-        for j, node in enumerate(T.NodeConn[elem]):
+        for j, node in enumerate(D.NodeConn[elem]):
             if node == collapsenode:
                 UpdatedConn[i,j] = targetnode
             else:
@@ -2077,8 +1620,8 @@ def _do_collapse_tm(T, EdgeStatus, edge, FeatureRank, emin, emax):
 
     if FeatureRank[targetnode] == FeatureRank[collapsenode]:
         # Move the target node to the midpoint of the edge
-        coordbk = np.copy(T.NodeCoords[targetnode])
-        T.NodeCoords[targetnode] = (T.NodeCoords[targetnode] + T.NodeCoords[collapsenode])/2
+        coordbk = np.copy(D.NodeCoords[targetnode])
+        D.NodeCoords[targetnode] = (D.NodeCoords[targetnode] + D.NodeCoords[collapsenode])/2
     else:
         coordbk = None
 
@@ -2089,20 +1632,20 @@ def _do_collapse_tm(T, EdgeStatus, edge, FeatureRank, emin, emax):
     edgenodes = np.unique(np.array([n for elem in UpdatedConn for n in elem if n!=targetnode]))
     for edgenode in edgenodes:
         newedge = sorted((edgenode, targetnode))
-        L = np.linalg.norm(T.NodeCoords[newedge[0]]-T.NodeCoords[newedge[1]])
+        L = np.linalg.norm(D.NodeCoords[newedge[0]]-D.NodeCoords[newedge[1]])
         if L > (emax[newedge[0]]+emax[newedge[1]])/2:
             if coordbk is not None:
-                T.NodeCoords[targetnode] = coordbk
-            return False, T, EdgeStatus, to_add
+                D.NodeCoords[targetnode] = coordbk
+            return False, D, EdgeStatus, to_add
         newedges.append(newedge)
         Ls.append(L)
 
     # Check volume
-    new_vol = quality.tet_volume(T.NodeCoords, UpdatedConn)
+    new_vol = quality.tet_volume(D.NodeCoords, UpdatedConn)
     if np.any(new_vol <= 0):
         if coordbk is not None:
-            T.NodeCoords[targetnode] = coordbk
-        return False, T, EdgeStatus, to_add
+            D.NodeCoords[targetnode] = coordbk
+        return False, D, EdgeStatus, to_add
 
     # Check for inversion of normals (leads to folds on the surface)
     if FeatureRank[targetnode] >= 1:        
@@ -2121,12 +1664,12 @@ def _do_collapse_tm(T, EdgeStatus, edge, FeatureRank, emin, emax):
                 if len(faces) > 0:
                     points = np.empty((faces.shape[0], faces.shape[1], 3), dtype=np.float64)
                     for i, face in enumerate(faces):
-                        points[i] = T.NodeCoords[face]
+                        points[i] = D.NodeCoords[face]
                     n2 = utils._tri_normals(points)
 
                     for i, face in enumerate(faces):
                         face[face == targetnode] = collapsenode
-                        points[i] = T.NodeCoords[face]
+                        points[i] = D.NodeCoords[face]
                     n1 = utils._tri_normals(points)
                     
                     dots = np.array([n1[i][0]*n2[i][0] + n1[i][1]*n2[i][1] + n1[i][2]*n2[i][2] for i in range(len(n1))])
@@ -2134,14 +1677,14 @@ def _do_collapse_tm(T, EdgeStatus, edge, FeatureRank, emin, emax):
                     if np.any(dots < 0.9659): #np.cos(np.pi/12))
                         # if the angle of the normal vector changes by more than 15 degrees, reject the collapse
                         if coordbk is not None:
-                            T.NodeCoords[targetnode] = coordbk
-                        return False, T, EdgeStatus, to_add
+                            D.NodeCoords[targetnode] = coordbk
+                        return False, D, EdgeStatus, to_add
     
     # Flip is valid, update data structures
     
     for elem in sorted(affectedelems[collapsed])[::-1]:
-        T.removeElem(elem)
-    T.swapNode(collapsenode, targetnode)  
+        D.removeElem(elem)
+    D.swapNode(collapsenode, targetnode)  
     # Add new edges to the heap
     for newedge, L, edgenode in zip(newedges,Ls,edgenodes):
         newedge = sorted((edgenode, targetnode))
@@ -2172,155 +1715,7 @@ def _do_collapse_tm(T, EdgeStatus, edge, FeatureRank, emin, emax):
             EdgeStatus[newedge] = (added, False)
     
     success = True
-    return success, T, EdgeStatus, to_add
-
-def _do_collapse_np(edge, FeatureRank, emin, emax, ElemConnTable, EdgeStatus, NewCoords, label_nodes):
-    to_add = []
-    node1 = edge[0]
-    node2 = edge[1]
-    EdgeStatus[edge] = (False, EdgeStatus[edge][1])
-    # Validity checks
-    if len(ElemConnTable[node1]) == 0 or len(ElemConnTable[node2]) == 0:
-        # Edge has already been removed
-        return False, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-    elif FeatureRank[node1] == FeatureRank[node2] == 4:
-        # Both nodes are fixed, can't collapse this edge
-        return False, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-    elif FeatureRank[node1] > 0 and FeatureRank[node2] > 0 and not EdgeStatus[edge][1]:
-        # Both nodes are on the surface, but they're not connected by a
-        # surface edge -> connected through the body -> invalid
-        return False, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-    elif FeatureRank[node1] > 1 and FeatureRank[node2] > 1:
-        # This holds all edges and corners fixed
-        # TODO: I'd prefer not to have this test, but another one that 
-        # prevents that inconsistencies that this prevents
-        return False, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-
-    # Determine which node to collapse
-    if FeatureRank[node1] < FeatureRank[node2]:
-        collapsenode = node1
-        targetnode = node2
-        equal_rank = False
-    elif FeatureRank[node1] > FeatureRank[node2]:
-        collapsenode = node2
-        targetnode = node1
-        equal_rank = False
-    else:
-        # if ranks are equal, try node1, but if fails, can retry with node 2
-        collapsenode = node1
-        targetnode = node2
-        equal_rank = True 
-    # Get affected elements
-    affectedelems = set([elem for elem in ElemConnTable[collapsenode]]).union(set([elem for elem in ElemConnTable[targetnode]]))
-    AffectedConn = np.array(list(affectedelems))
-    
-    # Update elements
-    collapsed = np.any(AffectedConn==targetnode, axis=1) & np.any(AffectedConn==collapsenode, axis=1)
-    UpdatedConn = AffectedConn[~collapsed]
-    if len(UpdatedConn) == 0:
-        success = False
-        return success, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-        
-    UpdatedConn[UpdatedConn == collapsenode] = targetnode
-
-    if FeatureRank[targetnode] == FeatureRank[collapsenode]:
-        coordbk = np.copy(NewCoords[targetnode])
-        NewCoords[targetnode] = (NewCoords[targetnode] + NewCoords[collapsenode])/2
-    else:
-        coordbk = None
-    # Check for inversion of normals (leads to folds on the surface)
-    if FeatureRank[targetnode] >= 1:
-        faces = converter.tet2faces(NewCoords, UpdatedConn)
-        faces = faces[np.all(FeatureRank[faces] >= 1, axis=1)]
-        # faces = faces[np.any(faces == collapsenode, axis=1)]
-        if len(faces) > 0:
-            n2 = utils._tri_normals(NewCoords[faces]) # Updated normals
-
-            # Surface edge
-            faces[faces == targetnode] = collapsenode
-            n1 = utils._tri_normals(NewCoords[faces]) # Original normals
-            
-            if np.any(np.sum(n1*n2, axis=1) < np.cos(np.pi/12)):
-                # if the angle of the normal vector changes by more than 15 degrees, reject the collapse
-                if coordbk is not None:
-                    NewCoords[targetnode] = coordbk
-                success = False
-                return success, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-    # Check volume
-    new_vol = quality.tet_volume(NewCoords, UpdatedConn)
-    if np.any(new_vol <= 0):
-        if coordbk is not None:
-            NewCoords[targetnode] = coordbk
-        success = False
-        return success, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-
-    newedges = []
-    Ls = []
-    edgenodes = list(set(UpdatedConn[UpdatedConn != targetnode]))
-    # Check for creation of edges that are too long
-    for edgenode in edgenodes:
-        newedge = sorted((edgenode, targetnode))
-        L = np.linalg.norm(np.diff(NewCoords[newedge],axis=0))
-        if L > (emax[newedge[0]]+emax[newedge[1]])/2:
-            if coordbk is not None:
-                NewCoords[targetnode] = coordbk
-            success = False
-            return success, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
-        newedges.append(newedge)
-        Ls.append(L)
-
-    # Flip is valid, update data structures
-    new_elems = [tuple(e) for e in UpdatedConn]
-    old_elems = [tuple(e) for e in AffectedConn]
-    for node in set([n for elem in old_elems for n in elem]):
-        # Remove old nodes from the table  
-        elems = numba.typed.List([elem for elem in ElemConnTable[node] if elem not in set(old_elems)])
-        if len(elems) > 0:
-            ElemConnTable[node] = elems
-        else:
-            ElemConnTable[node].clear()
-
-        for elem in new_elems:
-            if node in elem:
-                ElemConnTable[node].append(elem)
-        
-    # Add new elements to the target node
-    # ElemConnTable[targetnode].update(new_elems)
-    ElemConnTable[targetnode] = list(set(ElemConnTable[targetnode]).union(new_elems))
-    if label_nodes is not None:
-        label_nodes[:,targetnode] = label_nodes[:,collapsenode] | label_nodes[:,targetnode]
-
-    # Remove all elements from the collapsed node
-    ElemConnTable[collapsenode] = set()
-    
-    # Add new edges to the heap
-    for newedge, L, edgenode in zip(newedges,Ls,edgenodes):
-        newedge = tuple(sorted((edgenode, targetnode)))
-        if EdgeStatus.get(newedge, (False, False))[0]:
-            # skip if edge is already in the heap
-            continue
-
-        if L < (emin[newedge[0]]+emin[newedge[1]])/2:
-            to_add.append((L, newedge))
-            added = True
-        else:
-            added = False
-
-        # All nodes that are newly connected to the target node
-        # if SurfEdgeTable[tuple(sorted((edgenode, collapsenode)))]:
-        oldedge = tuple(sorted((edgenode, collapsenode)))
-        if oldedge in EdgeStatus and EdgeStatus[oldedge][1]:
-            # SurfEdgeTable[newedge] = True
-            EdgeStatus[newedge] = (added, True)
-        else:
-            # SurfEdgeTable[newedge] = False
-            EdgeStatus[newedge] = (added, False)
-        
-        # if L < (emin[newedge[0]]+emin[newedge[1]])/2:
-        #     heapq.heappush(heap, (L, newedge))
-        #     inheap[newedge] = True
-    success = True
-    return success, ElemConnTable, EdgeStatus, NewCoords, label_nodes, to_add
+    return success, D, EdgeStatus, to_add
 
 def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
     """
@@ -2377,14 +1772,7 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
 
     """
     
-    # Setup Data Structures
-    NodeCoords = np.asarray(M.NodeCoords)
-    NodeConn = np.asarray(M.NodeConn)
-    N = len(NodeCoords)
-    Edges = [tuple(edge) for edge in np.sort(M.Edges,axis=1)]
-    Elems = [tuple(elem) for elem in M.NodeConn]
-    EdgeTable = {edge:tuple(Elems[ielem] for ielem in M.EdgeElemConn[i]) for i,edge in enumerate(Edges)}
-    NodeTable = {i:coord for i,coord in enumerate(NodeCoords)}
+    Edges = np.sort(M.Edges,axis=1).astype(np.int64)
     if labels is not None:
         if isinstance(labels, str):
             if labels in M.ElemData.keys():
@@ -2395,18 +1783,12 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
         else:
             label_str = 'labels'
         assert len(labels) == M.NElem, 'labels must correspond to the number of elements.'
-        ElemLabels = {elem:labels[i] for i,elem in enumerate(Elems)}
-        
-    ## Get edge lengths
-    EdgeDiff = NodeCoords[M.Edges[:,0]] - NodeCoords[M.Edges[:,1]]
-    EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
-
-    if type(sizing) is str and sizing == 'auto':
-        sizing = 2*h
+    else:
+        labels = np.empty(0, np.int64)
 
     if sizing is None:
-        node_cutoff = None
-        cutoff = np.repeat(h, M.NEdge)
+        emin = np.repeat(4*h/5, M.NNode)
+        emax = np.repeat(4*h/3, M.NNode)
     elif isinstance(sizing, (float, int)):
         if labels is None:
             Surface = M.Surface
@@ -2420,6 +1802,8 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
             label_nodes = np.zeros((len(ulabels),M.NNode),dtype=int) # For each label, boolean indicator of whether each node is touching an element with that label
             mesh_nodes = np.arange(M.NNode)
             for i,label in enumerate(ulabels):
+                NodeCoords = np.asarray(M.NodeCoords)
+                NodeConn = np.asarray(M.NodeConn)
                 if 'mesh' in dir(mesh):
                     m = mesh.mesh(NodeCoords, NodeConn[labels == label], verbose=False)
                 else:
@@ -2430,262 +1814,170 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
             Surface = MultiSurface
 
         udf = implicit.mesh2udf(Surface, M.NodeCoords)
-        node_cutoff = (sizing - h)*udf + h
-        cutoff = np.mean(node_cutoff[Edges], axis=1)
+        sizing = (sizing - h)*udf + h
+        emin = 4*sizing/5
+        emax = 4*sizing/3
+    else:
+        emin = 4*sizing/5
+        emax = 4*sizing/3
+    
+    EdgeTuple = list(map(tuple,Edges))
 
+    # Get edge lengths
+    EdgeDiff = M.NodeCoords[Edges[:,0]] - M.NodeCoords[Edges[:,1]]
+    EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
 
-    # Create edge heap
-    heap = [(-EdgeLengths[i], tuple(edge)) for i,edge in enumerate(Edges) if (EdgeLengths[i] > cutoff[i]) and (EdgeLengths[i] > 0)]
-    inmesh = {tuple(edge):True for i,edge in enumerate(Edges)}
+    # Create edge heap - Negative edge lengths so longest get sorted first
+    heap = [(-EdgeLengths[i], edge) for i,edge in enumerate(EdgeTuple) if (EdgeLengths[i] > (emax[edge[0]] + emax[edge[0]])/2)]
+
     heapq.heapify(heap)
+    loop = 0; valid = 1;
+    if verbose and 'tqdm' in sys.modules:
+        tqdm_loaded = True
+    else:
+        tqdm_loaded = False
+    if verbose: print(f'TetSplit:', end='')
+    valid = 0
+    invalid = 0
+    if verbose and tqdm_loaded:
+        progress = tqdm.tqdm(total=len(heap))
 
-
-    def do_split(L, edge, N):
-        
-        inmesh[edge] = False
-        edge1 = (edge[0],N)
-        edge2 = (edge[1],N)
-        EdgeTable[edge1] = tuple()
-        EdgeTable[edge2] = tuple()
-        inmesh[edge1] = True
-        inmesh[edge2] = True
-        NewEdges = set()
-        
-        for elem in EdgeTable[edge]:
-            # for each connected element
-            a, b, c, d = elem
-            lookup_key = np.sum(np.isin(elem, edge) * 2**np.arange(0,4)[::-1])
-
-            if lookup_key == 3:
-                new_elems = ((a,b,c,N), (d,b,a,N))
-                # Split Edges - add one new element
-                EdgeTable[(c,N)] += (new_elems[0],)
-                EdgeTable[(d,N)] += (new_elems[1],)
-                
-                # Other New Edges - add both new elements
-                NewEdges.update({(a,N), (b,N)})
-                if (a,N) in EdgeTable.keys():
-                    EdgeTable[(a,N)] += new_elems
-                else:
-                    EdgeTable[(a,N)] = new_elems
-                if (b,N) in EdgeTable.keys():
-                    EdgeTable[(b,N)] += new_elems
-                else:
-                    EdgeTable[(b,N)] = new_elems
-                # Existing Edges - remove old element and add new element(s)
-                ab = tuple(sorted((a,b)))
-                ac = tuple(sorted((a,c)))
-                ad = tuple(sorted((a,d)))
-                bc = tuple(sorted((b,c)))
-                bd = tuple(sorted((b,d)))
-
-                EdgeTable[ab] = tuple(e for e in EdgeTable[ab] if e != elem) + new_elems
-                EdgeTable[bc] = tuple(e for e in EdgeTable[bc] if e != elem) + (new_elems[0],)
-                EdgeTable[ac] = tuple(e for e in EdgeTable[ac] if e != elem) + (new_elems[0],)
-                EdgeTable[bd] = tuple(e for e in EdgeTable[bd] if e != elem) + (new_elems[1],)
-                EdgeTable[ad] = tuple(e for e in EdgeTable[ad] if e != elem) + (new_elems[1],)
-            elif lookup_key == 5:
-                new_elems = ((a,b,c,N), (c,d,a,N))
-                # Split Edges - add one new element
-                EdgeTable[(b,N)] += (new_elems[0],)
-                EdgeTable[(d,N)] += (new_elems[1],)
-                
-                # Other New Edges - add both new elements
-                NewEdges.update({(a,N), (c,N)})
-                if (a,N) in EdgeTable.keys():
-                    EdgeTable[(a,N)] += new_elems
-                else:
-                    EdgeTable[(a,N)] = new_elems
-                if (c,N) in EdgeTable.keys():
-                    EdgeTable[(c,N)] += new_elems
-                else:
-                    EdgeTable[(c,N)] = new_elems
-                # Existing Edges - remove old element and add new element(s)
-                ab = tuple(sorted((a,b)))
-                ac = tuple(sorted((a,c)))
-                ad = tuple(sorted((a,d)))
-                bc = tuple(sorted((b,c)))
-                cd = tuple(sorted((c,d)))
-
-                EdgeTable[ac] = tuple(e for e in EdgeTable[ac] if e != elem) + new_elems
-                EdgeTable[ab] = tuple(e for e in EdgeTable[ab] if e != elem) + (new_elems[0],)
-                EdgeTable[bc] = tuple(e for e in EdgeTable[bc] if e != elem) + (new_elems[0],)
-                EdgeTable[cd] = tuple(e for e in EdgeTable[cd] if e != elem) + (new_elems[1],)
-                EdgeTable[ad] = tuple(e for e in EdgeTable[ad] if e != elem) + (new_elems[1],)
-            elif lookup_key == 9:
-                new_elems = ((a,b,c,N), (b,d,c,N))
-                # Split Edges - add one new element
-                EdgeTable[(a,N)] += (new_elems[0],)
-                EdgeTable[(d,N)] += (new_elems[1],)
-                
-                # Other New Edges - add both new elements
-                NewEdges.update({(b,N), (c,N)})
-                if (b,N) in EdgeTable.keys():
-                    EdgeTable[(b,N)] += new_elems
-                else:
-                    EdgeTable[(b,N)] = new_elems
-                if (c,N) in EdgeTable.keys():
-                    EdgeTable[(c,N)] += new_elems
-                else:
-                    EdgeTable[(c,N)] = new_elems
-                
-                # Existing Edges - remove old element and add new element(s)
-                ab = tuple(sorted((a,b)))
-                ac = tuple(sorted((a,c)))
-                ad = tuple(sorted((a,d)))
-                bc = tuple(sorted((b,c)))
-                bd = tuple(sorted((b,d)))
-                cd = tuple(sorted((c,d)))
-
-                EdgeTable[bc] = tuple(e for e in EdgeTable[bc] if e != elem) + new_elems
-                EdgeTable[ab] = tuple(e for e in EdgeTable[ab] if e != elem) + (new_elems[0],)
-                EdgeTable[ac] = tuple(e for e in EdgeTable[ac] if e != elem) + (new_elems[0],)
-                EdgeTable[bd] = tuple(e for e in EdgeTable[bd] if e != elem) + (new_elems[1],)
-                EdgeTable[cd] = tuple(e for e in EdgeTable[cd] if e != elem) + (new_elems[1],)
-            elif lookup_key == 6:
-                new_elems = ((a,d,b,N), (a,c,d,N))
-                
-                # Split Edges - add one new element
-                EdgeTable[(b,N)] += (new_elems[0],)
-                EdgeTable[(c,N)] += (new_elems[1],)
-                
-                # Other New Edges - add both new elements
-                NewEdges.update({(a,N), (d,N)})
-                if (a,N) in EdgeTable.keys():
-                    EdgeTable[(a,N)] += new_elems
-                else:
-                    EdgeTable[(a,N)] = new_elems
-                if (d,N) in EdgeTable.keys():
-                    EdgeTable[(d,N)] += new_elems
-                else:
-                    EdgeTable[(d,N)] = new_elems
-                
-                # Existing Edges - remove old element and add new element(s)
-                ab = tuple(sorted((a,b)))
-                ac = tuple(sorted((a,c)))
-                ad = tuple(sorted((a,d)))
-                bd = tuple(sorted((b,d)))
-                cd = tuple(sorted((c,d)))
-
-                EdgeTable[ad] = tuple(e for e in EdgeTable[ad] if e != elem) + new_elems
-                EdgeTable[ab] = tuple(e for e in EdgeTable[ab] if e != elem) + (new_elems[0],)
-                EdgeTable[bd] = tuple(e for e in EdgeTable[bd] if e != elem) + (new_elems[0],)
-                EdgeTable[ac] = tuple(e for e in EdgeTable[ac] if e != elem) + (new_elems[1],)
-                EdgeTable[cd] = tuple(e for e in EdgeTable[cd] if e != elem) + (new_elems[1],)
-            elif lookup_key == 10:
-                new_elems = ((a,d,b,N), (b,d,c,N))
-
-                # Split Edges - add one new element
-                EdgeTable[(a,N)] += (new_elems[0],)
-                EdgeTable[(c,N)] += (new_elems[1],)
-                
-                # Other New Edges - add both new elements
-                NewEdges.update({(b,N), (d,N)})
-                if (b,N) in EdgeTable.keys():
-                    EdgeTable[(b,N)] += new_elems
-                else:
-                    EdgeTable[(b,N)] = new_elems
-                if (d,N) in EdgeTable.keys():
-                    EdgeTable[(d,N)] += new_elems
-                else:
-                    EdgeTable[(d,N)] = new_elems
-                
-                # Existing Edges - remove old element and add new element(s)
-                ab = tuple(sorted((a,b)))
-                ad = tuple(sorted((a,d)))
-                bc = tuple(sorted((b,c)))
-                bd = tuple(sorted((b,d)))
-                cd = tuple(sorted((c,d)))
-
-                EdgeTable[bd] = tuple(e for e in EdgeTable[bd] if e != elem) + new_elems
-                EdgeTable[ab] = tuple(e for e in EdgeTable[ab] if e != elem) + (new_elems[0],)
-                EdgeTable[ad] = tuple(e for e in EdgeTable[ad] if e != elem) + (new_elems[0],)
-                EdgeTable[bc] = tuple(e for e in EdgeTable[bc] if e != elem) + (new_elems[1],)
-                EdgeTable[cd] = tuple(e for e in EdgeTable[cd] if e != elem) + (new_elems[1],)
-            elif lookup_key == 12:
-                new_elems = ((a,c,d,N), (b,d,c,N))
-                # Split Edges - add one new element
-                EdgeTable[(a,N)] += (new_elems[0],)
-                EdgeTable[(b,N)] += (new_elems[1],)
-                
-                # Other New Edges - add both new elements
-                NewEdges.update({(c,N), (d,N)})
-                if (c,N) in EdgeTable.keys():
-                    EdgeTable[(c,N)] += new_elems
-                else:
-                    EdgeTable[(c,N)] = new_elems
-                if (d,N) in EdgeTable.keys():
-                    EdgeTable[(d,N)] += new_elems
-                else:
-                    EdgeTable[(d,N)] = new_elems
-                
-                # Existing Edges - remove old element and add new element(s)
-                ac = tuple(sorted((a,c)))
-                ad = tuple(sorted((a,d)))
-                bc = tuple(sorted((b,c)))
-                bd = tuple(sorted((b,d)))
-                cd = tuple(sorted((c,d)))
-
-                EdgeTable[cd] = tuple(e for e in EdgeTable[cd] if e != elem) + new_elems
-                EdgeTable[ac] = tuple(e for e in EdgeTable[ac] if e != elem) + (new_elems[0],)
-                EdgeTable[ad] = tuple(e for e in EdgeTable[ad] if e != elem) + (new_elems[0],)
-                EdgeTable[bc] = tuple(e for e in EdgeTable[bc] if e != elem) + (new_elems[1],)
-                EdgeTable[bd] = tuple(e for e in EdgeTable[bd] if e != elem) + (new_elems[1],)
-        
-            # Update labels - new elements get the label of their parent element
-            if labels is not None:
-                for e in new_elems:
-                    ElemLabels[e] = ElemLabels[elem]
-        # Define new node coordinates
-        NodeTable[N] = (NodeTable[edge[0]] + NodeTable[edge[1]])/2
-        N += 1
-
-        # Add new edges to heap if they're above the threshold
-        # Note lengths are negative so longest edges get sorted first in the heap
-        if (sizing is None and L/2 < -h) or (sizing is not None and L/2 < -(node_cutoff[edge[0]]+node_cutoff[edge[1]])/2):
-            # Split edges
-            heapq.heappush(heap,(L/2, edge1))
-            heapq.heappush(heap,(L/2, edge2))
-        for e in NewEdges:
-            # other new edges
-            inmesh[e] = True
-            L = - np.linalg.norm(NodeTable[e[0]]-NodeTable[e[1]])
-            if (sizing is None and L < -h) or (sizing is not None and L < - (node_cutoff[e[0]]+node_cutoff[e[1]])/2):
-                heapq.heappush(heap,(L, e))
-        return N
-    
-    if verbose:
-        print('TetSplit:', end='')
-        if 'tqdm' in sys.modules:
-            tqdm_loaded = True
-            progress = tqdm.tqdm(total=len(heap))
-        else:
-            tqdm_loaded = False
-    
+    D = M.mesh2dmesh(ElemLabels=labels)
     while len(heap) > 0:
         
         L, edge = heapq.heappop(heap)
+        
         if verbose and tqdm_loaded:
             progress.update(1)
             L1 = len(heap)
-        N = do_split(L, edge, N)
+        
+        D, emax, to_add = _do_split(D, edge, L, emax)
+        # Add new edges to the heap
+        for entry in to_add:
+            heapq.heappush(heap, entry)
+
         if verbose and tqdm_loaded:
             L2 = len(heap)
             progress.total += max(0, L2-L1)
 
-    NewConn = np.array(list(set(elem for edge in EdgeTable.keys() for elem in EdgeTable[edge] if inmesh[edge])))
-    NewCoords = np.array([NodeTable[key] for key in NodeTable.keys()])
-
-    
+    NewCoords = D.NodeCoords
+    NewConn = D.NodeConn
+    new_labels = D.ElemLabels
     if 'mesh' in dir(mesh):
-        Mnew = mesh.mesh(NewCoords, NewConn, verbose=M.verbose)
+        Mnew = mesh.mesh(NewCoords, NewConn, verbose=M.verbose, Type='vol')
     else:
-        Mnew = mesh(NewCoords, NewConn, verbose=M.verbose)
-    if labels is not None:
-        new_labels = np.array([ElemLabels[tuple(elem)] for elem in NewConn])
+        Mnew = mesh(NewCoords, NewConn, verbose=M.verbose, Type='vol')
+    if len(new_labels) > 0:
         Mnew.ElemData[label_str] = new_labels
-    
+
     return Mnew
+
+@try_njit(cache=True)
+def _do_split(D, edge, L, emax):
+
+    node1 = edge[0]
+    node2 = edge[1]
+    elemconn1 = D.getElemConn(node1)
+    elemconn2 = D.getElemConn(node2)
+
+    N = D.NNode # Index of the new node
+    Lcheck = -np.linalg.norm((D.NodeCoords[node1] - D.NodeCoords[node2]))
+    if not np.isclose(L, Lcheck):
+        merp = 3
+    newnode = (D.NodeCoords[node1] + D.NodeCoords[node2])/2 # Create a new node at the midpoint of the edge
+
+    # Adding node manually instead of using D.addNodes so that emax can be tracked with it
+    new_emax = (emax[node1] + emax[node2])/2
+    NewLength = D.NNode + 1
+    if len(D._NodeCoords) < NewLength:
+        # Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.
+        # If the new addition is more than double the current length, the array will be extended 
+        # to exactly fit the new nodes
+        newsize = np.maximum(NewLength,len(D._NodeCoords)*2)
+        D._NodeCoords = np.resize(D._NodeCoords, (newsize,3))
+        emax = np.resize(emax, newsize)
+        # update the ElemConn structure as well
+        D.ElemConn_head = np.resize(D.ElemConn_head, newsize)
+        D.ElemConn_tail = np.resize(D.ElemConn_tail, newsize)
+    
+    D.ElemConn_head[D.NNode] = -1
+    D.ElemConn_tail[D.NNode] = -1
+    D._NodeCoords[D.NNode] = newnode
+    emax[D.NNode] = new_emax
+
+    D.NNode = NewLength
+
+    to_add = []
+    if -L/2 > (emax[node1] + emax[node2])/2:
+        # If the split edges still exceed emax, add the new edges to the heap
+        # NOTE: L is inverted for proper heap sorting
+        to_add.append((L/2,(node1, N)))
+        to_add.append((L/2,(node2, N)))
+        
+    shared_elems = list(set(elemconn1).intersection(set(elemconn2)))[::-1] # Elements connected to the edge, sorted largest index to smallest
+    
+    for e in shared_elems:
+        
+        elem = D.NodeConn[e]
+        a, b, c, d = elem
+
+        if not (node1 in elem and node2 in elem):
+            merp = 2
+
+        lookup_key = np.sum(np.array([1 if n in edge else 0 for n in elem]) * 2**np.arange(0,4)[::-1])
+
+        if lookup_key == 3:
+            new_elems = ((a,b,c,N), (d,b,a,N))
+            newedge1 = (a,N)
+            newedge2 = (b,N)
+
+        elif lookup_key == 5:
+            new_elems = ((a,b,c,N), (c,d,a,N))
+            newedge1 = (a,N)
+            newedge2 = (c,N)
+        
+        elif lookup_key == 9:
+            new_elems = ((a,b,c,N), (b,d,c,N))
+            newedge1 = (b,N)
+            newedge2 = (c,N)
+
+        elif lookup_key == 6:
+            new_elems = ((a,d,b,N), (a,c,d,N))
+            newedge1 = (a,N)
+            newedge2 = (d,N)
+            
+        elif lookup_key == 10:
+            new_elems = ((a,d,b,N), (b,d,c,N))
+            newedge1 = (b,N)
+            newedge2 = (d,N)
+
+        elif lookup_key == 12:
+            new_elems = ((a,c,d,N), (b,d,c,N))
+            newedge1 = (c,N)
+            newedge2 = (d,N)
+        else:
+            raise NotImplementedError('Unexpected behavior in edge splitting - likely related to a bug.')
+        # Remove old element:
+        # Add new elements to the mesh
+        if len(D.ElemLabels > 0):
+            for new_elem in new_elems:
+                D.addElem(new_elem, D.ElemLabels[e])
+        else:
+            for new_elem in new_elems:
+                D.addElem(new_elem)
+    for e in shared_elems:
+        D.removeElem(e)
+    # Check if the new edges (other than the split edges) need to be added to the heap
+    # NOTE: L is inverted for proper heap sorting  
+    newedge1_L = np.linalg.norm(D.NodeCoords[newedge1[0]] - D.NodeCoords[newedge1[1]])
+    if newedge1_L > (emax[newedge1[0]] + emax[newedge1[1]])/2:
+        to_add.append((-newedge1_L, newedge1))
+
+    newedge2_L = np.linalg.norm(D.NodeCoords[newedge2[0]] - D.NodeCoords[newedge2[1]])
+    if newedge2_L > (emax[newedge2[0]] + emax[newedge2[1]])/2:
+        to_add.append((-newedge2_L, newedge2))
+    
+    return D, emax, to_add
 
 def TetFlip(M, iterate='converge', QualityMetric='Skewness', target='min', flips=['4-4','3-2','2-3'], verbose=False):
 
@@ -3498,6 +2790,34 @@ def _Tet44Flip(elemkey, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, t
             break
 
     return  success
+
+def TetFlip2(M):
+
+    Edges = np.sort(M.Edges,axis=1).astype(np.int64)
+    EdgeTuple = list(map(tuple,Edges))
+    EdgeSet = set(EdgeTuple)
+
+    D = M.mesh2dmesh()#(ElemLabels=labels)
+
+
+
+def _Tet32Flip2(D, edge):
+    pass
+
+    node1, node2 = edge
+    elemconn1 = D.getElemConn(node1)
+    elemconn2 = D.getElemConn(node2)
+    shared_elems = list(set(elemconn1).intersection(set(elemconn2)))[::-1] # Elements connected to the edge, sorted largest index to smallest
+
+    if len(shared_elems) != 3:
+        # Edge not connected to exactly 3 elements
+        return D
+
+    # ...
+    
+
+    
+
 
 ## Need to be updated or removed
 # Needs update:   

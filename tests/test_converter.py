@@ -236,9 +236,9 @@ def test_quad2tri(NodeCoords, NodeConn, n_expected):
     # Case 1: single tet
     (np.array([[0,0,0],[1,0,0],[1,1,0],[0,0,1]]),[[0,1,2,3]]),
 ])
-def test_tet42tet10(NodeCoords, NodeConn):
+def test_tet2quadratic(NodeCoords, NodeConn):
 
-    NewCoords, NewConn = converter.tet42tet10(NodeCoords, NodeConn)
+    NewCoords, NewConn = converter.tet2quadratic(NodeCoords, NodeConn)
     
     assert np.shape(NewConn)[1] == 10, 'Incorrect number of nodes per element' 
 
@@ -256,9 +256,9 @@ def test_tet42tet10(NodeCoords, NodeConn):
        [1. , 1. , 0. ]]),
      [[0, 7, 9, 2, 3, 8, 5, 1, 4, 6]]),
 ])
-def test_tet102tet4(NodeCoords, NodeConn):
+def test_tet102linear(NodeCoords, NodeConn):
 
-    NewCoords, NewConn = converter.tet102tet4(NodeCoords, NodeConn)
+    NewCoords, NewConn = converter.tet102linear(NodeCoords, NodeConn)
     
     assert np.shape(NewConn)[1] == 4, 'Incorrect number of nodes per element' 
     assert np.all(quality.Volume(NewCoords, NewConn) > 0), 'Inverted elements'
@@ -267,9 +267,9 @@ def test_tet102tet4(NodeCoords, NodeConn):
     # Case 1: single hex
     (np.array([[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]]),[[0,1,2,3,4,5,6,7]]),
 ])
-def test_hex82hex20(NodeCoords, NodeConn):
+def test_hex2quadratic(NodeCoords, NodeConn):
 
-    NewCoords, NewConn = converter.hex82hex20(NodeCoords, NodeConn)
+    NewCoords, NewConn = converter.hex2quadratic(NodeCoords, NodeConn)
     
     assert np.shape(NewConn)[1] == 20, 'Incorrect number of nodes per element' 
 
@@ -297,9 +297,21 @@ def test_hex82hex20(NodeCoords, NodeConn):
        [1. , 1. , 1. ]]),
      np.array([[ 0, 12, 17,  5,  2, 14, 19,  7,  8, 15, 10,  3,  9, 16, 11,  4, 1, 13, 18,  6]])),
 ])
-def test_hex202hex8(NodeCoords, NodeConn):
+def test_hex202linear(NodeCoords, NodeConn):
 
-    NewCoords, NewConn = converter.hex202hex8(NodeCoords, NodeConn)
+    NewCoords, NewConn = converter.hex202linear(NodeCoords, NodeConn)
     
+    assert np.shape(NewConn)[1] == 8, 'Incorrect number of nodes per element' 
+    assert np.all(quality.Volume(NewCoords, NewConn) > 0), 'Inverted elements'
+
+@pytest.mark.parametrize("NodeCoords, NodeConn", [
+    # Case 1: single hex
+    (np.array([[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]]),[[0,1,2,3,4,5,6,7]]),
+])
+def test_hexsubdivide(NodeCoords, NodeConn):
+
+    NewCoords, NewConn = converter.hexsubdivide(NodeCoords, NodeConn)
+    
+    assert np.shape(NewConn)[0] == 8*len(NodeConn), 'Incorrect number of elements' 
     assert np.shape(NewConn)[1] == 8, 'Incorrect number of nodes per element' 
     assert np.all(quality.Volume(NewCoords, NewConn) > 0), 'Inverted elements'

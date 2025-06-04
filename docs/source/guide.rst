@@ -34,7 +34,7 @@ submodules:
     ~mymesh.image
     ~mymesh.implicit
     ~mymesh.improvement
-    ~mymesh.octree
+    ~mymesh.tree
     ~mymesh.primitives
     ~mymesh.quality
     ~mymesh.rays

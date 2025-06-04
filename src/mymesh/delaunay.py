@@ -190,7 +190,7 @@ def ConvexHull(NodeCoords,method='scipy'):
         if method.lower() == 'giftwrapping':
             hull = GiftWrapping(NodeCoords,IncludeCollinear=True)
         elif method.lower() == 'scipy':
-            qhull = spatial.ConvexHull(NodeCoords)
+            qhull = spatial.ConvexHull(np.asarray(NodeCoords, dtype=np.float64))
             hull = qhull.simplices
         elif method.lower() == 'bowyerwatson':
             tri = BowyerWatson2d(NodeCoords)
@@ -204,7 +204,7 @@ def ConvexHull(NodeCoords,method='scipy'):
 
     elif nD == 3:
         if method.lower() == 'scipy':
-            qhull = spatial.ConvexHull(NodeCoords)
+            qhull = spatial.ConvexHull(np.asarray(NodeCoords, dtype=np.float64))
             hull = qhull.simplices
         elif method.lower() == 'bowyerwatson':
             tet = BowyerWatson3d(NodeCoords)
@@ -327,6 +327,8 @@ def TetGen(NodeCoords, SurfConn, **kwargs):
         raise ImportError("This function interfaces with the PyVista python wrapper for Hang Si's TetGen. To install: pip install tetgen")
 
     NodeCoords, SurfConn = converter.surf2tris(NodeCoords, SurfConn)
+
+    assert len(mesh(NodeCoords, SurfConn, verbose=False).BoundaryNodes) == 0, 'The input mesh has unclosed boundary edges - TetGen will fail to tetrahedralize this input.'
 
     tet = tetgen.TetGen(NodeCoords, SurfConn)
     NewCoords, NewConn = tet.tetrahedralize(**kwargs)

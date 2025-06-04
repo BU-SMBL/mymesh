@@ -107,6 +107,7 @@ class mesh:
 
         # Properties:
         self._ElemType = []
+        self._MeshNodes = None
         self._Surface = None
         self._SurfConn = []
         self._SurfNodes = None
@@ -332,6 +333,24 @@ class mesh:
                 self._printlevel-=1
                 print('Done', end='\n'+'\t'*self._printlevel)
         return self._EdgeElemConn
+    @property
+    def MeshNodes(self):
+        """
+        Array of node IDs contained within the mesh. If all nodes 
+        are connected to elements, this will just be equivalent to
+        `np.arange(m.NNode)`,  but if there are free nodes disconnected 
+        from any elements, those nodes will be excluded.
+        """ 
+        if self._MeshNodes is None:
+            if self.verbose: 
+                print('\n'+'\t'*self._printlevel+'Identifying surface nodes...',end='')
+                self._printlevel += 1
+            self._MeshNodes = np.array(list({i for elem in self.NodeConn for i in elem}))
+            if self.verbose: 
+                print('Done', end='\n'+'\t'*self._printlevel)
+                self._printlevel -= 1
+        MeshNodes = self._MeshNodes
+        return MeshNodes    
     @property
     def SurfConn(self):
         """
@@ -1493,6 +1512,8 @@ class mesh:
 
                 '==' - Keeping condition is `value == threshold`.
 
+                '!=' - Keeping condition is `value != threshold`.
+
             Double threshold options:
                 'in' - Inside bounds, inclusive of thresholds, default. 
 
@@ -1593,6 +1614,10 @@ class mesh:
                 lower = threshold
                 upper = threshold
                 mode = 'in'
+            elif mode == '!=':
+                lower = threshold
+                upper = threshold
+                mode = 'xout'
             else:
                 raise ValueError('For single-threshold inputs, mode must be ">=", ">", "<=", or "<".')
         
@@ -2031,7 +2056,12 @@ class mesh:
         except:
             raise ImportError('mesh.Meshio2Mesh() requires the meshio library. Install with: pip install meshio')
         if int(meshio.__version__.split('.')[0]) >= 5 and int(meshio.__version__.split('.')[1]) >= 2:
-            NodeConn = [elem for cells in m.cells for elem in cells.data.tolist()]
+            if len(m.cells) == 1:
+                # Single element type - keeps NodeConn as an array
+                NodeConn = m.cells[0].data
+            else:
+                # Multiple element types - convert to list
+                NodeConn = [elem for cells in m.cells for elem in cells.data.tolist()]
         else:
             # Support for older meshio version
             NodeConn = [elem for cells in m.cells for elem in cells[1].tolist()]
@@ -2248,29 +2278,30 @@ class mesh:
         else:
             return [], [], []
 
-    def mesh2dmesh(self):
+    def mesh2dmesh(self, ElemLabels=None):
         """
-        Convert to a dynamic mesh (dmesh)
+        Convert to a dynamic mesh (:class:`dmesh`)
 
-        Parameters
-        ----------
-        state : bool or NoneType, optional
-            If None, Topological Mode will be toggled, otherwise it will be set
-            to the state specified, by default None
-        """        
+        Returns
+        -------
+        D : mesh.dmesh
+            dynamic mesh
+
+
+        """      
 
         # Ensure relevant data is in properly typed numpy arrays
         try:
-            NodeConn = np.asarray(self.NodeConn, dtype=np.int64)
+            NodeConn = np.array(self.NodeConn, dtype=np.int64)
         except:
             raise ValueError('Dynamic meshes are only valid for meshes with a single element type.')
         
-        NodeCoords = np.asarray(self.NodeCoords, dtype=np.float64)
+        NodeCoords = np.array(self.NodeCoords, dtype=np.float64)
 
-        Edges = np.asarray(self.Edges, dtype=np.int64)
+        Edges = np.array(self.Edges, dtype=np.int64)
 
         try:
-            Faces = np.asarray(self.Faces, dtype=np.int64)
+            Faces = np.array(self.Faces, dtype=np.int64)
         except:
             raise ValueError('Dynamic meshes are not valid for meshes with elements that have mixed faces (e.g. wedges or pyramids).')
         
@@ -2301,16 +2332,20 @@ class mesh:
         # elif self.Type == 'vol':
         #     # Neighbors are connected by faces
         #     NeighborConnection = len(Faces[0])
+        if ElemLabels is None:
+            ElemLabels = np.empty(0, np.int64)
+        else:
+            ElemLabels = np.asarray(ElemLabels, np.int64)
 
-        T = dmesh(NodeCoords, NodeConn, ElemConn_head, ElemConn_elem, ElemConn_next, ElemConn_prev, ElemConn_tail)
+        D = dmesh(NodeCoords, NodeConn, ElemConn_head, ElemConn_elem, ElemConn_next, ElemConn_prev, ElemConn_tail, ElemLabels)
 
-        return T
+        return D
 
 import numba
 from numba.experimental import jitclass
 @jitclass([
-    ('NodeCoords', numba.float64[:,:]),
-    ('NodeConn', numba.int64[:,:]),
+    ('_NodeCoords', numba.float64[:,:]),
+    ('_NodeConn', numba.int64[:,:]),
     ('ElemConn_head', numba.int64[:]),
     ('ElemConn_elem', numba.int64[:]),
     ('ElemConn_next', numba.int64[:]),
@@ -2319,13 +2354,34 @@ from numba.experimental import jitclass
     ('ElemConn_size', numba.int64),
     ('NNode', numba.int64),
     ('NElem', numba.int64),
-    ('Labels', numba.int64[:]),
+    ('ElemLabels', numba.int64[:]),
 ])
 class dmesh:
+    """
+    A specialized mesh class intended for dynamic modification of mesh 
+    connectivity. 
+    
+    The dmesh (Dynamic Mesh) class only supports single element
+    type meshes, and only element types that contain a single face type (e.g. 
+    wedge elements aren't supported because they have both quadrilateral and
+    triangular faces). 
+    
+    It's recommended that a :class:`dmesh` object is created from a :class:`mesh` 
+    object using :meth:`mesh.mesh2dmesh`. Incorrect initialization of the mesh
+    will likely lead to misbehavior. 
 
-    def __init__(self, NodeCoords, NodeConn, ElemConn_head, ElemConn_elem, ElemConn_next, ElemConn_prev, ElemConn_tail,):
-        self.NodeCoords = NodeCoords
-        self.NodeConn = NodeConn
+    Parameters
+    ----------
+    NodeCoords : np.ndarray(dtype=np.float64)
+        Node coordinates array with shape=(n,3)
+    NodeConn : np.ndarray
+        Node connectivity of elements with shape=(l,m)
+        
+
+    """    
+    def __init__(self, NodeCoords, NodeConn, ElemConn_head, ElemConn_elem, ElemConn_next, ElemConn_prev, ElemConn_tail,ElemLabels=np.empty(0, np.int64)):
+        self._NodeCoords = NodeCoords
+        self._NodeConn = NodeConn
         # self.ElemNeighbors = ElemNeighbors
         self.ElemConn_head = ElemConn_head # Points from a node to the first connected element
         self.ElemConn_elem = ElemConn_elem # Element ids
@@ -2336,10 +2392,18 @@ class dmesh:
         # self.ElemConn_slots = [] # E
         # self.NeighborConnection = NeighborConnection # Number of shared nodes required to be considered an element neighbor. If Faces/Edges get added, this could be removed
 
-        self.NNode = len(self.NodeCoords)
-        self.NElem = len(self.NodeConn)
-        self.Labels = np.empty(0, np.int64)
+        self.NNode = len(self._NodeCoords)
+        self.NElem = len(self._NodeConn)
+        self.ElemLabels = ElemLabels
 
+    @property
+    def NodeCoords(self):
+        return self._NodeCoords[:self.NNode]
+    
+    @property
+    def NodeConn(self):
+        return self._NodeConn[:self.NElem,:]
+    
     def addNodes(self,NodeCoords,labels=np.array([], dtype=np.int64)):
         """
         Add nodes to the mesh.
@@ -2354,30 +2418,23 @@ class dmesh:
 
         NodeCoords = np.atleast_2d(NodeCoords)
         NewLength = self.NNode + len(NodeCoords)
-        if len(self.NodeCoords) < NewLength:
+        if len(self._NodeCoords) < NewLength:
             # Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.
             # If the new addition is more than double the current length, the array will be extended 
             # to exactly fit the new nodes
-            newsize = np.maximum(NewLength,len(self.NodeCoords)*2)
-            self.NodeCoords = np.resize(self.NodeCoords, (newsize,3))
+            newsize = np.maximum(NewLength,len(self._NodeCoords)*2)
+            self._NodeCoords = np.resize(self._NodeCoords, (newsize,3))
             
-            if len(self.Labels)>0:
-                self.Labels = np.resize(self.Labels, newsize)
-
             # update the ElemConn structure as well
             self.ElemConn_head = np.resize(self.ElemConn_head, newsize)
             self.ElemConn_tail = np.resize(self.ElemConn_tail, newsize)
         
-        if labels is not None and len(self.Labels)>0:
-            labels = np.atleast_1d(labels)
-            self.Labels[self.NNode:NewLength] = labels
-
-        self.NodeCoords[self.NNode:NewLength] = NodeCoords
+        self._NodeCoords[self.NNode:NewLength] = NodeCoords
         self.ElemConn_head[self.NNode:NewLength] = -1
         self.ElemConn_tail[self.NNode:NewLength] = -1
         self.NNode = NewLength
 
-    def addElem(self,NodeConn):
+    def addElem(self,NodeConn,Label=0):
         """
         Add a new element to the mesh. The element should reference 
         nodes that already exist in the mesh.
@@ -2391,18 +2448,22 @@ class dmesh:
 
         NewLength = self.NElem + 1
         NewElemId = self.NElem
-        if len(self.NodeConn) < NewLength:
+        if len(self._NodeConn) < NewLength:
             # Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.
             # If the new addition is more than double the current length, the array will be extended 
             # to exactly fit the new elements
-            self.NodeConn = np.resize(self.NodeConn, (int(np.maximum(NewLength,len(self.NodeConn)*2)),np.shape(self.NodeConn)[1]))
+            self._NodeConn = np.resize(self._NodeConn, (int(np.maximum(NewLength,len(self._NodeConn)*2)),np.shape(self._NodeConn)[1]))
 
-        self.NodeConn[NewElemId] = NodeConn
+            if len(self.ElemLabels) > 0:
+                self.ElemLabels = np.resize(self.ElemLabels, int(np.maximum(NewLength,len(self.ElemLabels)*2)))
+
+        self._NodeConn[NewElemId] = NodeConn
+        if len(self.ElemLabels) > 0:
+            self.ElemLabels[NewElemId] = Label
 
         # Update ElemConn with new connections
-        for node in self.NodeConn[NewElemId]:
+        for node in self._NodeConn[NewElemId]:
             self.addElemConn(node, NewElemId)
-
 
 
         self.NElem += 1
@@ -2416,15 +2477,17 @@ class dmesh:
         # order (largest first)
 
         LastId = self.NElem - 1
-        oldnodes = self.NodeConn[LastId].copy()
+        oldnodes = self._NodeConn[LastId].copy()
 
         # Remove connections to the old element
-        for node in self.NodeConn[ElemId]:
+        for node in self._NodeConn[ElemId]:
             self.removeElemConn(node,ElemId)
-
+  
         if ElemId != LastId:
             # Swap element @ ElemId with the element in the last position
-            self.NodeConn[ElemId] = oldnodes
+            self._NodeConn[ElemId] = oldnodes
+            if len(self.ElemLabels) > 0:
+                self.ElemLabels[ElemId] = self.ElemLabels[LastId]
             # Update ElemConn for each node in the element
             for n in oldnodes:
                 i = self.ElemConn_head[n]
@@ -2441,9 +2504,9 @@ class dmesh:
         elemconn1 = self.getElemConn(NodeId1)
         elemconn2 = self.getElemConn(NodeId2)
         for ElemId in elemconn1:
-            elem = self.NodeConn[ElemId]
+            elem = self._NodeConn[ElemId]
             elem[elem == NodeId1] = NodeId2
-            self.NodeConn[ElemId] = elem
+            self._NodeConn[ElemId] = elem
             self.removeElemConn(NodeId1, ElemId)
             if ElemId not in elemconn2:
                 self.addElemConn(NodeId2, ElemId)

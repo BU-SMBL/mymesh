@@ -113,9 +113,9 @@ def test_CubicFit(S, k1, k2):
 ])
 def test__CubicFit(NodeCoords, neighborhood, normals):
 
-    maxp, minp = curvature._CubicFit(NodeCoords, neighborhood, normals)
+    maxp, minp, maxd, mind = curvature._CubicFit(NodeCoords, neighborhood, normals)
     if mymesh.check_numba():
-        maxp, minp = curvature._CubicFit.py_func(NodeCoords, neighborhood, normals)
+        maxp, minp, maxd, mind = curvature._CubicFit.py_func(NodeCoords, neighborhood, normals)
 
 
 @pytest.mark.parametrize("func, NodeCoords, k1, k2", [

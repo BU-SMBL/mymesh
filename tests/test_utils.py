@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import mymesh
 from mymesh import utils, primitives, implicit, mesh, quality
 
 @pytest.mark.parametrize("NodeCoords, NodeConn, ElemType, expected", [
@@ -409,6 +410,8 @@ def test_BaryTri(Nodes, Pt, expected):
     BaryCoords = utils.BaryTri(Nodes, Pt)
     np.testing.assert_array_almost_equal_nulp(np.array(BaryCoords), np.array(expected))
     assert np.isclose(np.sum(BaryCoords), 1), "Barycentric coordinates don't add to 1."
+    if mymesh.check_numba():
+        BaryCoords = utils.BaryTri.py_func(Nodes, Pt)
 
 @pytest.mark.parametrize("Nodes, Pt, expected", [
     # Case 1: Single point
@@ -460,6 +463,8 @@ def test_BaryTet(Nodes, Pt, expected):
     BaryCoords = utils.BaryTet(Nodes, Pt)
     np.testing.assert_array_almost_equal_nulp(np.array(BaryCoords), np.array(expected))
     assert np.isclose(np.sum(BaryCoords), 1), "Barycentric coordinates don't add to 1."
+    if mymesh.check_numba():
+        BaryCoords = utils.BaryTet.py_func(Nodes, Pt)
 
 @pytest.mark.parametrize("NodeCoords, NodeConn", [
     # Case 1: Two tets
