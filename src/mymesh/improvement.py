@@ -100,12 +100,10 @@ def LocalLaplacianSmoothing(M, options=dict()):
 
     .. plot::
 
-        M = mesh(np.array([[0,0,0],[0,1,0],[1,1,0],[1,0,0],[0.4,0.4,0]]),
-                np.array([[0,1,4],[1,2,4],[2,3,4],[3,0,4]]))
+        M = implicit.SurfaceMesh(implicit.sphere([0,0,0], 1), [-1,1,-1,1,-1,1],  .1)
         Mnew = improvement.LocalLaplacianSmoothing(M, options=dict(iterate=1))
         
-        M.plot(bgcolor='w', show_edges=True, view='xy')
-        Mnew.plot(bgcolor='w', show_edges=True, view='xy')
+        visualize.Subplot([M, Mnew], (1,2), bgcolor='w', show_edges=True)
 
     """    
     
@@ -301,7 +299,7 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
         'min' - repositioning is allowed if the minimum quality of the connected
         elements doesn't decrease.
     TangentialSurface : bool, optional
-        Option to use tangential laplacian smoothing on the surface (and interfaces, 
+        Option to use tangential Laplacian smoothing on the surface (and interfaces, 
         if labels are provided), by default True.
     options : dict, optional
         Smoothing options. Available options are:

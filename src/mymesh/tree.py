@@ -25,7 +25,7 @@ Tree
     TreeNode
 
 Tree Utilities
-----------------
+--------------
 .. autosummary::
     :toctree: submodules/
 
@@ -40,7 +40,7 @@ Quadtree
     QuadtreeNode
 
 Quadtree Creation
----------------
+-----------------
 .. autosummary::
     :toctree: submodules/
 
@@ -48,7 +48,7 @@ Quadtree Creation
     Edges2Quadtree  
 
 Conversion From Quadtree
-----------------------
+------------------------
 .. autosummary::
     :toctree: submodules/
 
@@ -92,6 +92,7 @@ Octree Querying
 import numpy as np
 from . import rays, utils, mesh
 import sympy as sp
+import copy
 
 class TreeNode:
     def __init__(self,parent=None,data=None,level=0,state='unknown'):
@@ -207,6 +208,17 @@ class TreeNode:
         """        
         # includes both "leaf" and "empty" nodes
         return len(self.children) == 0
+
+    def prune(self, level):
+
+        new_tree = copy.deepcopy(self)
+
+        level_nodes = new_tree.getLevel(level)
+        for node in level_nodes:
+            if node.state == 'branch':
+                node.state = 'leaf'
+                node.children = []        
+
 
 class QuadtreeNode(TreeNode):
           
