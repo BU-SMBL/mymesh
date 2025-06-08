@@ -640,10 +640,14 @@ def Volume(NodeCoords,NodeConn,verbose=False,ElemType='auto'):
         print('------------------------------------------')
     return V
 
+@try_njit(cache=True)
 def tri_area(NodeCoords, NodeConn):
 
-    Points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
-    area = np.linalg.norm(np.cross(Points[:,1]-Points[:,0],Points[:,2]-Points[:,0]),axis=1)/2 
+    pt0 = NodeCoords[NodeConn[:,0]]
+    pt1 = NodeCoords[NodeConn[:,1]]
+    pt2 = NodeCoords[NodeConn[:,2]]
+    cross = np.cross(pt1 - pt0, pt2-pt0)
+    area = np.sqrt(cross[:,0]**2 + cross[:,1]**2 + cross[:,2]**2)/2
 
     return area
 
