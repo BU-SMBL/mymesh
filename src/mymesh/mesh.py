@@ -988,7 +988,10 @@ class mesh:
         KeepSet = set(range(self.NElem)).difference(ElemIds)
         KeepIds = np.array(list(KeepSet))
         if type(self.NodeConn) is np.ndarray:
-            self.NodeConn = self.NodeConn[KeepIds]
+            if len(KeepIds) > 0:
+                self.NodeConn = self.NodeConn[KeepIds]
+            else:
+                self.NodeConn = np.array([])
         else:
             self.NodeConn = [self.NodeConn[i] for i in KeepIds]
 
@@ -1485,7 +1488,7 @@ class mesh:
                                                       scalars, threshold=threshold, 
                                                       flip=flip, mixed_elements=mixed_elements, 
                                                       Type=Type, interpolation=interpolation)
-        M = mesh(NewCoords, NewConn)
+        M = mesh(NewCoords, NewConn, verbose=self.verbose)
         return M
 
     def Threshold(self, scalars, threshold, mode=None, scalar_preference='elements', all_nodes=True, InPlace=False, cleanup=False):
