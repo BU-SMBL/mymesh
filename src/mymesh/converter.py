@@ -19,6 +19,7 @@ Mesh type conversion
 
     solid2surface
     im2voxel
+    mesh2im
     voxel2im
     surf2voxel
     surf2dual
@@ -2857,7 +2858,7 @@ def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None):
         resolved by the voxelization, then the image will still be able to be
         filled).
     sdf : bool, optional
-        Option make the image a signed distance field using a Euclidean distance
+        Option to make the image a signed distance field using a Euclidean distance
         transform (:func:`scipy.ndimage.distance_transform_edt`)
         on the binarized image. The returned image will have values
         less than zero inside the surface and greater than zero outside the 
@@ -2871,6 +2872,44 @@ def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None):
     -------
     img : np.ndarray
         Three dimensional binarized (0,1) image of the mesh
+
+    Examples
+    --------
+    To convert a surface mesh into a binary image:
+    
+    .. plot::
+
+        import matplotlib.pyplot as plt
+
+        M = primitives.Torus([0,0,0], 1, .5)
+
+        img = converter.mesh2im(M.NodeCoords, M.NodeConn, 0.05)
+        plt.imshow(img[10], cmap='gray')
+
+    To voxelize only the surface of the mesh, the `fill=False` option can be used:
+
+    .. plot::
+
+        import matplotlib.pyplot as plt
+
+        M = primitives.Torus([0,0,0], 1, .5)
+
+        img = converter.mesh2im(M.NodeCoords, M.NodeConn, 0.05, fill=False)
+        plt.imshow(img[10], cmap='gray')
+
+    The binarized image can be converted to a signed distance field (values are
+    the distance to the surface, sign is negative inside, positive outside) using
+    the `sdf=True` option:
+
+    .. plot::
+
+        import matplotlib.pyplot as plt
+
+        M = primitives.Torus([0,0,0], 1, .5)
+
+        img = converter.mesh2im(M.NodeCoords, M.NodeConn, 0.05, sdf=True)
+        plt.imshow(img[10], cmap='gray')
+
     """
     if Type is None:
         Type = utils.identify_type(NodeCoords, NodeConn)    
