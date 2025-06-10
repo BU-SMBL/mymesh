@@ -45,10 +45,14 @@ Quality Calculation Helper Functions
 ====================================
 .. autosummary::
     :toctree: submodules/
-
+    
+    
+    tri_area
     tri_skewness
     quad_skewness
+    tet_volume
     tet_vol_skewness
+    tet_circumradius
     equiangular_skewness
     dihedralAngles
     SurfDihedralAngles
@@ -642,6 +646,28 @@ def Volume(NodeCoords,NodeConn,verbose=False,ElemType='auto'):
 
 @try_njit(cache=True)
 def tri_area(NodeCoords, NodeConn):
+    """
+    Element areas of a purely triangular mesh.
+
+    .. math::
+
+        A = \\frac{||(b - a) \\times (c - a)||}{2}
+
+    where :math:`a`, :math:`b`, and :math:`c` are the coordinates :math:`(x,y,z)` 
+    of the vertices.
+
+    Parameters
+    ----------
+    NodeCoords : np.ndarray
+        Node coordinates (shape=(n,3))
+    NodeConn : np.ndarray
+        Node connectivity (shape=(m,3), dtype=int)
+
+    Returns
+    -------
+    area : np.ndarray
+        Areas of each triangle
+    """   
 
     pt0 = NodeCoords[NodeConn[:,0]]
     pt1 = NodeCoords[NodeConn[:,1]]
@@ -653,7 +679,28 @@ def tri_area(NodeCoords, NodeConn):
 
 @try_njit(cache=True)
 def tet_volume(NodeCoords, NodeConn):
+    """
+    Element volumes of a purely tetrahedal mesh.
 
+    .. math::
+
+        V = -\\frac{(a-b)\\cdot ((b-d) \\times (c - d))}{6}
+
+    where :math:`a`, :math:`b`, :math:`c`, and :math:`d` are the coordinates
+    :math:`(x,y,z)` of the vertices.
+
+    Parameters
+    ----------
+    NodeCoords : np.ndarray
+        Node coordinates (shape=(n,3))
+    NodeConn : np.ndarray
+        Node connectivity (shape=(m,4), dtype=int)
+
+    Returns
+    -------
+    vol : np.ndarray
+        Volumes of each tetrahedron
+    """   
     pt0 = NodeCoords[NodeConn[:,0]]
     pt1 = NodeCoords[NodeConn[:,1]]
     pt2 = NodeCoords[NodeConn[:,2]]
@@ -661,6 +708,52 @@ def tet_volume(NodeCoords, NodeConn):
     vol = -np.sum((pt0-pt1)*np.cross((pt1-pt3),(pt2-pt3)),axis=1)/6
 
     return vol
+
+def tet_circumradius(NodeCoords, NodeConn, V=None):
+    """
+    Circumradii for elements in a tetrahedral mesh.
+        
+    .. math::
+
+        V = \\frac{\\sqrt{(aA + bB + cC)(aA + bB - cC)(aA - bB + cC)(-aA + bB + cC)}}{24 V}
+
+    where :math:`a`, :math:`b`, and :math:`c`, are the lengths of the three edges
+    meeting at a vertex and :math:`A`, :math:`B`, and :math:`C` are the lengths
+    of their opposite edges.
+
+    Parameters
+    ----------
+    NodeCoords : np.ndarray
+        Node coordinates (shape=(n,3))
+    NodeConn : np.ndarray
+        Node connectivity (shape=(m,4), dtype=int)
+    V : array_like, optional
+        Volume of tetrahedra. If not provided, the volumes will be calculated.
+
+    Returns
+    -------
+    R : np.ndarray
+        Circumradii of tetrahedra
+    """   
+
+    if V is None:
+        V = tet_volume(NodeCoords,NodeConn)
+    else:
+        V = np.asarray(V)
+    points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
+    # edge lengths
+    a = np.sqrt((points[:,0,0] - points[:,3,0])**2 + (points[:,0,1] - points[:,3,1])**2 + (points[:,0,2] - points[:,3,2])**2)
+    b = np.sqrt((points[:,1,0] - points[:,3,0])**2 + (points[:,1,1] - points[:,3,1])**2 + (points[:,1,2] - points[:,3,2])**2)
+    c = np.sqrt((points[:,2,0] - points[:,3,0])**2 + (points[:,2,1] - points[:,3,1])**2 + (points[:,2,2] - points[:,3,2])**2)
+    A = np.sqrt((points[:,1,0] - points[:,2,0])**2 + (points[:,1,1] - points[:,2,1])**2 + (points[:,1,2] - points[:,2,2])**2)
+    B = np.sqrt((points[:,2,0] - points[:,0,0])**2 + (points[:,2,1] - points[:,0,1])**2 + (points[:,2,2] - points[:,0,2])**2)
+    C = np.sqrt((points[:,0,0] - points[:,1,0])**2 + (points[:,0,1] - points[:,1,1])**2 + (points[:,0,2] - points[:,1,2])**2)
+    # Circumradius
+    num = (a*A+b*B+c*C)*(a*A+b*B-c*C)*(a*A-b*B+c*C)*(-a*A+b*B+c*C)
+    num[num < 0] = 0
+    R = np.sqrt(num)/(24*V)
+
+    return R
 
 def tri_skewness(NodeCoords,NodeConn):
     """
@@ -824,23 +917,13 @@ def tet_vol_skewness(NodeCoords, NodeConn, V=None):
     
     # Volume-based
     if V is None:
-        V = Volume(NodeCoords,NodeConn,ElemType='tet')
+        V = tet_volume(NodeCoords,NodeConn)
     else:
         V = np.asarray(V)
-    points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
-    # edge lengths
-    a = np.linalg.norm(points[:,0] - points[:,3],axis=1)
-    b = np.linalg.norm(points[:,1] - points[:,3],axis=1)
-    c = np.linalg.norm(points[:,2] - points[:,3],axis=1)
-    A = np.linalg.norm(points[:,1] - points[:,2],axis=1)
-    B = np.linalg.norm(points[:,2] - points[:,0],axis=1)
-    C = np.linalg.norm(points[:,0] - points[:,1],axis=1)
-    # Circumradius
-    with np.errstate(divide='ignore', invalid='ignore'):
-        R = np.sqrt((a*A+b*B+c*C)*(a*A+b*B-c*C)*(a*A-b*B+c*C)*(-a*A+b*B+c*C))/(24*V)
-
-        Videal = 8*np.sqrt(3)/27 * R**3
-        skew = (Videal - V)/Videal
+    
+    R = tet_circumradius(NodeCoords, NodeConn, V=V)
+    Videal = 8*np.sqrt(3)/27 * R**3
+    skew = (Videal - V)/Videal
     return skew
 
 def equiangular_skewness(NodeCoords,NodeConn):
