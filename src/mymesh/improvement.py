@@ -28,7 +28,7 @@ Local mesh topology
 .. autosummary::
     :toctree: submodules/
 
-    TetContract
+    Contract
     TetSplit
     TetFlip
     TetImprove
@@ -100,12 +100,10 @@ def LocalLaplacianSmoothing(M, options=dict()):
 
     .. plot::
 
-        M = mesh(np.array([[0,0,0],[0,1,0],[1,1,0],[1,0,0],[0.4,0.4,0]]),
-                np.array([[0,1,4],[1,2,4],[2,3,4],[3,0,4]]))
+        M = implicit.SurfaceMesh(implicit.sphere([0,0,0], 1), [-1,1,-1,1,-1,1],  .1)
         Mnew = improvement.LocalLaplacianSmoothing(M, options=dict(iterate=1))
         
-        M.plot(bgcolor='w', show_edges=True, view='xy')
-        Mnew.plot(bgcolor='w', show_edges=True, view='xy')
+        visualize.Subplot([M, Mnew], (1,2), bgcolor='w', show_edges=True)
 
     """    
     
@@ -268,7 +266,8 @@ def TangentialLaplacianSmoothing(M, options=dict()):
         i += 1
 
         Q = ArrayCoords[r]
-        U = (1/lens)[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
+        denom = np.divide(1., lens, where=lens > 0, out=np.zeros_like(lens, dtype=np.float64))
+        U = denom[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
         R = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
         ArrayCoords[FreeNodes] += R[FreeNodes]
 
@@ -301,7 +300,7 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
         'min' - repositioning is allowed if the minimum quality of the connected
         elements doesn't decrease.
     TangentialSurface : bool, optional
-        Option to use tangential laplacian smoothing on the surface (and interfaces, 
+        Option to use tangential Laplacian smoothing on the surface (and interfaces, 
         if labels are provided), by default True.
     options : dict, optional
         Smoothing options. Available options are:
@@ -1350,27 +1349,24 @@ def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='invert
     return NewCoords, NodeConn
 
 ## Local Mesh Topology Operations
-def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, FeatureAngle=25, sizing=None):
+def Contract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, FeatureAngle=25, sizing=None, quadric=True):
     """
-    Edge contraction for tetrahedral mesh coarsening and quality improvement. 
-    Edges with edge length less than `h` will attempt to be contracted. Surfaces
-    and features are preserved by prioritizing surface/feature nodes over 
+    Edge contraction for triangular or tetrahedral mesh coarsening and quality 
+    improvement. 
+    Contraction of edges with edge length less than `h` will be attempted. 
+    Surfaces and features are preserved by prioritizing surface/feature nodes over 
     interior nodes when deciding which node to remove in the edge collapse
     operation. Features (edges, corners), as determined by 
     :func:`~mymesh.utils.DetectFeatures`, are held fixed. An edge is only 
     contracted if doing so doesn't invert any elements or reduce the quality
     by creating a new element with a lower quality than was present in the 
     local edge neighborhood before the contraction. Edges are processed in a
-    heap sorted by edge length, with shorter edges being contracted first. New
-    edges created in the edge contraction process are added to the heap, thus 
-    most edges are contracted in the first iteration, however some non-viable
-    contractions may become viable after the first pass, thus multiple iterations
-    can be performed until all possible edges are contracted.
+    heap sorted by edge length, with shorter edges being contracted first. 
 
     Parameters
     ----------
     M : mymesh.mesh
-        Tetrahedral mesh to be contracted
+        Tetrahedral or triangular mesh to be contracted
     h : float
         Edge length below which wil be contracted. Using 4/5 of the target
         edge length is often recommended.
@@ -1395,13 +1391,53 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
     FeatureAngle : int, optional
         Angle (in degrees) used to identify features, by default 25. See
         :func:`~mymesh.utils.DetectFeatures` for more information.
+        To turn off feature preservation, use `FeatureAngle = None`
+    quadric : bool, optional
+        Use quadric error minimization :cite:`Garland1997` to reposition surface 
+        nodes during contraction. This better preserves the shape of the original
+        surface. By default, True.
 
     Returns
     -------
     Mnew : mymesh.mesh
         Coarsened tetrahedral mesh
 
+    Examples
+    --------
+
+    Coarsening preserves interfaces between labeled regions
+    
+    .. plot::
+
+        # Create a spherical mesh
+        S = implicit.TetMesh(implicit.sphere([0,0,0], 1), [-1,1,-1,1,-1,1], .1)
+
+        # Embed a torus in the mesh
+        S.NodeData['torus'] = implicit.torus([0,0,0],1,.5)(*S.NodeCoords.T)
+        S1 = S.Contour('torus', 0, threshold_direction=1, mixed_elements=False)
+        S1.ElemData['labels'] = np.zeros(S1.NElem)
+        S2 = S.Contour('torus', 0, threshold_direction=-1, mixed_elements=False)
+        S2.ElemData['labels'] = np.ones(S2.NElem)
+        S1.merge(S2)
+
+        # Coarsen
+        Sc = improvement.Contract(S1, 0.2, labels='labels')
+
+        visualize.Subplot((S1, Sc, S1.Clip(), Sc.Clip()), (2,2), scalars='labels', show_edges=True, titles=['Original', 'Coarsened', '', ''], view='-yz')
+
+    Quadrics help to preserve shape even during extreme coarsening:
+    
+    .. plot::
+
+        bunny = mymesh.demo_mesh('bunny')
+        coarse = improvement.Contract(bunny, 0.05, quadric=False, FeatureAngle=None)
+        quadric = improvement.Contract(bunny, 0.05, quadric=True, FeatureAngle=None)
+
+        visualize.Subplot((bunny, coarse, quadric), (1,3), view='xy', titles=['Original', 'quadric=False', 'quadric=True'])
+
     """    
+    assert len(M.ElemType) == 1 and M.ElemType[0] in ['tri', 'tet'], 'Mesh must be either triangular or tetrahedral.'
+
     Edges = np.sort(M.Edges,axis=1).astype(np.int64)
     if labels is None:
         SurfConn = np.array(M.SurfConn, dtype=np.int64)
@@ -1468,7 +1504,11 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
     surface_nodes = np.unique(SurfEdges)
     surfnodeset = set(surface_nodes)
     fixed_nodes = np.array(list(FixedNodes),dtype=int)
-    feat_edges, feat_corners = utils.DetectFeatures(M.NodeCoords,SurfConn,angle=FeatureAngle)
+    if FeatureAngle is None:
+        feat_edges = np.empty((0,), dtype=int)
+        feat_corners = np.empty((0,), dtype=int)
+    else:
+        feat_edges, feat_corners = utils.DetectFeatures(M.NodeCoords,SurfConn,angle=FeatureAngle)
 
     # 0 : interior; 1 : surface; 2 : feature edge; 3 : feature corner; 4 : fixed node
     FeatureRank = np.zeros(len(M.NodeCoords))
@@ -1484,6 +1524,31 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
     EdgeDiff = M.NodeCoords[Edges[:,0]] - M.NodeCoords[Edges[:,1]]
     EdgeLengths = np.sqrt(EdgeDiff[:,0]**2 + EdgeDiff[:,1]**2 + EdgeDiff[:,2]**2)
 
+    if quadric:
+        Normals = utils.CalcFaceNormal(M.NodeCoords, SurfConn)
+        Pts = utils.Centroids(M.NodeCoords, SurfConn)# NodeCoords[SurfConn[:,0]] # A point on each plane
+
+        # Plane equations for each face (ax + by + cz + d = 0)
+        a, b, c = Normals.T
+        d = -(a*Pts[:,0] + b*Pts[:,1] + c*Pts[:,2])
+        p = np.column_stack([a, b, c, d]) # (n,4)
+        # Fundamental quadrics
+        K = p[:, :, None] @ p[:, None, :]
+        # Node quadrics
+        ElemConn = utils.getElemConnectivity(M.NodeCoords, SurfConn)
+        quadrics = np.array([np.sum(K[elems],axis=0) for elems in ElemConn])
+        quadrics[np.isnan(quadrics)] = 0
+        # # Edge quadrics
+        # edgeQ = np.sum(Q[SurfEdges],axis=1)
+        # # Target and Error cost of contracting each edge
+        # cond = np.linalg.cond(edgeQ[:, :3, :3])
+        # bad = (cond > 1e5) | np.isnan(cond)
+        # Targets = np.ones((len(SurfEdges), 4))
+        # Targets[bad,:3] = (NodeCoords[SurfEdges[bad,0]] + NodeCoords[SurfEdges[bad,1]])/2 # midpoints 
+        # Targets[~bad,:3] = -np.linalg.solve(edgeQ[~bad, :3, :3], edgeQ[~bad, :3,  3])
+        # Cost = (Targets[:,None,:] @ edgeQ @ Targets[:,:,None])[:,0,0]
+        
+    
     # Create edge heap
     heap = [(EdgeLengths[i], edge) for i,edge in enumerate(EdgeTuple) if (EdgeLengths[i] < emin[edge[0]]) and (EdgeLengths[i] > 0)]
 
@@ -1502,7 +1567,7 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
         tqdm_loaded = True
     else:
         tqdm_loaded = False
-    if verbose: print(f'TetContract:', end='')
+    if verbose: print(f'Edge Contraction:', end='')
     valid = 0
     invalid = 0
     if verbose and tqdm_loaded:
@@ -1517,7 +1582,10 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
             L1 = len(heap)
 
         # Check if collapse is valid:
-        success, D, EdgeStatus, to_add = _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax)
+        if quadric:
+            success, D, EdgeStatus, to_add = _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics)
+        else:
+            success, D, EdgeStatus, to_add = _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax)
         if success:
             for entry in to_add:
                 heapq.heappush(heap, entry)
@@ -1552,7 +1620,7 @@ def TetContract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None,
     return Mnew
 
 @try_njit(cache=True)
-def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax):
+def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics=None):
     
     to_add = []
     # to_add = numba.typed.List()
@@ -1610,7 +1678,7 @@ def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax):
     
     # construct the updated local mesh
     updatedelems = affectedelems[~collapsed]
-    UpdatedConn = np.empty((len(updatedelems),4), dtype=np.int64)
+    UpdatedConn = np.empty((len(updatedelems),np.shape(D.NodeConn)[1]), dtype=np.int64)
     for i, elem in enumerate(updatedelems):
         for j, node in enumerate(D.NodeConn[elem]):
             if node == collapsenode:
@@ -1618,10 +1686,26 @@ def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax):
             else:
                 UpdatedConn[i,j] = node
 
+    qbk = None
     if FeatureRank[targetnode] == FeatureRank[collapsenode]:
-        # Move the target node to the midpoint of the edge
         coordbk = np.copy(D.NodeCoords[targetnode])
-        D.NodeCoords[targetnode] = (D.NodeCoords[targetnode] + D.NodeCoords[collapsenode])/2
+        if quadrics is not None and FeatureRank[targetnode] == 1:
+            # Quadric surface
+            edgeQ = quadrics[targetnode] + quadrics[collapsenode]
+            cond = np.linalg.cond(edgeQ[:3, :3])
+            qbk = np.copy(quadrics[targetnode])
+            if cond > 1e5 or np.isnan(cond):
+                # Poorly conditioned matrix, use midpoint
+                D.NodeCoords[targetnode] = (D.NodeCoords[targetnode] + D.NodeCoords[collapsenode])/2
+            else:
+                # Calculate quadric error-minimizing location
+                D.NodeCoords[targetnode] = -np.linalg.solve(edgeQ[:3, :3], edgeQ[:3,  3])
+                quadrics[targetnode] = edgeQ
+
+
+        else:
+            # Move the target node to the midpoint of the edge
+            D.NodeCoords[targetnode] = (D.NodeCoords[targetnode] + D.NodeCoords[collapsenode])/2
     else:
         coordbk = None
 
@@ -1636,29 +1720,42 @@ def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax):
         if L > (emax[newedge[0]]+emax[newedge[1]])/2:
             if coordbk is not None:
                 D.NodeCoords[targetnode] = coordbk
+                if quadrics is not None and qbk is not None:
+                    quadrics[targetnode] = qbk
             return False, D, EdgeStatus, to_add
         newedges.append(newedge)
         Ls.append(L)
 
     # Check volume
-    new_vol = quality.tet_volume(D.NodeCoords, UpdatedConn)
+    if np.shape(UpdatedConn)[1] == 4:
+        new_vol = quality.tet_volume(D.NodeCoords, UpdatedConn)
+    elif np.shape(UpdatedConn)[1] == 3:
+        new_vol = quality.tri_area(D.NodeCoords, UpdatedConn)
+        
     if np.any(new_vol <= 0):
         if coordbk is not None:
             D.NodeCoords[targetnode] = coordbk
+            if quadrics is not None and qbk is not None:
+                    quadrics[targetnode] = qbk
         return False, D, EdgeStatus, to_add
 
     # Check for inversion of normals (leads to folds on the surface)
     if FeatureRank[targetnode] >= 1:        
         for i, elem in enumerate(UpdatedConn):
-            faces = np.array([[elem[0], elem[2], elem[1]],
-                [elem[0], elem[1], elem[3]],
-                [elem[1], elem[2], elem[3]],
-                [elem[0], elem[3], elem[2]]])
-            surface_indicators = np.array([FeatureRank[elem[0]] >= 1 and FeatureRank[elem[2]] >= 1 and FeatureRank[elem[1]] >= 1,
-                                        FeatureRank[elem[0]] >= 1 and FeatureRank[elem[1]] >= 1 and FeatureRank[elem[3]] >= 1,
-                                        FeatureRank[elem[1]] >= 1 and FeatureRank[elem[2]] >= 1 and FeatureRank[elem[3]] >= 1,
-                                        FeatureRank[elem[0]] >= 1 and FeatureRank[elem[3]] >= 1 and FeatureRank[elem[2]] >= 1])
-
+            if np.shape(UpdatedConn)[1] == 4:
+                # Tet
+                faces = np.array([[elem[0], elem[2], elem[1]],
+                    [elem[0], elem[1], elem[3]],
+                    [elem[1], elem[2], elem[3]],
+                    [elem[0], elem[3], elem[2]]])
+                surface_indicators = np.array([FeatureRank[elem[0]] >= 1 and FeatureRank[elem[2]] >= 1 and FeatureRank[elem[1]] >= 1,
+                                            FeatureRank[elem[0]] >= 1 and FeatureRank[elem[1]] >= 1 and FeatureRank[elem[3]] >= 1,
+                                            FeatureRank[elem[1]] >= 1 and FeatureRank[elem[2]] >= 1 and FeatureRank[elem[3]] >= 1,
+                                            FeatureRank[elem[0]] >= 1 and FeatureRank[elem[3]] >= 1 and FeatureRank[elem[2]] >= 1])
+            else:
+                # tri
+                faces = elem[None,:]
+                surface_indicators = np.array([True])
             if np.any(surface_indicators):
                 faces = faces[surface_indicators]
                 if len(faces) > 0:
@@ -1678,10 +1775,11 @@ def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax):
                         # if the angle of the normal vector changes by more than 15 degrees, reject the collapse
                         if coordbk is not None:
                             D.NodeCoords[targetnode] = coordbk
+                            if quadrics is not None and qbk is not None:
+                                quadrics[targetnode] = qbk
                         return False, D, EdgeStatus, to_add
     
     # Flip is valid, update data structures
-    
     for elem in sorted(affectedelems[collapsed])[::-1]:
         D.removeElem(elem)
     D.swapNode(collapsenode, targetnode)  

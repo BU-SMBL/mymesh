@@ -374,9 +374,11 @@ def read(img, scalefactor=1, scaleorder=1, verbose=True):
             
         if len(files) == 1:
             imgs = tifffile.imread(files[0])
-            if len(imgs.shape) > 2:
+            if len(imgs.shape) > 2 and 3 <= imgs.shape[0] <= 4:
                 multichannel = True
                 multiimgs = np.array([imgs[...,i] for i in range(np.shape(imgs)[-1])])
+            else:
+                multichannel = False
             
         else:
             temp = tifffile.imread(files[0])
@@ -602,7 +604,7 @@ def _writedcm(imdir, filename, I, dtype):
     ds.PixelData = I.astype(dtype).tobytes()
     ds.save_as(os.path.join(imdir,file))
        
-def SurfaceNodeOptimization(M, img, h, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, gaussian_sigma=1, smooth=True, copy=True, interpolation='linear', 
+def SurfaceNodeOptimization(M, img, h, Cr=0.1, Cz=0.01, iterate=1, threshold=0, FixedNodes=set(), FixEdges=False, gaussian_sigma=1, smooth=True, copy=True, interpolation='linear', 
 springs=True):
     """
     Optimize the placement of surface node to lie on the "true" surface. This
@@ -620,6 +622,11 @@ springs=True):
         Image array or file path to an image
     voxelsize : float
         Voxel size of the image
+    Cr : float
+        Relaxation coefficient (only used if smooth=True). Scales the magnitude
+        of smoothing
+    Cz : float
+        Node motion coefficient. Scales the magnitude of node movement
     iterate : int, optional
         Number of iterations to perform, by default 1
     FixedNodes : set, optional
@@ -670,18 +677,23 @@ springs=True):
     FreeNodes = np.array(list(SurfNodes.difference(EdgeNodes).difference(FixedNodes)))
     
     # Get gradient
-    Fx = ndimage.gaussian_filter(img,gaussian_sigma,order=(1,0,0))
-    Fy = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,1,0))
-    Fz = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,0,1))
+    Fz = ndimage.gaussian_filter(img,gaussian_sigma,order=(1,0,0))/h[0]
+    Fy = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,1,0))/h[1]
+    Fx = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,0,1))/h[2]
     
     Ximg = np.arange(img.shape[2])*h[2] 
     Yimg = np.arange(img.shape[1])*h[1]
     Zimg = np.arange(img.shape[0])*h[0]
 
-    F = lambda x,y,z : interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),img.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
-    gradFx = lambda x,y,z : interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),Fx.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
-    gradFy = lambda x,y,z : interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),Fy.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
-    gradFz = lambda x,y,z : interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),Fx.T,method='linear',bounds_error=False,fill_value=None)(np.vstack([x,y,z]).T)
+    interpF = interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),img.T,method='linear',bounds_error=False,fill_value=None)
+    interpFx = interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),Fx.T,method='linear',bounds_error=False,fill_value=None)
+    interpFy = interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),Fy.T,method='linear',bounds_error=False,fill_value=None)
+    interpFz = interpolate.RegularGridInterpolator((Ximg,Yimg,Zimg),Fz.T,method='linear',bounds_error=False,fill_value=None)
+
+    F = lambda x,y,z : interpF(np.column_stack([x,y,z]))
+    gradFx = lambda x,y,z : interpFx(np.column_stack([x,y,z]))
+    gradFy = lambda x,y,z : interpFy(np.column_stack([x,y,z]))
+    gradFz = lambda x,y,z : interpFz(np.column_stack([x,y,z]))
 
     gradF = lambda x,y,z : np.column_stack([gradFx(x,y,z), gradFy(x,y,z), gradFz(x,y,z)])
 
@@ -698,9 +710,9 @@ springs=True):
     for i in range(iterate):
         X = points[:,0]; Y = points[:,1]; Z = points[:,2]
         f = F(X,Y,Z) - threshold
-        g = np.squeeze(gradF(X,Y,Z))
+        g = gradF(X,Y,Z)
         fg = (f[:,None]*g)
-        tau = h/(100*np.max(np.linalg.norm(fg,axis=0)))
+        tau = Cz*(np.mean(h)/(np.linalg.norm(fg,axis=1)))[:,None]
 
         Zflow = -2*tau*fg
 
@@ -710,7 +722,7 @@ springs=True):
             U = (1/lengths)[:,None] * np.nansum(Q - points[:,None,:],axis=1)
             gnorm = np.linalg.norm(g,axis=1)[:,None]
             NodeNormals = np.divide(g, gnorm, out=np.zeros_like(g), where=gnorm!=0)
-            Rflow = 1*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
+            Rflow = Cr*(U - np.sum(U*NodeNormals,axis=1)[:,None]*NodeNormals)
         elif smooth == 'local':
             Q = NodeCoords[r]
             U = (1/lengths)[:,None] * np.nansum(Q - points[:,None,:],axis=1)
@@ -722,7 +734,7 @@ springs=True):
             Forces = np.zeros((M.NNode, 3))
             Forces[FreeNodes] = Zflow + Rflow
             M = improvement.NodeSpringSmoothing(M, Displacements=Forces, options=dict(FixSurf=False, FixedNodes=FixedNodes, InPlace=True))
-            NodeCoords = M.NodeCoords
+            NodeCoords[:-1] = M.NodeCoords
             points = np.asarray(M.NodeCoords)[FreeNodes]
         else:
             points = points + Zflow + Rflow

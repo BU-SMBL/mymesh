@@ -2204,17 +2204,17 @@ class mesh:
 
             if type(scalars) is str:
                 if scalar_preference.lower() == 'nodes':
-                    if scalars in M.NodeData.keys():
-                        scalars = M.NodeData[scalars]
-                    elif scalars in M.ElemData.keys():
-                        scalars = M.ElemData[scalars]
+                    if scalars in self.NodeData.keys():
+                        scalars = self.NodeData[scalars]
+                    elif scalars in self.ElemData.keys():
+                        scalars = self.ElemData[scalars]
                     else:
                         raise ValueError(f'Scalar {scalars:s} not present in mesh.')
                 elif scalar_preference.lower() == 'elements':
-                    if scalars in M.ElemData.keys():
-                        scalars = M.ElemData[scalars]
-                    elif scalars in M.NodeData.keys():
-                        scalars = M.NodeData[scalars]
+                    if scalars in self.ElemData.keys():
+                        scalars = self.ElemData[scalars]
+                    elif scalars in self.NodeData.keys():
+                        scalars = self.NodeData[scalars]
                     else:
                         raise ValueError(f'Scalar {scalars:s} not present in mesh.')
                 else:

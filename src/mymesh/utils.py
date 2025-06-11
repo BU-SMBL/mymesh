@@ -2,7 +2,7 @@
 # Created on Wed Sep 29 18:31:03 2021
 # @author: toj
 """
-Various mesh utilities 
+Various mesh utilities for mesh measurements, manipulations, cleanup, and more.
 
 .. currentmodule:: mymesh.utils
 
@@ -57,8 +57,8 @@ Surface Projection
     BaryTris
     BaryTet
 
-Mesh Clean Up
-=============
+Mesh Cleanup
+============
 .. autosummary::
     :toctree: submodules/
 
@@ -1614,18 +1614,6 @@ def MergeMesh(NodeCoords1, NodeConn1, NodeCoords2, NodeConn2, NodeVals1=[], Node
         If provided, merged list of NodeVals.
     
     """
-    if type(NodeCoords1) == np.ndarray:
-        NodeCoords1 = NodeCoords1.tolist()
-    if type(NodeConn1) == np.ndarray:
-        NodeConn1 = NodeConn1.tolist()
-    if type(NodeCoords2) == np.ndarray:
-        NodeCoords2 = NodeCoords2.tolist()
-    if type(NodeConn2) == np.ndarray:
-        NodeConn2 = NodeConn2.tolist()
-    if type(NodeVals1) == np.ndarray:
-        NodeVals1 = NodeVals1.tolist()
-    if type(NodeVals2) == np.ndarray:
-        NodeVals2 = NodeVals2.tolist()
 
     if isinstance(NodeCoords1, (list, tuple)) and isinstance(NodeCoords2, (list, tuple)):
         MergeCoords = NodeCoords1 + NodeCoords2 
