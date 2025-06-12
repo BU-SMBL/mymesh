@@ -987,7 +987,12 @@ class mesh:
         
         KeepSet = set(range(self.NElem)).difference(ElemIds)
         KeepIds = np.array(list(KeepSet))
-        if type(self.NodeConn) is np.ndarray:
+        if len(KeepIds) == 0:
+            if type(self.NodeConn) is np.ndarray:
+                self.NodeConn = np.empty((0,np.shape(self.NodeConn)[1]))
+            else:
+                self.NodeConn = []
+        elif type(self.NodeConn) is np.ndarray:
             self.NodeConn = self.NodeConn[KeepIds]
         else:
             self.NodeConn = [self.NodeConn[i] for i in KeepIds]
