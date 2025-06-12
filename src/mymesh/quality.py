@@ -651,9 +651,9 @@ def tri_area(NodeCoords, NodeConn):
 
     .. math::
 
-        A = \\frac{||(b - a) \\times (c - a)||}{2}
+        A = \\frac{||(v_1 - v_0) \\times (v_3 - v_0)||}{2}
 
-    where :math:`a`, :math:`b`, and :math:`c` are the coordinates :math:`(x,y,z)` 
+    where :math:`v_0`, :math:`v_1`, and :math:`v_3` are the coordinates :math:`(x,y,z)` 
     of the vertices.
 
     Parameters
@@ -677,6 +677,46 @@ def tri_area(NodeCoords, NodeConn):
 
     return area
 
+def tri_circumradius(NodeCoords, NodeConn):
+    """
+    Circumradii for elements in a triangular mesh.
+
+    .. math::
+
+        R = \\frac{abc}{(a + b + c)(b + c - a)(c + a - b)(a + b - c)}
+
+    where :math:`a`, :math:`b`, and :math:`c` are the side lengths of the 
+    triangle
+
+    Parameters
+    ----------
+    NodeCoords : np.ndarray
+        Node coordinates (shape=(n,3))
+    NodeConn : np.ndarray
+        Node connectivity (shape=(m,3), dtype=int)
+
+    Returns
+    -------
+    area : np.ndarray
+        Areas of each triangle
+    """ 
+
+    points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
+    if points.shape[2] == 3:
+        a = np.sqrt((points[:,0,0] - points[:,1,0])**2 + (points[:,0,1] - points[:,1,1])**2 + (points[:,0,2] - points[:,1,2])**2)
+        b = np.sqrt((points[:,1,0] - points[:,2,0])**2 + (points[:,1,1] - points[:,2,1])**2 + (points[:,1,2] - points[:,2,2])**2)
+        c = np.sqrt((points[:,2,0] - points[:,0,0])**2 + (points[:,2,1] - points[:,0,1])**2 + (points[:,2,2] - points[:,0,2])**2)
+    elif points.shape[2] == 2:
+        a = np.sqrt((points[:,0,0] - points[:,1,0])**2 + (points[:,0,1] - points[:,1,1])**2)
+        b = np.sqrt((points[:,1,0] - points[:,2,0])**2 + (points[:,1,1] - points[:,2,1])**2) 
+        c = np.sqrt((points[:,2,0] - points[:,0,0])**2 + (points[:,2,1] - points[:,0,1])**2)
+    else:
+        raise ValueError('Node coordinates must have shape=(n,3)')
+
+    R = (a * b * c) / ((a + b + c)*(b + c - a)*(c + a - b)*(a + b - c))
+    
+    return R
+
 @try_njit(cache=True)
 def tet_volume(NodeCoords, NodeConn):
     """
@@ -684,9 +724,9 @@ def tet_volume(NodeCoords, NodeConn):
 
     .. math::
 
-        V = -\\frac{(a-b)\\cdot ((b-d) \\times (c - d))}{6}
+        V = -\\frac{(v_0 - v_1)\\cdot ((v_1 - v_3) \\times (v_2 - v_3))}{6}
 
-    where :math:`a`, :math:`b`, :math:`c`, and :math:`d` are the coordinates
+    where :math:`v_0`, :math:`v_1`, :math:`v_2`, and :math:`v_3` are the coordinates
     :math:`(x,y,z)` of the vertices.
 
     Parameters

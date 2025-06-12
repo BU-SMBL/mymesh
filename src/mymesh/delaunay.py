@@ -672,20 +672,68 @@ def BowyerWatson3d(NodeCoords):
 
     return NodeConn
 
-def Alpha3d(NodeCoords, alpha, method='scipy', Type='surf'):
+def Alpha2d(NodeCoords, alpha, method='scipy', Type='line'):
+    """
+    2D Alpha shapes
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates
+    alpha : float or list of floats
+        Alpha value. If given as a list of values, a corresponding list of 
+        meshes will be returned
+    method : str, optional
+        Delaunay triangulation method used to determine the alpha shape, by 
+        default None. See :func:`Triangulate` for more details and the default 
+        method.
+    Type : str, optional
+        Type of the returned Mesh or Meshes, by default 'line'. Note that if  
+        using Type='surf', triangular meshes may have small unnoticed holes that 
+        could pose problems for some applications. 
+
+    Returns
+    -------
+    M : mymesh.mesh or list of mymesh.mesh
+        Mesh of the alpha shape. If alpha is given as a list, a corresponding
+        list of meshes will be returned.
+    """    
+    T = Triangulate(NodeCoords, method=method)
+    T.verbose=False
+    R = quality.tri_circumradius(T.NodeCoords, T.NodeConn)
+    if isinstance(alpha, (list, tuple, np.ndarray)):
+        M = []
+        for a in alpha:
+            thresh = 1/a if a != 0 else np.inf
+            m = T.Threshold(R, (0,thresh), 'in', InPlace=False)
+            if Type.lower() == 'line':
+                M.append(m.Boundary)
+            else:
+                M.append(m)
+    else:
+        thresh = 1/alpha if alpha != 0 else np.inf
+        T.Threshold(R, (0,thresh), 'in', InPlace=True)
+        if Type.lower() == 'line':
+            M = T.Boundary
+        else:
+            M = T
+    return M
+
+def Alpha3d(NodeCoords, alpha, method=None, Type='surf'):
     """
     3D Alpha shapes
 
     Parameters
     ----------
     NodeCoords : array_like
-        _description_
+        Node coordinates
     alpha : float or list of floats
         Alpha value. If given as a list of values, a corresponding list of 
         meshes will be returned
     method : str, optional
         Delaunay tetrahedralization method used to determine the alpha shape, by 
-        default 'scipy'. See :func:`Tetrahedralize` for more details.
+        default None. See :func:`Tetrahedralize` for more details and the 
+        default method.
     Type : str, optional
         Type of the returned Mesh or Meshes, by default 'surf'. Note that if  
         using Type='vol', tetrahedral meshes may have small unnoticed holes that 
