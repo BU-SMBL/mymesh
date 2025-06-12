@@ -2519,6 +2519,9 @@ def surf2edges(NodeCoords,NodeConn,ElemType='auto'):
     """
 
     edges = solid2edges(NodeCoords, NodeConn, ElemType=ElemType)
+    if len(edges) == 0:
+        Edges = edges
+        return Edges
     UEdges, indices, counts = edges2unique(edges, return_idx=True, return_counts=True)
 
     EdgeIdx = indices[np.where(counts==1)]

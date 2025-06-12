@@ -2,7 +2,7 @@
 # Created on Wed Sep 29 18:31:03 2021
 # @author: toj
 """
-Various mesh utilities for mesh measurements, manipulations, cleanup, and more.
+Various mesh utilities for mesh measurements, manipulations, cleanup, and more
 
 .. currentmodule:: mymesh.utils
 
@@ -587,7 +587,7 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
         norms = np.nanprod(np.linalg.norm(x,axis=3),axis=2)
         # cos(alpha) = dot(u,v)/(norm(u)*norm(v))
         cosAlpha = dots/norms
-        alpha = np.arccos(cosAlpha)*Masknan
+        alpha = np.arccos(cosAlpha, out=np.nan*np.ones_like(cosAlpha), where=(cosAlpha>=-1)|(cosAlpha<=1))*Masknan
 
         sumAlphaN = np.nansum(alpha[:,:,None]*Ns,axis=1)
         NodeNormals = np.nan*np.ones_like(NodeCoords)
