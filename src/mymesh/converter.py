@@ -233,6 +233,17 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,
                 ))
             FaceConn = -1*np.ones((len(NodeConn),4), dtype=int)
             FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
+    elif ElemType=='tet10':
+        Faces = tet102faces(NodeCoords,NodeConn)
+        if return_FaceElem or return_FaceConn:
+            tetIdx = np.arange(len(NodeConn))
+            FaceElem = np.repeat(tetIdx,4)
+        if return_FaceConn:
+            ElemIds_j = np.concatenate((
+                np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
+                ))
+            FaceConn = -1*np.ones((len(NodeConn),4), dtype=int)
+            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
     elif ElemType=='pyramid':
         Faces = pyramid2faces(NodeCoords,NodeConn)
         if return_FaceElem or return_FaceConn:
@@ -257,6 +268,17 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,
             FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
     elif ElemType=='hex':
         Faces = hex2faces(NodeCoords,NodeConn)
+        if return_FaceElem or return_FaceConn:
+            hexIdx = np.arange(len(NodeConn))
+            FaceElem = np.repeat(hexIdx,6)
+        if return_FaceConn:
+            ElemIds_j = np.concatenate((
+                np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6),                    
+                ))
+            FaceConn = -1*np.ones((len(NodeConn),6), dtype=int)
+            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
+    elif ElemType=='hex20':
+        Faces = hex202faces(NodeCoords,NodeConn)
         if return_FaceElem or return_FaceConn:
             hexIdx = np.arange(len(NodeConn))
             FaceElem = np.repeat(hexIdx,6)
