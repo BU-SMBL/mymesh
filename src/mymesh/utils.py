@@ -77,6 +77,7 @@ Miscellaneous
     PadRagged
     ExtractRagged
     identify_type
+    identify_elem
 
 """
 
@@ -2175,6 +2176,7 @@ def ExtractRagged(In,delval=-1,dtype=None):
 def identify_type(NodeCoords, NodeConn):
         """
         Classify the mesh as either a surface or volume.
+
         A mesh is classified as a volume mesh (``vol``) if any elements are unambiguous 
         volume elements - pyramid (5 nodes), wedge (6), hexahedron (8), or if 
         any of a random sample of 10 elements (or all elements if NElem < 10) has
@@ -2201,6 +2203,13 @@ def identify_type(NodeCoords, NodeConn):
 
         In such cases, Type should be specified explicitly when creating the mesh
         object.
+
+        Parameters
+        ----------
+        NodeCoords : array_like
+            Node coordinates.
+        NodeConn : array_like
+            Node connectivity.
 
         Returns
         -------
@@ -2260,7 +2269,38 @@ def identify_type(NodeCoords, NodeConn):
         return Type    
 
 def identify_elem(NodeCoords, NodeConn, Type=None):
+    """
+    Identify the types of elements present in the mesh. This provides this only
+    identifies the unique types present, not the type of each individual 
+    element.
 
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates.
+    NodeConn : array_like
+        Node connectivity.
+    Type : str, NoneType, optional
+        Type of mesh (`'line'`, `'surf'`, `'vol'`), if known. For some meshes
+        this won't be needed, if it is but isn't provided, it will be identified
+        using :func:`identify_type`. By default None.
+
+    Returns
+    -------
+    elems : list
+        List of strings identifying the element types present in the mesh
+
+    Examples
+    --------
+    >>> S = primitives.Sphere([0,0,0], 1, Type='surf')
+    >>> utils.identify_elem(S.NodeCoords, S.NodeConn)
+    ['tri', 'quad']
+
+    >>> S = primitives.Sphere([0,0,0], 1, Type='surf', ElemType='tri')
+    >>> utils.identify_elem(S.NodeCoords, S.NodeConn)
+    ['tri']
+
+    """
     ambiguous_lengths = {4,6,8} # Element lengths that are ambiguous
     if type(NodeConn) is np.ndarray and NodeConn.dtype is not object:
         lengths = (np.shape(NodeConn)[1],)
