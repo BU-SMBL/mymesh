@@ -62,11 +62,30 @@ def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scal
     voxel : mymesh.mesh
         Mesh object containing the voxel mesh. The image data are stored in voxel.ElemData['Image Data'] and optional voxel.NodeData['Image Data']
 
-        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = implicit.VoxelMesh(...)``
+        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = image.VoxelMesh(...)``
 
     Examples
     --------
+    
+    Create a voxel mesh of the full image, visualizing the image data
+    stored in `V.ElemData['Image Data']`:
 
+    .. plot::
+
+        img = mymesh.demo_image('bunny')
+        voxelsize = 1
+        V = image.VoxelMesh(img, voxelsize, scalefactor=0.25)
+        V.Clip(normal=[0,1,0]).plot(scalars='Image Data', view='-x-z')
+
+
+    Create a thresholded voxel mesh:
+
+    .. plot::
+
+        img = mymesh.demo_image('bunny')
+        voxelsize = 1
+        V = image.VoxelMesh(img, voxelsize, threshold=100, scalefactor=0.25)
+        V.plot(view='-x-z')
 
     """        
     
@@ -136,14 +155,20 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
     surface : mymesh.mesh
         Mesh object containing the surface mesh.
 
-        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = implicit.SurfaceMesh(...)``
+        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = image.SurfaceMesh(...)``
 
     Examples
     --------
+    
     .. plot::
 
-        surface = implicit.SurfaceMesh(implicit.gyroid, [0,1,0,1,0,1], 0.05)
-        surface.plot(bgcolor='w')
+        img = mymesh.demo_image('bunny')
+        voxelsize = 1
+        threshold = 100
+        S = image.SurfaceMesh(img, voxelsize, threshold, scalefactor=0.25)
+        S.plot(view='-x-z')
+        S.Clip(normal=[0,1,0]).plot(view='-x-z')
+
     """
 
     if not isinstance(h, (list, tuple, np.ndarray)):
@@ -203,14 +228,26 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
         Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
         Must be 0-5.
     interpolation : str, optional
-        Method of interpolation used for placing the vertices on the approximated isosurface. This can be 'midpoint', 'linear', by default 'linear'. 
+        Method of interpolation used for placing the vertices on the approximated isosurface. This can be 'midpoint' or 'linear', by default 'linear'. 
 
     Returns
     -------
     tet : mymesh.mesh
         Mesh object containing the tetrahedral mesh.
 
-        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = implicit.TetMesh(...)``
+        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = image.TetMesh(...)``
+
+    Examples
+    --------
+    
+    .. plot::
+
+        img = mymesh.demo_image('bunny')
+        voxelsize = 1
+        threshold = 100
+        T = image.TetMesh(img, voxelsize, threshold, scalefactor=0.25)
+        T.plot(view='-x-z')
+        T.Clip(normal=[0,1,0]).plot(view='-x-z')
 
     """
     
@@ -227,7 +264,9 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
 
     voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)
     NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
-    TetCoords, TetConn, Values = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['Image Data'], Type='vol', threshold=threshold, flip=flip, return_NodeValues=True)
+    if interpolation == 'quadratic':
+        raise NotImplementedError('Quadratic interpolation of images not yet supported.')
+    TetCoords, TetConn, Values = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['Image Data'], Type='vol', threshold=threshold, flip=flip, return_NodeValues=True, interpolation=interpolation)
 
 
     if 'mesh' in dir(mesh):

@@ -29,12 +29,15 @@ Tetrahedralization
     Tetrahedralize
     BowyerWatson3d
 
-Convex Hull
-===========
+Hulls
+=====
 .. autosummary::
     :toctree: submodules/
 
     ConvexHull
+    Alpha2d
+    Alpha3d
+    AlphaPeel3d
     GiftWrapping
     
 
@@ -772,7 +775,7 @@ def AlphaPeel3d(NodeCoords, alpha, method='scipy', Type='surf'):
     Parameters
     ----------
     NodeCoords : array_like
-        _description_
+        Node coordinates
     alpha : float or list of floats
         Alpha value. If given as a list of values, a corresponding list of 
         meshes will be returned
