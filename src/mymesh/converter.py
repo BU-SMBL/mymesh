@@ -232,7 +232,7 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,
                 np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
                 ))
             FaceConn = -1*np.ones((len(NodeConn),4), dtype=int)
-            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Edges))
+            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
     elif ElemType=='pyramid':
         Faces = pyramid2faces(NodeCoords,NodeConn)
         if return_FaceElem or return_FaceConn:
@@ -243,7 +243,7 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,
                 np.repeat([[0,1,2,3,4]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*5),                   
                 ))
             FaceConn = -1*np.ones((len(NodeConn),5), dtype=int)
-            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Edges))
+            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
     elif ElemType=='wedge':
         Facees = wedge2faces(NodeCoords,NodeConn)
         if return_FaceElem or return_FaceConn:
