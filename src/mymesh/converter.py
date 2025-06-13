@@ -112,7 +112,7 @@ def solid2surface(NodeCoords,NodeConn,return_SurfElem=False):
         
         return SurfConn
 
-def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False):
+def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,ElemType='auto'):
     """
     Convert solid mesh to faces. The will be one face for each side of each element,
     i.e. there will be duplicate faces for non-surface faces. Use faces2surface(Faces) to extract only the surface faces or face2unique(Faces) to remove duplicates.
@@ -131,6 +131,28 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
         If true, will return FaceElem, the Element Connectivity of each face.
         For each face, FaceElem has the index of the element that the face
         is a part of, by default False
+    ElemType : str, optional
+        Specifies the element type contained within the mesh, by default 'auto'.
+
+        - 'auto' or 'mixed' - Will detect element type by the number of nodes present in each element using :func:`~mymesh.utils.identify_type`. 
+
+        - 'surf' - Will detect element type by the number of nodes present in each 
+        element, assuming four node elements are quads
+
+        - 'vol' - Will detect element type by the number of nodes present in each 
+        element, assuming four node elements are tets (functionally the ame as 'auto')
+
+        - 'tri' - All elements treated as 3-node triangular elements.
+
+        - 'quad' - All elements treated as 4-node quadrilateral elements.
+
+        - 'tet' - All elements treated as 4-node tetrahedral elements.
+
+        - 'pyramid' - All elements treated as 5-node wedge elements.
+
+        - 'wedge' - All elements treated as 6-node quadrilateral elements.
+
+        - 'hex' - All elements treated as 8-node quadrilateral elements.
 
     Returns
     -------
