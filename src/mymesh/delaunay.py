@@ -29,15 +29,12 @@ Tetrahedralization
     Tetrahedralize
     BowyerWatson3d
 
-Hulls
-=====
+Convex Hull
+===========
 .. autosummary::
     :toctree: submodules/
 
     ConvexHull
-    Alpha2d
-    Alpha3d
-    AlphaPeel3d
     GiftWrapping
     
 
@@ -45,7 +42,7 @@ Hulls
 #%%
 import numpy as np
 import sys, copy, itertools, warnings, random
-from . import utils, rays, converter, mesh, quality
+from . import utils, rays, converter, mesh
 from . import try_njit, check_numba, _MYMESH_USE_NUMBA
 from scipy import spatial
 
@@ -127,7 +124,7 @@ def Tetrahedralize(NodeCoords, method=None, tol=1e-8):
         by default None. Edge constraints should be specified by node indices,
         for example [[0, 1], [1,2], ...]
     method : str, optional
-        Triangulation method, by default 'scipy'.
+        Triangulation method, by default 'BowyerWatson'.
 
         - 'BowyerWatson' - Generate a Delaunay triangulation by the Bowyer-Watson algorithm (:func:`BowyerWatson3d`)
 
@@ -141,7 +138,7 @@ def Tetrahedralize(NodeCoords, method=None, tol=1e-8):
     
     Points = np.asarray(NodeCoords)
     if method is None:
-        method = 'scipy'
+        method = 'bowyerwatson'
 
     Points,_,idx = utils.DeleteDuplicateNodes(Points,[],return_idx=True, tol=tol)
     if method.lower() == 'bowyerwatson':
@@ -225,7 +222,7 @@ def ConvexHull(NodeCoords,method='scipy'):
     
     return Hull
 
-def SciPy(NodeCoords, FixVol=True):
+def SciPy(NodeCoords):
     """
     Wrapper for :external+scipy:class:`scipy.spatial.Delaunay` for 2D triangulation
     or 3D tetrahedralization.
@@ -236,10 +233,6 @@ def SciPy(NodeCoords, FixVol=True):
         (n,2) or (n,3) node coordinates for the triangulation. Triangulation is 
         only based on the coordinates in the first two dimensions, if an (n,3)
         is provided, the coordinates of the third column is ignored.
-    FixVol : bool, optional
-        By default some of the signed volumes of the tetrahedra are negative,
-        this option reorders the node connectivity to correct this, by default 
-        True.
 
     Returns
     -------
@@ -249,9 +242,6 @@ def SciPy(NodeCoords, FixVol=True):
         
     out = spatial.Delaunay(NodeCoords,qhull_options='Qbb Qc Qz Q12 Qt')
     NodeConn = out.simplices
-    if np.shape(NodeConn)[1] == 4 and FixVol:
-        V = quality.tet_volume(NodeCoords, NodeConn)
-        NodeConn[V < 0] = NodeConn[V < 0][:, [2, 1, 0, 3]]
     return NodeConn
 
 def Triangle(NodeCoords,Constraints=None):
@@ -674,145 +664,6 @@ def BowyerWatson3d(NodeCoords):
     
 
     return NodeConn
-
-def Alpha2d(NodeCoords, alpha, method='scipy', Type='line'):
-    """
-    2D Alpha shapes
-
-    Parameters
-    ----------
-    NodeCoords : array_like
-        Node coordinates
-    alpha : float or list of floats
-        Alpha value. If given as a list of values, a corresponding list of 
-        meshes will be returned
-    method : str, optional
-        Delaunay triangulation method used to determine the alpha shape, by 
-        default None. See :func:`Triangulate` for more details and the default 
-        method.
-    Type : str, optional
-        Type of the returned Mesh or Meshes, by default 'line'. Note that if  
-        using Type='surf', triangular meshes may have small unnoticed holes that 
-        could pose problems for some applications. 
-
-    Returns
-    -------
-    M : mymesh.mesh or list of mymesh.mesh
-        Mesh of the alpha shape. If alpha is given as a list, a corresponding
-        list of meshes will be returned.
-    """    
-    T = Triangulate(NodeCoords, method=method)
-    T.verbose=False
-    R = quality.tri_circumradius(T.NodeCoords, T.NodeConn)
-    if isinstance(alpha, (list, tuple, np.ndarray)):
-        M = []
-        for a in alpha:
-            thresh = 1/a if a != 0 else np.inf
-            m = T.Threshold(R, (0,thresh), 'in', InPlace=False)
-            if Type.lower() == 'line':
-                M.append(m.Boundary)
-            else:
-                M.append(m)
-    else:
-        thresh = 1/alpha if alpha != 0 else np.inf
-        T.Threshold(R, (0,thresh), 'in', InPlace=True)
-        if Type.lower() == 'line':
-            M = T.Boundary
-        else:
-            M = T
-    return M
-
-def Alpha3d(NodeCoords, alpha, method=None, Type='surf'):
-    """
-    3D Alpha shapes
-
-    Parameters
-    ----------
-    NodeCoords : array_like
-        Node coordinates
-    alpha : float or list of floats
-        Alpha value. If given as a list of values, a corresponding list of 
-        meshes will be returned
-    method : str, optional
-        Delaunay tetrahedralization method used to determine the alpha shape, by 
-        default None. See :func:`Tetrahedralize` for more details and the 
-        default method.
-    Type : str, optional
-        Type of the returned Mesh or Meshes, by default 'surf'. Note that if  
-        using Type='vol', tetrahedral meshes may have small unnoticed holes that 
-        could pose problems for some applications. 
-
-    Returns
-    -------
-    M : mymesh.mesh or list of mymesh.mesh
-        Mesh of the alpha shape. If alpha is given as a list, a corresponding
-        list of meshes will be returned.
-    """    
-    T = Tetrahedralize(NodeCoords, method=method)
-    T.verbose=False
-    R = quality.tet_circumradius(T.NodeCoords, T.NodeConn)
-    
-    if isinstance(alpha, (list, tuple, np.ndarray)):
-        M = []
-        for a in alpha:
-            m = T.Threshold(R, (0,1/a), 'in', InPlace=False)
-            if Type.lower() == 'surf':
-                M.append(m.Surface)
-            else:
-                M.append(m)
-    else:
-        T.Threshold(R, (0,1/alpha), 'in', InPlace=True)
-        if Type.lower() == 'surf':
-            M = T.Surface
-        else:
-            M = T
-    return M
-
-def AlphaPeel3d(NodeCoords, alpha, method='scipy', Type='surf'):
-    """
-    3D Alpha shapes
-
-    Parameters
-    ----------
-    NodeCoords : array_like
-        Node coordinates
-    alpha : float or list of floats
-        Alpha value. If given as a list of values, a corresponding list of 
-        meshes will be returned
-    method : str, optional
-        Delaunay tetrahedralization method used to determine the alpha shape, by 
-        default 'scipy'. See :func:`Tetrahedralize` for more details.
-    Type : str, optional
-        Type of the returned Mesh or Meshes, by default 'surf'. Note that if  
-        using Type='vol', tetrahedral meshes may have small unnoticed holes that 
-        could pose problems for some applications. 
-
-    Returns
-    -------
-    M : mymesh.mesh or list of mymesh.mesh
-        Mesh of the alpha shape. If alpha is given as a list, a corresponding
-        list of meshes will be returned.
-    """    
-    T = Tetrahedralize(NodeCoords, method=method)
-    T.verbose=False
-    R = quality.tet_circumradius(T.NodeCoords, T.NodeConn)
-
-    _, SurfElem = converter.solid2surface(T.NodeCoords, T.NodeConn, return_SurfElem=True)
-    ElemNeighbors = T.ElemNeighbors
-
-    Peelable = set(SurfElem[R[SurfElem] > 1/alpha])
-    Peeled = set()
-    while len(Peelable) > 0:
-
-        NextLayer = []
-        Peeled.update(Peelable)
-        Peelable = {elem for i in Peelable for elem in ElemNeighbors[i] if R[elem] > 1/alpha and elem not in Peeled}
-
-    T.removeElems(Peeled)
-    if Type.lower() == 'surf':
-        return T.Surface
-    
-    return T
 
 ## Utils ##
 @try_njit

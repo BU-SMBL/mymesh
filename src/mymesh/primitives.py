@@ -141,21 +141,18 @@ def Multiline(points, h=None, n=None, connect_ends=False):
     
     return line
         
-def Box(vertices, n, ElemType='hex', Type='vol'):
+def Box(bounds, h, ElemType='quad'):
     """
-    Generate a mesh of box. 
+    Generate a surface mesh of a rectangular box. 
 
     Parameters
     ----------
-    vertices : list
-        Array of box vertices (shape = (8,3)).
-    n : int, tuple
-        Number of elements along each edge of the box.
+    bounds : list
+        Six element list of bounds [xmin,xmax,ymin,ymax,zmin,zmax].
+    h : float
+        Approximate element size.
     ElemType : str, optional
-        Specify the element type of the grid mesh. 
-    Type : str, optional
-        Mesh type of the final mesh. This could be 'surf' for a surface mesh or
-        'vol' the full volumetric grid, by default 'vol'.
+        Specify the element type of the grid mesh. This can either be 'quad' for a quadrilateral mesh or 'tri' for a triangular mesh, by default 'quad'.
 
     Returns
     -------
@@ -169,68 +166,25 @@ def Box(vertices, n, ElemType='hex', Type='vol'):
     --------
     .. plot::
 
-        vertices = [[0,0,0],
-                    [1,0,0],
-                    [1,1,0],
-                    [0,1,0],
-                    [0,0,1],
-                    [1,0,1],
-                    [1,1,1],
-                    [0,1,1]
-                    ]
-        box = primitives.Box(vertices, 10, ElemType='tet')
+        box = primitives.Box([0,1,0,1,0,1], 0.05, ElemType='tri')
         box.plot(bgcolor='w', show_edges=True)
 
     """    
-    if type(n) is tuple or type(n) is list:
-        n0 = n[0]; n1 = n[1]; n2 = n[2]
-    else:
-        n0 = n; n1 = n; n2 = n
-    
-    e0 = np.linspace(vertices[0], vertices[1], n0)
-    e2 = np.linspace(vertices[3], vertices[2], n0)
-    f0 = np.linspace(e0, e2, n1)
+    GridCoords, GridConn = Grid(bounds,h,exact_h=False)
+    BoxConn = converter.solid2surface(GridCoords,GridConn)
+    BoxCoords,BoxConn,_ = utils.RemoveNodes(GridCoords,BoxConn)
+    if ElemType == 'tri':
+        _,BoxConn = converter.quad2tri([],BoxConn)
 
-    e4 = np.linspace(vertices[4], vertices[5], n0)
-    e6 = np.linspace(vertices[7], vertices[6], n0)
-    f5 = np.linspace(e4, e6, n1)
-    v = np.linspace(f0, f5, n2)
-
-    BoxCoords = np.reshape(v,(np.prod(np.shape(v)[:3]), 3), order='F')
-
-    if n0*n1*n2 > np.iinfo(np.uint32).max:
-        itype = np.uint64
-    else:
-        itype = np.uint32
-
-    Ids = np.reshape(np.arange(n0*n1*n2),(n0,n1,n2))
-    
-    BoxConn = np.empty(((n0-1)*(n1-1)*(n2-1),8),dtype=itype)
-
-    BoxConn[:,0] = Ids[:-1,:-1,:-1].flatten()
-    BoxConn[:,1] = Ids[1:,:-1,:-1].flatten()
-    BoxConn[:,2] = Ids[1:,1:,:-1].flatten()
-    BoxConn[:,3] = Ids[:-1,1:,:-1].flatten()
-    BoxConn[:,4] = Ids[:-1,:-1,1:].flatten()
-    BoxConn[:,5] = Ids[1:,:-1,1:].flatten()
-    BoxConn[:,6] = Ids[1:,1:,1:].flatten()
-    BoxConn[:,7] = Ids[:-1,1:,1:].flatten()
-
-    if ElemType == 'tet' or ElemType == 'tri':
-        BoxCoords, BoxConn = converter.hex2tet(BoxCoords, BoxConn, method='1to6')
-    
     if 'mesh' in dir(mesh):
-        box = mesh.mesh(BoxCoords,BoxConn,'vol')
+        box = mesh.mesh(BoxCoords,BoxConn)
     else:
-        box = mesh(BoxCoords,BoxConn,'vol')
-
-    if Type.lower() == 'surf':
-        box = box.Surface
-        box.cleanup()
-        return box
+        box = mesh(BoxCoords,BoxConn)
+    box.Type = 'surf'
+    box.cleanup()
     return box
 
-def Grid(bounds, h, exact_h=False, ElemType='hex', Type='vol'):
+def Grid(bounds, h, exact_h=False, ElemType='hex'):
     """
     Generate a 3D rectangular grid mesh.
 
@@ -248,9 +202,6 @@ def Grid(bounds, h, exact_h=False, ElemType='hex', Type='vol'):
     ElemType : str, optional
         Specify the element type of the grid mesh. This can either be 'hex' for 
         a hexahedral mesh or 'tet' for a tetrahedral mesh, by default 'hex'.
-    Type : str, optional
-        Mesh type of the final mesh. This could be 'surf' for a surface mesh or
-        'vol' the full volumetric grid, by default 'vol'.
 
     Returns
     -------
@@ -314,18 +265,13 @@ def Grid(bounds, h, exact_h=False, ElemType='hex', Type='vol'):
     GridConn[:,6] = Ids[1:,1:,1:].flatten()
     GridConn[:,7] = Ids[:-1,1:,1:].flatten()
 
-    if ElemType == 'tet' or ElemType == 'tri':
+    if ElemType == 'tet':
         GridCoords, GridConn = converter.hex2tet(GridCoords, GridConn, method='1to6')
     
     if 'mesh' in dir(mesh):
         Grid = mesh.mesh(GridCoords,GridConn,'vol')
     else:
         Grid = mesh(GridCoords,GridConn,'vol')
-
-    if Type.lower() == 'surf':
-        Grid = Grid.Surface
-        Grid.cleanup()
-        return Grid
     return Grid
 
 def Grid2D(bounds, h, z=0, exact_h=False, ElemType='quad'):

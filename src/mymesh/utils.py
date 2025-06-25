@@ -2,7 +2,7 @@
 # Created on Wed Sep 29 18:31:03 2021
 # @author: toj
 """
-Various mesh utilities for mesh measurements, manipulations, cleanup, and more
+Various mesh utilities 
 
 .. currentmodule:: mymesh.utils
 
@@ -57,8 +57,8 @@ Surface Projection
     BaryTris
     BaryTet
 
-Mesh Cleanup
-============
+Mesh Clean Up
+=============
 .. autosummary::
     :toctree: submodules/
 
@@ -77,7 +77,6 @@ Miscellaneous
     PadRagged
     ExtractRagged
     identify_type
-    identify_elem
 
 """
 
@@ -588,7 +587,7 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
         norms = np.nanprod(np.linalg.norm(x,axis=3),axis=2)
         # cos(alpha) = dot(u,v)/(norm(u)*norm(v))
         cosAlpha = dots/norms
-        alpha = np.arccos(cosAlpha, out=np.nan*np.ones_like(cosAlpha), where=(cosAlpha>=-1)|(cosAlpha<=1))*Masknan
+        alpha = np.arccos(cosAlpha)*Masknan
 
         sumAlphaN = np.nansum(alpha[:,:,None]*Ns,axis=1)
         NodeNormals = np.nan*np.ones_like(NodeCoords)
@@ -1615,6 +1614,18 @@ def MergeMesh(NodeCoords1, NodeConn1, NodeCoords2, NodeConn2, NodeVals1=[], Node
         If provided, merged list of NodeVals.
     
     """
+    if type(NodeCoords1) == np.ndarray:
+        NodeCoords1 = NodeCoords1.tolist()
+    if type(NodeConn1) == np.ndarray:
+        NodeConn1 = NodeConn1.tolist()
+    if type(NodeCoords2) == np.ndarray:
+        NodeCoords2 = NodeCoords2.tolist()
+    if type(NodeConn2) == np.ndarray:
+        NodeConn2 = NodeConn2.tolist()
+    if type(NodeVals1) == np.ndarray:
+        NodeVals1 = NodeVals1.tolist()
+    if type(NodeVals2) == np.ndarray:
+        NodeVals2 = NodeVals2.tolist()
 
     if isinstance(NodeCoords1, (list, tuple)) and isinstance(NodeCoords2, (list, tuple)):
         MergeCoords = NodeCoords1 + NodeCoords2 
@@ -2176,7 +2187,6 @@ def ExtractRagged(In,delval=-1,dtype=None):
 def identify_type(NodeCoords, NodeConn):
         """
         Classify the mesh as either a surface or volume.
-
         A mesh is classified as a volume mesh (``vol``) if any elements are unambiguous 
         volume elements - pyramid (5 nodes), wedge (6), hexahedron (8), or if 
         any of a random sample of 10 elements (or all elements if NElem < 10) has
@@ -2203,13 +2213,6 @@ def identify_type(NodeCoords, NodeConn):
 
         In such cases, Type should be specified explicitly when creating the mesh
         object.
-
-        Parameters
-        ----------
-        NodeCoords : array_like
-            Node coordinates.
-        NodeConn : array_like
-            Node connectivity.
 
         Returns
         -------
@@ -2269,38 +2272,7 @@ def identify_type(NodeCoords, NodeConn):
         return Type    
 
 def identify_elem(NodeCoords, NodeConn, Type=None):
-    """
-    Identify the types of elements present in the mesh. This provides this only
-    identifies the unique types present, not the type of each individual 
-    element.
 
-    Parameters
-    ----------
-    NodeCoords : array_like
-        Node coordinates.
-    NodeConn : array_like
-        Node connectivity.
-    Type : str, NoneType, optional
-        Type of mesh (`'line'`, `'surf'`, `'vol'`), if known. For some meshes
-        this won't be needed, if it is but isn't provided, it will be identified
-        using :func:`identify_type`. By default None.
-
-    Returns
-    -------
-    elems : list
-        List of strings identifying the element types present in the mesh
-
-    Examples
-    --------
-    >>> S = primitives.Sphere([0,0,0], 1, Type='surf')
-    >>> utils.identify_elem(S.NodeCoords, S.NodeConn)
-    ['tri', 'quad']
-
-    >>> S = primitives.Sphere([0,0,0], 1, Type='surf', ElemType='tri')
-    >>> utils.identify_elem(S.NodeCoords, S.NodeConn)
-    ['tri']
-
-    """
     ambiguous_lengths = {4,6,8} # Element lengths that are ambiguous
     if type(NodeConn) is np.ndarray and NodeConn.dtype is not object:
         lengths = (np.shape(NodeConn)[1],)

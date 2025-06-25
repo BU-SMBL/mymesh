@@ -19,7 +19,6 @@ Mesh type conversion
 
     solid2surface
     im2voxel
-    mesh2im
     voxel2im
     surf2voxel
     surf2dual
@@ -112,7 +111,7 @@ def solid2surface(NodeCoords,NodeConn,return_SurfElem=False):
         
         return SurfConn
 
-def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,ElemType='auto'):
+def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False):
     """
     Convert solid mesh to faces. The will be one face for each side of each element,
     i.e. there will be duplicate faces for non-surface faces. Use faces2surface(Faces) to extract only the surface faces or face2unique(Faces) to remove duplicates.
@@ -131,28 +130,6 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,
         If true, will return FaceElem, the Element Connectivity of each face.
         For each face, FaceElem has the index of the element that the face
         is a part of, by default False
-    ElemType : str, optional
-        Specifies the element type contained within the mesh, by default 'auto'.
-
-        - 'auto' or 'mixed' - Will detect element type by the number of nodes present in each element using :func:`~mymesh.utils.identify_type`. 
-
-        - 'surf' - Will detect element type by the number of nodes present in each 
-        element, assuming four node elements are quads
-
-        - 'vol' - Will detect element type by the number of nodes present in each 
-        element, assuming four node elements are tets (functionally the ame as 'auto')
-
-        - 'tri' - All elements treated as 3-node triangular elements.
-
-        - 'quad' - All elements treated as 4-node quadrilateral elements.
-
-        - 'tet' - All elements treated as 4-node tetrahedral elements.
-
-        - 'pyramid' - All elements treated as 5-node wedge elements.
-
-        - 'wedge' - All elements treated as 6-node quadrilateral elements.
-
-        - 'hex' - All elements treated as 8-node quadrilateral elements.
 
     Returns
     -------
@@ -163,133 +140,41 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,
     FaceElem : list, optional
         The element index that each face is taken from.
     """     
+       
+    Ls = np.array(list(map(len, NodeConn)))
+    edgIdx = np.where(Ls == 2)[0]
+    triIdx = np.where(Ls == 3)[0]
+    tetIdx = np.where(Ls == 4)[0]
+    tet10Idx = np.where(Ls == 10)[0]
+    pyrIdx = np.where(Ls == 5)[0]
+    wdgIdx = np.where(Ls == 6)[0]
+    hexIdx = np.where(Ls == 8)[0] 
+    hex20Idx = np.where(Ls == 20)[0]
+    edgs = [NodeConn[i] for i in edgIdx]
+    tris = [NodeConn[i] for i in triIdx]
+    tets = [NodeConn[i] for i in tetIdx]
+    tet10s = [NodeConn[i] for i in tet10Idx]
+    pyrs = [NodeConn[i] for i in pyrIdx]
+    wdgs = [NodeConn[i] for i in wdgIdx]
+    hexs = [NodeConn[i] for i in hexIdx]
+    hex20s = [NodeConn[i] for i in hex20Idx]
     
-    if ElemType in ('auto','mixed','line','surf','vol'):
-        # check if a single element mesh to avoid unnecessary overhead
-        if ElemType in ('line','surf','vol'):
-            t = ElemType
-        else:
-            t = None
-        types = utils.identify_elem(NodeCoords, NodeConn, Type=t)
-        if len(types) == 1:
-            ElemType = types[0]
-    
-    if ElemType in ('auto','mixed','line','surf','vol'):
-        Ls = np.array(list(map(len, NodeConn)))
-        edgIdx = np.where(Ls == 2)[0]
-        triIdx = np.where(Ls == 3)[0]
-        tetIdx = np.where(Ls == 4)[0]
-        tet10Idx = np.where(Ls == 10)[0]
-        pyrIdx = np.where(Ls == 5)[0]
-        wdgIdx = np.where(Ls == 6)[0]
-        hexIdx = np.where(Ls == 8)[0] 
-        hex20Idx = np.where(Ls == 20)[0]
-        edgs = [NodeConn[i] for i in edgIdx]
-        tris = [NodeConn[i] for i in triIdx]
-        tets = [NodeConn[i] for i in tetIdx]
-        tet10s = [NodeConn[i] for i in tet10Idx]
-        pyrs = [NodeConn[i] for i in pyrIdx]
-        wdgs = [NodeConn[i] for i in wdgIdx]
-        hexs = [NodeConn[i] for i in hexIdx]
-        hex20s = [NodeConn[i] for i in hex20Idx]
-
-        Faces = edgs + tris + tet2faces([],tets).tolist() + tet102faces([],tet10s).tolist() + pyramid2faces([],pyrs) + wedge2faces([],wdgs) + hex2faces([],hexs).tolist()+ hex202faces([],hex20s).tolist()
-        if return_FaceConn or return_FaceElem:
-            ElemIds_i = np.concatenate((edgIdx,triIdx,np.repeat(tetIdx,4),np.repeat(tet10Idx,4),np.repeat(pyrIdx,5),np.repeat(wdgIdx,5),np.repeat(hexIdx,6),np.repeat(hex20Idx,6)))
-            FaceElem = ElemIds_i
-            ElemIds_j = np.concatenate((np.repeat(0,len(edgIdx)),np.repeat(0,len(triIdx)), 
-                    np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
-                    np.repeat([[0,1,2,3]],len(tet10Idx),axis=0).reshape(len(tet10Idx)*4),  
-                    np.repeat([[0,1,2,3,4]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*5),                   
-                    np.repeat([[0,1,2,3,4]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*5),   
-                    np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6), 
-                    np.repeat([[0,1,2,3,4,5]],len(hex20Idx),axis=0).reshape(len(hex20Idx)*6),                    
-                    ))
-            FaceConn = -1*np.ones((len(NodeConn),6))
-            FaceConn[ElemIds_i,ElemIds_j] = np.arange(len(Faces))
-            FaceConn = utils.ExtractRagged(FaceConn,dtype=int)
-    elif ElemType=='tri':
-        Faces = NodeConn
-        if return_FaceElem or return_FaceConn:
-            triIdx = np.arange(len(NodeConn))
-            FaceElem = triIdx
-        if return_FaceConn:
-            FaceConn = triIdx
-    elif ElemType=='quad':
-        Faces = NodeConn
-        if return_FaceElem or return_FaceConn:
-            quadIdx = np.arange(len(NodeConn))
-            FaceElem = quadIdx
-        if return_FaceConn:
-            FaceConn = quadIdx
-    elif ElemType=='tet':
-        Faces = tet2faces(NodeCoords,NodeConn)
-        if return_FaceElem or return_FaceConn:
-            tetIdx = np.arange(len(NodeConn))
-            FaceElem = np.repeat(tetIdx,4)
-        if return_FaceConn:
-            ElemIds_j = np.concatenate((
+    Faces = edgs + tris + tet2faces([],tets).tolist() + tet102faces([],tet10s).tolist() + pyramid2faces([],pyrs) + wedge2faces([],wdgs) + hex2faces([],hexs).tolist()+ hex202faces([],hex20s).tolist()
+    if return_FaceConn or return_FaceElem:
+        ElemIds_i = np.concatenate((edgIdx,triIdx,np.repeat(tetIdx,4),np.repeat(tet10Idx,4),np.repeat(pyrIdx,5),np.repeat(wdgIdx,5),np.repeat(hexIdx,6),np.repeat(hex20Idx,6)))
+        FaceElem = ElemIds_i
+        ElemIds_j = np.concatenate((np.repeat(0,len(edgIdx)),np.repeat(0,len(triIdx)), 
                 np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
-                ))
-            FaceConn = -1*np.ones((len(NodeConn),4), dtype=int)
-            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
-    elif ElemType=='tet10':
-        Faces = tet102faces(NodeCoords,NodeConn)
-        if return_FaceElem or return_FaceConn:
-            tetIdx = np.arange(len(NodeConn))
-            FaceElem = np.repeat(tetIdx,4)
-        if return_FaceConn:
-            ElemIds_j = np.concatenate((
-                np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
-                ))
-            FaceConn = -1*np.ones((len(NodeConn),4), dtype=int)
-            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
-    elif ElemType=='pyramid':
-        Faces = pyramid2faces(NodeCoords,NodeConn)
-        if return_FaceElem or return_FaceConn:
-            pyrIdx = np.arange(len(NodeConn))
-            FaceElem = np.repeat(pyrIdx,5)
-        if return_FaceConn:
-            ElemIds_j = np.concatenate((
+                np.repeat([[0,1,2,3]],len(tet10Idx),axis=0).reshape(len(tet10Idx)*4),  
                 np.repeat([[0,1,2,3,4]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*5),                   
-                ))
-            FaceConn = -1*np.ones((len(NodeConn),5), dtype=int)
-            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
-    elif ElemType=='wedge':
-        Facees = wedge2faces(NodeCoords,NodeConn)
-        if return_FaceElem or return_FaceConn:
-            wdgIdx = np.arange(len(NodeConn))
-            FaceElem = np.repeat(wdgIdx,5)
-        if return_FaceConn:
-            ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2,3,4]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*5),   
+                np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6), 
+                np.repeat([[0,1,2,3,4,5]],len(hex20Idx),axis=0).reshape(len(hex20Idx)*6),                    
                 ))
-            FaceConn = -1*np.ones((len(NodeConn),5), dtype=int)
-            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
-    elif ElemType=='hex':
-        Faces = hex2faces(NodeCoords,NodeConn)
-        if return_FaceElem or return_FaceConn:
-            hexIdx = np.arange(len(NodeConn))
-            FaceElem = np.repeat(hexIdx,6)
-        if return_FaceConn:
-            ElemIds_j = np.concatenate((
-                np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6),                    
-                ))
-            FaceConn = -1*np.ones((len(NodeConn),6), dtype=int)
-            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
-    elif ElemType=='hex20':
-        Faces = hex202faces(NodeCoords,NodeConn)
-        if return_FaceElem or return_FaceConn:
-            hexIdx = np.arange(len(NodeConn))
-            FaceElem = np.repeat(hexIdx,6)
-        if return_FaceConn:
-            ElemIds_j = np.concatenate((
-                np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6),                    
-                ))
-            FaceConn = -1*np.ones((len(NodeConn),6), dtype=int)
-            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
-
-
+        FaceConn = -1*np.ones((len(NodeConn),6))
+        FaceConn[ElemIds_i,ElemIds_j] = np.arange(len(Faces))
+        FaceConn = utils.ExtractRagged(FaceConn,dtype=int)
+    
     if return_FaceConn and return_FaceElem:
         return Faces,FaceConn,FaceElem
     elif return_FaceConn:
@@ -354,16 +239,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
     EdgeElem : list, optional
         The element index that each edge is taken from. Ex. [E0,E0,E0,E0,E0,E0,E1,E1,E1,...]
     """     
-    if ElemType in ('auto','mixed','line','surf','vol'):
-        # check if a single element mesh to avoid unnecessary overhead
-        if ElemType in ('line','surf','vol'):
-            t = ElemType
-        else:
-            t = None
-        types = utils.identify_elem(NodeCoords, NodeConn, Type=t)
-        if len(types) == 1:
-            ElemType = types[0]
-
+    
     if ElemType in ('auto','mixed','line','surf','vol'):
         Ls = np.array([len(elem) for elem in NodeConn])
         edgIdx = np.where(Ls == 2)[0]
@@ -2642,9 +2518,6 @@ def surf2edges(NodeCoords,NodeConn,ElemType='auto'):
     """
 
     edges = solid2edges(NodeCoords, NodeConn, ElemType=ElemType)
-    if len(edges) == 0:
-        Edges = edges
-        return Edges
     UEdges, indices, counts = edges2unique(edges, return_idx=True, return_counts=True)
 
     EdgeIdx = indices[np.where(counts==1)]
@@ -2984,7 +2857,7 @@ def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None):
         resolved by the voxelization, then the image will still be able to be
         filled).
     sdf : bool, optional
-        Option to make the image a signed distance field using a Euclidean distance
+        Option make the image a signed distance field using a Euclidean distance
         transform (:func:`scipy.ndimage.distance_transform_edt`)
         on the binarized image. The returned image will have values
         less than zero inside the surface and greater than zero outside the 
@@ -2998,44 +2871,6 @@ def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None):
     -------
     img : np.ndarray
         Three dimensional binarized (0,1) image of the mesh
-
-    Examples
-    --------
-    To convert a surface mesh into a binary image:
-    
-    .. plot::
-
-        import matplotlib.pyplot as plt
-
-        M = primitives.Torus([0,0,0], 1, .5)
-
-        img = converter.mesh2im(M.NodeCoords, M.NodeConn, 0.05)
-        plt.imshow(img[10], cmap='gray')
-
-    To voxelize only the surface of the mesh, the `fill=False` option can be used:
-
-    .. plot::
-
-        import matplotlib.pyplot as plt
-
-        M = primitives.Torus([0,0,0], 1, .5)
-
-        img = converter.mesh2im(M.NodeCoords, M.NodeConn, 0.05, fill=False)
-        plt.imshow(img[10], cmap='gray')
-
-    The binarized image can be converted to a signed distance field (values are
-    the distance to the surface, sign is negative inside, positive outside) using
-    the `sdf=True` option:
-
-    .. plot::
-
-        import matplotlib.pyplot as plt
-
-        M = primitives.Torus([0,0,0], 1, .5)
-
-        img = converter.mesh2im(M.NodeCoords, M.NodeConn, 0.05, sdf=True)
-        plt.imshow(img[10], cmap='gray')
-
     """
     if Type is None:
         Type = utils.identify_type(NodeCoords, NodeConn)    

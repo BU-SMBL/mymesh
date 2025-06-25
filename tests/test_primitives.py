@@ -2,40 +2,26 @@ import pytest
 import numpy as np
 from mymesh import primitives, quality
 
-@pytest.mark.parametrize("vertices, n, ElemType", [
-    # 1x1x1 cube, hex elements
-    ([[0,0,0],
-    [1,0,0],
-    [1,1,0],
-    [0,1,0],
-    [0,0,1],
-    [1,0,1],
-    [1,1,1],
-    [0,1,1]], 
-     10, 
-     'hex',
+@pytest.mark.parametrize("bounds, h, ElemType", [
+    # 1x1x1 cube, quad elements
+    ([0,1,0,1,0,1], 
+     0.1, 
+     'quad',
      ),
-     # 1x1x1 cube, tet elements
-    ([[0,0,0],
-    [1,0,0],
-    [1,1,0],
-    [0,1,0],
-    [0,0,1],
-    [1,0,1],
-    [1,1,1],
-    [0,1,1]], 
-     10, 
-     'tet',
+     # 4x3x2 cube, tri elements
+    ([-2,2,-1.5,1.5,-1,1], 
+     0.13, 
+     'tri',
      ),
 ])
-def test_Box(vertices, n, ElemType):
-    box = primitives.Box(vertices, n, ElemType=ElemType)
+def test_Box(bounds, h, ElemType):
+    box = primitives.Box(bounds, h, ElemType=ElemType)
 
-    # assert np.all(np.max(box.NodeCoords,axis=0) == [bounds[1],bounds[3],bounds[5]]) & np.all(np.min(box.NodeCoords,axis=0) == [bounds[0],bounds[2],bounds[4]]), "Non-matching bounds"
-    if ElemType == 'hex':
-        assert np.shape(box.NodeConn)[1] == 8, "Incorrect element type"
-    else:
+    assert np.all(np.max(box.NodeCoords,axis=0) == [bounds[1],bounds[3],bounds[5]]) & np.all(np.min(box.NodeCoords,axis=0) == [bounds[0],bounds[2],bounds[4]]), "Non-matching bounds"
+    if ElemType == 'quad':
         assert np.shape(box.NodeConn)[1] == 4, "Incorrect element type"
+    else:
+        assert np.shape(box.NodeConn)[1] == 3, "Incorrect element type"
     assert len(box.BoundaryNodes) == 0, "Unclosed edges"
 
 @pytest.mark.parametrize("bounds, h, exact_h, ElemType", [

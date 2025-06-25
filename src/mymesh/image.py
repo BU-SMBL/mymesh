@@ -659,8 +659,11 @@ springs=True):
         Mesh object
     img : str or np.ndarray
         Image array or file path to an image
-    voxelsize : float
-        Voxel size of the image
+    h : float, tuple
+        Voxel size of the image. If provided as a float, the image is assumed
+        to have an isotropic voxel size. If given as a three element tuple,
+        the three sizes refer to the voxel size in the first, second, and 
+        third dimensions of the image, corresponding to (z, y, x) axes. 
     Cr : float
         Relaxation coefficient (only used if smooth=True). Scales the magnitude
         of smoothing

@@ -226,16 +226,13 @@ def VoxelMesh(func, bounds, h, threshold=0, threshold_direction=-1, mode='any', 
 
     NodeCoords, GridConn = primitives.Grid(bounds, h, exact_h=False)
     Values = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2], *args, **kwargs)
-    if threshold is None:
-        mode = 'notrim'
-        NodeVals = Values
     if np.sign(threshold_direction) == 1:
         NodeVals = -1*Values
-        if threshold is not None: threshold = -1*threshold
+        threshold = -1*threshold
     else:
         NodeVals = Values
 
-    if threshold is not None and np.min(NodeVals) >= threshold:
+    if np.min(NodeVals) >= threshold:
         if 'mesh' in dir(mesh):
             voxel = mesh.mesh()
         else:
@@ -1156,7 +1153,7 @@ def torus(center, R, r):
         surface = implicit.SurfaceMesh(implicit.torus([0,0,0], 1, .25), [-1.25,1.25,-1.25,1.25,-.3,.3], 0.1)
         surface.plot(bgcolor='w')
     """    
-    func = lambda x,y,z : (((x-center[0])**2 + (y-center[1])**2)**(1/2) - R)**2 + (z-center[2])**2 - r**2
+    func = lambda x,y,z : (((x-center[0])**2 + (y-center[1])**2)**(1/2) - R)**2 + z**2 - r**2
     return func
 
 # Implicit Function Operators

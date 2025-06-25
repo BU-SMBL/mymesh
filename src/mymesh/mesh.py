@@ -987,12 +987,7 @@ class mesh:
         
         KeepSet = set(range(self.NElem)).difference(ElemIds)
         KeepIds = np.array(list(KeepSet))
-        if len(KeepIds) == 0:
-            if type(self.NodeConn) is np.ndarray:
-                self.NodeConn = np.empty((0,np.shape(self.NodeConn)[1]))
-            else:
-                self.NodeConn = []
-        elif type(self.NodeConn) is np.ndarray:
+        if type(self.NodeConn) is np.ndarray:
             self.NodeConn = self.NodeConn[KeepIds]
         else:
             self.NodeConn = [self.NodeConn[i] for i in KeepIds]
@@ -2206,17 +2201,17 @@ class mesh:
 
             if type(scalars) is str:
                 if scalar_preference.lower() == 'nodes':
-                    if scalars in self.NodeData.keys():
-                        scalars = self.NodeData[scalars]
-                    elif scalars in self.ElemData.keys():
-                        scalars = self.ElemData[scalars]
+                    if scalars in M.NodeData.keys():
+                        scalars = M.NodeData[scalars]
+                    elif scalars in M.ElemData.keys():
+                        scalars = M.ElemData[scalars]
                     else:
                         raise ValueError(f'Scalar {scalars:s} not present in mesh.')
                 elif scalar_preference.lower() == 'elements':
-                    if scalars in self.ElemData.keys():
-                        scalars = self.ElemData[scalars]
-                    elif scalars in self.NodeData.keys():
-                        scalars = self.NodeData[scalars]
+                    if scalars in M.ElemData.keys():
+                        scalars = M.ElemData[scalars]
+                    elif scalars in M.NodeData.keys():
+                        scalars = M.NodeData[scalars]
                     else:
                         raise ValueError(f'Scalar {scalars:s} not present in mesh.')
                 else:
