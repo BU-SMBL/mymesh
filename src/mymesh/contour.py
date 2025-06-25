@@ -3995,7 +3995,7 @@ def MarchingTriangles(TriNodeCoords, TriNodeConn, NodeValues, threshold=0, inter
     TriNodeCoords = np.asarray(TriNodeCoords)
     TriNodeConn = np.asarray(TriNodeConn)
     NodeValues = np.asarray(NodeValues).flatten()
-    assert len(NodeValues) == len(TriNodeCoords), 'Number of nodes must much number of node values.'
+    assert len(NodeValues) == len(TriNodeCoords), 'Number of nodes must match number of node values.'
 
     #      5
     #     / \
@@ -4649,7 +4649,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     TetNodeCoords = np.asarray(TetNodeCoords)
     TetNodeConn = np.asarray(TetNodeConn)
     NodeValues = np.asarray(NodeValues).flatten()
-    assert len(NodeValues) == len(TetNodeCoords), 'Number of nodes must much number of node values.'
+    assert len(NodeValues) == len(TetNodeCoords), 'Number of nodes must match number of node values.'
 
     MT_Lookup = np.array([
             [],                     # 0-0000
