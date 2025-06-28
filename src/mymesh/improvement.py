@@ -87,8 +87,14 @@ def LocalLaplacianSmoothing(M, options=dict()):
         FixSurf : bool
             If true, all nodes on the surface will be held in place and only 
             interior nodes will be smoothed, by default False.
-
-        
+        limit : float
+            Maximum distance nodes are allowed to move, by default None
+        constraint : np.ndarray
+            Constraint array (shape = (m,3)). The first column indicates nodes
+            that will be constrained, the second column indicates the axis
+            the constraint will be applied in, and the third column indicates
+            the displacement of the given node along the given axis (e.g. 0
+            for no motion in a particular axis))
 
     Returns
     -------
@@ -123,7 +129,8 @@ def LocalLaplacianSmoothing(M, options=dict()):
                         FixSurf = False,
                         FixEdge = True,
                         qualityFunc = quality.MeanRatio,
-                        limit = np.inf
+                        limit = np.inf,
+                        constraint = np.empty((0,3)),
                     )
 
     NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(M, SmoothOptions, options)
@@ -156,9 +163,18 @@ def LocalLaplacianSmoothing(M, options=dict()):
             Q = ArrayCoords[r]
             U = len_inv[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
             Utotal[FreeNodes] += U[FreeNodes]
+            # enforce limit
             Unorm = np.linalg.norm(Utotal[FreeNodes], axis=1)
             Utotal[FreeNodes[Unorm > SmoothOptions['limit']]] = Utotal[FreeNodes[Unorm > SmoothOptions['limit']]]/Unorm[Unorm > SmoothOptions['limit']][:,None] * SmoothOptions['limit']
+            # enforce constraint
+            if len(SmoothOptions['constraint']) > 0:
+                nodes = SmoothOptions['constraint'][:,0].astype(int)
+                axes = SmoothOptions['constraint'][:,1].astype(int)
+                magnitudes = SmoothOptions['constraint'][:,2]
+                Utotal[nodes, axes] = magnitudes
+            # apply displacement
             ArrayCoords[FreeNodes] = NodeCoords[FreeNodes] + Utotal[FreeNodes]
+            
     
         NewCoords = ArrayCoords[:-1]
     else:
