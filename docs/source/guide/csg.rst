@@ -12,7 +12,7 @@ implicit and explicit.
 .. plot::
     :include-source: False
     
-    cube = primitives.Box([-1,1,-1,1,-1,1], .25, ElemType='tri')
+    cube = primitives.Grid([-1,1,-1,1,-1,1], .25, Type='surf', ElemType='tri')
     sphere = primitives.Sphere([1,-1,1], 1.65, ElemType='tri')
 
     U,I,D = booleans.MeshBooleans(cube,sphere)
@@ -138,7 +138,7 @@ symmetric, i.e. A-B ≠ B-A).
 
 .. plot::
     
-    cube = primitives.Box([-.9,.9,-.9,.9,-.9,.9], .25, ElemType='tri')
+    cube = primitives.Grid([-.9,.9,-.9,.9,-.9,.9], .25, Type='surf', ElemType='tri')
     sphere = primitives.Sphere([0,0,0], 1, ElemType='tri')
 
     U,I,D = booleans.MeshBooleans(cube,sphere)

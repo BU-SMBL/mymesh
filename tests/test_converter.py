@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from mymesh import converter, quality
+from mymesh import converter, primitives, quality
 
 @pytest.mark.parametrize("NodeCoords, NodeConn, return_SurfElem, expected",[
     # Single hex, False
@@ -315,3 +315,16 @@ def test_hexsubdivide(NodeCoords, NodeConn):
     assert np.shape(NewConn)[0] == 8*len(NodeConn), 'Incorrect number of elements' 
     assert np.shape(NewConn)[1] == 8, 'Incorrect number of nodes per element' 
     assert np.all(quality.Volume(NewCoords, NewConn) > 0), 'Inverted elements'
+
+@pytest.mark.parametrize("M, voxelsize", [
+    # Case 1: torus
+    (
+        primitives.Torus([0,0,0], 1, .5),
+        0.05
+    ),
+])
+def test_mesh2im(M, voxelsize):
+
+    img = converter.mesh2im(M.NodeCoords, M.NodeConn, voxelsize)
+
+    # TODO: Validation testing

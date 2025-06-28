@@ -38,7 +38,8 @@ extensions = ['sphinx.ext.autodoc',
             'jupyter_sphinx',
             'sphinx_gallery.gen_gallery', 
             # 'jupyterlite_sphinx', 
-            'sphinx.ext.intersphinx']
+            'sphinx.ext.intersphinx',
+            'sphinx_tabs.tabs']
 autodoc_mock_imports = []
 autodoc_member_order = 'bysource'
 autosummary_generate = True
@@ -65,6 +66,8 @@ html_theme =  'pydata_sphinx_theme' #'sphinx_rtd_theme' #
 html_static_path = ['_static']
 html_logo = '_static/mymesh_logo.png'
 html_css_files = ['css/mymesh.css']
+pygments_light_style="tango"
+pygments_dark_style="nord"
 html_theme_options = dict(collapse_navigation=True, 
                            navigation_depth=1,
                            icon_links= [
@@ -77,8 +80,12 @@ html_theme_options = dict(collapse_navigation=True,
                                  "icon": "fa-brands fa-square-github",
                                  # The type of image to be used (see below for details)
                                  "type": "fontawesome",
-                              }]
+                              },],
+                           pygments_light_style=pygments_light_style, 
+                           pygments_dark_style=pygments_dark_style
                         )
+
+
 html_context = {
    "default_mode": "light"
 }
@@ -97,6 +104,7 @@ plot_formats = ['png']
 plot_pre_code = '''
 import numpy as np
 from matplotlib import pyplot as plt
+import mymesh
 from mymesh import *
 visualize.set_vispy_backend(preference='PyQt6')
 '''

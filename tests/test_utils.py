@@ -579,7 +579,7 @@ def test_CleanupDegenerateElements(NodeCoords, NodeConn, Type, expected):
     4/3*np.pi*1**3
     ),
     # Case 3: unit cube (primitive)
-    (primitives.Box([0,1,0,1,0,1], .1, ElemType='tri'),
+    (primitives.Grid([0,1,0,1,0,1], .1, ElemType='tri', Type='surf'),
     1
     ),
     # Case 4: unit cube (implicit)
