@@ -64,7 +64,6 @@ def check_numba():
     return check
 
 def try_njit(func=None, *njit_args, **njit_kwargs):
-    # TODO: Set up type processing wrapper (see numpy.typing for input annotation and typing.get_type_hints) to handle flexible inputs on functions that get JITed 
     @wraps(func)
     def decorator(func):
         if check_numba():

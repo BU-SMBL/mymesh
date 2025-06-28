@@ -7,12 +7,13 @@ Mesh visualization and plotting
 :mod:`mymesh.visualize` is still experimental and may not work as expected
 on all systems or in all development environments. For more stable and
 full-featured mesh visualization, a mesh (``M``) can be converted to a PyVista
-mesh:
+mesh for visualization:
 
 .. code-block::
 
     import pyvista as pv
-    pvmesh = pv.wrap(M.mymesh2meshio())
+    pv_mesh = pv.wrap(M.mymesh2meshio())
+    pv_mesh.plot()
 
 Visualization
 =============
@@ -20,6 +21,7 @@ Visualization
     :toctree: submodules/
 
     View
+    Subplot
 
 Visualization Utilities
 =======================
@@ -184,6 +186,8 @@ def View(M, interactive=True, bgcolor=None,
     
     # Set up mesh
     vertices = np.asarray(M.NodeCoords)# - np.mean(M.NodeCoords,axis=0) # Centering mesh in window
+    if vertices.shape[1] == 2:
+        vertices = np.hstack([vertices, np.zeros((len(vertices),1))])
     if M.Type == 'vol':
         SurfConn, ids = converter.solid2surface(*M, return_SurfElem=True)
         _,faces, inv = converter.surf2tris(M.NodeCoords, SurfConn, return_inv=True)
@@ -279,8 +283,21 @@ def View(M, interactive=True, bgcolor=None,
         vsmesh.transform.rotate(30, (1, 0, 0))
     elif view == 'xy':
         vsmesh.transform.rotate(90, (1, 0, 0))
+    elif view == '-xy':
+        vsmesh.transform.rotate(90, (1, 0, 0))
+        vsmesh.transform.rotate(180, (0, 0, 1))
     elif view == 'xz':
         pass
+    elif view == '-xz':
+        vsmesh.transform.rotate(180, (0, 0, 1))
+    elif view == 'x-z':
+        vsmesh.transform.rotate(180, (1, 0, 0))
+    elif view == '-x-z':
+        vsmesh.transform.rotate(180, (0, 1, 0))
+    elif view == 'yz':
+        vsmesh.transform.rotate(-90, (0, 0, 1))
+    elif view == '-yz':
+        vsmesh.transform.rotate(90, (0, 0, 1))
     
     if wireframe_enabled:
         vsmesh.set_gl_state(polygon_offset_fill=True,
@@ -298,7 +315,7 @@ def View(M, interactive=True, bgcolor=None,
     shading_filter.shading = shading
 
     def attach_headlight(canvasview):
-        light_dir = (0, 1, 0, 0)
+        light_dir = (0, 1, 0, 0.001)
         shading_filter.light_dir = light_dir[:3]
         initial_light_dir = canvasview.camera.transform.imap(light_dir)
 
@@ -319,7 +336,7 @@ def View(M, interactive=True, bgcolor=None,
                                 (mins[2]+0.85*diffs[2], maxs[2]-0.85*diffs[2]))
     
     # Render
-    if ipython and interactive:
+    if chosen == 'jupyter_rfb' and interactive:
         return canvas
     elif interactive:
         app.run()
@@ -336,13 +353,31 @@ def View(M, interactive=True, bgcolor=None,
     if return_image:
         return img_data
 
+def Subplot(meshes, shape, show=True, return_fig=False, figsize=None, titles=None, **kwargs):
+
+    # Plotting:
+    fig, axes = plt.subplots(shape[0], shape[1], figsize=figsize)
+    if titles is None:
+        titles = ['' for i in range(len(meshes))]
+    for m, ax, title in zip(meshes, axes.ravel(), titles):
+        subfig, subax = m.plot(show=False,return_fig=True,**kwargs)
+        ax.imshow(subax.get_images()[0].get_array())
+        ax.set_title(title)
+        ax.set_axis_off()
+        plt.close(subfig)
+
+    if show:
+        plt.show()
+    if return_fig:
+        return fig, ax
+
 def FaceColor(NFaces, color, face_alpha, scalars=None, color_convert=None):
     
     if scalars is None:
         if type(color) is str:
             color = ParseColor(color, face_alpha)
             face_colors = np.tile(color,(NFaces,1))
-        elif isinstance(color, [list, tuple, np.ndarray]):
+        elif isinstance(color, (list, tuple, np.ndarray)):
             assert len(np.shape(color)) == 1 and np.shape(color)[0] == 4
             face_colors = np.tile(color,(NFaces,1))
     else:
@@ -411,6 +446,14 @@ def ParseColor(color, alpha=1, ):
 
 def GetTheme(theme, scalars):
     if theme == 'default':
+        bgcolor = 'white'
+        if scalars is None:
+            color = 'white'
+        else:
+            color = 'coolwarm'
+        linecolor = 'black'
+    
+    if theme == 'nord':
         bgcolor = '#2E3440'
         if scalars is None:
             color = 'white'
@@ -419,7 +462,7 @@ def GetTheme(theme, scalars):
         linecolor = 'black'
     return color, bgcolor, linecolor
 
-def set_vispy_backend(preference='PyGlet'):
+def set_vispy_backend(preference='glfw'):
     """
     Set the backend for VisPy. Can only be set once.
 
@@ -440,12 +483,14 @@ def set_vispy_backend(preference='PyGlet'):
     except:
         raise ImportError('vispy is needed for visualization. Install with: pip install vispy')
 
-    options = ['PyGlet', 'PyQt6', 'PyQt5', 'PyQt4', 'PySide', 'PySide2', 
-                'PySide6', 'Glfw', 'SDL2', 'osmesa', 'jupyter_rfb']
+    options = ['pyqt6', 'glfw', 'pyside6', 'pyqt5', 'pyqt4', 'pyglet', 'pyside', 'pyside2', 'sdl2', 'osmesa', 'jupyter_rfb']
 
+    preference = preference.lower()
     if preference in options:
         options.remove(preference)
         options.insert(0, preference)
+    else:
+        warnings.warn(f'VisPy backend must be one of {str(options):s}. {preference:s} is not supported.')
 
     success = False
     chosen = None
@@ -462,7 +507,7 @@ def set_vispy_backend(preference='PyGlet'):
                 break
 
     if not success:
-        raise ImportError('A valid vispy backend must be installed. PyQt6 is recommended: pip install pyglet')
+        raise ImportError('A valid vispy backend must be installed. Glfw is recommended: pip install glfw')
 
     return chosen
     

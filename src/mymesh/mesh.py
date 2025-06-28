@@ -390,7 +390,7 @@ class mesh:
         """
         if self.Type != 'surf':
             if self._Surface is None:
-                self._Surface = mesh(self.NodeCoords, self.SurfConn, 'surf')
+                self._Surface = mesh(self.NodeCoords, self.SurfConn, 'surf', verbose=self.verbose)
             surf = self._Surface
         else:
             surf = self
@@ -440,7 +440,7 @@ class mesh:
         """
         if self.Type != 'line':
             if self._Boundary is None:
-                self._Boundary = mesh(self.NodeCoords, self.BoundaryConn, 'line')
+                self._Boundary = mesh(self.NodeCoords, self.BoundaryConn, 'line', verbose=self.verbose)
             surf = self._Boundary
         else:
             surf = self
@@ -987,7 +987,12 @@ class mesh:
         
         KeepSet = set(range(self.NElem)).difference(ElemIds)
         KeepIds = np.array(list(KeepSet))
-        if type(self.NodeConn) is np.ndarray:
+        if len(KeepIds) == 0:
+            if type(self.NodeConn) is np.ndarray:
+                self.NodeConn = np.empty((0,np.shape(self.NodeConn)[1]))
+            else:
+                self.NodeConn = []
+        elif type(self.NodeConn) is np.ndarray:
             self.NodeConn = self.NodeConn[KeepIds]
         else:
             self.NodeConn = [self.NodeConn[i] for i in KeepIds]
@@ -2201,17 +2206,17 @@ class mesh:
 
             if type(scalars) is str:
                 if scalar_preference.lower() == 'nodes':
-                    if scalars in M.NodeData.keys():
-                        scalars = M.NodeData[scalars]
-                    elif scalars in M.ElemData.keys():
-                        scalars = M.ElemData[scalars]
+                    if scalars in self.NodeData.keys():
+                        scalars = self.NodeData[scalars]
+                    elif scalars in self.ElemData.keys():
+                        scalars = self.ElemData[scalars]
                     else:
                         raise ValueError(f'Scalar {scalars:s} not present in mesh.')
                 elif scalar_preference.lower() == 'elements':
-                    if scalars in M.ElemData.keys():
-                        scalars = M.ElemData[scalars]
-                    elif scalars in M.NodeData.keys():
-                        scalars = M.NodeData[scalars]
+                    if scalars in self.ElemData.keys():
+                        scalars = self.ElemData[scalars]
+                    elif scalars in self.NodeData.keys():
+                        scalars = self.NodeData[scalars]
                     else:
                         raise ValueError(f'Scalar {scalars:s} not present in mesh.')
                 else:

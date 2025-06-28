@@ -25,7 +25,7 @@ Tree
     TreeNode
 
 Tree Utilities
-----------------
+--------------
 .. autosummary::
     :toctree: submodules/
 
@@ -40,7 +40,7 @@ Quadtree
     QuadtreeNode
 
 Quadtree Creation
----------------
+-----------------
 .. autosummary::
     :toctree: submodules/
 
@@ -48,7 +48,7 @@ Quadtree Creation
     Edges2Quadtree  
 
 Conversion From Quadtree
-----------------------
+------------------------
 .. autosummary::
     :toctree: submodules/
 
@@ -92,6 +92,7 @@ Octree Querying
 import numpy as np
 from . import rays, utils, mesh
 import sympy as sp
+import copy
 
 class TreeNode:
     def __init__(self,parent=None,data=None,level=0,state='unknown'):
@@ -207,6 +208,18 @@ class TreeNode:
         """        
         # includes both "leaf" and "empty" nodes
         return len(self.children) == 0
+
+    def prune(self, level):
+
+        pruned = copy.deepcopy(self)
+
+        level_nodes = pruned.getLevel(level)
+        for node in level_nodes:
+            if node.state == 'branch':
+                node.state = 'leaf'
+                node.children = []
+        return pruned        
+
 
 class QuadtreeNode(TreeNode):
           
@@ -803,7 +816,7 @@ class OctreeNode(TreeNode):
                     child.makeChildrenBoxes(boxesInChild,minsize=minsize,maxsize=maxsize,maxdepth=maxdepth)
                     child.state = 'branch'
             elif len(boxesInChild) == 1:
-                if child.size > maxsize or child.level < maxdepth:
+                if child.size > maxsize and child.level < maxdepth:
                     child.makeChildrenBoxes(boxesInChild,minsize=minsize,maxsize=maxsize,maxdepth=maxdepth)
                     child.state = 'branch'
                 else:
@@ -922,7 +935,7 @@ def Points2Octree(Points, maxdepth=10):
     
     return root
 
-def Voxel2Octree(VoxelCoords, VoxelConn):
+def Voxel2Octree(VoxelCoords, VoxelConn, maxdepth=None):
     """
     Generate an octree representation of an isotropic voxel mesh. 
 
@@ -953,12 +966,13 @@ def Voxel2Octree(VoxelCoords, VoxelConn):
     size = VoxelSize
     while size < minsize:
         size *= 2
-    
+    if maxdepth is None:
+        maxdepth = np.inf
     centroid = np.array([minx + size/2, miny+size/2, minz+size/2])
     
     Root = OctreeNode(centroid,size,data=[])
     Root.state = 'root'
-    Root.makeChildrenPts(centroids, maxsize=VoxelSize)    
+    Root.makeChildrenPts(centroids, maxsize=VoxelSize, maxdepth=maxdepth)    
     
     return Root
 
@@ -1081,7 +1095,7 @@ def Function2Octree(func, bounds, threshold=0, grad=None, mindepth=2, maxdepth=5
     ----------
     func : function
         Implicit function that describes the geometry of the object to be meshed. 
-        The function should be of the form v = f(x,y,z,*args,**kwargs) where 
+        The function should be of the form v = f(x,y,z) where 
         x, y, and z are numpy arrays of x, y and z coordinates and v is a numpy 
         array of function values. 
     bounds : array_like
@@ -1103,6 +1117,9 @@ def Function2Octree(func, bounds, threshold=0, grad=None, mindepth=2, maxdepth=5
     strategy : str, optional
         Strategy to guide subdivision, by default 'EDerror'.
         
+        - 'Threshold': Subdivision continues as long as an octree node contains 
+            values both above and below. This method has no natural termination
+            (follows `maxdepth`) and isn't sensitive to surface complexity.
         - 'EDerror': Uses the Euclidian distance error function proposed by 
             :cite:`Zhang2003` to assess the error between linear interpolation within
             an octree node and with the evaluation of the function at vertices at 
@@ -1124,11 +1141,19 @@ def Function2Octree(func, bounds, threshold=0, grad=None, mindepth=2, maxdepth=5
     
     # Function value and gradient evaluated at the vertices is stored as `data` in each node
     # func and grad should both accept 3 arguments (x,y,z), and handle both vectorized and scalar inputs
+    if isinstance(func, sp.Basic):
+        x, y, z = sp.symbols('x y z', real=True)
+        F = sp.lambdify((x, y, z), func, 'numpy')
+    elif isinstance(func(bounds[0],bounds[2],0), sp.Basic):
+        x, y, z = sp.symbols('x y z', real=True)
+        F = sp.lambdify((x, y, z), func(x,y,z), 'numpy')
+    else:
+        F = lambda x, y, z : func(x, y, z)
 
     size = max([bounds[1]-bounds[0],bounds[3]-bounds[2],bounds[5]-bounds[4]])
     centroid = np.array([bounds[0] + size/2, bounds[2]+size/2, bounds[4]+size/2])
 
-    if grad is None:
+    if grad is None and strategy in ('EDerror', 'QEF'):
         x, y, z = sp.symbols('x y z', real=True)
         if callable(func):
             if isinstance(func(centroid[0], centroid[1], centroid[2]), sp.Basic):
@@ -1168,7 +1193,52 @@ def Function2Octree(func, bounds, threshold=0, grad=None, mindepth=2, maxdepth=5
     root = OctreeNode(centroid, size)
     root.state = 'root'
 
-    if strategy == 'QEF':
+    if strategy == 'Threshold':
+        
+        NodeIdx = [0,1,2,3,4,5,6,7,0,1,2,3,0,0,1,2,3,4,0]
+        VertIdx = [1,2,3,0,5,6,7,4,4,5,6,7,2,5,6,7,4,6,6]
+        
+        for level in range(maxdepth):
+
+            nodes = root.getLevel(level)
+            nodes = [node for node in nodes if node.state != 'leaf']
+            if len(nodes) == 0:
+                break
+            if level < mindepth:
+                for node in nodes:
+                    node.makeChildren(childstate='branch')
+                    
+                continue
+
+            if level == mindepth:
+                for node in nodes:
+                    node.makeChildren(childstate='branch')
+            
+            # Vertices for the next level 
+            nodes_plus = [node.children for node in nodes] #root.getLevel(level+1)
+            # vertices_plus is a 4th order tensor
+            # first index corresponds to parent nodes, second index is the child, third index is each vertex, fourth index is coordinate (x,y,z)
+            vertices_plus = np.array([[node.getVertices() for node in n] for n in nodes_plus])
+            
+            x = vertices_plus[:,NodeIdx,VertIdx,0]
+            y = vertices_plus[:,NodeIdx,VertIdx,1]
+            z = vertices_plus[:,NodeIdx,VertIdx,2]
+
+            # Function values for the next level 
+            f_plus = F(x, y, z) - threshold
+
+            if level == maxdepth - 1:
+                childstate = 'leaf'
+            else:
+                childstate = 'branch'
+            for i,row in enumerate(nodes_plus):
+                if not (np.all(f_plus[i] > 0) or np.all(f_plus[i] < 0)):
+                    for n in row:
+                        n.makeChildren(childstate=childstate)
+                else:
+                    nodes[i].state = 'leaf'
+
+    elif strategy == 'QEF':
         for level in range(maxdepth):
 
             nodes = root.getLevel(level)
