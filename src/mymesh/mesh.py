@@ -129,6 +129,9 @@ class mesh:
         self._EdgeConn = []
         self._EdgeElemConn = []
         self._NodeNormalsMethod = 'Angle'
+        self._bounds = None
+        self._aabb = None
+        self._mvbb = None
         
         # Sets:
         self.NodeSets = {}
@@ -343,7 +346,7 @@ class mesh:
         """ 
         if self._MeshNodes is None:
             if self.verbose: 
-                print('\n'+'\t'*self._printlevel+'Identifying surface nodes...',end='')
+                print('\n'+'\t'*self._printlevel+'Identifying mesh nodes...',end='')
                 self._printlevel += 1
             self._MeshNodes = np.array(list({i for elem in self.NodeConn for i in elem}))
             if self.verbose: 
@@ -615,6 +618,35 @@ class mesh:
             self._ElemType = utils.identify_elem(*self, Type=self.Type)
             if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
         return self._ElemType
+    @property
+    def bounds(self):
+        """ Bounds of the mesh, formatted as [min(x), max(x), min(y), max(y), min(z), max(z)]. """
+        if self._bounds is None:
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying bounds...',end='')
+            self._bounds = np.array([np.min(self.NodeCoords[self.MeshNodes,0]), np.max(self.NodeCoords[self.MeshNodes,0]),
+                                     np.min(self.NodeCoords[self.MeshNodes,1]), np.max(self.NodeCoords[self.MeshNodes,1]),
+                                     np.min(self.NodeCoords[self.MeshNodes,2]), np.max(self.NodeCoords[self.MeshNodes,2]),
+                                     ])
+            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+        return self._bounds
+    @property
+    def aabb(self):
+        """ Axis aligned bounding box of the mesh. """
+        if self._aabb is None:
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying axis aligned bounding box...',end='')
+            self._aabb = utils.AABB(self.NodeCoords[self.MeshNodes])
+            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+        return self._aabb
+    @property
+    def mvbb(self):
+        """ Minimum volume bounding box of the mesh. """
+        if self._mvbb is None:
+            if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying minimum volume bounding box...',end='')
+            self._mvbb = utils.MVBB(self.NodeCoords[self.MeshNodes])
+            if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
+        return self._mvbb
+    
+    
     # Methods
     ## Maintenance Methods
     def identify_type(self):
