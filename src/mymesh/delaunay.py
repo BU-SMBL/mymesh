@@ -159,7 +159,7 @@ def Tetrahedralize(NodeCoords, method=None, tol=1e-8):
         T = mesh(NodeCoords,NodeConn)
     return T
 
-def ConvexHull(NodeCoords,method='scipy'):
+def ConvexHull(NodeCoords,method='scipy',OrientSurf=True):
     """
     Identify the convex hull of a set of points. For a 2D point set 
     (np.shape(NodeCoords) = (n,2)), a 2D convex hull of line elements will be 
@@ -180,6 +180,9 @@ def ConvexHull(NodeCoords,method='scipy'):
         - 'BowyerWatson' - Generate a Delaunay triangulation by the Bowyer-Watson algorithm (:func:`BowyerWatson2d` or :func:`BowyerWatson3d`)
 
         - 'GiftWrapping' - Use the gift wrapping algorithm (:func:`GiftWrapping`)
+    OrientSurf : str, optional
+        Ensure the normals of the convex hull are consistently oriented outward,
+        by default True.
 
     Returns
     -------
@@ -208,8 +211,12 @@ def ConvexHull(NodeCoords,method='scipy'):
 
     elif nD == 3:
         if method.lower() == 'scipy':
-            qhull = spatial.ConvexHull(np.asarray(NodeCoords, dtype=np.float64))
-            hull = qhull.simplices
+            if OrientSurf:
+                tet = SciPy(np.asarray(NodeCoords, dtype=np.float64), FixVol=True)
+                hull = converter.solid2surface(NodeCoords, tet)
+            else:
+                qhull = spatial.ConvexHull(np.asarray(NodeCoords, dtype=np.float64))
+                hull = qhull.simplices
         elif method.lower() == 'bowyerwatson':
             tet = BowyerWatson3d(NodeCoords)
             hull = converter.solid2surface(NodeCoords, tet)
