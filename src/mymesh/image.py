@@ -10,6 +10,7 @@ Image-based Mesh Generation
 .. autosummary::
     :toctree: submodules/
 
+    PixelMesh
     VoxelMesh
     SurfaceMesh
     TetMesh
@@ -34,7 +35,69 @@ from . import utils, converter, contour, quality, improvement, rays, mesh, primi
 # Mesh generators
 def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, return_nodedata=False):
     """
-    Generate voxel mesh of an image function
+    Generate pixel mesh of a 2D image
+
+    Parameters
+    ----------
+    img : str or np.ndarray
+        Image array or file path to an image
+    h : scalar, tuple
+        Pixel size of the image. Can be specified as a single scalar value, or a three element tuple (or array_like).
+        If a tuple, entries should correspond to (hx, hy).
+    threshold : scalar
+        Isovalue threshold to use for keeping/removing elements, by default 0.
+    threshold_direction : signed integer
+        If threshold_direction is negative, values less than or equal to the threshold will be considered "inside" the mesh and the opposite if threshold_direction is positive, by default 1.
+    scalefactor : float, optional
+        Scale factor for resampling the image. If greater than 1, there will be more than
+        1 elements per pixel. If less than 1, will coarsen the image, by default 1.
+    scaleorder : int, optional
+        Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
+        Must be 0-5.
+    return_nodedata : bool, optional
+        Option to interpolate image data to the nodes rather than just the pixels, by default False.
+        This can add significant computational costs for large images.
+
+    Returns
+    -------
+    pixel : mymesh.mesh
+        Mesh object containing the pixel mesh. The image data are stored in pixel.ElemData['Image Data'] and optional pixel.NodeData['Image Data']
+
+        .. note:: Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = image.PixelMesh(...)``
+
+
+    """        
+    
+    if not isinstance(h, (list, tuple, np.ndarray)):
+        h = (h,h)
+
+    if return_nodedata:
+        PixelCoords, PixelConn, PixelData, NodeData = converter.im2pixel(img, h,scalefactor=scalefactor, scaleorder=scaleorder, threshold=threshold, threshold_direction=threshold_direction, return_nodedata=True)
+
+        if 'mesh' in dir(mesh):
+            pixel = mesh.mesh(PixelCoords, PixelConn)
+        else:
+            pixel = mesh(PixelCoords, PixelConn)
+
+        pixel.NodeData['Image Data'] = NodeData
+        pixel.ElemData['Image Data'] = PixelData
+
+    else:
+        PixelCoords, PixelConn, PixelData = converter.im2pixel(img, h,scalefactor=scalefactor, scaleorder=scaleorder, threshold=threshold, threshold_direction=threshold_direction)
+
+        if 'mesh' in dir(mesh):
+            pixel = mesh.mesh(PixelCoords, PixelConn)
+        else:
+            pixel = mesh(PixelCoords, PixelConn)
+
+        pixel.ElemData['Image Data'] = PixelData
+
+
+    return pixel
+
+def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, return_nodedata=False):
+    """
+    Generate voxel mesh of an image
 
     Parameters
     ----------
@@ -313,7 +376,7 @@ def read(img, scalefactor=1, scaleorder=1, verbose=True):
 
     if type(img) == np.ndarray:
         # If img is an array, only perform scaling
-        assert len(img.shape) == 3, 'Image data must be a 3D array.'
+        # assert len(img.shape) == 3, 'Image data must be a 3D array.'
         if scalefactor != 1:
             I = ndimage.zoom(img,scalefactor,order=scaleorder)
         else:

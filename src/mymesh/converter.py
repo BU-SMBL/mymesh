@@ -20,6 +20,7 @@ Mesh type conversion
     solid2surface
     im2voxel
     mesh2im
+    pixel2im
     voxel2im
     surf2voxel
     surf2dual
@@ -449,7 +450,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
             EdgeElem = np.repeat(quadIdx,4)
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
-                np.repeat([[0,1,2]],len(tetIdx),axis=0).reshape(len(tetIdx)*3), 
+                np.repeat([[0,1,2,3]],len(quadIdx),axis=0).reshape(len(quadIdx)*4), 
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),4), dtype=int)
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
@@ -2733,6 +2734,139 @@ def hexsubdivide(NodeCoords, NodeConn):
     SubConn[7::8] = np.column_stack([Face4CentroidIds, CentroidIds, Face3CentroidIds, Edge37Ids, Edge74Ids, Face5CentroidIds, Edge67Ids, ArrayConn[:,7]])
 
     return NewCoords, SubConn
+
+def im2pixel(img, pixelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
+    """
+    Convert 2D image data to a grid mesh. Each pixel will be represented by an element.
+
+    Parameters
+    ----------
+    img : str or np.ndarray
+        If a str, should be the file path to an image
+    pixelsize : float, or tuple
+        Size of voxel (based on image resolution).
+        If a tuple, should be specified as (hx,hy,hz)
+    scalefactor : float, optional
+        Scale factor for resampling the image. If greater than 1, there will be more than
+        1 elements per voxel. If less than 1, will coarsen the image, by default 1.
+    scaleorder : int, optional
+        Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
+        Must be 0-5.
+    threshold : float, optional
+        Voxel intensity threshold, by default None.
+        If given, elements with all nodes less than threshold will be discarded.
+
+    Returns
+    -------
+    PixelCoords : list
+        Node coordinates for the pixel mesh
+    PixelConn : list
+        Node connectivity for the pixel mesh
+    PixelData : numpy.ndarray
+        Image intensity data for each pixel.
+    NodeData : numpy.ndarray
+        Image intensity data for each node, averaged from connected voxels.
+
+    """    
+    multichannel = False
+
+
+    if type(pixelsize) is list or type(pixelsize) is tuple:
+        assert len(pixelsize) == 2, 'If specified as a list or tuple, pixelsize must have a length of 2.'
+        xscale = pixelsize[0] / scalefactor
+        yscale = pixelsize[1] / scalefactor
+        pixelsize = 1
+        rectangular_elements=True
+    else:
+        pixelsize /= scalefactor
+        rectangular_elements=False
+    
+    if isinstance(img, tuple):
+        if scalefactor != 1:
+            img = tuple([image.read(i, scalefactor, scaleorder) for i in img])
+        multichannel = True
+        multiimg = img
+        img = multiimg[0]
+    else:
+        img = image.read(img, scalefactor, scaleorder)
+    
+    if crop is None:
+        (ny,nx) = img.shape
+        xlims = [0,(nx)*pixelsize]
+        ylims = [0,(ny)*pixelsize]
+        bounds = [xlims[0],xlims[1],ylims[0],ylims[1]]
+        PixelCoords, PixelConn = primitives.Grid(bounds, pixelsize, exact_h=False)
+        if multichannel:
+            PixelData = np.column_stack([I.flatten(order='F') for I in multiimg])
+        else:
+            PixelData = img.flatten(order='F')
+        if return_gradient:
+            gradx = ndimage.gaussian_filter(img,gaussian_sigma,order=(1,0,0))
+            grady = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,1,0))
+            GradData = np.vstack([gradx.flatten(order='F'),grady.flatten(order='F')]).T
+    else:
+        # Adjust crop values to only get whole voxels
+        crop[:-1:2] = np.floor(np.asarray(crop)[:-1:2]/pixelsize)*pixelsize
+        crop[1::2] = np.ceil(np.asarray(crop)[1::2]/pixelsize)*pixelsize
+        if rectangular_elements:
+            bounds = [crop[0]/xscale,crop[1]/xscale,
+                    crop[2]/yscale,crop[3]/yscale]
+        else:
+            bounds = crop
+        PixelCoords, PixelConn = primitives.Grid(bounds, pixelsize, exact_h=False)
+        mins = np.round(np.min(PixelCoords,axis=0)/pixelsize).astype(int)
+        maxs = np.round(np.max(PixelCoords,axis=0)/pixelsize).astype(int)
+        if multichannel:
+            cropimg = [I[mins[1]:maxs[1],mins[0]:maxs[0]] for I in multiimg]
+            PixelData = np.column_stack([I.flatten(order='F') for I in cropimg])
+        else:
+            cropimg = img[mins[2]:maxs[2],mins[1]:maxs[1],mins[0]:maxs[0]]
+            PixelData = cropimg.flatten(order='F')
+        if return_gradient:
+            gradx = ndimage.gaussian_filter(cropimg,gaussian_sigma,order=(1,0,0))
+            grady = ndimage.gaussian_filter(cropimg,gaussian_sigma,order=(0,1,0))
+            GradData = np.vstack([gradx.flatten(order='F'),grady.flatten(order='F')]).T
+    if rectangular_elements:
+        PixelCoords[:,0] = PixelCoords[:,0]*xscale
+        PixelCoords[:,1] = PixelCoords[:,1]*yscale
+        
+    if threshold is not None:
+        if threshold_direction == 1:
+            PixelConn = PixelConn[PixelData>=threshold]
+            PixelData = PixelData[PixelData>=threshold]
+            if return_gradient: GradData = GradData[PixelData>=threshold]
+            PixelCoords,PixelConn,_ = utils.RemoveNodes(PixelCoords,PixelConn)
+            PixelConn = np.asarray(PixelConn)
+
+        elif threshold_direction == -1:
+            PixelConn = PixelConn[PixelData<=threshold]
+            PixelData = PixelData[PixelData<=threshold]
+            if return_gradient: GradData = GradData[PixelData<=threshold]
+            PixelCoords,PixelConn,_ = utils.RemoveNodes(PixelCoords,PixelConn)
+            PixelConn = np.asarray(PixelConn)
+        else:
+            raise Exception('threshold_direction must be 1 or -1, where 1 indicates that values >= threshold will be kept and -1 indicates that values <= threshold will be kept.')
+    if return_nodedata:
+        rows = PixelConn.flatten()
+        cols = np.repeat(np.arange(len(PixelConn)),4)
+        data = np.ones(len(rows))
+        M = sparse.coo_matrix((data,(rows,cols))).tolil()
+        M = M.multiply(1/(M*np.ones((M.shape[1],1))))
+
+        if multichannel:
+            NodeData = np.column_stack([M*PixelData[:,i] for i in range(PixelData.shape[1])])
+        else:
+            NodeData = M*PixelData
+        
+        if return_gradient:
+            NodeGrad = M*GradData            
+            PixelData = (PixelData,GradData)
+            NodeData = (NodeData,NodeGrad)
+            
+        return PixelCoords, PixelConn, PixelData, NodeData
+    if return_gradient:
+        PixelData = (PixelData,GradData)
+    return PixelCoords, PixelConn, PixelData
 
 def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
     """
