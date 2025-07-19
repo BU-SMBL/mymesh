@@ -18,7 +18,7 @@ Objects
 .. currentmodule:: mymesh
 
 Submodules
-===============
+==========
 .. autosummary::
     :toctree: generated/
 
@@ -36,6 +36,14 @@ Submodules
     rays
     utils
     visualize
+
+Functions
+=========
+.. autosummary::
+    :toctree: generated/
+
+    demo_mesh  
+    demo_image
 
 """
 from functools import wraps
@@ -77,8 +85,10 @@ def try_njit(func=None, *njit_args, **njit_kwargs):
 
 def demo_image(name='bunny', normalize=True):
     """
-    Access example image data. Data is obtained from online sources, requires
-    internet connectivity.
+    Example image data from online databases
+
+    Since data is obtained on-demand from online sources, internet connectivity 
+    is required.
 
     Parameters
     ----------
@@ -126,6 +136,154 @@ def demo_image(name='bunny', normalize=True):
         img = (img/np.max(img)*255).astype(dtype=np.uint8)
 
     return img
+
+def demo_mesh(name='bunny'):
+    """
+    Example mesh models from online databases
+    
+    Since data is obtained on-demand from online sources, internet connectivity 
+    is required.
+
+    The Stanford models (bunny, dragon, Lucy) are obtained from the 
+    `Stanford Computer Graphics Library <https://graphics.stanford.edu/data/3Dscanrep/>`__.
+    The following notices from the library's website apply to these models:
+
+        Please be sure to acknowledge the source of the data and models you take 
+        from this repository. In each of the listings below, we have cited the 
+        source of the range data and reconstructed models. You are welcome to 
+        use the data and models for research purposes. You are also welcome to 
+        mirror or redistribute them for free. Finally, you may publish images 
+        made using these models, or the images on this web site, in a scholarly
+        article or book - as long as credit is given to the Stanford Computer 
+        Graphics Laboratory. However, such models or images are not to be used 
+        for commercial purposes, nor should they appear in a product for sale 
+        (with the exception of scholarly journals or books), without our 
+        permission. 
+
+        As you browse this repository and think about how you might use our 3D 
+        models and range datasets, please remember that several of these 
+        artifacts have religious or cultural significance. Aside from the buddha, 
+        which is a religious symbol revered by hundreds of millions of people, 
+        the dragon is a symbol of Chinese culture, the Thai statue contains 
+        elements of religious significance to Hindus, and Lucy is a Christian 
+        angel; statues like her are commonly seen in Italian churches. Keep your 
+        renderings and other uses of these particular models in good taste. 
+        Don't animate or morph them, don't apply Boolean operators to them, and 
+        don't simulate nasty things happening to them (like breaking, exploding, 
+        melting, etc.). Choose another model for these sorts of experiments. 
+        (You can do anything you want to the Stanford bunny or the armadillo.) 
+    
+
+    Parameters
+    ----------
+    name : str, optional
+        Name of the image to access, by default 'bunny'.
+        Available options are:
+
+        - "bunny" - Stanford Bunny from the Stanford 3D Scanning Repository.
+            - Coarser versions of the model are available as "bunny_res2", "bunny_res3", "bunny_res4"
+            - This is a non-manifold surface, the mesh has several holes on the bottom
+
+        - "dragon" - Stanford Dragon from the Stanford 3D Scanning Repository 
+            - Coarser versions of the model are available as "dragon_res2", "dragon_res3", "dragon_res4"
+            - This is a non-manifold surface, the mesh has numerous small holes
+
+        - "Lucy" - "Angel of Light" statue from the Stanford 3D Scanning Repository
+            - This surface is hole free but has some topological defects/bridging
+    Returns
+    -------
+    M : mymesh.mesh
+        Mesh object
+
+    Examples
+    --------
+
+    .. plot::
+
+        import mymesh
+        bunny = mymesh.demo_mesh("bunny")
+        bunny.plot(view='xy')
+
+    .. plot::
+
+        import mymesh
+        dragon = mymesh.demo_mesh("dragon")
+        dragon.plot(view='xy')
+
+    .. plot::
+
+        import mymesh
+        lucy = mymesh.demo_mesh("Lucy")
+        lucy.plot(view='-xz')
+
+    """    
+    try:
+        import meshio
+    except:
+        raise ImportError('meshio library is required to load demo meshes. Install with: pip install meshio')
+        
+    if 'bunny' in name:
+        # "Stanford Bunny" from the Stanford 3D Scanning Repository
+        # https://graphics.stanford.edu/data/3Dscanrep/
+        url = 'https://graphics.stanford.edu/pub/3Dscanrep/bunny.tar.gz'
+
+        # Get data and extract archive
+        response = urllib.request.urlopen(url)
+        tar_bytes = response.read()
+        tar_file = tarfile.open(fileobj=io.BytesIO(tar_bytes), mode="r:gz")
+
+        if 'res2' in name:
+            f = tar_file.extractfile('bunny/reconstruction/bun_zipper_res2.ply')
+        elif 'res3' in name:
+            f = tar_file.extractfile('bunny/reconstruction/bun_zipper_res3.ply')
+        elif 'res4' in name:
+            f = tar_file.extractfile('bunny/reconstruction/bun_zipper_res4.ply')
+        else:
+            f = tar_file.extractfile('bunny/reconstruction/bun_zipper.ply')
+
+        m = meshio.ply._ply.read_buffer(f)
+        M = mesh.meshio2mymesh(m)
+    elif 'dragon' in name:
+        # "Stanford Dragon" from the Stanford 3D Scanning Repository
+        # https://graphics.stanford.edu/data/3Dscanrep/
+        url = 'https://graphics.stanford.edu/pub/3Dscanrep/dragon/dragon_recon.tar.gz'
+
+        # Get data and extract archive
+        response = urllib.request.urlopen(url)
+        tar_bytes = response.read()
+        tar_file = tarfile.open(fileobj=io.BytesIO(tar_bytes), mode="r:gz")
+
+        if 'res2' in name:
+            f = tar_file.extractfile('dragon_recon/dragon_vrip_res2.ply')
+        elif 'res3' in name:
+            f = tar_file.extractfile('dragon_recon/dragon_vrip_res3.ply')
+        elif 'res4' in name:
+            f = tar_file.extractfile('dragon_recon/dragon_vrip_res4.ply')
+        else:
+            f = tar_file.extractfile('dragon_recon/dragon_vrip.ply')
+
+        m = meshio.ply._ply.read_buffer(f)
+        M = mesh.meshio2mymesh(m)
+
+    elif 'Lucy' in name:
+        # Lucy statue from the Stanford 3D Scanning Repository
+        # https://graphics.stanford.edu/data/3Dscanrep/
+        url = 'https://graphics.stanford.edu/data/3Dscanrep/lucy.tar.gz'
+
+        # Get data and extract archive
+        response = urllib.request.urlopen(url)
+        tar_bytes = response.read()
+        tar_file = tarfile.open(fileobj=io.BytesIO(tar_bytes), mode="r:gz")
+
+        f = tar_file.extractfile('lucy.ply')
+
+        m = meshio.ply._ply.read_buffer(f)
+        M = mesh.meshio2mymesh(m)
+    else:
+        raise ValueError(f'Unknown image option: {name:s}')
+
+    
+    return M
 
 from .mesh import mesh
 from . import booleans, contour, curvature, delaunay, image, implicit, improvement, tree, primitives, quality, utils, visualize
