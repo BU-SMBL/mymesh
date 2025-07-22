@@ -212,8 +212,11 @@ def ConvexHull(NodeCoords,method='scipy',OrientSurf=True):
     elif nD == 3:
         if method.lower() == 'scipy':
             if OrientSurf:
-                tet = SciPy(np.asarray(NodeCoords, dtype=np.float64), FixVol=True)
-                hull = converter.solid2surface(NodeCoords, tet)
+                qhull = spatial.ConvexHull(np.asarray(NodeCoords, dtype=np.float64))
+                
+                tet = qhull.vertices[SciPy(np.asarray(NodeCoords, dtype=np.float64)[qhull.vertices], FixVol=True)]
+                
+                hull = np.asarray(converter.solid2surface(NodeCoords, tet))
             else:
                 qhull = spatial.ConvexHull(np.asarray(NodeCoords, dtype=np.float64))
                 hull = qhull.simplices
