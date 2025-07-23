@@ -3097,9 +3097,9 @@ def voxel2im(VoxelCoords, VoxelConn, Vals):
     
     return I
 
-def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None):
+def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None, indexing='zyx'):
     """
-    Convert a mesh to a binarized image. 
+    Convert a 3D mesh to a binarized image. 
 
     Parameters
     ----------
@@ -3127,6 +3127,19 @@ def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None):
     Type : str, NoneType, optional
         Mesh Type ('surf', 'vol'), by default None.
         If not provided, the Type will be inferred using :func:`~mymesh.utils.identify_type`.
+    indexing : str, optional
+        Specify how to handle coordinates during the conversion, by default 
+        'zyx'. 
+
+        - 
+            'zyx': The z coordinate will correspond to the first dimension of
+            the image and the x coordinate will become the last dimension of 
+            the image. This is consistent with how meshes/images are handled
+            throughout mymesh and follows a common convention (default)
+        -
+            'xyz': The x coordinate will correspond to the first dimension of 
+            the image and the z coordinate will become the last dimension of the
+            image.
 
     Returns
     -------
@@ -3183,8 +3196,15 @@ def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None):
 
         root = tree.Surface2Octree(TriCoords, TriConn, minsize=voxelsize)
         leaves = tree.getAllLeaf(root)
-        # flipping so x,y,z -> 2,1,0
-        centroids = np.array([leaf.centroid for leaf in leaves])[:,::-1] 
+        centroids = np.array([leaf.centroid for leaf in leaves])
+        if indexing.lower() == 'zyx':
+            # flipping so x,y,z -> 2,1,0
+            centroids = centroids[:,::-1] 
+        elif indexing.lower() == 'xyz':
+            # No flipping
+            pass
+        else:
+            raise ValueError('Invalid indexing option: {s:indexing}. Must be "zyx" or "xyz".')
         mins = np.min(centroids, axis=0)
         maxs = np.max(centroids, axis=0)
 
