@@ -496,7 +496,7 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
         
     return tet
 
-def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set(), FreeNodes=None, FixEdges=False, finite_diff_step=1e-5, smooth=True, InPlace=False, springs=True):
+def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set(), FreeNodes=None, FixEdges=False, finite_diff_step=1e-5, smooth=True, InPlace=False, springs=True, constraint=np.empty((0,3))):
     """
     Optimize the placement of surface node to lie on the "true" surface. This
     This simultaneously moves nodes towards the isosurface and redistributes
@@ -650,8 +650,15 @@ def SurfaceNodeOptimization(M, func, h, iterate=1, threshold=0, FixedNodes=set()
             NodeCoords = M.NodeCoords
             points = np.asarray(M.NodeCoords)[FreeNodes]
         else:
-            points = points + Zflow + Rflow
-            M.NodeCoords[FreeNodes] = points
+            Utotal = np.zeros((M.NNode,3))
+            Utotal[FreeNodes] = Zflow + Rflow
+            if len(constraint) > 0:
+                nodes = constraint[:,0].astype(int)
+                axes = constraint[:,1].astype(int)
+                magnitudes = constraint[:,2]
+                Utotal[nodes, axes] = magnitudes
+            M.NodeCoords[FreeNodes] += Utotal[FreeNodes]
+            points = M.NodeCoords[FreeNodes]
     M.NodeCoords = M.NodeCoords[:-1]
     return M
 

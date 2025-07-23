@@ -6,6 +6,7 @@ User Guide
     :hidden:
     
     guide/installation
+    guide/getting_started
     guide/what_mesh
     guide/mesh_class
     guide/elem_types

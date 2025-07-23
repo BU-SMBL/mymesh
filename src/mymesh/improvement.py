@@ -87,8 +87,14 @@ def LocalLaplacianSmoothing(M, options=dict()):
         FixSurf : bool
             If true, all nodes on the surface will be held in place and only 
             interior nodes will be smoothed, by default False.
-
-        
+        limit : float
+            Maximum distance nodes are allowed to move, by default None
+        constraint : np.ndarray
+            Constraint array (shape = (m,3)). The first column indicates nodes
+            that will be constrained, the second column indicates the axis
+            the constraint will be applied in, and the third column indicates
+            the displacement of the given node along the given axis (e.g. 0
+            for no motion in a particular axis))
 
     Returns
     -------
@@ -123,7 +129,8 @@ def LocalLaplacianSmoothing(M, options=dict()):
                         FixSurf = False,
                         FixEdge = True,
                         qualityFunc = quality.MeanRatio,
-                        limit = np.inf
+                        limit = np.inf,
+                        constraint = np.empty((0,3)),
                     )
 
     NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(M, SmoothOptions, options)
@@ -156,9 +163,18 @@ def LocalLaplacianSmoothing(M, options=dict()):
             Q = ArrayCoords[r]
             U = len_inv[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
             Utotal[FreeNodes] += U[FreeNodes]
+            # enforce limit
             Unorm = np.linalg.norm(Utotal[FreeNodes], axis=1)
             Utotal[FreeNodes[Unorm > SmoothOptions['limit']]] = Utotal[FreeNodes[Unorm > SmoothOptions['limit']]]/Unorm[Unorm > SmoothOptions['limit']][:,None] * SmoothOptions['limit']
+            # enforce constraint
+            if len(SmoothOptions['constraint']) > 0:
+                nodes = SmoothOptions['constraint'][:,0].astype(int)
+                axes = SmoothOptions['constraint'][:,1].astype(int)
+                magnitudes = SmoothOptions['constraint'][:,2]
+                Utotal[nodes, axes] = magnitudes
+            # apply displacement
             ArrayCoords[FreeNodes] = NodeCoords[FreeNodes] + Utotal[FreeNodes]
+            
     
         NewCoords = ArrayCoords[:-1]
     else:
@@ -1349,7 +1365,7 @@ def TetSUS(NodeCoords, NodeConn, ElemConn=None, method='BFGS', FreeNodes='invert
     return NewCoords, NodeConn
 
 ## Local Mesh Topology Operations
-def Contract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, FeatureAngle=25, sizing=None, quadric=True):
+def Contract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, FeatureAngle=25, sizing=None, quadric=True, allow_inversion=False):
     """
     Edge contraction for triangular or tetrahedral mesh coarsening and quality 
     improvement. 
@@ -1574,6 +1590,7 @@ def Contract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, Fe
         progress = tqdm.tqdm(total=len(heap))
 
     D = M.mesh2dmesh()
+    Exits = []
     while len(heap) > 0:
         l, edge = heapq.heappop(heap)
         
@@ -1583,13 +1600,13 @@ def Contract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, Fe
 
         # Check if collapse is valid:
         if quadric:
-            success, D, EdgeStatus, to_add = _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics)
+            success, D, EdgeStatus, to_add, Exit = _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics=quadrics, allow_inversion=allow_inversion)
         else:
-            success, D, EdgeStatus, to_add = _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax)
+            success, D, EdgeStatus, to_add, Exit = _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics=None, allow_inversion=allow_inversion)
         if success:
             for entry in to_add:
                 heapq.heappush(heap, entry)
-        
+        Exits.append(Exit)
         if success:
             valid += 1
         else:
@@ -1620,8 +1637,9 @@ def Contract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, Fe
     return Mnew
 
 @try_njit(cache=True)
-def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics=None):
+def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics=None, allow_inversion=False):
     
+    Exit = 0
     to_add = []
     # to_add = numba.typed.List()
     node1 = edge[0]
@@ -1632,19 +1650,23 @@ def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics=None):
     elemconn2 = D.getElemConn(node2)
     if len(elemconn1) == 0 or len(elemconn2) == 0:
         # Edge has already been removed
-        return False, D, EdgeStatus, to_add
+        Exit = -1
+        return False, D, EdgeStatus, to_add, Exit
     elif FeatureRank[node1] == FeatureRank[node2] == 4:
         # Both nodes are fixed, can't collapse this edge
-        return False, D, EdgeStatus, to_add
+        Exit = -1
+        return False, D, EdgeStatus, to_add, Exit
     elif FeatureRank[node1] > 0 and FeatureRank[node2] > 0 and not EdgeStatus[edge][1]:
         # Both nodes are on the surface, but they're not connected by a
         # surface edge -> connected through the body -> invalid
-        return False, D, EdgeStatus, to_add
+        Exit = -1
+        return False, D, EdgeStatus, to_add, Exit
     elif FeatureRank[node1] > 1 and FeatureRank[node2] > 1:
         # This holds all edges and corners fixed
         # TODO: I'd prefer not to have this test, but another one that 
         # prevents that inconsistencies that this prevents
-        return False, D, EdgeStatus, to_add
+        Exit = -1
+        return False, D, EdgeStatus, to_add, Exit
 
     # Determine which node to collapse
     if FeatureRank[node1] < FeatureRank[node2]:
@@ -1674,7 +1696,8 @@ def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics=None):
             collapsed[i] = True
     
     if np.all(collapsed):
-        return False, D, EdgeStatus, to_add
+        Exit = -2
+        return False, D, EdgeStatus, to_add, Exit
     
     # construct the updated local mesh
     updatedelems = affectedelems[~collapsed]
@@ -1722,27 +1745,30 @@ def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics=None):
                 D.NodeCoords[targetnode] = coordbk
                 if quadrics is not None and qbk is not None:
                     quadrics[targetnode] = qbk
-            return False, D, EdgeStatus, to_add
+            Exit = -3
+            return False, D, EdgeStatus, to_add, Exit
         newedges.append(newedge)
         Ls.append(L)
 
     # Check volume
-    if np.shape(UpdatedConn)[1] == 4:
-        new_vol = quality.tet_volume(D.NodeCoords, UpdatedConn)
-    elif np.shape(UpdatedConn)[1] == 3:
-        new_vol = quality.tri_area(D.NodeCoords, UpdatedConn)
-        
-    if np.any(new_vol <= 0):
-        if coordbk is not None:
-            D.NodeCoords[targetnode] = coordbk
-            if quadrics is not None and qbk is not None:
-                    quadrics[targetnode] = qbk
-        return False, D, EdgeStatus, to_add
+    if not allow_inversion:
+        if np.shape(UpdatedConn)[1] == 4:
+            new_vol = quality.tet_volume(D.NodeCoords, UpdatedConn)
+        elif np.shape(UpdatedConn)[1] == 3:
+            new_vol = quality.tri_area(D.NodeCoords, UpdatedConn)
+            
+        if np.any(new_vol <= 0):
+            if coordbk is not None:
+                D.NodeCoords[targetnode] = coordbk
+                if quadrics is not None and qbk is not None:
+                        quadrics[targetnode] = qbk
+            Exit = -5
+            return False, D, EdgeStatus, to_add, Exit
 
     # Check for inversion of normals (leads to folds on the surface)
-    if FeatureRank[targetnode] >= 1:        
-        for i, elem in enumerate(UpdatedConn):
-            if np.shape(UpdatedConn)[1] == 4:
+    if FeatureRank[targetnode] >= 1 and FeatureRank[collapsenode] >= 1:        
+        for i, elem in enumerate(D.NodeConn[affectedelems]):
+            if len(elem) == 4:
                 # Tet
                 faces = np.array([[elem[0], elem[2], elem[1]],
                     [elem[0], elem[1], elem[3]],
@@ -1765,7 +1791,7 @@ def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics=None):
                     n2 = utils._tri_normals(points)
 
                     for i, face in enumerate(faces):
-                        face[face == targetnode] = collapsenode
+                        face[face == collapsenode] = targetnode 
                         points[i] = D.NodeCoords[face]
                     n1 = utils._tri_normals(points)
                     
@@ -1777,7 +1803,8 @@ def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics=None):
                             D.NodeCoords[targetnode] = coordbk
                             if quadrics is not None and qbk is not None:
                                 quadrics[targetnode] = qbk
-                        return False, D, EdgeStatus, to_add
+                        Exit = -6
+                        return False, D, EdgeStatus, to_add, Exit
     
     # Flip is valid, update data structures
     for elem in sorted(affectedelems[collapsed])[::-1]:
@@ -1813,7 +1840,7 @@ def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics=None):
             EdgeStatus[newedge] = (added, False)
     
     success = True
-    return success, D, EdgeStatus, to_add
+    return success, D, EdgeStatus, to_add, Exit
 
 def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
     """

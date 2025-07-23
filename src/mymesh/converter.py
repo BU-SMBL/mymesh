@@ -20,6 +20,7 @@ Mesh type conversion
     solid2surface
     im2voxel
     mesh2im
+    pixel2im
     voxel2im
     surf2voxel
     surf2dual
@@ -112,7 +113,7 @@ def solid2surface(NodeCoords,NodeConn,return_SurfElem=False):
         
         return SurfConn
 
-def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False):
+def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,ElemType='auto'):
     """
     Convert solid mesh to faces. The will be one face for each side of each element,
     i.e. there will be duplicate faces for non-surface faces. Use faces2surface(Faces) to extract only the surface faces or face2unique(Faces) to remove duplicates.
@@ -131,6 +132,28 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
         If true, will return FaceElem, the Element Connectivity of each face.
         For each face, FaceElem has the index of the element that the face
         is a part of, by default False
+    ElemType : str, optional
+        Specifies the element type contained within the mesh, by default 'auto'.
+
+        - 'auto' or 'mixed' - Will detect element type by the number of nodes present in each element using :func:`~mymesh.utils.identify_type`. 
+
+        - 'surf' - Will detect element type by the number of nodes present in each 
+        element, assuming four node elements are quads
+
+        - 'vol' - Will detect element type by the number of nodes present in each 
+        element, assuming four node elements are tets (functionally the ame as 'auto')
+
+        - 'tri' - All elements treated as 3-node triangular elements.
+
+        - 'quad' - All elements treated as 4-node quadrilateral elements.
+
+        - 'tet' - All elements treated as 4-node tetrahedral elements.
+
+        - 'pyramid' - All elements treated as 5-node wedge elements.
+
+        - 'wedge' - All elements treated as 6-node quadrilateral elements.
+
+        - 'hex' - All elements treated as 8-node quadrilateral elements.
 
     Returns
     -------
@@ -141,41 +164,133 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False)
     FaceElem : list, optional
         The element index that each face is taken from.
     """     
-       
-    Ls = np.array(list(map(len, NodeConn)))
-    edgIdx = np.where(Ls == 2)[0]
-    triIdx = np.where(Ls == 3)[0]
-    tetIdx = np.where(Ls == 4)[0]
-    tet10Idx = np.where(Ls == 10)[0]
-    pyrIdx = np.where(Ls == 5)[0]
-    wdgIdx = np.where(Ls == 6)[0]
-    hexIdx = np.where(Ls == 8)[0] 
-    hex20Idx = np.where(Ls == 20)[0]
-    edgs = [NodeConn[i] for i in edgIdx]
-    tris = [NodeConn[i] for i in triIdx]
-    tets = [NodeConn[i] for i in tetIdx]
-    tet10s = [NodeConn[i] for i in tet10Idx]
-    pyrs = [NodeConn[i] for i in pyrIdx]
-    wdgs = [NodeConn[i] for i in wdgIdx]
-    hexs = [NodeConn[i] for i in hexIdx]
-    hex20s = [NodeConn[i] for i in hex20Idx]
     
-    Faces = edgs + tris + tet2faces([],tets).tolist() + tet102faces([],tet10s).tolist() + pyramid2faces([],pyrs) + wedge2faces([],wdgs) + hex2faces([],hexs).tolist()+ hex202faces([],hex20s).tolist()
-    if return_FaceConn or return_FaceElem:
-        ElemIds_i = np.concatenate((edgIdx,triIdx,np.repeat(tetIdx,4),np.repeat(tet10Idx,4),np.repeat(pyrIdx,5),np.repeat(wdgIdx,5),np.repeat(hexIdx,6),np.repeat(hex20Idx,6)))
-        FaceElem = ElemIds_i
-        ElemIds_j = np.concatenate((np.repeat(0,len(edgIdx)),np.repeat(0,len(triIdx)), 
+    if ElemType in ('auto','mixed','line','surf','vol'):
+        # check if a single element mesh to avoid unnecessary overhead
+        if ElemType in ('line','surf','vol'):
+            t = ElemType
+        else:
+            t = None
+        types = utils.identify_elem(NodeCoords, NodeConn, Type=t)
+        if len(types) == 1:
+            ElemType = types[0]
+    
+    if ElemType in ('auto','mixed','line','surf','vol'):
+        Ls = np.array(list(map(len, NodeConn)))
+        edgIdx = np.where(Ls == 2)[0]
+        triIdx = np.where(Ls == 3)[0]
+        tetIdx = np.where(Ls == 4)[0]
+        tet10Idx = np.where(Ls == 10)[0]
+        pyrIdx = np.where(Ls == 5)[0]
+        wdgIdx = np.where(Ls == 6)[0]
+        hexIdx = np.where(Ls == 8)[0] 
+        hex20Idx = np.where(Ls == 20)[0]
+        edgs = [NodeConn[i] for i in edgIdx]
+        tris = [NodeConn[i] for i in triIdx]
+        tets = [NodeConn[i] for i in tetIdx]
+        tet10s = [NodeConn[i] for i in tet10Idx]
+        pyrs = [NodeConn[i] for i in pyrIdx]
+        wdgs = [NodeConn[i] for i in wdgIdx]
+        hexs = [NodeConn[i] for i in hexIdx]
+        hex20s = [NodeConn[i] for i in hex20Idx]
+
+        Faces = edgs + tris + tet2faces([],tets).tolist() + tet102faces([],tet10s).tolist() + pyramid2faces([],pyrs) + wedge2faces([],wdgs) + hex2faces([],hexs).tolist()+ hex202faces([],hex20s).tolist()
+        if return_FaceConn or return_FaceElem:
+            ElemIds_i = np.concatenate((edgIdx,triIdx,np.repeat(tetIdx,4),np.repeat(tet10Idx,4),np.repeat(pyrIdx,5),np.repeat(wdgIdx,5),np.repeat(hexIdx,6),np.repeat(hex20Idx,6)))
+            FaceElem = ElemIds_i
+            ElemIds_j = np.concatenate((np.repeat(0,len(edgIdx)),np.repeat(0,len(triIdx)), 
+                    np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
+                    np.repeat([[0,1,2,3]],len(tet10Idx),axis=0).reshape(len(tet10Idx)*4),  
+                    np.repeat([[0,1,2,3,4]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*5),                   
+                    np.repeat([[0,1,2,3,4]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*5),   
+                    np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6), 
+                    np.repeat([[0,1,2,3,4,5]],len(hex20Idx),axis=0).reshape(len(hex20Idx)*6),                    
+                    ))
+            FaceConn = -1*np.ones((len(NodeConn),6))
+            FaceConn[ElemIds_i,ElemIds_j] = np.arange(len(Faces))
+            FaceConn = utils.ExtractRagged(FaceConn,dtype=int)
+    elif ElemType=='tri':
+        Faces = NodeConn
+        if return_FaceElem or return_FaceConn:
+            triIdx = np.arange(len(NodeConn))
+            FaceElem = triIdx
+        if return_FaceConn:
+            FaceConn = triIdx[:,None]
+    elif ElemType=='quad':
+        Faces = NodeConn
+        if return_FaceElem or return_FaceConn:
+            quadIdx = np.arange(len(NodeConn))
+            FaceElem = quadIdx
+        if return_FaceConn:
+            FaceConn = quadIdx[:,None]
+    elif ElemType=='tet':
+        Faces = tet2faces(NodeCoords,NodeConn)
+        if return_FaceElem or return_FaceConn:
+            tetIdx = np.arange(len(NodeConn))
+            FaceElem = np.repeat(tetIdx,4)
+        if return_FaceConn:
+            ElemIds_j = np.concatenate((
                 np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
-                np.repeat([[0,1,2,3]],len(tet10Idx),axis=0).reshape(len(tet10Idx)*4),  
-                np.repeat([[0,1,2,3,4]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*5),                   
-                np.repeat([[0,1,2,3,4]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*5),   
-                np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6), 
-                np.repeat([[0,1,2,3,4,5]],len(hex20Idx),axis=0).reshape(len(hex20Idx)*6),                    
                 ))
-        FaceConn = -1*np.ones((len(NodeConn),6))
-        FaceConn[ElemIds_i,ElemIds_j] = np.arange(len(Faces))
-        FaceConn = utils.ExtractRagged(FaceConn,dtype=int)
-    
+            FaceConn = -1*np.ones((len(NodeConn),4), dtype=int)
+            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
+    elif ElemType=='tet10':
+        Faces = tet102faces(NodeCoords,NodeConn)
+        if return_FaceElem or return_FaceConn:
+            tetIdx = np.arange(len(NodeConn))
+            FaceElem = np.repeat(tetIdx,4)
+        if return_FaceConn:
+            ElemIds_j = np.concatenate((
+                np.repeat([[0,1,2,3]],len(tetIdx),axis=0).reshape(len(tetIdx)*4),  
+                ))
+            FaceConn = -1*np.ones((len(NodeConn),4), dtype=int)
+            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
+    elif ElemType=='pyramid':
+        Faces = pyramid2faces(NodeCoords,NodeConn)
+        if return_FaceElem or return_FaceConn:
+            pyrIdx = np.arange(len(NodeConn))
+            FaceElem = np.repeat(pyrIdx,5)
+        if return_FaceConn:
+            ElemIds_j = np.concatenate((
+                np.repeat([[0,1,2,3,4]],len(pyrIdx),axis=0).reshape(len(pyrIdx)*5),                   
+                ))
+            FaceConn = -1*np.ones((len(NodeConn),5), dtype=int)
+            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
+    elif ElemType=='wedge':
+        Facees = wedge2faces(NodeCoords,NodeConn)
+        if return_FaceElem or return_FaceConn:
+            wdgIdx = np.arange(len(NodeConn))
+            FaceElem = np.repeat(wdgIdx,5)
+        if return_FaceConn:
+            ElemIds_j = np.concatenate((
+                np.repeat([[0,1,2,3,4]],len(wdgIdx),axis=0).reshape(len(wdgIdx)*5),   
+                ))
+            FaceConn = -1*np.ones((len(NodeConn),5), dtype=int)
+            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
+    elif ElemType=='hex':
+        Faces = hex2faces(NodeCoords,NodeConn)
+        if return_FaceElem or return_FaceConn:
+            hexIdx = np.arange(len(NodeConn))
+            FaceElem = np.repeat(hexIdx,6)
+        if return_FaceConn:
+            ElemIds_j = np.concatenate((
+                np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6),                    
+                ))
+            FaceConn = -1*np.ones((len(NodeConn),6), dtype=int)
+            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
+    elif ElemType=='hex20':
+        Faces = hex202faces(NodeCoords,NodeConn)
+        if return_FaceElem or return_FaceConn:
+            hexIdx = np.arange(len(NodeConn))
+            FaceElem = np.repeat(hexIdx,6)
+        if return_FaceConn:
+            ElemIds_j = np.concatenate((
+                np.repeat([[0,1,2,3,4,5]],len(hexIdx),axis=0).reshape(len(hexIdx)*6),                    
+                ))
+            FaceConn = -1*np.ones((len(NodeConn),6), dtype=int)
+            FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
+
+
     if return_FaceConn and return_FaceElem:
         return Faces,FaceConn,FaceElem
     elif return_FaceConn:
@@ -240,7 +355,16 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
     EdgeElem : list, optional
         The element index that each edge is taken from. Ex. [E0,E0,E0,E0,E0,E0,E1,E1,E1,...]
     """     
-    
+    if ElemType in ('auto','mixed','line','surf','vol'):
+        # check if a single element mesh to avoid unnecessary overhead
+        if ElemType in ('line','surf','vol'):
+            t = ElemType
+        else:
+            t = None
+        types = utils.identify_elem(NodeCoords, NodeConn, Type=t)
+        if len(types) == 1:
+            ElemType = types[0]
+
     if ElemType in ('auto','mixed','line','surf','vol'):
         Ls = np.array([len(elem) for elem in NodeConn])
         edgIdx = np.where(Ls == 2)[0]
@@ -326,7 +450,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
             EdgeElem = np.repeat(quadIdx,4)
         if return_EdgeConn:
             ElemIds_j = np.concatenate((
-                np.repeat([[0,1,2]],len(tetIdx),axis=0).reshape(len(tetIdx)*3), 
+                np.repeat([[0,1,2,3]],len(quadIdx),axis=0).reshape(len(quadIdx)*4), 
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),4), dtype=int)
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
@@ -2519,6 +2643,9 @@ def surf2edges(NodeCoords,NodeConn,ElemType='auto'):
     """
 
     edges = solid2edges(NodeCoords, NodeConn, ElemType=ElemType)
+    if len(edges) == 0:
+        Edges = edges
+        return Edges
     UEdges, indices, counts = edges2unique(edges, return_idx=True, return_counts=True)
 
     EdgeIdx = indices[np.where(counts==1)]
@@ -2607,6 +2734,139 @@ def hexsubdivide(NodeCoords, NodeConn):
     SubConn[7::8] = np.column_stack([Face4CentroidIds, CentroidIds, Face3CentroidIds, Edge37Ids, Edge74Ids, Face5CentroidIds, Edge67Ids, ArrayConn[:,7]])
 
     return NewCoords, SubConn
+
+def im2pixel(img, pixelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
+    """
+    Convert 2D image data to a grid mesh. Each pixel will be represented by an element.
+
+    Parameters
+    ----------
+    img : str or np.ndarray
+        If a str, should be the file path to an image
+    pixelsize : float, or tuple
+        Size of voxel (based on image resolution).
+        If a tuple, should be specified as (hx,hy,hz)
+    scalefactor : float, optional
+        Scale factor for resampling the image. If greater than 1, there will be more than
+        1 elements per voxel. If less than 1, will coarsen the image, by default 1.
+    scaleorder : int, optional
+        Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
+        Must be 0-5.
+    threshold : float, optional
+        Voxel intensity threshold, by default None.
+        If given, elements with all nodes less than threshold will be discarded.
+
+    Returns
+    -------
+    PixelCoords : list
+        Node coordinates for the pixel mesh
+    PixelConn : list
+        Node connectivity for the pixel mesh
+    PixelData : numpy.ndarray
+        Image intensity data for each pixel.
+    NodeData : numpy.ndarray
+        Image intensity data for each node, averaged from connected voxels.
+
+    """    
+    multichannel = False
+
+
+    if type(pixelsize) is list or type(pixelsize) is tuple:
+        assert len(pixelsize) == 2, 'If specified as a list or tuple, pixelsize must have a length of 2.'
+        xscale = pixelsize[0] / scalefactor
+        yscale = pixelsize[1] / scalefactor
+        pixelsize = 1
+        rectangular_elements=True
+    else:
+        pixelsize /= scalefactor
+        rectangular_elements=False
+    
+    if isinstance(img, tuple):
+        if scalefactor != 1:
+            img = tuple([image.read(i, scalefactor, scaleorder) for i in img])
+        multichannel = True
+        multiimg = img
+        img = multiimg[0]
+    else:
+        img = image.read(img, scalefactor, scaleorder)
+    
+    if crop is None:
+        (ny,nx) = img.shape
+        xlims = [0,(nx)*pixelsize]
+        ylims = [0,(ny)*pixelsize]
+        bounds = [xlims[0],xlims[1],ylims[0],ylims[1]]
+        PixelCoords, PixelConn = primitives.Grid(bounds, pixelsize, exact_h=False)
+        if multichannel:
+            PixelData = np.column_stack([I.flatten(order='F') for I in multiimg])
+        else:
+            PixelData = img.flatten(order='F')
+        if return_gradient:
+            gradx = ndimage.gaussian_filter(img,gaussian_sigma,order=(1,0,0))
+            grady = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,1,0))
+            GradData = np.vstack([gradx.flatten(order='F'),grady.flatten(order='F')]).T
+    else:
+        # Adjust crop values to only get whole voxels
+        crop[:-1:2] = np.floor(np.asarray(crop)[:-1:2]/pixelsize)*pixelsize
+        crop[1::2] = np.ceil(np.asarray(crop)[1::2]/pixelsize)*pixelsize
+        if rectangular_elements:
+            bounds = [crop[0]/xscale,crop[1]/xscale,
+                    crop[2]/yscale,crop[3]/yscale]
+        else:
+            bounds = crop
+        PixelCoords, PixelConn = primitives.Grid(bounds, pixelsize, exact_h=False)
+        mins = np.round(np.min(PixelCoords,axis=0)/pixelsize).astype(int)
+        maxs = np.round(np.max(PixelCoords,axis=0)/pixelsize).astype(int)
+        if multichannel:
+            cropimg = [I[mins[1]:maxs[1],mins[0]:maxs[0]] for I in multiimg]
+            PixelData = np.column_stack([I.flatten(order='F') for I in cropimg])
+        else:
+            cropimg = img[mins[2]:maxs[2],mins[1]:maxs[1],mins[0]:maxs[0]]
+            PixelData = cropimg.flatten(order='F')
+        if return_gradient:
+            gradx = ndimage.gaussian_filter(cropimg,gaussian_sigma,order=(1,0,0))
+            grady = ndimage.gaussian_filter(cropimg,gaussian_sigma,order=(0,1,0))
+            GradData = np.vstack([gradx.flatten(order='F'),grady.flatten(order='F')]).T
+    if rectangular_elements:
+        PixelCoords[:,0] = PixelCoords[:,0]*xscale
+        PixelCoords[:,1] = PixelCoords[:,1]*yscale
+        
+    if threshold is not None:
+        if threshold_direction == 1:
+            PixelConn = PixelConn[PixelData>=threshold]
+            PixelData = PixelData[PixelData>=threshold]
+            if return_gradient: GradData = GradData[PixelData>=threshold]
+            PixelCoords,PixelConn,_ = utils.RemoveNodes(PixelCoords,PixelConn)
+            PixelConn = np.asarray(PixelConn)
+
+        elif threshold_direction == -1:
+            PixelConn = PixelConn[PixelData<=threshold]
+            PixelData = PixelData[PixelData<=threshold]
+            if return_gradient: GradData = GradData[PixelData<=threshold]
+            PixelCoords,PixelConn,_ = utils.RemoveNodes(PixelCoords,PixelConn)
+            PixelConn = np.asarray(PixelConn)
+        else:
+            raise Exception('threshold_direction must be 1 or -1, where 1 indicates that values >= threshold will be kept and -1 indicates that values <= threshold will be kept.')
+    if return_nodedata:
+        rows = PixelConn.flatten()
+        cols = np.repeat(np.arange(len(PixelConn)),4)
+        data = np.ones(len(rows))
+        M = sparse.coo_matrix((data,(rows,cols))).tolil()
+        M = M.multiply(1/(M*np.ones((M.shape[1],1))))
+
+        if multichannel:
+            NodeData = np.column_stack([M*PixelData[:,i] for i in range(PixelData.shape[1])])
+        else:
+            NodeData = M*PixelData
+        
+        if return_gradient:
+            NodeGrad = M*GradData            
+            PixelData = (PixelData,GradData)
+            NodeData = (NodeData,NodeGrad)
+            
+        return PixelCoords, PixelConn, PixelData, NodeData
+    if return_gradient:
+        PixelData = (PixelData,GradData)
+    return PixelCoords, PixelConn, PixelData
 
 def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
     """
@@ -2837,9 +3097,9 @@ def voxel2im(VoxelCoords, VoxelConn, Vals):
     
     return I
 
-def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None):
+def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None, indexing='zyx'):
     """
-    Convert a mesh to a binarized image. 
+    Convert a 3D mesh to a binarized image. 
 
     Parameters
     ----------
@@ -2867,6 +3127,19 @@ def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None):
     Type : str, NoneType, optional
         Mesh Type ('surf', 'vol'), by default None.
         If not provided, the Type will be inferred using :func:`~mymesh.utils.identify_type`.
+    indexing : str, optional
+        Specify how to handle coordinates during the conversion, by default 
+        'zyx'. 
+
+        - 
+            'zyx': The z coordinate will correspond to the first dimension of
+            the image and the x coordinate will become the last dimension of 
+            the image. This is consistent with how meshes/images are handled
+            throughout mymesh and follows a common convention (default)
+        -
+            'xyz': The x coordinate will correspond to the first dimension of 
+            the image and the z coordinate will become the last dimension of the
+            image.
 
     Returns
     -------
@@ -2923,8 +3196,15 @@ def mesh2im(NodeCoords, NodeConn, voxelsize, fill=True, sdf=False, Type=None):
 
         root = tree.Surface2Octree(TriCoords, TriConn, minsize=voxelsize)
         leaves = tree.getAllLeaf(root)
-        # flipping so x,y,z -> 2,1,0
-        centroids = np.array([leaf.centroid for leaf in leaves])[:,::-1] 
+        centroids = np.array([leaf.centroid for leaf in leaves])
+        if indexing.lower() == 'zyx':
+            # flipping so x,y,z -> 2,1,0
+            centroids = centroids[:,::-1] 
+        elif indexing.lower() == 'xyz':
+            # No flipping
+            pass
+        else:
+            raise ValueError('Invalid indexing option: {s:indexing}. Must be "zyx" or "xyz".')
         mins = np.min(centroids, axis=0)
         maxs = np.max(centroids, axis=0)
 

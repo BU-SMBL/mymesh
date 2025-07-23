@@ -18,7 +18,7 @@ Objects
 .. currentmodule:: mymesh
 
 Submodules
-===========
+==========
 .. autosummary::
     :toctree: generated/
 

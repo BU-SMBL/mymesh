@@ -29,12 +29,16 @@ Tetrahedralization
     Tetrahedralize
     BowyerWatson3d
 
-Convex Hull
-===========
+Hulls
+=====
 .. autosummary::
     :toctree: submodules/
 
     ConvexHull
+    AlphaShape
+    Alpha2d
+    Alpha3d
+    AlphaPeel3d
     GiftWrapping
     
 
@@ -155,7 +159,7 @@ def Tetrahedralize(NodeCoords, method=None, tol=1e-8):
         T = mesh(NodeCoords,NodeConn)
     return T
 
-def ConvexHull(NodeCoords,method='scipy'):
+def ConvexHull(NodeCoords,method='scipy',OrientSurf=True):
     """
     Identify the convex hull of a set of points. For a 2D point set 
     (np.shape(NodeCoords) = (n,2)), a 2D convex hull of line elements will be 
@@ -176,6 +180,9 @@ def ConvexHull(NodeCoords,method='scipy'):
         - 'BowyerWatson' - Generate a Delaunay triangulation by the Bowyer-Watson algorithm (:func:`BowyerWatson2d` or :func:`BowyerWatson3d`)
 
         - 'GiftWrapping' - Use the gift wrapping algorithm (:func:`GiftWrapping`)
+    OrientSurf : str, optional
+        Ensure the normals of the convex hull are consistently oriented outward,
+        by default True.
 
     Returns
     -------
@@ -204,8 +211,15 @@ def ConvexHull(NodeCoords,method='scipy'):
 
     elif nD == 3:
         if method.lower() == 'scipy':
-            qhull = spatial.ConvexHull(np.asarray(NodeCoords, dtype=np.float64))
-            hull = qhull.simplices
+            if OrientSurf:
+                qhull = spatial.ConvexHull(np.asarray(NodeCoords, dtype=np.float64))
+                
+                tet = qhull.vertices[SciPy(np.asarray(NodeCoords, dtype=np.float64)[qhull.vertices], FixVol=True)]
+                
+                hull = np.asarray(converter.solid2surface(NodeCoords, tet))
+            else:
+                qhull = spatial.ConvexHull(np.asarray(NodeCoords, dtype=np.float64))
+                hull = qhull.simplices
         elif method.lower() == 'bowyerwatson':
             tet = BowyerWatson3d(NodeCoords)
             hull = converter.solid2surface(NodeCoords, tet)
@@ -672,20 +686,105 @@ def BowyerWatson3d(NodeCoords):
 
     return NodeConn
 
-def Alpha3d(NodeCoords, alpha, method='scipy', Type='surf'):
+def AlphaShape(NodeCoords, alpha, method=None, Type='surf'):
+    """
+    Alpha shapes in 2D or 3D
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates. If coordinates are two dimensional (shape=(n,2)),
+        a 2D alpha shape will be produce, for three dimensional coordinates,
+        a 3D alpha shape will be produced.
+    alpha : float or list of floats
+        Alpha value. If given as a list of values, a corresponding list of 
+        meshes will be returned
+    method : str, optional
+        Delaunay triangulation/tetrahedralization method used to determine the 
+        alpha shape, by default None. See :func:`Triangulate`/
+        :func:`Tetrahedralize` for more details and the default method.
+    Type : str, optional
+        Type of the returned Mesh or Meshes, by default 'surf'. Note that if  
+        using Type='vol', tetrahedral meshes may have small unnoticed holes that 
+        could pose problems for some applications. 
+
+    Returns
+    -------
+    M : mymesh.mesh or list of mymesh.mesh
+        Mesh of the alpha shape. If alpha is given as a list, a corresponding
+        list of meshes will be returned.
+    """    
+
+    if np.shape(NodeCoords)[1] == 2:
+        # 2D
+        M = Alpha2d(NodeCoords, alpha, method, Type)
+    elif np.shape(NodeCoords)[1] == 3:
+        # 3D
+        M = Alpha3d(NodeCoords, alpha, method, Type)
+    return M
+
+def Alpha2d(NodeCoords, alpha, method='scipy', Type='line'):
+    """
+    2D Alpha shapes
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        Node coordinates
+    alpha : float or list of floats
+        Alpha value. If given as a list of values, a corresponding list of 
+        meshes will be returned
+    method : str, optional
+        Delaunay triangulation method used to determine the alpha shape, by 
+        default None. See :func:`Triangulate` for more details and the default 
+        method.
+    Type : str, optional
+        Type of the returned Mesh or Meshes, by default 'line'. Note that if  
+        using Type='surf', triangular meshes may have small unnoticed holes that 
+        could pose problems for some applications. 
+
+    Returns
+    -------
+    M : mymesh.mesh or list of mymesh.mesh
+        Mesh of the alpha shape. If alpha is given as a list, a corresponding
+        list of meshes will be returned.
+    """    
+    T = Triangulate(NodeCoords, method=method)
+    T.verbose=False
+    R = quality.tri_circumradius(T.NodeCoords, T.NodeConn)
+    if isinstance(alpha, (list, tuple, np.ndarray)):
+        M = []
+        for a in alpha:
+            thresh = 1/a if a != 0 else np.inf
+            m = T.Threshold(R, (0,thresh), 'in', InPlace=False)
+            if Type.lower() == 'line':
+                M.append(m.Boundary)
+            else:
+                M.append(m)
+    else:
+        thresh = 1/alpha if alpha != 0 else np.inf
+        T.Threshold(R, (0,thresh), 'in', InPlace=True)
+        if Type.lower() == 'line':
+            M = T.Boundary
+        else:
+            M = T
+    return M
+
+def Alpha3d(NodeCoords, alpha, method=None, Type='surf'):
     """
     3D Alpha shapes
 
     Parameters
     ----------
     NodeCoords : array_like
-        _description_
+        Node coordinates
     alpha : float or list of floats
         Alpha value. If given as a list of values, a corresponding list of 
         meshes will be returned
     method : str, optional
         Delaunay tetrahedralization method used to determine the alpha shape, by 
-        default 'scipy'. See :func:`Tetrahedralize` for more details.
+        default None. See :func:`Tetrahedralize` for more details and the 
+        default method.
     Type : str, optional
         Type of the returned Mesh or Meshes, by default 'surf'. Note that if  
         using Type='vol', tetrahedral meshes may have small unnoticed holes that 
@@ -724,7 +823,7 @@ def AlphaPeel3d(NodeCoords, alpha, method='scipy', Type='surf'):
     Parameters
     ----------
     NodeCoords : array_like
-        _description_
+        Node coordinates
     alpha : float or list of floats
         Alpha value. If given as a list of values, a corresponding list of 
         meshes will be returned
