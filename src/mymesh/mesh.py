@@ -1984,6 +1984,8 @@ class mesh:
                 data = np.asarray(self.ElemData[key])
                 if data.dtype == bool:
                     data = data.astype(int)
+                elif np.issubdtype(data.dtype, np.str_):
+                    data = np.array([int.from_bytes(x.encode('utf-8'), 'little') for x in data])
                 celldata[0] = data[elemlengths==2]  # line
                 celldata[1] = data[elemlengths==3]  # tri
                 celldata[2] = data[elemlengths==4]  # quad/tet
@@ -1996,12 +1998,15 @@ class mesh:
                 celldata[9] = data[elemlengths==20] # hex20
                 celldata = [c for c in celldata if len(c) > 0]
                 celldict[key] = celldata
-        if len(self.NodeData) > 0:
-            for key in self.NodeData.keys():
-                data = np.asarray(self.NodeData[key])
+        NodeData = copy.copy(self.NodeData)
+        if len(NodeData) > 0:
+            for key in NodeData.keys():
+                data = np.asarray(NodeData[key])
                 if data.dtype == bool:
                     data = data.astype(int)
-                self.NodeData[key] = data
+                elif np.issubdtype(data.dtype, np.str_):
+                    data = np.array([int.from_bytes(x.encode('utf-8'), 'little') for x in data])
+                NodeData[key] = data
         if np.all(elemlengths == elemlengths[0]):
             ArrayConn = np.array(self.NodeConn,dtype=int)
         else:
@@ -2036,7 +2041,7 @@ class mesh:
 
         elems = [e for e in [('line',edges),('triangle',tris),('triangle6',tri6s),('quad',quads),('quad8',quad8s),('tetra',tets),('tetra10',tet10s),('pyramid',pyrs),('pyramid13',pyr13s),('wedge',wdgs),('wedge15',wdg15s),('hexahedron',hexs),('hexahedron20',hex20s)] if len(e[1]) > 0]
         
-        m = meshio.Mesh(self.NodeCoords, elems, point_data=self.NodeData, cell_data=celldict)
+        m = meshio.Mesh(self.NodeCoords, elems, point_data=NodeData, cell_data=celldict)
 
         
 
