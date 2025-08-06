@@ -2216,8 +2216,8 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
         character indicating an operation, by default 'scfS'.
 
         Possible operations:
-            - 's' - Splitting (:func:`TetSplit`)
-            - 'c' - Contraction (:func:`TetContract`)
+            - 's' - Splitting (:func:`Split`)
+            - 'c' - Contraction (:func:`Contract`)
             - 'f' - Flipping (:func:`TetFlip`)
             - 'S' - Smoothing 
 
@@ -2256,7 +2256,7 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
                 M.verbose=False
             elif operation == 'c':
                 # Contract
-                M = TetContract(M, 4/5*h, verbose=verbose, labels=labels, FeatureAngle=FeatureAngle, maxIter=ContractIter)
+                M = Contract(M, 4/5*h, verbose=verbose, labels=labels, FeatureAngle=FeatureAngle, maxIter=ContractIter)
                 M.verbose=False
             # elif operation == 'f':
             #     # Flip
