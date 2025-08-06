@@ -50,7 +50,8 @@ def View(M, interactive=True, bgcolor=None,
     color=None, face_alpha=1, color_convert=None, 
     clim=None, theme='default', scalar_preference='nodes',
     view='iso', scalars=None,
-    show_edges=False, show_faces=True, line_width=1, line_color=None, 
+    show_edges=False, show_faces=True, show_points=False, point_size=2,
+    line_width=1, line_color=None, 
     return_image=False, hide=False, shading='flat'):
     """
     Visualize a mesh.
@@ -116,6 +117,8 @@ def View(M, interactive=True, bgcolor=None,
     line_color : None, optional
         Color of edges shown if show_edges=True, by default None.
         If None, color will be selected based on theme.
+    point_size : float, optional
+        Size of points, if show_points=True, by default 2.
     return_image : bool, optional
         If true, image array of the plot will be returned, by default False
     hide : bool, optional
@@ -135,7 +138,7 @@ def View(M, interactive=True, bgcolor=None,
         from vispy import app, scene
         from vispy.io import read_mesh, load_data_file
         from vispy.scene.visuals import Mesh as vispymesh
-        from vispy.scene.visuals import Line
+        from vispy.scene.visuals import Line, Markers
         from vispy.scene import transforms
         from vispy.visuals.filters import ShadingFilter, WireframeFilter, FacePickingFilter
     except:
@@ -307,6 +310,12 @@ def View(M, interactive=True, bgcolor=None,
         canvasview.add(wireframe)
     if not wireframe_only:
         canvasview.add(vsmesh)
+    if show_points:
+        if vertex_colors is None:
+            vertex_colors = 'black'
+        points = Markers(pos=vertices, edge_width=0, symbol='o', face_color=vertex_colors, size=point_size, edge_color=vertex_colors)
+        points.transform = vsmesh.transform
+        canvasview.add(points)
     
     
     # Set shading/lighting
