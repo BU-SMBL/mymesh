@@ -6,13 +6,13 @@ Mesh visualization and plotting
 
 :mod:`mymesh.visualize` is still experimental and may not work as expected
 on all systems or in all development environments. For more stable and
-full-featured mesh visualization, a mesh (``M``) can be converted to a PyVista
-mesh for visualization:
+full-featured mesh visualization, a mymesh mesh object (:code:`M`) can be 
+converted to a `pyvista <https://pyvista.org/>`_ mesh for visualization:
 
 .. code-block::
 
     import pyvista as pv
-    pv_mesh = pv.wrap(M.mymesh2meshio())
+    pv_mesh = M.to_pyvista()
     pv_mesh.plot()
 
 Visualization

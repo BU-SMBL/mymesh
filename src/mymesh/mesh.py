@@ -2181,6 +2181,38 @@ class mesh:
             if return_nodedata: M.NodeData['Image Data'] = NodeData
         return M
 
+    def to_meshio(self):
+        """
+        Convert mesh object to a `meshio <https://github.com/nschloe/meshio>`_  
+        mesh object. This is an alias to  mymesh2meshio.
+
+        Returns
+        -------
+        m : meshio._mesh.mesh
+            meshio-type mesh object with nodes, elements (cells), and 
+            node/element data.
+        """        
+        return self.mymesh2meshio()
+    
+    def to_pyvista(self):
+        """
+        Convert mesh object to a `pyvista <https://pyvista.org/>`_  
+        unstructured grid object. 
+
+        Returns
+        -------
+        pvmesh : pyvista.core.pointset.UnstructuredGrid
+            meshio-type mesh object with nodes, elements (cells), and 
+            node/element data.
+        """
+        try: 
+            import pyvista as pv
+        except:
+            raise ImportError('pyvista m ust be installed to create an pyvista mesh object. Install with: `pip install pyvista`')
+        
+        pvmesh = pv.wrap(self.to_meshio())
+        return pvmesh
+
     ## Visualization Methods
     def view(self, **kwargs):
         """
