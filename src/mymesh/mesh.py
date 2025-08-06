@@ -2189,7 +2189,7 @@ class mesh:
         """        
         out = visualize.View(self, **kwargs)   
         return out 
-    def plot(self, show=True, return_fig=False, clim=None, **kwargs):
+    def plot(self, show=True, return_fig=False, clim=None, show_colorbar=True, **kwargs):
         """
         Generate a static plot of the mesh. See :func:`mymesh.visualize.view` 
         for a full list of optional arguments.
@@ -2260,7 +2260,8 @@ class mesh:
 
             scale = matplotlib.cm.ScalarMappable(cmap='coolwarm')
             scale.set_clim(cmin, cmax)
-            colorbar = matplotlib.pyplot.colorbar(scale, ax=ax)
+            if show_colorbar:
+                colorbar = matplotlib.pyplot.colorbar(scale, ax=ax)
         if show:
             plt.show()
         if return_fig:
