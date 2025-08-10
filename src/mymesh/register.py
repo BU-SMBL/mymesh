@@ -629,19 +629,23 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
         else:
             raise ValueError('Image must be either two or three dimensional.')
 
-        # Process threshold input
-        if threshold is None:
-            # This option intended for already binarized images (flexible enough to accomodate different types of binarization, e.g. True/False, 1/0, 255/0, ...)
-            # If the image is not binary, this will assume the midpoint of the range of values as the threshold
-            threshold1 = (np.max(img1) + np.min(img1))/2
-            threshold2 = (np.max(img2) + np.min(img2))/2
-        elif isinstance(threshold, (list, tuple, np.ndarray)):
+        if isinstance(threshold, (list, tuple, np.ndarray)):
             assert len(threshold) == 2, 'threshold must be defined as a single value or a list/tuple/array of two values (one for each image).'
             threshold1, threshold2 = threshold
         else:
             threshold1 = threshold2 = threshold
+        # Process threshold input
+        if threshold1 is None:
+            # This option intended for already binarized images (flexible enough to accomodate different types of binarization, e.g. True/False, 1/0, 255/0, ...)
+            # If the image is not binary, this will assume the midpoint of the range of values as the threshold
+            threshold1 = (np.max(img1) + np.min(img1))/2
+        if threshold2 is None:
+            threshold2 = (np.max(img2) + np.min(img2))/2
             
         # Process T0 input
+        if img2.dtype in (bool, int, np.int64, np.int32):
+            # Convert binary to float for better interpolation
+            img2 = img2.astype(np.float32)
         if T0 is not None:
             img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))
         else:
@@ -655,6 +659,9 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
         
         # Process scale input
         if scale != 1:
+            if img1.dtype in (bool, int, np.int64, np.int32):
+                # Convert binary to float for better interpolation
+                img1 = img1.astype(np.float32)
             moving_img = scipy.ndimage.zoom(img2T0, scale, order=interpolation_order)
             fixed_img =  scipy.ndimage.zoom(img1, scale, order=interpolation_order)
         else:
@@ -709,7 +716,19 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
             center = np.asarray(center) * scale
 
         # Process transform input
-        if transform.lower() == 'rigid':
+        if transform.lower() == 'scale_uniform':
+            nparam = 1
+            transformation = lambda x : scale_uniform(x, center=center)
+            x0 = np.ones(nparam)
+            if bounds is None:
+                bounds = [
+                    (.9,1.1)
+                ]
+                
+            if verbose:
+                print('iter.||      score||        s ')
+                print('-----||-----------||----------')   
+        elif transform.lower() == 'rigid':
             nparam = 6
             transformation = lambda x : rigid(x, center=center)
             x0 = np.zeros(nparam)
@@ -886,7 +905,7 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
                 T = transformation(x)
                 
                 imgT = transform_image(moving_img, T, options=transform_args)
-
+                
                 f = obj(fixed_img, imgT)
                 if verbose: 
                     print(f'||{f:11.4f}|',end='')
@@ -1117,8 +1136,8 @@ def S2d(s0,s1,reference=np.array([0,0])):
     s : np.ndarray
         4x4 scaling matrix
     """    
-    s = np.array([[1/s0,0,0],
-                  [0,1/s1,0],
+    s = np.array([[s0,0,0],
+                  [0,s1,0],
                   [0,0,1]])
 
     T1 = T2d(*reference)
@@ -1252,9 +1271,9 @@ def S3d(s0,s1,s2,reference=np.array([0,0,0])):
     s : np.ndarray
         4x4 scaling matrix
     """    
-    s = np.array([[1/s0,0,0,0],
-                  [0,1/s1,0,0],
-                  [0,0,1/s2,0],
+    s = np.array([[s0,0,0,0],
+                  [0,s1,0,0],
+                  [0,0,s2,0],
                   [0,0,0,1]])
 
     T1 = T3d(*reference)
@@ -1290,6 +1309,31 @@ def Sh3d(sh01,sh10,sh02,sh20,sh12,sh21,reference=np.array([0,0,0])):
     T2 = T3d(*-np.asarray(reference))
     sh = np.linalg.multi_dot([T1,sh,T2]) 
     return sh
+
+def scale_uniform(x, center=np.array([0,0,0]), image=False):
+    """
+    Rigid rotation in 3D.
+
+    Parameters
+    ----------
+    x : list
+        list with a single value for uniform scaling
+        
+    center : list or np.ndarary, optional
+        Reference point for the scaling
+
+    Returns
+    -------
+    A : np.ndarray
+        scaling matrix (shape=(4,4))
+    """    
+    s = x[0]
+    
+    S = S3d(s, s, s, reference=center)
+
+    A = S
+    
+    return A
 
 def rotation(x, center=np.array([0,0,0]), rotation_order=[0,1,2], rotation_mode='cartesian', image=False):
     """

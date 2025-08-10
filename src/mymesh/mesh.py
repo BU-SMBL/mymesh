@@ -1061,46 +1061,47 @@ class mesh:
         else:
             MeshList = [Mesh2]
         for M in MeshList:
+            m = M.copy()
             # Original Stats
             NNode = self.NNode
             NElem = self.NElem
             
             # Add Nodes
             if len(M.NodeSets) > 1:
-                keys = list(M.NodeSets.keys())
+                keys = list(m.NodeSets.keys())
                 for i in range(len(keys)):
                     keyName = keys[i]
-                    self.addNodes([M.NodeCoords[node] for node in M.NodeSets[keyName]],NodeSet=keyName)
+                    self.addNodes([m.NodeCoords[node] for node in m.NodeSets[keyName]],NodeSet=keyName)
             else:
-                self.addNodes(M.NodeCoords)
+                self.addNodes(m.NodeCoords)
 
             # Add Elems
-            if len(M.ElemSets) > 1:
-                keys = list(M.ElemSets.keys())
+            if len(m.ElemSets) > 1:
+                keys = list(m.ElemSets.keys())
                 for i in range(len(keys)):
                     keyName = keys[i]
-                    self.addElems([[node+NNode for node in M.NodeConn[elem]] for elem in M.ElemSets[keyName]],ElemSet=keyName)
+                    self.addElems([[node+NNode for node in m.NodeConn[elem]] for elem in m.ElemSets[keyName]],ElemSet=keyName)
             else:
-                self.addElems([[node+NNode for node in M.NodeConn[elem]] for elem in range(len(M.NodeConn))])
+                self.addElems([[node+NNode for node in m.NodeConn[elem]] for elem in range(len(m.NodeConn))])
                     
             # Add Node and Element Data
             for key in self.NodeData.keys():
-                if not key in M.NodeData.keys():
-                    M.NodeData[key] = np.nan * np.ones_like(self.NodeData[key])
+                if not key in m.NodeData.keys():
+                    m.NodeData[key] = np.nan * np.ones_like(self.NodeData[key])[:m.NNode,...]
                 if len(np.shape(self.NodeData[key])) == 1:
                     # 1D data
-                    self.NodeData[key] = np.append(self.NodeData[key], M.NodeData[key])
+                    self.NodeData[key] = np.append(self.NodeData[key], m.NodeData[key])
                 else: 
-                    self.NodeData[key] = np.vstack([self.NodeData[key], M.NodeData[key]])
+                    self.NodeData[key] = np.vstack([self.NodeData[key], m.NodeData[key]])
 
             for key in self.ElemData.keys():
-                if not key in M.ElemData.keys():
-                    M.ElemData[key] = np.nan * np.ones_like(self.ElemData[key])
+                if not key in m.ElemData.keys():
+                    m.ElemData[key] = np.nan * np.ones_like(self.ElemData[key])[:m.NElem,...]
                 if len(np.shape(self.ElemData[key])) == 1:
                     # 1D data
-                    self.ElemData[key] = np.append(self.ElemData[key], M.ElemData[key])
+                    self.ElemData[key] = np.append(self.ElemData[key], m.ElemData[key])
                 else: 
-                    self.ElemData[key] = np.vstack([self.ElemData[key], M.ElemData[key]])
+                    self.ElemData[key] = np.vstack([self.ElemData[key], m.ElemData[key]])
 
         # Cleanup
         if cleanup:
