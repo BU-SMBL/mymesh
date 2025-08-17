@@ -121,7 +121,7 @@ class mesh:
         self._SurfElemConn = []
         self._ElemNormals = []
         self._NodeNormals = []
-        self._Centroids = []
+        self._Centroids = np.empty((0,3))
         self._Faces = []  
         self._FaceConn = [] 
         self._FaceElemConn = [] # For each face, gives the indices of connected elements (nan -> surface)
