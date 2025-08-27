@@ -779,6 +779,34 @@ def SurfaceReconstruction(M, decimate=1, method='compact', Radius=None, regulari
     return func
 
 # Implicit Function Primitives
+def tpms(name, cellsize):
+    
+    
+    x, y, z = sp.symbols('x y z', real=True)
+    X = 2*np.pi*x/cellsize
+    Y = 2*np.pi*y/cellsize
+    Z = 2*np.pi*z/cellsize
+    
+    if name.lower() == 'gyroid':
+        func = sp.sin(X)*sp.cos(Y) + sp.sin(Y)*sp.cos(Z) + sp.sin(Z)*sp.cos(X)
+    elif name.lower() == 'primitive':
+        func = sp.cos(X) + sp.cos(Y) + sp.cos(Z)        
+    elif name.lower() == 'diamond':
+        func = sp.sin(X)*sp.sin(Y)*sp.sin(Z) + sp.sin(X)*sp.cos(Y)*sp.cos(Z) +\
+            sp.cos(X)*sp.sin(Y)*sp.cos(Z) + sp.cos(X)*sp.cos(Y)*sp.sin(Z)
+    elif name.lower() == 'diamond':
+        func = sp.sin(X)*sp.sin(Y)*sp.sin(Z) + sp.sin(X)*sp.cos(Y)*sp.cos(Z) +\
+            sp.cos(X)*sp.sin(Y)*sp.cos(Z) + sp.cos(X)*sp.cos(Y)*sp.sin(Z)
+    elif name.lower() == 's':
+        func = sp.cos(2*X)*sp.sin(Y)*sp.cos(Z) +\
+            sp.cos(X)*sp.cos(2*Y)*sp.sin(Z) +\
+            sp.sin(X)*sp.cos(Y)*sp.cos(2*Z)
+            
+    else:
+        raise ValueError(f'Unknown TPMS surface: {name}')
+        
+    return func
+    
 def gyroid(x,y,z):
     """
     Implicit function approximation of the gyroid triply periodic minimal 
