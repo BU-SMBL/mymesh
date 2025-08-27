@@ -1529,6 +1529,7 @@ def Contract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, Fe
     # 0 : interior; 1 : surface; 2 : feature edge; 3 : feature corner; 4 : fixed node
     FeatureRank = np.zeros(len(M.NodeCoords))
     FeatureRank[surface_nodes] = 1
+    FeatureRank[M.BoundaryNodes] = 1 
     FeatureRank[feat_edges]    = 2
     FeatureRank[JunctionNodes] = 2
     FeatureRank[feat_corners]  = 3
@@ -1971,15 +1972,17 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
     while len(heap) > 0:
         
         L, edge = heapq.heappop(heap)
+        # L, edge = heap.pop()
         
         if verbose and tqdm_loaded:
             progress.update(1)
             L1 = len(heap)
         
-        D, emax, to_add = _do_split(D, edge, L, emax)
+        D, emin, emax, to_add = _do_split(D, edge, L, emin, emax)
         # Add new edges to the heap
         for entry in to_add:
             heapq.heappush(heap, entry)
+            # heap.add(entry)
 
         if verbose and tqdm_loaded:
             L2 = len(heap)
@@ -1998,56 +2001,26 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
     return Mnew
 
 @try_njit(cache=True)
-def _do_split(D, edge, L, emax):
+def _do_split(D, edge, L, emin, emax):
 
     node1 = edge[0]
     node2 = edge[1]
     elemconn1 = D.getElemConn(node1)
     elemconn2 = D.getElemConn(node2)
-
-    N = D.NNode # Index of the new node
-    Lcheck = -np.linalg.norm((D.NodeCoords[node1] - D.NodeCoords[node2]))
-    if not np.isclose(L, Lcheck):
-        merp = 3
-    newnode = (D.NodeCoords[node1] + D.NodeCoords[node2])/2 # Create a new node at the midpoint of the edge
-
-    # Adding node manually instead of using D.addNodes so that emax can be tracked with it
-    new_emax = (emax[node1] + emax[node2])/2
-    NewLength = D.NNode + 1
-    if len(D._NodeCoords) < NewLength:
-        # Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.
-        # If the new addition is more than double the current length, the array will be extended 
-        # to exactly fit the new nodes
-        newsize = np.maximum(NewLength,len(D._NodeCoords)*2)
-        D._NodeCoords = np.resize(D._NodeCoords, (newsize,3))
-        emax = np.resize(emax, newsize)
-        # update the ElemConn structure as well
-        D.ElemConn_head = np.resize(D.ElemConn_head, newsize)
-        D.ElemConn_tail = np.resize(D.ElemConn_tail, newsize)
-    
-    D.ElemConn_head[D.NNode] = -1
-    D.ElemConn_tail[D.NNode] = -1
-    D._NodeCoords[D.NNode] = newnode
-    emax[D.NNode] = new_emax
-
-    D.NNode = NewLength
-
     to_add = []
-    if -L/2 > (emax[node1] + emax[node2])/2:
-        # If the split edges still exceed emax, add the new edges to the heap
-        # NOTE: L is inverted for proper heap sorting
-        to_add.append((L/2,(node1, N)))
-        to_add.append((L/2,(node2, N)))
-        
+    N = D.NNode # Index of the new node
+    newnode = (D.NodeCoords[node1] + D.NodeCoords[node2])/2 # Create a new node at the midpoint of the edge
+    new_emax = (emax[node1] + emax[node2])/2
+    new_emin = (emin[node1] + emin[node2])/2
+    if -L/2 < new_emin:
+        return D, emin, emax, to_add
+
     shared_elems = list(set(elemconn1).intersection(set(elemconn2)))[::-1] # Elements connected to the edge, sorted largest index to smallest
-    
+    NewElems = []
     for e in shared_elems:
         
         elem = D.NodeConn[e]
         a, b, c, d = elem
-
-        if not (node1 in elem and node2 in elem):
-            merp = 2
 
         lookup_key = np.sum(np.array([1 if n in edge else 0 for n in elem]) * 2**np.arange(0,4)[::-1])
 
@@ -2082,7 +2055,40 @@ def _do_split(D, edge, L, emax):
             newedge2 = (d,N)
         else:
             raise NotImplementedError('Unexpected behavior in edge splitting - likely related to a bug.')
-        # Remove old element:
+        NewElems.append(new_elems)
+        newedge1_L = np.linalg.norm(D.NodeCoords[newedge1[0]] - newnode)
+        newedge2_L = np.linalg.norm(D.NodeCoords[newedge2[0]] - newnode)
+        if newedge1_L < (emin[newedge1[0]] + new_emin)/2 or newedge2_L < (emin[newedge1[0]] + new_emin)/2:
+            return D, emin, emax, to_add
+
+    # Adding node manually instead of using D.addNodes so that emax can be tracked with it
+    NewLength = D.NNode + 1
+    if len(D._NodeCoords) < NewLength:
+        # Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.
+        # If the new addition is more than double the current length, the array will be extended 
+        # to exactly fit the new nodes
+        newsize = np.maximum(NewLength,len(D._NodeCoords)*2)
+        D._NodeCoords = np.resize(D._NodeCoords, (newsize,3))
+        emax = np.resize(emax, newsize)
+        emin = np.resize(emin, newsize)
+        # update the ElemConn structure as well
+        D.ElemConn_head = np.resize(D.ElemConn_head, newsize)
+        D.ElemConn_tail = np.resize(D.ElemConn_tail, newsize)
+    
+    D.ElemConn_head[D.NNode] = -1
+    D.ElemConn_tail[D.NNode] = -1
+    D._NodeCoords[D.NNode] = newnode
+    emax[D.NNode] = new_emax
+    emin[D.NNode] = new_emin
+
+    D.NNode = NewLength
+
+    if -L/2 > (emax[node1] + emax[node2])/2:
+        # If the split edges still exceed emax, add the new edges to the heap
+        # NOTE: L is inverted for proper heap sorting
+        to_add.append((L/2,(node1, N)))
+        to_add.append((L/2,(node2, N)))
+    for new_elems in NewElems:
         # Add new elements to the mesh
         if len(D.ElemLabels > 0):
             for new_elem in new_elems:
@@ -2094,15 +2100,12 @@ def _do_split(D, edge, L, emax):
         D.removeElem(e)
     # Check if the new edges (other than the split edges) need to be added to the heap
     # NOTE: L is inverted for proper heap sorting  
-    newedge1_L = np.linalg.norm(D.NodeCoords[newedge1[0]] - D.NodeCoords[newedge1[1]])
     if newedge1_L > (emax[newedge1[0]] + emax[newedge1[1]])/2:
         to_add.append((-newedge1_L, newedge1))
 
-    newedge2_L = np.linalg.norm(D.NodeCoords[newedge2[0]] - D.NodeCoords[newedge2[1]])
     if newedge2_L > (emax[newedge2[0]] + emax[newedge2[1]])/2:
         to_add.append((-newedge2_L, newedge2))
-    
-    return D, emax, to_add
+    return D, emin, emax, to_add
 
 def TetFlip(M, iterate='converge', QualityMetric='Skewness', target='min', flips=['4-4','3-2','2-3'], verbose=False):
 
