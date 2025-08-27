@@ -87,7 +87,7 @@ import scipy
 import sys, os, copy, warnings
 from mymesh import utils
 
-def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=True, return_transform=False):
+def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=True, return_transform=False, method='MVBB'):
     """
     Align an point cloud to the x, y, z axes. This works by identifying
     the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and 
@@ -127,24 +127,34 @@ def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=
         `return_transform = True`.
     """    
     assert ValueError(len(axis_order) == 3 and np.array_equal([0,1,2], np.sort(axis_order))), 'axis_order must contain only 0, 1, and 2.'
-
-    mvbb, mat = utils.MVBB(points, return_matrix=True)
     
-    # Modify rotation to specified axis_order
-    mvbb_t = transform_points(mvbb, mat)
-    side_lengths = np.max(mvbb_t,axis=0) - np.min(mvbb_t,axis=0)
-    current_order = np.argsort(side_lengths)
-    if not np.all(current_order == axis_order):
-        idx = np.argsort(np.argsort(current_order)[np.argsort(axis_order)])
-        perpendicular_transform = np.eye(3)[idx]
-        if np.linalg.det(perpendicular_transform) < 0:
-            # If the determinant is negative, it would cause a reflection, inverting a column fixes this
-            perpendicular_transform[:,0] = -1*perpendicular_transform[:,0]
-        mat = perpendicular_transform@mat
-        mvbb_t = transform_points(mvbb, mat)
-    
-    # Restore center after rotation
     original_center = np.mean(points,axis=0)
+    if method.lower() == 'mvbb':
+        mvbb, mat = utils.MVBB(points, return_matrix=True)
+        
+        # Modify rotation to specified axis_order
+        mvbb_t = transform_points(mvbb, mat)
+        side_lengths = np.max(mvbb_t,axis=0) - np.min(mvbb_t,axis=0)
+        current_order = np.argsort(side_lengths)
+        if not np.all(current_order == axis_order):
+            idx = np.argsort(np.argsort(current_order)[np.argsort(axis_order)])
+            perpendicular_transform = np.eye(3)[idx]
+            if np.linalg.det(perpendicular_transform) < 0:
+                # If the determinant is negative, it would cause a reflection, inverting a column fixes this
+                perpendicular_transform[:,0] = -1*perpendicular_transform[:,0]
+            mat = perpendicular_transform@mat
+            # mvbb_t = transform_points(mvbb, mat)
+    elif method.lower() == 'pca':
+        
+        cov = np.cov((points-original_center).T)
+        vals, vecs = np.linalg.eig(cov)
+        idx = np.argsort(vals)[axis_order]
+        vals = vals[idx]
+        vecs = vecs[:,idx]
+        mat = vecs
+        
+    # Restore center after rotation
+    
     transformed_center = transform_points(np.atleast_2d(original_center), mat)[0]
     if center is None:
         center = original_center
