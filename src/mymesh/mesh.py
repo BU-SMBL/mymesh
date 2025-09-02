@@ -54,28 +54,28 @@ class mesh:
     verbose : bool
         Verbosity mode of the mesh. If True, some operations will print activity or other information, 
         by default True
-    NodeData
+    NodeData : dict
         Node data dictionary for storing scalar or vector data associated with 
         each node in the mesh. Each entry should be an array_like with the same
         length as the number of nodes in the mesh. When using :meth:`mesh.write`, 
         this data will be transferred to the written file if supported by that
         file type.
-    ElemData 
+    ElemData : dict
         Element data dictionary for storing scalar or vector data associated with 
         each element in the mesh. Each entry should be an array_like with the same
         length as the number of elements in the mesh. When using :meth:`mesh.write`, 
         this data will be transferred to the written file if supported by that
         file type.
-    NodeSets
+    NodeSets : dict
         Dictionary used for creating named sets of nodes. Each entry should 
         be a set (or array_like) of node numbers.
-    ElemSets
+    ElemSets : dict
         Dictionary used for creating named sets of elements. Each entry should 
         be a set (or array_like) of element numbers.
-    FaceSets 
+    FaceSets : dict
         Dictionary used for creating named sets of faces. Each entry should 
         be a set (or array_like) of face numbers.
-    EdgeSets 
+    EdgeSets : dict
         Dictionary used for creating named sets of edges. Each entry should 
         be a set (or array_like) of edge numbers.
 
@@ -109,7 +109,7 @@ class mesh:
         self._ElemType = []
         self._MeshNodes = None
         self._Surface = None
-        self._SurfConn = []
+        self._SurfConn = None
         self._SurfNodes = None
         self._Boundary = None
         self._BoundaryConn = None
@@ -362,7 +362,7 @@ class mesh:
         if self.Type == 'surf':
             SurfConn = self.NodeConn
         else:
-            if self._SurfConn == []:
+            if self._SurfConn is None:
                 if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying surface...',end='')
                 self._SurfConn = converter.solid2surface(*self)
                 if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
