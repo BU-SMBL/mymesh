@@ -1529,7 +1529,7 @@ def Contract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, Fe
     # 0 : interior; 1 : surface; 2 : feature edge; 3 : feature corner; 4 : fixed node
     FeatureRank = np.zeros(len(M.NodeCoords))
     FeatureRank[surface_nodes] = 1
-    FeatureRank[M.BoundaryNodes] = 1 
+    FeatureRank[M.BoundaryNodes] = 2
     FeatureRank[feat_edges]    = 2
     FeatureRank[JunctionNodes] = 2
     FeatureRank[feat_corners]  = 3

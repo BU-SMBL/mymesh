@@ -50,7 +50,7 @@ from . import utils, rays, converter, mesh, quality
 from . import try_njit, check_numba, _MYMESH_USE_NUMBA
 from scipy import spatial
 
-def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8):
+def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8, steiner=0):
     """
     Generate a triangulation for a 2D set of points. This will be a strictly
     convex triangulation.
@@ -94,7 +94,8 @@ def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8):
         elif method.lower() == 'scipy':
             NodeConn = idx[SciPy(Points)]
         elif method.lower() == 'triangle':
-            NodeConn = idx[Triangle(Points)]
+            NodeCoords, NodeConn = Triangle(Points,steiner=steiner)
+            NodeConn = idx[NodeConn]
         else:
             raise ValueError(f'Invalid method "{method:s}".')
     else: 
@@ -105,7 +106,7 @@ def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8):
         else:
             raise ValueError('Currently only method="Triangle" is supported for constrained triangulation.')
         
-        NodeConn = Triangle(Points,Constraints=Constraints)
+        NodeCoords, NodeConn = Triangle(Points,Constraints=Constraints,steiner=steiner)
 
     if 'mesh' in dir(mesh):
         T = mesh.mesh(NodeCoords,NodeConn)
@@ -265,7 +266,7 @@ def SciPy(NodeCoords, FixVol=True):
         NodeConn[V < 0] = NodeConn[V < 0][:, [2, 1, 0, 3]]
     return NodeConn
 
-def Triangle(NodeCoords,Constraints=None):
+def Triangle(NodeCoords,Constraints=None, steiner=0):
     """
     Interface to Jonathan Shewchuk's Triangle via a python wrapper (https://pypi.org/project/triangle/). To use, the python wrapper must be installed (`pip install triangle`).
 
@@ -276,6 +277,8 @@ def Triangle(NodeCoords,Constraints=None):
     Constraints : array_like, optional
         Edge connectivity array of node indices that indicate edges to be ensured
         by constrained Delaunay triangulation, by default None
+    steiner : int, optional
+        Maximum number of steiner points allowed
 
     Returns
     -------
@@ -293,7 +296,7 @@ def Triangle(NodeCoords,Constraints=None):
     else:
         In = dict(vertices=NodeCoords,segments=Constraints)
     try:
-        Out = triangle.triangulate(In,'pc')
+        Out = triangle.triangulate(In,f'pqS{steiner:d}')
         NodeConn = Out['triangles']
         # NodeCoords = Out['vertices']
         if len(Out['vertices']) != len(NodeCoords):
@@ -304,12 +307,11 @@ def Triangle(NodeCoords,Constraints=None):
                 if np.any(All):
                     NodeConn[NodeConn==v] = np.where(All)[0][0]
             if np.any(NodeConn >= len(NodeCoords)):
-                a = 2
                 NodeCoords = Out['vertices']
     except:
         NodeConn = SciPy(NodeCoords)
 
-    return NodeConn
+    return NodeCoords, NodeConn
     
 def TetGen(NodeCoords, SurfConn, **kwargs):
     """
