@@ -52,7 +52,8 @@ def View(M, interactive=True, bgcolor=None,
     view='iso', scalars=None,
     show_edges=False, show_faces=True, show_points=False, point_size=2,
     line_width=1, line_color=None, 
-    return_image=False, hide=False, shading='flat'):
+    return_image=False, hide=False, shading='flat',
+    size=(800,600)):
     """
     Visualize a mesh.
     View uses vispy for visualization.
@@ -126,6 +127,8 @@ def View(M, interactive=True, bgcolor=None,
     shading : str, optional
         Shading mode, by default 'flat'
         Options are 'flat', 'smooth', None
+    size : tuple, optional
+        Figure size (width, height) in pixels. By default, (800, 600)
 
     Returns
     -------
@@ -180,7 +183,7 @@ def View(M, interactive=True, bgcolor=None,
         line_color = theme[2]
     
     # Create canvas
-    canvas = scene.SceneCanvas(keys='interactive', bgcolor=ParseColor(bgcolor), title='MyMesh Viewer',show=interactive)
+    canvas = scene.SceneCanvas(keys='interactive', bgcolor=ParseColor(bgcolor), title='MyMesh Viewer',show=interactive, size=size)
 
     # Set view mode
     viewmode='arcball'
