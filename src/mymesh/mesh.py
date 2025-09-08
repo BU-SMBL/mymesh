@@ -734,7 +734,7 @@ class mesh:
             keep = []
         if properties == None:
             if 'ElemType' not in keep: self._ElemType = []
-            if 'SurfConn' not in keep: self._SurfConn = []
+            if 'SurfConn' not in keep: self._SurfConn = None
             if 'SurfNodes' not in keep: self._SurfNodes = None
             if 'Surface' not in keep: self._Surface = None
             if 'BoundaryConn' not in keep: self._BoundaryConn = None
