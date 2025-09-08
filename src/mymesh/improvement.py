@@ -1529,7 +1529,8 @@ def Contract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, Fe
     # 0 : interior; 1 : surface; 2 : feature edge; 3 : feature corner; 4 : fixed node
     FeatureRank = np.zeros(len(M.NodeCoords))
     FeatureRank[surface_nodes] = 1
-    FeatureRank[M.BoundaryNodes] = 2
+    if len(M.BoundaryNodes) > 0:
+        FeatureRank[M.BoundaryNodes] = 2
     FeatureRank[feat_edges]    = 2
     FeatureRank[JunctionNodes] = 2
     FeatureRank[feat_corners]  = 3
@@ -2082,7 +2083,8 @@ def _do_split(D, edge, L, emin, emax):
     emin[D.NNode] = new_emin
 
     D.NNode = NewLength
-
+    if np.any(quality.tet_volume(D.NodeCoords, np.array(new_elems)) < 0):
+        return D, emin, emax, to_add
     if -L/2 > (emax[node1] + emax[node2])/2:
         # If the split edges still exceed emax, add the new edges to the heap
         # NOTE: L is inverted for proper heap sorting
