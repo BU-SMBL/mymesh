@@ -2735,6 +2735,47 @@ def hexsubdivide(NodeCoords, NodeConn):
 
     return NewCoords, SubConn
 
+def tetsubdivide(NodeCoords, NodeConn):
+    """
+    Subdivide tetrahedra into 4 sub-tetrahedra, connecting vertices to the 
+    centroid.
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of node coordinates
+    NodeConn : array_like
+        List of node connectivities (must be purely tetrahdral, shape=(n,4))
+
+    Returns
+    -------
+    NewCoords : np.ndarray
+        Node coordinates of the subdivided mesh. The new nodes are 
+        appended to the original nodes, so the node numbers of the original 
+        mesh will refer to the same nodes in the new mesh.
+    NewConn : np.ndarray
+        Node connectivities of the subdivided mesh. The elements are ordered 
+        so that the first element in the original mesh is subdivided into
+        the first 4 elements in the new mesh, the second element in the mesh
+        becomes the next 4 elements, and so on.
+    """
+    ArrayCoords = np.asarray(NodeCoords)
+    ArrayConn = np.asarray(NodeConn, dtype=int)
+
+    Centroids = utils.Centroids(ArrayCoords,NodeConn)
+
+    CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*0,len(NodeCoords)+len(NodeConn)*1, dtype=int)
+    
+    NewCoords = np.vstack([ArrayCoords,Centroids])        
+    
+    SubConn = -1*np.ones((len(NodeConn)*4,4), dtype=int)
+    SubConn[0::4] = np.column_stack([ArrayConn[:,[0,1,2]], CentroidIds])
+    SubConn[1::4] = np.column_stack([ArrayConn[:,[0,3,1]], CentroidIds])
+    SubConn[2::4] = np.column_stack([ArrayConn[:,[1,3,2]], CentroidIds])
+    SubConn[3::4] = np.column_stack([ArrayConn[:,[0,2,3]], CentroidIds])
+
+    return NewCoords, SubConn
+
 def im2pixel(img, pixelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
     """
     Convert 2D image data to a grid mesh. Each pixel will be represented by an element.
