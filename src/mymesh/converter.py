@@ -2735,7 +2735,7 @@ def hexsubdivide(NodeCoords, NodeConn):
 
     return NewCoords, SubConn
 
-def tetsubdivide(NodeCoords, NodeConn):
+def tetsubdivide(NodeCoords, NodeConn, method='1to24'):
     """
     Subdivide tetrahedra into 4 sub-tetrahedra, connecting vertices to the 
     centroid.
@@ -2765,14 +2765,71 @@ def tetsubdivide(NodeCoords, NodeConn):
     Centroids = utils.Centroids(ArrayCoords,NodeConn)
 
     CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*0,len(NodeCoords)+len(NodeConn)*1, dtype=int)
-    
-    NewCoords = np.vstack([ArrayCoords,Centroids])        
-    
-    SubConn = -1*np.ones((len(NodeConn)*4,4), dtype=int)
-    SubConn[0::4] = np.column_stack([ArrayConn[:,[0,1,2]], CentroidIds])
-    SubConn[1::4] = np.column_stack([ArrayConn[:,[0,3,1]], CentroidIds])
-    SubConn[2::4] = np.column_stack([ArrayConn[:,[1,3,2]], CentroidIds])
-    SubConn[3::4] = np.column_stack([ArrayConn[:,[0,2,3]], CentroidIds])
+    if method == '1to4':
+        NewCoords = np.vstack([ArrayCoords,Centroids])        
+        
+        SubConn = -1*np.ones((len(NodeConn)*4,4), dtype=int)
+        SubConn[0::4] = np.column_stack([ArrayConn[:,[0,1,2]], CentroidIds])
+        SubConn[1::4] = np.column_stack([ArrayConn[:,[0,3,1]], CentroidIds])
+        SubConn[2::4] = np.column_stack([ArrayConn[:,[1,3,2]], CentroidIds])
+        SubConn[3::4] = np.column_stack([ArrayConn[:,[0,2,3]], CentroidIds])
+    elif method == '1to24':
+        Face0Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,1,2]]],axis=1)
+        Face1Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,3,1]]],axis=1)
+        Face2Centroids = np.mean(ArrayCoords[ArrayConn[:,[1,3,2]]],axis=1)
+        Face3Centroids = np.mean(ArrayCoords[ArrayConn[:,[0,2,3]]],axis=1)
+        Edge01 = np.mean(ArrayCoords[ArrayConn[:,[0,1]]],axis=1)
+        Edge12 = np.mean(ArrayCoords[ArrayConn[:,[1,2]]],axis=1)
+        Edge20 = np.mean(ArrayCoords[ArrayConn[:,[2,0]]],axis=1)        
+        Edge03 = np.mean(ArrayCoords[ArrayConn[:,[0,3]]],axis=1) 
+        Edge13 = np.mean(ArrayCoords[ArrayConn[:,[1,3]]],axis=1) 
+        Edge23 = np.mean(ArrayCoords[ArrayConn[:,[2,3]]],axis=1)      
+        
+        Face0CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*1,len(NodeCoords)+len(NodeConn)*2, dtype=int)
+        Face1CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*2,len(NodeCoords)+len(NodeConn)*3, dtype=int)
+        Face2CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*3,len(NodeCoords)+len(NodeConn)*4, dtype=int)
+        Face3CentroidIds = np.arange(len(NodeCoords)+len(NodeConn)*4,len(NodeCoords)+len(NodeConn)*5, dtype=int)
+        Edge01Ids = np.arange(len(NodeCoords)+len(NodeConn)*5,len(NodeCoords)+len(NodeConn)*6, dtype=int)
+        Edge12Ids = np.arange(len(NodeCoords)+len(NodeConn)*6,len(NodeCoords)+len(NodeConn)*7, dtype=int)
+        Edge20Ids = np.arange(len(NodeCoords)+len(NodeConn)*7,len(NodeCoords)+len(NodeConn)*8, dtype=int)
+        Edge03Ids = np.arange(len(NodeCoords)+len(NodeConn)*8,len(NodeCoords)+len(NodeConn)*9, dtype=int)
+        Edge13Ids = np.arange(len(NodeCoords)+len(NodeConn)*9,len(NodeCoords)+len(NodeConn)*10, dtype=int)
+        Edge23Ids = np.arange(len(NodeCoords)+len(NodeConn)*10,len(NodeCoords)+len(NodeConn)*11, dtype=int)
+
+        NewCoords = np.vstack([ArrayCoords,Centroids,Face0Centroids,Face1Centroids,Face2Centroids,Face3Centroids, Edge01, Edge12, Edge20, Edge03, Edge13, Edge23])   
+        SubConn = -1*np.ones((len(NodeConn)*24,4), dtype=int)
+
+        # Face 0: (0,1,2)
+        SubConn[0::24] = np.column_stack([ArrayConn[:,0], Edge01Ids, Face0CentroidIds, CentroidIds])
+        SubConn[1::24] = np.column_stack([ArrayConn[:,1], Face0CentroidIds, Edge01Ids, CentroidIds])
+        SubConn[2::24] = np.column_stack([ArrayConn[:,1], Edge12Ids, Face0CentroidIds, CentroidIds])
+        SubConn[3::24] = np.column_stack([ArrayConn[:,2], Face0CentroidIds, Edge12Ids, CentroidIds])
+        SubConn[4::24] = np.column_stack([ArrayConn[:,2], Edge20Ids, Face0CentroidIds, CentroidIds])
+        SubConn[5::24] = np.column_stack([ArrayConn[:,0], Face0CentroidIds, Edge20Ids, CentroidIds])
+
+        # Face 1: (0,3,1)
+        SubConn[6::24] = np.column_stack([ArrayConn[:,0], Edge03Ids, Face1CentroidIds, CentroidIds])
+        SubConn[7::24] = np.column_stack([ArrayConn[:,3], Face1CentroidIds, Edge03Ids, CentroidIds])
+        SubConn[8::24] = np.column_stack([ArrayConn[:,3], Edge13Ids, Face1CentroidIds, CentroidIds])
+        SubConn[9::24] = np.column_stack([ArrayConn[:,1], Face1CentroidIds, Edge13Ids, CentroidIds])
+        SubConn[10::24] = np.column_stack([ArrayConn[:,1], Edge01Ids, Face1CentroidIds, CentroidIds])
+        SubConn[11::24] = np.column_stack([ArrayConn[:,0], Face1CentroidIds, Edge01Ids, CentroidIds])
+
+        # Face 2: (1,3,2)
+        SubConn[12::24] = np.column_stack([ArrayConn[:,1], Edge13Ids, Face2CentroidIds, CentroidIds])
+        SubConn[13::24] = np.column_stack([ArrayConn[:,3], Face2CentroidIds, Edge13Ids, CentroidIds])
+        SubConn[14::24] = np.column_stack([ArrayConn[:,3], Edge23Ids, Face2CentroidIds, CentroidIds])
+        SubConn[15::24] = np.column_stack([ArrayConn[:,2], Face2CentroidIds, Edge23Ids, CentroidIds])
+        SubConn[16::24] = np.column_stack([ArrayConn[:,2], Edge12Ids, Face2CentroidIds, CentroidIds])
+        SubConn[17::24] = np.column_stack([ArrayConn[:,1], Face2CentroidIds, Edge12Ids, CentroidIds])
+
+        # Face 3: (1,3,2)
+        SubConn[18::24] = np.column_stack([ArrayConn[:,0], Edge20Ids, Face3CentroidIds, CentroidIds])
+        SubConn[19::24] = np.column_stack([ArrayConn[:,2], Face3CentroidIds, Edge20Ids, CentroidIds])
+        SubConn[20::24] = np.column_stack([ArrayConn[:,2], Edge23Ids, Face3CentroidIds, CentroidIds])
+        SubConn[21::24] = np.column_stack([ArrayConn[:,3], Face3CentroidIds, Edge23Ids, CentroidIds])
+        SubConn[22::24] = np.column_stack([ArrayConn[:,3], Edge03Ids, Face3CentroidIds, CentroidIds])
+        SubConn[23::24] = np.column_stack([ArrayConn[:,0], Face3CentroidIds, Edge03Ids, CentroidIds])
 
     return NewCoords, SubConn
 
