@@ -77,6 +77,7 @@ Element type conversion
     hex202linear
     hex2quadratic
     hexsubdivide
+    tetsubdivide
 
 """
 
@@ -2737,8 +2738,7 @@ def hexsubdivide(NodeCoords, NodeConn):
 
 def tetsubdivide(NodeCoords, NodeConn, method='1to24'):
     """
-    Subdivide tetrahedra into 4 sub-tetrahedra, connecting vertices to the 
-    centroid.
+    Subdivide tetrahedra into sub-tetrahedra.
 
     Parameters
     ----------
@@ -2746,6 +2746,12 @@ def tetsubdivide(NodeCoords, NodeConn, method='1to24'):
         List of node coordinates
     NodeConn : array_like
         List of node connectivities (must be purely tetrahdral, shape=(n,4))
+    method : str
+        Subdivision method
+
+        - "1to4" : Connect vertices to centroid
+        
+        - "1to24" : Connect vertices to centroid, face centroids, and edge centroids
 
     Returns
     -------
