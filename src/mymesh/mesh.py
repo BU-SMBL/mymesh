@@ -13,7 +13,7 @@ from . import utils, implicit, improvement, contour, converter, quality, rays, c
 from sys import getsizeof
 import scipy
 import numpy as np
-import os, copy, warnings, pickle, json
+import os, copy, warnings, pickle, json, itertools
 
 class mesh:  
     """
@@ -348,6 +348,10 @@ class mesh:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying mesh nodes...',end='')
                 self._printlevel += 1
+            if type(self.NodeConn) is np.ndarray:
+                self._MeshNodes = np.unique(self.NodeConn)
+            else:
+                self._MeshNodes = np.unique(np.fromiter(itertools.chain.from_iterable(self.NodeConn)))
             self._MeshNodes = np.array(list({i for elem in self.NodeConn for i in elem}))
             if self.verbose: 
                 print('Done', end='\n'+'\t'*self._printlevel)
@@ -377,7 +381,10 @@ class mesh:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying surface nodes...',end='')
                 self._printlevel += 1
-            self._SurfNodes = np.array(list({i for elem in self.SurfConn for i in elem}))
+            if type(self.SurfConn) is np.ndarray:
+                self._SurfNodes = np.unique(self.SurfConn)
+            else:
+                self._SurfNodes = np.unique(np.fromiter(itertools.chain.from_iterable(self.SurfConn)))
             if self.verbose: 
                 print('Done', end='\n'+'\t'*self._printlevel)
                 self._printlevel -= 1
