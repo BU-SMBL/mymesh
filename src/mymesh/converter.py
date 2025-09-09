@@ -2838,7 +2838,7 @@ def tetsubdivide(NodeCoords, NodeConn, method='1to24'):
         SubConn[23::24] = np.column_stack([ArrayConn[:,0], Face3CentroidIds, Edge03Ids, CentroidIds])
         
         
-        NodeCoords, SubConn = utils.DeleteDuplicateNodes(NodeCoords, NodeConn)
+    NewCoords, SubConn = utils.DeleteDuplicateNodes(NewCoords, SubConn)
     return NewCoords, SubConn
 
 def im2pixel(img, pixelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
