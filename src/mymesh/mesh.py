@@ -13,7 +13,7 @@ from . import utils, implicit, improvement, contour, converter, quality, rays, c
 from sys import getsizeof
 import scipy
 import numpy as np
-import os, copy, warnings, pickle, json
+import os, copy, warnings, pickle, json, itertools
 
 class mesh:  
     """
@@ -54,28 +54,28 @@ class mesh:
     verbose : bool
         Verbosity mode of the mesh. If True, some operations will print activity or other information, 
         by default True
-    NodeData
+    NodeData : dict
         Node data dictionary for storing scalar or vector data associated with 
         each node in the mesh. Each entry should be an array_like with the same
         length as the number of nodes in the mesh. When using :meth:`mesh.write`, 
         this data will be transferred to the written file if supported by that
         file type.
-    ElemData 
+    ElemData : dict
         Element data dictionary for storing scalar or vector data associated with 
         each element in the mesh. Each entry should be an array_like with the same
         length as the number of elements in the mesh. When using :meth:`mesh.write`, 
         this data will be transferred to the written file if supported by that
         file type.
-    NodeSets
+    NodeSets : dict
         Dictionary used for creating named sets of nodes. Each entry should 
         be a set (or array_like) of node numbers.
-    ElemSets
+    ElemSets : dict
         Dictionary used for creating named sets of elements. Each entry should 
         be a set (or array_like) of element numbers.
-    FaceSets 
+    FaceSets : dict
         Dictionary used for creating named sets of faces. Each entry should 
         be a set (or array_like) of face numbers.
-    EdgeSets 
+    EdgeSets : dict
         Dictionary used for creating named sets of edges. Each entry should 
         be a set (or array_like) of edge numbers.
 
@@ -109,7 +109,7 @@ class mesh:
         self._ElemType = []
         self._MeshNodes = None
         self._Surface = None
-        self._SurfConn = []
+        self._SurfConn = None
         self._SurfNodes = None
         self._Boundary = None
         self._BoundaryConn = None
@@ -121,7 +121,7 @@ class mesh:
         self._SurfElemConn = []
         self._ElemNormals = []
         self._NodeNormals = []
-        self._Centroids = []
+        self._Centroids = np.empty((0,3))
         self._Faces = []  
         self._FaceConn = [] 
         self._FaceElemConn = [] # For each face, gives the indices of connected elements (nan -> surface)
@@ -348,6 +348,10 @@ class mesh:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying mesh nodes...',end='')
                 self._printlevel += 1
+            if type(self.NodeConn) is np.ndarray:
+                self._MeshNodes = np.unique(self.NodeConn)
+            else:
+                self._MeshNodes = np.unique(np.fromiter(itertools.chain.from_iterable(self.NodeConn), np.int64))
             self._MeshNodes = np.array(list({i for elem in self.NodeConn for i in elem}))
             if self.verbose: 
                 print('Done', end='\n'+'\t'*self._printlevel)
@@ -362,7 +366,7 @@ class mesh:
         if self.Type == 'surf':
             SurfConn = self.NodeConn
         else:
-            if self._SurfConn == []:
+            if self._SurfConn is None:
                 if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying surface...',end='')
                 self._SurfConn = converter.solid2surface(*self)
                 if self.verbose: print('Done', end='\n'+'\t'*self._printlevel)
@@ -377,7 +381,10 @@ class mesh:
             if self.verbose: 
                 print('\n'+'\t'*self._printlevel+'Identifying surface nodes...',end='')
                 self._printlevel += 1
-            self._SurfNodes = np.array(list({i for elem in self.SurfConn for i in elem}))
+            if type(self.SurfConn) is np.ndarray:
+                self._SurfNodes = np.unique(self.SurfConn)
+            else:
+                self._SurfNodes = np.unique(np.fromiter(itertools.chain.from_iterable(self.SurfConn),np.int64))
             if self.verbose: 
                 print('Done', end='\n'+'\t'*self._printlevel)
                 self._printlevel -= 1
@@ -734,7 +741,7 @@ class mesh:
             keep = []
         if properties == None:
             if 'ElemType' not in keep: self._ElemType = []
-            if 'SurfConn' not in keep: self._SurfConn = []
+            if 'SurfConn' not in keep: self._SurfConn = None
             if 'SurfNodes' not in keep: self._SurfNodes = None
             if 'Surface' not in keep: self._Surface = None
             if 'BoundaryConn' not in keep: self._BoundaryConn = None
@@ -1984,6 +1991,8 @@ class mesh:
                 data = np.asarray(self.ElemData[key])
                 if data.dtype == bool:
                     data = data.astype(int)
+                elif np.issubdtype(data.dtype, np.str_):
+                    data = np.array([int.from_bytes(x.encode('utf-8'), 'little') for x in data])
                 celldata[0] = data[elemlengths==2]  # line
                 celldata[1] = data[elemlengths==3]  # tri
                 celldata[2] = data[elemlengths==4]  # quad/tet
@@ -1996,12 +2005,15 @@ class mesh:
                 celldata[9] = data[elemlengths==20] # hex20
                 celldata = [c for c in celldata if len(c) > 0]
                 celldict[key] = celldata
-        if len(self.NodeData) > 0:
-            for key in self.NodeData.keys():
-                data = np.asarray(self.NodeData[key])
+        NodeData = copy.copy(self.NodeData)
+        if len(NodeData) > 0:
+            for key in NodeData.keys():
+                data = np.asarray(NodeData[key])
                 if data.dtype == bool:
                     data = data.astype(int)
-                self.NodeData[key] = data
+                elif np.issubdtype(data.dtype, np.str_):
+                    data = np.array([int.from_bytes(x.encode('utf-8'), 'little') for x in data])
+                NodeData[key] = data
         if np.all(elemlengths == elemlengths[0]):
             ArrayConn = np.array(self.NodeConn,dtype=int)
         else:
@@ -2036,7 +2048,7 @@ class mesh:
 
         elems = [e for e in [('line',edges),('triangle',tris),('triangle6',tri6s),('quad',quads),('quad8',quad8s),('tetra',tets),('tetra10',tet10s),('pyramid',pyrs),('pyramid13',pyr13s),('wedge',wdgs),('wedge15',wdg15s),('hexahedron',hexs),('hexahedron20',hex20s)] if len(e[1]) > 0]
         
-        m = meshio.Mesh(self.NodeCoords, elems, point_data=self.NodeData, cell_data=celldict)
+        m = meshio.Mesh(self.NodeCoords, elems, point_data=NodeData, cell_data=celldict)
 
         
 
@@ -2175,6 +2187,38 @@ class mesh:
             M.ElemData['Image Data'] = VoxelData
             if return_nodedata: M.NodeData['Image Data'] = NodeData
         return M
+
+    def to_meshio(self):
+        """
+        Convert mesh object to a `meshio <https://github.com/nschloe/meshio>`_  
+        mesh object. This is an alias to  mymesh2meshio.
+
+        Returns
+        -------
+        m : meshio._mesh.mesh
+            meshio-type mesh object with nodes, elements (cells), and 
+            node/element data.
+        """        
+        return self.mymesh2meshio()
+    
+    def to_pyvista(self):
+        """
+        Convert mesh object to a `pyvista <https://pyvista.org/>`_  
+        unstructured grid object. 
+
+        Returns
+        -------
+        pvmesh : pyvista.core.pointset.UnstructuredGrid
+            meshio-type mesh object with nodes, elements (cells), and 
+            node/element data.
+        """
+        try: 
+            import pyvista as pv
+        except:
+            raise ImportError('pyvista m ust be installed to create an pyvista mesh object. Install with: `pip install pyvista`')
+        
+        pvmesh = pv.wrap(self.to_meshio())
+        return pvmesh
 
     ## Visualization Methods
     def view(self, **kwargs):

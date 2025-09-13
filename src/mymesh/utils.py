@@ -460,9 +460,13 @@ def Centroids(NodeCoords,NodeConn):
     """
     if len(NodeConn) == 0:
         return []
-    ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
-    R = PadRagged(NodeConn,fillval=-1)
-    Points = ArrayCoords[R]
+    try:
+        ArrayConn = np.asarray(NodeConn)
+        ArrayCoords = np.asarray(NodeCoords)
+    except:
+        ArrayConn = PadRagged(NodeConn,fillval=-1)
+        ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
+    Points = ArrayCoords[ArrayConn]
     centroids = np.nanmean(Points,axis=1)
     return centroids
     

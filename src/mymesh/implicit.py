@@ -79,7 +79,7 @@ import numpy as np
 import sympy as sp
 from scipy import optimize, interpolate, sparse
 from scipy.spatial import KDTree
-import sys, os, time, copy, warnings, bisect
+import warnings
 
 from . import utils, converter, contour, quality, improvement, rays, mesh, primitives
 
@@ -779,6 +779,59 @@ def SurfaceReconstruction(M, decimate=1, method='compact', Radius=None, regulari
     return func
 
 # Implicit Function Primitives
+def tpms(name, cellsize=1):
+    """
+    Triply periodic minimal surfaces.
+
+    Parameters
+    ----------
+    name : str
+        Name of the TPMS surface
+
+        - 'gyroid' - Schoen's gyroid
+
+        - 'primitive' or 'p' - Schwarz P
+
+        - 'diamond' or 'd' - Schwarz D
+
+        - 's' - Fischer-Koch S
+
+
+    cellsize : float, optional
+        Unit cell size or periodicity, by default 1
+
+    Returns
+    -------
+    func : callable
+        Callable implicit function f(x,y,z).
+        This function utilizes sympy operators - for a vectorized function, use 
+        implicit.wrapfunc(func)
+
+    """    
+    
+    x, y, z = sp.symbols('x y z', real=True)
+    X = 2*np.pi*x/cellsize
+    Y = 2*np.pi*y/cellsize
+    Z = 2*np.pi*z/cellsize
+    
+    if name.lower() == 'gyroid':
+        surf = sp.sin(X)*sp.cos(Y) + sp.sin(Y)*sp.cos(Z) + sp.sin(Z)*sp.cos(X)
+    elif name.lower() == 'primitive' or name.lower() == 'p':
+        surf = sp.cos(X) + sp.cos(Y) + sp.cos(Z)        
+    elif name.lower() == 'diamond' or name.lower() == 'd':
+        surf = sp.sin(X)*sp.sin(Y)*sp.sin(Z) + sp.sin(X)*sp.cos(Y)*sp.cos(Z) +\
+            sp.cos(X)*sp.sin(Y)*sp.cos(Z) + sp.cos(X)*sp.cos(Y)*sp.sin(Z)
+    elif name.lower() == 's':
+        surf = sp.cos(2*X)*sp.sin(Y)*sp.cos(Z) +\
+            sp.cos(X)*sp.cos(2*Y)*sp.sin(Z) +\
+            sp.sin(X)*sp.cos(Y)*sp.cos(2*Z)
+            
+    else:
+        raise ValueError(f'Unknown TPMS surface: {name}')
+    
+    func = sp.lambdify((x, y, z), surf, 'sympy')
+    return func
+    
 def gyroid(x,y,z):
     """
     Implicit function approximation of the gyroid triply periodic minimal 
