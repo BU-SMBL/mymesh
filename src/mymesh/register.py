@@ -77,7 +77,7 @@ import scipy
 import sys, os, copy, warnings
 from mymesh import utils
 
-def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=True, return_transform=False):
+def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=True, return_transform=False, method='MVBB'):
     """
     Align an point cloud to the x, y, z axes. This works by identifying
     the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and 
@@ -117,24 +117,34 @@ def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=
         `return_transform = True`.
     """    
     assert ValueError(len(axis_order) == 3 and np.array_equal([0,1,2], np.sort(axis_order))), 'axis_order must contain only 0, 1, and 2.'
-
-    mvbb, mat = utils.MVBB(points, return_matrix=True)
     
-    # Modify rotation to specified axis_order
-    mvbb_t = transform_points(mvbb, mat)
-    side_lengths = np.max(mvbb_t,axis=0) - np.min(mvbb_t,axis=0)
-    current_order = np.argsort(side_lengths)
-    if not np.all(current_order == axis_order):
-        idx = np.argsort(np.argsort(current_order)[np.argsort(axis_order)])
-        perpendicular_transform = np.eye(3)[idx]
-        if np.linalg.det(perpendicular_transform) < 0:
-            # If the determinant is negative, it would cause a reflection, inverting a column fixes this
-            perpendicular_transform[:,0] = -1*perpendicular_transform[:,0]
-        mat = perpendicular_transform@mat
-        mvbb_t = transform_points(mvbb, mat)
-    
-    # Restore center after rotation
     original_center = np.mean(points,axis=0)
+    if method.lower() == 'mvbb':
+        mvbb, mat = utils.MVBB(points, return_matrix=True)
+        
+        # Modify rotation to specified axis_order
+        mvbb_t = transform_points(mvbb, mat)
+        side_lengths = np.max(mvbb_t,axis=0) - np.min(mvbb_t,axis=0)
+        current_order = np.argsort(side_lengths)
+        if not np.all(current_order == axis_order):
+            idx = np.argsort(np.argsort(current_order)[np.argsort(axis_order)])
+            perpendicular_transform = np.eye(3)[idx]
+            if np.linalg.det(perpendicular_transform) < 0:
+                # If the determinant is negative, it would cause a reflection, inverting a column fixes this
+                perpendicular_transform[:,0] = -1*perpendicular_transform[:,0]
+            mat = perpendicular_transform@mat
+            # mvbb_t = transform_points(mvbb, mat)
+    elif method.lower() == 'pca':
+        
+        cov = np.cov((points-original_center).T)
+        vals, vecs = np.linalg.eig(cov)
+        idx = np.argsort(vals)[axis_order]
+        vals = vals[idx]
+        vecs = vecs[:,idx]
+        mat = vecs
+        
+    # Restore center after rotation
+    
     transformed_center = transform_points(np.atleast_2d(original_center), mat)[0]
     if center is None:
         center = original_center
@@ -795,6 +805,74 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
     else:
         raise ValueError('Image must be either two or three dimensional.')
 
+        if isinstance(threshold, (list, tuple, np.ndarray)):
+            assert len(threshold) == 2, 'threshold must be defined as a single value or a list/tuple/array of two values (one for each image).'
+            threshold1, threshold2 = threshold
+        else:
+            threshold1 = threshold2 = threshold
+        # Process threshold input
+        if threshold1 is None:
+            # This option intended for already binarized images (flexible enough to accomodate different types of binarization, e.g. True/False, 1/0, 255/0, ...)
+            # If the image is not binary, this will assume the midpoint of the range of values as the threshold
+            threshold1 = (np.max(img1) + np.min(img1))/2
+        if threshold2 is None:
+            threshold2 = (np.max(img2) + np.min(img2))/2
+            
+        # Process T0 input
+        if img2.dtype in (bool, int, np.int64, np.int32):
+            # Convert binary to float for better interpolation
+            img2 = img2.astype(np.float32)
+        if T0 is not None:
+            img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))
+        else:
+            # Initialize by centering img2 on img1
+            center_diff = np.subtract(scipy.ndimage.center_of_mass(img1 > threshold1), scipy.ndimage.center_of_mass(img2 > threshold2))
+            if nD == 3:
+                T0 = translation(center_diff)
+            else:
+                T0 = translation2d(center_diff)
+            img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))    
+        
+        # Process scale input
+        if scale != 1:
+            if img1.dtype in (bool, int, np.int64, np.int32):
+                # Convert binary to float for better interpolation
+                img1 = img1.astype(np.float32)
+            moving_img = scipy.ndimage.zoom(img2T0, scale, order=interpolation_order)
+            fixed_img =  scipy.ndimage.zoom(img1, scale, order=interpolation_order)
+        else:
+            moving_img = img2T0
+            fixed_img = img1
+        
+        # Process metric input
+        point_based = False
+        grayscale = False
+        if metric.lower() == 'mutual_information' or metric.lower() == 'MI':
+            obj = mutual_information
+            grayscale = True
+        elif metric.lower() == 'dice':
+            obj = lambda img1, img2 : -dice(img1 > threshold1, img2 > threshold2)
+        elif metric.lower() == 'symmetric_closest_point_mse':
+            if threshold is not None:
+                binarized1 = fixed_img > threshold1
+                binarized2 = moving_img > threshold2
+            else:
+                binarized1 = fixed_img
+                binarized2 = moving_img
+            point_based = True
+            points1 = np.column_stack(np.where(binarized1))
+            points2 = np.column_stack(np.where(binarized2))
+            # tree1 = scipy.spatial.KDTree(points1) 
+            # Note: can't precommute tree for the moving points
+            # obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)
+        elif metric.lower() == 'icp':
+            if threshold is not None:
+                binarized1 = fixed_img > threshold1
+                binarized2 = moving_img > threshold2
+            else:
+                binarized1 = fixed_img
+                binarized2 = moving_img
+            point_based = True
     if method.lower() == 'icp' or metric.lower() == 'icp':
         method = 'icp'
         metric = 'icp'
@@ -896,6 +974,222 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
     else:
         center = np.asarray(center) * scale
 
+        # Process transform input
+        if transform.lower() == 'scale_uniform':
+            nparam = 1
+            transformation = lambda x : scale_uniform(x, center=center)
+            x0 = np.ones(nparam)
+            if bounds is None:
+                bounds = [
+                    (.9,1.1)
+                ]
+                
+            if verbose:
+                print('iter.||      score||        s ')
+                print('-----||-----------||----------')   
+        elif transform.lower() == 'rigid':
+            nparam = 6
+            transformation = lambda x : rigid(x, center=center)
+            x0 = np.zeros(nparam)
+            if bounds is None:
+                bounds = [
+                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
+                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
+                    (-0.25*np.shape(fixed_img)[2],0.25*np.shape(fixed_img)[2]),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi)
+                ]
+                
+            if verbose:
+                print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma ')
+                print('-----||-----------||----------|----------|----------|----------|----------|----------')   
+        elif transform.lower() == 'translation':
+            nparam = 3
+            transformation = lambda x : translation(x, center=center)
+            x0 = np.zeros(nparam)
+            if bounds is None:
+                bounds = [
+                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
+                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
+                    (-0.25*np.shape(fixed_img)[2],0.25*np.shape(fixed_img)[2]),
+                ]
+                
+            if verbose:
+                print('iter.||      score||       tx |       ty |       tz ')
+                print('-----||-----------||----------|----------|----------')   
+        elif transform.lower() == 'rotation':
+            nparam = 3
+            transformation = lambda x : rotation(x, center=center)
+            x0 = np.zeros(nparam)
+            if bounds is None:
+                bounds = [
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi)
+                ]
+                
+            if verbose:
+                print('iter.||      score||    alpha |     beta |    gamma ')
+                print('-----||-----------||----------|----------|----------') 
+        elif transform.lower() == 'similarity':
+            nparam = 7
+            transformation = lambda x : similarity(x, center=center)
+            x0 = np.zeros(nparam)
+            x0[6] = 1
+            if bounds is None:
+                bounds = [
+                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
+                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
+                    (-0.25*np.shape(fixed_img)[2],0.25*np.shape(fixed_img)[2]),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi),
+                    (0.9, 1.1),
+                ]
+            if verbose:
+                print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma |        s |')
+                print('-----||-----------||----------|----------|----------|----------|----------|----------|----------|')
+        elif transform.lower() == 'affine':
+            nparam = 15
+            transformation = lambda x : affine(x, center=center)
+            x0 = np.zeros(nparam)
+            x0[6:9] = 1
+            if bounds is None:
+                bounds = [
+                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
+                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
+                    (-0.25*np.shape(fixed_img)[2],0.25*np.shape(fixed_img)[2]),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi),
+                    (-np.pi, np.pi),
+                    (0.9, 1.1),
+                    (0.9, 1.1),
+                    (0.9, 1.1),
+                    np.divide((0.25*np.shape(fixed_img)[0],0.75*np.shape(fixed_img)[0]),10),
+                    np.divide((0.25*np.shape(fixed_img)[0],0.75*np.shape(fixed_img)[0]),10),
+                    np.divide((0.25*np.shape(fixed_img)[1],0.75*np.shape(fixed_img)[1]),10),
+                    np.divide((0.25*np.shape(fixed_img)[1],0.75*np.shape(fixed_img)[1]),10),
+                    np.divide((0.25*np.shape(fixed_img)[2],0.75*np.shape(fixed_img)[2]),10),
+                    np.divide((0.25*np.shape(fixed_img)[2],0.75*np.shape(fixed_img)[2]),10),
+                ]
+            if verbose:
+                print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma |        s |')
+                print('-----||-----------||----------|----------|----------|----------|----------|----------|----------|')
+        elif transform.lower() == 'rigid2d':
+            nparam = 3
+            transformation = lambda x : rigid2d(x, center=center)
+            x0 = np.zeros(nparam)
+            if bounds is None:
+                bounds = [
+                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
+                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
+                    (-np.pi, np.pi),
+                ]
+                
+            if verbose:
+                print('iter.||      score||       tx |       ty |    theta ')
+                print('-----||-----------||----------|----------|----------')   
+        elif transform.lower() == 'translation2d':
+            nparam = 2
+            transformation = lambda x : translation2d(x, center=center)
+            x0 = np.zeros(nparam)
+            if bounds is None:
+                bounds = [
+                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
+                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
+                ]
+                
+            if verbose:
+                print('iter.||      score||       tx |       ty ')
+                print('-----||-----------||----------|----------')   
+        elif transform.lower() == 'rotation2d':
+            nparam = 1
+            transformation = lambda x : rotation(x, center=center)
+            x0 = np.zeros(nparam)
+            if bounds is None:
+                bounds = [
+                    (-np.pi, np.pi)
+                ]
+                
+            if verbose:
+                print('iter.||      score||    theta ')
+                print('-----||-----------||----------') 
+        elif transform.lower() == 'similarity2d':
+            nparam = 4
+            transformation = lambda x : similarity2d(x, center=center)
+            x0 = np.zeros(nparam)
+            x0[3] = 1
+            if bounds is None:
+                bounds = [
+                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
+                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
+                    (-np.pi, np.pi),
+                    (0.9, 1.1),
+                ]
+            if verbose:
+                print('iter.||      score||       tx |       ty |    theta |        s ')
+                print('-----||-----------||----------|----------|----------|----------')
+        elif transform.lower() == 'affine2d':
+            nparam = 15
+            transformation = lambda x : affine2d(x, center=center)
+            x0 = np.zeros(nparam)
+            x0[6:9] = 1
+            if bounds is None:
+                bounds = [
+                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
+                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
+                    (-np.pi, np.pi),
+                    (0.9, 1.1),
+                    (0.9, 1.1),
+                    np.divide((0.25*np.shape(fixed_img)[0],0.75*np.shape(fixed_img)[0]),10),
+                    np.divide((0.25*np.shape(fixed_img)[1],0.75*np.shape(fixed_img)[1]),10),
+                ]
+            if verbose:
+                print('iter.||      score||       tx |       ty |    theta |       s1 |       s2 |     sh01 |     sh10 ')
+                print('-----||-----------||----------|----------|----------|----------|----------|----------|----------')        
+        else:
+            raise ValueError(f'Transformation model "{transform:s}" is not supported for Image2Image registration.')       
+        
+        if point_based:
+            _, T = Point2Point(points1, points2, T0=None, bounds=bounds, transform=transform, metric=metric, method=method, transform_args=transform_args, decimation=decimation, optimizer_args=optimizer_args, verbose=verbose)
+            new_img = transform_image(img2, T, options=dict(order=interpolation_order))
+        else:
+            if np.shape(img1) != np.shape(img2):
+               raise Exception('Images must be the same size for image-based image-to-image registration.')
+            def objective(x):
+                objective.k += 1
+                if verbose: 
+                    print('{:5d}'.format(objective.k),end='')
+                T = transformation(x)
+                
+                imgT = transform_image(moving_img, T, options=transform_args)
+                
+                f = obj(fixed_img, imgT)
+                if verbose: 
+                    print(f'||{f:11.4f}|',end='')
+                    print(('|{:10.4f}'*len(x)).format(*x))
+                return f
+            objective.k = 0
+            x,f = optimize(objective, method, x0, bounds, optimizer_args=optimizer_args)
+            
+            T1 = transformation(x)
+            if scale != 1:
+                # Account for scaling so that the transformation matrix refers to the original image size
+                D = np.eye(len(T0))
+                D[:nD,:nD] =  np.diag([scale]*nD)
+                T1 = np.linalg.inv(D) @ T1 @ D
+            
+            T = T1 @ T0 # include T0 so that img is transformed first by T0, then by the new transform
+            new_img = transform_image(img2, T, options=transform_args)
+            f = obj(img1, new_img)
+            if verbose: 
+                print('-----||-----------|', end='')
+                for i in x:
+                    print('|----------',end = '')
+                print('')
+                print(f'final||{f:11.4f}|',end='')
+                print(('|{:10.4f}'*len(x)).format(*x))
     # Process transform input
     if transform.lower() == 'rigid':
         nparam = 6
@@ -1336,8 +1630,8 @@ def S2d(s0,s1,reference=np.array([0,0])):
     s : np.ndarray
         3x3 scaling matrix
     """    
-    s = np.array([[1/s0,0,0],
-                  [0,1/s1,0],
+    s = np.array([[s0,0,0],
+                  [0,s1,0],
                   [0,0,1]])
 
     T1 = T2d(*reference)
@@ -1530,9 +1824,9 @@ def S3d(s0,s1,s2,reference=np.array([0,0,0])):
     s : np.ndarray
         4x4 scaling matrix
     """    
-    s = np.array([[1/s0,0,0,0],
-                  [0,1/s1,0,0],
-                  [0,0,1/s2,0],
+    s = np.array([[s0,0,0,0],
+                  [0,s1,0,0],
+                  [0,0,s2,0],
                   [0,0,0,1]])
 
     T1 = T3d(*reference)
@@ -1586,6 +1880,31 @@ def Sh3d(sh01,sh10,sh02,sh20,sh12,sh21,reference=np.array([0,0,0])):
     T2 = T3d(*-np.asarray(reference))
     sh = np.linalg.multi_dot([T1,sh,T2]) 
     return sh
+
+def scale_uniform(x, center=np.array([0,0,0]), image=False):
+    """
+    Rigid rotation in 3D.
+
+    Parameters
+    ----------
+    x : list
+        list with a single value for uniform scaling
+        
+    center : list or np.ndarary, optional
+        Reference point for the scaling
+
+    Returns
+    -------
+    A : np.ndarray
+        scaling matrix (shape=(4,4))
+    """    
+    s = x[0]
+    
+    S = S3d(s, s, s, reference=center)
+
+    A = S
+    
+    return A
 
 def rotation(x, center=np.array([0,0,0]), rotation_order=[0,1,2], rotation_mode='cartesian', image=False):
     """
