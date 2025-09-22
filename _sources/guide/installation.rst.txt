@@ -47,7 +47,8 @@ Package          Purpose              Used in                                   
 ================ ==================== ===================================================================== =============================
 `meshio`_        Mesh file I/O        :class:`~mymesh.mesh`                                                 ``pip install meshio``
 `numba`_         Enhanced efficiency  :mod:`~mymesh.delaunay`, :mod:`~mymesh.utils`, :mod:`~mymesh.quality` ``pip install numba``
-`pydicom`_       DICOM image file I/O :mod:`~mymesh.image`                                                  ``pip install pydicom``  
+`pydicom`_       DICOM image file I/O :mod:`~mymesh.image`       
+`tifffile`_      TIFF image file I/O  :mod:`~mymesh.image`                                                  ``pip install pydicom``  
 `opencv (cv2)`_  Image file I/O       :mod:`~mymesh.image`                                                  ``pip install opencv-python``
 `triangle`_      Constrained Delaunay :mod:`~mymesh.delaunay`                                               ``pip install triangle``
 `vispy`_         Mesh visualization   :mod:`~mymesh.visualize`                                              ``pip install vispy``
