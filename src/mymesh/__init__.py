@@ -34,6 +34,7 @@ Submodules
     primitives
     quality
     rays
+    register
     utils
     visualize
 
@@ -286,7 +287,7 @@ def demo_mesh(name='bunny'):
     return M
 
 from .mesh import mesh
-from . import booleans, contour, curvature, delaunay, image, implicit, improvement, tree, primitives, quality, utils, visualize
+from . import booleans, contour, converter, curvature, delaunay, image, implicit, improvement, primitives, quality, rays, register, tree, utils, visualize
 __all__ = ["check_numba", "use_numba", "try_njit", "mesh", "booleans", "contour", "converter",
-"curvature", "delaunay", "image", "implicit", "improvement", "tree", 
-"primitives", "quality", "rays", "utils", "visualize"]
+"curvature", "delaunay", "image", "implicit", "improvement", 
+"primitives", "quality", "rays", "register", "tree", "utils", "visualize"]
