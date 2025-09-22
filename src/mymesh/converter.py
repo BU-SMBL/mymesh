@@ -246,7 +246,7 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,
                 ))
             FaceConn = -1*np.ones((len(NodeConn),4), dtype=int)
             FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
-    elif ElemType=='pyramid':
+    elif ElemType=='pyramid' or ElemType=='pyr':
         Faces = pyramid2faces(NodeCoords,NodeConn)
         if return_FaceElem or return_FaceConn:
             pyrIdx = np.arange(len(NodeConn))
@@ -257,7 +257,7 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,
                 ))
             FaceConn = -1*np.ones((len(NodeConn),5), dtype=int)
             FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
-    elif ElemType=='wedge':
+    elif ElemType=='wedge' or ElemType=='wdg':
         Facees = wedge2faces(NodeCoords,NodeConn)
         if return_FaceElem or return_FaceConn:
             wdgIdx = np.arange(len(NodeConn))
@@ -290,7 +290,8 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,
                 ))
             FaceConn = -1*np.ones((len(NodeConn),6), dtype=int)
             FaceConn[FaceElem,ElemIds_j] = np.arange(len(Faces))
-
+    else:
+        raise Exception(f'Invalid ElemType: {ElemType}')
 
     if return_FaceConn and return_FaceElem:
         return Faces,FaceConn,FaceElem
@@ -466,7 +467,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),6), dtype=int)
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-    elif ElemType=='pyramid':
+    elif ElemType=='pyramid' or ElemType=='pyr':
         Edges = pyramid2edges(NodeCoords,NodeConn)
         if return_EdgeElem or return_EdgeConn:
             pyrIdx = np.arange(len(NodeConn))
@@ -477,7 +478,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
                 ))
             EdgeConn = -1*np.ones((len(NodeConn),8), dtype=int)
             EdgeConn[EdgeElem,ElemIds_j] = np.arange(len(Edges))
-    elif ElemType=='wedge':
+    elif ElemType=='wedge' or ElemType=='wdg':
         Edges = wedge2edges(NodeCoords,NodeConn)
         if return_EdgeElem or return_EdgeConn:
             wdgIdx = np.arange(len(NodeConn))
@@ -504,7 +505,7 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
         if return_EdgeElem or return_EdgeConn:
             raise Exception('EdgeElem not implemented for ElemType=polygon')
     else:
-        raise Exception('Invalid ElemType')
+        raise Exception(f'Invalid ElemType: {ElemType}')
     
     if return_EdgeElem and return_EdgeConn:
         return Edges, EdgeConn, EdgeElem

@@ -957,7 +957,7 @@ def tet_vol_skewness(NodeCoords, NodeConn, V=None):
     
     # Volume-based
     if V is None:
-        V = tet_volume(NodeCoords,NodeConn)
+        V = tet_volume(NodeCoords,np.asarray(NodeConn))
     else:
         V = np.asarray(V)
     

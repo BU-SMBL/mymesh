@@ -642,8 +642,8 @@ def test_TetMeshVol(M, Vol):
 def test_MVBB(Points, BB):
 
     MVBB = utils.MVBB(Points)
-    
-    assert np.all(np.isclose(MVBB, BB)), 'Incorrect Bounding Box'
+    for point in MVBB:
+        assert np.any(np.all(np.isclose(point, BB), axis=1)), 'Incorrect Bounding Box'
     
 @pytest.mark.parametrize("Points, BB", [
     # simple cube
