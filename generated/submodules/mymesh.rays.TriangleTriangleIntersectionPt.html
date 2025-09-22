@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -433,7 +438,7 @@
 <span class="sig-prename descclassname"><span class="pre">mymesh.rays.</span></span><span class="sig-name descname"><span class="pre">TriangleTriangleIntersectionPt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Tri1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tri2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgeedge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/rays.html#TriangleTriangleIntersectionPt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.rays.TriangleTriangleIntersectionPt" title="Link to this definition">#</a></dt>
 <dd><p>Intersection test for two triangles that returns the point(s) of intersection.</p>
 <p>Möller, T. (1997). Fast triangle-triangle intersection test. Journal of Graphics Tools, 2(2), 25-30. <a class="reference external" href="https://doi.org/10.1080/10867651.1997.10487472">https://doi.org/10.1080/10867651.1997.10487472</a>
-<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id24" title="Tomas Möller. Fast triangle-triangle intersection test. Journal of Graphics Tools, 2(2):25–30, 1997. URL: https://www.doi.org/10.1080/10867651.1997.10487472, doi:10.1080/10867651.1997.10487472.">Moller97</a>]</span></p>
+<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id36" title="Tomas Möller. Fast triangle-triangle intersection test. Journal of Graphics Tools, 2(2):25–30, 1997. URL: https://www.doi.org/10.1080/10867651.1997.10487472, doi:10.1080/10867651.1997.10487472.">Moller97</a>]</span></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -441,8 +446,8 @@
 <code class="docutils literal notranslate"><span class="pre">np.array([[a,</span> <span class="pre">b,</span> <span class="pre">c],</span> <span class="pre">[d,</span> <span class="pre">e,</span> <span class="pre">f],</span> <span class="pre">[g,</span> <span class="pre">h,</span> <span class="pre">i]])</span></code></p></li>
 <li><p><strong>Tri2</strong> (<em>array_like</em>) – Coordinates of the three vertices of the second triangle in the format
 <code class="docutils literal notranslate"><span class="pre">np.array([[a,</span> <span class="pre">b,</span> <span class="pre">c],</span> <span class="pre">[d,</span> <span class="pre">e,</span> <span class="pre">f],</span> <span class="pre">[g,</span> <span class="pre">h,</span> <span class="pre">i]])</span></code></p></li>
-<li><p><strong>eps</strong> (<em>float</em><em>, </em><em>optional</em>) – Small parameter used to determine if a value is sufficiently close to 0, by default 1e-14</p></li>
-<li><p><strong>edgeedge</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">edgeedge</span></code> is true, two triangles that meet exactly at the edges will be counted as an intersection, by default False. This inclues two adjacent triangles that share an edge, but also cases where two points of Tri1 lie exactly on the edges of Tri2.</p></li>
+<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Small parameter used to determine if a value is sufficiently close to 0, by default 1e-14</p></li>
+<li><p><strong>edgeedge</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">edgeedge</span></code> is true, two triangles that meet exactly at the edges will be counted as an intersection, by default False. This inclues two adjacent triangles that share an edge, but also cases where two points of Tri1 lie exactly on the edges of Tri2.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

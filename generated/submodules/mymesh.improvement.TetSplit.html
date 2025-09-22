@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="mymesh.improvement.TetFlip" href="mymesh.improvement.TetFlip.html" />
-    <link rel="prev" title="mymesh.improvement.TetContract" href="mymesh.improvement.TetContract.html" />
+    <link rel="prev" title="mymesh.improvement.Contract" href="mymesh.improvement.Contract.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -435,15 +440,15 @@
 specified edge length (<cite>h</cite>) will be split by placing a new node at the
 midpoint of the edge. Tetrahedral edge splitting is inherently interface
 and feature preserving as nodes are only added, not removed or moved.</p>
-<p>This method is inspired by <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id12" title="Noura Faraj, Jean Marc Thiery, and Tamy Boubekeur. Multi-material adaptive volume remesher. Computers and Graphics (Pergamon), 58:150–160, 2016. URL: http://dx.doi.org/10.1016/j.cag.2016.05.019, doi:10.1016/j.cag.2016.05.019.">FTB16</a>]</span> and <span id="id2">[<a class="reference internal" href="../../guide/ref.html#id25" title="Yixin Hu, Qingnan Zhou, Xifeng Gao, Alec Jacobson, Denis Zorin, and Daniele Panozzo. Tetrahedral meshing in the wild. ACM Transactions on Graphics, 2018. doi:10.1145/3197517.3201353.">HZG+18</a>]</span>.</p>
+<p>This method is inspired by <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id24" title="Noura Faraj, Jean Marc Thiery, and Tamy Boubekeur. Multi-material adaptive volume remesher. Computers and Graphics (Pergamon), 58:150–160, 2016. URL: http://dx.doi.org/10.1016/j.cag.2016.05.019, doi:10.1016/j.cag.2016.05.019.">FTB16</a>]</span> and <span id="id2">[<a class="reference internal" href="../../guide/ref.html#id39" title="Yixin Hu, Qingnan Zhou, Xifeng Gao, Alec Jacobson, Denis Zorin, and Daniele Panozzo. Tetrahedral meshing in the wild. ACM Transactions on Graphics, 2018. doi:10.1145/3197517.3201353.">HZG+18</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>M</strong> (<a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><em>mymesh.mesh</em></a>) – Tetrahedral mesh to be contracted</p></li>
-<li><p><strong>h</strong> (<em>float</em>) – Edge length above which will be split. Using 4/3 of the target
+<li><p><strong>h</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Edge length above which will be split. Using 4/3 of the target
 edge length is often recommended.</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, will display progress, by default True</p></li>
-<li><p><strong>labels</strong> (<em>str</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Element labels used to identify separate regions (e.g. materials) within
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will display progress, by default True</p></li>
+<li><p><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Element labels used to identify separate regions (e.g. materials) within
 a mesh, by default None. If provided as a string, the string must
 refer to an entry in <cite>M.ElemData</cite>, otherwise must be an array_like with
 the number of entries equal to the number of elements (<cite>M.NElem</cite>).
@@ -453,9 +458,9 @@ be stored in the ElemData of the returned mesh, either in
 ElemData[‘labels’] (if labels were provided as an array), or the entry
 matching the original ElemData entry (if labels were provided as a
 string).</p></li>
-<li><p><strong>sizing</strong> (<em>str</em><em>, </em><em>float</em><em>, </em><em>callable</em><em>, or </em><em>None</em>) – <p>Option for non-uniform element sizing.</p>
+<li><p><strong>sizing</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>callable</em><em>, or </em><em>None</em>) – <p>Option for non-uniform element sizing.</p>
 <p>float - Specify a second target edge length (hi) to be used for edges
-far from the boundary. This will be used following <span id="id3">Faraj <em>et al.</em> [<a class="reference internal" href="../../guide/ref.html#id12" title="Noura Faraj, Jean Marc Thiery, and Tamy Boubekeur. Multi-material adaptive volume remesher. Computers and Graphics (Pergamon), 58:150–160, 2016. URL: http://dx.doi.org/10.1016/j.cag.2016.05.019, doi:10.1016/j.cag.2016.05.019.">FTB16</a>]</span>
+far from the boundary. This will be used following <span id="id3">Faraj <em>et al.</em> [<a class="reference internal" href="../../guide/ref.html#id24" title="Noura Faraj, Jean Marc Thiery, and Tamy Boubekeur. Multi-material adaptive volume remesher. Computers and Graphics (Pergamon), 58:150–160, 2016. URL: http://dx.doi.org/10.1016/j.cag.2016.05.019, doi:10.1016/j.cag.2016.05.019.">FTB16</a>]</span>
 to generate an adaptive sizing field h_node = (hi-h)*D(node)+h, where
 D is a distance field from boundaries/interface evaluated at each
 node. The target edge length is then taken as the average of it’s
@@ -491,12 +496,12 @@ target edge length for each node and takes the average for an edge</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mymesh.improvement.TetContract.html"
+       href="mymesh.improvement.Contract.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.improvement.TetContract</p>
+        <p class="prev-next-title">mymesh.improvement.Contract</p>
       </div>
     </a>
     <a class="right-next"

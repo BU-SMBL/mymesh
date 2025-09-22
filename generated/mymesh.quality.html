@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -358,12 +358,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -495,7 +500,7 @@
 <td><p>Calculate the maximum dihedral angle between element faces</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.quality.MeanRatio.html#mymesh.quality.MeanRatio" title="mymesh.quality.MeanRatio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeanRatio</span></code></a>(NodeCoords, NodeConn[, verbose])</p></td>
-<td><p></p></td>
+<td><p>Calculates mean ratios for each element.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.quality.Area.html#mymesh.quality.Area" title="mymesh.quality.Area"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Area</span></code></a>(NodeCoords, NodeConn[, Type, verbose])</p></td>
 <td><p>Calculates element areas for each element in the mesh.</p></td>
@@ -511,22 +516,31 @@
 <h2>Quality Calculation Helper Functions<a class="headerlink" href="#quality-calculation-helper-functions" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.quality.tri_skewness.html#mymesh.quality.tri_skewness" title="mymesh.quality.tri_skewness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tri_skewness</span></code></a>(NodeCoords, NodeConn)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.quality.tri_area.html#mymesh.quality.tri_area" title="mymesh.quality.tri_area"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tri_area</span></code></a>(NodeCoords, NodeConn)</p></td>
+<td><p>Element areas of a purely triangular mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.quality.tri_skewness.html#mymesh.quality.tri_skewness" title="mymesh.quality.tri_skewness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tri_skewness</span></code></a>(NodeCoords, NodeConn)</p></td>
 <td><p>Calculates triangular skewness for each triangle in the mesh.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.quality.quad_skewness.html#mymesh.quality.quad_skewness" title="mymesh.quality.quad_skewness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quad_skewness</span></code></a>(NodeCoords, NodeConn)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.quality.quad_skewness.html#mymesh.quality.quad_skewness" title="mymesh.quality.quad_skewness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quad_skewness</span></code></a>(NodeCoords, NodeConn)</p></td>
 <td><p>Calculates quadrilateral skewness for each quad in the mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.quality.tet_volume.html#mymesh.quality.tet_volume" title="mymesh.quality.tet_volume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tet_volume</span></code></a>(NodeCoords, NodeConn)</p></td>
+<td><p>Element volumes of a purely tetrahedal mesh.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.quality.tet_vol_skewness.html#mymesh.quality.tet_vol_skewness" title="mymesh.quality.tet_vol_skewness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tet_vol_skewness</span></code></a>(NodeCoords, NodeConn[, V])</p></td>
 <td><p>Calculates element skewness for each tetrahedral element in the mesh using the equilateral volume skewness method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.quality.equiangular_skewness.html#mymesh.quality.equiangular_skewness" title="mymesh.quality.equiangular_skewness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">equiangular_skewness</span></code></a>(NodeCoords, NodeConn)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.quality.tet_circumradius.html#mymesh.quality.tet_circumradius" title="mymesh.quality.tet_circumradius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tet_circumradius</span></code></a>(NodeCoords, NodeConn[, V])</p></td>
+<td><p>Circumradii for elements in a tetrahedral mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.quality.equiangular_skewness.html#mymesh.quality.equiangular_skewness" title="mymesh.quality.equiangular_skewness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">equiangular_skewness</span></code></a>(NodeCoords, NodeConn)</p></td>
 <td><p>Calculates element skewness for each element in the mesh using the equiangular skewness method.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.quality.dihedralAngles.html#mymesh.quality.dihedralAngles" title="mymesh.quality.dihedralAngles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dihedralAngles</span></code></a>(Nis, Njs[, Abs])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.quality.dihedralAngles.html#mymesh.quality.dihedralAngles" title="mymesh.quality.dihedralAngles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dihedralAngles</span></code></a>(Nis, Njs[, Abs])</p></td>
 <td><p>Calculate dihedral angles between paired normal vectors.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.quality.SurfDihedralAngles.html#mymesh.quality.SurfDihedralAngles" title="mymesh.quality.SurfDihedralAngles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfDihedralAngles</span></code></a>(ElemNormals, ElemNeighbors)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.quality.SurfDihedralAngles.html#mymesh.quality.SurfDihedralAngles" title="mymesh.quality.SurfDihedralAngles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfDihedralAngles</span></code></a>(ElemNormals, ElemNeighbors)</p></td>
 <td><p>Calculate dihedral angles between adjacent faces in a triangular surface mesh</p></td>
 </tr>
 </tbody>

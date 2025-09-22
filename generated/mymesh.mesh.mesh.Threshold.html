@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -435,15 +440,16 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>scalars</strong> (<em>str</em><em> or </em><em>array_like</em>) – Values to be used for thresholding, either a string indicating an entry in NodeData or ElemData, or an array_like of values.</p></li>
-<li><p><strong>threshold</strong> (<em>int</em><em>, </em><em>float</em><em>, or </em><em>tuple</em>) – Thresholding value(s) to use. If provided as a two element tuple, they’re taken to be lower and upper bounds.</p></li>
-<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Thresholding condition to determine which elements to keep in the mesh.</p>
+<li><p><strong>scalars</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>array_like</em>) – Values to be used for thresholding, either a string indicating an entry in NodeData or ElemData, or an array_like of values.</p></li>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a>) – Thresholding value(s) to use. If provided as a two element tuple, they’re taken to be lower and upper bounds.</p></li>
+<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Thresholding condition to determine which elements to keep in the mesh.</p>
 <dl>
 <dt>Single threshold options:</dt><dd><p>’&gt;=’ - Keeping condition is <cite>value &gt;= threshold</cite>, default.</p>
 <p>’&gt;’ - Keeping condition is <cite>value &gt; threshold</cite>.</p>
 <p>’&lt;’ - Keeping condition is <cite>value &lt; threshold</cite>.</p>
 <p>’&lt;=’ - Keeping condition is <cite>value &lt;= threshold</cite>.</p>
 <p>’==’ - Keeping condition is <cite>value == threshold</cite>.</p>
+<p>’!=’ - Keeping condition is <cite>value != threshold</cite>.</p>
 </dd>
 <dt>Double threshold options:</dt><dd><p>’in’ - Inside bounds, inclusive of thresholds, default.</p>
 <p>’xin’ - Inside bounds, exclusive of thresholds.</p>
@@ -456,12 +462,12 @@
 </dd>
 </dl>
 </p></li>
-<li><p><strong>scalar_preference</strong> (<em>str</em><em>, </em><em>optional</em>) – If scalars is provided as a string and that string exists as an entry in both NodeData and ElemData,
+<li><p><strong>scalar_preference</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – If scalars is provided as a string and that string exists as an entry in both NodeData and ElemData,
 this determines which will be used. Must be either ‘nodes’ or ‘elements’, by default ‘elements’.</p></li>
-<li><p><strong>all_nodes</strong> (<em>bool</em><em>, </em><em>optional</em>) – If node data is being used, this determines whether to keep an element if all nodes pass the
+<li><p><strong>all_nodes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If node data is being used, this determines whether to keep an element if all nodes pass the
 thresholding condition or if any nodes pass the condition, by default True</p></li>
-<li><p><strong>InPlace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, this mesh will be modified, otherwise a copy of the mesh will be created and modified, by default False.</p></li>
-<li><p><strong>cleanup</strong> (<em>bool</em><em>, </em><em>optional</em>) – Option to run <a class="reference internal" href="mymesh.mesh.mesh.cleanup.html#mymesh.mesh.mesh.cleanup" title="mymesh.mesh.mesh.cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mesh.cleanup()</span></code></a>, removing nodes that are no
+<li><p><strong>InPlace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, this mesh will be modified, otherwise a copy of the mesh will be created and modified, by default False.</p></li>
+<li><p><strong>cleanup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to run <a class="reference internal" href="mymesh.mesh.mesh.cleanup.html#mymesh.mesh.mesh.cleanup" title="mymesh.mesh.mesh.cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mesh.cleanup()</span></code></a>, removing nodes that are no
 longer in the cropped mesh, by default False.</p></li>
 </ul>
 </dd>

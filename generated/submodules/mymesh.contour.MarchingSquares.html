@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -430,13 +435,13 @@
 <h1>mymesh.contour.MarchingSquares<a class="headerlink" href="#mymesh-contour-marchingsquares" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.contour.MarchingSquares">
-<span class="sig-prename descclassname"><span class="pre">mymesh.contour.</span></span><span class="sig-name descname"><span class="pre">MarchingSquares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'triangle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_anchors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/contour.html#MarchingSquares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.contour.MarchingSquares" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mymesh.contour.</span></span><span class="sig-name descname"><span class="pre">MarchingSquares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'surf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixed_elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_anchors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/contour.html#MarchingSquares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.contour.MarchingSquares" title="Link to this definition">#</a></dt>
 <dd><p>Marching squares algorithm for extracting an isocontour from a quadrilateral mesh.</p>
 <p>For a two dimensional grid (NodeCoords, NodeConn) with values (NodeValues),
 Marching Squares will extract the isovalue contour defined by threshold.
 This can either be used to obtain line segments along the isoline
-(method=’edge’) or triangles filling the region inside the isoline
-(method=’triangle’).</p>
+(Type=’line) or triangles filling the region inside the isoline
+(Type=’surf’).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -445,21 +450,24 @@ primitives.Grid2D)</p></li>
 <li><p><strong>NodeConn</strong> (<em>array_like</em>) – Node connectivities of a two dimensional grid of rectilinear grid (e.g.
 from primitives.Grid2D) of quadrilaterals.</p></li>
 <li><p><strong>NodeValues</strong> (<em>array_like</em>) – Array of node values corresponding to each node in the mesh.</p></li>
-<li><p><strong>threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – Isosurface level that defines the boundary, by default 0</p></li>
-<li><p><strong>interpolation</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Interpolation to interpolate the position of the new nodes along the
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Isosurface level that defines the boundary, by default 0</p></li>
+<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Interpolation to interpolate the position of the new nodes along the
 edges of the input mesh, by default ‘linear’.</p>
 <p>’midpoint’ - No interpolation is performed, new nodes are placed at the
 midpoint of edges</p>
 <p>’linear’ - Bilinear interpolation is performed between adjacent nodes on
 the input mesh</p>
 </p></li>
-<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Mesh generation method, either ‘edge’ for a line mesh of the boundary or
-‘triangle’ for a filled triangular mesh, by default ‘triangle’</p></li>
-<li><p><strong>flip</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the interior/exterior of the mesh, by default False. By default,
+<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Determines whether to generate a surface mesh (‘surf’) or volume mesh (‘vol’),
+by default ‘surf’</p></li>
+<li><p><strong>flip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Flip the interior/exterior of the mesh, by default False. By default,
 values less than the threshold are assumed to be the “inside” of the
 mesh. If the inside is denoted by values greater than the threshold, set
 flip=True.</p></li>
-<li><p><strong>cleanup</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines whether or not to perform mesh cleanup, removing degenerate elements and duplicate nodes, by default True</p></li>
+<li><p><strong>mixed_elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True and Type=’surf’, the generated mesh will have mixed element types
+(triangles/quadrilateral otherwise a single element type (triangles), by
+default False.</p></li>
+<li><p><strong>cleanup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Determines whether or not to perform mesh cleanup, removing degenerate elements and duplicate nodes, by default True</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

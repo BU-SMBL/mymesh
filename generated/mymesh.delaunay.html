@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -436,19 +441,19 @@ capabilities are planned for the future.</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.Triangulate.html#mymesh.delaunay.Triangulate" title="mymesh.delaunay.Triangulate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Triangulate</span></code></a>(NodeCoords[, Constraints, ...])</p></td>
-<td><p>Generic interface for two dimensional triangulation.</p></td>
+<td><p>Generate a triangulation for a 2D set of points.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.BowyerWatson2d.html#mymesh.delaunay.BowyerWatson2d" title="mymesh.delaunay.BowyerWatson2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BowyerWatson2d</span></code></a>(NodeCoords)</p></td>
 <td><p>Bowyer-Watson algorithm for 2D Delaunay triangulation</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.TriangleSplittingTriangulation.html#mymesh.delaunay.TriangleSplittingTriangulation" title="mymesh.delaunay.TriangleSplittingTriangulation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TriangleSplittingTriangulation</span></code></a>(NodeCoords[, ...])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.SciPy.html#mymesh.delaunay.SciPy" title="mymesh.delaunay.SciPy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SciPy</span></code></a>(NodeCoords[, FixVol])</p></td>
+<td><p>Wrapper for <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html#scipy.spatial.Delaunay" title="(in SciPy v1.16.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.spatial.Delaunay</span></code></a> for 2D triangulation or 3D tetrahedralization.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.SciPy.html#mymesh.delaunay.SciPy" title="mymesh.delaunay.SciPy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SciPy</span></code></a>(NodeCoords)</p></td>
-<td><p>Wrapper for scipy.spatial.Delaunay</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.Triangle.html#mymesh.delaunay.Triangle" title="mymesh.delaunay.Triangle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Triangle</span></code></a>(NodeCoords[, Constraints])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.Triangle.html#mymesh.delaunay.Triangle" title="mymesh.delaunay.Triangle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Triangle</span></code></a>(NodeCoords[, Constraints, steiner])</p></td>
 <td><p>Interface to Jonathan Shewchuk's Triangle via a python wrapper (<a class="reference external" href="https://pypi.org/project/triangle/">https://pypi.org/project/triangle/</a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.FanTriangulation.html#mymesh.delaunay.FanTriangulation" title="mymesh.delaunay.FanTriangulation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FanTriangulation</span></code></a>(NodeCoords[, Hull])</p></td>
+<td><p>Generate a fan triangulation of a two dimensional convex hull around the points.</p></td>
 </tr>
 </tbody>
 </table>
@@ -458,25 +463,37 @@ capabilities are planned for the future.</p>
 <h2>Tetrahedralization<a class="headerlink" href="#tetrahedralization" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.BowyerWatson3d.html#mymesh.delaunay.BowyerWatson3d" title="mymesh.delaunay.BowyerWatson3d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BowyerWatson3d</span></code></a>(NodeCoords)</p></td>
-<td><p>Bowyer-Watson algorithm for 3D Delaunay tetrahedralization <a class="reference external" href="https://arxiv.org/pdf/1805.08831v2">https://arxiv.org/pdf/1805.08831v2</a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.Tetrahedralize.html#mymesh.delaunay.Tetrahedralize" title="mymesh.delaunay.Tetrahedralize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Tetrahedralize</span></code></a>(NodeCoords[, method, tol])</p></td>
+<td><p>Generate a Delaunay tetrahedralization for a 3D set of points.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.BowyerWatson3d.html#mymesh.delaunay.BowyerWatson3d" title="mymesh.delaunay.BowyerWatson3d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BowyerWatson3d</span></code></a>(NodeCoords)</p></td>
+<td><p>Bowyer-Watson algorithm for 3D Delaunay tetrahedralization <span id="id1">[<a class="reference internal" href="../guide/ref.html#id18" title="Adrian Bowyer. Computing Dirichlet Tessellations. Computer Journal, 24(2):162–166, 1981. URL: https://academic.oup.com/comjnl/article/24/2/162/338193, doi:10.1093/comjnl/24.2.162.">Bow81</a>]</span>, <span id="id2">[<a class="reference internal" href="../guide/ref.html#id16" title="David F. Watson. Computing the n-dimensional Delaunau tessellation with application to Voronoi polytopes. Computer Journal, 24(2):167–172, 1981. URL: https://academic.oup.com/comjnl/article/24/2/167/338200, doi:10.1093/comjnl/24.2.167.">Wat81</a>]</span>, <span id="id3">[<a class="reference internal" href="../guide/ref.html#id17" title="Célestin Marot, Jeanne Pellerin, and Jean François Remacle. One machine, one minute, three billion tetrahedra. International Journal for Numerical Methods in Engineering, 117(9):967–990, 2019. URL: http://gmsh.info., arXiv:1805.08831, doi:10.1002/nme.5987.">MPR19</a>]</span></p></td>
 </tr>
 </tbody>
 </table>
 </div>
 </section>
-<section id="convex-hull">
-<h2>Convex Hull<a class="headerlink" href="#convex-hull" title="Link to this heading">#</a></h2>
+<section id="hulls">
+<h2>Hulls<a class="headerlink" href="#hulls" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.ConvexHull.html#mymesh.delaunay.ConvexHull" title="mymesh.delaunay.ConvexHull"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConvexHull</span></code></a>(NodeCoords[, IncludeCollinear, ...])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.ConvexHull.html#mymesh.delaunay.ConvexHull" title="mymesh.delaunay.ConvexHull"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConvexHull</span></code></a>(NodeCoords[, method, OrientSurf])</p></td>
+<td><p>Identify the convex hull of a set of points.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.ConvexHull_GiftWrapping.html#mymesh.delaunay.ConvexHull_GiftWrapping" title="mymesh.delaunay.ConvexHull_GiftWrapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConvexHull_GiftWrapping</span></code></a>(NodeCoords[, ...])</p></td>
-<td><p>ConvexHull_GiftWrapping Gift wrapping algorithm for computing the convex hull of a set of 2D points.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.AlphaShape.html#mymesh.delaunay.AlphaShape" title="mymesh.delaunay.AlphaShape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AlphaShape</span></code></a>(NodeCoords, alpha[, method, Type])</p></td>
+<td><p>Alpha shapes in 2D or 3D</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.ConvexHullFanTriangulation.html#mymesh.delaunay.ConvexHullFanTriangulation" title="mymesh.delaunay.ConvexHullFanTriangulation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConvexHullFanTriangulation</span></code></a>(Hull)</p></td>
-<td><p>ConvexHullFanTriangulation Generate a fan triangulation of a convex hull</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.Alpha2d.html#mymesh.delaunay.Alpha2d" title="mymesh.delaunay.Alpha2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Alpha2d</span></code></a>(NodeCoords, alpha[, method, Type])</p></td>
+<td><p>2D Alpha shapes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.Alpha3d.html#mymesh.delaunay.Alpha3d" title="mymesh.delaunay.Alpha3d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Alpha3d</span></code></a>(NodeCoords, alpha[, method, Type])</p></td>
+<td><p>3D Alpha shapes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.AlphaPeel3d.html#mymesh.delaunay.AlphaPeel3d" title="mymesh.delaunay.AlphaPeel3d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AlphaPeel3d</span></code></a>(NodeCoords, alpha[, method, Type])</p></td>
+<td><p>3D Alpha shapes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.delaunay.GiftWrapping.html#mymesh.delaunay.GiftWrapping" title="mymesh.delaunay.GiftWrapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GiftWrapping</span></code></a>(NodeCoords[, IncludeCollinear])</p></td>
+<td><p>Gift wrapping algorithm for computing the convex hull of a set of 2D points.</p></td>
 </tr>
 </tbody>
 </table>
@@ -533,7 +550,7 @@ capabilities are planned for the future.</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#triangulation">Triangulation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tetrahedralization">Tetrahedralization</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#convex-hull">Convex Hull</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hulls">Hulls</a></li>
 </ul>
   </nav></div>
 

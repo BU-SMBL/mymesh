@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -431,22 +436,22 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.improvement.SmartLaplacianSmoothing">
 <span class="sig-prename descclassname"><span class="pre">mymesh.improvement.</span></span><span class="sig-name descname"><span class="pre">SmartLaplacianSmoothing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TangentialSurface</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/improvement.html#SmartLaplacianSmoothing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.improvement.SmartLaplacianSmoothing" title="Link to this definition">#</a></dt>
-<dd><p>Performs smart Laplacian smoothing <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id15" title="Lori A. Freitag. On combining laplacian and optimization-based mesh smoothing techniques. American Society of Mechanical Engineers, Applied Mechanics Division, AMD, 220:37–43, 1997.">Fre97</a>]</span>, repositioning
+<dd><p>Performs smart Laplacian smoothing <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id27" title="Lori A. Freitag. On combining laplacian and optimization-based mesh smoothing techniques. American Society of Mechanical Engineers, Applied Mechanics Division, AMD, 220:37–43, 1997.">Fre97</a>]</span>, repositioning
 each node to the center of its adjacent nodes only if doing so doesn’t
 reduce the element quality.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>M</strong> (<a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><em>mymesh.mesh</em></a>) – Mesh object to smooth</p></li>
-<li><p><strong>target</strong> (<em>str</em>) – <p>Determines whether criteria for repositioning a node, by default ‘mean’.</p>
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – <p>Determines whether criteria for repositioning a node, by default ‘mean’.</p>
 <p>’mean’ - repositioning is allowed if the average quality of the connected
 elements doesn’t decrease.</p>
 <p>’min’ - repositioning is allowed if the minimum quality of the connected
 elements doesn’t decrease.</p>
 </p></li>
-<li><p><strong>TangentialSurface</strong> (<em>bool</em><em>, </em><em>optional</em>) – Option to use tangential laplacian smoothing on the surface (and interfaces,
+<li><p><strong>TangentialSurface</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to use tangential Laplacian smoothing on the surface (and interfaces,
 if labels are provided), by default True.</p></li>
-<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – <p>Smoothing options. Available options are:</p>
+<li><p><strong>options</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>, </em><em>optional</em>) – <p>Smoothing options. Available options are:</p>
 <dl class="simple">
 <dt>method<span class="classifier">str</span></dt><dd><p>’simultaneous’ or ‘sequential’. Specifies if smoothing is performed
 on all nodes at the same time, or one after another. Simultaneous

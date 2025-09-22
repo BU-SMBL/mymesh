@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -442,24 +447,24 @@ elliptical cross-section. For elliptical cross-sections, the two elements
 correspond to the two axes in the plane perpendicular to &lt;axis&gt; (e.g. if
 axis=2, (r1, r2) specify the x, y radii, respectively; if axis=1,
 (r1, r2) specify the x, z radii, respectively, etc.).</p></li>
-<li><p><strong>height</strong> (<em>float</em>) – height of the cylinder. Cylinder will be extruded from &lt;center&gt; by &lt;height&gt;
+<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – height of the cylinder. Cylinder will be extruded from &lt;center&gt; by &lt;height&gt;
 in the &lt;axis&gt; direction. To extrude in the negative-&lt;axis&gt; direction,
 a negative height can be given.</p></li>
-<li><p><strong>theta_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of points in the circumference of the cylinder, by default 20.</p></li>
-<li><p><strong>axial_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of points along the axis of the cylinder, by default 10.</p></li>
-<li><p><strong>radial_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of radial points from center to edge, by default 10. Only relevant
+<li><p><strong>theta_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of points in the circumference of the cylinder, by default 20.</p></li>
+<li><p><strong>axial_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of points along the axis of the cylinder, by default 10.</p></li>
+<li><p><strong>radial_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of radial points from center to edge, by default 10. Only relevant
 if Type=’vol’.</p></li>
-<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Long axis of the cylinder (i.e. the circular ends will lie in the plane of the other two axes).
+<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Long axis of the cylinder (i.e. the circular ends will lie in the plane of the other two axes).
 Must be 0, 1, or 2 (x, y, z), by default 2</p></li>
-<li><p><strong>cap</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, will close the ends of the cylinder, otherwise it will leave them open, by
+<li><p><strong>cap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, will close the ends of the cylinder, otherwise it will leave them open, by
 default True.</p></li>
-<li><p><strong>ElemType</strong> (<em>str</em><em>, </em><em>optional</em>) – Specify the element type of the mesh. If Type=’surf’ (default), ElemType
+<li><p><strong>ElemType</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Specify the element type of the mesh. If Type=’surf’ (default), ElemType
 can be ‘tri’, which will produce a purely triangular mesh or None, which
 will produce a quad-dominant mesh with some triangles. If Type=’vol’,
 ElemType can be ‘tet’, which will produce a purely tetrahedral mesh or
 None, which  will produce a hex-dominant mesh with some tetrahedra. By
 default, None.</p></li>
-<li><p><strong>Type</strong> (<em>str</em><em>, </em><em>optional</em>) – Mesh type of the final mesh. This could be ‘surf’ for a surface mesh or
+<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Mesh type of the final mesh. This could be ‘surf’ for a surface mesh or
 ‘vol’ for a volumetric mesh, by default ‘surf’.</p></li>
 </ul>
 </dd>

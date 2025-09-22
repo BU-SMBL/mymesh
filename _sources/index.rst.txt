@@ -89,7 +89,7 @@ in `Elise Morgan <https://scholar.google.com/citations?user=hLf0lzEAAAAJ&hl=en&o
 `Skeletal Mechanobiology and Biomechanics Lab <https://morganresearchlab.org/>`_ 
 at Boston University. MyMesh was used extensively in the scaffold design 
 optimization research by :cite:t:`Josephson2024b` and is currently 
-being used in  various ongoing projects at Boston University, including vertebral 
+being used in various ongoing projects at Boston University, including vertebral 
 modeling (Andre Gutierrez Marty, Neilesh Frings), hip fracture modeling (Joshua 
 Auger, Ariella Blake), mechanobiologically-driven growth modeling of skeletal 
 tissue (Tim Josephson, Vivian Shi), and analysis of micro CT-scanned teeth 
@@ -97,52 +97,28 @@ tissue (Tim Josephson, Vivian Shi), and analysis of micro CT-scanned teeth
 
 Statement of need
 -----------------
-.. --
-.. There are two main goals behind the MyMesh package - one technical, and one 
-.. philosophical. 
-
-.. The technical goal is to have a mesh toolbox for generating,
-.. manipulating, and analyzing implicit function and image-based meshes with
-.. a robust set of general purpose tools. The initial driving force for this was
-.. to support computational simulations and generative design for additive 
-.. manufacturing of bone tissue engineering scaffolds, though it has applications
-.. well beyond that specific one. MyMesh features tools for creating voxel, surface,
-.. and tetrahedral meshes of both images and implicit functions. Additionally,
-.. functions are available for calculating surface curvatures using both mesh-based
-.. :cite:p:`Goldfeather2004` and analytical approaches, the latter of which is 
-.. generally superior when images/functional representations are available. To 
-.. our knowledge, such an approach is not available in any existing software packages.
-
-.. The philosophical goal is...
 
 There are a variety of software packages for working with and generating 
-meshes. Some are general purpose, like CGAL, VTK, and gmsh, and others are more
-focused and do specific tasks very well, such as triangular (Triangle
-:cite:p:`Shewchuk1996`) or tetrahedral (TetGen :cite:p:`Si2015`) mesh generation. 
-In Python, most meshing packages depend on (or are direct wrappers to) one or more 
-of these libraries, such as PyVista (a pythonic interface to VTK), PyMesh (which
-depends on CGAL, Triangle, TetGen, and others), and MeshPy (which interfaces to 
-Triangle and TetGen). While these interfaces are useful and provide access to 
-powerful mesh generation tools, their reliance on external, compiled dependencies 
+meshes. 
+Some are general purpose, like CGAL, VTK, and gmsh, and others are more focused and do specific tasks very well, such as triangular (Triangle :cite:p:`Shewchuk1996`) or tetrahedral (TetGen :cite:p:`Si2015`) mesh generation. 
+In Python, most meshing packages depend on (or are direct wrappers to) one or more of these libraries, such as PyVista (a pythonic interface to VTK), PyMesh (which depends on CGAL, Triangle, TetGen, and others), and MeshPy (which interfaces to Triangle and TetGen). 
+While these interfaces are useful and provide access to powerful mesh generation tools, their reliance on external, compiled dependencies 
 limits code readability and makes it difficult to build upon and extend the 
-algorithms. A notable exception is TriMesh, a pure-python library focused on 
+algorithms. 
+A notable exception is TriMesh, a pure-python library focused on 
 triangular surfaces meshes. 
 
-MyMesh strives to be a comprehensive library of meshing tools, written in Python
-with clear documentation that makes it both easy to use and easy to understand.
-MyMesh has a particular focus on implicit function and image-based meshes, but 
-also supplies a wide variety of general purpose meshing tools. Rather than wrapping 
-other libraries, algorithms are implemented from scratch, either directly based 
-on or loosely inspired by published algorithms and research. 
+MyMesh strives to be a comprehensive library of meshing tools, written in Python with clear documentation that makes it both easy to use and easy to understand.
+MyMesh has a particular focus on implicit function and image-based meshes, but also supplies a wide variety of general purpose meshing tools. Rather than wrapping other libraries, algorithms are implemented from scratch, either directly based on, or loosely inspired by, published algorithms and research. 
 
-As we aim to contribute to the existing community of meshing software, MyMesh 
-was designed to allow for easy extraction of key mesh information that can be 
-passed to other libraries' data structures in python or written to various file 
-types using meshio.
 
 .. Note::
     MyMesh is intended for research purposes. Any applications of MyMesh should
     be should be validated and verified appropriately. 
+
+Examples
+--------
+
 
 Acknowledgements
 ----------------

@@ -1,5 +1,6 @@
 Octree
 ======
+See also: :func:`mymesh.tree.OctreeNode`
 
 Octree Definition
 -----------------
@@ -112,7 +113,7 @@ voxel meshes, surface meshes, and implicit functions.
 
 Point Cloud Octrees
 ^^^^^^^^^^^^^^^^^^^
-See :func:`~mymesh.octree.Points2Octree`
+See :func:`~mymesh.tree.Points2Octree`
 
 Perhaps the most straight forward data to represent with an octree is a set of 
 points. First, the root node is created to bound the full set of points. It is 
@@ -126,7 +127,7 @@ longer continue to be subdivided.
 
 Voxel Octrees
 ^^^^^^^^^^^^^
-See :func:`~mymesh.octree.Voxel2Octree`
+See :func:`~mymesh.tree.Voxel2Octree`
 
 Since octrees are based on cubes, it's natural to associate them with voxel 
 meshes - voxel meshes can be used to create octrees and vice versa. The creation
@@ -137,11 +138,11 @@ subdivided until leaf nodes exactly correspond to voxel elements.
 
 Surface Mesh Octrees
 ^^^^^^^^^^^^^^^^^^^^
-See :func:`~mymesh.octree.Surface2Octree`
+See :func:`~mymesh.tree.Surface2Octree`
 
 Implicit Function Octrees
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-See :func:`~mymesh.octree.Function2Octree`
+See :func:`~mymesh.tree.Function2Octree`
 
 An octree can be constructed to efficiently sample an implicit function,
 allowing for higher resolution in complex regions of the surface and lower

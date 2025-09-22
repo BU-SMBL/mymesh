@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -62,7 +62,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'theory/improvement';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Spring-based Smoothing" href="springsmooth.html" />
+    <link rel="next" title="Laplacian Smoothing" href="laplaciansmooth.html" />
     <link rel="prev" title="Delaunay Triangulation" href="delaunay.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -418,18 +418,34 @@
 <section id="node-repositioning">
 <h2>Node Repositioning<a class="headerlink" href="#node-repositioning" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="springsmooth.html">Spring-based Smoothing</a></li>
-</ul>
 </div>
+<p>Node repositioning/mesh smoothing moves the nodes of a mesh with the goal of
+more evenly distributing nodes and/or improving element quality. Throughout
+the process, no nodes or elements are added/removed and the connectivity of the
+elements doesn’t change.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="laplaciansmooth.html#laplacian-smoothing"><span class="std std-ref">Laplacian Smoothing</span></a></p></li>
+<li><p><a class="reference internal" href="springsmooth.html#spring-based-smoothing"><span class="std std-ref">Spring-based Smoothing</span></a></p></li>
+</ul>
+</div></blockquote>
 </section>
 <section id="topological-modifications">
 <h2>Topological Modifications<a class="headerlink" href="#topological-modifications" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="flips23.html">2→3 and 3→2 Flips</a></li>
-</ul>
 </div>
+<p>The mesh topology (i.e. connectivity of the elements) can be modified to
+improve mesh element quality.
+Topological modifications include “flips” where adjacent elements that share a
+face or an edge are reconnected in a new configuration, as well as edge
+contraction and splitting, which can be used to coarsen and refine a mesh,
+respectively.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="flips23.html#and-32-flips"><span class="std std-ref">2→3 and 3→2 Flips</span></a></p></li>
+<li><p><a class="reference internal" href="edgecontract.html#edge-contraction"><span class="std std-ref">Edge Contraction</span></a></p></li>
+</ul>
+</div></blockquote>
 </section>
 </section>
 
@@ -453,11 +469,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="springsmooth.html"
+       href="laplaciansmooth.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Spring-based Smoothing</p>
+        <p class="prev-next-title">Laplacian Smoothing</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -436,7 +441,7 @@ however, these curvature values are only meaningful at the surface of the imaged
 utils.grid2fun, converter.im2voxel, contours.MarchingCubesImage to evaluate the voxel curvatures at points on the surface
 of the imaged object(s).
 Based on Curvature formulas for implicit curves and surfaces, Ron Goldman (2005).
-<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id29" title="Ron Goldman. Curvature formulas for implicit curves and surfaces. Computer Aided Geometric Design, 22(7 SPEC. ISS.):632–658, 2005. doi:10.1016/j.cagd.2005.06.005.">Gol05</a>]</span></p>
+<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id43" title="Ron Goldman. Curvature formulas for implicit curves and surfaces. Computer Aided Geometric Design, 22(7 SPEC. ISS.):632–658, 2005. doi:10.1016/j.cagd.2005.06.005.">Gol05</a>]</span></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Errors can occur if surface is too close to the boundary of the image. Consider building in padding based on gaussian_sigma.</p>
@@ -447,17 +452,17 @@ Based on Curvature formulas for implicit curves and surfaces, Ron Goldman (2005)
 <li><p><strong>I</strong> (<em>np.ndarray</em>) – 3D array of grayscale voxel data.</p></li>
 <li><p><strong>NodeCoords</strong> (<em>array_like</em>) – If provided, curvature from the grid will be evaluated at these points
 and returned. If not, the returned values will be of the full image</p></li>
-<li><p><strong>gaussian_sigma</strong> (<em>int</em><em>, </em><em>optional</em>) – Standard deviation used in calculating image gradients (in voxels), by default 1.
+<li><p><strong>gaussian_sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Standard deviation used in calculating image gradients (in voxels), by default 1.
 See scipy.ndimage.gaussian_filter.</p></li>
-<li><p><strong>voxelsize</strong> (<em>int</em><em>, </em><em>float</em><em>, </em><em>optional</em>) – Voxel size of the image, by default 1.
+<li><p><strong>voxelsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Voxel size of the image, by default 1.
 This is necessary to determine the correct magnitudes of
 curvature. By default, the image coordinate system will
 be used, so principal curvatures will be in units of
 (voxel)^-1</p></li>
-<li><p><strong>brightobject</strong> (<em>bool</em><em>, </em><em>optional</em>) – Specifies whether the foreground of the image is bright or dark, by default True.
+<li><p><strong>brightobject</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Specifies whether the foreground of the image is bright or dark, by default True.
 If the imaged object is darker than the background, set brightobject=False. This
 is important for determining the directionality of curvatures.</p></li>
-<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – Method used for handling edges of the image. See scipy.ndimage.gaussian_filter</p></li>
+<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Method used for handling edges of the image. See scipy.ndimage.gaussian_filter</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

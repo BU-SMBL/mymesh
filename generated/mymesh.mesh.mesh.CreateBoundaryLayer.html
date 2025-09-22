@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -434,21 +439,21 @@
 <dd><p>Generate boundary layer elements.
 Based partially on Bottasso, C. L., &amp; Detomi, D. (2002). A procedure for
 tetrahedral boundary layer mesh generation. Engineering with Computers,
-18(1), 66-79. <a class="reference external" href="https://doi.org/10.1007/s003660200006">https://doi.org/10.1007/s003660200006</a> <span id="id1">[<a class="reference internal" href="../guide/ref.html#id31" title="C. L. Bottasso and D. Detomi. A procedure for tetrahedral boundary layer mesh generation. Engineering with Computers, 18(1):66–79, 2002. doi:10.1007/s003660200006.">BD02</a>]</span></p>
+18(1), 66-79. <a class="reference external" href="https://doi.org/10.1007/s003660200006">https://doi.org/10.1007/s003660200006</a> <span id="id1">[<a class="reference internal" href="../guide/ref.html#id46" title="C. L. Bottasso and D. Detomi. A procedure for tetrahedral boundary layer mesh generation. Engineering with Computers, 18(1):66–79, 2002. doi:10.1007/s003660200006.">BD02</a>]</span></p>
 <p>Currently surfaces must be strictly triangular.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>nLayers</strong> (<em>int</em>) – Number of element layers to generate.</p></li>
-<li><p><strong>FixedNodes</strong> (<em>set</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – Set of nodes that will be held fixed, by default set().
+<li><p><strong>nLayers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of element layers to generate.</p></li>
+<li><p><strong>FixedNodes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><em>set</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – Set of nodes that will be held fixed, by default set().
 It is not necessary to specify any fixed nodes, and by default
 the starting nodes of the boundary layer will be held fixed.</p></li>
-<li><p><strong>StiffnessFactor</strong> (<em>int</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Stiffness factor used for the spring network, by default 1</p></li>
-<li><p><strong>Thickness</strong> (<em>float</em><em> or </em><em>NoneType</em><em>, </em><em>optional</em>) – Specified value for the maximum total thickness of the boundary layers.
+<li><p><strong>StiffnessFactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Stiffness factor used for the spring network, by default 1</p></li>
+<li><p><strong>Thickness</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>NoneType</em><em>, </em><em>optional</em>) – Specified value for the maximum total thickness of the boundary layers.
 If nLayers &gt; 1, this thickness is subdivided by nLayers, by default None</p></li>
-<li><p><strong>OptimizeTets</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, will perform tetrahedral mesh optimization
+<li><p><strong>OptimizeTets</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, will perform tetrahedral mesh optimization
 (see improvement.TetOpt), by default True.</p></li>
-<li><p><strong>FaceSets</strong> (<em>str</em><em> or </em><em>list</em><em>, </em><em>optional</em>) – FaceSet or list of FaceSets to generate boundary later elements on, by default [‘surf’].
+<li><p><strong>FaceSets</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – FaceSet or list of FaceSets to generate boundary later elements on, by default [‘surf’].
 While mesh.FaceSets can generally contain any element face, boundary layer face sets
 must be surface faces; however, the face ids contained within the face sets should index
 mesh.Faces, and not mesh.SurfConn. The default value of ‘surf’ can be used even if no

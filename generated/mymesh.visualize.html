@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="mymesh.visualize.View" href="submodules/mymesh.visualize.View.html" />
-    <link rel="prev" title="mymesh.utils.identify_type" href="submodules/mymesh.utils.identify_type.html" />
+    <link rel="prev" title="mymesh.utils.identify_elem" href="submodules/mymesh.utils.identify_elem.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -428,10 +433,11 @@
 <p>Mesh visualization and plotting</p>
 <p><a class="reference internal" href="#module-mymesh.visualize" title="mymesh.visualize"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mymesh.visualize</span></code></a> is still experimental and may not work as expected
 on all systems or in all development environments. For more stable and
-full-featured mesh visualization, a mesh (<code class="docutils literal notranslate"><span class="pre">M</span></code>) can be converted to a PyVista
-mesh:</p>
+full-featured mesh visualization, a mymesh mesh object (<code class="code docutils literal notranslate"><span class="pre">M</span></code>) can be
+converted to a <a class="reference external" href="https://pyvista.org/">pyvista</a> mesh for visualization:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyvista</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pv</span>
-<span class="n">pvmesh</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">mymesh2meshio</span><span class="p">())</span>
+<span class="n">pv_mesh</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">()</span>
+<span class="n">pv_mesh</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 <section id="visualization">
@@ -440,6 +446,9 @@ mesh:</p>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.visualize.View.html#mymesh.visualize.View" title="mymesh.visualize.View"><code class="xref py py-obj docutils literal notranslate"><span class="pre">View</span></code></a>(M[, interactive, bgcolor, color, ...])</p></td>
 <td><p>Visualize a mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.visualize.Subplot.html#mymesh.visualize.Subplot" title="mymesh.visualize.Subplot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Subplot</span></code></a>(meshes, shape[, show, return_fig, ...])</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -478,12 +487,12 @@ mesh:</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="submodules/mymesh.utils.identify_type.html"
+       href="submodules/mymesh.utils.identify_elem.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.utils.identify_type</p>
+        <p class="prev-next-title">mymesh.utils.identify_elem</p>
       </div>
     </a>
     <a class="right-next"

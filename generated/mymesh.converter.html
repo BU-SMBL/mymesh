@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -425,7 +430,11 @@
                   
   <section id="module-mymesh.converter">
 <span id="mymesh-converter"></span><h1>mymesh.converter<a class="headerlink" href="#module-mymesh.converter" title="Link to this heading">#</a></h1>
-<p>Mesh conversion tools</p>
+<p>Mesh conversion tools.
+This module provides functions for converting between mesh types (e.g. a solid
+volumetric mesh to a surface mesh) element types (e.g. hexahedral to
+tetrahedral), and connectivity representations (e.g. element node connectivities
+to element faces or edges).</p>
 <section id="mesh-type-conversion">
 <h2>Mesh type conversion<a class="headerlink" href="#mesh-type-conversion" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
@@ -436,13 +445,16 @@
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.im2voxel.html#mymesh.converter.im2voxel" title="mymesh.converter.im2voxel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">im2voxel</span></code></a>(img, voxelsize[, scalefactor, ...])</p></td>
 <td><p>Convert 3D image data to a cubic mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.voxel2im.html#mymesh.converter.voxel2im" title="mymesh.converter.voxel2im"><code class="xref py py-obj docutils literal notranslate"><span class="pre">voxel2im</span></code></a>(VoxelCoords, VoxelConn, Vals)</p></td>
-<td><p>Convert a rectilinear voxel mesh (grid) to an 3D image matrix.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.mesh2im.html#mymesh.converter.mesh2im" title="mymesh.converter.mesh2im"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mesh2im</span></code></a>(NodeCoords, NodeConn, voxelsize[, ...])</p></td>
+<td><p>Convert a 3D mesh to a binarized image.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.surf2voxel.html#mymesh.converter.surf2voxel" title="mymesh.converter.surf2voxel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">surf2voxel</span></code></a>(SurfCoords, SurfConn, h[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.voxel2im.html#mymesh.converter.voxel2im" title="mymesh.converter.voxel2im"><code class="xref py py-obj docutils literal notranslate"><span class="pre">voxel2im</span></code></a>(VoxelCoords, VoxelConn, Vals)</p></td>
+<td><p>Convert a rectilinear voxel mesh (grid) to a 3D image matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.surf2voxel.html#mymesh.converter.surf2voxel" title="mymesh.converter.surf2voxel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">surf2voxel</span></code></a>(SurfCoords, SurfConn, h[, ...])</p></td>
 <td><p>Convert a surface mesh to a filled voxel mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.surf2dual.html#mymesh.converter.surf2dual" title="mymesh.converter.surf2dual"><code class="xref py py-obj docutils literal notranslate"><span class="pre">surf2dual</span></code></a>(NodeCoords, SurfConn[, Centroids, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.surf2dual.html#mymesh.converter.surf2dual" title="mymesh.converter.surf2dual"><code class="xref py py-obj docutils literal notranslate"><span class="pre">surf2dual</span></code></a>(NodeCoords, SurfConn[, Centroids, ...])</p></td>
 <td><p>Convert a surface mesh to it's dual mesh.</p></td>
 </tr>
 </tbody>
@@ -518,29 +530,74 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.solid2tets.html#mymesh.converter.solid2tets" title="mymesh.converter.solid2tets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solid2tets</span></code></a>(NodeCoords, NodeConn[, ...])</p></td>
 <td><p>Decompose all elements of a 3D volume mesh to tetrahedra.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.hex2tet.html#mymesh.converter.hex2tet" title="mymesh.converter.hex2tet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hex2tet</span></code></a>(NodeCoords, NodeConn[, method])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.surf2tris.html#mymesh.converter.surf2tris" title="mymesh.converter.surf2tris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">surf2tris</span></code></a>(NodeCoords, NodeConn[, ...])</p></td>
+<td><p>Decompose all elements of a surface mesh to triangles.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.linear2quadratic.html#mymesh.converter.linear2quadratic" title="mymesh.converter.linear2quadratic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">linear2quadratic</span></code></a>(NodeCoords, NodeConn[, Type])</p></td>
+<td><p>Convert linear (first-order) elements to quadratic (second-order) elements.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.quadratic2linear.html#mymesh.converter.quadratic2linear" title="mymesh.converter.quadratic2linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quadratic2linear</span></code></a>(NodeCoords, NodeConn[, cleanup])</p></td>
+<td><p>Convert quadratic (second-order) elements to linear (first-order) elements.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.hex2tet.html#mymesh.converter.hex2tet" title="mymesh.converter.hex2tet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hex2tet</span></code></a>(NodeCoords, NodeConn[, method])</p></td>
 <td><p>Decompose all elements of a 3D hexahedral mesh to tetrahedra.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.wedge2tet.html#mymesh.converter.wedge2tet" title="mymesh.converter.wedge2tet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wedge2tet</span></code></a>(NodeCoords, NodeConn[, method])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.wedge2tet.html#mymesh.converter.wedge2tet" title="mymesh.converter.wedge2tet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wedge2tet</span></code></a>(NodeCoords, NodeConn[, method])</p></td>
 <td><p>Decompose all elements of a 3D wedge-element mesh to tetrahedra.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.pyramid2tet.html#mymesh.converter.pyramid2tet" title="mymesh.converter.pyramid2tet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyramid2tet</span></code></a>(NodeCoords, NodeConn[, method])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.pyramid2tet.html#mymesh.converter.pyramid2tet" title="mymesh.converter.pyramid2tet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyramid2tet</span></code></a>(NodeCoords, NodeConn[, method])</p></td>
 <td><p>Decompose all elements of a 3D pyramidal mesh to tetrahedra.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.surf2tris.html#mymesh.converter.surf2tris" title="mymesh.converter.surf2tris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">surf2tris</span></code></a>(NodeCoords, NodeConn[, ...])</p></td>
-<td><p>Decompose all elements of a surface mesh to triangles.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.quad2tri.html#mymesh.converter.quad2tri" title="mymesh.converter.quad2tri"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quad2tri</span></code></a>(NodeCoords, NodeConn)</p></td>
 <td><p>Converts a quadrilateral mesh to a triangular mesh by splitting each quad into 2 tris</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.tet102tet4.html#mymesh.converter.tet102tet4" title="mymesh.converter.tet102tet4"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tet102tet4</span></code></a>(NodeCoords, Tet10NodeConn)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.edge32linear.html#mymesh.converter.edge32linear" title="mymesh.converter.edge32linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge32linear</span></code></a>(NodeCoords, NodeConn)</p></td>
+<td><p>Converts a 3-node edge mesh to a 2-node edge mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.edge2quadratic.html#mymesh.converter.edge2quadratic" title="mymesh.converter.edge2quadratic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge2quadratic</span></code></a>(NodeCoords, NodeConn[, cleanup])</p></td>
+<td><p>Converts a 2 node edge mesh to 3 node edge mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.tri62linear.html#mymesh.converter.tri62linear" title="mymesh.converter.tri62linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tri62linear</span></code></a>(NodeCoords, NodeConn)</p></td>
+<td><p>Converts a 6-node triangular mesh to a 3-node triangular mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.tri2quadratic.html#mymesh.converter.tri2quadratic" title="mymesh.converter.tri2quadratic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tri2quadratic</span></code></a>(NodeCoords, NodeConn[, cleanup])</p></td>
+<td><p>Converts a 3 node triangular mesh to 6 node triangular mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.quad82linear.html#mymesh.converter.quad82linear" title="mymesh.converter.quad82linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quad82linear</span></code></a>(NodeCoords, NodeConn)</p></td>
+<td><p>Converts a 8-node quadrilateral mesh to a 4-node quadrilateral mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.quad2quadratic.html#mymesh.converter.quad2quadratic" title="mymesh.converter.quad2quadratic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quad2quadratic</span></code></a>(NodeCoords, NodeConn[, cleanup])</p></td>
+<td><p>Converts a 4 node quadrilateral mesh to 8 node quadrilateral mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.tet102linear.html#mymesh.converter.tet102linear" title="mymesh.converter.tet102linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tet102linear</span></code></a>(NodeCoords, Tet10NodeConn)</p></td>
 <td><p>Converts a 10-node tetradehdral mesh to a 4-node tetradehedral mesh.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.tet42tet10.html#mymesh.converter.tet42tet10" title="mymesh.converter.tet42tet10"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tet42tet10</span></code></a>(NodeCoords, Tet4NodeConn)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.tet2quadratic.html#mymesh.converter.tet2quadratic" title="mymesh.converter.tet2quadratic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tet2quadratic</span></code></a>(NodeCoords, Tet4NodeConn[, ...])</p></td>
+<td><p>Converts a 4 node tetrahedral mesh to 10 node tetrahedral mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.pyr132linear.html#mymesh.converter.pyr132linear" title="mymesh.converter.pyr132linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyr132linear</span></code></a>(NodeCoords, NodeConn)</p></td>
+<td><p>Converts a 13-node pyramid mesh to a 5-node pyramid mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.pyr2quadratic.html#mymesh.converter.pyr2quadratic" title="mymesh.converter.pyr2quadratic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyr2quadratic</span></code></a>(NodeCoords, NodeConn[, cleanup])</p></td>
+<td><p>Converts a 5 node pyramid mesh to 13 node pyramid mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.wdg152linear.html#mymesh.converter.wdg152linear" title="mymesh.converter.wdg152linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wdg152linear</span></code></a>(NodeCoords, NodeConn)</p></td>
+<td><p>Converts a 15-node wedge mesh to a 6-node wedge mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.wdg2quadratic.html#mymesh.converter.wdg2quadratic" title="mymesh.converter.wdg2quadratic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wdg2quadratic</span></code></a>(NodeCoords, NodeConn[, cleanup])</p></td>
+<td><p>Converts a 6 node wedge mesh to 15 node wedge mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.hex202linear.html#mymesh.converter.hex202linear" title="mymesh.converter.hex202linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hex202linear</span></code></a>(NodeCoords, Hex20NodeConn)</p></td>
+<td><p>Converts a 20-node hexahedral mesh to an 8-node hexahedral mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.hex2quadratic.html#mymesh.converter.hex2quadratic" title="mymesh.converter.hex2quadratic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hex2quadratic</span></code></a>(NodeCoords, Hex8NodeConn[, ...])</p></td>
 <td><p>Converts a 4 node tetrahedral mesh to 10 node tetrahedral mesh.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.converter.hexsubdivide.html#mymesh.converter.hexsubdivide" title="mymesh.converter.hexsubdivide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hexsubdivide</span></code></a>(NodeCoords, NodeConn)</p></td>
 <td><p>Subdivide hexahedra into 8 sub-hexahedra, connecting corners to the element, face, and edge centroids.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.converter.tetsubdivide.html#mymesh.converter.tetsubdivide" title="mymesh.converter.tetsubdivide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tetsubdivide</span></code></a>(NodeCoords, NodeConn[, method])</p></td>
+<td><p>Subdivide tetrahedra into sub-tetrahedra.</p></td>
 </tr>
 </tbody>
 </table>

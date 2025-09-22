@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.to\_pyvista
+============================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.to_pyvista

@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="mymesh.utils.getNodeNeighbors" href="submodules/mymesh.utils.getNodeNeighbors.html" />
-    <link rel="prev" title="mymesh.rays.PointsInTris" href="submodules/mymesh.rays.PointsInTris.html" />
+    <link rel="prev" title="mymesh.register.ImageOverlay" href="submodules/mymesh.register.ImageOverlay.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -425,7 +430,7 @@
                   
   <section id="module-mymesh.utils">
 <span id="mymesh-utils"></span><h1>mymesh.utils<a class="headerlink" href="#module-mymesh.utils" title="Link to this heading">#</a></h1>
-<p>Various mesh utilities</p>
+<p>Various mesh utilities for mesh measurements, manipulations, cleanup, and more</p>
 <section id="mesh-connectivity">
 <h2>Mesh Connectivity<a class="headerlink" href="#mesh-connectivity" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
@@ -536,8 +541,8 @@
 </table>
 </div>
 </section>
-<section id="mesh-clean-up">
-<h2>Mesh Clean Up<a class="headerlink" href="#mesh-clean-up" title="Link to this heading">#</a></h2>
+<section id="mesh-cleanup">
+<h2>Mesh Cleanup<a class="headerlink" href="#mesh-cleanup" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.utils.DeleteDuplicateNodes.html#mymesh.utils.DeleteDuplicateNodes" title="mymesh.utils.DeleteDuplicateNodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DeleteDuplicateNodes</span></code></a>(NodeCoords, NodeConn[, ...])</p></td>
@@ -573,7 +578,10 @@
 <td><p>Convert a padded numpy array to a ragged list of list by removing entries that match the specified value.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.utils.identify_type.html#mymesh.utils.identify_type" title="mymesh.utils.identify_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">identify_type</span></code></a>(NodeCoords, NodeConn)</p></td>
-<td><p>Classify the mesh as either a surface or volume. A mesh is classified as a volume mesh (<code class="docutils literal notranslate"><span class="pre">vol</span></code>) if any elements are unambiguous volume elements - pyramid (5 nodes), wedge (6), hexahedron (8), or if any of a random sample of 10 elements (or all elements if NElem &lt; 10) has a volume less than machine precision (<code class="docutils literal notranslate"><span class="pre">np.finfo(float).eps</span></code>). Alternatively, a surface mesh (<code class="docutils literal notranslate"><span class="pre">surf</span></code>) is identified if any of the elements is a triangle (3 nodes). In the case of a mesh containing both triangular and volume elements, the mesh will be classified arbitrarily by whichever appears first in NodeConn. A <code class="docutils literal notranslate"><span class="pre">line</span></code> mesh is identified if any line (2  node) elements are present.</p></td>
+<td><p>Classify the mesh as either a surface or volume.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.utils.identify_elem.html#mymesh.utils.identify_elem" title="mymesh.utils.identify_elem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">identify_elem</span></code></a>(NodeCoords, NodeConn[, Type])</p></td>
+<td><p>Identify the types of elements present in the mesh.</p></td>
 </tr>
 </tbody>
 </table>
@@ -592,12 +600,12 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="submodules/mymesh.rays.PointsInTris.html"
+       href="submodules/mymesh.register.ImageOverlay.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.rays.PointsInTris</p>
+        <p class="prev-next-title">mymesh.register.ImageOverlay</p>
       </div>
     </a>
     <a class="right-next"
@@ -632,7 +640,7 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mesh-measurements">Mesh Measurements</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mesh-manipulations">Mesh Manipulations</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#surface-projection">Surface Projection</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mesh-clean-up">Mesh Clean Up</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mesh-cleanup">Mesh Cleanup</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#miscellaneous">Miscellaneous</a></li>
 </ul>
   </nav></div>

@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -358,12 +358,17 @@
 <li class="toctree-l1"><a class="reference internal" href="generated/mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -439,13 +444,13 @@
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/mymesh.booleans.html#module-mymesh.booleans" title="mymesh.booleans"><code class="xref py py-obj docutils literal notranslate"><span class="pre">booleans</span></code></a></p></td>
-<td><p>Boolean operations for meshes</p></td>
+<td><p>Boolean (union, intersection, difference) operations for meshes</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/mymesh.contour.html#module-mymesh.contour" title="mymesh.contour"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contour</span></code></a></p></td>
 <td><p>Tools for extracting isosurfaces from images or implicit functions</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/mymesh.converter.html#module-mymesh.converter" title="mymesh.converter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">converter</span></code></a></p></td>
-<td><p>Mesh conversion tools</p></td>
+<td><p>Mesh conversion tools.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/mymesh.curvature.html#module-mymesh.curvature" title="mymesh.curvature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curvature</span></code></a></p></td>
 <td><p>Tools for calculating curvature</p></td>
@@ -462,8 +467,8 @@
 <tr class="row-even"><td><p><a class="reference internal" href="generated/mymesh.improvement.html#module-mymesh.improvement" title="mymesh.improvement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">improvement</span></code></a></p></td>
 <td><p>Mesh quality improvement</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/mymesh.octree.html#module-mymesh.octree" title="mymesh.octree"><code class="xref py py-obj docutils literal notranslate"><span class="pre">octree</span></code></a></p></td>
-<td><p>Octree data structure and related methods.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mymesh.tree.html#module-mymesh.tree" title="mymesh.tree"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tree</span></code></a></p></td>
+<td><p>Tree data structures and related methods.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/mymesh.primitives.html#module-mymesh.primitives" title="mymesh.primitives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">primitives</span></code></a></p></td>
 <td><p>Mesh generation for pre-defined shapes</p></td>
@@ -474,11 +479,28 @@
 <tr class="row-even"><td><p><a class="reference internal" href="generated/mymesh.rays.html#module-mymesh.rays" title="mymesh.rays"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rays</span></code></a></p></td>
 <td><p>Ray casting and intersection tests</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/mymesh.utils.html#module-mymesh.utils" title="mymesh.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utils</span></code></a></p></td>
-<td><p>Various mesh utilities</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mymesh.register.html#module-mymesh.register" title="mymesh.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a></p></td>
+<td><p>Tools for registering or aligning point clouds, meshes, and images.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/mymesh.visualize.html#module-mymesh.visualize" title="mymesh.visualize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visualize</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/mymesh.utils.html#module-mymesh.utils" title="mymesh.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utils</span></code></a></p></td>
+<td><p>Various mesh utilities for mesh measurements, manipulations, cleanup, and more</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/mymesh.visualize.html#module-mymesh.visualize" title="mymesh.visualize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visualize</span></code></a></p></td>
 <td><p>Mesh visualization and plotting</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.demo_mesh.html#mymesh.demo_mesh" title="mymesh.demo_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">demo_mesh</span></code></a>([name])</p></td>
+<td><p>Example mesh models from online databases</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.demo_image.html#mymesh.demo_image" title="mymesh.demo_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">demo_image</span></code></a>([name, normalize])</p></td>
+<td><p>Example image data from online databases</p></td>
 </tr>
 </tbody>
 </table>
@@ -535,6 +557,7 @@
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#objects">Objects</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
 </ul>
   </nav></div>
 

@@ -1,6 +1,0 @@
-mymesh.octree.getAllLeaf
-========================
-
-.. currentmodule:: mymesh.octree
-
-.. autofunction:: getAllLeaf

@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="mymesh.primitives.Line" href="submodules/mymesh.primitives.Line.html" />
-    <link rel="prev" title="mymesh.octree.Print" href="submodules/mymesh.octree.Print.html" />
+    <link rel="prev" title="mymesh.tree.SearchOctreeTri" href="submodules/mymesh.tree.SearchOctreeTri.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -433,31 +438,34 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Line.html#mymesh.primitives.Line" title="mymesh.primitives.Line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Line</span></code></a>(pt1, pt2[, h, n])</p></td>
 <td><p>Generate a mesh of a straight line between two points</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Box.html#mymesh.primitives.Box" title="mymesh.primitives.Box"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Box</span></code></a>(bounds, h[, ElemType])</p></td>
-<td><p>Generate a surface mesh of a rectangular box.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Multiline.html#mymesh.primitives.Multiline" title="mymesh.primitives.Multiline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Multiline</span></code></a>(points[, h, n, connect_ends])</p></td>
+<td><p>Create a multi-point line by connecting a series of points</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Grid.html#mymesh.primitives.Grid" title="mymesh.primitives.Grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Grid</span></code></a>(bounds, h[, exact_h, ElemType])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Box.html#mymesh.primitives.Box" title="mymesh.primitives.Box"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Box</span></code></a>(vertices, n[, ElemType, Type])</p></td>
+<td><p>Generate a mesh of box.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Grid.html#mymesh.primitives.Grid" title="mymesh.primitives.Grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Grid</span></code></a>(bounds, h[, exact_h, ElemType, Type])</p></td>
 <td><p>Generate a 3D rectangular grid mesh.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Grid2D.html#mymesh.primitives.Grid2D" title="mymesh.primitives.Grid2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Grid2D</span></code></a>(bounds, h[, z, exact_h, ElemType])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Grid2D.html#mymesh.primitives.Grid2D" title="mymesh.primitives.Grid2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Grid2D</span></code></a>(bounds, h[, z, exact_h, ElemType])</p></td>
 <td><p>Generate a rectangular grid mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Plane.html#mymesh.primitives.Plane" title="mymesh.primitives.Plane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Plane</span></code></a>(pt, normal, bounds, h[, exact_h, ElemType])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Plane.html#mymesh.primitives.Plane" title="mymesh.primitives.Plane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Plane</span></code></a>(pt, normal, bounds, h[, exact_h, ElemType])</p></td>
 <td><p>Generate a 2D grid oriented on a plane</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Circle.html#mymesh.primitives.Circle" title="mymesh.primitives.Circle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Circle</span></code></a>(center, radius[, theta_resolution, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Circle.html#mymesh.primitives.Circle" title="mymesh.primitives.Circle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Circle</span></code></a>(center, radius[, theta_resolution, ...])</p></td>
 <td><p>Construct a circle from a center and radius.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.primitives.CirclePt.html#mymesh.primitives.CirclePt" title="mymesh.primitives.CirclePt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CirclePt</span></code></a>(center, point[, theta_resolution, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.primitives.CirclePt.html#mymesh.primitives.CirclePt" title="mymesh.primitives.CirclePt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CirclePt</span></code></a>(center, point[, theta_resolution, ...])</p></td>
 <td><p>Construct a circle from a center and point.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Cylinder.html#mymesh.primitives.Cylinder" title="mymesh.primitives.Cylinder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cylinder</span></code></a>(center, radius, height[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Cylinder.html#mymesh.primitives.Cylinder" title="mymesh.primitives.Cylinder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cylinder</span></code></a>(center, radius, height[, ...])</p></td>
 <td><p>Generate an axis-aligned cylindrical mesh</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Sphere.html#mymesh.primitives.Sphere" title="mymesh.primitives.Sphere"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sphere</span></code></a>(center, radius[, theta_resolution, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Sphere.html#mymesh.primitives.Sphere" title="mymesh.primitives.Sphere"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sphere</span></code></a>(center, radius[, theta_resolution, ...])</p></td>
 <td><p>Generate a sphere (or ellipsoid) The total number of points will be phi_resolution*(theta_resolution-2) + 2</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Torus.html#mymesh.primitives.Torus" title="mymesh.primitives.Torus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Torus</span></code></a>(center, R, r[, axis, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.primitives.Torus.html#mymesh.primitives.Torus" title="mymesh.primitives.Torus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Torus</span></code></a>(center, R, r[, axis, ...])</p></td>
 <td><p>Generate a torus The total number of points will be phi_resolution*(theta_resolution-2) + 2</p></td>
 </tr>
 </tbody>
@@ -491,12 +499,12 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="submodules/mymesh.octree.Print.html"
+       href="submodules/mymesh.tree.SearchOctreeTri.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.octree.Print</p>
+        <p class="prev-next-title">mymesh.tree.SearchOctreeTri</p>
       </div>
     </a>
     <a class="right-next"

@@ -1,6 +1,0 @@
-mymesh.octree.Print
-===================
-
-.. currentmodule:: mymesh.octree
-
-.. autofunction:: Print

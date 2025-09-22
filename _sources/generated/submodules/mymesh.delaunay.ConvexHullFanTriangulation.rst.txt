@@ -1,6 +1,0 @@
-mymesh.delaunay.ConvexHullFanTriangulation
-==========================================
-
-.. currentmodule:: mymesh.delaunay
-
-.. autofunction:: ConvexHullFanTriangulation

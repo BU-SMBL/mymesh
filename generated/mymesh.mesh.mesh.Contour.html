@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -430,17 +435,23 @@
 <h1>mymesh.mesh.mesh.Contour<a class="headerlink" href="#mymesh-mesh-mesh-contour" title="Link to this heading">#</a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="mymesh.mesh.mesh.Contour">
-<span class="sig-prename descclassname"><span class="pre">mesh.</span></span><span class="sig-name descname"><span class="pre">Contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scalars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'surf'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mymesh/mesh.html#mesh.Contour"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.mesh.mesh.Contour" title="Link to this definition">#</a></dt>
-<dd><p>Contour the mesh to extract an isosurface based on nodal scalar values.</p>
+<span class="sig-prename descclassname"><span class="pre">mesh.</span></span><span class="sig-name descname"><span class="pre">Contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scalars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixed_elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mymesh/mesh.html#mesh.Contour"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.mesh.mesh.Contour" title="Link to this definition">#</a></dt>
+<dd><p>Contour the mesh to extract an isosurface/isoline based on nodal scalar values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>scalars</strong> (<em>str</em><em> or </em><em>array_like</em>) – Values to be used for thresholding, either a string indicating an entry in NodeData or ElemData, or an array_like of values.</p></li>
-<li><p><strong>threshold</strong> (<em>int</em><em>, </em><em>float</em>) – Isosurface level that defines the boundary</p></li>
+<li><p><strong>scalars</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>array_like</em>) – Values to be used for thresholding, either a string indicating an entry in NodeData or ElemData, or an array_like of values.</p></li>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Isosurface level that defines the boundary</p></li>
 <li><p><strong>threshold_direction</strong> (<em>signed int</em>) – If threshold_direction is negative (default), values less than or equal to the threshold will be considered “inside” the mesh and the opposite if threshold_direction is positive, by default 1.</p></li>
-<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Method to be used for contouring. This option not currently implemented.</p></li>
-<li><p><strong>Type</strong> (<em>str</em><em>, </em><em>optional</em>) – Specfies the mesh type (‘surf’ or ‘vol’) to produce by contouring,
-by default ‘surf’.</p></li>
+<li><p><strong>mixed_elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, the generated mesh will have mixed element types
+(triangles/quadrilaterals, tetrahedra/wedges), otherwise a single element
+type (triangles, tetrahedra), by default False.</p></li>
+<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Specfies the mesh type (‘vol’, ‘surf’, or ‘line’) to produce by
+contouring. If None is provided, the output Type will be the same
+as the input Type, by default None. A volumetric mesh can be contoured
+to create a volumetric mesh or a surface mesh, and a surface mesh can
+be contoured to create a surface mesh or a line mesh. Contouring of
+line meshes isn’t currently supported.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

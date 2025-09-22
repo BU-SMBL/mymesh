@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -61,8 +61,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/mymesh.image';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="mymesh.image.VoxelMesh" href="submodules/mymesh.image.VoxelMesh.html" />
-    <link rel="prev" title="mymesh.delaunay.ConvexHullFanTriangulation" href="submodules/mymesh.delaunay.ConvexHullFanTriangulation.html" />
+    <link rel="next" title="mymesh.image.PixelMesh" href="submodules/mymesh.image.PixelMesh.html" />
+    <link rel="prev" title="mymesh.delaunay.GiftWrapping" href="submodules/mymesh.delaunay.GiftWrapping.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -357,12 +357,17 @@
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -430,16 +435,19 @@
 <h2>Image-based Mesh Generation<a class="headerlink" href="#image-based-mesh-generation" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.image.VoxelMesh.html#mymesh.image.VoxelMesh" title="mymesh.image.VoxelMesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VoxelMesh</span></code></a>(img, h[, threshold, ...])</p></td>
-<td><p>Generate voxel mesh of an image function</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.image.PixelMesh.html#mymesh.image.PixelMesh" title="mymesh.image.PixelMesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PixelMesh</span></code></a>(img, h[, threshold, ...])</p></td>
+<td><p>Generate pixel mesh of a 2D image</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.image.SurfaceMesh.html#mymesh.image.SurfaceMesh" title="mymesh.image.SurfaceMesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfaceMesh</span></code></a>(img, h[, threshold, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.image.VoxelMesh.html#mymesh.image.VoxelMesh" title="mymesh.image.VoxelMesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VoxelMesh</span></code></a>(img, h[, threshold, ...])</p></td>
+<td><p>Generate voxel mesh of an image</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.image.SurfaceMesh.html#mymesh.image.SurfaceMesh" title="mymesh.image.SurfaceMesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfaceMesh</span></code></a>(img, h[, threshold, ...])</p></td>
 <td><p>Generate a surface mesh of an image function</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.image.TetMesh.html#mymesh.image.TetMesh" title="mymesh.image.TetMesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TetMesh</span></code></a>(img, h[, threshold, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.image.TetMesh.html#mymesh.image.TetMesh" title="mymesh.image.TetMesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TetMesh</span></code></a>(img, h[, threshold, ...])</p></td>
 <td><p>Generate a tetrahedral mesh of an image</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.image.SurfaceNodeOptimization.html#mymesh.image.SurfaceNodeOptimization" title="mymesh.image.SurfaceNodeOptimization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfaceNodeOptimization</span></code></a>(M, img, h[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.image.SurfaceNodeOptimization.html#mymesh.image.SurfaceNodeOptimization" title="mymesh.image.SurfaceNodeOptimization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfaceNodeOptimization</span></code></a>(M, img, h[, Cr, Cz, ...])</p></td>
 <td><p>Optimize the placement of surface node to lie on the &quot;true&quot; surface.</p></td>
 </tr>
 </tbody>
@@ -450,7 +458,7 @@
 <h2>File IO<a class="headerlink" href="#file-io" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.image.read.html#mymesh.image.read" title="mymesh.image.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>(img[, scalefactor, scaleorder])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.image.read.html#mymesh.image.read" title="mymesh.image.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>(img[, scalefactor, scaleorder, verbose])</p></td>
 <td><p>Read image data into a numpy array format.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.image.write.html#mymesh.image.write" title="mymesh.image.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(impath, I[, filetype, verbose, dtype])</p></td>
@@ -473,20 +481,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="submodules/mymesh.delaunay.ConvexHullFanTriangulation.html"
+       href="submodules/mymesh.delaunay.GiftWrapping.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.delaunay.ConvexHullFanTriangulation</p>
+        <p class="prev-next-title">mymesh.delaunay.GiftWrapping</p>
       </div>
     </a>
     <a class="right-next"
-       href="submodules/mymesh.image.VoxelMesh.html"
+       href="submodules/mymesh.image.PixelMesh.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.image.VoxelMesh</p>
+        <p class="prev-next-title">mymesh.image.PixelMesh</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

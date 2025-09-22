@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -421,7 +421,7 @@
 and where those intersections occur.</p>
 <section id="ray-triangle-intersection">
 <h3>Ray-Triangle Intersection<a class="headerlink" href="#ray-triangle-intersection" title="Link to this heading">#</a></h3>
-<p><em>The Möller-Trumbore Intersection Test</em> <span id="id1">[<a class="reference internal" href="../guide/ref.html#id21" title="Tomas Möller and Ben Trumbore. Fast, minimum storage ray/triangle intersection. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, pages 7823–7830, 2005. URL: https://www.doi.org/10.1145/1198555.1198746, doi:10.1145/1198555.1198746.">MollerT05</a>]</span></p>
+<p><em>The Möller-Trumbore Intersection Test</em> <span id="id1">[<a class="reference internal" href="../guide/ref.html#id33" title="Tomas Möller and Ben Trumbore. Fast, minimum storage ray/triangle intersection. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, pages 7823–7830, 2005. URL: https://www.doi.org/10.1145/1198555.1198746, doi:10.1145/1198555.1198746.">MollerT05</a>]</span></p>
 <p>See <a class="reference internal" href="../generated/submodules/mymesh.rays.RayTriangleIntersection.html#mymesh.rays.RayTriangleIntersection" title="mymesh.rays.RayTriangleIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RayTriangleIntersection()</span></code></a>,
 <a class="reference internal" href="../generated/submodules/mymesh.rays.RayTrianglesIntersection.html#mymesh.rays.RayTrianglesIntersection" title="mymesh.rays.RayTrianglesIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RayTrianglesIntersection()</span></code></a>,
 <a class="reference internal" href="../generated/submodules/mymesh.rays.RaysTrianglesIntersection.html#mymesh.rays.RaysTrianglesIntersection" title="mymesh.rays.RaysTrianglesIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RaysTrianglesIntersection()</span></code></a>.</p>
@@ -483,20 +483,20 @@ intersection point is then</p>
 </section>
 <section id="ray-box-intersection">
 <h3>Ray-Box Intersection<a class="headerlink" href="#ray-box-intersection" title="Link to this heading">#</a></h3>
-<p><span id="id2">Williams <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id22" title="Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley. An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1):55–60, 2005. URL: https://www.doi.org/10.1145/1198555.1198748, doi:10.1145/1198555.1198748.">WBMS05</a>]</span></p>
+<p><span id="id2">Williams <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id34" title="Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley. An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1):55–60, 2005. URL: https://www.doi.org/10.1145/1198555.1198748, doi:10.1145/1198555.1198748.">WBMS05</a>]</span></p>
 <p>See <a class="reference internal" href="../generated/submodules/mymesh.rays.RayBoxIntersection.html#mymesh.rays.RayBoxIntersection" title="mymesh.rays.RayBoxIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RayBoxIntersection()</span></code></a>,
 <a class="reference internal" href="../generated/submodules/mymesh.rays.RayBoxesIntersection.html#mymesh.rays.RayBoxesIntersection" title="mymesh.rays.RayBoxesIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RayBoxesIntersection()</span></code></a>.</p>
 <p>This test determines whether a ray,
 <span class="math notranslate nohighlight">\(R(t) = O + tD = \begin{bmatrix}R_x &amp; R_y &amp; R_z \end{bmatrix}\)</span> with origin
-<span class="math notranslate nohighlight">\(O\)</span> and direction <span class="math notranslate nohighlight">\(D\)</span> intersects an axis-aligned box with bounds
+<span class="math notranslate nohighlight">\(O\)</span> and direction <span class="math notranslate nohighlight">\(D=\begin{bmatrix}D_x &amp; D_y &amp; D_z \end{bmatrix}\)</span> intersects an axis-aligned box with bounds
 <span class="math notranslate nohighlight">\((x_{min},x_{max}),(y_{min},y_{max}),(z_{min},z_{max})\)</span>. The test works by
 finding the values of the parameter <span class="math notranslate nohighlight">\(t\)</span> that correspond to the points
 where the ray reaches each bound of the box. For example,
-<span class="math notranslate nohighlight">\(t_{xmin} = (x_{min} - O_x)/R_x\)</span>, <span class="math notranslate nohighlight">\(t_{xmax} = (x_{max} - O_x)/R_x\)</span>
+<span class="math notranslate nohighlight">\(t_{xmin} = (x_{min} - O_x)/D_x\)</span>, <span class="math notranslate nohighlight">\(t_{xmax} = (x_{max} - O_x)/D_x\)</span>
 correspond to the points where the ray crosses the lower and upper x axis bounds
 of the box. The order of these calculations is determined based on the sign of
 each component of the ray vector such that <span class="math notranslate nohighlight">\(t_{xmin} \leq t_{xmax}\)</span> (i.e.
-if <span class="math notranslate nohighlight">\(R_x&lt;0\)</span>, <span class="math notranslate nohighlight">\(t_{xmin}=(x_{max} - O_x)/R_x\)</span>).</p>
+if <span class="math notranslate nohighlight">\(D_x&lt;0\)</span>, <span class="math notranslate nohighlight">\(t_{xmin}=(x_{max} - O_x)/D_x\)</span>).</p>
 <div class="graphviz"><img src="../_images/graphviz-30c1d8b22f0d981a0ed47974532ca70249a5a344.png" alt="graph raybox {
 node [shape=point, fontname=&quot;source code pro&quot;];
 edge [style=solid];
@@ -554,6 +554,9 @@ be an intersection and the test can proceed to checking the <span class="math no
 <span class="math notranslate nohighlight">\(t_{zmin} \leq \min{(t_{xmax},t_{ymax})}\)</span>, then there is a section of the
 ray that falls between the bounds of the box on all three axes, so the ray must
 intersect with the box.</p>
+<p>For unidirectional intersections (intersections only in the positive direction
+of the ray from the point), at least one of the limit-intersection parameters
+must be positive.</p>
 </section>
 <section id="ray-segment-intersection">
 <h3>Ray-Segment Intersection<a class="headerlink" href="#ray-segment-intersection" title="Link to this heading">#</a></h3>
@@ -704,7 +707,7 @@ the boundary an odd number of times, while if it’s outside the boundary it wil
 intersect the ray an even number of times, regardless of how intricate the boundary
 is and how many intersections there are, as long as the boundary is closed and
 not self-intersecting. This is known as the <em>even-odd rule</em> or the <em>parity rule</em>
-<span id="id3">[<a class="reference internal" href="../guide/ref.html#id2" title="Kai Hormann and Alexander Agathos. The point in polygon problem for arbitrary polygons. Computational Geometry: Theory and Applications, 20(3):131–144, 2001. URL: https://www.doi.org/10.1016/S0925-7721(01)00012-8, doi:10.1016/S0925-7721(01)00012-8.">HA01</a>]</span>.</p>
+<span id="id3">[<a class="reference internal" href="../guide/ref.html#id14" title="Kai Hormann and Alexander Agathos. The point in polygon problem for arbitrary polygons. Computational Geometry: Theory and Applications, 20(3):131–144, 2001. URL: https://www.doi.org/10.1016/S0925-7721(01)00012-8, doi:10.1016/S0925-7721(01)00012-8.">HA01</a>]</span>.</p>
 <div class="graphviz"><img src="../_images/graphviz-d37b1e11357a73906b031f0056d43a5068448ada.png" alt="digraph cluster_0 {
 node [shape=point];
 splines=false
@@ -745,7 +748,7 @@ the surface an odd number of times, while if it’s outside the surface it will
 intersect the ray an even number of times, regardless of how intricate the surface
 is and how many intersections there are, as long as the surface is closed and
 not self-intersecting. This is known as the <em>even-odd rule</em> or the <em>parity rule</em>
-<span id="id4">[<a class="reference internal" href="../guide/ref.html#id2" title="Kai Hormann and Alexander Agathos. The point in polygon problem for arbitrary polygons. Computational Geometry: Theory and Applications, 20(3):131–144, 2001. URL: https://www.doi.org/10.1016/S0925-7721(01)00012-8, doi:10.1016/S0925-7721(01)00012-8.">HA01</a>]</span>.</p>
+<span id="id4">[<a class="reference internal" href="../guide/ref.html#id14" title="Kai Hormann and Alexander Agathos. The point in polygon problem for arbitrary polygons. Computational Geometry: Theory and Applications, 20(3):131–144, 2001. URL: https://www.doi.org/10.1016/S0925-7721(01)00012-8, doi:10.1016/S0925-7721(01)00012-8.">HA01</a>]</span>.</p>
 </section>
 </section>
 </section>

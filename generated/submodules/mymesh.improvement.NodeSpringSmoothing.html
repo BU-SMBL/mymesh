@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -432,7 +437,7 @@
 <dt class="sig sig-object py" id="mymesh.improvement.NodeSpringSmoothing">
 <span class="sig-prename descclassname"><span class="pre">mymesh.improvement.</span></span><span class="sig-name descname"><span class="pre">NodeSpringSmoothing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Stiffness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Forces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Displacements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/improvement.html#NodeSpringSmoothing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.improvement.NodeSpringSmoothing" title="Link to this definition">#</a></dt>
 <dd><p>Perform node spring smoothing, with or without mesh deformation. Uses the
-node spring analogy <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id34" title="Frederic J. Blom. Considerations on the spring analogy. International Journal for Numerical Methods in Fluids, 32(6):647–668, 2000. URL: https://doi.org/10.1002/(SICI)1097-0363(20000330)32:6{\%}3C647::AID-FLD979{\%}3E3.0.CO;2-K, doi:10.1002/(SICI)1097-0363(20000330)32:6&lt;647::AID-FLD979&gt;3.0.CO;2-K.">Blo00</a>]</span> to redistribute nodes and achieve
+node spring analogy <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id49" title="Frederic J. Blom. Considerations on the spring analogy. International Journal for Numerical Methods in Fluids, 32(6):647–668, 2000. URL: https://doi.org/10.1002/(SICI)1097-0363(20000330)32:6{\%}3C647::AID-FLD979{\%}3E3.0.CO;2-K, doi:10.1002/(SICI)1097-0363(20000330)32:6&lt;647::AID-FLD979&gt;3.0.CO;2-K.">Blo00</a>]</span> to redistribute nodes and achieve
 equilibrium. If Forces and/or Displacements are prescribed, this an be used
 to deform a mesh while keeping nodes spread apart.</p>
 <div class="admonition note">
@@ -444,7 +449,7 @@ large deformations.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>M</strong> (<a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><em>mymesh.mesh</em></a>) – Mesh object to smooth</p></li>
-<li><p><strong>Stiffness</strong> (<em>float</em><em>, </em><em>optional</em>) – Spring stiffness, by default 1. If no forces are applied, the choice
+<li><p><strong>Stiffness</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Spring stiffness, by default 1. If no forces are applied, the choice
 of stiffness is irrelevant.</p></li>
 <li><p><strong>Forces</strong> (<em>np.ndarray</em><em> or </em><em>NoneType</em><em>, </em><em>optional</em>) – nx3 array of applied forces, where n is the number of nodes in the mesh.
 If provided, there must be forces assigned to all nodes, by default None.</p></li>
@@ -454,7 +459,7 @@ Nodes with non-zero displacements will be held fixed at their displaced
 position, while nodes with zero displacement in x, y, and z will be
 free to move (to prescribe a displacement of 0 to hold a node in place,
 add that node to options[‘FixedNodes’].)</p></li>
-<li><p><strong>options</strong> (<em>dict</em>) – <p>Smoothing options. Available options are:</p>
+<li><p><strong>options</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – <p>Smoothing options. Available options are:</p>
 <dl class="simple">
 <dt>iterate<span class="classifier">int or str</span></dt><dd><p>Fixed number of iterations to perform, or ‘converge’ to iterate until
 convergence, by default ‘converge’.</p>

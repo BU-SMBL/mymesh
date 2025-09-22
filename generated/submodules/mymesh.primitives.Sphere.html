@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -439,17 +444,17 @@ The total number of points will be phi_resolution*(theta_resolution-2) + 2</p>
 <li><p><strong>center</strong> (<em>array_like</em>) – Three element array of the coordinates of the center of the sphere.</p></li>
 <li><p><strong>radius</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – The radius of the sphere. Radius can be specified as a scalar radius of
 the sphere or three element array of half-axes for an ellipsoid.</p></li>
-<li><p><strong>theta_resolution</strong> (<em>int</em><em>, </em><em>optionalperpendicular</em>) – Number of circular (or elliptical) cross sections sampled along the z axis, by default 20.</p></li>
-<li><p><strong>phi_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of circumferential points for each cross section, by default 20.</p></li>
-<li><p><strong>radial_resolution</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of radial points from center to edge, by default 10. Only relevant
+<li><p><strong>theta_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optionalperpendicular</em>) – Number of circular (or elliptical) cross sections sampled along the z axis, by default 20.</p></li>
+<li><p><strong>phi_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of circumferential points for each cross section, by default 20.</p></li>
+<li><p><strong>radial_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of radial points from center to edge, by default 10. Only relevant
 if Type=’vol’.</p></li>
-<li><p><strong>ElemType</strong> (<em>str</em><em>, </em><em>optional</em>) – Specify the element type of the mesh. If Type=’surf’ (default), ElemType
+<li><p><strong>ElemType</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Specify the element type of the mesh. If Type=’surf’ (default), ElemType
 can be ‘tri’, which will produce a purely triangular mesh or None, which
 will produce a quad-dominant mesh with some triangles. If Type=’vol’,
 ElemType can be ‘tet’, which will produce a purely tetrahedral mesh or
 None, which  will produce a hex-dominant mesh with some tetrahedra. By
 default, None.</p></li>
-<li><p><strong>Type</strong> (<em>str</em><em>, </em><em>optional</em>) – Mesh type of the final mesh. This could be ‘surf’ for a surface mesh or
+<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Mesh type of the final mesh. This could be ‘surf’ for a surface mesh or
 ‘vol’ for a volumetric mesh, by default ‘surf’.</p></li>
 </ul>
 </dd>

@@ -16,7 +16,7 @@ Examples for different methods of generating meshes.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example generates a surface mesh of an implicit function and then performs  Laplacian smoothing on it.">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example generates a surface mesh of an implicit function (Taubin&#x27;s heart surface :citeTaubin1993) and then performs  Laplacian smoothing on it.">
 
 .. only:: html
 

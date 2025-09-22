@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -430,8 +435,29 @@
 <h1>mymesh.mesh.mesh.addElems<a class="headerlink" href="#mymesh-mesh-mesh-addelems" title="Link to this heading">#</a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="mymesh.mesh.mesh.addElems">
-<span class="sig-prename descclassname"><span class="pre">mesh.</span></span><span class="sig-name descname"><span class="pre">addElems</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NewNodeConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ElemSet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mymesh/mesh.html#mesh.addElems"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.mesh.mesh.addElems" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">mesh.</span></span><span class="sig-name descname"><span class="pre">addElems</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NodeConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ElemSet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mymesh/mesh.html#mesh.addElems"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.mesh.mesh.addElems" title="Link to this definition">#</a></dt>
+<dd><p>Add new elements to the mesh. These elements will be appended to the end
+of the list of elements (<code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.NodeConn</span></code>) and should reference
+nodes that already exist in the mesh. Note that properties that are
+calculated on demand are not updated by this operation - it’s safest
+to use the reset=True option or use <a class="reference internal" href="mymesh.mesh.mesh.reset.html#mymesh.mesh.mesh.reset" title="mymesh.mesh.mesh.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mesh.reset()</span></code></a> after this
+operation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>NodeConn</strong> (<em>array_like</em>) – Node connectivities of the new element(s). This can either be a
+single element (shape=(1,m)) or multiple elements (shape=(n,m) or
+list of lists with length n for mixed element type elements). If a
+single element, it must be a 2D array or list of a single list
+(i.e. [[a,b,c]]).</p></li>
+<li><p><strong>ElemSet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – If provided, name of a element set that the new elements will be
+added to in mesh.ElemSets[&lt;ElemSet&gt;], by default None.</p></li>
+<li><p><strong>reset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, will reset all cached mesh properties (e.g. Faces,
+ElemNeighbors)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

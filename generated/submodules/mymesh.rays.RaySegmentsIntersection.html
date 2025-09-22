@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -61,7 +61,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.rays.RaySegmentsIntersection';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mymesh.rays.RaySurfIntersection" href="mymesh.rays.RaySurfIntersection.html" />
+    <link rel="next" title="mymesh.rays.RayBoundaryIntersection" href="mymesh.rays.RayBoundaryIntersection.html" />
     <link rel="prev" title="mymesh.rays.RaySegmentIntersection" href="mymesh.rays.RaySegmentIntersection.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -437,11 +442,11 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>s1</strong> (<em>array_like</em>) – Coordinates of the first set of n line segments (shape=(n,2,3))</p></li>
 <li><p><strong>s2</strong> (<em>array_like</em>) – Coordinates of the second set of n line segments (shape=(n,2,3))</p></li>
-<li><p><strong>return_intersection</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, return the coordinates of the intersection point. If no
+<li><p><strong>return_intersection</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, return the coordinates of the intersection point. If no
 intersection, np.empty((0,3)) is returned. By default False</p></li>
-<li><p><strong>endpt_inclusive</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, one end point lying exactly on the other segment will be
+<li><p><strong>endpt_inclusive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, one end point lying exactly on the other segment will be
 considered an intersection, by default True</p></li>
-<li><p><strong>eps</strong> (<em>int</em><em>, </em><em>optional</em>) – Small tolerance parameter, by default 0</p></li>
+<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Small tolerance parameter, by default 0</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -478,11 +483,11 @@ is [np.nan, np.nan, np.nan].</p></li>
       </div>
     </a>
     <a class="right-next"
-       href="mymesh.rays.RaySurfIntersection.html"
+       href="mymesh.rays.RayBoundaryIntersection.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.rays.RaySurfIntersection</p>
+        <p class="prev-next-title">mymesh.rays.RayBoundaryIntersection</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

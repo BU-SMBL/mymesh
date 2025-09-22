@@ -12,7 +12,7 @@ implicit and explicit.
 .. plot::
     :include-source: False
     
-    cube = primitives.Box([-1,1,-1,1,-1,1], .25, ElemType='tri')
+    cube = primitives.Grid([-1,1,-1,1,-1,1], .25, Type='surf', ElemType='tri')
     sphere = primitives.Sphere([1,-1,1], 1.65, ElemType='tri')
 
     U,I,D = booleans.MeshBooleans(cube,sphere)
@@ -117,7 +117,7 @@ Explicit CSG
 
 Explicit CSG operates directly on existing meshes, rather than functions or 
 values. This involves calculating intersections between meshes (utilizing 
-:mod:`mymesh.rays` and :mod:`mymesh.octree`) and then splitting and joining 
+:mod:`mymesh.rays` and :mod:`mymesh.tree`) and then splitting and joining 
 elements to create the new mesh. These operations are more computationally 
 demanding and generally slower than implicit CSG, especially for large meshes, 
 but and can be used when no functional representation of a mesh exists. 
@@ -138,7 +138,7 @@ symmetric, i.e. A-B ≠ B-A).
 
 .. plot::
     
-    cube = primitives.Box([-.9,.9,-.9,.9,-.9,.9], .25, ElemType='tri')
+    cube = primitives.Grid([-.9,.9,-.9,.9,-.9,.9], .25, Type='surf', ElemType='tri')
     sphere = primitives.Sphere([0,0,0], 1, ElemType='tri')
 
     U,I,D = booleans.MeshBooleans(cube,sphere)

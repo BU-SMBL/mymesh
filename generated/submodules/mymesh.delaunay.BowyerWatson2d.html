@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -61,7 +61,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.delaunay.BowyerWatson2d';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mymesh.delaunay.TriangleSplittingTriangulation" href="mymesh.delaunay.TriangleSplittingTriangulation.html" />
+    <link rel="next" title="mymesh.delaunay.SciPy" href="mymesh.delaunay.SciPy.html" />
     <link rel="prev" title="mymesh.delaunay.Triangulate" href="mymesh.delaunay.Triangulate.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -432,10 +437,11 @@
 <dt class="sig sig-object py" id="mymesh.delaunay.BowyerWatson2d">
 <span class="sig-prename descclassname"><span class="pre">mymesh.delaunay.</span></span><span class="sig-name descname"><span class="pre">BowyerWatson2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/delaunay.html#BowyerWatson2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.delaunay.BowyerWatson2d" title="Link to this definition">#</a></dt>
 <dd><p>Bowyer-Watson algorithm for 2D Delaunay triangulation</p>
-<p><span id="id1">[<a class="reference internal" href="../../guide/ref.html#id6" title="Adrian Bowyer. Computing Dirichlet Tessellations. Computer Journal, 24(2):162–166, 1981. URL: https://academic.oup.com/comjnl/article/24/2/162/338193, doi:10.1093/comjnl/24.2.162.">Bow81</a>]</span>, <span id="id2">[<a class="reference internal" href="../../guide/ref.html#id4" title="David F. Watson. Computing the n-dimensional Delaunau tessellation with application to Voronoi polytopes. Computer Journal, 24(2):167–172, 1981. URL: https://academic.oup.com/comjnl/article/24/2/167/338200, doi:10.1093/comjnl/24.2.167.">Wat81</a>]</span></p>
+<p><span id="id1">[<a class="reference internal" href="../../guide/ref.html#id18" title="Adrian Bowyer. Computing Dirichlet Tessellations. Computer Journal, 24(2):162–166, 1981. URL: https://academic.oup.com/comjnl/article/24/2/162/338193, doi:10.1093/comjnl/24.2.162.">Bow81</a>]</span>, <span id="id2">[<a class="reference internal" href="../../guide/ref.html#id16" title="David F. Watson. Computing the n-dimensional Delaunau tessellation with application to Voronoi polytopes. Computer Journal, 24(2):167–172, 1981. URL: https://academic.oup.com/comjnl/article/24/2/167/338200, doi:10.1093/comjnl/24.2.167.">Wat81</a>]</span></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>NodeCoords</strong> (<em>array_like</em>) – nx2 or nx3 set of points to be triangulated</p>
+<dd class="field-odd"><p><strong>NodeCoords</strong> (<em>array_like</em>) – (n,2) or (n,3) array of points to be triangulated. If three dimensional
+coordinates are given, the third coordinate will be ignored.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>NodeConn</strong> – mx3 array of node connectivities for the Delaunay triangulation</p>
@@ -468,11 +474,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="mymesh.delaunay.TriangleSplittingTriangulation.html"
+       href="mymesh.delaunay.SciPy.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.delaunay.TriangleSplittingTriangulation</p>
+        <p class="prev-next-title">mymesh.delaunay.SciPy</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

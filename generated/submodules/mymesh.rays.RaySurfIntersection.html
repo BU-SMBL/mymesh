@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="mymesh.rays.RaysSurfIntersection" href="mymesh.rays.RaysSurfIntersection.html" />
-    <link rel="prev" title="mymesh.rays.RaySegmentsIntersection" href="mymesh.rays.RaySegmentsIntersection.html" />
+    <link rel="prev" title="mymesh.rays.RayBoundaryIntersection" href="mymesh.rays.RayBoundaryIntersection.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -430,7 +435,7 @@
 <h1>mymesh.rays.RaySurfIntersection<a class="headerlink" href="#mymesh-rays-raysurfintersection" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.rays.RaySurfIntersection">
-<span class="sig-prename descclassname"><span class="pre">mymesh.rays.</span></span><span class="sig-name descname"><span class="pre">RaySurfIntersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SurfConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Octree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'generate'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/rays.html#RaySurfIntersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.rays.RaySurfIntersection" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mymesh.rays.</span></span><span class="sig-name descname"><span class="pre">RaySurfIntersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SurfConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bidirectional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Octree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/rays.html#RaySurfIntersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.rays.RaySurfIntersection" title="Link to this definition">#</a></dt>
 <dd><p>Identify intersections between a ray and a triangular surface mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -440,15 +445,17 @@
 <li><p><strong>NodeCoords</strong> (<em>array_like</em>) – nx3 list of node coordinates</p></li>
 <li><p><strong>SurfConn</strong> (<em>array_like</em>) – List of surface element connectivities. This should be a strictly
 triangular mesh. See <a class="reference internal" href="mymesh.converter.surf2tris.html#mymesh.converter.surf2tris" title="mymesh.converter.surf2tris"><code class="xref py py-func docutils literal notranslate"><span class="pre">surf2tris()</span></code></a> for conversion.</p></li>
-<li><p><strong>eps</strong> (<em>float</em><em>, </em><em>optional</em>) – Small tolerance parameter, by default 1e-14</p></li>
-<li><p><strong>Octree</strong> (<em>str</em><em>, </em><em>octree.OctreeNode</em><em>, or </em><em>NoneType</em><em>, </em><em>optional</em>) – <p>Specify whether to use an octree structure for acceleration of
-intersection tests. An octree previously constructed using
-<a class="reference internal" href="mymesh.octree.Surface2Octree.html#mymesh.octree.Surface2Octree" title="mymesh.octree.Surface2Octree"><code class="xref py py-func docutils literal notranslate"><span class="pre">Surface2Octree()</span></code></a> can be used, or one can be
-generated by default ‘generate’.</p>
+<li><p><strong>bidirectional</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Determines whether to check for intersections only in the direction the
+ray is pointing, or in both directions (±ray), by default False.</p></li>
+<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Small tolerance parameter, by default 1e-14</p></li>
+<li><p><strong>Octree</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference internal" href="mymesh.tree.OctreeNode.html#mymesh.tree.OctreeNode" title="mymesh.tree.OctreeNode"><em>tree.OctreeNode</em></a><em>, or </em><em>NoneType</em><em>, </em><em>optional</em>) – <p>Specify whether to use an octree structure for acceleration of
+intersection tests. An octree previously contructed using
+<a class="reference internal" href="mymesh.tree.Surface2Octree.html#mymesh.tree.Surface2Octree" title="mymesh.tree.Surface2Octree"><code class="xref py py-func docutils literal notranslate"><span class="pre">Surface2Octree()</span></code></a> can be used, or one can be
+generated by default None.</p>
 <ul>
 <li><p>’generate’ : Create an octree</p></li>
 <li><p>’None’ or None : Don’t use an octree</p></li>
-<li><p>octree.OctreeNode : Use this octree</p></li>
+<li><p>tree.OctreeNode : Use this octree</p></li>
 </ul>
 </p></li>
 </ul>
@@ -477,12 +484,12 @@ generated by default ‘generate’.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mymesh.rays.RaySegmentsIntersection.html"
+       href="mymesh.rays.RayBoundaryIntersection.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.rays.RaySegmentsIntersection</p>
+        <p class="prev-next-title">mymesh.rays.RayBoundaryIntersection</p>
       </div>
     </a>
     <a class="right-next"

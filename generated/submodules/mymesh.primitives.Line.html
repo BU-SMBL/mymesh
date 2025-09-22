@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -61,7 +61,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.primitives.Line';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mymesh.primitives.Box" href="mymesh.primitives.Box.html" />
+    <link rel="next" title="mymesh.primitives.Multiline" href="mymesh.primitives.Multiline.html" />
     <link rel="prev" title="mymesh.primitives" href="../mymesh.primitives.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -437,9 +442,9 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>pt1</strong> (<em>array_like</em>) – Coordinates (x,y,z) of the first point of the line</p></li>
 <li><p><strong>pt2</strong> (<em>array_like</em>) – Coordinates (x,y,z) of the second point of the line</p></li>
-<li><p><strong>h</strong> (<em>float</em><em>, </em><em>optional</em>) – Approximate element size. Only used if n is not provided. If neither h
+<li><p><strong>h</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Approximate element size. Only used if n is not provided. If neither h
 nor n are provided, element size is norm(pt2-pt1). By default, None.</p></li>
-<li><p><strong>n</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of segments of the line. If h is also provided, n takes
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of segments of the line. If h is also provided, n takes
 precedence. If neither h nor n are provided, number of segments is 1.
 By default, None.</p></li>
 </ul>
@@ -484,11 +489,11 @@ By default, None.</p></li>
       </div>
     </a>
     <a class="right-next"
-       href="mymesh.primitives.Box.html"
+       href="mymesh.primitives.Multiline.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.primitives.Box</p>
+        <p class="prev-next-title">mymesh.primitives.Multiline</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

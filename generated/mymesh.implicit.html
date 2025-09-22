@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -469,25 +474,28 @@ and values above zero are considered “outside”.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.diamond.html#mymesh.implicit.diamond" title="mymesh.implicit.diamond"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diamond</span></code></a>(x, y, z)</p></td>
 <td><p>Implicit function approximation of the diamond (Schwarz D) triply periodic minimal surface (TPMS).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.cylinder.html#mymesh.implicit.cylinder" title="mymesh.implicit.cylinder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cylinder</span></code></a>(center, radius)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.cylinder.html#mymesh.implicit.cylinder" title="mymesh.implicit.cylinder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cylinder</span></code></a>(center, radius[, axis])</p></td>
 <td><p>Implicit function of a cylinder.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.box.html#mymesh.implicit.box" title="mymesh.implicit.box"><code class="xref py py-obj docutils literal notranslate"><span class="pre">box</span></code></a>(x1, x2, y1, y2, z1, z2)</p></td>
 <td><p>Implicit function of a box.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.xplane.html#mymesh.implicit.xplane" title="mymesh.implicit.xplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xplane</span></code></a>(x0[, n])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.plane.html#mymesh.implicit.plane" title="mymesh.implicit.plane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plane</span></code></a>(pt, normal)</p></td>
+<td><p>Implicit function of an arbitrary plane.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.xplane.html#mymesh.implicit.xplane" title="mymesh.implicit.xplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xplane</span></code></a>(x0[, n])</p></td>
 <td><p>Implicit function of a plane whose normal direction is along the x axis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.yplane.html#mymesh.implicit.yplane" title="mymesh.implicit.yplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">yplane</span></code></a>(y0[, n])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.yplane.html#mymesh.implicit.yplane" title="mymesh.implicit.yplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">yplane</span></code></a>(y0[, n])</p></td>
 <td><p>Implicit function of a plane whose normal direction is along the y axis.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.zplane.html#mymesh.implicit.zplane" title="mymesh.implicit.zplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zplane</span></code></a>(z0[, n])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.zplane.html#mymesh.implicit.zplane" title="mymesh.implicit.zplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zplane</span></code></a>(z0[, n])</p></td>
 <td><p>Implicit function of a plane whose normal direction is along the z axis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.sphere.html#mymesh.implicit.sphere" title="mymesh.implicit.sphere"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sphere</span></code></a>(center, radius)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.sphere.html#mymesh.implicit.sphere" title="mymesh.implicit.sphere"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sphere</span></code></a>(center, radius)</p></td>
 <td><p>Implicit function of a sphere.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.torus.html#mymesh.implicit.torus" title="mymesh.implicit.torus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">torus</span></code></a>(center, R, r)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.torus.html#mymesh.implicit.torus" title="mymesh.implicit.torus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">torus</span></code></a>(center, R, r)</p></td>
 <td><p>Implicit function of a torus oriented about the z-axis.</p></td>
 </tr>
 </tbody>
@@ -498,19 +506,19 @@ and values above zero are considered “outside”.</p>
 <h2>Implicit Function Operators<a class="headerlink" href="#implicit-function-operators" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.offset.html#mymesh.implicit.offset" title="mymesh.implicit.offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">offset</span></code></a>(fval, value)</p></td>
-<td><p>Offset function values by a prescribed amount.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.offset.html#mymesh.implicit.offset" title="mymesh.implicit.offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">offset</span></code></a>(f, value)</p></td>
+<td><p>Offset an implicit surface by a prescribed amount.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.union.html#mymesh.implicit.union" title="mymesh.implicit.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(fval1, fval2)</p></td>
-<td><p>Boolean union of two values or sets of values.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.union.html#mymesh.implicit.union" title="mymesh.implicit.union"><code class="xref py py-obj docutils literal notranslate"><span class="pre">union</span></code></a>(f1, f2)</p></td>
+<td><p>Boolean union of two implicit functions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.diff.html#mymesh.implicit.diff" title="mymesh.implicit.diff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diff</span></code></a>(fval1, fval2)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.diff.html#mymesh.implicit.diff" title="mymesh.implicit.diff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diff</span></code></a>(f1, f2)</p></td>
 <td><p>Boolean difference of two values or sets of values.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.thicken.html#mymesh.implicit.thicken" title="mymesh.implicit.thicken"><code class="xref py py-obj docutils literal notranslate"><span class="pre">thicken</span></code></a>(fval, t)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.thicken.html#mymesh.implicit.thicken" title="mymesh.implicit.thicken"><code class="xref py py-obj docutils literal notranslate"><span class="pre">thicken</span></code></a>(f, t)</p></td>
 <td><p>Thicken an isosurface by offsetting in both directions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.intersection.html#mymesh.implicit.intersection" title="mymesh.implicit.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(fval1, fval2)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.intersection.html#mymesh.implicit.intersection" title="mymesh.implicit.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intersection</span></code></a>(f1, f2)</p></td>
 <td><p>Boolean intersection of two values or sets of values.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.unionf.html#mymesh.implicit.unionf" title="mymesh.implicit.unionf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unionf</span></code></a>(f1, f2)</p></td>
@@ -551,16 +559,13 @@ and values above zero are considered “outside”.</p>
 <h2>Other Implicit Mesh Utilities<a class="headerlink" href="#other-implicit-mesh-utilities" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.mesh2sdf.html#mymesh.implicit.mesh2sdf" title="mymesh.implicit.mesh2sdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mesh2sdf</span></code></a>(M, points[, method])</p></td>
-<td><p>Generates a signed distance field for a mesh.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.mesh2udf.html#mymesh.implicit.mesh2udf" title="mymesh.implicit.mesh2udf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mesh2udf</span></code></a>(M, points)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.mesh2udf.html#mymesh.implicit.mesh2udf" title="mymesh.implicit.mesh2udf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mesh2udf</span></code></a>(M, points)</p></td>
 <td><p>Generates an unsigned distance field for a mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.grid2fun.html#mymesh.implicit.grid2fun" title="mymesh.implicit.grid2fun"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grid2fun</span></code></a>(VoxelCoords, VoxelConn, Vals[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.grid2fun.html#mymesh.implicit.grid2fun" title="mymesh.implicit.grid2fun"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grid2fun</span></code></a>(VoxelCoords, VoxelConn, Vals[, ...])</p></td>
 <td><p>Converts a voxel grid mesh into a function that can be evaluated at any point within the bounds of the grid.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.grid2grad.html#mymesh.implicit.grid2grad" title="mymesh.implicit.grid2grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grid2grad</span></code></a>(VoxelCoords, VoxelConn, NodeVals)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.grid2grad.html#mymesh.implicit.grid2grad" title="mymesh.implicit.grid2grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grid2grad</span></code></a>(VoxelCoords, VoxelConn, NodeVals)</p></td>
 <td><p>Converts a voxel grid mesh into a function.</p></td>
 </tr>
 </tbody>

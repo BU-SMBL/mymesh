@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.prune
+==============================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.prune

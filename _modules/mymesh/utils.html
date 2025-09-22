@@ -40,7 +40,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -373,6 +373,9 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
+    
+    <li class="breadcrumb-item"><a href="../mymesh.html" class="nav-link">mymesh</a></li>
+    
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh.utils</span></li>
   </ul>
 </nav>
@@ -395,7 +398,7 @@
 <span class="c1"># Created on Wed Sep 29 18:31:03 2021</span>
 <span class="c1"># @author: toj</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Various mesh utilities </span>
+<span class="sd">Various mesh utilities for mesh measurements, manipulations, cleanup, and more</span>
 
 <span class="sd">.. currentmodule:: mymesh.utils</span>
 
@@ -450,8 +453,8 @@
 <span class="sd">    BaryTris</span>
 <span class="sd">    BaryTet</span>
 
-<span class="sd">Mesh Clean Up</span>
-<span class="sd">=============</span>
+<span class="sd">Mesh Cleanup</span>
+<span class="sd">============</span>
 <span class="sd">.. autosummary::</span>
 <span class="sd">    :toctree: submodules/</span>
 
@@ -470,14 +473,15 @@
 <span class="sd">    PadRagged</span>
 <span class="sd">    ExtractRagged</span>
 <span class="sd">    identify_type</span>
+<span class="sd">    identify_elem</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span><span class="o">,</span><span class="w"> </span><span class="nn">copy</span><span class="o">,</span><span class="w"> </span><span class="nn">time</span><span class="o">,</span><span class="w"> </span><span class="nn">itertools</span><span class="o">,</span><span class="w"> </span><span class="nn">collections</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">converter</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">octree</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">mesh</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">try_njit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">converter</span><span class="p">,</span> <span class="n">delaunay</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">try_njit</span><span class="p">,</span> <span class="n">check_numba</span>
 
 <div class="viewcode-block" id="getNodeNeighbors">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.utils.getNodeNeighbors.html#mymesh.utils.getNodeNeighbors">[docs]</a>
@@ -537,12 +541,15 @@
 <span class="sd">    ElemConn : list</span>
 <span class="sd">        List of elements connected to each node.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="n">nodes</span><span class="p">,</span><span class="n">elems</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[(</span><span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])</span>
-    <span class="n">NotInMesh</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)))</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
-    <span class="n">nodes</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">NotInMesh</span><span class="p">)</span>
-    <span class="n">elems</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">nodes</span><span class="p">,</span><span class="n">elems</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[(</span><span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])</span>
+        <span class="n">NotInMesh</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)))</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="n">nodes</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">NotInMesh</span><span class="p">)</span>
+        <span class="n">elems</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)))</span>
 
-    <span class="n">ElemConn</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">elem</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">group</span> <span class="k">if</span> <span class="n">elem</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span><span class="n">elems</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> 
+        <span class="n">ElemConn</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">elem</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">group</span> <span class="k">if</span> <span class="n">elem</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span><span class="n">elems</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> 
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ElemConn</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">return</span> <span class="n">ElemConn</span></div>
 
@@ -872,9 +879,13 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span>
-    <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]])</span>
-    <span class="n">R</span> <span class="o">=</span> <span class="n">PadRagged</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">fillval</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">Points</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">R</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ArrayConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span>
+        <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">ArrayConn</span> <span class="o">=</span> <span class="n">PadRagged</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">fillval</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]])</span>
+    <span class="n">Points</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">ArrayConn</span><span class="p">]</span>
     <span class="n">centroids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">centroids</span></div>
 
@@ -902,7 +913,17 @@
     <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">TriConn</span><span class="p">,</span> <span class="n">inv</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2tris</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">return_inv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">points</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">TriConn</span><span class="p">]</span>
-    <span class="n">TriNormals</span> <span class="o">=</span> <span class="n">_tri_normals</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">check_numba</span><span class="p">():</span>
+        <span class="n">TriNormals</span> <span class="o">=</span> <span class="n">_tri_normals</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,:]</span><span class="o">-</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,:]</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,:]</span><span class="o">-</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,:]</span>
+        <span class="n">Nx</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">U</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">Ny</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">U</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">Nz</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">U</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">Nx</span><span class="p">,</span><span class="n">Ny</span><span class="p">,</span><span class="n">Nz</span><span class="p">))</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">TriNormals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">d</span><span class="p">[:,</span><span class="kc">None</span><span class="p">],</span> <span class="n">out</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">N</span><span class="p">)),</span> <span class="n">where</span><span class="o">=</span><span class="n">d</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span><span class="o">!=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="n">ElemNormals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">SurfConn</span><span class="p">),</span><span class="mi">3</span><span class="p">))</span>
     <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">ElemNormals</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="n">TriNormals</span><span class="p">)</span>
@@ -911,17 +932,25 @@
     <span class="k">return</span> <span class="n">ElemNormals</span></div>
 
 
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_tri_normals</span><span class="p">(</span><span class="n">Tris</span><span class="p">):</span>
     
-    <span class="n">U</span> <span class="o">=</span> <span class="n">Tris</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,:]</span><span class="o">-</span><span class="n">Tris</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,:]</span>
-    <span class="n">V</span> <span class="o">=</span> <span class="n">Tris</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,:]</span><span class="o">-</span><span class="n">Tris</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,:]</span>
-    <span class="n">Nx</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">U</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">Ny</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">U</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
-    <span class="n">Nz</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">U</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">Nx</span><span class="p">,</span><span class="n">Ny</span><span class="p">,</span><span class="n">Nz</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
-        <span class="n">ElemNormals</span> <span class="o">=</span> <span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="n">d</span><span class="p">[:,</span><span class="kc">None</span><span class="p">])</span>
+    <span class="n">ElemNormals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">Tris</span><span class="p">),</span><span class="mi">3</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">tri</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Tris</span><span class="p">):</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">tri</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">tri</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">tri</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">tri</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">Nx</span> <span class="o">=</span> <span class="n">U</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">U</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">Ny</span> <span class="o">=</span> <span class="n">U</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">U</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">Nz</span> <span class="o">=</span> <span class="n">U</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">U</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">V</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Nx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Ny</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Nz</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">norm</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ElemNormals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Nx</span><span class="o">/</span><span class="n">norm</span>
+            <span class="n">ElemNormals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ny</span><span class="o">/</span><span class="n">norm</span>
+            <span class="n">ElemNormals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Nz</span><span class="o">/</span><span class="n">norm</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ElemNormals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">ElemNormals</span>
 
@@ -988,7 +1017,7 @@
         <span class="n">norms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanprod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="c1"># cos(alpha) = dot(u,v)/(norm(u)*norm(v))</span>
         <span class="n">cosAlpha</span> <span class="o">=</span> <span class="n">dots</span><span class="o">/</span><span class="n">norms</span>
-        <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">cosAlpha</span><span class="p">)</span><span class="o">*</span><span class="n">Masknan</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">cosAlpha</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">cosAlpha</span><span class="p">),</span> <span class="n">where</span><span class="o">=</span><span class="p">(</span><span class="n">cosAlpha</span><span class="o">&gt;=-</span><span class="mi">1</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">cosAlpha</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">Masknan</span>
 
         <span class="n">sumAlphaN</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">alpha</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">Ns</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">NodeNormals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
@@ -1327,12 +1356,12 @@
 <span class="sd">        Nodal connectivity of the surface mesh that the point is being projected to.</span>
 <span class="sd">    tol : float, optional</span>
 <span class="sd">        Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf</span>
-<span class="sd">        Octree : str (or octree.OctreeNode), optional</span>
+<span class="sd">        Octree : str (or tree.OctreeNode), optional</span>
 <span class="sd">        octree options. An octree representation of the surface can significantly</span>
 <span class="sd">        improve mapping speeds, by default &#39;generate&#39;.</span>
 <span class="sd">        &#39;generate&#39; - Will generate an octree for use in surface mapping.</span>
 <span class="sd">        &#39;none&#39; or None - Won&#39;t generate an octree and will use a brute force approach.</span>
-<span class="sd">        octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by octree.Surface2Octree(NodeCoords,SurfConn)</span>
+<span class="sd">        tree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by tree.Surface2Octree(NodeCoords,SurfConn)</span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    MappingMatrix : np.ndarray</span>
@@ -1391,12 +1420,12 @@
 <span class="sd">        Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf</span>
 <span class="sd">    verbose : bool, optional</span>
 <span class="sd">        If true, will print mapping statistics, by default False.</span>
-<span class="sd">    Octree : str (or octree.OctreeNode), optional</span>
+<span class="sd">    Octree : str (or tree.OctreeNode), optional</span>
 <span class="sd">        octree options. An octree representation of surface 2 can significantly</span>
 <span class="sd">        improve mapping speeds, by default &#39;generate&#39;.</span>
 <span class="sd">        &#39;generate&#39; - Will generate an octree for use in surface mapping.</span>
 <span class="sd">        &#39;none&#39; or None - Won&#39;t generate an octree and will use a brute force approach.</span>
-<span class="sd">        octree.OctreeNode - Provide a precompute octree structure corresponding to surface 2. Should be created by octree.Surface2Octree(NodeCoords2,SurfConn2)</span>
+<span class="sd">        tree.OctreeNode - Provide a precompute octree structure corresponding to surface 2. Should be created by tree.Surface2Octree(NodeCoords2,SurfConn2)</span>
 <span class="sd">    return_octree : bool, optional</span>
 <span class="sd">        If true, will return the generated or provided octree, by default False.</span>
 <span class="sd">    npts : int, optional</span>
@@ -1408,7 +1437,7 @@
 <span class="sd">    MappingMatrix : list</span>
 <span class="sd">        min(npts, len(NodeCoords1))x4 matrix of of barycentric coordinates, defining NodeCoords1 in terms</span>
 <span class="sd">        of the triangular surface elements of Surface 2.</span>
-<span class="sd">    Octree : octree.OctreeNode, optional</span>
+<span class="sd">    Octree : tree.OctreeNode, optional</span>
 <span class="sd">        The generated or provided octree structure corresponding to Surface 2.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1433,7 +1462,7 @@
     <span class="n">NodeNormals1</span> <span class="o">=</span> <span class="n">Face2NodeNormal</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">,</span> <span class="n">SurfConn1</span><span class="p">,</span> <span class="n">ElemConn1</span><span class="p">,</span> <span class="n">ElemNormals1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;angle&#39;</span><span class="p">)</span>
 
     
-    <span class="k">if</span> <span class="n">Octree</span> <span class="o">==</span> <span class="s1">&#39;generate&#39;</span><span class="p">:</span> <span class="n">Octree</span> <span class="o">=</span> <span class="n">octree</span><span class="o">.</span><span class="n">Surface2Octree</span><span class="p">(</span><span class="n">NodeCoords2</span><span class="p">,</span><span class="n">SurfConn2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Octree</span> <span class="o">==</span> <span class="s1">&#39;generate&#39;</span><span class="p">:</span> <span class="n">Octree</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Surface2Octree</span><span class="p">(</span><span class="n">NodeCoords2</span><span class="p">,</span><span class="n">SurfConn2</span><span class="p">)</span>
     
     <span class="n">MappingMatrix</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">),</span><span class="mi">4</span><span class="p">))</span>
     <span class="n">MappingMatrix</span><span class="p">[</span><span class="n">NodeIds</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Project2Surface</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">[</span><span class="n">NodeIds</span><span class="p">,:],</span> <span class="n">NodeNormals1</span><span class="p">[</span><span class="n">NodeIds</span><span class="p">,:],</span> <span class="n">NodeCoords2</span><span class="p">,</span> <span class="n">SurfConn2</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span> <span class="n">Octree</span><span class="o">=</span><span class="n">Octree</span><span class="p">)</span>
@@ -1468,12 +1497,12 @@
 <span class="sd">        Contains the nodal connectivity defining the surface elements.</span>
 <span class="sd">    tol : float, optional</span>
 <span class="sd">        Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf </span>
-<span class="sd">    Octree : str (or octree.OctreeNode), optional</span>
+<span class="sd">    Octree : str (or tree.OctreeNode), optional</span>
 <span class="sd">        octree options. An octree representation of surface 1 can significantly</span>
 <span class="sd">        improve mapping speeds, by default &#39;generate&#39;.</span>
 <span class="sd">        &#39;generate&#39; - Will generate an octree for use in surface mapping.</span>
 <span class="sd">        &#39;none&#39; or None - Won&#39;t generate an octree and will use a brute force approach.</span>
-<span class="sd">        octree.OctreeNode - Provide a precompute octree structure corresponding to surface 1. Should be created by octree.Surface2Octree(NodeCoords1,SurfConn1)</span>
+<span class="sd">        tree.OctreeNode - Provide a precompute octree structure corresponding to surface 1. Should be created by tree.Surface2Octree(NodeCoords1,SurfConn1)</span>
 <span class="sd">    MappingMatrix : list</span>
 <span class="sd">        len(NodeCoords2)x4 matrix of of barycentric coordinates, defining NodeCoords2 in terms</span>
 <span class="sd">        of the triangular surface elements of Surface 1.</span>
@@ -1599,13 +1628,22 @@
         <span class="n">arrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
     <span class="n">unq</span><span class="p">,</span><span class="n">idx</span><span class="p">,</span><span class="n">inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">arrayCoords</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
-        <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">NewCoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">idx</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">tempIds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inv</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">R</span> <span class="o">=</span> <span class="n">PadRagged</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">fillval</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">NewConn</span> <span class="o">=</span> <span class="n">ExtractRagged</span><span class="p">(</span><span class="n">tempIds</span><span class="p">[</span><span class="n">R</span><span class="p">],</span><span class="n">delval</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="c1"># NodeConn already an array</span>
+            <span class="n">NewConn</span> <span class="o">=</span> <span class="n">inv</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Try to index with NodeConn, assuming it&#39;s rectangular (uniform element type)</span>
+                <span class="n">NewConn</span> <span class="o">=</span> <span class="n">inv</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="c1"># If NodeConn is a ragged list of lists (mixed element types), pad ragged</span>
+                <span class="n">tempIds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inv</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">R</span> <span class="o">=</span> <span class="n">PadRagged</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">fillval</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">NewConn</span> <span class="o">=</span> <span class="n">ExtractRagged</span><span class="p">(</span><span class="n">tempIds</span><span class="p">[</span><span class="n">R</span><span class="p">],</span><span class="n">delval</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">NewConn</span> <span class="o">=</span> <span class="n">NodeConn</span>
 
@@ -1917,9 +1955,12 @@
             <span class="n">wdgints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">uConn</span><span class="p">[</span><span class="n">hex2wdg</span><span class="p">,</span> <span class="p">:</span><span class="mi">8</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">8</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="c1"># Wedge cases: TODO: Not all cases accounted for</span>
-            <span class="c1"># Case 3 : Face 1 vertical collapse (2==6, 3==7)</span>
+            <span class="c1"># Case 3 : Face 3 vertical collapse (2==6, 3==7)</span>
             <span class="n">uConn</span><span class="p">[</span><span class="n">hex2wdg</span><span class="p">[</span><span class="n">wdgints</span> <span class="o">==</span> <span class="mi">3</span><span class="p">],</span> <span class="p">:</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">uConn</span><span class="p">[</span><span class="n">hex2wdg</span><span class="p">[</span><span class="n">wdgints</span> <span class="o">==</span> <span class="mi">3</span><span class="p">]][:,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">]]</span>
             
+            <span class="c1"># Case 9 : Face 4 vertical collapse (0==5, 3==7)</span>
+            <span class="n">uConn</span><span class="p">[</span><span class="n">hex2wdg</span><span class="p">[</span><span class="n">wdgints</span> <span class="o">==</span> <span class="mi">9</span><span class="p">],</span> <span class="p">:</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">uConn</span><span class="p">[</span><span class="n">hex2wdg</span><span class="p">[</span><span class="n">wdgints</span> <span class="o">==</span> <span class="mi">9</span><span class="p">]][:,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">7</span><span class="p">]]</span>
+
             <span class="c1"># Case 12 : Face 1 vertical collapse (0==4, 1==5)</span>
             <span class="n">uConn</span><span class="p">[</span><span class="n">hex2wdg</span><span class="p">[</span><span class="n">wdgints</span> <span class="o">==</span> <span class="mi">12</span><span class="p">],</span> <span class="p">:</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">uConn</span><span class="p">[</span><span class="n">hex2wdg</span><span class="p">[</span><span class="n">wdgints</span> <span class="o">==</span> <span class="mi">12</span><span class="p">]][:,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
 
@@ -1942,7 +1983,7 @@
             <span class="c1"># Case 7 : Face 5 collapse (4==5==6==7)</span>
             <span class="n">uConn</span><span class="p">[</span><span class="n">hex2pyr</span><span class="p">[</span><span class="n">pyrints</span> <span class="o">==</span> <span class="mi">7</span><span class="p">],</span> <span class="p">:</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">uConn</span><span class="p">[</span><span class="n">hex2pyr</span><span class="p">[</span><span class="n">pyrints</span> <span class="o">==</span> <span class="mi">7</span><span class="p">]][:,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">]]</span>
 
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">((</span><span class="n">wdgints</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">wdgints</span> <span class="o">!=</span> <span class="mi">12</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">((</span><span class="n">wdgints</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">wdgints</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">wdgints</span> <span class="o">!=</span> <span class="mi">12</span><span class="p">)):</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unaccounted for hex-to-wedge case(s) in CleanupDegenerateElements. This is a bug, please report.&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">((</span><span class="n">pyrints</span> <span class="o">!=</span> <span class="mi">7</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pyrints</span> <span class="o">!=</span> <span class="mi">19</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pyrints</span> <span class="o">!=</span> <span class="mi">25</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pyrints</span> <span class="o">!=</span> <span class="mi">38</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pyrints</span> <span class="o">!=</span> <span class="mi">76</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pyrints</span> <span class="o">!=</span> <span class="mi">112</span><span class="p">)):</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unaccounted for hex-to-pyr case(s) in CleanupDegenerateElements. This is a bug, please report.&#39;</span><span class="p">)</span>
@@ -2039,34 +2080,45 @@
 <span class="sd">        If provided, merged list of NodeVals.</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="n">NodeCoords1</span> <span class="o">=</span> <span class="n">NodeCoords1</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeConn1</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="n">NodeConn1</span> <span class="o">=</span> <span class="n">NodeConn1</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeCoords2</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="n">NodeCoords2</span> <span class="o">=</span> <span class="n">NodeCoords2</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeConn2</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="n">NodeConn2</span> <span class="o">=</span> <span class="n">NodeConn2</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeVals1</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="n">NodeVals1</span> <span class="o">=</span> <span class="n">NodeVals1</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeVals2</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="n">NodeVals2</span> <span class="o">=</span> <span class="n">NodeVals2</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        
-    <span class="n">MergeCoords</span> <span class="o">=</span> <span class="n">NodeCoords1</span> <span class="o">+</span> <span class="n">NodeCoords2</span>
 
-    <span class="n">MergeConn</span> <span class="o">=</span> <span class="n">NodeConn1</span> <span class="o">+</span> <span class="p">[[</span><span class="n">node</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">]</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">NodeConn2</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">NodeCoords2</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="n">MergeCoords</span> <span class="o">=</span> <span class="n">NodeCoords1</span> <span class="o">+</span> <span class="n">NodeCoords2</span> 
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">MergeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">NodeCoords1</span><span class="p">,</span> <span class="n">NodeCoords2</span><span class="p">])</span>
+    
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeConn1</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeConn2</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeConn1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeConn2</span><span class="p">)[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="c1"># Use vstack if NodeConns are arrays and compatible sizes</span>
+        <span class="n">MergeConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">NodeConn1</span><span class="p">,</span> <span class="n">NodeConn2</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">)])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Handle as lists</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeConn2</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="n">NodeConn2</span> <span class="o">=</span> <span class="p">(</span><span class="n">NodeConn2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">NodeConn2</span> <span class="o">=</span> <span class="p">[[</span><span class="n">node</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">]</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">NodeConn2</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeConn1</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="n">NodeConn1</span> <span class="o">=</span> <span class="n">NodeConn1</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        
+        <span class="n">MergeConn</span> <span class="o">=</span> <span class="n">NodeConn1</span> <span class="o">+</span> <span class="n">NodeConn2</span>
     
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeVals1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeVals1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords1</span><span class="p">),</span> <span class="s1">&#39;NodeVals lists must contain the number of entries as nodes.&#39;</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeVals2</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords2</span><span class="p">),</span> <span class="s1">&#39;NodeVals lists must contain the number of entries as nodes.&#39;</span>
 
-        <span class="n">MergeVals</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeVals1</span><span class="p">))]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeVals1</span><span class="p">)):</span>
-            <span class="n">MergeVals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeVals1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">NodeVals2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">NodeVals1</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">NodeVals2</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">MergeVals</span> <span class="o">=</span> <span class="n">NodeVals1</span> <span class="o">+</span> <span class="n">NodeVals2</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeVals1</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeVals2</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">MergeVals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">NodeVals1</span><span class="p">,</span> <span class="n">NodeVals2</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeVals1</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeVals2</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">MergeVals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">NodeVals1</span><span class="p">,</span> <span class="n">NodeVals2</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Dimensions of NodeVals1 and NodeVals2 are incompatible&#39;</span><span class="p">)</span>
+        
         <span class="k">if</span> <span class="n">cleanup</span><span class="p">:</span>
             <span class="n">MergeCoords</span><span class="p">,</span><span class="n">MergeConn</span><span class="p">,</span><span class="n">inv</span> <span class="o">=</span> <span class="n">DeleteDuplicateNodes</span><span class="p">(</span><span class="n">MergeCoords</span><span class="p">,</span><span class="n">MergeConn</span><span class="p">,</span><span class="n">return_inv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MergeVals</span><span class="p">)):</span>
-                <span class="n">MergeVals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">MergeVals</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">idx</span><span class="p">]</span>
+                <span class="n">MergeVals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">MergeVals</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">inv</span><span class="p">]</span>
                 
             <span class="k">return</span> <span class="n">MergeCoords</span><span class="p">,</span> <span class="n">MergeConn</span><span class="p">,</span> <span class="n">MergeVals</span>
     
@@ -2357,12 +2409,15 @@
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>    
 
-    <span class="n">hull</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">ConvexHull</span><span class="p">(</span><span class="n">Points</span><span class="p">)</span>
-    <span class="n">hull_points</span><span class="p">,</span> <span class="n">hull_facets</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">RemoveNodes</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">hull</span><span class="o">.</span><span class="n">simplices</span><span class="p">)</span>
-    <span class="n">hull_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">hull_points</span><span class="p">)</span>
+    <span class="c1"># hull = scipy.spatial.ConvexHull(Points)</span>
+    <span class="c1"># hull_points, hull_facets,_ = RemoveNodes(Points, hull.simplices)</span>
+    <span class="c1"># hull_points = np.asarray(hull_points)</span>
+    <span class="n">hull</span> <span class="o">=</span> <span class="n">delaunay</span><span class="o">.</span><span class="n">ConvexHull</span><span class="p">(</span><span class="n">Points</span><span class="p">)</span>
+    <span class="n">hull</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">hull</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">hull</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">RemoveNodes</span><span class="p">(</span><span class="o">*</span><span class="n">hull</span><span class="p">)</span> <span class="c1"># removes nodes that aren&#39;t in the hull</span>
 
     <span class="c1"># Calculate rotation matrices to align each hull facet with [0,0,-1] (so that it&#39;s rotated to the minimal z plane)</span>
-    <span class="n">normals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">CalcFaceNormal</span><span class="p">(</span><span class="n">hull_points</span><span class="p">,</span> <span class="n">hull_facets</span><span class="p">))</span>
+    <span class="n">normals</span> <span class="o">=</span> <span class="n">hull</span><span class="o">.</span><span class="n">ElemNormals</span>
     <span class="n">rot_axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">normals</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">rot_axes</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">normals</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">rot_axes</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">normals</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
@@ -2370,19 +2425,19 @@
     <span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">normals</span><span class="o">*</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
     <span class="n">thetas</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">normals</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
     <span class="n">outer_prod</span> <span class="o">=</span> <span class="n">rot_axes</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">rot_axes</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
-    <span class="n">cross_prod_matrices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">hull_facets</span><span class="p">),</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">cross_prod_matrices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">hull</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">),</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
     <span class="n">cross_prod_matrices</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">rot_axes</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">cross_prod_matrices</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span>  <span class="n">rot_axes</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">cross_prod_matrices</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span>  <span class="n">rot_axes</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">cross_prod_matrices</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">rot_axes</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">cross_prod_matrices</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">rot_axes</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">cross_prod_matrices</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span>  <span class="n">rot_axes</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">rot_matrices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">thetas</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)],</span><span class="nb">len</span><span class="p">(</span><span class="n">hull_facets</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">thetas</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">cross_prod_matrices</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">thetas</span><span class="p">))[:,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">outer_prod</span>
+    <span class="n">rot_matrices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">thetas</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)],</span><span class="nb">len</span><span class="p">(</span><span class="n">hull</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">thetas</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">cross_prod_matrices</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">thetas</span><span class="p">))[:,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">outer_prod</span>
 
     <span class="c1"># NOTE: might be able to reduce memory usage by not explicitly obtaining the rotation matrices (see https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle)</span>
 
     <span class="c1"># For each possible rotation, rotate all of the points</span>
-    <span class="n">rotated_points</span> <span class="o">=</span> <span class="n">rot_matrices</span> <span class="o">@</span> <span class="n">hull_points</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+    <span class="n">rotated_points</span> <span class="o">=</span> <span class="n">rot_matrices</span> <span class="o">@</span> <span class="n">hull</span><span class="o">.</span><span class="n">NodeCoords</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
 
     <span class="c1"># Get the local coordinate system axis-aligned bounding boxes for each rotation</span>
     <span class="n">mins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">rotated_points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -2625,6 +2680,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">identify_type</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Classify the mesh as either a surface or volume.</span>
+
 <span class="sd">        A mesh is classified as a volume mesh (``vol``) if any elements are unambiguous </span>
 <span class="sd">        volume elements - pyramid (5 nodes), wedge (6), hexahedron (8), or if </span>
 <span class="sd">        any of a random sample of 10 elements (or all elements if NElem &lt; 10) has</span>
@@ -2652,6 +2708,13 @@
 <span class="sd">        In such cases, Type should be specified explicitly when creating the mesh</span>
 <span class="sd">        object.</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        NodeCoords : array_like</span>
+<span class="sd">            Node coordinates.</span>
+<span class="sd">        NodeConn : array_like</span>
+<span class="sd">            Node connectivity.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Type : str</span>
@@ -2675,7 +2738,7 @@
 
         <span class="c1"># Check element lengths</span>
         <span class="n">lengths</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">NodeConn</span><span class="p">)</span>
-        <span class="n">vol_elem_set</span> <span class="o">=</span> <span class="p">{</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">}</span> <span class="c1"># Set of unambiguous volume element lengths</span>
+        <span class="n">vol_elem_set</span> <span class="o">=</span> <span class="p">{</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">20</span><span class="p">}</span> <span class="c1"># Set of unambiguous volume element lengths</span>
         <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lengths</span><span class="p">:</span>
             <span class="c1"># NOTE: any mesh containing triangle and volume elements will be </span>
             <span class="c1"># arbitrarily classified by whichever comes first.</span>
@@ -2707,8 +2770,142 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">Type</span> <span class="o">=</span> <span class="s1">&#39;surf&#39;</span>
 
-        <span class="k">return</span> <span class="n">Type</span></div>
+        <span class="k">return</span> <span class="n">Type</span>    </div>
 
+
+<div class="viewcode-block" id="identify_elem">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.utils.identify_elem.html#mymesh.utils.identify_elem">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">identify_elem</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identify the types of elements present in the mesh. This provides this only</span>
+<span class="sd">    identifies the unique types present, not the type of each individual </span>
+<span class="sd">    element.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    NodeCoords : array_like</span>
+<span class="sd">        Node coordinates.</span>
+<span class="sd">    NodeConn : array_like</span>
+<span class="sd">        Node connectivity.</span>
+<span class="sd">    Type : str, NoneType, optional</span>
+<span class="sd">        Type of mesh (`&#39;line&#39;`, `&#39;surf&#39;`, `&#39;vol&#39;`), if known. For some meshes</span>
+<span class="sd">        this won&#39;t be needed, if it is but isn&#39;t provided, it will be identified</span>
+<span class="sd">        using :func:`identify_type`. By default None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    elems : list</span>
+<span class="sd">        List of strings identifying the element types present in the mesh</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; S = primitives.Sphere([0,0,0], 1, Type=&#39;surf&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; utils.identify_elem(S.NodeCoords, S.NodeConn)</span>
+<span class="sd">    [&#39;tri&#39;, &#39;quad&#39;]</span>
+
+<span class="sd">    &gt;&gt;&gt; S = primitives.Sphere([0,0,0], 1, Type=&#39;surf&#39;, ElemType=&#39;tri&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; utils.identify_elem(S.NodeCoords, S.NodeConn)</span>
+<span class="sd">    [&#39;tri&#39;]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ambiguous_lengths</span> <span class="o">=</span> <span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">}</span> <span class="c1"># Element lengths that are ambiguous</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">and</span> <span class="n">NodeConn</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="p">:</span>
+        <span class="n">lengths</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)[</span><span class="mi">1</span><span class="p">],)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span>
+            <span class="n">lengths</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)[</span><span class="mi">1</span><span class="p">],)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># ragged list of lists, check all lengths</span>
+            <span class="n">lengths</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">)))</span>
+    
+    <span class="n">lengths</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">l</span> <span class="ow">in</span> <span class="n">ambiguous_lengths</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lengths</span><span class="p">)</span> <span class="ow">and</span> <span class="n">Type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Type</span> <span class="o">=</span> <span class="n">identify_type</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">)</span>
+
+    
+    <span class="n">elems</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lengths</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;line&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;tri&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
+            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;quad&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;tet&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;pyr&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;wdg&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;hex&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;tet10&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">20</span><span class="p">:</span>
+            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;hex20&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">elems</span></div>
+
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RotateNormalToVector</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">Vector</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reorient nodes to align an asociated normal vector with a chosen vector.</span>
+<span class="sd">    This can be used to reorient a mesh so that a particular element is facing</span>
+<span class="sd">    in a certain direction</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    NodeCoords : np.ndarray(dtype=np.float64)</span>
+<span class="sd">        Array of node coordinates (shape=(n,3))</span>
+<span class="sd">    Normal : np.ndarray(dtype=np.float64)</span>
+<span class="sd">        Normal vector associated with the nodes (shape=(3,)). This could </span>
+<span class="sd">        be the normal vector of a particular node or element of the mesh, or </span>
+<span class="sd">        some other vector related to the nodes that is the basis of reorientation.</span>
+<span class="sd">    Vector : np.ndarray(dtype=np.float64)</span>
+<span class="sd">        Vector which the nodes will be rotated so that Normal is aligned with it (shape=(3,)).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RotCoords : np.ndarray</span>
+<span class="sd">        Coordinates of the rotated nodes. These will be positioned arbitrarily</span>
+<span class="sd">        in space, but will be rotated so that Normal is parallel with Vector</span>
+<span class="sd">    R : np.ndarray</span>
+<span class="sd">        3x3 rotation matrix. RotCoords = (R @ NodeCoords.T).T</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">Normal</span> <span class="o">=</span> <span class="n">Normal</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Normal</span><span class="p">)</span>
+    <span class="n">Vector</span> <span class="o">=</span> <span class="n">Vector</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Vector</span><span class="p">)</span>
+    <span class="n">Cross</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">Normal</span><span class="p">,</span><span class="n">Vector</span><span class="p">)</span> 
+    <span class="n">CrossNorm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Cross</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">CrossNorm</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">pass</span>
+        <span class="c1"># RotAxis = np.array([[0,0,1],[1,0,0],[0,1,0]],dtype=np.float64) @ Normal[:,None]</span>
+        <span class="n">RotAxis</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">RotAxis</span> <span class="o">=</span> <span class="n">Cross</span><span class="o">/</span><span class="n">CrossNorm</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">Normal</span><span class="p">,</span> <span class="n">Vector</span><span class="p">):</span>
+        <span class="n">Angle</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Vector</span><span class="p">,</span> <span class="n">Normal</span><span class="p">))</span>
+    
+    <span class="n">outer_prod</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">RotAxis</span><span class="p">,</span> <span class="n">RotAxis</span><span class="p">)</span>
+    <span class="n">cross_prod_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">cross_prod_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">RotAxis</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">cross_prod_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span>  <span class="n">RotAxis</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">cross_prod_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span>  <span class="n">RotAxis</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">cross_prod_matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">RotAxis</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">cross_prod_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">RotAxis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">cross_prod_matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span>  <span class="n">RotAxis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Angle</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">Angle</span><span class="p">)</span><span class="o">*</span><span class="n">cross_prod_matrix</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Angle</span><span class="p">))</span><span class="o">*</span><span class="n">outer_prod</span>
+
+    <span class="n">RotCoords</span> <span class="o">=</span> <span class="p">(</span><span class="n">R</span> <span class="o">@</span> <span class="n">NodeCoords</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">return</span> <span class="n">RotCoords</span><span class="p">,</span> <span class="n">R</span>
+
+    
 </pre></div>
 
                 </article>

@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -430,36 +435,42 @@
 <h1>mymesh.image.SurfaceNodeOptimization<a class="headerlink" href="#mymesh-image-surfacenodeoptimization" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.image.SurfaceNodeOptimization">
-<span class="sig-prename descclassname"><span class="pre">mymesh.image.</span></span><span class="sig-name descname"><span class="pre">SurfaceNodeOptimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FixedNodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FixEdges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">springs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/image.html#SurfaceNodeOptimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.image.SurfaceNodeOptimization" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mymesh.image.</span></span><span class="sig-name descname"><span class="pre">SurfaceNodeOptimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FixedNodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FixEdges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">springs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/image.html#SurfaceNodeOptimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.image.SurfaceNodeOptimization" title="Link to this definition">#</a></dt>
 <dd><p>Optimize the placement of surface node to lie on the “true” surface. This
 This simultaneously moves nodes towards the isosurface and redistributes
 nodes more evenly, thus smoothing the mesh without shrinkage or destruction
 of features. This method is consistes of using the Z-flow (and R-flow if
-smooth=True) from <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id35" title="Y. Ohtake and A. G. Belyaev. Mesh optimization for polygonized isosurfaces. Computer Graphics Forum, 20(3):368–376, sep 2001. URL: https://onlinelibrary-wiley-com.ezproxy.bu.edu/doi/10.1111/1467-8659.00529, doi:10.1111/1467-8659.00529.">OB01</a>]</span>.</p>
+smooth=True) from <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id50" title="Y. Ohtake and A. G. Belyaev. Mesh optimization for polygonized isosurfaces. Computer Graphics Forum, 20(3):368–376, sep 2001. URL: https://onlinelibrary-wiley-com.ezproxy.bu.edu/doi/10.1111/1467-8659.00529, doi:10.1111/1467-8659.00529.">OB01</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>M</strong> (<a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><em>mymesh.mesh</em></a>) – Mesh object</p></li>
-<li><p><strong>img</strong> (<em>str</em><em> or </em><em>np.ndarray</em>) – Image array or file path to an image</p></li>
-<li><p><strong>voxelsize</strong> (<em>float</em>) – Voxel size of the image</p></li>
-<li><p><strong>iterate</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of iterations to perform, by default 1</p></li>
-<li><p><strong>FixedNodes</strong> (<em>set</em><em>, </em><em>optional</em>) – Nodes to hold in place during repositioning, by default set()</p></li>
-<li><p><strong>FixEdges</strong> (<em>bool</em><em>, </em><em>optional</em>) – Option to detect and hold in place exposed surface edges, by default False</p></li>
-<li><p><strong>gaussian_sigma</strong> (<em>float</em><em>, </em><em>optional</em>) – Standard deviation used for getting the gradient via convolution with
+<li><p><strong>img</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>np.ndarray</em>) – Image array or file path to an image</p></li>
+<li><p><strong>h</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a>) – Voxel size of the image. If provided as a float, the image is assumed
+to have an isotropic voxel size. If given as a three element tuple,
+the three sizes refer to the voxel size in the first, second, and
+third dimensions of the image, corresponding to (z, y, x) axes.</p></li>
+<li><p><strong>Cr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Relaxation coefficient (only used if smooth=True). Scales the magnitude
+of smoothing</p></li>
+<li><p><strong>Cz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Node motion coefficient. Scales the magnitude of node movement</p></li>
+<li><p><strong>iterate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of iterations to perform, by default 1</p></li>
+<li><p><strong>FixedNodes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><em>set</em></a><em>, </em><em>optional</em>) – Nodes to hold in place during repositioning, by default set()</p></li>
+<li><p><strong>FixEdges</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to detect and hold in place exposed surface edges, by default False</p></li>
+<li><p><strong>gaussian_sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Standard deviation used for getting the gradient via convolution with
 a Gaussian kernel in units of voxels (see scipy.ndimage.gaussian_filter),
 by default 1 voxel.</p></li>
-<li><p><strong>smooth</strong> (<em>str</em><em>, </em><em>optional</em>) – Option to perform smoothing. This can be either ‘local’ for local
+<li><p><strong>smooth</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Option to perform smoothing. This can be either ‘local’ for local
 Laplacian smoothing or ‘tangential’ for tangential Laplacian smoothing,
 by default ‘tangential’. For any other option, smoothing will not be
 performed. Tangential smoothing differs from local in that nodes
 are only repositioned in the tangent plane (based on the normal vector
 obtain from the gradient).</p></li>
-<li><p><strong>InPlace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If False, will create a copy of the mesh, rather than altering node
+<li><p><strong>InPlace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If False, will create a copy of the mesh, rather than altering node
 positions of the original mesh object “in-place”, by default False</p></li>
-<li><p><strong>interpolation</strong> (<em>str</em><em>, </em><em>optional</em>) – Interpolation method used for evaluating surface points inside the image
+<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Interpolation method used for evaluating surface points inside the image
 using scipy.interpolate.RegularGridInterpolator (input must be one of the
 allowable “method” inputs), by default ‘linear’.</p></li>
-<li><p><strong>springs</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True and the mesh is a volume mesh, internal nodes will be treated as
+<li><p><strong>springs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True and the mesh is a volume mesh, internal nodes will be treated as
 if they are connected by springs (see <code class="xref py py-func docutils literal notranslate"><span class="pre">NodeSpringSmoothing()</span></code>)
 to reduce risk of element distortion or inversion, by default True.</p></li>
 </ul>

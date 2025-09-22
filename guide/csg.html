@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -347,6 +347,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="what_mesh.html">What is a mesh?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mesh_class.html">Working with the <code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code> class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="elem_types.html">Element Types</a></li>
@@ -420,7 +421,7 @@
 <h1>Constructive Solid Geometry<a class="headerlink" href="#constructive-solid-geometry" title="Link to this heading">#</a></h1>
 <p>Constructive solid geometry (CSG) is the process of combining a set of initial,
 often simple geometries into more complex shapes through the use of boolean
-operations such as unions, intersections, and differences <span id="id1">[<a class="reference internal" href="ref.html#id30" title="David H. Laidlaw, W. Benjamin Trumbore, and John F. Hughes. Constructive solid geometry for polyhedral objects. Proceedings of the 13th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1986, pages 161–170, aug 1986. URL: https://www.doi.org/10.1145/15922.15904, doi:10.1145/15922.15904.">LTH86</a>]</span>.
+operations such as unions, intersections, and differences <span id="id1">[<a class="reference internal" href="ref.html#id44" title="David H. Laidlaw, W. Benjamin Trumbore, and John F. Hughes. Constructive solid geometry for polyhedral objects. Proceedings of the 13th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1986, pages 161–170, aug 1986. URL: https://www.doi.org/10.1145/15922.15904, doi:10.1145/15922.15904.">LTH86</a>]</span>.
 In computer graphics applications, this may involve ray tracing or other
 approaches for efficient visualization, but MyMesh is primarily concerned with
 generating and/or modifying meshes. MyMesh offers two approaches to CSG:
@@ -490,7 +491,7 @@ that may require improvement if being used for finite element applications.</p>
 <h2>Explicit CSG<a class="headerlink" href="#explicit-csg" title="Link to this heading">#</a></h2>
 <p>Explicit CSG operates directly on existing meshes, rather than functions or
 values. This involves calculating intersections between meshes (utilizing
-<a class="reference internal" href="../generated/mymesh.rays.html#module-mymesh.rays" title="mymesh.rays"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mymesh.rays</span></code></a> and <a class="reference internal" href="../generated/mymesh.octree.html#module-mymesh.octree" title="mymesh.octree"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mymesh.octree</span></code></a>) and then splitting and joining
+<a class="reference internal" href="../generated/mymesh.rays.html#module-mymesh.rays" title="mymesh.rays"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mymesh.rays</span></code></a> and <a class="reference internal" href="../generated/mymesh.tree.html#module-mymesh.tree" title="mymesh.tree"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mymesh.tree</span></code></a>) and then splitting and joining
 elements to create the new mesh. These operations are more computationally
 demanding and generally slower than implicit CSG, especially for large meshes,
 but and can be used when no functional representation of a mesh exists.
@@ -500,14 +501,14 @@ may be problematic for some applications. If performing explicit CSG on surface
 meshes with the aim of producing models that require volumetric meshes,
 <a class="reference external" href="https://github.com/wildmeshing/fTetWild">fTetWild</a> may be useful for
 generating high quality tetrahedral meshes from imperfect surfaces
-<span id="id2">[<a class="reference internal" href="ref.html#id27" title="Yixin Hu, Teseo Schneider, Bolun Wang, Denis Zorin, and Daniele Panozzo. Fast tetrahedral meshing in the wild. ACM Transactions on Graphics, 39(4):18, 2020. URL: https://www.doi.org/10.1145/3386569.3392385, arXiv:1908.03581, doi:10.1145/3386569.3392385.">HSW+20</a>]</span>. Explicit CSG mesh boolean functions can be found in
+<span id="id2">[<a class="reference internal" href="ref.html#id41" title="Yixin Hu, Teseo Schneider, Bolun Wang, Denis Zorin, and Daniele Panozzo. Fast tetrahedral meshing in the wild. ACM Transactions on Graphics, 39(4):18, 2020. URL: https://www.doi.org/10.1145/3386569.3392385, arXiv:1908.03581, doi:10.1145/3386569.3392385.">HSW+20</a>]</span>. Explicit CSG mesh boolean functions can be found in
 <a class="reference internal" href="../generated/mymesh.booleans.html#module-mymesh.booleans" title="mymesh.booleans"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mymesh.booleans</span></code></a>.</p>
 <p>Since the vast majority of the computational effort is spent splitting and
 labeling elements, which is done identically regardless of which operation is
 being performed, <a class="reference internal" href="../generated/submodules/mymesh.booleans.MeshBooleans.html#mymesh.booleans.MeshBooleans" title="mymesh.booleans.MeshBooleans"><code class="xref py py-func docutils literal notranslate"><span class="pre">MeshBooleans()</span></code></a> returns the union,
 intersection, and difference meshes together (note that the difference is not
 symmetric, i.e. A-B ≠ B-A).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cube</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Box</span><span class="p">([</span><span class="o">-</span><span class="mf">.9</span><span class="p">,</span><span class="mf">.9</span><span class="p">,</span><span class="o">-</span><span class="mf">.9</span><span class="p">,</span><span class="mf">.9</span><span class="p">,</span><span class="o">-</span><span class="mf">.9</span><span class="p">,</span><span class="mf">.9</span><span class="p">],</span> <span class="mf">.25</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;tri&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cube</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">([</span><span class="o">-</span><span class="mf">.9</span><span class="p">,</span><span class="mf">.9</span><span class="p">,</span><span class="o">-</span><span class="mf">.9</span><span class="p">,</span><span class="mf">.9</span><span class="p">,</span><span class="o">-</span><span class="mf">.9</span><span class="p">,</span><span class="mf">.9</span><span class="p">],</span> <span class="mf">.25</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;tri&#39;</span><span class="p">)</span>
 <span class="n">sphere</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;tri&#39;</span><span class="p">)</span>
 
 <span class="n">U</span><span class="p">,</span><span class="n">I</span><span class="p">,</span><span class="n">D</span> <span class="o">=</span> <span class="n">booleans</span><span class="o">.</span><span class="n">MeshBooleans</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span><span class="n">sphere</span><span class="p">)</span>

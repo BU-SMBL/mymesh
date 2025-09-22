@@ -6,6 +6,7 @@
 .. autoclass:: mesh
     :no-members:
     :no-inherited-members:
+    :show-inheritance:
     :no-special-members:
 
 Properties
@@ -17,6 +18,7 @@ Properties
         :toctree:
             
     
+            ~mesh.mesh.Boundary
             ~mesh.mesh.BoundaryConn
             ~mesh.mesh.BoundaryNodes
             ~mesh.mesh.Centroids
@@ -26,11 +28,13 @@ Properties
             ~mesh.mesh.ElemConn
             ~mesh.mesh.ElemNeighbors
             ~mesh.mesh.ElemNormals
+            ~mesh.mesh.ElemType
             ~mesh.mesh.EulerCharacteristic
             ~mesh.mesh.FaceConn
             ~mesh.mesh.FaceElemConn
             ~mesh.mesh.Faces
             ~mesh.mesh.Genus
+            ~mesh.mesh.MeshNodes
             ~mesh.mesh.ND
             ~mesh.mesh.NEdge
             ~mesh.mesh.NElem
@@ -44,7 +48,10 @@ Properties
             ~mesh.mesh.SurfNodeNeighbors
             ~mesh.mesh.SurfNodes
             ~mesh.mesh.Surface
+            ~mesh.mesh.aabb
+            ~mesh.mesh.bounds
             ~mesh.mesh.cells
+            ~mesh.mesh.mvbb
             ~mesh.mesh.points
 
 
@@ -76,12 +83,15 @@ Methods
             ~mesh.mesh.identify_type
             ~mesh.mesh.imread
             ~mesh.mesh.merge
+            ~mesh.mesh.mesh2dmesh
             ~mesh.mesh.meshio2mymesh
             ~mesh.mesh.mymesh2meshio
             ~mesh.mesh.plot
             ~mesh.mesh.read
             ~mesh.mesh.removeElems
             ~mesh.mesh.reset
+            ~mesh.mesh.to_meshio
+            ~mesh.mesh.to_pyvista
             ~mesh.mesh.validate
             ~mesh.mesh.view
             ~mesh.mesh.write

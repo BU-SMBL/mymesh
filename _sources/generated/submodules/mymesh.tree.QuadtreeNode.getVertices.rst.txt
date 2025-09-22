@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.getVertices
+====================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.getVertices

@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -436,15 +441,15 @@ calculated in this way are sensitive to triangulation, with highly
 skewed triangles contributing error. In general, CubicFit provides
 better results.
 From Goldfeather &amp; Interrante (2004).
-<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id38" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
+<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id53" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>NodeCoords</strong> (<em>list</em><em>, </em><em>np.ndarray</em>) – List of nodal coordinates.</p></li>
-<li><p><strong>SurfConn</strong> (<em>list</em><em>, </em><em>np.ndarray</em>) – Nodal connectivity list for a surface mesh.</p></li>
-<li><p><strong>NodeNeighbors</strong> (<em>list</em>) – List of neighbors for each node. This can be obtained
+<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – List of nodal coordinates.</p></li>
+<li><p><strong>SurfConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – Nodal connectivity list for a surface mesh.</p></li>
+<li><p><strong>NodeNeighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – List of neighbors for each node. This can be obtained
 with utils.getNodeNeighbors or mesh.NodeNeighbors.</p></li>
-<li><p><strong>NodeNormals</strong> (<em>list</em><em>, </em><em>np.ndarray</em>) – Unit normal vectors for each node in a nx3 array. This can be obtained
+<li><p><strong>NodeNormals</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – Unit normal vectors for each node in a nx3 array. This can be obtained
 with utils.CalcFaceNormal and utils.Face2NodeNormal, or mesh.NodeNormals.</p></li>
 </ul>
 </dd>

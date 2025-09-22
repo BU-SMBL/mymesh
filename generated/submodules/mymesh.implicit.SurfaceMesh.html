@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -437,20 +442,20 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>func</strong> (<em>function</em>) – Implicit function that describes the geometry of the object to be meshed. The function should be of the form v = f(x,y,z,*args,**kwargs) where x, y, and z are 1D numpy arrays of x, y and z coordinates and v is a 1D numpy array of function values. For method=’mc’, x, y, and z will be 3D coordinate arrays and v must be 3D as well. Additional arguments and keyword arguments may be passed through args and kwargs.</p></li>
 <li><p><strong>bounds</strong> (<em>array_like</em>) – 6 element array, list, or tuple with the minimum and maximum bounds in each direction that the function will be evaluated. This should be formatted as: [xmin, xmax, ymin, ymax, zmin, zmax]</p></li>
-<li><p><strong>h</strong> (<em>scalar</em><em>, </em><em>tuple</em>) – Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).</p></li>
+<li><p><strong>h</strong> (<em>scalar</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a>) – Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).</p></li>
 <li><p><strong>threshold</strong> (<em>scalar</em>) – Isovalue threshold to use for keeping/removing elements, by default 0.</p></li>
 <li><p><strong>threshold_direction</strong> (<em>signed integer</em>) – If threshold_direction is negative (default), values less than or equal to the threshold will be considered “inside” the mesh and the opposite if threshold_direction is positive, by default -1.</p></li>
-<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Surface triangulation method, by default ‘mc’.
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Surface triangulation method, by default ‘mc’.
 ‘mc’ : Marching cubes (see contour.MarchingCubesImage) (default)</p>
 <p>’mc33’ : Marching cubes 33 (see contour.MarchingCubes)</p>
 <p>’mt’ : Marching tetrahedra (see contour.MarchingTetrahedra)</p>
 </p></li>
-<li><p><strong>interpolation</strong> (<em>str</em><em>, </em><em>optional</em>) – Method of interpolation used for placing the vertices on the approximated isosurface. This can be ‘midpoint’, ‘linear’, or ‘cubic’, by default ‘linear’. If ‘cubic’ is selected, method is overridden to be ‘mc’.</p></li>
-<li><p><strong>mixed_elements</strong> (<em>bool</em><em>, </em><em>optional</em>) – If marching tetrahedra is used, setting mixed_elements to True will allow
+<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Method of interpolation used for placing the vertices on the approximated isosurface. This can be ‘midpoint’, ‘linear’, or ‘cubic’, by default ‘linear’. If ‘cubic’ is selected, method is overridden to be ‘mc’.</p></li>
+<li><p><strong>mixed_elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If marching tetrahedra is used, setting mixed_elements to True will allow
 for a surface mesh with a combination of quads and tris, by default False.</p></li>
-<li><p><strong>args</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple of additional positional arguments for func, by default ().</p></li>
-<li><p><strong>kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary of additional keyword arguments for func, by default {}.</p></li>
-<li><p><strong>snap2surf</strong> (<em>bool</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Option to use <code class="xref py py-func docutils literal notranslate"><span class="pre">SnapGrid2Surf()</span></code> which moves points
+<li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>, </em><em>optional</em>) – Tuple of additional positional arguments for func, by default ().</p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>, </em><em>optional</em>) – Dictionary of additional keyword arguments for func, by default {}.</p></li>
+<li><p><strong>snap2surf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Option to use <code class="xref py py-func docutils literal notranslate"><span class="pre">SnapGrid2Surf()</span></code> which moves points
 of the background mesh to lie on the surface. If specified as a float
 in the range [0, 0.5], sets the snapping parameter which indicates
 the relative distance within which a point is snapped (0 = no snapping,

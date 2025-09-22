@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -436,14 +441,20 @@
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.contour.MarchingSquaresImage.html#mymesh.contour.MarchingSquaresImage" title="mymesh.contour.MarchingSquaresImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MarchingSquaresImage</span></code></a>(I[, h, threshold, z, ...])</p></td>
 <td><p>Marching squares algorithm applied to 2D image data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.contour.MarchingCubes.html#mymesh.contour.MarchingCubes" title="mymesh.contour.MarchingCubes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MarchingCubes</span></code></a>(VoxelNodeCoords, ...[, ...])</p></td>
-<td><p>Marching cubes algorithm <span id="id1">[<a class="reference internal" href="../guide/ref.html#id26" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span> for extracting an isosurface from a hexahedral mesh.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.contour.MarchingTriangles.html#mymesh.contour.MarchingTriangles" title="mymesh.contour.MarchingTriangles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MarchingTriangles</span></code></a>(TriNodeCoords, ...[, ...])</p></td>
+<td><p>Marching tetrahedra algorithm for extracting an isoline from a triangular mesh.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.contour.MarchingCubesImage.html#mymesh.contour.MarchingCubesImage" title="mymesh.contour.MarchingCubesImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MarchingCubesImage</span></code></a>(I[, h, threshold, ...])</p></td>
-<td><p>Marching cubes algorithm <span id="id2">[<a class="reference internal" href="../guide/ref.html#id26" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span> applied to 3D image data.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.contour.MarchingCubes.html#mymesh.contour.MarchingCubes" title="mymesh.contour.MarchingCubes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MarchingCubes</span></code></a>(VoxelNodeCoords, ...[, ...])</p></td>
+<td><p>Marching cubes algorithm <span id="id1">[<a class="reference internal" href="../guide/ref.html#id40" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span> for extracting an isosurface from a hexahedral mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.contour.MarchingTetrahedra.html#mymesh.contour.MarchingTetrahedra" title="mymesh.contour.MarchingTetrahedra"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MarchingTetrahedra</span></code></a>(TetNodeCoords, ...[, ...])</p></td>
-<td><p>Marching tetrahedra algorithm <span id="id3">[<a class="reference internal" href="../guide/ref.html#id20" title="Jules Bloomenthal. An Implicit Surface Polygonizer. Graphics Gems, pages 324–349, 1994. doi:10.1016/b978-0-12-336156-1.50040-9.">Blo94</a>]</span> for extracting an isosurface from a tetrahedral mesh.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.contour.MarchingCubesImage.html#mymesh.contour.MarchingCubesImage" title="mymesh.contour.MarchingCubesImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MarchingCubesImage</span></code></a>(I[, h, threshold, ...])</p></td>
+<td><p>Marching cubes algorithm <span id="id2">[<a class="reference internal" href="../guide/ref.html#id40" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span> applied to 3D image data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.contour.MarchingTetrahedra.html#mymesh.contour.MarchingTetrahedra" title="mymesh.contour.MarchingTetrahedra"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MarchingTetrahedra</span></code></a>(TetNodeCoords, ...[, ...])</p></td>
+<td><p>Marching tetrahedra algorithm <span id="id3">[<a class="reference internal" href="../guide/ref.html#id32" title="Jules Bloomenthal. An Implicit Surface Polygonizer. Graphics Gems, pages 324–349, 1994. doi:10.1016/b978-0-12-336156-1.50040-9.">Blo94</a>]</span> for extracting an isosurface from a tetrahedral mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.contour.MarchingElements.html#mymesh.contour.MarchingElements" title="mymesh.contour.MarchingElements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MarchingElements</span></code></a>(NodeCoords, NodeConn, ...)</p></td>
+<td><p>Generic wrapper class for <a class="reference internal" href="submodules/mymesh.contour.MarchingSquares.html#mymesh.contour.MarchingSquares" title="mymesh.contour.MarchingSquares"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingSquares()</span></code></a>, :func:'MarchingTriangles', <a class="reference internal" href="submodules/mymesh.contour.MarchingCubes.html#mymesh.contour.MarchingCubes" title="mymesh.contour.MarchingCubes"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingCubes()</span></code></a>, and <a class="reference internal" href="submodules/mymesh.contour.MarchingTetrahedra.html#mymesh.contour.MarchingTetrahedra" title="mymesh.contour.MarchingTetrahedra"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingTetrahedra()</span></code></a>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.contour.Adaptive.html#mymesh.contour.Adaptive" title="mymesh.contour.Adaptive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Adaptive</span></code></a>(func, bounds[, threshold, method, ...])</p></td>
 <td><p>Adaptively contour an implicit function.</p></td>

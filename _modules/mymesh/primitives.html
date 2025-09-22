@@ -40,7 +40,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -373,6 +373,9 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
+    
+    <li class="breadcrumb-item"><a href="../mymesh.html" class="nav-link">mymesh</a></li>
+    
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh.primitives</span></li>
   </ul>
 </nav>
@@ -408,6 +411,7 @@
 <span class="sd">    :toctree: submodules/</span>
 <span class="sd">    </span>
 <span class="sd">    Line</span>
+<span class="sd">    Multiline</span>
 <span class="sd">    Box</span>
 <span class="sd">    Grid</span>
 <span class="sd">    Grid2D</span>
@@ -492,20 +496,70 @@
     <span class="k">return</span> <span class="n">line</span></div>
 
 
-<div class="viewcode-block" id="Box">
-<a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Box.html#mymesh.primitives.Box">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">Box</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;quad&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Multiline">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Multiline.html#mymesh.primitives.Multiline">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Multiline</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">connect_ends</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generate a surface mesh of a rectangular box. </span>
+<span class="sd">    Create a multi-point line by connecting a series of points</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    bounds : list</span>
-<span class="sd">        Six element list of bounds [xmin,xmax,ymin,ymax,zmin,zmax].</span>
-<span class="sd">    h : float</span>
-<span class="sd">        Approximate element size.</span>
+<span class="sd">    points : array_like</span>
+<span class="sd">        Point coordinates (shape=(n,3))</span>
+<span class="sd">    h : float, optional</span>
+<span class="sd">        Element size, by default None. If specified, each line segment</span>
+<span class="sd">        will be approximately divided into elements of size h. If neither h nor </span>
+<span class="sd">        n are specified, each line segment will be represented by a single </span>
+<span class="sd">        element. If both n and h are specified, n takes precedence.</span>
+<span class="sd">    n : _type_, optional</span>
+<span class="sd">        Number of elements for each segment, by default None. If specified, each </span>
+<span class="sd">        line segment will be divided into n elements. If neither h nor n are</span>
+<span class="sd">        specified, each line segment will be represented by a single element. If </span>
+<span class="sd">        both n and h are specified, n takes precedence.</span>
+<span class="sd">    connect_ends : bool, optional</span>
+<span class="sd">        If true, the last point will be connected to the first point (e.g. to </span>
+<span class="sd">        create a closed loop), by default False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    line : mymesh.mesh</span>
+<span class="sd">        Mesh of the multiline</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">if</span> <span class="n">connect_ends</span><span class="p">:</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="p">[</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">()</span>
+        
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">line</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">Line</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">))</span>
+    
+    <span class="n">line</span><span class="o">.</span><span class="n">Type</span> <span class="o">=</span><span class="s1">&#39;line&#39;</span>
+    <span class="n">line</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">line</span></div>
+
+        
+<div class="viewcode-block" id="Box">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Box.html#mymesh.primitives.Box">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Box</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;hex&#39;</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a mesh of box. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    vertices : list</span>
+<span class="sd">        Array of box vertices (shape = (8,3)).</span>
+<span class="sd">    n : int, tuple</span>
+<span class="sd">        Number of elements along each edge of the box.</span>
 <span class="sd">    ElemType : str, optional</span>
-<span class="sd">        Specify the element type of the grid mesh. This can either be &#39;quad&#39; for a quadrilateral mesh or &#39;tri&#39; for a triangular mesh, by default &#39;quad&#39;.</span>
+<span class="sd">        Specify the element type of the grid mesh. </span>
+<span class="sd">    Type : str, optional</span>
+<span class="sd">        Mesh type of the final mesh. This could be &#39;surf&#39; for a surface mesh or</span>
+<span class="sd">        &#39;vol&#39; the full volumetric grid, by default &#39;vol&#39;.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -519,28 +573,71 @@
 <span class="sd">    --------</span>
 <span class="sd">    .. plot::</span>
 
-<span class="sd">        box = primitives.Box([0,1,0,1,0,1], 0.05, ElemType=&#39;tri&#39;)</span>
+<span class="sd">        vertices = [[0,0,0],</span>
+<span class="sd">                    [1,0,0],</span>
+<span class="sd">                    [1,1,0],</span>
+<span class="sd">                    [0,1,0],</span>
+<span class="sd">                    [0,0,1],</span>
+<span class="sd">                    [1,0,1],</span>
+<span class="sd">                    [1,1,1],</span>
+<span class="sd">                    [0,1,1]</span>
+<span class="sd">                    ]</span>
+<span class="sd">        box = primitives.Box(vertices, 10, ElemType=&#39;tet&#39;)</span>
 <span class="sd">        box.plot(bgcolor=&#39;w&#39;, show_edges=True)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="n">GridCoords</span><span class="p">,</span> <span class="n">GridConn</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">BoxConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2surface</span><span class="p">(</span><span class="n">GridCoords</span><span class="p">,</span><span class="n">GridConn</span><span class="p">)</span>
-    <span class="n">BoxCoords</span><span class="p">,</span><span class="n">BoxConn</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">RemoveNodes</span><span class="p">(</span><span class="n">GridCoords</span><span class="p">,</span><span class="n">BoxConn</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
-        <span class="n">_</span><span class="p">,</span><span class="n">BoxConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">quad2tri</span><span class="p">([],</span><span class="n">BoxConn</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
-        <span class="n">box</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">BoxCoords</span><span class="p">,</span><span class="n">BoxConn</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">n0</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span> <span class="n">n1</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span> <span class="n">n2</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">box</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">BoxCoords</span><span class="p">,</span><span class="n">BoxConn</span><span class="p">)</span>
-    <span class="n">box</span><span class="o">.</span><span class="n">Type</span> <span class="o">=</span> <span class="s1">&#39;surf&#39;</span>
-    <span class="n">box</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+        <span class="n">n0</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span> <span class="n">n1</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span> <span class="n">n2</span> <span class="o">=</span> <span class="n">n</span>
+    
+    <span class="n">e0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">vertices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vertices</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">n0</span><span class="p">)</span>
+    <span class="n">e2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">vertices</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">vertices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">n0</span><span class="p">)</span>
+    <span class="n">f0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">e0</span><span class="p">,</span> <span class="n">e2</span><span class="p">,</span> <span class="n">n1</span><span class="p">)</span>
+
+    <span class="n">e4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">vertices</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">vertices</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">n0</span><span class="p">)</span>
+    <span class="n">e6</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">vertices</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">vertices</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">n0</span><span class="p">)</span>
+    <span class="n">f5</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">e4</span><span class="p">,</span> <span class="n">e6</span><span class="p">,</span> <span class="n">n1</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">f0</span><span class="p">,</span> <span class="n">f5</span><span class="p">,</span> <span class="n">n2</span><span class="p">)</span>
+
+    <span class="n">BoxCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">v</span><span class="p">,(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">v</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]),</span> <span class="mi">3</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">n0</span><span class="o">*</span><span class="n">n1</span><span class="o">*</span><span class="n">n2</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
+        <span class="n">itype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">itype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span>
+
+    <span class="n">Ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n0</span><span class="o">*</span><span class="n">n1</span><span class="o">*</span><span class="n">n2</span><span class="p">),(</span><span class="n">n0</span><span class="p">,</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">))</span>
+    
+    <span class="n">BoxConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(((</span><span class="n">n0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n2</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="mi">8</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">itype</span><span class="p">)</span>
+
+    <span class="n">BoxConn</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">BoxConn</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">BoxConn</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">BoxConn</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">BoxConn</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">BoxConn</span><span class="p">[:,</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">BoxConn</span><span class="p">[:,</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">BoxConn</span><span class="p">[:,</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;tet&#39;</span> <span class="ow">or</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
+        <span class="n">BoxCoords</span><span class="p">,</span> <span class="n">BoxConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">hex2tet</span><span class="p">(</span><span class="n">BoxCoords</span><span class="p">,</span> <span class="n">BoxConn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;1to6&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">BoxCoords</span><span class="p">,</span><span class="n">BoxConn</span><span class="p">,</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">BoxCoords</span><span class="p">,</span><span class="n">BoxConn</span><span class="p">,</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">Type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">Surface</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">box</span>
     <span class="k">return</span> <span class="n">box</span></div>
 
 
 <div class="viewcode-block" id="Grid">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Grid.html#mymesh.primitives.Grid">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">Grid</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;hex&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Grid</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;hex&#39;</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a 3D rectangular grid mesh.</span>
 
@@ -558,6 +655,9 @@
 <span class="sd">    ElemType : str, optional</span>
 <span class="sd">        Specify the element type of the grid mesh. This can either be &#39;hex&#39; for </span>
 <span class="sd">        a hexahedral mesh or &#39;tet&#39; for a tetrahedral mesh, by default &#39;hex&#39;.</span>
+<span class="sd">    Type : str, optional</span>
+<span class="sd">        Mesh type of the final mesh. This could be &#39;surf&#39; for a surface mesh or</span>
+<span class="sd">        &#39;vol&#39; the full volumetric grid, by default &#39;vol&#39;.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -597,17 +697,20 @@
         <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">nX</span><span class="p">)</span>
         <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">nY</span><span class="p">)</span>
         <span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span><span class="n">nZ</span><span class="p">)</span>
-        
 
-    <span class="n">GridCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">))[:,</span><span class="kc">None</span><span class="p">],</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">zs</span><span class="p">)),</span><span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[:,</span><span class="kc">None</span><span class="p">],</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span><span class="nb">len</span><span class="p">(</span><span class="n">ys</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[:,</span><span class="kc">None</span><span class="p">]</span>
-    <span class="p">])</span>
+    <span class="k">if</span> <span class="n">nX</span><span class="o">*</span><span class="n">nY</span><span class="o">*</span><span class="n">nZ</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
+        <span class="n">itype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">itype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span>
 
-    <span class="n">Ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">GridCoords</span><span class="p">)),(</span><span class="n">nX</span><span class="p">,</span><span class="n">nY</span><span class="p">,</span><span class="n">nZ</span><span class="p">))</span>
+    <span class="n">GridCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">nX</span><span class="o">*</span><span class="n">nY</span><span class="o">*</span><span class="n">nZ</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">GridCoords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">nY</span><span class="o">*</span><span class="n">nZ</span><span class="p">)</span>
+    <span class="n">GridCoords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span><span class="n">nZ</span><span class="p">),</span><span class="n">nX</span><span class="p">)</span>
+    <span class="n">GridCoords</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span><span class="n">nX</span><span class="p">),</span><span class="n">nY</span><span class="p">)</span>
+
+    <span class="n">Ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nX</span><span class="o">*</span><span class="n">nY</span><span class="o">*</span><span class="n">nZ</span><span class="p">),(</span><span class="n">nX</span><span class="p">,</span><span class="n">nY</span><span class="p">,</span><span class="n">nZ</span><span class="p">))</span>
     
-    <span class="n">GridConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(((</span><span class="n">nX</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nY</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nZ</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="mi">8</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">GridConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(((</span><span class="n">nX</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nY</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nZ</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="mi">8</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">itype</span><span class="p">)</span>
 
     <span class="n">GridConn</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
     <span class="n">GridConn</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
@@ -618,13 +721,18 @@
     <span class="n">GridConn</span><span class="p">[:,</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
     <span class="n">GridConn</span><span class="p">[:,</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;tet&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;tet&#39;</span> <span class="ow">or</span> <span class="n">ElemType</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
         <span class="n">GridCoords</span><span class="p">,</span> <span class="n">GridConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">hex2tet</span><span class="p">(</span><span class="n">GridCoords</span><span class="p">,</span> <span class="n">GridConn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;1to6&#39;</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
         <span class="n">Grid</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">GridCoords</span><span class="p">,</span><span class="n">GridConn</span><span class="p">,</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">Grid</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">GridCoords</span><span class="p">,</span><span class="n">GridConn</span><span class="p">,</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">Type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
+        <span class="n">Grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="o">.</span><span class="n">Surface</span>
+        <span class="n">Grid</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">Grid</span>
     <span class="k">return</span> <span class="n">Grid</span></div>
 
 
@@ -1018,7 +1126,7 @@
     <span class="k">if</span> <span class="n">cap</span> <span class="ow">or</span> <span class="n">Type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">cap</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Cannot create an un-capped cylinder with Type=&quot;vol&quot;.&#39;</span><span class="p">)</span>
-        <span class="n">circle</span> <span class="o">=</span> <span class="n">Circle</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="n">radial_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
+        <span class="n">circle</span> <span class="o">=</span> <span class="n">Circle</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="n">theta_resolution</span><span class="p">,</span>  <span class="n">radial_resolution</span><span class="o">=</span><span class="n">radial_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">Type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
             <span class="n">cylinder</span> <span class="o">=</span> <span class="n">Extrude</span><span class="p">(</span><span class="n">circle</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">height</span><span class="o">/</span><span class="n">axial_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="n">ElemType</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">Type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
@@ -1032,7 +1140,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Type must be &quot;vol&quot; or &quot;surf&quot;.&#39;</span><span class="p">)</span>
     
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">circle</span> <span class="o">=</span> <span class="n">Circle</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="n">radial_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;line&#39;</span><span class="p">)</span>
+        <span class="n">circle</span> <span class="o">=</span> <span class="n">Circle</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="n">theta_resolution</span><span class="p">,</span> <span class="n">radial_resolution</span><span class="o">=</span><span class="n">radial_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;line&#39;</span><span class="p">)</span>
         <span class="n">cylinder</span> <span class="o">=</span> <span class="n">Extrude</span><span class="p">(</span><span class="n">circle</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">height</span><span class="o">/</span><span class="n">axial_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="n">ElemType</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">radius</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">radius</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
@@ -1233,8 +1341,10 @@
         <span class="n">circle_axis</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="n">circle</span> <span class="o">=</span> <span class="n">Circle</span><span class="p">(</span><span class="n">circle_center</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">theta_resolution</span><span class="o">=</span><span class="n">theta_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">circle_axis</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">circle_type</span><span class="p">)</span>
-
-    <span class="n">torus</span> <span class="o">=</span> <span class="n">Revolve</span><span class="p">(</span><span class="n">circle</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">phi_resolution</span><span class="p">),</span> <span class="n">center</span><span class="o">=</span><span class="n">center</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="n">ElemType</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+        <span class="n">torus</span> <span class="o">=</span> <span class="n">Revolve</span><span class="p">(</span><span class="n">circle</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">phi_resolution</span><span class="p">),</span> <span class="n">center</span><span class="o">=</span><span class="n">center</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="n">ElemType</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">torus</span> <span class="o">=</span> <span class="n">Revolve</span><span class="p">(</span><span class="n">circle</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">phi_resolution</span><span class="p">),</span> <span class="n">center</span><span class="o">=</span><span class="n">center</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="n">ElemType</span><span class="p">)</span>
     <span class="n">torus</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">torus</span></div>
 

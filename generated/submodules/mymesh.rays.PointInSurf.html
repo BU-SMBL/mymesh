@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -430,7 +435,7 @@
 <h1>mymesh.rays.PointInSurf<a class="headerlink" href="#mymesh-rays-pointinsurf" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.rays.PointInSurf">
-<span class="sig-prename descclassname"><span class="pre">mymesh.rays.</span></span><span class="sig-name descname"><span class="pre">PointInSurf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SurfConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ElemNormals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Octree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ray</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.08451039,</span> <span class="pre">0.1199149,</span> <span class="pre">0.47645033])</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/rays.html#PointInSurf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.rays.PointInSurf" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mymesh.rays.</span></span><span class="sig-name descname"><span class="pre">PointInSurf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SurfConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ElemNormals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Octree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ray</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.91278753,</span> <span class="pre">0.99435195,</span> <span class="pre">0.60591035])</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/rays.html#PointInSurf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.rays.PointInSurf" title="Link to this definition">#</a></dt>
 <dd><p>Test to determine whether a point is inside a surface mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -439,11 +444,11 @@
 <li><p><strong>NodeCoords</strong> (<em>array_like</em>) – List of node coordinates of the surface</p></li>
 <li><p><strong>SurfConn</strong> (<em>array_like</em>) – Node connectivity of elements. This function is only valid for triangular surface meshes.</p></li>
 <li><p><strong>ElemNormals</strong> (<em>array_like</em>) – Element normal vectors</p></li>
-<li><p><strong>Octree</strong> (<em>None</em><em>, </em><em>str</em><em>, or </em><em>octree.octreeNode</em><em>, </em><em>optional</em>) – Determines whether to use/generate an octree data structure for acceleration of the intersection testing, by default None.
+<li><p><strong>Octree</strong> (<em>None</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, or </em><em>tree.octreeNode</em><em>, </em><em>optional</em>) – Determines whether to use/generate an octree data structure for acceleration of the intersection testing, by default None.
 ‘generate’ - Will generate an octree structure of the surface
 None - Will not use an octree structure
-octree.octreeNode - Octree data structure precomputed using <a class="reference internal" href="mymesh.octree.Surface2Octree.html#mymesh.octree.Surface2Octree" title="mymesh.octree.Surface2Octree"><code class="xref py py-func docutils literal notranslate"><span class="pre">mymesh.octree.Surface2Octree()</span></code></a></p></li>
-<li><p><strong>eps</strong> (<em>float</em><em>, </em><em>optional</em>) – Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8</p></li>
+tree.octreeNode - Octree data structure precomputed using <a class="reference internal" href="mymesh.tree.Surface2Octree.html#mymesh.tree.Surface2Octree" title="mymesh.tree.Surface2Octree"><code class="xref py py-func docutils literal notranslate"><span class="pre">mymesh.tree.Surface2Octree()</span></code></a></p></li>
+<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8</p></li>
 <li><p><strong>ray</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Ray that will be cast to determine whether the point is inside or outside the surface, by default np.random.rand(3). For a closed, manifold surface, the choice of ray shouldn’t matter.</p></li>
 </ul>
 </dd>
@@ -451,7 +456,7 @@ octree.octreeNode - Octree data structure precomputed using <a class="reference 
 <dd class="field-even"><p><strong>inside</strong> – True if the point is inside the surface, otherwise False.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>

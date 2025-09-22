@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -437,7 +442,7 @@ center of its adjacent nodes.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>M</strong> (<a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><em>mymesh.mesh</em></a>) – Mesh object to smooth</p></li>
-<li><p><strong>options</strong> (<em>dict</em>) – <p>Smoothing options. Available options are:</p>
+<li><p><strong>options</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – <p>Smoothing options. Available options are:</p>
 <dl class="simple">
 <dt>method<span class="classifier">str</span></dt><dd><p>’simultaneous’ or ‘sequential’. Specifies if smoothing is performed
 on all nodes at the same time, or one after another. Simultaneous
@@ -463,6 +468,14 @@ are fixed.</p>
 <dt>FixSurf<span class="classifier">bool</span></dt><dd><p>If true, all nodes on the surface will be held in place and only
 interior nodes will be smoothed, by default False.</p>
 </dd>
+<dt>limit<span class="classifier">float</span></dt><dd><p>Maximum distance nodes are allowed to move, by default None</p>
+</dd>
+<dt>constraint<span class="classifier">np.ndarray</span></dt><dd><p>Constraint array (shape = (m,3)). The first column indicates nodes
+that will be constrained, the second column indicates the axis
+the constraint will be applied in, and the third column indicates
+the displacement of the given node along the given axis (e.g. 0
+for no motion in a particular axis))</p>
+</dd>
 </dl>
 </p></li>
 </ul>
@@ -475,19 +488,14 @@ interior nodes will be smoothed, by default False.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">M</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mi">0</span><span class="p">]]),</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">]]))</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">M</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">implicit</span><span class="o">.</span><span class="n">sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>  <span class="mf">.1</span><span class="p">)</span>
 <span class="n">Mnew</span> <span class="o">=</span> <span class="n">improvement</span><span class="o">.</span><span class="n">LocalLaplacianSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">iterate</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
 
-<span class="n">M</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">)</span>
-<span class="n">Mnew</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">)</span>
+<span class="n">visualize</span><span class="o">.</span><span class="n">Subplot</span><span class="p">([</span><span class="n">M</span><span class="p">,</span> <span class="n">Mnew</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <figure class="align-default">
-<img alt="../../_images/mymesh-improvement-LocalLaplacianSmoothing-1_00.png" class="plot-directive" src="../../_images/mymesh-improvement-LocalLaplacianSmoothing-1_00.png" />
-</figure>
-<figure class="align-default">
-<img alt="../../_images/mymesh-improvement-LocalLaplacianSmoothing-1_01.png" class="plot-directive" src="../../_images/mymesh-improvement-LocalLaplacianSmoothing-1_01.png" />
+<img alt="../../_images/mymesh-improvement-LocalLaplacianSmoothing-1.png" class="plot-directive" src="../../_images/mymesh-improvement-LocalLaplacianSmoothing-1.png" />
 </figure>
 </dd></dl>
 

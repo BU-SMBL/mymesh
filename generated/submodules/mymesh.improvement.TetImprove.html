@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -61,7 +61,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.improvement.TetImprove';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mymesh.octree" href="../mymesh.octree.html" />
+    <link rel="next" title="mymesh.tree" href="../mymesh.tree.html" />
     <link rel="prev" title="mymesh.improvement.TetFlip" href="mymesh.improvement.TetFlip.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -436,31 +441,31 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>M</strong> (<a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><em>mymesh.mesh</em></a>) – Tetrahedral mesh to be improved</p></li>
-<li><p><strong>h</strong> (<em>float</em>) – Target element size/edge length</p></li>
-<li><p><strong>schedule</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Order of operations to perform, specified as a string with each
+<li><p><strong>h</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Target element size/edge length</p></li>
+<li><p><strong>schedule</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Order of operations to perform, specified as a string with each
 character indicating an operation, by default ‘scfS’.</p>
 <dl class="simple">
 <dt>Possible operations:</dt><dd><ul>
-<li><p>’s’ - Splitting (<a class="reference internal" href="mymesh.improvement.TetSplit.html#mymesh.improvement.TetSplit" title="mymesh.improvement.TetSplit"><code class="xref py py-func docutils literal notranslate"><span class="pre">TetSplit()</span></code></a>)</p></li>
-<li><p>’c’ - Contraction (<a class="reference internal" href="mymesh.improvement.TetContract.html#mymesh.improvement.TetContract" title="mymesh.improvement.TetContract"><code class="xref py py-func docutils literal notranslate"><span class="pre">TetContract()</span></code></a>)</p></li>
+<li><p>’s’ - Splitting (<code class="xref py py-func docutils literal notranslate"><span class="pre">Split()</span></code>)</p></li>
+<li><p>’c’ - Contraction (<a class="reference internal" href="mymesh.improvement.Contract.html#mymesh.improvement.Contract" title="mymesh.improvement.Contract"><code class="xref py py-func docutils literal notranslate"><span class="pre">Contract()</span></code></a>)</p></li>
 <li><p>’f’ - Flipping (<a class="reference internal" href="mymesh.improvement.TetFlip.html#mymesh.improvement.TetFlip" title="mymesh.improvement.TetFlip"><code class="xref py py-func docutils literal notranslate"><span class="pre">TetFlip()</span></code></a>)</p></li>
 <li><p>’S’ - Smoothing</p></li>
 </ul>
 </dd>
 </dl>
 </p></li>
-<li><p><strong>repeat</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of times to repeat the schedule, by default 1</p></li>
-<li><p><strong>labels</strong> (<em>str</em><em>, </em><em>array_like</em><em>, or </em><em>NoneType</em><em>, </em><em>optional</em>) – Element labels indicating different regions. If specified,
+<li><p><strong>repeat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of times to repeat the schedule, by default 1</p></li>
+<li><p><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>array_like</em><em>, or </em><em>NoneType</em><em>, </em><em>optional</em>) – Element labels indicating different regions. If specified,
 region interfaces will be preserved. This can be specified as
 an array_like with M.NElem entries or a string corresponding to
 an entry in M.ElemData, by default None.</p></li>
-<li><p><strong>smoother</strong> (<em>str</em><em>, </em><em>optional</em>) – Specify which smoothing operation to use, by default ‘SmartLaplacianSmoothing’</p></li>
-<li><p><strong>smooth_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Key word arguments to be passed to the smoother, by default {}</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, will display progress, by default True</p></li>
-<li><p><strong>FeatureAngle</strong> (<em>int</em><em>, </em><em>optional</em>) – FeatureAngle : int, optional
+<li><p><strong>smoother</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Specify which smoothing operation to use, by default ‘SmartLaplacianSmoothing’</p></li>
+<li><p><strong>smooth_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>, </em><em>optional</em>) – Key word arguments to be passed to the smoother, by default {}</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, will display progress, by default True</p></li>
+<li><p><strong>FeatureAngle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – FeatureAngle : int, optional
 Angle (in degrees) used to identify features, by default 25. See
 <a class="reference internal" href="mymesh.utils.DetectFeatures.html#mymesh.utils.DetectFeatures" title="mymesh.utils.DetectFeatures"><code class="xref py py-func docutils literal notranslate"><span class="pre">DetectFeatures()</span></code></a> for more information., by default 25</p></li>
-<li><p><strong>ContractIter</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of iterations to perform in the contraction step, by default 5</p></li>
+<li><p><strong>ContractIter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Maximum number of iterations to perform in the contraction step, by default 5</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -494,11 +499,11 @@ Angle (in degrees) used to identify features, by default 25. See
       </div>
     </a>
     <a class="right-next"
-       href="../mymesh.octree.html"
+       href="../mymesh.tree.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.octree</p>
+        <p class="prev-next-title">mymesh.tree</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

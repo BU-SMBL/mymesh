@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -61,7 +61,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.visualize.View';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mymesh.visualize.FaceColor" href="mymesh.visualize.FaceColor.html" />
+    <link rel="next" title="mymesh.visualize.Subplot" href="mymesh.visualize.Subplot.html" />
     <link rel="prev" title="mymesh.visualize" href="../mymesh.visualize.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -430,31 +435,31 @@
 <h1>mymesh.visualize.View<a class="headerlink" href="#mymesh-visualize-view" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.visualize.View">
-<span class="sig-prename descclassname"><span class="pre">mymesh.visualize.</span></span><span class="sig-name descname"><span class="pre">View</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bgcolor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">face_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_convert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_preference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nodes'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iso'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_faces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hide</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flat'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/visualize.html#View"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.visualize.View" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mymesh.visualize.</span></span><span class="sig-name descname"><span class="pre">View</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bgcolor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">face_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_convert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_preference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nodes'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iso'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_faces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hide</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(800,</span> <span class="pre">600)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/visualize.html#View"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.visualize.View" title="Link to this definition">#</a></dt>
 <dd><p>Visualize a mesh.
 View uses vispy for visualization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>M</strong> (<a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><em>mymesh.mesh</em></a>) – Mesh object to be viewed</p></li>
-<li><p><strong>interactive</strong> (<em>bool</em><em>, </em><em>optional</em>) – View mesh in an interactive window, allowing for panning, rotation, etc.
+<li><p><strong>interactive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – View mesh in an interactive window, allowing for panning, rotation, etc.
 By default True.</p></li>
 <li><p><strong>bgcolor</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_, by default None</p></li>
-<li><p><strong>color</strong> (<em>str</em><em>, </em><em>array_like</em><em>, or </em><em>NoneType</em><em>, </em><em>optional</em>) – Color of the surface, specified as a named color (see <a class="reference internal" href="mymesh.visualize.ParseColor.html#mymesh.visualize.ParseColor" title="mymesh.visualize.ParseColor"><code class="xref py py-func docutils literal notranslate"><span class="pre">ParseColor()</span></code></a>,
+<li><p><strong>color</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>array_like</em><em>, or </em><em>NoneType</em><em>, </em><em>optional</em>) – Color of the surface, specified as a named color (see <a class="reference internal" href="mymesh.visualize.ParseColor.html#mymesh.visualize.ParseColor" title="mymesh.visualize.ParseColor"><code class="xref py py-func docutils literal notranslate"><span class="pre">ParseColor()</span></code></a>,
 hex color code, or RGBA list/tuple/array). If None, the color will
 be chosen based on the <cite>theme</cite>, by default None.</p></li>
 <li><p><strong>face_alpha</strong> (<em>Float</em><em>, </em><em>optional</em>) – Alpha value controlling face opacity - 0 = transparent, 1 = opaque, by
 default 1.</p></li>
-<li><p><strong>color_convert</strong> (<em>str</em><em> or </em><em>NoneType</em><em>, </em><em>optional</em>) – Convert the colors to simulate different types of color vision. Available
+<li><p><strong>color_convert</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>NoneType</em><em>, </em><em>optional</em>) – Convert the colors to simulate different types of color vision. Available
 options are “deuteranomaly”, “protanomaly”, “tritanomaly”, or “grayscale”,
 by default None. Color conversion is performed using
 <a class="reference external" href="https://github.com/njsmith/colorspacious">Colorspacious</a></p></li>
-<li><p><strong>clim</strong> (<em>tuple</em><em> or </em><em>NoneType</em><em>, </em><em>optional</em>) – Color range bounds if displaying scalar data, by default None.</p></li>
-<li><p><strong>theme</strong> (<em>str</em><em>, </em><em>optional</em>) – Select a theme (see <a class="reference internal" href="mymesh.visualize.GetTheme.html#mymesh.visualize.GetTheme" title="mymesh.visualize.GetTheme"><code class="xref py py-func docutils literal notranslate"><span class="pre">GetTheme()</span></code></a>), by default ‘default’.</p></li>
-<li><p><strong>scalar_preference</strong> (<em>str</em><em>, </em><em>optional</em>) – In the even that <cite>scalars</cite> is specified by a string that references
+<li><p><strong>clim</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em> or </em><em>NoneType</em><em>, </em><em>optional</em>) – Color range bounds if displaying scalar data, by default None.</p></li>
+<li><p><strong>theme</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Select a theme (see <a class="reference internal" href="mymesh.visualize.GetTheme.html#mymesh.visualize.GetTheme" title="mymesh.visualize.GetTheme"><code class="xref py py-func docutils literal notranslate"><span class="pre">GetTheme()</span></code></a>), by default ‘default’.</p></li>
+<li><p><strong>scalar_preference</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – In the even that <cite>scalars</cite> is specified by a string that references
 an entry in both M.NodeData and M.ElemData, this will decide which
 is chosen. Specified as either ‘nodes’ or ‘elements’, by default ‘nodes’.</p></li>
-<li><p><strong>view</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Named orientation for viewing the mesh, by default ‘iso’</p>
+<li><p><strong>view</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Named orientation for viewing the mesh, by default ‘iso’</p>
 <p>Options are:</p>
 <ul>
 <li><p>”iso” or “isometric” : isometric view</p></li>
@@ -464,7 +469,7 @@ is chosen. Specified as either ‘nodes’ or ‘elements’, by default ‘node
 <li><p>”xz” : View of the x-z plane with +x to the right and +z ups</p></li>
 </ul>
 </p></li>
-<li><p><strong>scalars</strong> (<em>str</em><em>, </em><em>array_like</em><em>, or </em><em>None</em><em>, </em><em>optional</em>) – Scalar values to color the mesh by. If specified by a string, the string
+<li><p><strong>scalars</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>array_like</em><em>, or </em><em>None</em><em>, </em><em>optional</em>) – Scalar values to color the mesh by. If specified by a string, the string
 should be an entry in either M.NodeData or M.ElemData. If the string is
 present in both, <cite>scalar_preference</cite> will be used determine whether node
 or element data will be displayed (node by default). If specified by an
@@ -472,17 +477,19 @@ array_like (numpy ndarray or list), the length of the array_like most be
 equal to either the number of nodes or the number of elements in the
 mesh. If None, the mesh will be given a solid color following <cite>color</cite>.
 By default None.</p></li>
-<li><p><strong>show_edges</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show lines denoting element edges. For a wireframe view, set
+<li><p><strong>show_edges</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Show lines denoting element edges. For a wireframe view, set
 <cite>show_edges=True</cite>, <cite>show_faces=False</cite>, by default False.</p></li>
-<li><p><strong>show_faces</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show element faces in the mesh. For a wireframe view, set
+<li><p><strong>show_faces</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Show element faces in the mesh. For a wireframe view, set
 <cite>show_edges=True</cite>, <cite>show_faces=False</cite>, by default True</p></li>
-<li><p><strong>line_width</strong> (<em>int</em><em>, </em><em>optional</em>) – Width of lines shown if show_edges=True, by default 1</p></li>
+<li><p><strong>line_width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Width of lines shown if show_edges=True, by default 1</p></li>
 <li><p><strong>line_color</strong> (<em>None</em><em>, </em><em>optional</em>) – Color of edges shown if show_edges=True, by default None.
 If None, color will be selected based on theme.</p></li>
-<li><p><strong>return_image</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, image array of the plot will be returned, by default False</p></li>
-<li><p><strong>hide</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, plot will not be shown, by default False</p></li>
-<li><p><strong>shading</strong> (<em>str</em><em>, </em><em>optional</em>) – Shading mode, by default ‘flat’
+<li><p><strong>point_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Size of points, if show_points=True, by default 2.</p></li>
+<li><p><strong>return_image</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, image array of the plot will be returned, by default False</p></li>
+<li><p><strong>hide</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, plot will not be shown, by default False</p></li>
+<li><p><strong>shading</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Shading mode, by default ‘flat’
 Options are ‘flat’, ‘smooth’, None</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>, </em><em>optional</em>) – Figure size (width, height) in pixels. By default, (800, 600)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -516,11 +523,11 @@ Options are ‘flat’, ‘smooth’, None</p></li>
       </div>
     </a>
     <a class="right-next"
-       href="mymesh.visualize.FaceColor.html"
+       href="mymesh.visualize.Subplot.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.visualize.FaceColor</p>
+        <p class="prev-next-title">mymesh.visualize.Subplot</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

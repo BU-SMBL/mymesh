@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="mymesh.delaunay.Triangle" href="mymesh.delaunay.Triangle.html" />
-    <link rel="prev" title="mymesh.delaunay.TriangleSplittingTriangulation" href="mymesh.delaunay.TriangleSplittingTriangulation.html" />
+    <link rel="prev" title="mymesh.delaunay.BowyerWatson2d" href="mymesh.delaunay.BowyerWatson2d.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -430,13 +435,19 @@
 <h1>mymesh.delaunay.SciPy<a class="headerlink" href="#mymesh-delaunay-scipy" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.delaunay.SciPy">
-<span class="sig-prename descclassname"><span class="pre">mymesh.delaunay.</span></span><span class="sig-name descname"><span class="pre">SciPy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/delaunay.html#SciPy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.delaunay.SciPy" title="Link to this definition">#</a></dt>
-<dd><p>Wrapper for scipy.spatial.Delaunay</p>
+<span class="sig-prename descclassname"><span class="pre">mymesh.delaunay.</span></span><span class="sig-name descname"><span class="pre">SciPy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FixVol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/delaunay.html#SciPy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.delaunay.SciPy" title="Link to this definition">#</a></dt>
+<dd><p>Wrapper for <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html#scipy.spatial.Delaunay" title="(in SciPy v1.16.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.spatial.Delaunay</span></code></a> for 2D triangulation
+or 3D tetrahedralization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>NodeCoords</strong> (<em>array_like</em>) – (n,2) or (n,3) node coordinates for the triangulation. Triangulation is
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>NodeCoords</strong> (<em>array_like</em>) – (n,2) or (n,3) node coordinates for the triangulation. Triangulation is
 only based on the coordinates in the first two dimensions, if an (n,3)
-is provided, the coordinates of the third column is ignored.</p>
+is provided, the coordinates of the third column is ignored.</p></li>
+<li><p><strong>FixVol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – By default some of the signed volumes of the tetrahedra are negative,
+this option reorders the node connectivity to correct this, by default
+True.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>NodeConn</strong> – mx3 array of node connectivity for the triangles</p>
@@ -460,12 +471,12 @@ is provided, the coordinates of the third column is ignored.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mymesh.delaunay.TriangleSplittingTriangulation.html"
+       href="mymesh.delaunay.BowyerWatson2d.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.delaunay.TriangleSplittingTriangulation</p>
+        <p class="prev-next-title">mymesh.delaunay.BowyerWatson2d</p>
       </div>
     </a>
     <a class="right-next"

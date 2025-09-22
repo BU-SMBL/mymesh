@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="mymesh.converter" href="../mymesh.converter.html" />
-    <link rel="prev" title="mymesh.contour.MarchingTetrahedra" href="mymesh.contour.MarchingTetrahedra.html" />
+    <link rel="prev" title="mymesh.contour.MarchingElements" href="mymesh.contour.MarchingElements.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -432,11 +437,11 @@
 <dt class="sig sig-object py" id="mymesh.contour.Adaptive">
 <span class="sig-prename descclassname"><span class="pre">mymesh.contour.</span></span><span class="sig-name descname"><span class="pre">Adaptive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mindepth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdepth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">octree_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EDerror'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">octree_eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dualgrid_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'centroid'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'surf'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/contour.html#Adaptive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.contour.Adaptive" title="Link to this definition">#</a></dt>
 <dd><p>Adaptively contour an implicit function. Uses an octree
-(<a class="reference internal" href="mymesh.octree.Function2Octree.html#mymesh.octree.Function2Octree" title="mymesh.octree.Function2Octree"><code class="xref py py-func docutils literal notranslate"><span class="pre">Function2Octree()</span></code></a>) to adaptively sample the function,
+(<a class="reference internal" href="mymesh.tree.Function2Octree.html#mymesh.tree.Function2Octree" title="mymesh.tree.Function2Octree"><code class="xref py py-func docutils literal notranslate"><span class="pre">Function2Octree()</span></code></a>) to adaptively sample the function,
 then uses the chosen method to contour the dual grid
-(<a class="reference internal" href="mymesh.octree.Octree2Dual.html#mymesh.octree.Octree2Dual" title="mymesh.octree.Octree2Dual"><code class="xref py py-func docutils literal notranslate"><span class="pre">Octree2Dual()</span></code></a>) of the octree.</p>
+(<a class="reference internal" href="mymesh.tree.Octree2Dual.html#mymesh.tree.Octree2Dual" title="mymesh.tree.Octree2Dual"><code class="xref py py-func docutils literal notranslate"><span class="pre">Octree2Dual()</span></code></a>) of the octree.</p>
 <p>Based on, but not an exact implementation of, Dual Marching Cubes
-<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id23" title="Scott Schaefer and Joe Warren. Dual marching cubes: Primal contouring of dual grids. Computer Graphics Forum, 24(2):195–201, 2005. doi:10.1111/j.1467-8659.2005.00843.x.">SW05</a>]</span>.</p>
+<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id35" title="Scott Schaefer and Joe Warren. Dual marching cubes: Primal contouring of dual grids. Computer Graphics Forum, 24(2):195–201, 2005. doi:10.1111/j.1467-8659.2005.00843.x.">SW05</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -445,7 +450,7 @@ The function should be of the form v = f(x,y,z) and capable of handling
 vectorized inputs.</p></li>
 <li><p><strong>bounds</strong> (<em>array_like</em>) – 6 element array, list, or tuple with the minimum and maximum bounds in each direction that the function will be evaluated. This should be formatted as: [xmin, xmax, ymin, ymax, zmin, zmax]</p></li>
 <li><p><strong>threshold</strong> (<em>scalar</em>) – Isovalue threshold to use for keeping/removing elements, by default 0.</p></li>
-<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Contouring method to be used</p>
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Contouring method to be used</p>
 <blockquote>
 <div><ul>
 <li><p>”mc”: Marching Cubes</p></li>
@@ -458,15 +463,15 @@ vectorized inputs.</p></li>
 <li><p><strong>grad</strong> (<em>function</em><em>, </em><em>optional</em>) – Gradient of the function. By default, the gradient will be obtained
 through either symbolic differentiation or finite difference
 approximation.</p></li>
-<li><p><strong>mindepth</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum octree depth, by default 2</p></li>
-<li><p><strong>maxdepth</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum octree depth, by default 5</p></li>
-<li><p><strong>octree_strategy</strong> (<em>str</em><em>, </em><em>optional</em>) – Octree subdivision strategy (see <a class="reference internal" href="mymesh.octree.Function2Octree.html#mymesh.octree.Function2Octree" title="mymesh.octree.Function2Octree"><code class="xref py py-func docutils literal notranslate"><span class="pre">Function2Octree()</span></code></a>),
+<li><p><strong>mindepth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum octree depth, by default 2</p></li>
+<li><p><strong>maxdepth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Maximum octree depth, by default 5</p></li>
+<li><p><strong>octree_strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Octree subdivision strategy (see <a class="reference internal" href="mymesh.tree.Function2Octree.html#mymesh.tree.Function2Octree" title="mymesh.tree.Function2Octree"><code class="xref py py-func docutils literal notranslate"><span class="pre">Function2Octree()</span></code></a>),
 by default ‘EDerror’.</p></li>
-<li><p><strong>octree_eps</strong> (<em>float</em><em>, </em><em>optional</em>) – Error tolerance for octree subdivision
-(see <a class="reference internal" href="mymesh.octree.Function2Octree.html#mymesh.octree.Function2Octree" title="mymesh.octree.Function2Octree"><code class="xref py py-func docutils literal notranslate"><span class="pre">Function2Octree()</span></code></a>), by default 0.1</p></li>
-<li><p><strong>dualgrid_method</strong> (<em>str</em><em>, </em><em>optional</em>) – Method for placing dual grid vertices (see
-<a class="reference internal" href="mymesh.octree.Octree2Dual.html#mymesh.octree.Octree2Dual" title="mymesh.octree.Octree2Dual"><code class="xref py py-func docutils literal notranslate"><span class="pre">Octree2Dual()</span></code></a>), by default ‘centroid’.</p></li>
-<li><p><strong>Type</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies whether to generate a surface mesh (“surf”) or a volume
+<li><p><strong>octree_eps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Error tolerance for octree subdivision
+(see <a class="reference internal" href="mymesh.tree.Function2Octree.html#mymesh.tree.Function2Octree" title="mymesh.tree.Function2Octree"><code class="xref py py-func docutils literal notranslate"><span class="pre">Function2Octree()</span></code></a>), by default 0.1</p></li>
+<li><p><strong>dualgrid_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Method for placing dual grid vertices (see
+<a class="reference internal" href="mymesh.tree.Octree2Dual.html#mymesh.tree.Octree2Dual" title="mymesh.tree.Octree2Dual"><code class="xref py py-func docutils literal notranslate"><span class="pre">Octree2Dual()</span></code></a>), by default ‘centroid’.</p></li>
+<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Specifies whether to generate a surface mesh (“surf”) or a volume
 mesh (“vol”), by default ‘surf’</p></li>
 </ul>
 </dd>
@@ -504,12 +509,12 @@ mesh (“vol”), by default ‘surf’</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mymesh.contour.MarchingTetrahedra.html"
+       href="mymesh.contour.MarchingElements.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.contour.MarchingTetrahedra</p>
+        <p class="prev-next-title">mymesh.contour.MarchingElements</p>
       </div>
     </a>
     <a class="right-next"

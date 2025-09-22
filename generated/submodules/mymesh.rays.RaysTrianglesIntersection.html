@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -433,7 +438,7 @@
 <span class="sig-prename descclassname"><span class="pre">mymesh.rays.</span></span><span class="sig-name descname"><span class="pre">RaysTrianglesIntersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rays</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tris</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bidirectional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-14</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/rays.html#RaysTrianglesIntersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.rays.RaysTrianglesIntersection" title="Link to this definition">#</a></dt>
 <dd><p>Vectorized Möller-Trumbore intersection algorithm to detect intersections between a pairwise set of rays and a set of triangles.
 Möller, T., &amp; Trumbore, B. (2005). Fast, minimum storage ray/triangle intersection. In ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005. <a class="reference external" href="https://doi.org/10.1145/1198555.1198746">https://doi.org/10.1145/1198555.1198746</a>
-<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id21" title="Tomas Möller and Ben Trumbore. Fast, minimum storage ray/triangle intersection. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, pages 7823–7830, 2005. URL: https://www.doi.org/10.1145/1198555.1198746, doi:10.1145/1198555.1198746.">MollerT05</a>]</span></p>
+<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id33" title="Tomas Möller and Ben Trumbore. Fast, minimum storage ray/triangle intersection. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, pages 7823–7830, 2005. URL: https://www.doi.org/10.1145/1198555.1198746, doi:10.1145/1198555.1198746.">MollerT05</a>]</span></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>With this version of the intersection test, there must be one ray for each triangle. itertools.combinations can be useful for constructing such a set of pairwise combinations, or see <a class="reference internal" href="mymesh.rays.RaysSurfIntersection.html#mymesh.rays.RaysSurfIntersection" title="mymesh.rays.RaysSurfIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RaysSurfIntersection()</span></code></a> which handles this and can utilize octree acceleration.</p>
@@ -450,9 +455,9 @@ Should have shape (n, 3) for n rays.</p></li>
 <li><p><strong>Tris</strong> (<em>array_like</em>) – Coordinates of triangle vertices for each triangle in the format
 <code class="docutils literal notranslate"><span class="pre">np.array([[[a,</span> <span class="pre">b,</span> <span class="pre">c],</span> <span class="pre">[d,</span> <span class="pre">e,</span> <span class="pre">f],</span> <span class="pre">[g,</span> <span class="pre">h,</span> <span class="pre">i]],</span> <span class="pre">[[...],[...],[...]],</span> <span class="pre">...)</span></code>.
 Should have shape (n,3,3) for n triangles.</p></li>
-<li><p><strong>bidirectional</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines whether to check for intersections only in the direction the
+<li><p><strong>bidirectional</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Determines whether to check for intersections only in the direction the
 ray is pointing, or in both directions (±ray), by default False.</p></li>
-<li><p><strong>eps</strong> (<em>float</em><em>, </em><em>optional</em>) – Small parameter used to determine if a value is sufficiently close to 0, by default 1e-14</p></li>
+<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Small parameter used to determine if a value is sufficiently close to 0, by default 1e-14</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

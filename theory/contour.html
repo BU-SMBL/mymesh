@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -418,7 +418,7 @@
 <p>Isosurface contouring methods are used to extract the surface from a field of
 values, most often an image or an implicit function evaluated on a grid of
 points. One of the earliest and most famous methods is the Marching Cubes
-algorithm by <span id="id1">Lorensen and Cline [<a class="reference internal" href="../guide/ref.html#id26" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span>, which inspired a variety of “marching
+algorithm by <span id="id1">Lorensen and Cline [<a class="reference internal" href="../guide/ref.html#id40" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span>, which inspired a variety of “marching
 element” methods that follow a similar approach. These methods “march” from
 element to element, at each one assessing the node values to determine whether
 each node is above or below the isovalue threshold in order to determine whether
@@ -1378,7 +1378,7 @@ blank [pos=&quot;0.,0!&quot;, color=white];
 </section>
 <section id="marching-cubes">
 <h2>Marching Cubes<a class="headerlink" href="#marching-cubes" title="Link to this heading">#</a></h2>
-<p><span id="id2">Lorensen and Cline [<a class="reference internal" href="../guide/ref.html#id26" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span></p>
+<p><span id="id2">Lorensen and Cline [<a class="reference internal" href="../guide/ref.html#id40" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span></p>
 <p>See also <a class="reference internal" href="../generated/submodules/mymesh.contour.MarchingCubes.html#mymesh.contour.MarchingCubes" title="mymesh.contour.MarchingCubes"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingCubes()</span></code></a></p>
 <p>For a cube, there are <span class="math notranslate nohighlight">\(2^8 = 256\)</span> possible combinations of vertices
 falling inside or outside of the surface, however by rotations and inversion,
@@ -2244,7 +2244,7 @@ blank [pos=&quot;0.,0!&quot;, color=white];
 </div>
 <section id="marching-cubes-33">
 <h3>Marching Cubes 33<a class="headerlink" href="#marching-cubes-33" title="Link to this heading">#</a></h3>
-<p><span id="id3">Chernyaev [<a class="reference internal" href="../guide/ref.html#id32" title="Ev Chernyaev. Marching cubes 33: Construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1–8, 1995.">Che95</a>]</span></p>
+<p><span id="id3">Chernyaev [<a class="reference internal" href="../guide/ref.html#id47" title="Ev Chernyaev. Marching cubes 33: Construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1–8, 1995.">Che95</a>]</span></p>
 <p>See also <a class="reference internal" href="../generated/submodules/mymesh.contour.MarchingCubes.html#mymesh.contour.MarchingCubes" title="mymesh.contour.MarchingCubes"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingCubes()</span></code></a></p>
 <p>One of the main shortcomings of the marching cubes algorithm is that there exist
 several ambiguous cases - situations in which there are multiple possible
@@ -2253,13 +2253,13 @@ surface. For example, the opposite corners of Case 4 could be connected through
 the center of the cube. These ambiguities can lead to topological errors and
 non-watertight surfaces. Several methods have been proposed to resolve these
 ambiguities, including an extend lookup table that has 33 entries, rather than
-15 <span id="id4">[<a class="reference internal" href="../guide/ref.html#id32" title="Ev Chernyaev. Marching cubes 33: Construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1–8, 1995.">Che95</a>]</span>. Additional tests are used to test whether diagonal
+15 <span id="id4">[<a class="reference internal" href="../guide/ref.html#id47" title="Ev Chernyaev. Marching cubes 33: Construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1–8, 1995.">Che95</a>]</span>. Additional tests are used to test whether diagonal
 nodes are connected or separated to choose the correct triangulation.</p>
 </section>
 </section>
 <section id="marching-tetrahedra">
 <h2>Marching Tetrahedra<a class="headerlink" href="#marching-tetrahedra" title="Link to this heading">#</a></h2>
-<p><span id="id5">Bloomenthal [<a class="reference internal" href="../guide/ref.html#id20" title="Jules Bloomenthal. An Implicit Surface Polygonizer. Graphics Gems, pages 324–349, 1994. doi:10.1016/b978-0-12-336156-1.50040-9.">Blo94</a>]</span></p>
+<p><span id="id5">Bloomenthal [<a class="reference internal" href="../guide/ref.html#id32" title="Jules Bloomenthal. An Implicit Surface Polygonizer. Graphics Gems, pages 324–349, 1994. doi:10.1016/b978-0-12-336156-1.50040-9.">Blo94</a>]</span></p>
 <p>See also <a class="reference internal" href="../generated/submodules/mymesh.contour.MarchingTetrahedra.html#mymesh.contour.MarchingTetrahedra" title="mymesh.contour.MarchingTetrahedra"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingTetrahedra()</span></code></a></p>
 <p>Another approach to resolve the ambiguities of marching cubes is to partition
 tetrahedra, rather than cubes.</p>

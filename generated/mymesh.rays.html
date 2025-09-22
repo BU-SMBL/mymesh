@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -472,17 +477,29 @@
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.BoxTrianglesIntersection.html#mymesh.rays.BoxTrianglesIntersection" title="mymesh.rays.BoxTrianglesIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BoxTrianglesIntersection</span></code></a>(Tris, xlim, ylim, zlim)</p></td>
 <td><p>Intersection test for detecting intersections between a triangle and a box.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.SegmentSegmentIntersection.html#mymesh.rays.SegmentSegmentIntersection" title="mymesh.rays.SegmentSegmentIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SegmentSegmentIntersection</span></code></a>(s1, s2[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.BoxBoxIntersection.html#mymesh.rays.BoxBoxIntersection" title="mymesh.rays.BoxBoxIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BoxBoxIntersection</span></code></a>(box1, box2)</p></td>
+<td><p>Intersection of two boxes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.SegmentSegmentIntersection.html#mymesh.rays.SegmentSegmentIntersection" title="mymesh.rays.SegmentSegmentIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SegmentSegmentIntersection</span></code></a>(s1, s2[, ...])</p></td>
 <td><p>Detect intersections between two line segments.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.SegmentsSegmentsIntersection.html#mymesh.rays.SegmentsSegmentsIntersection" title="mymesh.rays.SegmentsSegmentsIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SegmentsSegmentsIntersection</span></code></a>(s1, s2[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.SegmentsSegmentsIntersection.html#mymesh.rays.SegmentsSegmentsIntersection" title="mymesh.rays.SegmentsSegmentsIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SegmentsSegmentsIntersection</span></code></a>(s1, s2[, ...])</p></td>
 <td><p>Detect intersections between pairs of line segments.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaySegmentIntersection.html#mymesh.rays.RaySegmentIntersection" title="mymesh.rays.RaySegmentIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaySegmentIntersection</span></code></a>(pt, ray, segment[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.SegmentBox2DIntersection.html#mymesh.rays.SegmentBox2DIntersection" title="mymesh.rays.SegmentBox2DIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SegmentBox2DIntersection</span></code></a>(segment, xlim, ylim)</p></td>
+<td><p>Intersection algorithm for detecting intersections between a ray and an axis-aligned box.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.SegmentBoxIntersection.html#mymesh.rays.SegmentBoxIntersection" title="mymesh.rays.SegmentBoxIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SegmentBoxIntersection</span></code></a>(segment, xlim, ylim, zlim)</p></td>
+<td><p>Intersection algorithm for detecting intersections between a ray and an axis-aligned box.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaySegmentIntersection.html#mymesh.rays.RaySegmentIntersection" title="mymesh.rays.RaySegmentIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaySegmentIntersection</span></code></a>(pt, ray, segment[, ...])</p></td>
 <td><p>Detect intersections between a ray and a line segment.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaySegmentsIntersection.html#mymesh.rays.RaySegmentsIntersection" title="mymesh.rays.RaySegmentsIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaySegmentsIntersection</span></code></a>(pt, ray, segments[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaySegmentsIntersection.html#mymesh.rays.RaySegmentsIntersection" title="mymesh.rays.RaySegmentsIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaySegmentsIntersection</span></code></a>(pt, ray, segments[, ...])</p></td>
 <td><p>Detect intersections between pairs of line segments.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.RayBoundaryIntersection.html#mymesh.rays.RayBoundaryIntersection" title="mymesh.rays.RayBoundaryIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RayBoundaryIntersection</span></code></a>(pt, ray, NodeCoords, ...)</p></td>
+<td><p>Identify intersections between a ray and a boundary mesh of line elements.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaySurfIntersection.html#mymesh.rays.RaySurfIntersection" title="mymesh.rays.RaySurfIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaySurfIntersection</span></code></a>(pt, ray, NodeCoords, ...)</p></td>
 <td><p>Identify intersections between a ray and a triangular surface mesh.</p></td>
@@ -490,7 +507,7 @@
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.RaysSurfIntersection.html#mymesh.rays.RaysSurfIntersection" title="mymesh.rays.RaysSurfIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RaysSurfIntersection</span></code></a>(pts, rays, NodeCoords, ...)</p></td>
 <td><p>Identify intersections between rays and a triangular surface mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.RayOctreeIntersection.html#mymesh.rays.RayOctreeIntersection" title="mymesh.rays.RayOctreeIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RayOctreeIntersection</span></code></a>(pt, ray, Octree)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.RayOctreeIntersection.html#mymesh.rays.RayOctreeIntersection" title="mymesh.rays.RayOctreeIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RayOctreeIntersection</span></code></a>(pt, ray, Octree[, ...])</p></td>
 <td><p>Test for identifying intersections between a ray and an octree.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.BoundaryBoundaryIntersection.html#mymesh.rays.BoundaryBoundaryIntersection" title="mymesh.rays.BoundaryBoundaryIntersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BoundaryBoundaryIntersection</span></code></a>(NodeCoords1, ...)</p></td>
@@ -522,17 +539,23 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointsInSurf.html#mymesh.rays.PointsInSurf" title="mymesh.rays.PointsInSurf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointsInSurf</span></code></a>(pts, NodeCoords, SurfConn[, ...])</p></td>
 <td><p>Test to determine whether points are inside a surface mesh.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInBox.html#mymesh.rays.PointInBox" title="mymesh.rays.PointInBox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInBox</span></code></a>(pt, xlim, ylim, zlim[, inclusive])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInBox2D.html#mymesh.rays.PointInBox2D" title="mymesh.rays.PointInBox2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInBox2D</span></code></a>(pt, xlim, ylim[, inclusive])</p></td>
+<td><p>Test whether a point is inside a 2 dimensional box</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInBox.html#mymesh.rays.PointInBox" title="mymesh.rays.PointInBox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInBox</span></code></a>(pt, xlim, ylim, zlim[, inclusive])</p></td>
 <td><p>Test whether a point is inside a box</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointsInVoxel.html#mymesh.rays.PointsInVoxel" title="mymesh.rays.PointsInVoxel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointsInVoxel</span></code></a>(pts, VoxelCoords, VoxelConn[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointsInVoxel.html#mymesh.rays.PointsInVoxel" title="mymesh.rays.PointsInVoxel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointsInVoxel</span></code></a>(pts, VoxelCoords, VoxelConn[, ...])</p></td>
 <td><p>Test to determine whether points are inside a voxel mesh</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInTri.html#mymesh.rays.PointInTri" title="mymesh.rays.PointInTri"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInTri</span></code></a>(Tri, pt[, method, eps, inclusive])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInTri.html#mymesh.rays.PointInTri" title="mymesh.rays.PointInTri"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInTri</span></code></a>(pt, Tri[, eps, inclusive])</p></td>
+<td><p>Test to determine whether a point is inside a triangle</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointsInTris.html#mymesh.rays.PointsInTris" title="mymesh.rays.PointsInTris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointsInTris</span></code></a>(Tris, pts[, method, eps, inclusive])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointsInTris.html#mymesh.rays.PointsInTris" title="mymesh.rays.PointsInTris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointsInTris</span></code></a>(pts, Tris[, eps, inclusive])</p></td>
+<td><p>Pairwise inclusion tests between an array of points and an array of triangles.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.rays.PointInTet.html#mymesh.rays.PointInTet" title="mymesh.rays.PointInTet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointInTet</span></code></a>(pt, Tet[, eps, inclusive])</p></td>
+<td><p>Test to determine whether a point is inside a tetrahedron</p></td>
 </tr>
 </tbody>
 </table>

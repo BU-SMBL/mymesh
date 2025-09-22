@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -61,7 +61,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.improvement.SegmentSpringSmoothing';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mymesh.improvement.TetContract" href="mymesh.improvement.TetContract.html" />
+    <link rel="next" title="mymesh.improvement.Contract" href="mymesh.improvement.Contract.html" />
     <link rel="prev" title="mymesh.improvement.NodeSpringSmoothing" href="mymesh.improvement.NodeSpringSmoothing.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -436,28 +441,28 @@ Blom, F.J., 2000. Considerations on the spring analogy. International journal fo
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>NodeCoords</strong> (<em>list</em>) – List of nodal coordinates.</p></li>
-<li><p><strong>NodeConn</strong> (<em>list</em>) – Nodal connectivity list.</p></li>
-<li><p><strong>NodeNeighbors</strong> (<em>list</em><em>, </em><em>optional</em>) – List of node neighboring nodes for each node in the mesh.
+<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – List of nodal coordinates.</p></li>
+<li><p><strong>NodeConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – Nodal connectivity list.</p></li>
+<li><p><strong>NodeNeighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – List of node neighboring nodes for each node in the mesh.
 If provided with ElemConn, will avoid the need to recalculate, by default None.
 If only one is provided, both will be recalculated.</p></li>
-<li><p><strong>ElemConn</strong> (<em>list</em><em>, </em><em>optional</em>) – List of elements connected to each node.
+<li><p><strong>ElemConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – List of elements connected to each node.
 If provided with NodeNeighbors, will avoid the need to recalculate, by default None.
 If only one is provided, both will be recalculated.</p></li>
-<li><p><strong>StiffnessFactor</strong> (<em>float</em><em>, </em><em>optional</em>) – Specifies a scaling factor for the stiffness of the springs. The default is 1.</p></li>
-<li><p><strong>FixedNotes</strong> (<em>list</em><em> or </em><em>set</em><em>, </em><em>optional</em>) – Set of nodes to be held fixed. The default is set().</p></li>
-<li><p><strong>Forces</strong> (<em>list</em><em>, </em><em>optional</em>) – Set of applied forces. If specified, forces must be specified for every node,
+<li><p><strong>StiffnessFactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Specifies a scaling factor for the stiffness of the springs. The default is 1.</p></li>
+<li><p><strong>FixedNotes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><em>set</em></a><em>, </em><em>optional</em>) – Set of nodes to be held fixed. The default is set().</p></li>
+<li><p><strong>Forces</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – Set of applied forces. If specified, forces must be specified for every node,
 with a force of [0,0,0] applied to unloaded nodes. The default is None.</p></li>
-<li><p><strong>L0Override</strong> (<em>str</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Override value for assigning the length of springs whose initial length is 0.
+<li><p><strong>L0Override</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Override value for assigning the length of springs whose initial length is 0.
 ‘min’ : 0-length springs will be assigned to be equal to the shortest non-0-length spring in the mesh.
 ‘max’ : 0-length springs will be assigned to be equal to the longest spring in the mesh.
 float : 0-length springs will be assigned to be equal to the specified float.
 The default is ‘min’.</p></li>
-<li><p><strong>CellCentered</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, will add cell (element)-centered springs, adding springs between each node in an element to
+<li><p><strong>CellCentered</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will add cell (element)-centered springs, adding springs between each node in an element to
 the element centrod, by default True.</p></li>
-<li><p><strong>FaceCentered</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, will add face-centered springs, adding springs between each node in an element face to
+<li><p><strong>FaceCentered</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will add face-centered springs, adding springs between each node in an element face to
 the face centrod, by default True.</p></li>
-<li><p><strong>return_KF</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, will return a tuple (K,F) containing the matrices (in scipy sparse formats) K and F of the
+<li><p><strong>return_KF</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return a tuple (K,F) containing the matrices (in scipy sparse formats) K and F of the
 linear spring equation KU=F which is solved to find the the nodal displacements, by default False.</p></li>
 </ul>
 </dd>
@@ -494,11 +499,11 @@ linear spring equation KU=F which is solved to find the the nodal displacements,
       </div>
     </a>
     <a class="right-next"
-       href="mymesh.improvement.TetContract.html"
+       href="mymesh.improvement.Contract.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.improvement.TetContract</p>
+        <p class="prev-next-title">mymesh.improvement.Contract</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

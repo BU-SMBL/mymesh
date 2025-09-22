@@ -1,0 +1,41 @@
+mymesh.tree.QuadtreeNode
+========================
+
+.. currentmodule:: mymesh.tree
+
+.. autoclass:: QuadtreeNode
+    :no-members:
+    :no-inherited-members:
+    :show-inheritance:
+    :no-special-members:
+
+Properties
+----------
+
+
+
+
+
+Methods
+-------
+
+
+    .. autosummary::
+        :toctree:
+
+    
+                QuadtreeNode.ContainsEdges
+                QuadtreeNode.ContainsPts
+                QuadtreeNode.PointInNode
+                QuadtreeNode.PointsInNode
+                QuadtreeNode.clearData
+                QuadtreeNode.getLevel
+                QuadtreeNode.getLimits
+                QuadtreeNode.getMaxDepth
+                QuadtreeNode.getVertices
+                QuadtreeNode.hasChildren
+                QuadtreeNode.makeChildren
+                QuadtreeNode.makeChildrenEdges
+                QuadtreeNode.makeChildrenPts
+                QuadtreeNode.prune
+    

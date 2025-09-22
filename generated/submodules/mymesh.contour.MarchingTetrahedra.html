@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -61,7 +61,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.contour.MarchingTetrahedra';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mymesh.contour.Adaptive" href="mymesh.contour.Adaptive.html" />
+    <link rel="next" title="mymesh.contour.MarchingElements" href="mymesh.contour.MarchingElements.html" />
     <link rel="prev" title="mymesh.contour.MarchingCubesImage" href="mymesh.contour.MarchingCubesImage.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -431,33 +436,42 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.contour.MarchingTetrahedra">
 <span class="sig-prename descclassname"><span class="pre">mymesh.contour.</span></span><span class="sig-name descname"><span class="pre">MarchingTetrahedra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">TetNodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TetNodeConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'surf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixed_elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_NodeValues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_ParentIds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/contour.html#MarchingTetrahedra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.contour.MarchingTetrahedra" title="Link to this definition">#</a></dt>
-<dd><p>Marching tetrahedra algorithm <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id20" title="Jules Bloomenthal. An Implicit Surface Polygonizer. Graphics Gems, pages 324–349, 1994. doi:10.1016/b978-0-12-336156-1.50040-9.">Blo94</a>]</span> for extracting an isosurface from a tetrahedral mesh. This can be used to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).</p>
+<dd><p>Marching tetrahedra algorithm <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id32" title="Jules Bloomenthal. An Implicit Surface Polygonizer. Graphics Gems, pages 324–349, 1994. doi:10.1016/b978-0-12-336156-1.50040-9.">Blo94</a>]</span> for extracting an isosurface from a tetrahedral mesh. This can be used to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>TetNodeCoords</strong> (<em>array_like</em>) – Node coordinates for the input tetrahedral mesh</p></li>
 <li><p><strong>TetNodeConn</strong> (<em>array_like</em>) – Node connectivity for the input tetrahedral mesh. All elements must be tetrahedra.</p></li>
 <li><p><strong>NodeValues</strong> (<em>array_like</em>) – Values at each node in the mesh that are used to extract the isosurface</p></li>
-<li><p><strong>threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – Isosurface level, by default 0</p></li>
-<li><p><strong>interpolation</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Interpolation to interpolate the position of the new nodes along the edges
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Isosurface level, by default 0</p></li>
+<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Interpolation to interpolate the position of the new nodes along the edges
 of the input mesh, by default ‘linear’.</p>
 <p>’midpoint’ - No interpolation is performed, new nodes are placed at the midpoint of edges</p>
 <p>’linear’ - Linear interpolation is performed between adjacent nodes on the input mesh.</p>
 <p>’quadratic’ - Quadratic interpolation is performed. This requires that the provided
 tetrahedral mesh has quadratic elements (10 node tetrahedra).</p>
 </p></li>
-<li><p><strong>Type</strong> (<em>str</em><em>, </em><em>optional</em>) – Determines whether to generate a surface mesh (‘surf’) or volume mesh (‘vol’),
+<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Determines whether to generate a surface mesh (‘surf’) or volume mesh (‘vol’),
 by default ‘surf’</p></li>
-<li><p><strong>mixed_elements</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the generated mesh will have mixed element types (triangles/quadrilaterals, tetrahedra/wedges), otherwise a single element type (triangles, tetrahedra), by default False. For surface
-meshes, either version is generated directly. For a volume mesh, a mixed mesh is generated initially and then converted to tetrahedra using converter.solid2tets()
+<li><p><strong>mixed_elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, the generated mesh will have mixed element types
+(triangles/quadrilaterals, tetrahedra/wedges), otherwise a single element
+type (triangles, tetrahedra), by default False. For surface meshes, either
+version is generated directly. For a volume mesh, a mixed mesh is generated
+initially and then converted to tetrahedra using converter.solid2tets()
 which results in additional computational cost.</p></li>
-<li><p><strong>flip</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the interior/exterior of the mesh, by default False.
+<li><p><strong>flip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Flip the interior/exterior of the mesh, by default False.
 By default, values less than the threshold are assumed to be the “inside”
 of the mesh. If the inside is denoted by values greater than the threshold,
 set flip=True.</p></li>
-<li><p><strong>return_NodeValues</strong> (<em>bool</em><em>, </em><em>optional</em>) – Return the node values for each node in the tetrahedral mesh. If method=’surface’, these will all be <cite>threshold</cite>, if method=’volume’, these will be <cite>threshold</cite> for the surface nodes and the original grid values for the interior nodes</p></li>
-<li><p><strong>return_ParentIds</strong> (<em>bool</em><em>, </em><em>optional</em>) – Return Ids that refer to the original tetrahedra that each of the new elements is connected to, by default False.</p></li>
-<li><p><strong>cleanup_tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance value used to classify whether two nodes are sufficiently close to be considered a single node (see <a class="reference internal" href="mymesh.utils.DeleteDuplicateNodes.html#mymesh.utils.DeleteDuplicateNodes" title="mymesh.utils.DeleteDuplicateNodes"><code class="xref py py-func docutils literal notranslate"><span class="pre">mymesh.utils.DeleteDuplicateNodes()</span></code></a>), by default 1e-12.</p></li>
+<li><p><strong>return_NodeValues</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Return the node values for each node in the tetrahedral mesh. If
+Type=’surf’, these will all be <cite>threshold</cite>, if Type=’vol’, these will be
+<cite>threshold</cite> for the surface nodes and the original grid values for the
+interior nodes</p></li>
+<li><p><strong>return_ParentIds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Return Ids that refer to the original tetrahedra that each of the new
+elements is connected to, by default False.</p></li>
+<li><p><strong>cleanup_tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Tolerance value used to classify whether two nodes are sufficiently close
+to be considered a single node (see <a class="reference internal" href="mymesh.utils.DeleteDuplicateNodes.html#mymesh.utils.DeleteDuplicateNodes" title="mymesh.utils.DeleteDuplicateNodes"><code class="xref py py-func docutils literal notranslate"><span class="pre">mymesh.utils.DeleteDuplicateNodes()</span></code></a>),
+by default 1e-12.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -505,11 +519,11 @@ returned if return_ParentIds=True</p></li>
       </div>
     </a>
     <a class="right-next"
-       href="mymesh.contour.Adaptive.html"
+       href="mymesh.contour.MarchingElements.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.contour.Adaptive</p>
+        <p class="prev-next-title">mymesh.contour.MarchingElements</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

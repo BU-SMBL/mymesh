@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -437,17 +442,17 @@ coordinates (alpha, beta, gamma) of that projection within that element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>Point</strong> (<em>list</em><em> or </em><em>np.ndarray</em>) – Coordinates of the point to be projected on to the surface.</p></li>
-<li><p><strong>Normal</strong> (<em>list</em><em> or </em><em>np.ndarray</em>) – Vector along which the point will be projected.</p></li>
-<li><p><strong>NodeCoords</strong> (<em>list</em><em> or </em><em>np.ndarray</em>) – Node coordinates list of the mesh that the point is being projected to.</p></li>
-<li><p><strong>SurfConn</strong> (<em>list</em><em> or </em><em>np.ndarray</em>) – Nodal connectivity of the surface mesh that the point is being projected to.</p></li>
-<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
-Octree : str (or octree.OctreeNode), optional
+<li><p><strong>Point</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><em>np.ndarray</em>) – Coordinates of the point to be projected on to the surface.</p></li>
+<li><p><strong>Normal</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><em>np.ndarray</em>) – Vector along which the point will be projected.</p></li>
+<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><em>np.ndarray</em>) – Node coordinates list of the mesh that the point is being projected to.</p></li>
+<li><p><strong>SurfConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><em>np.ndarray</em>) – Nodal connectivity of the surface mesh that the point is being projected to.</p></li>
+<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
+Octree : str (or tree.OctreeNode), optional
 octree options. An octree representation of the surface can significantly
 improve mapping speeds, by default ‘generate’.
 ‘generate’ - Will generate an octree for use in surface mapping.
 ‘none’ or None - Won’t generate an octree and will use a brute force approach.
-octree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by octree.Surface2Octree(NodeCoords,SurfConn)</p></li>
+tree.OctreeNode - Provide a precompute octree structure corresponding to the surface mesh. Should be created by tree.Surface2Octree(NodeCoords,SurfConn)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

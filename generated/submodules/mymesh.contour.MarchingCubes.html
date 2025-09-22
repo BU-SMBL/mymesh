@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=152078be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
   <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="mymesh.contour.MarchingCubesImage" href="mymesh.contour.MarchingCubesImage.html" />
-    <link rel="prev" title="mymesh.contour.MarchingSquaresImage" href="mymesh.contour.MarchingSquaresImage.html" />
+    <link rel="prev" title="mymesh.contour.MarchingTriangles" href="mymesh.contour.MarchingTriangles.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -357,12 +357,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.octree.html">mymesh.octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.rays.html">mymesh.rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.register.html">mymesh.register</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.utils.html">mymesh.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.visualize.html">mymesh.visualize</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_mesh.html">mymesh.demo_mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.demo_image.html">mymesh.demo_image</a></li>
 </ul>
 </div>
 </nav></div>
@@ -431,7 +436,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.contour.MarchingCubes">
 <span class="sig-prename descclassname"><span class="pre">mymesh.contour.</span></span><span class="sig-name descname"><span class="pre">MarchingCubes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">VoxelNodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VoxelNodeConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'33'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_anchors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/contour.html#MarchingCubes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.contour.MarchingCubes" title="Link to this definition">#</a></dt>
-<dd><p>Marching cubes algorithm <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id26" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span> for extracting an isosurface from a hexahedral mesh.</p>
+<dd><p>Marching cubes algorithm <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id40" title="William E. Lorensen and Harvey E. Cline. Marching cubes: A high resolution 3D surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21(4):163–169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span> for extracting an isosurface from a hexahedral mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -440,14 +445,14 @@ primitives.Grid)</p></li>
 <li><p><strong>NodeConn</strong> (<em>array_like</em>) – Node connectivities of a two dimensional grid of rectilinear grid (e.g.
 from primitives.Grid) of hexahedra.</p></li>
 <li><p><strong>NodeValues</strong> (<em>array_like</em>) – Array of node values corresponding to each node in the mesh.</p></li>
-<li><p><strong>threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – Isosurface level that defines the boundary, by default 0</p></li>
-<li><p><strong>interpolation</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Interpolation to interpolate the position of the new nodes along the edges of the input mesh, by default ‘linear’.</p>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Isosurface level that defines the boundary, by default 0</p></li>
+<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Interpolation to interpolate the position of the new nodes along the edges of the input mesh, by default ‘linear’.</p>
 <p>’midpoint’ - No interpolation is performed, new nodes are placed at the midpoint of edges</p>
 <p>’linear’ - Bilinear interpolation is performed between adjacent nodes on the input mesh</p>
 </p></li>
-<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Mesh generation method, either ‘original’ for the original marching cubes
-algorithm or ‘33’ for the marching cubes 33 algorithm <span id="id2">[<a class="reference internal" href="../../guide/ref.html#id32" title="Ev Chernyaev. Marching cubes 33: Construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1–8, 1995.">Che95</a>]</span>.</p></li>
-<li><p><strong>flip</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the interior/exterior of the mesh, by default False. By default, values less than the threshold are assumed to be the “inside” of the mesh. If the inside is denoted by values greater than the threshold, set flip=True.</p></li>
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Mesh generation method, either ‘original’ for the original marching cubes
+algorithm or ‘33’ for the marching cubes 33 algorithm <span id="id2">[<a class="reference internal" href="../../guide/ref.html#id47" title="Ev Chernyaev. Marching cubes 33: Construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1–8, 1995.">Che95</a>]</span>.</p></li>
+<li><p><strong>flip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Flip the interior/exterior of the mesh, by default False. By default, values less than the threshold are assumed to be the “inside” of the mesh. If the inside is denoted by values greater than the threshold, set flip=True.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -473,12 +478,12 @@ algorithm or ‘33’ for the marching cubes 33 algorithm <span id="id2">[<a cla
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mymesh.contour.MarchingSquaresImage.html"
+       href="mymesh.contour.MarchingTriangles.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.contour.MarchingSquaresImage</p>
+        <p class="prev-next-title">mymesh.contour.MarchingTriangles</p>
       </div>
     </a>
     <a class="right-next"

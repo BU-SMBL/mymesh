@@ -1,6 +1,0 @@
-mymesh.converter.tet42tet10
-===========================
-
-.. currentmodule:: mymesh.converter
-
-.. autofunction:: tet42tet10
