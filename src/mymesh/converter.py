@@ -20,7 +20,6 @@ Mesh type conversion
     solid2surface
     im2voxel
     mesh2im
-    pixel2im
     voxel2im
     surf2voxel
     surf2dual
