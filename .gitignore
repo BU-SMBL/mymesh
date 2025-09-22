@@ -17,3 +17,5 @@ cov.xml
 *.whl
 *.gz
 *.db
+examples/MeshGeneration/*.png
+.coverage
