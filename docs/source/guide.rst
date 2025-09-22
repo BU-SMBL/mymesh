@@ -39,6 +39,7 @@ submodules:
     ~mymesh.primitives
     ~mymesh.quality
     ~mymesh.rays
+    ~mymesh.register
     ~mymesh.utils
     ~mymesh.visualize
 

@@ -122,6 +122,7 @@ jobs:
           jupyter-sphinx \
           setuptools \
           sphinx-design \
+          sphinx-tabs\
           pillow \
           jupyter_rfb \
           triangle
