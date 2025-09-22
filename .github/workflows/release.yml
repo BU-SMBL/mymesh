@@ -34,9 +34,15 @@ jobs:
     - name: Build package
       run: python -m build
 
-    - name: Publish to TestPyPI
+    # - name: Publish to TestPyPI
+    #   if: github.event_name == 'workflow_dispatch'
+    #   uses: pypa/gh-action-pypi-publish@release/v1
+    #   with:
+    #     repository-url: https://test.pypi.org/legacy/
+    #     password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+
+    - name: Publish to PyPI
       if: github.event_name == 'workflow_dispatch'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        repository-url: https://test.pypi.org/legacy/
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        password: ${{ secrets.PYPI_TOKEN }}
