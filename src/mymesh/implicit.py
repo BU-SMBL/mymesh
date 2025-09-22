@@ -832,6 +832,39 @@ def tpms(name, cellsize=1):
     func = sp.lambdify((x, y, z), surf, 'sympy')
     return func
     
+def mixed_topology(functions, weights, cellsize=1):
+    """
+    Mixed-topology surfaces :cite:p:`Josephson2024`.
+    A weighted sum of a set of functions, such as :func:`tpms` functions.
+
+    Parameters
+    ----------
+    functions : callable, str
+        Callable implicit function or name of a TPMS (see :fun:`tpms`).
+    weights : array_like
+        Weights to assign to each function
+    cellsize : int, optional
+        Unit cell size if using TPMS names, by default 1
+
+    Returns
+    -------
+    mixed_top : callable
+        Implicit function (f(x,y,z)) of the mixed-topology surface
+
+    """    
+    if len(functions) != len(weights):
+        raise ValueError('functions and weights must have the same number of entries.')
+    for i,f in enumerate(functions):
+        if type(f) is str:
+            functions[i] = tpms(f, cellsize=cellsize)
+        elif not callable(f):
+            raise ValueError('Invalid input for functions, all entries must be TPMS function names or callable functions.')
+    
+    def mixed_top(x, y, z):
+        out = np.sum([w*f(x,y,z) for w,f in zip(weights, functions)], axis=0)
+        return out
+    return mixed_top    
+
 def gyroid(x,y,z):
     """
     Implicit function approximation of the gyroid triply periodic minimal 
