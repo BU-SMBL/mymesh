@@ -28,11 +28,7 @@ Implicit Functions
 .. autosummary::
     :toctree: submodules/
 
-    gyroid
-    lidinoid
-    primitive
-    neovius
-    diamond
+    
     cylinder
     box
     plane
@@ -41,6 +37,13 @@ Implicit Functions
     zplane
     sphere
     torus
+    tpms
+    mixed_topology
+    gyroid
+    lidinoid
+    primitive
+    neovius
+    diamond
 
 Implicit Function Operators
 ===========================
@@ -799,12 +802,24 @@ def tpms(name, cellsize=1):
 
         - 'gyroid' - Schoen's gyroid
 
-        - 'primitive' or 'p' - Schwarz P
+        - 'primitive' or 'P' - Schwarz P
 
-        - 'diamond' or 'd' - Schwarz D
+        - 'diamond' or 'D' - Schwarz D
 
-        - 's' - Fischer-Koch S
+        - 'S' - Fischer-Koch S
 
+        - 'Lidinoid'
+
+        - 'IWP'
+
+        - 'FRD'
+
+        - 
+            All 3D nodal surfaces from :cite:t:`VonSchnering1991` (Table 1) 
+            are available following their naming convention, including, the
+            above named surfaces e.g. 'gyroid' is equivalent to 'Y**'. 
+            Others include 'I2-Y**', 'C(I2-Y**)', '(Fxxx)*', etc. 
+            See tpms.options for a full list.
 
     cellsize : float, optional
         Unit cell size or periodicity, by default 1
@@ -823,24 +838,136 @@ def tpms(name, cellsize=1):
     Y = 2*np.pi*y/cellsize
     Z = 2*np.pi*z/cellsize
     
-    if name.lower() == 'gyroid':
+    if name.lower() == 'gyroid' or name == 'Y**':
         surf = sp.sin(X)*sp.cos(Y) + sp.sin(Y)*sp.cos(Z) + sp.sin(Z)*sp.cos(X)
-    elif name.lower() == 'primitive' or name.lower() == 'p':
+    elif name.lower() == 'primitive' or name.lower() == 'p' or name == 'P*':
         surf = sp.cos(X) + sp.cos(Y) + sp.cos(Z)        
     elif name.lower() == 'diamond' or name.lower() == 'd':
-        surf = sp.sin(X)*sp.sin(Y)*sp.sin(Z) + sp.sin(X)*sp.cos(Y)*sp.cos(Z) +\
-            sp.cos(X)*sp.sin(Y)*sp.cos(Z) + sp.cos(X)*sp.cos(Y)*sp.sin(Z)
-    elif name.lower() == 's':
+        surf = sp.sin(X)*sp.sin(Y)*sp.sin(Z) + \
+               sp.sin(X)*sp.cos(Y)*sp.cos(Z) + \
+               sp.cos(X)*sp.sin(Y)*sp.cos(Z) + \
+               sp.cos(X)*sp.cos(Y)*sp.sin(Z)
+    elif name.lower() == 's' or name == 'S*':
         surf = sp.cos(2*X)*sp.sin(Y)*sp.cos(Z) +\
-            sp.cos(X)*sp.cos(2*Y)*sp.sin(Z) +\
-            sp.sin(X)*sp.cos(Y)*sp.cos(2*Z)
-            
+               sp.cos(X)*sp.cos(2*Y)*sp.sin(Z) +\
+               sp.sin(X)*sp.cos(Y)*sp.cos(2*Z)
+    elif name == 'lidinoid':
+        surf = 0.5*(sp.sin(2*X)*sp.cos(Y)*sp.sin(Z) + \
+                    sp.sin(2*Y)*sp.cos(Z)*sp.sin(X) + \
+                    sp.sin(2*Z)*sp.cos(X)*sp.sin(Y)) - \
+               0.5*(sp.cos(2*X)*sp.cos(2*Y) + \
+                    sp.cos(2*Y)*sp.cos(2*Z) + \
+                    sp.cos(2*Z)*sp.cos(2*X)) + 0.15
+    elif name == 'neovious':
+        surf = 3*(sp.cos(X) + sp.cos(Y) + sp.cos(Z)) + \
+            4*sp.cos(X)*sp.cos(Y)*sp.cos(Z)
+    elif name.lower() == 'iwp' or name == 'IP2-J*':
+        surf = 2*(sp.cos(X)*sp.cos(Y) + \
+                sp.cos(Y)*sp.cos(Z) + \
+                sp.cos(X)*sp.cos(Z)) - \
+                (sp.cos(2*X) + \
+                 sp.cos(2*Y) + \
+                 sp.cos(2*Z))
+    elif name.lower() == 'frd' or name == 'Fxx-P2Fz':
+        surf = 4*sp.cos(X)*sp.cos(Y)*sp.cos(Z) - \
+            (sp.cos(2*X)*sp.cos(2*Y) + \
+             sp.cos(2*X)*sp.cos(2*Z) + \
+             sp.cos(2*Y)*sp.cos(2*Z))
+    elif name == 'F*':
+        surf = sp.cos(X) * sp.cos(Y) * sp.cos(Z)
+    elif name == 'D*':
+        surf = sp.cos(X - Y) * sp.cos(Z) + sp.sin(X + Y)*sp.sin(Z)
+    elif name == 'C(D*)':
+        surf = sp.cos(3*X + Y)*sp.cos(Z) - \
+            sp.sin(3*X - Y)*sp.sin(Z) + \
+            sp.cos(X + 3*Y)*sp.cos(Z) + \
+            sp.sin(X - 3*Y)*sp.sin(Z) + \
+            sp.cos(X + Y)*sp.cos(3*Z) - \
+            sp.sin(X - Y)*sp.sin(3*Z)
+    elif name == 'P*J*':
+        surf = sp.cos(X) + sp.cos(Y) + sp.cos(Z) + \
+            4*sp.cos(X)*sp.cos(Y)*sp.cos(Z)
+    elif name == 'C(Y**)':
+        surf = 3*(sp.sin(X)*sp.cos(Y) + sp.sin(Y)*sp.cos(Z) + \
+                  sp.sin(Z)*sp.cos(X)) + \
+                2*(sp.sin(3*X)*sp.cos(Y) + \
+                  sp.cos(X)*sp.sin(3*Z) + \
+                  sp.sin(3*Y)*sp.cos(Z) - \
+                  sp.sin(X)*sp.cos(3*Y) - \
+                  sp.cos(3*X)*sp.sin(Z) - \
+                  sp.sin(Y)*sp.cos(3*Z))
+    elif name == 'C(S*)':
+        surf = sp.cos(2*X) + sp.cos(2*Y) + sp.cos(2*Z) + \
+        2*(sp.sin(3*X)*sp.sin(2*Y)*sp.cos(Z) + \
+           sp.cos(X)*sp.sin(3*Y)*sp.sin(2*Z) + \
+           sp.sin(2*X)*sp.cos(Y)*sp.sin(3*Z)) + \
+        2*(sp.sin(2*X)*sp.cos(3*Y)*sp.sin(Z) + \
+           sp.sin(X)*sp.sin(2*Y)*sp.cos(3*Z) + \
+           sp.cos(3*X)*sp.sin(Y)*sp.sin(2*Z))
+    elif name == 'I2-Y**':
+        surf = -2*(sp.sin(2*X)*sp.cos(Y)*sp.sin(Z) + \
+                   sp.sin(X)*sp.sin(2*Y)*sp.cos(Z) + \
+                   sp.cos(X)*sp.sin(Y)*sp.sin(2*Z)) + \
+                sp.cos(2*X)*sp.cos(2*Y) + \
+                sp.cos(2*Y)*sp.cos(2*Z) + \
+                sp.cos(2*X)*sp.cos(2*Z)
+    elif name == 'C(I2-Y**)':
+        surf = 2*(sp.sin(2*X)*sp.cos(Y)*sp.sin(Z) + \
+                  sp.sin(X)*sp.sin(2*Y)*sp.cos(Z) + \
+                  sp.cos(X)*sp.sin(Y)*sp.sin(2*Z)) + \
+                  sp.cos(2*X)*sp.cos(2*Y) + \
+                  sp.cos(2*Y)*sp.cos(2*Z) + \
+                  sp.cos(2*X)*sp.cos(2*Z)
+    elif name == 'W*':
+        surf = sp.cos(2*X)*sp.cos(Y) + \
+            sp.cos(2*Y)*sp.cos(Z) + \
+            sp.cos(X)*sp.cos(2*Z) - \
+            (sp.cos(X)*sp.cos(2*Y) + \
+             sp.cos(Y)*sp.cos(2*Z) + \
+             sp.cos(2*X)*sp.cos(Z))
+    elif name == 'Y*' :
+        surf = (sp.cos(X)*sp.cos(Y)*sp.cos(Z) + \
+                sp.sin(X)*sp.sin(Y)*sp.sin(Z)) + \
+               (sp.sin(2*X)*sp.sin(Y) + \
+                sp.sin(2*Y)*sp.sin(Z) + \
+                sp.sin(X)*sp.sin(2*Z) + \
+                sp.cos(X)*sp.sin(2*Y) + \
+                sp.cos(Y)*sp.sin(2*Z) + \
+                sp.sin(2*X)*sp.cos(Z))
+    elif name == '(YYxxx)*':
+        surf = -(sp.cos(X)*sp.cos(Y)*sp.cos(Z) + \
+                 sp.sin(X)*sp.sin(Y)*sp.sin(Z)) + \
+                (sp.sin(2*X)*sp.sin(Y) + \
+                 sp.sin(2*Y)*sp.sin(Z) + \
+                 sp.sin(X)*sp.sin(2*Z) + \
+                 sp.cos(X)*sp.sin(2*Y) + \
+                 sp.cos(Y)*sp.sin(2*Z) + \
+                 sp.sin(2*X)*sp.cos(Z))
+    elif name == '(Fxxx)*':
+        surf = 2*sp.cos(X)*sp.cos(Y)*sp.cos(Z) + \
+                (sp.sin(2*X)*sp.sin(Y) + \
+                 sp.sin(X)*sp.sin(2*Z) + \
+                 sp.sin(2*Y)*sp.sin(Z))
+    elif name == '(FFxxx)*':
+        surf = -2*sp.cos(X)*sp.cos(Y)*sp.cos(Z) + \
+                (sp.sin(2*X)*sp.sin(Y) + \
+                 sp.sin(X)*sp.sin(2*Z) + \
+                 sp.sin(2*Y)*sp.sin(Z))
+    elif name == 'Q*':
+        surf = (sp.cos(X) - 2*sp.cos(Y))*sp.cos(Z) - \
+                np.sqrt(3)*sp.sin(Z)*(sp.cos(X - Y) - sp.cos(X)) + \
+                sp.cos(X - Y)*sp.cos(Z)
     else:
-        raise ValueError(f'Unknown TPMS surface: {name}')
+        raise ValueError(f'Unknown TPMS surface: {name}. see tpms.options for list of available surfaces.')
     
     func = sp.lambdify((x, y, z), surf, 'sympy')
     return func
-    
+tpms.options = [
+    'gyroid', 'primitive', 'diamond', 'S', 'lidinoid', 'neovious',
+    'IWP', 'FRD', 'F*', 'D*', 'C(D*)', 'P*J*', 'C(Y**)', 'C(S*)', 'I2-Y**',
+    'C(I2-Y**)', 'W*', 'Y*', '(YYxxx)*', '(Fxxx)*', '(FFxxx)*', 'Q*'
+]
+
 def mixed_topology(functions, weights, cellsize=1):
     """
     Mixed-topology surfaces :cite:p:`Josephson2024`.
