@@ -388,7 +388,7 @@ def SurfaceMesh(func, bounds, h, threshold=0, threshold_direction=-1, method='mc
         
     return surface
 
-def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation='linear', args=(), kwargs={}, background=None, snap2surf=True):
+def TetMesh(func, bounds=None, h=None, threshold=0, threshold_direction=-1, interpolation='linear', args=(), kwargs={}, background=None, snap2surf=True):
     """
     Generate a tetrahedral mesh of an implicit function 
 
@@ -397,9 +397,11 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
     func : function
         Implicit function that describes the geometry of the object to be meshed. The function should be of the form v = f(x,y,z,*args,**kwargs) where x, y, and z are 1D numpy arrays of x, y and z coordinates and v is a 1D numpy array of function values. For method='mc', x, y, and z will be 3D coordinate arrays and v must be 3D as well. Additional arguments and keyword arguments may be passed through args and kwargs.
     bounds : array_like
-        6 element array, list, or tuple with the minimum and maximum bounds in each direction that the function will be evaluated. This should be formatted as: [xmin, xmax, ymin, ymax, zmin, zmax]
+        6 element array, list, or tuple with the minimum and maximum bounds in each direction that the function will be evaluated. This should be formatted as: [xmin, xmax, ymin, ymax, zmin, zmax].
+        Required unless background is provided.
     h : scalar, tuple
         Element side length. Can be specified as a single scalar value, or a three element tuple (or array_like).
+        Required unless background is provided.
     threshold : scalar
         Isovalue threshold to use for keeping/removing elements, by default 0.
     threshold_direction : signed integer
@@ -438,7 +440,11 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
         tet = implicit.TetMesh(implicit.gyroid, [0,1,0,1,0,1], 0.05)
         tet.plot(bgcolor='w')
     """
-
+    if background is not None:
+        if h is None:
+            h = 0
+        if bounds is None:
+            bounds = [0,1,0,1,0,1]
     if not isinstance(h, (list, tuple, np.ndarray)):
         h = (h,h,h)
 
@@ -476,7 +482,10 @@ def TetMesh(func, bounds, h, threshold=0, threshold_direction=-1, interpolation=
         else:
             NodeVals = voxel.NodeData['func']
     else:
-        NodeCoords, NodeConn = background
+        if len(background.ElemType) > 1 or background.ElemType[0] != 'tet':
+            NodeCoords, NodeConn = converter.solid2tets(*background)
+        else:
+            NodeCoords, NodeConn = background
         NodeCoords = np.asarray(NodeCoords)
         NodeVals = vector_func(NodeCoords[:,0], NodeCoords[:,1], NodeCoords[:,2])
         if snap2surf:
