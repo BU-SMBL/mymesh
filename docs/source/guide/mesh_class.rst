@@ -77,6 +77,15 @@ is equivalent to
     voxelized = mesh(*converter.surf2voxel(*sphere, .1))
 
 
+Storing data with meshes
+------------------------
+
+Data associated with meshes can be stored within the :class:`mesh` object. 
+Node data (data for which there are values associated with each node of the mesh) can be stored in the :attr:`mesh.NodeData` attribute. 
+Likewise, data associated with the elements of the mesh (element data) can be stored in the :attr:`mesh.ElemData` attribute.
+Both :attr:`mesh.NodeData` and :attr:`mesh.ElemData` data are dictionaries (:class:`dict`), so named data entries can be stored, for example, :code:`M.NodeData['strain'] = strain`. 
+Scalar and vector node/element data can be stored, and these values will be saved when writing the mesh to a .vtu file or other file formats that support such properties (see :ref:`File Input/Output` for more details on reading/writing files). 
+
 From meshes to meshes
 ---------------------
 
