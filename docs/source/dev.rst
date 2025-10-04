@@ -1,11 +1,16 @@
 Development
 ===========
-MyMesh is individually developed and maintained by me, Tim Josephson. 
-This project was originally, and continues to be, developed to support my 
-academic research of orthopaedic biomechanics and mechanobiology, which heavily
-involves mesh-dependent computational simulations. If you find MyMesh useful 
-(or not useful), or have any questions or feature requests, I'd love to hear 
-from you. 
+
+.. toctree::
+    :maxdepth: 2
+    :hidden:
+    
+    dev/CHANGELOG
+    dev/dev_guide
+
+MyMesh is developed and maintained by me, Tim Josephson. 
+This project was originally developed to support my academic research of orthopaedic biomechanics and mechanobiology, which heavily involves mesh-dependent computational simulations. 
+If you find MyMesh useful (or not useful), or have any questions or feature requests, I'd love to hear from you.
 
 
 Roadmap & Planned features

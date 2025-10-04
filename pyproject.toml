@@ -65,3 +65,9 @@ Documentation = 'https://bu-smbl.github.io/mymesh/'
 [tool.setuptools_scm]
 version_scheme = "python-simplified-semver"
 local_scheme = "no-local-version"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version_scheme = "semver"
+changelog_file = "docs/source/dev/CHANGELOG.md"
+changelog_incremental = true

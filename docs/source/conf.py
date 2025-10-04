@@ -39,7 +39,8 @@ extensions = ['sphinx.ext.autodoc',
             'sphinx_gallery.gen_gallery', 
             # 'jupyterlite_sphinx', 
             'sphinx.ext.intersphinx',
-            'sphinx_tabs.tabs']
+            'sphinx_tabs.tabs',
+            'myst_parser']
 autodoc_mock_imports = []
 autodoc_member_order = 'bysource'
 autosummary_generate = True

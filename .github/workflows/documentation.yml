@@ -123,6 +123,7 @@ jobs:
           setuptools \
           sphinx-design \
           sphinx-tabs\
+          myst-parser\
           pillow \
           jupyter_rfb \
           triangle
@@ -148,6 +149,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y graphviz
+    - name: Generate changelog
+      shell: bash -l {0}
+      run: |
+        pip install commitizen
+        cz changelog
     - name: Build documentation
       shell: bash -l {0}
       run: |
