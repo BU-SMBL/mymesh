@@ -445,7 +445,7 @@ and values above zero are considered “outside”.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.SurfaceMesh.html#mymesh.implicit.SurfaceMesh" title="mymesh.implicit.SurfaceMesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfaceMesh</span></code></a>(func, bounds, h[, threshold, ...])</p></td>
 <td><p>Generate a surface mesh of an implicit function</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.TetMesh.html#mymesh.implicit.TetMesh" title="mymesh.implicit.TetMesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TetMesh</span></code></a>(func, bounds, h[, threshold, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.TetMesh.html#mymesh.implicit.TetMesh" title="mymesh.implicit.TetMesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TetMesh</span></code></a>(func[, bounds, h, threshold, ...])</p></td>
 <td><p>Generate a tetrahedral mesh of an implicit function</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.SurfaceNodeOptimization.html#mymesh.implicit.SurfaceNodeOptimization" title="mymesh.implicit.SurfaceNodeOptimization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SurfaceNodeOptimization</span></code></a>(M, func, h[, ...])</p></td>
@@ -459,6 +459,36 @@ and values above zero are considered “outside”.</p>
 <h2>Implicit Functions<a class="headerlink" href="#implicit-functions" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.cylinder.html#mymesh.implicit.cylinder" title="mymesh.implicit.cylinder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cylinder</span></code></a>(center, radius[, axis])</p></td>
+<td><p>Implicit function of a cylinder.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.box.html#mymesh.implicit.box" title="mymesh.implicit.box"><code class="xref py py-obj docutils literal notranslate"><span class="pre">box</span></code></a>(x1, x2, y1, y2, z1, z2)</p></td>
+<td><p>Implicit function of a box.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.plane.html#mymesh.implicit.plane" title="mymesh.implicit.plane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plane</span></code></a>(pt, normal)</p></td>
+<td><p>Implicit function of an arbitrary plane.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.xplane.html#mymesh.implicit.xplane" title="mymesh.implicit.xplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xplane</span></code></a>(x0[, n])</p></td>
+<td><p>Implicit function of a plane whose normal direction is along the x axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.yplane.html#mymesh.implicit.yplane" title="mymesh.implicit.yplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">yplane</span></code></a>(y0[, n])</p></td>
+<td><p>Implicit function of a plane whose normal direction is along the y axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.zplane.html#mymesh.implicit.zplane" title="mymesh.implicit.zplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zplane</span></code></a>(z0[, n])</p></td>
+<td><p>Implicit function of a plane whose normal direction is along the z axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.sphere.html#mymesh.implicit.sphere" title="mymesh.implicit.sphere"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sphere</span></code></a>(center, radius)</p></td>
+<td><p>Implicit function of a sphere.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.torus.html#mymesh.implicit.torus" title="mymesh.implicit.torus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">torus</span></code></a>(center, R, r)</p></td>
+<td><p>Implicit function of a torus oriented about the z-axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.tpms.html#mymesh.implicit.tpms" title="mymesh.implicit.tpms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tpms</span></code></a>(name[, cellsize])</p></td>
+<td><p>Triply periodic minimal surfaces.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.mixed_topology.html#mymesh.implicit.mixed_topology" title="mymesh.implicit.mixed_topology"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mixed_topology</span></code></a>(functions, weights[, cellsize])</p></td>
+<td><p>Mixed-topology surfaces <span id="id1">[]</span>.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.gyroid.html#mymesh.implicit.gyroid" title="mymesh.implicit.gyroid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gyroid</span></code></a>(x, y, z)</p></td>
 <td><p>Implicit function approximation of the gyroid triply periodic minimal surface (TPMS).</p></td>
 </tr>
@@ -473,30 +503,6 @@ and values above zero are considered “outside”.</p>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.diamond.html#mymesh.implicit.diamond" title="mymesh.implicit.diamond"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diamond</span></code></a>(x, y, z)</p></td>
 <td><p>Implicit function approximation of the diamond (Schwarz D) triply periodic minimal surface (TPMS).</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.cylinder.html#mymesh.implicit.cylinder" title="mymesh.implicit.cylinder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cylinder</span></code></a>(center, radius[, axis])</p></td>
-<td><p>Implicit function of a cylinder.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.box.html#mymesh.implicit.box" title="mymesh.implicit.box"><code class="xref py py-obj docutils literal notranslate"><span class="pre">box</span></code></a>(x1, x2, y1, y2, z1, z2)</p></td>
-<td><p>Implicit function of a box.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.plane.html#mymesh.implicit.plane" title="mymesh.implicit.plane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plane</span></code></a>(pt, normal)</p></td>
-<td><p>Implicit function of an arbitrary plane.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.xplane.html#mymesh.implicit.xplane" title="mymesh.implicit.xplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xplane</span></code></a>(x0[, n])</p></td>
-<td><p>Implicit function of a plane whose normal direction is along the x axis.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.yplane.html#mymesh.implicit.yplane" title="mymesh.implicit.yplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">yplane</span></code></a>(y0[, n])</p></td>
-<td><p>Implicit function of a plane whose normal direction is along the y axis.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.zplane.html#mymesh.implicit.zplane" title="mymesh.implicit.zplane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zplane</span></code></a>(z0[, n])</p></td>
-<td><p>Implicit function of a plane whose normal direction is along the z axis.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.implicit.sphere.html#mymesh.implicit.sphere" title="mymesh.implicit.sphere"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sphere</span></code></a>(center, radius)</p></td>
-<td><p>Implicit function of a sphere.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.implicit.torus.html#mymesh.implicit.torus" title="mymesh.implicit.torus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">torus</span></code></a>(center, R, r)</p></td>
-<td><p>Implicit function of a torus oriented about the z-axis.</p></td>
 </tr>
 </tbody>
 </table>
