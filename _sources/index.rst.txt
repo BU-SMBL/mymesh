@@ -114,7 +114,7 @@ MyMesh has a particular focus on implicit function and image-based meshes, but a
 
 .. Note::
     MyMesh is intended for research purposes. Any applications of MyMesh should
-    be should be validated and verified appropriately. 
+    be validated and verified appropriately. 
 
 Examples
 --------

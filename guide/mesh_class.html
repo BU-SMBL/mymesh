@@ -477,6 +477,14 @@ values:</p>
 </pre></div>
 </div>
 </section>
+<section id="storing-data-with-meshes">
+<h2>Storing data with meshes<a class="headerlink" href="#storing-data-with-meshes" title="Link to this heading">#</a></h2>
+<p>Data associated with meshes can be stored within the <a class="reference internal" href="../generated/mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh.mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code></a> object.
+Node data (data for which there are values associated with each node of the mesh) can be stored in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.NodeData</span></code> attribute.
+Likewise, data associated with the elements of the mesh (element data) can be stored in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.ElemData</span></code> attribute.
+Both <code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.NodeData</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.ElemData</span></code> data are dictionaries (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>), so named data entries can be stored, for example, <code class="code docutils literal notranslate"><span class="pre">M.NodeData['strain']</span> <span class="pre">=</span> <span class="pre">strain</span></code>.
+Scalar and vector node/element data can be stored, and these values will be saved when writing the mesh to a .vtu file or other file formats that support such properties (see <a class="reference internal" href="io.html#file-input-output"><span class="std std-ref">File Input/Output</span></a> for more details on reading/writing files).</p>
+</section>
 <section id="from-meshes-to-meshes">
 <h2>From meshes to meshes<a class="headerlink" href="#from-meshes-to-meshes" title="Link to this heading">#</a></h2>
 <p>There are several <a class="reference internal" href="../generated/mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh.mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code></a> class methods that produce new meshes based on
@@ -581,6 +589,7 @@ original mesh based on scalar values.</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#on-demand-properties">On-demand properties</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unpacking">Unpacking</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#storing-data-with-meshes">Storing data with meshes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-meshes-to-meshes">From meshes to meshes</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#copy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">copy()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Clip()</span></code></a></li>
