@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: "MyMesh: General purpose, implicit, and image-based meshing in python"
+license: "MIT"
+type: software
+abstract: "MyMesh is a general purpose toolbox for generating, manipulating, and analyzing meshes. It's particularly focused on implicit function and image-based meshing, with other functionality including: Mesh type conversion (e.g. volume to surface, hexahedral or mixed-element to tetrahedral); Mesh quality evaluation and improvement; Mesh curvature analysis; Image-to-image, mesh-to-mesh, and mesh-to-image registration; Mesh boolean operations (intersection, union, difference)."
+message: "If you use this software, please cite it using these metadata"
+authors:
+  - given-names: Timothy
+    family-names: Josephson
+    affiliation: Boston University
+    orcid: "https://orcid.org/0000-0003-2703-6487"
+keywords:
+  - mesh
+  - computational geometry
+  - finite element
+  - finite volume
+  - 3D printing
+  - biomechanics
