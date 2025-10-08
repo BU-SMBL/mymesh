@@ -9,7 +9,7 @@ mesh class
 
 """
 
-from . import utils, implicit, improvement, contour, converter, quality, rays, curvature, visualize
+from . import utils, implicit, improvement, contour, converter, quality, rays, curvature, visualize, check_numba
 from sys import getsizeof
 import scipy
 import numpy as np
@@ -2423,240 +2423,247 @@ class mesh:
         D = dmesh(NodeCoords, NodeConn, ElemConn_head, ElemConn_elem, ElemConn_next, ElemConn_prev, ElemConn_tail, ElemLabels)
 
         return D
-
-import numba
-from numba.experimental import jitclass
-@jitclass([
-    ('_NodeCoords', numba.float64[:,:]),
-    ('_NodeConn', numba.int64[:,:]),
-    ('ElemConn_head', numba.int64[:]),
-    ('ElemConn_elem', numba.int64[:]),
-    ('ElemConn_next', numba.int64[:]),
-    ('ElemConn_prev', numba.int64[:]),
-    ('ElemConn_tail', numba.int64[:]),
-    ('ElemConn_size', numba.int64),
-    ('NNode', numba.int64),
-    ('NElem', numba.int64),
-    ('ElemLabels', numba.int64[:]),
-])
-class dmesh:
-    """
-    A specialized mesh class intended for dynamic modification of mesh 
-    connectivity. 
+if check_numba():
+    import numba
+    from numba.experimental import jitclass
     
-    The dmesh (Dynamic Mesh) class only supports single element
-    type meshes, and only element types that contain a single face type (e.g. 
-    wedge elements aren't supported because they have both quadrilateral and
-    triangular faces). 
-    
-    It's recommended that a :class:`dmesh` object is created from a :class:`mesh` 
-    object using :meth:`mesh.mesh2dmesh`. Incorrect initialization of the mesh
-    will likely lead to misbehavior. 
-
-    Parameters
-    ----------
-    NodeCoords : np.ndarray(dtype=np.float64)
-        Node coordinates array with shape=(n,3)
-    NodeConn : np.ndarray
-        Node connectivity of elements with shape=(l,m)
-        
-
-    """    
-    def __init__(self, NodeCoords, NodeConn, ElemConn_head, ElemConn_elem, ElemConn_next, ElemConn_prev, ElemConn_tail,ElemLabels=np.empty(0, np.int64)):
-        self._NodeCoords = NodeCoords
-        self._NodeConn = NodeConn
-        # self.ElemNeighbors = ElemNeighbors
-        self.ElemConn_head = ElemConn_head # Points from a node to the first connected element
-        self.ElemConn_elem = ElemConn_elem # Element ids
-        self.ElemConn_next = ElemConn_next # Points to the next element id connected to the node
-        self.ElemConn_prev = ElemConn_prev # Points to the previous element id connected to the node
-        self.ElemConn_tail = ElemConn_tail # Points from a node to the last connected element
-        self.ElemConn_size = len(self.ElemConn_elem) # 
-        # self.ElemConn_slots = [] # E
-        # self.NeighborConnection = NeighborConnection # Number of shared nodes required to be considered an element neighbor. If Faces/Edges get added, this could be removed
-
-        self.NNode = len(self._NodeCoords)
-        self.NElem = len(self._NodeConn)
-        self.ElemLabels = ElemLabels
-
-    @property
-    def NodeCoords(self):
-        return self._NodeCoords[:self.NNode]
-    
-    @property
-    def NodeConn(self):
-        return self._NodeConn[:self.NElem,:]
-    
-    def addNodes(self,NodeCoords,labels=np.array([], dtype=np.int64)):
+    @jitclass([
+        ('_NodeCoords', numba.float64[:,:]),
+        ('_NodeConn', numba.int64[:,:]),
+        ('ElemConn_head', numba.int64[:]),
+        ('ElemConn_elem', numba.int64[:]),
+        ('ElemConn_next', numba.int64[:]),
+        ('ElemConn_prev', numba.int64[:]),
+        ('ElemConn_tail', numba.int64[:]),
+        ('ElemConn_size', numba.int64),
+        ('NNode', numba.int64),
+        ('NElem', numba.int64),
+        ('ElemLabels', numba.int64[:]),
+    ])
+    class dmesh:
         """
-        Add nodes to the mesh.
+        A specialized mesh class intended for dynamic modification of mesh 
+        connectivity. 
+        
+        The dmesh (Dynamic Mesh) class only supports single element
+        type meshes, and only element types that contain a single face type (e.g. 
+        wedge elements aren't supported because they have both quadrilateral and
+        triangular faces). 
+        
+        It's recommended that a :class:`dmesh` object is created from a :class:`mesh` 
+        object using :meth:`mesh.mesh2dmesh`. Incorrect initialization of the mesh
+        will likely lead to misbehavior. 
 
         Parameters
         ----------
-        NodeCoords : array_like
-            Coordinates of the new node(s). This can either be a single node 
-            (shape=(3,)) or multiple nodes (shape=(n,3)).
-
-        """   
-
-        NodeCoords = np.atleast_2d(NodeCoords)
-        NewLength = self.NNode + len(NodeCoords)
-        if len(self._NodeCoords) < NewLength:
-            # Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.
-            # If the new addition is more than double the current length, the array will be extended 
-            # to exactly fit the new nodes
-            newsize = np.maximum(NewLength,len(self._NodeCoords)*2)
-            self._NodeCoords = np.resize(self._NodeCoords, (newsize,3))
+        NodeCoords : np.ndarray(dtype=np.float64)
+            Node coordinates array with shape=(n,3)
+        NodeConn : np.ndarray
+            Node connectivity of elements with shape=(l,m)
             
-            # update the ElemConn structure as well
-            self.ElemConn_head = np.resize(self.ElemConn_head, newsize)
-            self.ElemConn_tail = np.resize(self.ElemConn_tail, newsize)
+
+        """    
+        def __init__(self, NodeCoords, NodeConn, ElemConn_head, ElemConn_elem, ElemConn_next, ElemConn_prev, ElemConn_tail,ElemLabels=np.empty(0, np.int64)):
+            self._NodeCoords = NodeCoords
+            self._NodeConn = NodeConn
+            # self.ElemNeighbors = ElemNeighbors
+            self.ElemConn_head = ElemConn_head # Points from a node to the first connected element
+            self.ElemConn_elem = ElemConn_elem # Element ids
+            self.ElemConn_next = ElemConn_next # Points to the next element id connected to the node
+            self.ElemConn_prev = ElemConn_prev # Points to the previous element id connected to the node
+            self.ElemConn_tail = ElemConn_tail # Points from a node to the last connected element
+            self.ElemConn_size = len(self.ElemConn_elem) # 
+            # self.ElemConn_slots = [] # E
+            # self.NeighborConnection = NeighborConnection # Number of shared nodes required to be considered an element neighbor. If Faces/Edges get added, this could be removed
+
+            self.NNode = len(self._NodeCoords)
+            self.NElem = len(self._NodeConn)
+            self.ElemLabels = ElemLabels
+
+        @property
+        def NodeCoords(self):
+            return self._NodeCoords[:self.NNode]
         
-        self._NodeCoords[self.NNode:NewLength] = NodeCoords
-        self.ElemConn_head[self.NNode:NewLength] = -1
-        self.ElemConn_tail[self.NNode:NewLength] = -1
-        self.NNode = NewLength
-
-    def addElem(self,NodeConn,Label=0):
-        """
-        Add a new element to the mesh. The element should reference 
-        nodes that already exist in the mesh.
-
-        Parameters
-        ----------
-        NodeConn : array_like
-            Node connectivity of the new element. This should be a single
-            element (shape=(m,))
-        """  
-
-        NewLength = self.NElem + 1
-        NewElemId = self.NElem
-        if len(self._NodeConn) < NewLength:
-            # Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.
-            # If the new addition is more than double the current length, the array will be extended 
-            # to exactly fit the new elements
-            self._NodeConn = np.resize(self._NodeConn, (int(np.maximum(NewLength,len(self._NodeConn)*2)),np.shape(self._NodeConn)[1]))
-
-            if len(self.ElemLabels) > 0:
-                self.ElemLabels = np.resize(self.ElemLabels, int(np.maximum(NewLength,len(self.ElemLabels)*2)))
-
-        self._NodeConn[NewElemId] = NodeConn
-        if len(self.ElemLabels) > 0:
-            self.ElemLabels[NewElemId] = Label
-
-        # Update ElemConn with new connections
-        for node in self._NodeConn[NewElemId]:
-            self.addElemConn(node, NewElemId)
-
-
-        self.NElem += 1
-
-    def removeElem(self, ElemId):
-        # Remove an element from the mesh by swap removal
-        # Swaps the position of the element definition in NodeConn to the position
-        # of the last defined element. References to the last element are updated
-        # to refer to the swapped position
-        # NOTE: If removing multiple elements, be sure to remove them in reverse
-        # order (largest first)
-
-        LastId = self.NElem - 1
-        oldnodes = self._NodeConn[LastId].copy()
-
-        # Remove connections to the old element
-        for node in self._NodeConn[ElemId]:
-            self.removeElemConn(node,ElemId)
-  
-        if ElemId != LastId:
-            # Swap element @ ElemId with the element in the last position
-            self._NodeConn[ElemId] = oldnodes
-            if len(self.ElemLabels) > 0:
-                self.ElemLabels[ElemId] = self.ElemLabels[LastId]
-            # Update ElemConn for each node in the element
-            for n in oldnodes:
-                i = self.ElemConn_head[n]
-                while i != -1:
-                    if self.ElemConn_elem[i] == LastId:
-                        self.ElemConn_elem[i] = ElemId
-                    i = self.ElemConn_next[i]
-
-        self.NElem -= 1
-
-    def swapNode(self, NodeId1, NodeId2):
-
-        # Swap all references of Node1 to Node2
-        elemconn1 = self.getElemConn(NodeId1)
-        elemconn2 = self.getElemConn(NodeId2)
-        for ElemId in elemconn1:
-            elem = self._NodeConn[ElemId]
-            elem[elem == NodeId1] = NodeId2
-            self._NodeConn[ElemId] = elem
-            self.removeElemConn(NodeId1, ElemId)
-            if ElemId not in elemconn2:
-                self.addElemConn(NodeId2, ElemId)
-    
-    def getElemConn(self, NodeId):
+        @property
+        def NodeConn(self):
+            return self._NodeConn[:self.NElem,:]
         
-        i = self.ElemConn_head[NodeId]
-        ElemConn = []
-        while i != -1:
-            ElemConn.append(self.ElemConn_elem[i])
-            i = self.ElemConn_next[i]
-        return ElemConn
+        def addNodes(self,NodeCoords,labels=np.array([], dtype=np.int64)):
+            """
+            Add nodes to the mesh.
 
-    def addElemConn(self, NodeId, ElemId):
-        # Add a connection between an existing node and an element
-        
-        if len(self.ElemConn_elem) == self.ElemConn_size:
-            # Amortized O(1) insertion by doubling 
-            self.ElemConn_elem = np.resize(self.ElemConn_elem, np.maximum(len(self.ElemConn_elem)*2,1))
-            self.ElemConn_next = np.resize(self.ElemConn_next, np.maximum(len(self.ElemConn_next)*2,1))
-            self.ElemConn_prev = np.resize(self.ElemConn_prev, np.maximum(len(self.ElemConn_prev)*2,1))
+            Parameters
+            ----------
+            NodeCoords : array_like
+                Coordinates of the new node(s). This can either be a single node 
+                (shape=(3,)) or multiple nodes (shape=(n,3)).
 
-        i = self.ElemConn_tail[NodeId]
-        newIdx = self.ElemConn_size
-        self.ElemConn_elem[newIdx] = ElemId
-        if i == -1:
-            # If this is the first connection for the node
-            self.ElemConn_head[NodeId] = newIdx
-            self.ElemConn_prev[newIdx] = -1
-        else:
-            self.ElemConn_next[i] = newIdx
-            self.ElemConn_prev[newIdx] = i
+            """   
 
-        self.ElemConn_tail[NodeId] = newIdx
-        self.ElemConn_next[newIdx] = -1
-
-        self.ElemConn_size += 1
-
-    def removeElemConn(self, NodeId, ElemId):
-        # Remove a connection between a node and an element
-
-        # Find the position of the element
-        i = self.ElemConn_head[NodeId]
-        while i != -1:
-            elem = self.ElemConn_elem[i]
-            if elem == ElemId:
-                # Remove
-                if self.ElemConn_prev[i] == -1:
-                    # this node is the head
-                    self.ElemConn_head[NodeId] = self.ElemConn_next[i]
-                else:
-                    self.ElemConn_next[self.ElemConn_prev[i]] = self.ElemConn_next[i]
-
-                if self.ElemConn_next[i] == -1:
-                    # this node is the tail
-                    self.ElemConn_tail[NodeId] = self.ElemConn_prev[i]
-                else:
-                    self.ElemConn_prev[self.ElemConn_next[i]] = self.ElemConn_prev[i]
-
-                self.ElemConn_elem[i] = -1
-                self.ElemConn_next[i] = -1
-                self.ElemConn_prev[i] = -1
-                break
-            else:
-                i = self.ElemConn_next[i]
+            NodeCoords = np.atleast_2d(NodeCoords)
+            NewLength = self.NNode + len(NodeCoords)
+            if len(self._NodeCoords) < NewLength:
+                # Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.
+                # If the new addition is more than double the current length, the array will be extended 
+                # to exactly fit the new nodes
+                newsize = np.maximum(NewLength,len(self._NodeCoords)*2)
+                self._NodeCoords = np.resize(self._NodeCoords, (newsize,3))
                 
+                # update the ElemConn structure as well
+                self.ElemConn_head = np.resize(self.ElemConn_head, newsize)
+                self.ElemConn_tail = np.resize(self.ElemConn_tail, newsize)
+            
+            self._NodeCoords[self.NNode:NewLength] = NodeCoords
+            self.ElemConn_head[self.NNode:NewLength] = -1
+            self.ElemConn_tail[self.NNode:NewLength] = -1
+            self.NNode = NewLength
 
-        # NOTE: Not currently tracking freed slots so the remnants of old connections
-        # remain, taking up space. Could implement a tracker of free indices
-        # to all for reuse
+        def addElem(self,NodeConn,Label=0):
+            """
+            Add a new element to the mesh. The element should reference 
+            nodes that already exist in the mesh.
+
+            Parameters
+            ----------
+            NodeConn : array_like
+                Node connectivity of the new element. This should be a single
+                element (shape=(m,))
+            """  
+
+            NewLength = self.NElem + 1
+            NewElemId = self.NElem
+            if len(self._NodeConn) < NewLength:
+                # Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.
+                # If the new addition is more than double the current length, the array will be extended 
+                # to exactly fit the new elements
+                self._NodeConn = np.resize(self._NodeConn, (int(np.maximum(NewLength,len(self._NodeConn)*2)),np.shape(self._NodeConn)[1]))
+
+                if len(self.ElemLabels) > 0:
+                    self.ElemLabels = np.resize(self.ElemLabels, int(np.maximum(NewLength,len(self.ElemLabels)*2)))
+
+            self._NodeConn[NewElemId] = NodeConn
+            if len(self.ElemLabels) > 0:
+                self.ElemLabels[NewElemId] = Label
+
+            # Update ElemConn with new connections
+            for node in self._NodeConn[NewElemId]:
+                self.addElemConn(node, NewElemId)
+
+
+            self.NElem += 1
+
+        def removeElem(self, ElemId):
+            # Remove an element from the mesh by swap removal
+            # Swaps the position of the element definition in NodeConn to the position
+            # of the last defined element. References to the last element are updated
+            # to refer to the swapped position
+            # NOTE: If removing multiple elements, be sure to remove them in reverse
+            # order (largest first)
+
+            LastId = self.NElem - 1
+            oldnodes = self._NodeConn[LastId].copy()
+
+            # Remove connections to the old element
+            for node in self._NodeConn[ElemId]:
+                self.removeElemConn(node,ElemId)
+    
+            if ElemId != LastId:
+                # Swap element @ ElemId with the element in the last position
+                self._NodeConn[ElemId] = oldnodes
+                if len(self.ElemLabels) > 0:
+                    self.ElemLabels[ElemId] = self.ElemLabels[LastId]
+                # Update ElemConn for each node in the element
+                for n in oldnodes:
+                    i = self.ElemConn_head[n]
+                    while i != -1:
+                        if self.ElemConn_elem[i] == LastId:
+                            self.ElemConn_elem[i] = ElemId
+                        i = self.ElemConn_next[i]
+
+            self.NElem -= 1
+
+        def swapNode(self, NodeId1, NodeId2):
+
+            # Swap all references of Node1 to Node2
+            elemconn1 = self.getElemConn(NodeId1)
+            elemconn2 = self.getElemConn(NodeId2)
+            for ElemId in elemconn1:
+                elem = self._NodeConn[ElemId]
+                elem[elem == NodeId1] = NodeId2
+                self._NodeConn[ElemId] = elem
+                self.removeElemConn(NodeId1, ElemId)
+                if ElemId not in elemconn2:
+                    self.addElemConn(NodeId2, ElemId)
+        
+        def getElemConn(self, NodeId):
+            
+            i = self.ElemConn_head[NodeId]
+            ElemConn = []
+            while i != -1:
+                ElemConn.append(self.ElemConn_elem[i])
+                i = self.ElemConn_next[i]
+            return ElemConn
+
+        def addElemConn(self, NodeId, ElemId):
+            # Add a connection between an existing node and an element
+            
+            if len(self.ElemConn_elem) == self.ElemConn_size:
+                # Amortized O(1) insertion by doubling 
+                self.ElemConn_elem = np.resize(self.ElemConn_elem, np.maximum(len(self.ElemConn_elem)*2,1))
+                self.ElemConn_next = np.resize(self.ElemConn_next, np.maximum(len(self.ElemConn_next)*2,1))
+                self.ElemConn_prev = np.resize(self.ElemConn_prev, np.maximum(len(self.ElemConn_prev)*2,1))
+
+            i = self.ElemConn_tail[NodeId]
+            newIdx = self.ElemConn_size
+            self.ElemConn_elem[newIdx] = ElemId
+            if i == -1:
+                # If this is the first connection for the node
+                self.ElemConn_head[NodeId] = newIdx
+                self.ElemConn_prev[newIdx] = -1
+            else:
+                self.ElemConn_next[i] = newIdx
+                self.ElemConn_prev[newIdx] = i
+
+            self.ElemConn_tail[NodeId] = newIdx
+            self.ElemConn_next[newIdx] = -1
+
+            self.ElemConn_size += 1
+
+        def removeElemConn(self, NodeId, ElemId):
+            # Remove a connection between a node and an element
+
+            # Find the position of the element
+            i = self.ElemConn_head[NodeId]
+            while i != -1:
+                elem = self.ElemConn_elem[i]
+                if elem == ElemId:
+                    # Remove
+                    if self.ElemConn_prev[i] == -1:
+                        # this node is the head
+                        self.ElemConn_head[NodeId] = self.ElemConn_next[i]
+                    else:
+                        self.ElemConn_next[self.ElemConn_prev[i]] = self.ElemConn_next[i]
+
+                    if self.ElemConn_next[i] == -1:
+                        # this node is the tail
+                        self.ElemConn_tail[NodeId] = self.ElemConn_prev[i]
+                    else:
+                        self.ElemConn_prev[self.ElemConn_next[i]] = self.ElemConn_prev[i]
+
+                    self.ElemConn_elem[i] = -1
+                    self.ElemConn_next[i] = -1
+                    self.ElemConn_prev[i] = -1
+                    break
+                else:
+                    i = self.ElemConn_next[i]
+                    
+
+            # NOTE: Not currently tracking freed slots so the remnants of old connections
+            # remain, taking up space. Could implement a tracker of free indices
+            # to all for reuse
+
+else:
+    class dmesh:
+        def __init__(*args):
+            raise ImportError('The dmesh class requires numba.\nInstall with `pip install numba`.\nA restart of the python session will be required.')
+        

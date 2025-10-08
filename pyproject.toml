@@ -56,7 +56,8 @@ all = [
     "pillow>=10.0.0",
     "jupyter_rfb>=0.4.2",
     "PyQt6>=6.2.3",
-    "PyGlet>=2.0.10"
+    "PyGlet>=2.0.10",
+    "pyvista>=0.45.2",
     ]
 
 [project.urls]
