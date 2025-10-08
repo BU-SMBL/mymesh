@@ -446,8 +446,8 @@ another plane, the <cite>ray</cite> argument should be modified.</p>
 <li><p><strong>NodeCoords</strong> (<em>array_like</em>) – List of node coordinates of the surface</p></li>
 <li><p><strong>BoundaryConn</strong> (<em>array_like</em>) – Node connectivity of elements. This function is only valid for triangular surface meshes.</p></li>
 <li><p><strong>ElemNormals</strong> (<em>array_like</em>) – Element normal vectors</p></li>
-<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8</p></li>
-<li><p><strong>inclusive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, include points on the boundary (within tolerance <cite>eps</cite>) as
+<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Small parameter used to determine if a value is sufficiently close to 0, by default 1e-8</p></li>
+<li><p><strong>inclusive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, include points on the boundary (within tolerance <cite>eps</cite>) as
 inside the boundary.</p></li>
 <li><p><strong>ray</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Ray that will be cast to determine whether the point is inside or outside
 the boundary, by default a random unit vector parallel to the xy plane will be
@@ -459,7 +459,7 @@ as the ray is in the same plane as the boundary.</p></li>
 <dd class="field-even"><p><strong>inside</strong> – True if the point is inside the surface, otherwise False.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>

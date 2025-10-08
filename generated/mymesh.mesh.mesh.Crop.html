@@ -444,7 +444,7 @@ are within the cropping bounds.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>bounds</strong> (<em>array_like</em>) – Six element list of of cropping bounds, formatted as
 [xmin, xmax, ymin, ymax, zmin, zmax].</p></li>
-<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Cropping method, by default ‘centroids’</p>
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Cropping method, by default ‘centroids’</p>
 <blockquote>
 <div><ul>
 <li><p>’centroids’ - keep elements whose centroids are within the bounds</p></li>
@@ -452,10 +452,10 @@ are within the cropping bounds.</p>
 </ul>
 </div></blockquote>
 </p></li>
-<li><p><strong>InPlace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, the original mesh will be modified in place, otherwise a
+<li><p><strong>InPlace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, the original mesh will be modified in place, otherwise a
 copy will be made and modified, leaving the original mesh unaltered.
 By default False</p></li>
-<li><p><strong>cleanup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to run <a class="reference internal" href="mymesh.mesh.mesh.cleanup.html#mymesh.mesh.mesh.cleanup" title="mymesh.mesh.mesh.cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mesh.cleanup()</span></code></a>, removing nodes that are no
+<li><p><strong>cleanup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to run <a class="reference internal" href="mymesh.mesh.mesh.cleanup.html#mymesh.mesh.mesh.cleanup" title="mymesh.mesh.mesh.cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mesh.cleanup()</span></code></a>, removing nodes that are no
 longer in the cropped mesh, by default False.</p></li>
 </ul>
 </dd>

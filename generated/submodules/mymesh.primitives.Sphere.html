@@ -444,17 +444,17 @@ The total number of points will be phi_resolution*(theta_resolution-2) + 2</p>
 <li><p><strong>center</strong> (<em>array_like</em>) – Three element array of the coordinates of the center of the sphere.</p></li>
 <li><p><strong>radius</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – The radius of the sphere. Radius can be specified as a scalar radius of
 the sphere or three element array of half-axes for an ellipsoid.</p></li>
-<li><p><strong>theta_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optionalperpendicular</em>) – Number of circular (or elliptical) cross sections sampled along the z axis, by default 20.</p></li>
-<li><p><strong>phi_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of circumferential points for each cross section, by default 20.</p></li>
-<li><p><strong>radial_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of radial points from center to edge, by default 10. Only relevant
+<li><p><strong>theta_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optionalperpendicular</em>) – Number of circular (or elliptical) cross sections sampled along the z axis, by default 20.</p></li>
+<li><p><strong>phi_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of circumferential points for each cross section, by default 20.</p></li>
+<li><p><strong>radial_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of radial points from center to edge, by default 10. Only relevant
 if Type=’vol’.</p></li>
-<li><p><strong>ElemType</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Specify the element type of the mesh. If Type=’surf’ (default), ElemType
+<li><p><strong>ElemType</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specify the element type of the mesh. If Type=’surf’ (default), ElemType
 can be ‘tri’, which will produce a purely triangular mesh or None, which
 will produce a quad-dominant mesh with some triangles. If Type=’vol’,
 ElemType can be ‘tet’, which will produce a purely tetrahedral mesh or
 None, which  will produce a hex-dominant mesh with some tetrahedra. By
 default, None.</p></li>
-<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Mesh type of the final mesh. This could be ‘surf’ for a surface mesh or
+<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Mesh type of the final mesh. This could be ‘surf’ for a surface mesh or
 ‘vol’ for a volumetric mesh, by default ‘surf’.</p></li>
 </ul>
 </dd>

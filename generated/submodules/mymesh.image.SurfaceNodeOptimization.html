@@ -440,37 +440,37 @@
 This simultaneously moves nodes towards the isosurface and redistributes
 nodes more evenly, thus smoothing the mesh without shrinkage or destruction
 of features. This method is consistes of using the Z-flow (and R-flow if
-smooth=True) from <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id50" title="Y. Ohtake and A. G. Belyaev. Mesh optimization for polygonized isosurfaces. Computer Graphics Forum, 20(3):368–376, sep 2001. URL: https://onlinelibrary-wiley-com.ezproxy.bu.edu/doi/10.1111/1467-8659.00529, doi:10.1111/1467-8659.00529.">OB01</a>]</span>.</p>
+smooth=True) from <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id38" title="Y. Ohtake and A. G. Belyaev. Mesh optimization for polygonized isosurfaces. Computer Graphics Forum, 20(3):368–376, sep 2001. URL: https://onlinelibrary-wiley-com.ezproxy.bu.edu/doi/10.1111/1467-8659.00529, doi:10.1111/1467-8659.00529.">OB01</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>M</strong> (<a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><em>mymesh.mesh</em></a>) – Mesh object</p></li>
-<li><p><strong>img</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>np.ndarray</em>) – Image array or file path to an image</p></li>
-<li><p><strong>h</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a>) – Voxel size of the image. If provided as a float, the image is assumed
+<li><p><strong>img</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>np.ndarray</em>) – Image array or file path to an image</p></li>
+<li><p><strong>h</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Voxel size of the image. If provided as a float, the image is assumed
 to have an isotropic voxel size. If given as a three element tuple,
 the three sizes refer to the voxel size in the first, second, and
 third dimensions of the image, corresponding to (z, y, x) axes.</p></li>
-<li><p><strong>Cr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Relaxation coefficient (only used if smooth=True). Scales the magnitude
+<li><p><strong>Cr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Relaxation coefficient (only used if smooth=True). Scales the magnitude
 of smoothing</p></li>
-<li><p><strong>Cz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Node motion coefficient. Scales the magnitude of node movement</p></li>
-<li><p><strong>iterate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of iterations to perform, by default 1</p></li>
-<li><p><strong>FixedNodes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><em>set</em></a><em>, </em><em>optional</em>) – Nodes to hold in place during repositioning, by default set()</p></li>
-<li><p><strong>FixEdges</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to detect and hold in place exposed surface edges, by default False</p></li>
-<li><p><strong>gaussian_sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Standard deviation used for getting the gradient via convolution with
+<li><p><strong>Cz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Node motion coefficient. Scales the magnitude of node movement</p></li>
+<li><p><strong>iterate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of iterations to perform, by default 1</p></li>
+<li><p><strong>FixedNodes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.14)"><em>set</em></a><em>, </em><em>optional</em>) – Nodes to hold in place during repositioning, by default set()</p></li>
+<li><p><strong>FixEdges</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to detect and hold in place exposed surface edges, by default False</p></li>
+<li><p><strong>gaussian_sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Standard deviation used for getting the gradient via convolution with
 a Gaussian kernel in units of voxels (see scipy.ndimage.gaussian_filter),
 by default 1 voxel.</p></li>
-<li><p><strong>smooth</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Option to perform smoothing. This can be either ‘local’ for local
+<li><p><strong>smooth</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Option to perform smoothing. This can be either ‘local’ for local
 Laplacian smoothing or ‘tangential’ for tangential Laplacian smoothing,
 by default ‘tangential’. For any other option, smoothing will not be
 performed. Tangential smoothing differs from local in that nodes
 are only repositioned in the tangent plane (based on the normal vector
 obtain from the gradient).</p></li>
-<li><p><strong>InPlace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If False, will create a copy of the mesh, rather than altering node
+<li><p><strong>InPlace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If False, will create a copy of the mesh, rather than altering node
 positions of the original mesh object “in-place”, by default False</p></li>
-<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Interpolation method used for evaluating surface points inside the image
+<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Interpolation method used for evaluating surface points inside the image
 using scipy.interpolate.RegularGridInterpolator (input must be one of the
 allowable “method” inputs), by default ‘linear’.</p></li>
-<li><p><strong>springs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True and the mesh is a volume mesh, internal nodes will be treated as
+<li><p><strong>springs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If True and the mesh is a volume mesh, internal nodes will be treated as
 if they are connected by springs (see <code class="xref py py-func docutils literal notranslate"><span class="pre">NodeSpringSmoothing()</span></code>)
 to reduce risk of element distortion or inversion, by default True.</p></li>
 </ul>

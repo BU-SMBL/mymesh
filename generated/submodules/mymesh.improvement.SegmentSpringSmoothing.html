@@ -441,28 +441,28 @@ Blom, F.J., 2000. Considerations on the spring analogy. International journal fo
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – List of nodal coordinates.</p></li>
-<li><p><strong>NodeConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – Nodal connectivity list.</p></li>
-<li><p><strong>NodeNeighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – List of node neighboring nodes for each node in the mesh.
+<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – List of nodal coordinates.</p></li>
+<li><p><strong>NodeConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – Nodal connectivity list.</p></li>
+<li><p><strong>NodeNeighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>optional</em>) – List of node neighboring nodes for each node in the mesh.
 If provided with ElemConn, will avoid the need to recalculate, by default None.
 If only one is provided, both will be recalculated.</p></li>
-<li><p><strong>ElemConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – List of elements connected to each node.
+<li><p><strong>ElemConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>optional</em>) – List of elements connected to each node.
 If provided with NodeNeighbors, will avoid the need to recalculate, by default None.
 If only one is provided, both will be recalculated.</p></li>
-<li><p><strong>StiffnessFactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Specifies a scaling factor for the stiffness of the springs. The default is 1.</p></li>
-<li><p><strong>FixedNotes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><em>set</em></a><em>, </em><em>optional</em>) – Set of nodes to be held fixed. The default is set().</p></li>
-<li><p><strong>Forces</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – Set of applied forces. If specified, forces must be specified for every node,
+<li><p><strong>StiffnessFactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Specifies a scaling factor for the stiffness of the springs. The default is 1.</p></li>
+<li><p><strong>FixedNotes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.14)"><em>set</em></a><em>, </em><em>optional</em>) – Set of nodes to be held fixed. The default is set().</p></li>
+<li><p><strong>Forces</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>optional</em>) – Set of applied forces. If specified, forces must be specified for every node,
 with a force of [0,0,0] applied to unloaded nodes. The default is None.</p></li>
-<li><p><strong>L0Override</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Override value for assigning the length of springs whose initial length is 0.
+<li><p><strong>L0Override</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Override value for assigning the length of springs whose initial length is 0.
 ‘min’ : 0-length springs will be assigned to be equal to the shortest non-0-length spring in the mesh.
 ‘max’ : 0-length springs will be assigned to be equal to the longest spring in the mesh.
 float : 0-length springs will be assigned to be equal to the specified float.
 The default is ‘min’.</p></li>
-<li><p><strong>CellCentered</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will add cell (element)-centered springs, adding springs between each node in an element to
+<li><p><strong>CellCentered</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will add cell (element)-centered springs, adding springs between each node in an element to
 the element centrod, by default True.</p></li>
-<li><p><strong>FaceCentered</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will add face-centered springs, adding springs between each node in an element face to
+<li><p><strong>FaceCentered</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will add face-centered springs, adding springs between each node in an element face to
 the face centrod, by default True.</p></li>
-<li><p><strong>return_KF</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return a tuple (K,F) containing the matrices (in scipy sparse formats) K and F of the
+<li><p><strong>return_KF</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return a tuple (K,F) containing the matrices (in scipy sparse formats) K and F of the
 linear spring equation KU=F which is solved to find the the nodal displacements, by default False.</p></li>
 </ul>
 </dd>

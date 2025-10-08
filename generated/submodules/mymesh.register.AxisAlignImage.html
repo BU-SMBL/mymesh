@@ -453,7 +453,7 @@ combination of 0, 1, and 2.
 Threshold value used to binarize the image for identification of the
 object. If the image is already binarized, this is not necessary, by
 default None.</p></li>
-<li><p><strong>center</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>array_like</em><em>, or </em><em>NoneType</em><em>, </em><em>optional</em>) – <p>Location of the center of the object after axis alignment, by default
+<li><p><strong>center</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>array_like</em><em>, or </em><em>NoneType</em><em>, </em><em>optional</em>) – <p>Location of the center of the object after axis alignment, by default
 ‘image’. Options are:</p>
 <ul>
 <li><p>’image’: Centers the object at the center of the image</p></li>
@@ -463,17 +463,17 @@ voxels, of where to place to place the center of the bounding box
 of the object after transformation.</p></li>
 </ul>
 </p></li>
-<li><p><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Scale factor used to resample the image to either reduce (scale &lt; 1)
+<li><p><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Scale factor used to resample the image to either reduce (scale &lt; 1)
 or increase (scale &gt; 1) the size/resolution of the image used for
 alignment, by default 1. The returned image will still be of the
 original resolution.</p></li>
-<li><p><strong>interpolation_order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Interpolation order used in image scaling and transformation (see
+<li><p><strong>interpolation_order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Interpolation order used in image scaling and transformation (see
 <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.zoom.html#scipy.ndimage.zoom">scipy.ndimage.zoom</a>)
 and scaling (if used). Must be an integer in the range 0-5. Lower order
 is more efficient at the cost of quality. By default, 1.</p></li>
-<li><p><strong>transform_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>, </em><em>optional</em>) – Optional input arguments passed to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html">scipy.ndimage.affine_transform</a>, by
+<li><p><strong>transform_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Optional input arguments passed to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html">scipy.ndimage.affine_transform</a>, by
 default <cite>dict(mode=’constant’, order=interpolation_order)</cite>.</p></li>
-<li><p><strong>return_transform</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to return the transformation matrix as well as the transformed
+<li><p><strong>return_transform</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to return the transformation matrix as well as the transformed
 point cloud, by default False</p></li>
 </ul>
 </dd>

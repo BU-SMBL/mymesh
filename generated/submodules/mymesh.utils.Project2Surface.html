@@ -442,11 +442,11 @@ coordinates (alpha, beta, gamma) of that projection within that element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>Point</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><em>np.ndarray</em>) – Coordinates of the point to be projected on to the surface.</p></li>
-<li><p><strong>Normal</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><em>np.ndarray</em>) – Vector along which the point will be projected.</p></li>
-<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><em>np.ndarray</em>) – Node coordinates list of the mesh that the point is being projected to.</p></li>
-<li><p><strong>SurfConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><em>np.ndarray</em>) – Nodal connectivity of the surface mesh that the point is being projected to.</p></li>
-<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
+<li><p><strong>Point</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> or </em><em>np.ndarray</em>) – Coordinates of the point to be projected on to the surface.</p></li>
+<li><p><strong>Normal</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> or </em><em>np.ndarray</em>) – Vector along which the point will be projected.</p></li>
+<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> or </em><em>np.ndarray</em>) – Node coordinates list of the mesh that the point is being projected to.</p></li>
+<li><p><strong>SurfConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> or </em><em>np.ndarray</em>) – Nodal connectivity of the surface mesh that the point is being projected to.</p></li>
+<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf
 Octree : str (or tree.OctreeNode), optional
 octree options. An octree representation of the surface can significantly
 improve mapping speeds, by default ‘generate’.

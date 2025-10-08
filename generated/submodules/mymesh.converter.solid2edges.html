@@ -442,9 +442,9 @@ with 2D or surface meshes. It differs from surface2edges in that surface2edges r
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – List of nodal coordinates.</p></li>
-<li><p><strong>NodeConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – Nodal connectivity list.</p></li>
-<li><p><strong>ElemType</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Specifies the element type contained within the mesh, by default ‘auto’.</p>
+<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – List of nodal coordinates.</p></li>
+<li><p><strong>NodeConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – Nodal connectivity list.</p></li>
+<li><p><strong>ElemType</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Specifies the element type contained within the mesh, by default ‘auto’.</p>
 <ul>
 <li><p>’auto’ or ‘mixed’ - Will detect element type by the number of nodes present in each element using <a class="reference internal" href="mymesh.utils.identify_type.html#mymesh.utils.identify_type" title="mymesh.utils.identify_type"><code class="xref py py-func docutils literal notranslate"><span class="pre">identify_type()</span></code></a>.</p></li>
 <li><p>’surf’ - Will detect element type by the number of nodes present in each</p></li>
@@ -464,10 +464,10 @@ with 2D or surface meshes. It differs from surface2edges in that surface2edges r
 <li><p>’polygon’ - All elements treated as n-node polygonal elements. TODO: add support for return_EdgeConn and return_EdgeElem</p></li>
 </ul>
 </p></li>
-<li><p><strong>return_EdgeConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return EdgeConn, the Edge Connectivity of each element.
+<li><p><strong>return_EdgeConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return EdgeConn, the Edge Connectivity of each element.
 For each element, EdgeConn has the indices of the edges connected to
 that element, by default False</p></li>
-<li><p><strong>return_EdgeElem</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return EdgeElem, the Element Connectivity of each edge.
+<li><p><strong>return_EdgeElem</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return EdgeElem, the Element Connectivity of each edge.
 For each face, EdgeElem has the index of the element that the edge
 is a part of, by default False</p></li>
 </ul>

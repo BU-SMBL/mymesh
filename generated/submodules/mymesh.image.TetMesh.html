@@ -440,16 +440,16 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>np.ndarray</em>) – Image array or file path to an image</p></li>
-<li><p><strong>h</strong> (<em>scalar</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a>) – Voxel size of the image. Can be specified as a single scalar value, or a three element tuple (or array_like).
+<li><p><strong>img</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>np.ndarray</em>) – Image array or file path to an image</p></li>
+<li><p><strong>h</strong> (<em>scalar</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Voxel size of the image. Can be specified as a single scalar value, or a three element tuple (or array_like).
 If a tuple, entries should correspond to (hx, hy, hz).</p></li>
 <li><p><strong>threshold</strong> (<em>scalar</em>) – Isovalue threshold to use for keeping/removing elements, by default 0.</p></li>
 <li><p><strong>threshold_dir</strong> (<em>signed integer</em>) – If threshold_dir is negative (default), values less than or equal to the threshold will be considered “inside” the mesh and the opposite if threshold_dir is positive, by default 1.</p></li>
-<li><p><strong>scalefactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Scale factor for resampling the image. If greater than 1, there will be more than
+<li><p><strong>scalefactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Scale factor for resampling the image. If greater than 1, there will be more than
 1 elements per voxel. If less than 1, will coarsen the image, by default 1.</p></li>
-<li><p><strong>scaleorder</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
+<li><p><strong>scaleorder</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
 Must be 0-5.</p></li>
-<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Method of interpolation used for placing the vertices on the approximated isosurface. This can be ‘midpoint’ or ‘linear’, by default ‘linear’.</p></li>
+<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Method of interpolation used for placing the vertices on the approximated isosurface. This can be ‘midpoint’ or ‘linear’, by default ‘linear’.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

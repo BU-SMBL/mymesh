@@ -439,7 +439,7 @@
 <dd><p>Marching tetrahedra algorithm for extracting an isoline from a triangular
 mesh. This can be used to generate either a surface mesh of the region
 above or below the threshold or a line mesh of the isoline. Note that this
-method is different than the Marching Triangles algorithm by <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id11" title="A. Hilton, A. J. Stoddart, J. Illingworth, and T. Windeatt. Marching triangles: Range image fusion for complex object modelling. IEEE International Conference on Image Processing, 2:381–384, 1996. URL: https://doi.org/10.1109/ICIP.1996.560840, doi:10.1109/icip.1996.560840.">HSIW96</a>]</span>
+method is different than the Marching Triangles algorithm by <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id19" title="A. Hilton, A. J. Stoddart, J. Illingworth, and T. Windeatt. Marching triangles: Range image fusion for complex object modelling. IEEE International Conference on Image Processing, 2:381–384, 1996. URL: https://doi.org/10.1109/ICIP.1996.560840, doi:10.1109/icip.1996.560840.">HSIW96</a>]</span>
 and is instead analogous to the other “marching” contouring algorithms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -447,26 +447,26 @@ and is instead analogous to the other “marching” contouring algorithms.</p>
 <li><p><strong>TriNodeCoords</strong> (<em>array_like</em>) – Node coordinates for the input triangular mesh</p></li>
 <li><p><strong>TriNodeConn</strong> (<em>array_like</em>) – Node connectivity for the input triangular mesh. All elements must be triangles.</p></li>
 <li><p><strong>NodeValues</strong> (<em>array_like</em>) – Values at each node in the mesh that are used to extract the isoline</p></li>
-<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Isoline level, by default 0</p></li>
-<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Interpolation to interpolate the position of the new nodes along the edges
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Isoline level, by default 0</p></li>
+<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Interpolation to interpolate the position of the new nodes along the edges
 of the input mesh, by default ‘linear’.</p>
 <p>’midpoint’ - No interpolation is performed, new nodes are placed at the midpoint of edges</p>
 <p>’linear’ - Linear interpolation is performed between adjacent nodes on the input mesh.</p>
 </p></li>
-<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Determines whether to generate a surface mesh (‘surf’) or volume mesh (‘vol’),
+<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Determines whether to generate a surface mesh (‘surf’) or volume mesh (‘vol’),
 by default ‘surf’</p></li>
-<li><p><strong>mixed_elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True and Type=’surf’, the generated mesh will have mixed element types
+<li><p><strong>mixed_elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If True and Type=’surf’, the generated mesh will have mixed element types
 (triangles/quadrilateral otherwise a single element type (triangles), by
 default False.</p></li>
-<li><p><strong>flip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Flip the interior/exterior of the mesh, by default False.
+<li><p><strong>flip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Flip the interior/exterior of the mesh, by default False.
 By default, values less than the threshold are assumed to be the “inside”
 of the mesh. If the inside is denoted by values greater than the threshold,
 set flip=True.</p></li>
-<li><p><strong>return_NodeValues</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Return the node values for each node in the triangular mesh. If Type=’line’,
+<li><p><strong>return_NodeValues</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Return the node values for each node in the triangular mesh. If Type=’line’,
 these will all be <cite>threshold</cite>, if Type=’surf’, these will be <cite>threshold</cite>
 for the boundary nodes and the original grid values for the interior nodes</p></li>
-<li><p><strong>return_ParentIds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Return Ids that refer to the original triangles that each of the new elements is connected to, by default False.</p></li>
-<li><p><strong>cleanup_tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Tolerance value used to classify whether two nodes are sufficiently close to be considered a single node (see <a class="reference internal" href="mymesh.utils.DeleteDuplicateNodes.html#mymesh.utils.DeleteDuplicateNodes" title="mymesh.utils.DeleteDuplicateNodes"><code class="xref py py-func docutils literal notranslate"><span class="pre">mymesh.utils.DeleteDuplicateNodes()</span></code></a>), by default 1e-12.</p></li>
+<li><p><strong>return_ParentIds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Return Ids that refer to the original triangles that each of the new elements is connected to, by default False.</p></li>
+<li><p><strong>cleanup_tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Tolerance value used to classify whether two nodes are sufficiently close to be considered a single node (see <a class="reference internal" href="mymesh.utils.DeleteDuplicateNodes.html#mymesh.utils.DeleteDuplicateNodes" title="mymesh.utils.DeleteDuplicateNodes"><code class="xref py py-func docutils literal notranslate"><span class="pre">mymesh.utils.DeleteDuplicateNodes()</span></code></a>), by default 1e-12.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

@@ -440,9 +440,9 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>scalars</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>array_like</em>) – Values to be used for thresholding, either a string indicating an entry in NodeData or ElemData, or an array_like of values.</p></li>
-<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a>) – Thresholding value(s) to use. If provided as a two element tuple, they’re taken to be lower and upper bounds.</p></li>
-<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Thresholding condition to determine which elements to keep in the mesh.</p>
+<li><p><strong>scalars</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>array_like</em>) – Values to be used for thresholding, either a string indicating an entry in NodeData or ElemData, or an array_like of values.</p></li>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Thresholding value(s) to use. If provided as a two element tuple, they’re taken to be lower and upper bounds.</p></li>
+<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Thresholding condition to determine which elements to keep in the mesh.</p>
 <dl>
 <dt>Single threshold options:</dt><dd><p>’&gt;=’ - Keeping condition is <cite>value &gt;= threshold</cite>, default.</p>
 <p>’&gt;’ - Keeping condition is <cite>value &gt; threshold</cite>.</p>
@@ -462,12 +462,12 @@
 </dd>
 </dl>
 </p></li>
-<li><p><strong>scalar_preference</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – If scalars is provided as a string and that string exists as an entry in both NodeData and ElemData,
+<li><p><strong>scalar_preference</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – If scalars is provided as a string and that string exists as an entry in both NodeData and ElemData,
 this determines which will be used. Must be either ‘nodes’ or ‘elements’, by default ‘elements’.</p></li>
-<li><p><strong>all_nodes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If node data is being used, this determines whether to keep an element if all nodes pass the
+<li><p><strong>all_nodes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If node data is being used, this determines whether to keep an element if all nodes pass the
 thresholding condition or if any nodes pass the condition, by default True</p></li>
-<li><p><strong>InPlace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, this mesh will be modified, otherwise a copy of the mesh will be created and modified, by default False.</p></li>
-<li><p><strong>cleanup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to run <a class="reference internal" href="mymesh.mesh.mesh.cleanup.html#mymesh.mesh.mesh.cleanup" title="mymesh.mesh.mesh.cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mesh.cleanup()</span></code></a>, removing nodes that are no
+<li><p><strong>InPlace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, this mesh will be modified, otherwise a copy of the mesh will be created and modified, by default False.</p></li>
+<li><p><strong>cleanup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to run <a class="reference internal" href="mymesh.mesh.mesh.cleanup.html#mymesh.mesh.mesh.cleanup" title="mymesh.mesh.mesh.cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mesh.cleanup()</span></code></a>, removing nodes that are no
 longer in the cropped mesh, by default False.</p></li>
 </ul>
 </dd>

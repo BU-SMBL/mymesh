@@ -440,13 +440,13 @@
 contains hexahedral elements with nodes contained inside octree nodes, rather
 than at the octree vertices. At transitions between octree node levels,
 some hexahedra may be partially degenerate (i.e. form pyramids rather than
-hexahedra). Based on the algorithm proposed by <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id35" title="Scott Schaefer and Joe Warren. Dual marching cubes: Primal contouring of dual grids. Computer Graphics Forum, 24(2):195–201, 2005. doi:10.1111/j.1467-8659.2005.00843.x.">SW05</a>]</span> and
-explained by <span id="id2">[<a class="reference internal" href="../../guide/ref.html#id19" title="Elias Holmlid. Manifold Contouring of an Adaptively Sampled Distance Field. Chalmers Publication Library, pages 37, 2010. URL: http://publications.lib.chalmers.se/records/fulltext/123811.pdf.">Hol10</a>]</span>. This <a class="reference external" href="https://www.volume-gfx.com/volume-rendering/dual-marching-cubes/deriving-the-dualgrid/">website</a> is another useful reference.</p>
+hexahedra). Based on the algorithm proposed by <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id41" title="Scott Schaefer and Joe Warren. Dual marching cubes: Primal contouring of dual grids. Computer Graphics Forum, 24(2):195–201, 2005. doi:10.1111/j.1467-8659.2005.00843.x.">SW05</a>]</span> and
+explained by <span id="id2">[<a class="reference internal" href="../../guide/ref.html#id20" title="Elias Holmlid. Manifold Contouring of an Adaptively Sampled Distance Field. Chalmers Publication Library, pages 37, 2010. URL: http://publications.lib.chalmers.se/records/fulltext/123811.pdf.">Hol10</a>]</span>. This <a class="reference external" href="https://www.volume-gfx.com/volume-rendering/dual-marching-cubes/deriving-the-dualgrid/">website</a> is another useful reference.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>root</strong> (<a class="reference internal" href="mymesh.tree.OctreeNode.html#mymesh.tree.OctreeNode" title="mymesh.tree.OctreeNode"><em>tree.OctreeNode</em></a>) – Root node of the octree</p></li>
-<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Method used for placing the dual vertices within the octree nodes, by
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Method used for placing the dual vertices within the octree nodes, by
 default ‘centroid’.</p>
 <p>Currently the only implemented option is to place the vertices at
 the centroids of the octree nodes.</p>

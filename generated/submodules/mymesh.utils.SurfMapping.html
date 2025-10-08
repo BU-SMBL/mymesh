@@ -446,19 +446,19 @@ NOTE: Only triangular surface meshes are supported.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>NodeCoords1</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – List of nodal coordinates.</p></li>
-<li><p><strong>SurfConn1</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – List of nodal connectivities.</p></li>
-<li><p><strong>NodeCoords2</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – List of nodal coordinates.</p></li>
-<li><p><strong>SurfConn2</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – List of nodal connectivities.</p></li>
-<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will print mapping statistics, by default False.</p></li>
-<li><p><strong>Octree</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> (or </em><a class="reference internal" href="mymesh.tree.OctreeNode.html#mymesh.tree.OctreeNode" title="mymesh.tree.OctreeNode"><em>tree.OctreeNode</em></a><em>)</em><em>, </em><em>optional</em>) – octree options. An octree representation of surface 2 can significantly
+<li><p><strong>NodeCoords1</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – List of nodal coordinates.</p></li>
+<li><p><strong>SurfConn1</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – List of nodal connectivities.</p></li>
+<li><p><strong>NodeCoords2</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – List of nodal coordinates.</p></li>
+<li><p><strong>SurfConn2</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – List of nodal connectivities.</p></li>
+<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will print mapping statistics, by default False.</p></li>
+<li><p><strong>Octree</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> (or </em><a class="reference internal" href="mymesh.tree.OctreeNode.html#mymesh.tree.OctreeNode" title="mymesh.tree.OctreeNode"><em>tree.OctreeNode</em></a><em>)</em><em>, </em><em>optional</em>) – octree options. An octree representation of surface 2 can significantly
 improve mapping speeds, by default ‘generate’.
 ‘generate’ - Will generate an octree for use in surface mapping.
 ‘none’ or None - Won’t generate an octree and will use a brute force approach.
 tree.OctreeNode - Provide a precompute octree structure corresponding to surface 2. Should be created by tree.Surface2Octree(NodeCoords2,SurfConn2)</p></li>
-<li><p><strong>return_octree</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return the generated or provided octree, by default False.</p></li>
-<li><p><strong>npts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of points to map. A random sample of min(npts, len(NodeCoords1)) from Surface 1
+<li><p><strong>return_octree</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return the generated or provided octree, by default False.</p></li>
+<li><p><strong>npts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of points to map. A random sample of min(npts, len(NodeCoords1)) from Surface 1
 will be mapped , by default np.inf (all points).</p></li>
 </ul>
 </dd>

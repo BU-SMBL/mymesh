@@ -444,11 +444,11 @@ surfaces.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>SurfCoords</strong> (<em>array_like</em>) – Node coordinates of the surface mesh</p></li>
 <li><p><strong>SurfConn</strong> (<em>array_like</em>) – Node connectivity of the surface mesh</p></li>
-<li><p><strong>h</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Voxel size for the output mesh.</p></li>
-<li><p><strong>Octree</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference internal" href="mymesh.tree.OctreeNode.html#mymesh.tree.OctreeNode" title="mymesh.tree.OctreeNode"><em>tree.OctreeNode</em></a><em>, </em><em>None</em><em>, </em><em>optional</em>) – Octree setting, by default ‘generate’.
+<li><p><strong>h</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Voxel size for the output mesh.</p></li>
+<li><p><strong>Octree</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference internal" href="mymesh.tree.OctreeNode.html#mymesh.tree.OctreeNode" title="mymesh.tree.OctreeNode"><em>tree.OctreeNode</em></a><em>, </em><em>None</em><em>, </em><em>optional</em>) – Octree setting, by default ‘generate’.
 ‘generate’ will construct an octree for use in creating the voxel mesh, None will not use an octree. Alternatively, if an existing
 octree structure exists, that can be provided.</p></li>
-<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Mode for determining which elements are kept, by default ‘any’.
+<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Mode for determining which elements are kept, by default ‘any’.
 Voxels will be kept if:
 ‘any’ - if any node of a voxel is inside the surface,
 ‘all’ - if all nodes of a voxel are inside the surface,

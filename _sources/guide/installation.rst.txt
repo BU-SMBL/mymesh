@@ -56,6 +56,7 @@ Package          Purpose              Used in                                   
 `pillow`_        Mesh visualization   :mod:`~mymesh.visualize`                                              ``pip install pillow``
 `jupyter_rfb`_   Mesh visualization   :mod:`~mymesh.visualize`                                              ``pip install jupyter_rfb``
 `colorspacious`_ Mesh visualization   :mod:`~mymesh.visualize`                                              ``pip install colorspacious``
+`pyvista`_       Mesh visualization   :class:`~mymesh.mesh`                                                 ``pip install pyvista``
 ================ ==================== ===================================================================== =============================
 
 MyMesh can be used without these optional dependencies and if a function requires them, an error will be raised instructing the user to install the needed dependency.
@@ -66,6 +67,7 @@ MyMesh can be used without these optional dependencies and if a function require
 .. _meshio: https://github.com/nschloe/meshio
 .. _numba: http://numba.pydata.org/
 .. _pydicom: https://github.com/pydicom/pydicom
+.. _tifffile: https://github.com/cgohlke/tifffile/
 .. _opencv (cv2): https://github.com/opencv/opencv-python
 .. _triangle: https://github.com/drufat/triangle
 .. _vispy: https://vispy.org/
@@ -73,3 +75,4 @@ MyMesh can be used without these optional dependencies and if a function require
 .. _pillow: https://github.com/python-pillow/Pillow
 .. _jupyter_rfb: https://github.com/vispy/jupyter_rfb
 .. _colorspacious: https://github.com/njsmith/colorspacious
+.. _pyvista: https://pyvista.org/

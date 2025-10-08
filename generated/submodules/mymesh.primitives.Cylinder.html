@@ -447,24 +447,24 @@ elliptical cross-section. For elliptical cross-sections, the two elements
 correspond to the two axes in the plane perpendicular to &lt;axis&gt; (e.g. if
 axis=2, (r1, r2) specify the x, y radii, respectively; if axis=1,
 (r1, r2) specify the x, z radii, respectively, etc.).</p></li>
-<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – height of the cylinder. Cylinder will be extruded from &lt;center&gt; by &lt;height&gt;
+<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – height of the cylinder. Cylinder will be extruded from &lt;center&gt; by &lt;height&gt;
 in the &lt;axis&gt; direction. To extrude in the negative-&lt;axis&gt; direction,
 a negative height can be given.</p></li>
-<li><p><strong>theta_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of points in the circumference of the cylinder, by default 20.</p></li>
-<li><p><strong>axial_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of points along the axis of the cylinder, by default 10.</p></li>
-<li><p><strong>radial_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of radial points from center to edge, by default 10. Only relevant
+<li><p><strong>theta_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of points in the circumference of the cylinder, by default 20.</p></li>
+<li><p><strong>axial_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of points along the axis of the cylinder, by default 10.</p></li>
+<li><p><strong>radial_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of radial points from center to edge, by default 10. Only relevant
 if Type=’vol’.</p></li>
-<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Long axis of the cylinder (i.e. the circular ends will lie in the plane of the other two axes).
+<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Long axis of the cylinder (i.e. the circular ends will lie in the plane of the other two axes).
 Must be 0, 1, or 2 (x, y, z), by default 2</p></li>
-<li><p><strong>cap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, will close the ends of the cylinder, otherwise it will leave them open, by
+<li><p><strong>cap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, will close the ends of the cylinder, otherwise it will leave them open, by
 default True.</p></li>
-<li><p><strong>ElemType</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Specify the element type of the mesh. If Type=’surf’ (default), ElemType
+<li><p><strong>ElemType</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specify the element type of the mesh. If Type=’surf’ (default), ElemType
 can be ‘tri’, which will produce a purely triangular mesh or None, which
 will produce a quad-dominant mesh with some triangles. If Type=’vol’,
 ElemType can be ‘tet’, which will produce a purely tetrahedral mesh or
 None, which  will produce a hex-dominant mesh with some tetrahedra. By
 default, None.</p></li>
-<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Mesh type of the final mesh. This could be ‘surf’ for a surface mesh or
+<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Mesh type of the final mesh. This could be ‘surf’ for a surface mesh or
 ‘vol’ for a volumetric mesh, by default ‘surf’.</p></li>
 </ul>
 </dd>

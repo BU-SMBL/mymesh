@@ -447,7 +447,7 @@ serve as an ‘initial guess’ of the alignment.</p></li>
 <li><p><strong>bounds</strong> (<em>array_like</em><em> or </em><em>NoneType</em><em>, </em><em>optional</em>) – Optimization bounds, formatted as [(min,max),…] for each parameter.
 If None, bounds are selected that should cover most possible
 transformations, by default None. Not used by all optimizers.</p></li>
-<li><p><strong>center</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>array_like</em><em>, </em><em>optional</em>) – <p>Location of the center of rotation of the image. This will be used as the
+<li><p><strong>center</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>array_like</em><em>, </em><em>optional</em>) – <p>Location of the center of rotation of the image. This will be used as the
 “center” input to the transformation model (e.g. <a class="reference internal" href="mymesh.register.rigid.html#mymesh.register.rigid" title="mymesh.register.rigid"><code class="xref py py-func docutils literal notranslate"><span class="pre">rigid()</span></code></a>, <a class="reference internal" href="mymesh.register.affine.html#mymesh.register.affine" title="mymesh.register.affine"><code class="xref py py-func docutils literal notranslate"><span class="pre">affine()</span></code></a>).
 If “center” is given in <cite>transform_args</cite>, that value will be used instead.</p>
 <ul>
@@ -457,7 +457,7 @@ specifies the location, in voxels/pixels, of where to place to
 place the center of rotation</p></li>
 </ul>
 </p></li>
-<li><p><strong>transform</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Transformation model, by default ‘rigid’. If 2d images are given, the
+<li><p><strong>transform</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Transformation model, by default ‘rigid’. If 2d images are given, the
 transformation model will automatically be modified to the two dimensional
 variant (e.g. ‘rigid’ -&gt; ‘rigid2d’)</p>
 <ul>
@@ -473,17 +473,17 @@ variant (e.g. ‘rigid’ -&gt; ‘rigid2d’)</p>
 <li><p>’affine’: translations, rotations, triaxial scaling, shearing in two dimensions</p></li>
 </ul>
 </p></li>
-<li><p><strong>metric</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Similarity metric to compare the two point clouds, by default ‘hausdorff’</p></li>
-<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Optimization method, by default ‘direct’. See
+<li><p><strong>metric</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Similarity metric to compare the two point clouds, by default ‘hausdorff’</p></li>
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Optimization method, by default ‘direct’. See
 <a class="reference internal" href="mymesh.register.optimize.html#mymesh.register.optimize" title="mymesh.register.optimize"><code class="xref py py-func docutils literal notranslate"><span class="pre">optimize()</span></code></a> for details.</p></li>
-<li><p><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Scale factor used to resample the image to either reduce (scale &lt; 1)
+<li><p><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Scale factor used to resample the image to either reduce (scale &lt; 1)
 or increase (scale &gt; 1) the size/resolution of the image, by default
 1. The returned image will still be of the original resolution.</p></li>
-<li><p><strong>interpolation_order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Interpolation order used in image transformation (see
+<li><p><strong>interpolation_order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Interpolation order used in image transformation (see
 <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html#affine-transform">scipy.ndimage.affine_transform</a>)
 and scaling (if used). Must be an integer in the range 0-5. Lower order
 is more efficient at the cost of quality. By default, 1.</p></li>
-<li><p><strong>threshold</strong> (<em>NoneType</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>, </em><em>optional</em>) – Threshold value(s) to binarize the images. Images are binarized by <cite>img &gt; threshold</cite>.
+<li><p><strong>threshold</strong> (<em>NoneType</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>, </em><em>optional</em>) – Threshold value(s) to binarize the images. Images are binarized by <cite>img &gt; threshold</cite>.
 If given as a float or scalar value, this threshold value is applied to both images.
 If given as a two-element tuple (or array_like), the first value is applied to <cite>img1</cite>
 and the second value is paplied to <cite>img2</cite>. If None, the image is assumed to already
@@ -492,13 +492,13 @@ is chosen). Images can be binarized arbitrarily, consisting of <cite>True</cite>
 <cite>255</cite>/<cite>0</cite>, etc. If the image is not already binarized and no threshold is given, the
 threshold value will be the midpoint of the range of values for each image (which may
 not give the intended result). By default, None.</p></li>
-<li><p><strong>transform_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>, </em><em>optional</em>) – <p>Optional input arguments passed to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html">scipy.ndimage.affine_transform</a>, by
+<li><p><strong>transform_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – <p>Optional input arguments passed to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html">scipy.ndimage.affine_transform</a>, by
 default <cite>dict(mode=’constant’, order=interpolation_order)</cite>.</p>
 </p></li>
-<li><p><strong>optimizer_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>, </em><em>optional</em>) – Additional arguments for the chosen optimizer, by default None. See
+<li><p><strong>optimizer_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Additional arguments for the chosen optimizer, by default None. See
 <a class="reference internal" href="mymesh.register.optimize.html#mymesh.register.optimize" title="mymesh.register.optimize"><code class="xref py py-func docutils literal notranslate"><span class="pre">optimize()</span></code></a> for details.</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Verbosity, by default True. If True, iteration progress will be printed.</p></li>
-<li><p><strong>point_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Method for converting image to points if using a point-based method,
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Verbosity, by default True. If True, iteration progress will be printed.</p></li>
+<li><p><strong>point_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Method for converting image to points if using a point-based method,
 by default ‘boundary’.</p>
 <ul>
 <li><p>’boundary’ : The voxels of the boundaries of the thresholeded image wil be converted to points</p></li>

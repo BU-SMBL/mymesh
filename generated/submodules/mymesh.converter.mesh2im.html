@@ -441,24 +441,24 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>NodeCoords</strong> (<em>array_like</em>) – Coordinates of the nodes in the mesh</p></li>
-<li><p><strong>NodeConn</strong> (<em>array_like</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – Elements in the mesh, defined by the connectivity of nodes</p></li>
-<li><p><strong>voxelsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Voxel size of the image, i.e. image resolution in units/voxel</p></li>
-<li><p><strong>fill</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to fill in the volume of the mesh, by default True.
+<li><p><strong>NodeConn</strong> (<em>array_like</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – Elements in the mesh, defined by the connectivity of nodes</p></li>
+<li><p><strong>voxelsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Voxel size of the image, i.e. image resolution in units/voxel</p></li>
+<li><p><strong>fill</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to fill in the volume of the mesh, by default True.
 If False, only the boundary will be present in the binarized image.
 The image will only be able to be filled if the surface mesh is closed
 to the resolution of the image (i.e. if defects/holes in the mesh are
 sufficiently smaller than the <cite>voxelsize</cite> such that they aren’t
 resolved by the voxelization, then the image will still be able to be
 filled).</p></li>
-<li><p><strong>sdf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to make the image a signed distance field using a Euclidean distance
+<li><p><strong>sdf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to make the image a signed distance field using a Euclidean distance
 transform (<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.distance_transform_edt.html#scipy.ndimage.distance_transform_edt" title="(in SciPy v1.16.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.distance_transform_edt()</span></code></a>)
 on the binarized image. The returned image will have values
 less than zero inside the surface and greater than zero outside the
 surface. The magnitude of the values is equal to the distance from the
 surface. This is intended for use with <cite>fill=True</cite>.</p></li>
-<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>NoneType</em><em>, </em><em>optional</em>) – Mesh Type (‘surf’, ‘vol’), by default None.
+<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>NoneType</em><em>, </em><em>optional</em>) – Mesh Type (‘surf’, ‘vol’), by default None.
 If not provided, the Type will be inferred using <a class="reference internal" href="mymesh.utils.identify_type.html#mymesh.utils.identify_type" title="mymesh.utils.identify_type"><code class="xref py py-func docutils literal notranslate"><span class="pre">identify_type()</span></code></a>.</p></li>
-<li><p><strong>indexing</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Specify how to handle coordinates during the conversion, by default
+<li><p><strong>indexing</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Specify how to handle coordinates during the conversion, by default
 ‘zyx’.</p>
 <ul>
 <li><p>’zyx’: The z coordinate will correspond to the first dimension of

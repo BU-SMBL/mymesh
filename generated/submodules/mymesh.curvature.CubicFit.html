@@ -440,7 +440,7 @@
 in this way are sensitive to triangulation, with highly skewed triangles
 contributing error.
 From Goldfeather &amp; Interrante (2004).
-<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id53" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
+<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id17" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
 <p>If Principal Directions are returned (return_directions=True), the signs
 of the the directions vectors are not well defined and some may be flipped
 relative to other adjacent points. Despite this ambiguity, the directions
@@ -451,19 +451,19 @@ are oriented consistently with the normal vectors of the surface.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – List of nodal coordinates.</p></li>
-<li><p><strong>SurfConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – Nodal connectivity list for a surface mesh.</p></li>
-<li><p><strong>NodeNeighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – List of neighbors for each node. This can be obtained
+<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – List of nodal coordinates.</p></li>
+<li><p><strong>SurfConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – Nodal connectivity list for a surface mesh.</p></li>
+<li><p><strong>NodeNeighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – List of neighbors for each node. This can be obtained
 with utils.getNodeNeighbors or mesh.NodeNeighbors.</p></li>
-<li><p><strong>NodeNormals</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – Unit normal vectors for each node in a nx3 array. This can be obtained
+<li><p><strong>NodeNormals</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – Unit normal vectors for each node in a nx3 array. This can be obtained
 with utils.CalcFaceNormal and utils.Face2NodeNormal, or mesh.NodeNormals.</p></li>
-<li><p><strong>jit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, will attempt to use numba jit compilation for curvature
+<li><p><strong>jit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, will attempt to use numba jit compilation for curvature
 calculation. In general, the jit version should perform noticeably faster
 than the alternative vectorized approach, which encounters overhead due
 to the non-rectangular nature of the neighborhoods list. Numba must
 be installed for this option to work, and mymesh.check_numba() should
 return True.</p></li>
-<li><p><strong>return_directions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, will return the principal curvature directions as well as
+<li><p><strong>return_directions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, will return the principal curvature directions as well as
 magnitudes</p></li>
 </ul>
 </dd>

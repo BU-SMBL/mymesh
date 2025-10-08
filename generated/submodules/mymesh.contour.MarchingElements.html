@@ -448,19 +448,19 @@ more specific functions.</p>
 <li><p><strong>NodeCoords</strong> (<em>array_like</em>) – Node coordinates for the input mesh</p></li>
 <li><p><strong>NodeConn</strong> (<em>array_like</em>) – Node connectivity for the input mesh. All elements must be tetrahedra.</p></li>
 <li><p><strong>NodeValues</strong> (<em>array_like</em>) – Values at each node in the mesh that are used to extract the isosurface</p></li>
-<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Isosurface level, by default 0</p></li>
-<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Interpolation to interpolate the position of the new nodes along the edges
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Isosurface level, by default 0</p></li>
+<li><p><strong>interpolation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Interpolation to interpolate the position of the new nodes along the edges
 of the input mesh, by default ‘linear’.</p>
 <p>’midpoint’ - No interpolation is performed, new nodes are placed at the midpoint of edges</p>
 <p>’linear’ - Linear interpolation is performed between adjacent nodes on the input mesh.</p>
 </p></li>
-<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Determines whether to generate a surface mesh (‘surf’) or volume mesh (‘vol’),
+<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Determines whether to generate a surface mesh (‘surf’) or volume mesh (‘vol’),
 by default None. If None is provided, the output type will be the same as the
 input type</p></li>
-<li><p><strong>mixed_elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, the generated mesh will have mixed element types
+<li><p><strong>mixed_elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, the generated mesh will have mixed element types
 (triangles/quadrilaterals, tetrahedra/wedges), otherwise a single element
 type (triangles, tetrahedra), by default False.</p></li>
-<li><p><strong>flip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Flip the interior/exterior of the mesh, by default False.
+<li><p><strong>flip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Flip the interior/exterior of the mesh, by default False.
 By default, values less than the threshold are assumed to be the “inside”
 of the mesh. If the inside is denoted by values greater than the threshold,
 set flip=True.</p></li>

@@ -447,21 +447,21 @@ TODO: Multi-value mapping may produce errors - need to better verify.</p>
 <li><p><strong>NodeVals1</strong> (<em>List</em><em> or </em><em>List</em><em> of </em><em>lists</em>) – Scalar nodal values associated with surface 1. For multiple values: [[x1,x2,x3,…],[y1,y2,y3,…],[z1,z2,z3,…],…]</p></li>
 <li><p><strong>NodeCoords2</strong> (<em>List</em><em> of </em><em>lists</em>) – Contains coordinates for each node in surface 2. Ex. [[x1,y1,z1],…].</p></li>
 <li><p><strong>SurfConn2</strong> (<em>List</em><em> of </em><em>lists</em>) – Contains the nodal connectivity defining the surface elements.</p></li>
-<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf</p></li>
-<li><p><strong>Octree</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> (or </em><a class="reference internal" href="mymesh.tree.OctreeNode.html#mymesh.tree.OctreeNode" title="mymesh.tree.OctreeNode"><em>tree.OctreeNode</em></a><em>)</em><em>, </em><em>optional</em>) – octree options. An octree representation of surface 1 can significantly
+<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Tolerance value, if the projection distance is greater than tol, the projection will be exculded, default is np.inf</p></li>
+<li><p><strong>Octree</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> (or </em><a class="reference internal" href="mymesh.tree.OctreeNode.html#mymesh.tree.OctreeNode" title="mymesh.tree.OctreeNode"><em>tree.OctreeNode</em></a><em>)</em><em>, </em><em>optional</em>) – octree options. An octree representation of surface 1 can significantly
 improve mapping speeds, by default ‘generate’.
 ‘generate’ - Will generate an octree for use in surface mapping.
 ‘none’ or None - Won’t generate an octree and will use a brute force approach.
 tree.OctreeNode - Provide a precompute octree structure corresponding to surface 1. Should be created by tree.Surface2Octree(NodeCoords1,SurfConn1)</p></li>
-<li><p><strong>MappingMatrix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – len(NodeCoords2)x4 matrix of of barycentric coordinates, defining NodeCoords2 in terms
+<li><p><strong>MappingMatrix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – len(NodeCoords2)x4 matrix of of barycentric coordinates, defining NodeCoords2 in terms
 of the triangular surface elements of Surface 1.</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will print mapping statistics, by default False.</p></li>
-<li><p><strong>return_MappingMatrix</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return MappingMatrix, by default False.</p></li>
-<li><p><strong>return_octree</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return generated or provided octree, by defualt False.
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will print mapping statistics, by default False.</p></li>
+<li><p><strong>return_MappingMatrix</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return MappingMatrix, by default False.</p></li>
+<li><p><strong>return_octree</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will return generated or provided octree, by defualt False.
 NOTE if MappingMatrix is provided, the octree structure won’t be generated.
 In this cases, if Octree=’generate’ and return_octree=True, the returned value
 for octree will simply be the string ‘generate’.</p></li>
-<li><p><strong>npts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of points to map. Values from Surface 1 will be mapped to random sample of
+<li><p><strong>npts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of points to map. Values from Surface 1 will be mapped to random sample of
 min(npts, len(NodeCoords2) in Surface 2, by default np.inf (all points).</p></li>
 </ul>
 </dd>

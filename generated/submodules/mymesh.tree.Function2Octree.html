@@ -437,8 +437,8 @@
 <dt class="sig sig-object py" id="mymesh.tree.Function2Octree">
 <span class="sig-prename descclassname"><span class="pre">mymesh.tree.</span></span><span class="sig-name descname"><span class="pre">Function2Octree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mindepth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdepth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EDerror'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/tree.html#Function2Octree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.tree.Function2Octree" title="Link to this definition">#</a></dt>
 <dd><p>Generate an octree structure adapted to an implicit function.
-Based on octree generation approaches used by <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id35" title="Scott Schaefer and Joe Warren. Dual marching cubes: Primal contouring of dual grids. Computer Graphics Forum, 24(2):195–201, 2005. doi:10.1111/j.1467-8659.2005.00843.x.">SW05</a>]</span>,
-<span id="id2">[<a class="reference internal" href="../../guide/ref.html#id23" title="Yongjie Zhang, Chandrajit Bajaj, and Bong Soo Sohn. Adaptive and quality 3D meshing from imaging data. Proceedings of the Symposium on Solid Modeling and Applications, pages 286–291, 2003. doi:10.1145/781606.781653.">ZBS03</a>]</span>.</p>
+Based on octree generation approaches used by <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id41" title="Scott Schaefer and Joe Warren. Dual marching cubes: Primal contouring of dual grids. Computer Graphics Forum, 24(2):195–201, 2005. doi:10.1111/j.1467-8659.2005.00843.x.">SW05</a>]</span>,
+<span id="id2">[<a class="reference internal" href="../../guide/ref.html#id54" title="Yongjie Zhang, Chandrajit Bajaj, and Bong Soo Sohn. Adaptive and quality 3D meshing from imaging data. Proceedings of the Symposium on Solid Modeling and Applications, pages 286–291, 2003. doi:10.1145/781606.781653.">ZBS03</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -449,15 +449,15 @@ array of function values.</p></li>
 <li><p><strong>bounds</strong> (<em>array_like</em>) – 6 element array, list, or tuple with the minimum and maximum bounds in
 each direction that the function will be evaluated. This should be
 formatted as: [xmin, xmax, ymin, ymax, zmin, zmax]</p></li>
-<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Isosurface level, by default 0</p></li>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Isosurface level, by default 0</p></li>
 <li><p><strong>grad</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_, by default None</p></li>
-<li><p><strong>mindepth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum octree depth, by default 2. This correspond to a maximum octree
+<li><p><strong>mindepth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum octree depth, by default 2. This correspond to a maximum octree
 node size of L/(2^(mindepth)), where L is the maximum span between the
 x, y, or z bounds.</p></li>
-<li><p><strong>maxdepth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Maximum octree depth, by default 5. This correspond to a minimum octree
+<li><p><strong>maxdepth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Maximum octree depth, by default 5. This correspond to a minimum octree
 node size of L/(2^(maxdepth)), where L is the maximum span between the
 x, y, or z bounds.</p></li>
-<li><p><strong>strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Strategy to guide subdivision, by default ‘EDerror’.</p>
+<li><p><strong>strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Strategy to guide subdivision, by default ‘EDerror’.</p>
 <ul>
 <li><dl class="simple">
 <dt>’Threshold’: Subdivision continues as long as an octree node contains</dt><dd><p>values both above and below. This method has no natural termination
@@ -466,7 +466,7 @@ x, y, or z bounds.</p></li>
 </dl>
 </li>
 <li><dl class="simple">
-<dt>’EDerror’: Uses the Euclidian distance error function proposed by</dt><dd><p><span id="id3">[<a class="reference internal" href="../../guide/ref.html#id23" title="Yongjie Zhang, Chandrajit Bajaj, and Bong Soo Sohn. Adaptive and quality 3D meshing from imaging data. Proceedings of the Symposium on Solid Modeling and Applications, pages 286–291, 2003. doi:10.1145/781606.781653.">ZBS03</a>]</span> to assess the error between linear interpolation within
+<dt>’EDerror’: Uses the Euclidian distance error function proposed by</dt><dd><p><span id="id3">[<a class="reference internal" href="../../guide/ref.html#id54" title="Yongjie Zhang, Chandrajit Bajaj, and Bong Soo Sohn. Adaptive and quality 3D meshing from imaging data. Proceedings of the Symposium on Solid Modeling and Applications, pages 286–291, 2003. doi:10.1145/781606.781653.">ZBS03</a>]</span> to assess the error between linear interpolation within
 an octree node and with the evaluation of the function at vertices at
 the next level of refinement. If the error is less than the threshold
 specified by <cite>eps</cite> or if there are no sign changes detected, subdivision
@@ -475,13 +475,13 @@ is halted.</p>
 </dl>
 </li>
 <li><dl class="simple">
-<dt>’QEF’: Uses the quadratic error function proposed by</dt><dd><p><span id="id4">[<a class="reference internal" href="../../guide/ref.html#id35" title="Scott Schaefer and Joe Warren. Dual marching cubes: Primal contouring of dual grids. Computer Graphics Forum, 24(2):195–201, 2005. doi:10.1111/j.1467-8659.2005.00843.x.">SW05</a>]</span>. This approach is not fully implemented yet.</p>
+<dt>’QEF’: Uses the quadratic error function proposed by</dt><dd><p><span id="id4">[<a class="reference internal" href="../../guide/ref.html#id41" title="Scott Schaefer and Joe Warren. Dual marching cubes: Primal contouring of dual grids. Computer Graphics Forum, 24(2):195–201, 2005. doi:10.1111/j.1467-8659.2005.00843.x.">SW05</a>]</span>. This approach is not fully implemented yet.</p>
 </dd>
 </dl>
 </li>
 </ul>
 </p></li>
-<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Error threshold value used to determine whether further subdivision is
+<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Error threshold value used to determine whether further subdivision is
 necessary, by default 0.01</p></li>
 </ul>
 </dd>

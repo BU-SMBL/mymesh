@@ -441,12 +441,12 @@ connected mesh, a single region will be identified</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><em>lists</em>) – List of nodal coordinates.</p></li>
-<li><p><strong>NodeConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><em>lists</em>) – Nodal connectivity list.</p></li>
-<li><p><strong>ElemNeighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – List of neighboring elements for each element in NodeConn. The default is
+<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>lists</em>) – List of nodal coordinates.</p></li>
+<li><p><strong>NodeConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>lists</em>) – Nodal connectivity list.</p></li>
+<li><p><strong>ElemNeighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>optional</em>) – List of neighboring elements for each element in NodeConn. The default is
 None. If no value is provided, it will be computed with getNodeNeighbors</p></li>
-<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Connectivity method to be used for getElemNeighbors. The default is ‘edge’.</p></li>
-<li><p><strong>BarrierElems</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><em>set</em></a><em>, </em><em>optional</em>) – Set of barrier elements that the connected region cannot move past.
+<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Connectivity method to be used for getElemNeighbors. The default is ‘edge’.</p></li>
+<li><p><strong>BarrierElems</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.14)"><em>set</em></a><em>, </em><em>optional</em>) – Set of barrier elements that the connected region cannot move past.
 They can be included in a region, but will not connect to their neighbors</p></li>
 </ul>
 </dd>
@@ -456,7 +456,7 @@ size of region such that the region with the most nodes is first in
 the list.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a> of sets</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a> of sets</p>
 </dd>
 </dl>
 </dd></dl>

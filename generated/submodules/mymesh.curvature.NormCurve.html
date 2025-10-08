@@ -441,15 +441,15 @@ calculated in this way are sensitive to triangulation, with highly
 skewed triangles contributing error. In general, CubicFit provides
 better results.
 From Goldfeather &amp; Interrante (2004).
-<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id53" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
+<span id="id1">[<a class="reference internal" href="../../guide/ref.html#id17" title="Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. ACM Transactions on Graphics, 23(1):45–63, 2004. doi:10.1145/966131.966134.">GI04</a>]</span></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – List of nodal coordinates.</p></li>
-<li><p><strong>SurfConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – Nodal connectivity list for a surface mesh.</p></li>
-<li><p><strong>NodeNeighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – List of neighbors for each node. This can be obtained
+<li><p><strong>NodeCoords</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – List of nodal coordinates.</p></li>
+<li><p><strong>SurfConn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – Nodal connectivity list for a surface mesh.</p></li>
+<li><p><strong>NodeNeighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – List of neighbors for each node. This can be obtained
 with utils.getNodeNeighbors or mesh.NodeNeighbors.</p></li>
-<li><p><strong>NodeNormals</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – Unit normal vectors for each node in a nx3 array. This can be obtained
+<li><p><strong>NodeNormals</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>np.ndarray</em>) – Unit normal vectors for each node in a nx3 array. This can be obtained
 with utils.CalcFaceNormal and utils.Face2NodeNormal, or mesh.NodeNormals.</p></li>
 </ul>
 </dd>

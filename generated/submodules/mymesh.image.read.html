@@ -443,15 +443,15 @@ paths to image files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, or </em><em>np.ndarray</em>) – If given as a string, file path to image directory or file. If given
+<li><p><strong>img</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, or </em><em>np.ndarray</em>) – If given as a string, file path to image directory or file. If given
 as a list, treated as a list of file paths. If given a numpy array,
 assumed to be an image data matrix and only scaling will be performed
 (if scalefactor != 1).</p></li>
-<li><p><strong>scalefactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Scale factor for resampling the image. If greater than 1, there will be more than
+<li><p><strong>scalefactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Scale factor for resampling the image. If greater than 1, there will be more than
 1 elements per voxel. If less than 1, will coarsen the image, by default 1.</p></li>
-<li><p><strong>scaleorder</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
+<li><p><strong>scaleorder</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
 Must be 0-5.</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If Tru, will print status message for loading the image.</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If Tru, will print status message for loading the image.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -461,7 +461,7 @@ to be “z-slices”, and are stored along the first axis of the image matrix
 (i.e. slice0 = I[0,:,:]), so the 0, 1, 2 axes correspond with z, y, x.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a> of np.ndarray</p>
+<dd class="field-odd"><p>np.ndarray or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a> of np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>

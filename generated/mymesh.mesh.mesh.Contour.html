@@ -440,13 +440,13 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>scalars</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>array_like</em>) – Values to be used for thresholding, either a string indicating an entry in NodeData or ElemData, or an array_like of values.</p></li>
-<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Isosurface level that defines the boundary</p></li>
+<li><p><strong>scalars</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>array_like</em>) – Values to be used for thresholding, either a string indicating an entry in NodeData or ElemData, or an array_like of values.</p></li>
+<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Isosurface level that defines the boundary</p></li>
 <li><p><strong>threshold_direction</strong> (<em>signed int</em>) – If threshold_direction is negative (default), values less than or equal to the threshold will be considered “inside” the mesh and the opposite if threshold_direction is positive, by default 1.</p></li>
-<li><p><strong>mixed_elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, the generated mesh will have mixed element types
+<li><p><strong>mixed_elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, the generated mesh will have mixed element types
 (triangles/quadrilaterals, tetrahedra/wedges), otherwise a single element
 type (triangles, tetrahedra), by default False.</p></li>
-<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Specfies the mesh type (‘vol’, ‘surf’, or ‘line’) to produce by
+<li><p><strong>Type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specfies the mesh type (‘vol’, ‘surf’, or ‘line’) to produce by
 contouring. If None is provided, the output Type will be the same
 as the input Type, by default None. A volumetric mesh can be contoured
 to create a volumetric mesh or a surface mesh, and a surface mesh can
