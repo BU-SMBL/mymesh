@@ -2072,7 +2072,8 @@ class mesh:
             return
         if self.NElem == 0:
             self.NodeConn = [[0,0,0]]
-        if os.path.splitext(filename)[1].lower() == '.stl':
+        ext = os.path.splitext(filename)[1].lower()
+        if ext == '.stl':
             if self.Type.lower() == 'vol':
                 M = self.Surface.copy()
             else:
@@ -2081,7 +2082,9 @@ class mesh:
         else:
             M = self
         m = M.mymesh2meshio()
-        if binary is not None:
+        # File types that support the binary option: 
+        binary_support = ['.msh', '.f3grid', '.ply', '.stl', '.vtk', '.vtu'] 
+        if binary is not None and ext in binary_support:
             m.write(filename,binary=binary)
         else:
             m.write(filename)
