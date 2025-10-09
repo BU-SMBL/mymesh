@@ -2327,8 +2327,12 @@ def identify_elem(NodeCoords, NodeConn, Type=None):
             elems.append('line')
         elif l == 3:
             elems.append('tri')
+        elif l == 6 and Type == 'surf':
+            elems.append('tri6')
         elif l == 4 and Type == 'surf':
             elems.append('quad')
+        elif l == 8 and Type == 'surf':
+            elems.append('quad8')
         elif l == 4 and Type == 'vol':
             elems.append('tet')
         elif l == 5:
