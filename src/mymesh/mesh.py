@@ -2073,12 +2073,15 @@ class mesh:
         if self.NElem == 0:
             self.NodeConn = [[0,0,0]]
         ext = os.path.splitext(filename)[1].lower()
-        if ext == '.stl':
+        if ext == '.stl' or ext == '.ply':
+            # Surface only support
             if self.Type.lower() == 'vol':
                 M = self.Surface.copy()
             else:
                 M = self.copy()
-            M.NodeCoords, M.NodeConn = converter.surf2tris(M.NodeCoords, M.NodeConn)
+            if ext == '.stl':
+                # Triangle only support
+                M.NodeCoords, M.NodeConn = converter.surf2tris(M.NodeCoords, M.NodeConn)
         else:
             M = self
         m = M.mymesh2meshio()
