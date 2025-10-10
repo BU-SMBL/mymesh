@@ -2051,7 +2051,8 @@ class mesh:
         
         m = meshio.Mesh(self.NodeCoords, elems, point_data=NodeData, cell_data=celldict)
 
-        
+        m.point_sets = self.NodeSets
+        m.cell_sets = self.ElemSets     # TODO: This might not give the expected result
 
         return m
     def write(self,filename,binary=True):
