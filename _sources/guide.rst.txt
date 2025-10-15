@@ -9,12 +9,13 @@ User Guide
     guide/getting_started
     guide/what_mesh
     guide/mesh_class
+    guide/io
     guide/elem_types
     guide/connectivity
     guide/implicit_meshing
     guide/image_meshing
     guide/csg
-    guide/io
+    guide/matlab
     guide/ref
 
 Package Overview

@@ -3,6 +3,12 @@
 
 ## Unreleased
 
+### Fix
+
+- improve efficiency in RaysSurfIntersection
+
+## 0.1.1 (2025-10-10)
+
 ### Feat
 
 - add additional surfaces to tpms
