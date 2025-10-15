@@ -2191,15 +2191,20 @@ def RaysSurfIntersection(pts, rays, NodeCoords, SurfConn, bidirectional=True, ep
     spintersectionPtsZ = scipy.sparse.lil_matrix((len(pts),len(TriConn)))
 
     spintersections[RayIds[outintersections],TriIds[outintersections]] = TriIds[outintersections]+1 # +1 so that TriId = 0 doesn't get lost in sparse
-    spdistances[RayIds[outintersections],TriIds[outintersections]] = outdistances+1e-32
-    spintersectionPtsX[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts[:,0]+1e-32
-    spintersectionPtsY[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts[:,1]+1e-32
-    spintersectionPtsZ[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts[:,2]+1e-32
+    spdistances[RayIds[outintersections],TriIds[outintersections]] = outdistances
+    spintersectionPtsX[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts[:,0]
+    spintersectionPtsY[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts[:,1]
+    spintersectionPtsZ[RayIds[outintersections],TriIds[outintersections]] = outintersectionPts[:,2]
 
-    intersections = [x.toarray()[x.nonzero()]-1 for x in spintersections.tocsr()]
-    distances = [(x.toarray()[x.nonzero()]-1e-32) for x in spdistances.tocsr()]        
-    intersectionPts = [np.vstack([x.toarray()[x.nonzero()],y.toarray()[y.nonzero()],z.toarray()[z.nonzero()]]).T-1e-32 for x,y,z in zip(spintersectionPtsX.tocsr(),spintersectionPtsY.tocsr(),spintersectionPtsZ.tocsr())]
-
+    nonzero = spintersections.nonzero()
+    intersections = [x.toarray()[0, nonzero[1][nonzero[0] == i]]-1 for i,x in enumerate(spintersections.tocsr())]
+    distances = [(x.toarray()[0, nonzero[1][nonzero[0] == i]]) for i,x in enumerate(spdistances.tocsr())]        
+    intersectionPts = [np.vstack([x.toarray()[0, nonzero[1][nonzero[0] == i]],
+                                  y.toarray()[0, nonzero[1][nonzero[0] == i]],
+                                  z.toarray()[0, nonzero[1][nonzero[0] == i]]]).T for i,(x,y,z) in enumerate(zip(spintersectionPtsX.tocsr(),
+                                  spintersectionPtsY.tocsr(),
+                                  spintersectionPtsZ.tocsr()))]
+    
     if nontri:
         # For non-tri input meshes, can end up with redundant intersections because of quad-to tet decomposition
         # TODO: This may not be the most efficient way to deal with them
