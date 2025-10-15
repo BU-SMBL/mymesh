@@ -3,10 +3,10 @@ Using MyMesh in MATLAB
 MyMesh can be used in MATLAB using `MATLAB's python interface <https://www.mathworks.com/help/matlab/python-language.html?s_tid=CRUX_lftnav>`_. 
 The python environment must be set to an environment where MyMesh has been 
 installed (see `pyenv <https://www.mathworks.com/help/matlab/ref/pyenv.html>`_).
-See the `list of compatible versions<https://www.mathworks.com/support/requirements/python-compatibility.html>`_ 
+See the `list of compatible versions <https://www.mathworks.com/support/requirements/python-compatibility.html>`_ 
 to be sure an appropriate python version is set for the MATLAB version being used.
 MyMesh seems to run better when the execution mode is set to "OutOfProcess".
-(`pyenv("ExecutionMode", "OutOfProcess")`)
+(:code:`pyenv("ExecutionMode", "OutOfProcess")`)
 
 Once the environment is set, MyMesh commands (or other python functions) can be 
 run by adding a :code:`py.` prefix, for example:
