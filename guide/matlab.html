@@ -423,10 +423,10 @@
 <p>MyMesh can be used in MATLAB using <a class="reference external" href="https://www.mathworks.com/help/matlab/python-language.html?s_tid=CRUX_lftnav">MATLAB’s python interface</a>.
 The python environment must be set to an environment where MyMesh has been
 installed (see <a class="reference external" href="https://www.mathworks.com/help/matlab/ref/pyenv.html">pyenv</a>).
-See the <a href="#id1"><span class="problematic" id="id2">`list of compatible versions&lt;https://www.mathworks.com/support/requirements/python-compatibility.html&gt;`_</span></a>
+See the <a class="reference external" href="https://www.mathworks.com/support/requirements/python-compatibility.html">list of compatible versions</a>
 to be sure an appropriate python version is set for the MATLAB version being used.
 MyMesh seems to run better when the execution mode is set to “OutOfProcess”.
-(<cite>pyenv(“ExecutionMode”, “OutOfProcess”)</cite>)</p>
+(<code class="code docutils literal notranslate"><span class="pre">pyenv(&quot;ExecutionMode&quot;,</span> <span class="pre">&quot;OutOfProcess&quot;)</span></code>)</p>
 <p>Once the environment is set, MyMesh commands (or other python functions) can be
 run by adding a <code class="code docutils literal notranslate"><span class="pre">py.</span></code> prefix, for example:</p>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">M</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">py</span><span class="p">.</span><span class="n">mymesh</span><span class="p">.</span><span class="n">primitives</span><span class="p">.</span><span class="n">Torus</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">);</span>
