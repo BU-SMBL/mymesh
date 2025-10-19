@@ -2082,6 +2082,8 @@ class mesh:
                 M = self.copy()
             if ext == '.stl':
                 # Triangle only support
+                if 'tri6' in M.ElemType:
+                    M.NodeCoords, M.NodeConn = converter.quadratic2linear(M.NodeCoords, M.NodeConn)
                 M.NodeCoords, M.NodeConn = converter.surf2tris(M.NodeCoords, M.NodeConn)
         else:
             M = self
