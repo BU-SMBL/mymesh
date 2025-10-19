@@ -1913,6 +1913,38 @@ class mesh:
                 raise Exception(f'Invalid quality metric "{metric:s}".')
         return qual
     def getCurvature(self,metrics=['Max Principal','Min Principal', 'Curvedness', 'Shape Index', 'Mean', 'Gaussian'], nRings=1, SplitFeatures=False):
+        """
+        Calculate mesh-based curavature values using :ref:`cubic surface fitting <theory-cubic-surface-fitting>`. See also :func:`mymesh.curvature.CubicFit`.
+
+        Parameters
+        ----------
+        metrics : list, optional
+            List of curvature metrics to calculate. Options are:
+            
+            - 'Max Principal' - Maxiumum principal curvature
+
+            - 'Min Principal' - Minimum principal curvature
+
+            - 'Curvedness' - Curvedness (see :ref:`theory_curvedness`, :cite:`Koenderink1992a`)
+
+            - 'Shape Index' - Shape index (see :ref:`theory_shape-index`, :cite:`Koenderink1992a`)
+
+            - 'Mean' - Mean curvauture
+
+            - 'Gaussian' - Gaussian curvature
+
+            By default :code:`['Max Principal','Min Principal', 'Curvedness', 'Shape Index', 'Mean', 'Gaussian']`.
+
+        nRings : int, optional
+            Number of neighborhood 'rings' about each node to use in calculating the curvature, by default 1
+        SplitFeatures : bool, optional
+            If true, will split the mesh along feature edges (see :func:`mymesh.utils.DetectFeatures`) and calculate the curvature of each surface separately, by default False
+
+        Returns
+        -------
+        Curvature : dict
+            Dictionary containing selected output curvature values.
+        """        
         
         if type(metrics) is str: metrics = [metrics]
         Curvature = {}
