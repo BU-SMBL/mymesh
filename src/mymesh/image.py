@@ -136,7 +136,7 @@ def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scal
     .. plot::
 
         img = mymesh.demo_image('bunny')
-        voxelsize = 1
+        voxelsize = (0.337891, 0.337891, 0.5) # mm
         V = image.VoxelMesh(img, voxelsize, scalefactor=0.25)
         V.Clip(normal=[0,1,0]).plot(scalars='Image Data', view='-x-z')
 
@@ -146,7 +146,7 @@ def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scal
     .. plot::
 
         img = mymesh.demo_image('bunny')
-        voxelsize = 1
+        voxelsize = (0.337891, 0.337891, 0.5) # mm
         V = image.VoxelMesh(img, voxelsize, threshold=100, scalefactor=0.25)
         V.plot(view='-x-z')
 
@@ -226,7 +226,7 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
     .. plot::
 
         img = mymesh.demo_image('bunny')
-        voxelsize = 1
+        voxelsize = (0.337891, 0.337891, 0.5) # mm
         threshold = 100
         S = image.SurfaceMesh(img, voxelsize, threshold, scalefactor=0.25)
         S.plot(view='-x-z')
@@ -306,7 +306,7 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
     .. plot::
 
         img = mymesh.demo_image('bunny')
-        voxelsize = 1
+        voxelsize = (0.337891, 0.337891, 0.5) # mm
         threshold = 100
         T = image.TetMesh(img, voxelsize, threshold, scalefactor=0.25)
         T.plot(view='-x-z')
