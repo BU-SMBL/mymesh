@@ -187,6 +187,170 @@ def LocalLaplacianSmoothing(M, options=dict()):
 
     return Mnew
 
+def TaubinSmoothing(M, Lambda=0.6, Mu=-0.6382, pass_band=None, options=dict()):
+    """
+    Performs Taubin smoothing :cite:p:`Taubin1995`. 
+    Taubin smoothing uses a two-step smoothing process where Laplacian smoothing
+    is performed in the first step, with the amount of smoothing weighted by 
+    the parameter Lambda, followed by a second pass of smoothing weighted by 
+    the negative parameter Mu, which counteracts the shrinkage, thus preserving 
+    volume better than Laplacian smoothing.
+
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Mesh object to smooth
+    Lambda : float, optional
+        Smoothing coefficient. Must be greater than 0 and less than abs(Mu),
+        recommended to be less than 1, by default 0.6
+    Mu : float, optional
+        Inflation coefficient. Must be less than zero and greater in magnitude than Lambda, by default -0.6382. Ignored if pass_band is given.
+    pass_band: float, optional
+        Pass band frequency. The pass band frequency is a function of Lambda
+        and Mu (kpb = 1/Lambda + 1/Mu). If provided, this will override the value for Mu. By default, None (the default Lambda and Mu give a pass 
+        band frequency of 0.1).
+    options : dict
+        Smoothing options. Available options are:
+
+        method : str
+            'simultaneous' or 'sequential'. Specifies if smoothing is performed
+            on all nodes at the same time, or one after another. Simultaneous
+            laplacian smoothing will move nodes to the center of their neighbors'
+            initial positions, while sequential will use the current positions of
+            previously smoothed nodes, by default 'simultaneous'.
+        iterate : int or str
+            Fixed number of iterations to perform, or 'converge' to iterate until
+            convergence, by default 'converge'.
+        tolerance : float
+            Convergence tolerance. For local Laplacian smoothing, iteration
+            will terminate if the largest movement of a node is less than the
+            specified tolerance, by default 1e-6.
+        maxIter : int
+            Maximum number of iterations when iterate='converge', By default 10.
+        FixedNodes : set or array_like
+            Set of nodes that are held fixed during iteration, by default none
+            are fixed.
+        FixFeatures : bool
+            If true, feature nodes on edges or corners (identified by
+            :func:`~mymesh.utils.DetectFeatures`) will be held in place, by default False.
+        FixSurf : bool
+            If true, all nodes on the surface will be held in place and only 
+            interior nodes will be smooLambdathed, by default False.
+        limit : float
+            Maximum distance nodes are allowed to move, by default None
+        constraint : np.ndarray
+            Constraint array (shape = (m,3)). The first column indicates nodes
+            that will be constrained, the second column indicates the axis
+            the constraint will be applied in, and the third column indicates
+            the displacement of the given node along the given axis (e.g. 0
+            for no motion in a particular axis))
+
+    Returns
+    -------
+    Mnew : mymesh.mesh
+        Mesh object with the new node locations.
+
+    Examples
+    --------
+
+    .. plot::
+
+        M = implicit.SurfaceMesh(implicit.sphere([0,0,0], 1), [-1,1,-1,1,-1,1],  .1)
+        Mnew = improvement.LocalLaplacianSmoothing(M, options=dict(iterate=1))
+        
+        visualize.Subplot([M, Mnew], (1,2), bgcolor='w', show_edges=True)
+
+    """    
+    
+    NodeCoords, NodeConn = M
+    NodeCoords = np.copy(NodeCoords)
+    NodeNeighbors = M.NodeNeighbors
+    # ElemConn = M.ElemConn
+    # SurfConn = M.SurfConn
+    if pass_band is not None:
+        assert pass_band > 0, f'Invalid value: {pass_band} for pass_band. pass_band must be strictly positive.'
+        Mu = 1/(pass_band-1/Lambda)
+    assert Lambda > 0, f'Invalid value: {Lambda} for Lambda. Lambda must be strictly positive.'
+    # assert -Mu >= Lambda, f'Invalid combination of Mu and Lambda. -Mu must be greater than or equal to Lambda.'
+    
+    # Process inputs
+    SmoothOptions = dict(method='simultaneous',
+                        iterate = 'converge',
+                        tolerance = 1e-6,
+                        maxIter = 10,
+                        FixedNodes = set(),
+                        FixFeatures = False,
+                        FixSurf = False,
+                        FixEdge = True,
+                        qualityFunc = quality.MeanRatio,
+                        limit = np.inf,
+                        constraint = np.empty((0,3)),
+                    )
+
+    NodeCoords, NodeConn, SmoothOptions = _SmoothingInputParser(M, SmoothOptions, options)
+    FreeNodes = SmoothOptions['FreeNodes']
+    FixedNodes = SmoothOptions['FixedNodes']
+    tolerance = SmoothOptions['tolerance']
+    iterate = SmoothOptions['iterate']
+    qualityFunc = SmoothOptions['qualityFunc']
+    maxIter = SmoothOptions['maxIter']
+    method = SmoothOptions['method']
+
+    if len(FreeNodes) > 0:
+        lens = np.array([len(n) for n in NodeNeighbors])
+        len_inv = np.divide(1,lens,out=np.zeros_like(lens,dtype=float),where=lens!=0)
+        r = utils.PadRagged(NodeNeighbors,fillval=-1)
+        ArrayCoords = np.vstack([NodeCoords,[np.nan,np.nan,np.nan]])
+        
+        if SmoothOptions['iterate'] == 'converge':
+            condition = lambda i, U : ((i == 0) | (np.max(U) > tolerance)) & (i < maxIter) 
+        elif isinstance(SmoothOptions['iterate'], (int, np.integer)):
+            condition = lambda i, U : i < SmoothOptions['iterate']
+        else:
+            raise ValueError('options["iterate"] must be "converge" or an integer.')
+        
+        i = 0
+        U = np.zeros((len(NodeCoords),3))
+        Utotal = np.zeros((len(NodeCoords),3))
+        while condition(i, U[FreeNodes]):
+            
+            Q = ArrayCoords[r]
+            U = len_inv[:,None] * np.nansum(Q - ArrayCoords[:-1,None,:],axis=1)
+            # Taubin coefficient
+            if i%2 == 0:
+                coeff = Lambda
+            else:
+                coeff = Mu
+            U *= coeff
+            
+            Utotal[FreeNodes] += U[FreeNodes]
+
+            # enforce limit
+            Unorm = np.linalg.norm(Utotal[FreeNodes], axis=1)
+            Utotal[FreeNodes[Unorm > SmoothOptions['limit']]] = Utotal[FreeNodes[Unorm > SmoothOptions['limit']]]/Unorm[Unorm > SmoothOptions['limit']][:,None] * SmoothOptions['limit']
+            
+            # enforce constraint
+            if len(SmoothOptions['constraint']) > 0:
+                nodes = SmoothOptions['constraint'][:,0].astype(int)
+                axes = SmoothOptions['constraint'][:,1].astype(int)
+                magnitudes = SmoothOptions['constraint'][:,2]
+                Utotal[nodes, axes] = magnitudes
+            # apply displacement
+            
+            ArrayCoords[FreeNodes] = NodeCoords[FreeNodes] + Utotal[FreeNodes]
+            i += 1
+    
+        NewCoords = ArrayCoords[:-1]
+    else:
+        NewCoords = NodeCoords
+
+    if 'mesh' in dir(mesh):
+        Mnew = mesh.mesh(NewCoords, NodeConn, Type=M.Type)
+    else:
+        Mnew = mesh(NewCoords, NodeConn, Type=M.Type)
+
+    return Mnew
+
 def TangentialLaplacianSmoothing(M, options=dict()):
     """
     Performs tangential Laplacian smoothing :cite:p:`Ohtake2003`, repositioning 
@@ -2929,8 +3093,6 @@ def TetFlip2(M):
 
     D = M.mesh2dmesh()#(ElemLabels=labels)
 
-
-
 def _Tet32Flip2(D, edge):
     pass
 
@@ -3096,595 +3258,3 @@ def _Tet32Flip2(D, edge):
 #     NewCoords = ArrayCoords.tolist()
 #     return NewCoords
 
-# def CollapseSlivers(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=set(), verbose=False):
-#     """
-#     Collapse sliver elements above a skewnessthreshold (default 0.9)
- 
-#     Parameters
-#     ----------
-#     NodeCoords : array_like
-#         Node coordinates
-#     NodeConn : list, array_like
-#         Nodal connectivites
-#     skewThreshold : float, optional
-#         Skewness threshold to determine whether an element is a sliver,
-#         by default 0.9
-#     FixedNodes : set, optional
-#         Set of nodes to be held in place and not affected by
-#         the sliver collapse operation, by default set().
-#     verbose : bool, optional
-#         If True, will report , by default False
-
-#     Returns
-#     -------
-#     NewCoords : array_like
-#         New node coordinate array
-#     NewConn : array_like
-#         New node connectivity array
-#     """    
-#     if type(FixedNodes) is list: FixedNodes = set(FixedNodes)
-#     ArrayCoords = np.asarray(NodeCoords)
-#     skew = quality.Skewness(ArrayCoords,NodeConn,verbose=False)
-#     Slivers = np.where(skew>skewThreshold)[0]
-#     if len(Slivers) > 0:
-
-#         NewConn = copy.copy(NodeConn)
-#         RNodeConn = utils.PadRagged(NodeConn)
-        
-#         Edges, EdgeConn, EdgeElem = converter.solid2edges(ArrayCoords,NodeConn,return_EdgeConn=True,return_EdgeElem=True)
-#         Edges = np.asarray(Edges)
-#         REdgeConn = utils.PadRagged(EdgeConn)
-        
-#         Pt1 = ArrayCoords[Edges[:,0]]; Pt2 = ArrayCoords[Edges[:,1]]
-#         EdgeLen = np.append(np.linalg.norm(Pt1-Pt2,axis=1),np.infty)
-#         ElemEdgeLen = EdgeLen[REdgeConn]
-#         EdgeSort = np.argsort(ElemEdgeLen,axis=1)
-
-#         for sliver in Slivers:
-#             for edge in REdgeConn[sliver][EdgeSort[sliver]]:
-#                 check = [Edges[edge][0] in FixedNodes, Edges[edge][1] in FixedNodes]
-#                 if check[0] and check[1]:
-#                     continue
-#                 elif check[1]:
-#                     RNodeConn[RNodeConn == Edges[edge][0]] = Edges[edge][1]
-#                 elif check[0]:
-#                     RNodeConn[RNodeConn == Edges[edge][1]] = Edges[edge][0]
-#                 else:
-#                     ArrayCoords[Edges[edge][0]] = (ArrayCoords[Edges[edge][0]]+ArrayCoords[Edges[edge][1]])/2
-#                     RNodeConn[RNodeConn == Edges[edge][0]] = Edges[edge][1]
-#                 break
-#         NewCoords,NewConn = utils.DeleteDegenerateElements(ArrayCoords,NewConn,strict=True)
-#         NewCoords = NewCoords
-#     else:
-#         NewCoords = NodeCoords
-#         NewConn = NodeConn
-#     return NewCoords, NewConn
-
-# def SliverPeel(NodeCoords, NodeConn, skewThreshold=0.95, FixedNodes=set()):
-#     """
-#     SliverPeel Peel highly skewed surface slivers off of a tetrahedral mesh.
-#     Only slivers above the skewThreshold with two surface faces will be peeled.
-
-#     Parameters
-#     ----------
-#     NodeCoords : list
-#         List of nodal coordinates.
-#     NodeConn : list
-#         List of nodal connectivities.
-#     skewThreshold : float, optional
-#         Skewness threshold above which slivers will be peeled from the surface, by default 0.95.
-
-#     Returns
-#     -------
-#     NewConn : list
-#         New nodal connectivity list.
-#     """
-#     skew = quality.Skewness(NodeCoords,NodeConn)
-#     Faces,FaceConn,FaceElem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)
-#     FaceElemConn,UFaces, UFaceConn, UFaceElem, idx, inv = converter.faces2faceelemconn(Faces,FaceConn,FaceElem,return_UniqueFaceInfo=True)
-#     UFaceConn = utils.PadRagged(UFaceConn)
-#     ElemNormals = np.array(utils.CalcFaceNormal(NodeCoords,Faces))
-
-#     where = np.where(np.isnan(FaceElemConn))
-#     SurfElems = np.asarray(FaceElemConn)[where[0],1-where[1]].astype(int)
-#     SurfConn = converter.solid2surface(NodeCoords,NodeConn)
-#     SurfNodes = set([n for e in SurfConn for n in e])
-
-#     ElemIds = np.arange(len(NodeConn))
-#     Skew01 = skew>skewThreshold         # Boolean check for if element skewness is greater than threshold
-#     # Surf01 = np.in1d(ElemIds,SurfElems) # Check if element is on the surface
-#     Surf01 = np.array([all([n in SurfNodes for n in elem]) for i,elem in enumerate(NodeConn)])
-#     X = np.isnan(np.append(FaceElemConn,[[np.inf,np.inf]],axis=0)[UFaceConn])
-#     Face01 = np.sum(X,axis=(1,2))==2 # Check if elem has 2 faces on surface
-#     # For elems with two surface faces, check if their normals are pointing the same direction
-#     SurfFacePairs = utils.PadRagged(FaceConn)[Face01][np.any(X,axis=2)[Face01]].reshape((sum(Face01),2))
-#     dots = np.sum(ElemNormals[SurfFacePairs[:,0]]*ElemNormals[SurfFacePairs[:,1]],axis=1)
-#     Face01[Face01] = dots > np.sqrt(3)/2
-#     Feature01 = np.array([sum([n in FixedNodes for n in elem]) < 2 for i,elem in enumerate(NodeConn)])
-
-
-#     NewConn = np.array(NodeConn,dtype=object)[~(Skew01 & Face01 & Feature01)].tolist()
-#     return NewConn
-
-    
-# def ResolveSurfSelfIntersections(NodeCoords,SurfConn,FixedNodes=set(),octree='generate',maxIter=10):
-
-#     if type(FixedNodes) != set:
-#         FixedNodes = set(FixedNodes)
-
-#     NewCoords = np.array(NodeCoords)
-#     SurfConn = np.asarray(SurfConn)
-#     if octree == 'generate':
-#         octree = octree.Surface2Octree(NewCoords,SurfConn)
-#     IntersectionPairs = rays.SurfSelfIntersection(NewCoords,SurfConn,octree=octree)
-#     Intersected = np.unique(IntersectionPairs).tolist()
-    
-#     count = 0
-#     while len(Intersected) > 0 and count < maxIter:
-#         print(count)
-#         ElemConn = utils.getElemConnectivity(NewCoords, SurfConn)
-#         NeighborhoodElems = np.unique([e for i in (SurfConn[Intersected]).flatten() for e in ElemConn[i]])
-#         PatchConn = SurfConn[NeighborhoodElems]
-#         BoundaryEdges = converter.surf2edges(NewCoords,PatchConn) 
-
-#         NewCoords = np.asarray(LocalLaplacianSmoothing(NewCoords,PatchConn,2,FixedNodes=FixedNodes.union(set([n for edge in BoundaryEdges for n in edge]))))
-
-#         IntersectionPairs = rays.SurfSelfIntersection(NewCoords,SurfConn,octree=octree)
-#         Intersected = np.unique(IntersectionPairs).tolist()
-#         count += 1
-#         if len(Intersected) > 0 and count > maxIter:
-#             warnings.warn('Unable to resolve surface mesh self intersections.')
-#     return NewCoords
-
-# def FlipEdge(NodeCoords,NodeConn,i,j):
-#     Si = set(NodeConn[i])
-#     Sj = set(NodeConn[j])
-#     shared = list(Si.intersection(Sj))
-#     assert len(shared)==2, 'Elements {:d} & {:d} are not properly connected for an edge flip.'.format(i,j)
-#     NotIni = Sj.difference(Si).pop()
-#     NotInj = Si.difference(Sj).pop()
-    
-#     Newi = [n if n != shared[0] else NotIni for n in NodeConn[i]]
-#     Newj = [n if n != shared[1] else NotInj for n in NodeConn[j]]
-#     # SetConn = [set(elem) for elem in NewConn]
-#     # if set(Newi) not in SetConn and set(Newj) not in SetConn:
-#     return Newi,Newj
-
-# def ValenceImprovementFlips(NodeCoords,NodeConn,NodeNeighbors,ElemNeighbors):
-
-#     Array = np.array(NodeCoords)
-#     NewConn = copy.copy(NodeConn)
-#     lens = np.array([len(n) for n in NodeNeighbors])
-#     R = -1*np.ones([len(NodeNeighbors),2*max(lens)],dtype=int)
-#     for i,n in enumerate(NodeNeighbors): R[i,:lens[i]] = n
-
-#     # Contains the number of node neighbors for each node stored at the nodes location within NodeConn
-#     TriValences = np.sum(R[np.array(NewConn)]>=0,axis=2)
-#     flips = 1
-#     while flips>0:
-#         flips = 0
-#         for i in range(len(ElemNeighbors)):
-#             if any(TriValences[i] < 5) or any(TriValences[i] > 7):
-#                 for j in ElemNeighbors[i]:
-#                     if len(set(ElemNeighbors[i]).intersection(ElemNeighbors[j])) > 0:
-#                         # This condition checks if the flip will be legal
-#                         continue
-#                     shared = list(set(NewConn[i]).intersection(NewConn[j]))
-#                     TempConn = copy.copy(NewConn)
-#                     Newi,Newj = FlipEdge(NodeCoords,NewConn,i,j)
-#                     if np.all(np.round(np.cross(Array[Newj[0]]-Array[Newj[1]],Array[Newj[0]]-Array[Newj[2]]),15) == [0,0,0]) or np.all(
-#                         np.round(np.cross(Array[Newi[0]]-Array[Newi[1]],Array[Newi[0]]-Array[Newi[2]]),15) == [0,0,0]):
-#                         # This condition checks if the flip leads to degenerate triangles
-#                         continue
-
-
-#                     TempConn[i] = Newi
-#                     TempConn[j] = Newj
-#                     Newshared = list(set(Newi).intersection(Newj))
-
-#                     if not rays.SegmentSegmentIntersection(Array[shared],Array[Newshared]):
-#                         # This condition checks if the flipped segment intersects with the old segment.
-#                         # Flips that don't pass this check could cause element inversion
-#                         continue
-
-#                     tempNeighbors = [
-#                         copy.copy(NodeNeighbors[shared[0]]),
-#                         copy.copy(NodeNeighbors[shared[1]]),
-#                         copy.copy(NodeNeighbors[Newshared[0]]),
-#                         copy.copy(NodeNeighbors[Newshared[1]]),
-#                     ]
-#                     tempNeighbors[0].remove(shared[1])
-#                     tempNeighbors[1].remove(shared[0])
-#                     tempNeighbors[2].append(Newshared[1])
-#                     tempNeighbors[3].append(Newshared[0])
-
-#                     ## TODO: This could be done more efficiently without copying all of R
-#                     newR = np.copy(R)
-#                     newR[[shared[0],shared[1],Newshared[0],Newshared[1]]] = -1*np.ones((4,R.shape[1]))
-#                     newR[shared[0],:len(tempNeighbors[0])] = tempNeighbors[0]
-#                     newR[shared[1],:len(tempNeighbors[1])] = tempNeighbors[1]
-#                     newR[Newshared[0],:len(tempNeighbors[2])] = tempNeighbors[2]
-#                     newR[Newshared[1],:len(tempNeighbors[3])] = tempNeighbors[3]
-#                     NewTriValences = np.sum(newR[np.array(TempConn)]>=0,axis=2)
-#                     if (np.max([TriValences[i],TriValences[j]]) - np.min([TriValences[i],TriValences[j]])) > (
-#                         np.max([NewTriValences[i],NewTriValences[j]]) - np.min([NewTriValences[i],NewTriValences[j]])):
-#                         flips += 1
-#                         NewConn = TempConn
-#                         R = newR
-#                         TriValences = NewTriValences
-#                         NodeNeighbors[shared[0]] = tempNeighbors[0]
-#                         NodeNeighbors[shared[1]] = tempNeighbors[1]
-#                         NodeNeighbors[Newshared[0]] = tempNeighbors[2]
-#                         NodeNeighbors[Newshared[1]] = tempNeighbors[3]
-#                         ENi = []; ENj = []
-#                         Si = set(Newi); Sj = set(Newj)
-#                         for k in np.unique(ElemNeighbors[i] + ElemNeighbors[j]):
-#                             if i in ElemNeighbors[k]: ElemNeighbors[k].remove(i)
-#                             if j in ElemNeighbors[k]: ElemNeighbors[k].remove(j)
-#                             if len(Si.intersection(NewConn[k])) == 2:
-#                                 ENi.append(k)
-#                                 ElemNeighbors[k].append(i)
-#                             if len(Sj.intersection(NewConn[k])) == 2:
-#                                 ENj.append(k)
-#                                 ElemNeighbors[k].append(j)
-#                         ElemNeighbors[i] = ENi; ElemNeighbors[j] = ENj
-#                         break
-#         # print(flips)
-
-
-#     return NewConn, ElemNeighbors
-
-# def AngleReductionFlips(NodeCoords,NodeConn,NodeNeighbors=None,FixedNodes=[]):
-#     NewCoords = np.array(NodeCoords)
-#     NewConn = copy.copy(NodeConn)
-#     if not NodeNeighbors: NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)
-#     thinking = True
-#     iter = 0
-#     while thinking:
-#         iter += 1
-#         flips = 0
-        
-#         Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True)
-#         UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
-#         UEdgeElem = np.asarray(EdgeElem)[UIdx]
-#         UEdgeConn = UInv[utils.PadRagged(EdgeConn)]
-#         EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)).astype(int)
-#         EdgeElemConn = -1*(np.ones((len(UEdges),2),dtype=int))
-#         EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)
-    
-#         NewCoords = np.asarray(NewCoords)
-#         NewConn = np.asarray(NewConn)
-#         EdgeVectors = NewCoords[UEdges[:,1]] - NewCoords[UEdges[:,0]]
-#         EdgeLengths = np.linalg.norm(EdgeVectors,axis=1)
-
-#         ElemVectors = EdgeVectors[UEdgeConn]
-#         ElemLengths = EdgeLengths[UEdgeConn]
-
-#         OppositeAngles = np.zeros(ElemLengths.shape)
-#         OppositeAngles[:,0] = np.arccos(np.sum(ElemVectors[:,2]*-ElemVectors[:,1],axis=1)/(ElemLengths[:,1]*ElemLengths[:,2]))
-#         OppositeAngles[:,1] = np.arccos(np.sum(ElemVectors[:,0]*-ElemVectors[:,2],axis=1)/(ElemLengths[:,0]*ElemLengths[:,2]))
-#         OppositeAngles[:,2] = np.arccos(np.sum(ElemVectors[:,1]*-ElemVectors[:,0],axis=1)/(ElemLengths[:,1]*ElemLengths[:,0]))
-        
-#         EdgeOppositeAngles = np.empty((len(UEdges),2))
-#         EdgeOppositeAngles[UEdgeConn,EECidx] = OppositeAngles
-
-#         NonDelaunay = np.where(np.sum(EdgeOppositeAngles,axis=1) > np.pi)[0]    # Indices of edges between two triangles that don't pass the 2D delaunay criteria (alpha+gamma<180)
-#         EffectedElems = set()
-#         nskipped = 0
-#         for k in NonDelaunay:  
-            
-#             [i,j] = EdgeElemConn[k]
-#             Edge = UEdges[k]
-
-#             if i in EffectedElems or j in EffectedElems:
-#                 continue
-#             elif Edge[0] in FixedNodes and Edge[1] in FixedNodes:
-#                 continue
-
-#             Newi,Newj = FlipEdge(NodeCoords,NewConn,i,j)
-#             NewEdge = list(set(Newi).intersection(Newj))
-
-#             if np.any(np.all(NewEdge==UEdges,axis=1)) or np.any(np.all(NewEdge[::-1]==UEdges,axis=1)):
-#                 # Edge already exists
-#                 nskipped += 1
-#                 continue
-
-#             if np.all(np.round(np.cross(NewCoords[Newj[0]]-NewCoords[Newj[1]],NewCoords[Newj[0]]-NewCoords[Newj[2]]),15) == [0,0,0]) or np.all(
-#                 np.round(np.cross(NewCoords[Newi[0]]-NewCoords[Newi[1]],NewCoords[Newi[0]]-NewCoords[Newi[2]]),15) == [0,0,0]):
-#                 # This condition checks if the flip leads to degenerate triangles
-#                 a = 1
-#                 nskipped += 1
-#                 continue            
-
-#             if not rays.SegmentSegmentIntersection(NewCoords[Edge],NewCoords[NewEdge]):
-#                 # This condition checks if the flipped segment intersects with the old segment.
-#                 # Flips that don't pass this check could cause element inversion
-#                 a = 2
-#                 nskipped += 1
-#                 continue
-
-#             if len(NodeNeighbors[UEdges[k,0]]) == 3 or len(NodeNeighbors[UEdges[k,1]]) == 3:
-#                 # If one of the edge nodes involved has only 3 neighbors, it can cause a topological error
-#                 nskipped += 1
-#                 continue
-            
-#             NewConn[i] = Newi; NewConn[j] = Newj
-#             EffectedElems.update((i,j))
-            
-#             Edges[k] = NewEdge
-
-#             flips += 1
-#         if flips < len(NonDelaunay)-nskipped:
-#             thinking = True
-#             NodeNeighbors = utils.getNodeNeighbors(NewCoords, NewConn)    
-#         else:
-#             thinking = False
-
-#     return NewConn
-
-# def Split(NodeCoords, NodeConn, h, iterate='converge', criteria=['AbsLongness','RelLongness'],thetal=145):
-#     # Clark, B., Ray, N., & Jiao, X. (2013). Surface mesh optimization, adaption, and untangling with high-order accuracy. Proceedings of the 21st International Meshing Roundtable, IMR 2012, 385–402. https://doi.org/10.1007/978-3-642-33573-0_23
-#     # Jiao, X., Colombi, A., Ni, X., & Hart, J. (2010). Anisotropic mesh adaptation for evolving triangulated surfaces. Engineering with Computers, 26(4), 363–376. https://doi.org/10.1007/s00366-009-0170-1
-    
-#     # criteria:
-#         # AbsLongness
-#         # RelLongness
-#         # AbsLargeAngle
-    
-    
-#     ### Parameters ###
-#     l = h       # Desired Edge Length
-#     phil = 0.005
-#     phiu = 0.07
-#     r = 0.25    # Small fraction of longest edge in incident triangles (Contraction - Relative shortness)
-#     R = 0.45    # Fraction of the longest edge in the mesh (Contraction - Relative small triangle)
-#     rho = np.sqrt(phil/phiu)  
-#     s = l*rho   # Minimum shortness threshold (Edge splitting - Relative longness)
-#     S = R*l     # Maximum shortness threshold (Contraction - Absolute small triangle)
-#     L = 1.5*l   # Maximum longness threshold (Edge splitting - Absolute longness)
-#     thetas = np.pi/12 # (15 deg) Minimum angle threshold (Contraction - Absolute small angle)
-#     thetal = thetal*np.pi/180 # (145 deg) Maximum angle threshold (Edge Splitting - Relative longness)
-#     ### ########## ###
-#     if type(criteria) is str: criteria = [criteria]
-#     def do_split(NewCoords,NewConn,EdgeSort,ConnSort,i):
-#         center = np.mean([NewCoords[EdgeSort[i,0]],NewCoords[EdgeSort[i,1]]],axis=0)
-#         NewId = len(NewCoords)
-#         NewCoords = np.vstack([NewCoords,center])
-#         # Get the node not belonging to the edge
-#         elem0 = NewConn[ConnSort[i,0]]
-#         elem1 = NewConn[ConnSort[i,1]]
-#         if type(elem0[0]) is list or type(elem1[0]) is list:
-#             return NewCoords, NewConn
-#         diff0 = set(elem0).difference(EdgeSort[i])
-#         diff1 = set(elem1).difference(EdgeSort[i])
-#         if len(diff0) == 0 or len(diff1) == 0:
-#             return NewCoords, NewConn
-#         NotShared0 = diff0.pop()
-#         NotShared1 = diff1.pop()
-#         # cycle the element definition so that it starts with the non-shared node
-#         #TODO: Probable Bottleneck
-#         while elem0[0] != NotShared0: elem0 = [elem0[-1]]+elem0[0:-1]
-#         while elem1[0] != NotShared1: elem1 = [elem1[-1]]+elem1[0:-1]
-        
-#         if ConnSort[i,0] >= 0: NewConn[ConnSort[i,0]] = [[elem0[0],elem0[1],NewId],[elem0[0],NewId,elem0[2]]]
-#         if ConnSort[i,1] >= 0: NewConn[ConnSort[i,1]] = [[elem1[0],elem1[1],NewId],[elem1[0],NewId,elem1[2]]]
-#         return NewCoords, NewConn
-
-#     NewCoords = np.array(NodeCoords)
-#     NewConn = copy.copy(NodeConn)
-#     if type(NewConn) is np.ndarray: NewConn = NewConn.tolist()
-
-#     if iterate == 'converge': iterate = np.inf
-
-#     iter = 0
-#     while iter < iterate:
-#         # print(iter)
-#         iter += 1
-#         Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True)
-#         UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
-#         UEdgeElem = np.asarray(EdgeElem)[UIdx]
-#         UEdgeConn = UInv[utils.PadRagged(EdgeConn)]
-#         EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)).astype(int)
-#         EdgeElemConn = -1*(np.ones((len(UEdges),2),dtype=int))
-#         EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)
-
-#         # EdgeVectors = NewCoords[UEdges[:,1]] - NewCoords[UEdges[:,0]]
-#         # EdgeLengths = np.linalg.norm(EdgeVectors,axis=1)
-
-#         # ElemVectors = EdgeVectors[UEdgeConn]
-#         # ElemLengths = EdgeLengths[UEdgeConn]
-
-#         # OppositeAngles = -1*np.ones(ElemLengths.shape)
-#         # # sign = (EECidx-.5)*2
-#         # OppositeAngles[:,0] = np.clip(np.sum(ElemVectors[:,2]*-ElemVectors[:,1],axis=1)/(ElemLengths[:,1]*ElemLengths[:,2]),-1,1)
-#         # OppositeAngles[:,1] = np.clip(np.sum(ElemVectors[:,0]*-ElemVectors[:,2],axis=1)/(ElemLengths[:,0]*ElemLengths[:,2]),-1,1)
-#         # OppositeAngles[:,2] = np.clip(np.sum(ElemVectors[:,1]*-ElemVectors[:,0],axis=1)/(ElemLengths[:,1]*ElemLengths[:,0]),-1,1)
-#         # OppositeAngles = np.arccos(OppositeAngles)
-
-
-#         ###
-#         Edges = np.asarray(Edges); EdgeConn = np.asarray(EdgeConn)
-#         EdgeVectors = NewCoords[Edges[:,1]] - NewCoords[Edges[:,0]]
-#         EdgeLengths = np.linalg.norm(EdgeVectors,axis=1)
-
-#         ElemVectors = EdgeVectors[EdgeConn]
-#         ElemLengths = EdgeLengths[EdgeConn]
-
-#         OppositeAngles = -1*np.ones(ElemLengths.shape)
-#         # sign = (EECidx-.5)*2
-#         with np.errstate(divide='ignore', invalid='ignore'):
-#             OppositeAngles[:,0] = np.clip(np.sum(ElemVectors[:,2]*-ElemVectors[:,1],axis=1)/(ElemLengths[:,1]*ElemLengths[:,2]),-1,1)
-#             OppositeAngles[:,1] = np.clip(np.sum(ElemVectors[:,0]*-ElemVectors[:,2],axis=1)/(ElemLengths[:,0]*ElemLengths[:,2]),-1,1)
-#             OppositeAngles[:,2] = np.clip(np.sum(ElemVectors[:,1]*-ElemVectors[:,0],axis=1)/(ElemLengths[:,1]*ElemLengths[:,0]),-1,1)
-#             OppositeAngles = np.arccos(OppositeAngles)
-
-#         ###
-#         EdgeOppositeAngles =  -1*np.ones((len(UEdges),2))
-#         EdgeOppositeAngles[UEdgeConn,EECidx] = OppositeAngles
-
-#         sortkey = np.argsort(EdgeLengths[UIdx])[::-1]
-#         LengthSort = EdgeLengths[UIdx][sortkey]
-#         AngleSort = EdgeOppositeAngles[sortkey]
-#         EdgeSort = np.asarray(UEdges)[sortkey]
-#         ConnSort = np.array(EdgeElemConn)[sortkey]
-
-#         todobool = np.repeat(False,len(sortkey))
-
-#         if 'RelLongness' in criteria: 
-#             RelLongness = (l < LengthSort) & np.any(AngleSort > thetal,axis=1) & (np.min(np.hstack([ElemLengths[ConnSort[:,0]],ElemLengths[ConnSort[:,1]]]),axis=1) >= s)
-#             todobool = todobool | RelLongness
-#         if 'AbsLongness' in criteria: 
-#             AbsLongness = (L < LengthSort) & (LengthSort == np.max(np.hstack([ElemLengths[ConnSort[:,0]],ElemLengths[ConnSort[:,1]]]),axis=1))
-#             todobool = todobool | AbsLongness
-#         if 'AbsLargeAngle' in criteria:
-#             AbsLargeAngle = np.any(AngleSort >= thetal,axis=1)
-#             todobool = todobool | AbsLargeAngle
-
-#         todo = np.where(todobool)[0]
-#         # Splits
-#         SplitElems = set()
-#         count = 0
-#         for i in todo:
-#             if ConnSort[i,0] in SplitElems or ConnSort[i,1] in SplitElems:
-#                 continue
-#             NewCoords,NewConn = do_split(NewCoords,NewConn,EdgeSort,ConnSort,i)
-#             SplitElems.update(ConnSort[i])
-#             count += 1
-#         NewConn = [elem if (type(elem[0]) != list) else elem[0] for elem in NewConn] + [elem[1] for elem in NewConn if (type(elem[0]) == list)]
-#         if count == 0:
-#             break
-#     NewCoords = NewCoords.tolist()
-
-#     return NewCoords, NewConn
-
-# def Contract(NodeCoords, NodeConn, h, iterate='converge', FixedNodes=set(), FixFeatures=False):
-#     # Clark, B., Ray, N., & Jiao, X. (2013). Surface mesh optimization, adaption, and untangling with high-order accuracy. Proceedings of the 21st International Meshing Roundtable, IMR 2012, 385–402. https://doi.org/10.1007/978-3-642-33573-0_23
-#     # Jiao, X., Colombi, A., Ni, X., & Hart, J. (2010). Anisotropic mesh adaptation for evolving triangulated surfaces. Engineering with Computers, 26(4), 363–376. https://doi.org/10.1007/s00366-009-0170-1
-#     ### Parameters ###
-#     l = h       # Desired Edge Length
-#     phil = 0.005
-#     phiu = 0.07
-#     r = 0.25    # Small fraction of longest edge in incident triangles (Contraction - Relative shortness)
-#     R = 0.45    # Fraction of the longest edge in the mesh (Contraction - Relative small triangle)
-#     rho = np.sqrt(phil/phiu)  
-#     s = l*rho   # Minimum shortness threshold (Edge splitting - Relative longness)
-#     S = R*l     # Maximum shortness threshold (Contraction - Absolute small triangle)
-#     L = 1.5*l   # Maximum longness threshold (Edge splitting - Absolute longness)
-#     thetas = np.pi/12 # (15 deg) Minimum angle threshold (Contraction - Absolute small angle)
-#     thetal = 145*np.pi/180 # (145 deg) Maximum angle threshold (Edge Splitting - Relative longness)
-#     ### ########## ###
-#     if iterate == 'converge': iterate = np.inf
-    
-    
-#     NewCoords = np.array(NodeCoords)
-#     NewConn = np.array(NodeConn)
-#     Old_NElem = len(NewConn)
-#     iter = 0
-#     degenerate = set()
-#     edges,corners = utils.DetectFeatures(NewCoords,NewConn)
-#     if FixFeatures:
-#         FixedNodes.update(edges)
-#         FixedNodes.update(corners)
-#     # FeatureRank = [2 if i in corners else 1 if i in edges else 0 for i in range(len(NewCoords))]
-#     FeatureRank = np.zeros(len(NewCoords))
-#     FeatureRank[list(corners)] = 2
-#     FeatureRank[list(edges)] = 1
-    
-#     while iter < iterate:
-#         iter += 1
-#         NodeNeighbors = utils.getNodeNeighbors(NewCoords,NewConn)
-#         ElemConn = utils.getElemConnectivity(NewCoords,NewConn)
-#         Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True)
-#         UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)
-#         UEdgeElem = np.asarray(EdgeElem)[UIdx]
-#         UEdgeConn = UInv[utils.PadRagged(EdgeConn)]
-#         EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)).astype(int)
-#         EdgeElemConn = -1*(np.ones((len(UEdges),2),dtype=int))
-#         EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)
-    
-#         NewCoords = np.asarray(NewCoords)
-#         NewConn = np.asarray(NewConn)
-#         EdgeVectors = NewCoords[UEdges[:,1]] - NewCoords[UEdges[:,0]]
-#         EdgeLengths = np.linalg.norm(EdgeVectors,axis=1)
-
-#         ElemVectors = EdgeVectors[UEdgeConn]
-#         ElemLengths = EdgeLengths[UEdgeConn]
-#         with np.errstate(divide='ignore', invalid='ignore'):
-#             OppositeAngles = np.zeros(ElemLengths.shape)
-#             OppositeAngles[:,0] = np.arccos(np.clip(np.sum(ElemVectors[:,2]*-ElemVectors[:,1],axis=1)/(ElemLengths[:,1]*ElemLengths[:,2]),-1,1))
-#             OppositeAngles[:,1] = np.arccos(np.clip(np.sum(ElemVectors[:,0]*-ElemVectors[:,2],axis=1)/(ElemLengths[:,0]*ElemLengths[:,2]),-1,1))
-#             OppositeAngles[:,2] = np.arccos(np.clip(np.sum(ElemVectors[:,1]*-ElemVectors[:,0],axis=1)/(ElemLengths[:,1]*ElemLengths[:,0]),-1,1))
-        
-#         EdgeOppositeAngles = np.empty((len(UEdges),2))
-#         EdgeOppositeAngles[UEdgeConn,EECidx] = OppositeAngles
-
-#         # # Feature Edges:
-#         # FeatureEdgeIds = [i for i,edge in enumerate(UEdges) if (edge[0] in edges or edge[0] in corners) and (edge[1] in edges or edge[1] in corners)]
-#         # maxFeatureEdgeLength = max(EdgeLengths[FeatureEdgeIds])
-#         # EdgeLengths[FeatureEdgeIds] -= maxFeatureEdgeLength
-
-#         sortkey = np.argsort(EdgeLengths)
-#         LengthSort = EdgeLengths[sortkey]
-#         AngleSort = EdgeOppositeAngles[sortkey]
-#         EdgeSort = np.asarray(UEdges)[sortkey]
-#         ConnSort = np.array(EdgeElemConn)[sortkey]
-#         MeshMaxLen = LengthSort[-1]
-
-#         TriMaxLen = np.max([ElemLengths[ConnSort[:,0]],ElemLengths[ConnSort[:,1]]],axis=2).T
-#         MaxTriMaxLen = np.max(TriMaxLen,axis=1)
-#         TriMinLen = np.min([ElemLengths[ConnSort[:,0]],ElemLengths[ConnSort[:,1]]],axis=2).T
-#         MinTriMinLen = np.min(TriMinLen,axis=1)
-        
-#         AbsSmallAngle = np.any((AngleSort < thetas) & (TriMaxLen < l),axis=1)
-#         RelShortness = LengthSort < r*MaxTriMaxLen
-#         AbsSmallTriangle = (LengthSort == MinTriMinLen) & (MaxTriMaxLen < S)
-#         RelSmallTriangle = (MaxTriMaxLen < R*MeshMaxLen) & (MaxTriMaxLen < l)
-#         todo = np.where(AbsSmallAngle | RelShortness | AbsSmallTriangle | RelSmallTriangle)[0]
-#         k=0
-#         impacted = set()
-#         for edgeID in todo:
-#             edge = EdgeSort[edgeID]
-#             if edge[0] in FixedNodes and edge[1] in FixedNodes:
-#                 continue
-#             elif edge[0] in impacted or edge[1] in impacted:
-#                 continue
-#             elif edge[0] in FixedNodes:
-#                 newpoint = NewCoords[edge[0]]
-#             elif edge[1] in FixedNodes:
-#                 newpoint = NewCoords[edge[1]]
-#             elif FeatureRank[edge[0]] == FeatureRank[edge[1]]:
-#                 newpoint = np.mean([NewCoords[edge[0]],NewCoords[edge[1]]],axis=0)
-#             elif FeatureRank[edge[0]] > FeatureRank[edge[1]]:
-#                 newpoint = NewCoords[edge[0]]
-#             else:
-#                 newpoint = NewCoords[edge[1]]
-#             OldCoords = [copy.copy(NewCoords[edge[0]]),copy.copy(NewCoords[edge[1]])]
-#             OldNormals = utils.CalcFaceNormal(NewCoords,[NewConn[e] for e in (ElemConn[edge[0]]+ElemConn[edge[1]])])
-            
-#             NewCoords[edge[0]] = newpoint
-#             NewCoords[edge[1]] = newpoint
-#             NewNormals = utils.CalcFaceNormal(NewCoords,[NewConn[e] for e in (ElemConn[edge[0]]+ElemConn[edge[1]])])
-#             if any([np.dot(OldNormals[i],NewNormals[i]) < np.sqrt(3)/2 for i in range(len(OldNormals)) if not(np.any(np.isnan(NewNormals[i])) or np.any(np.isnan(OldNormals[i])))]):
-#                 NewCoords[edge[0]] = OldCoords[0]
-#                 NewCoords[edge[1]] = OldCoords[1]
-#             else:
-#                 if FeatureRank[edge[0]] >= FeatureRank[edge[1]]:
-#                     remove = edge[1]
-#                     keep = edge[0]
-#                 else:
-#                     keep = edge[1]
-#                     remove = edge[0]
-#                 NewConn[NewConn==remove] = keep
-#                 EdgeSort[EdgeSort==remove] = keep
-#                 impacted.update([keep,remove])
-#                 impacted.update(NodeNeighbors[keep])
-#                 impacted.update(NodeNeighbors[remove])
-#                 k+=1
-#         NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
-#         if k == 0:
-#             break
-
-#     NewCoords,NewConn = utils.DeleteDuplicateNodes(NewCoords,NewConn)
-
-#     if type(NewCoords) is np.ndarray: NewCoords = NewCoords.tolist()
-#     return NewCoords, NewConn
