@@ -16,7 +16,7 @@ are compatible.
 Such surfaces can be easily generated in MyMesh with the :mod:`~mymesh.implicit` 
 module. Several TPMSs are available as built-in functions in :mod:`~mymesh.implicit` 
 including :func:`~mymesh.implicit.gyroid`, :func:`~mymesh.implicit.primitive` 
-(Schwarz P), and :func:`~mymesh.implicit.diamond` (Schwarz D) [#f1]_. 
+(Schwarz P), and :func:`~mymesh.implicit.diamond` (Schwarz D), or a more generic function :func:`~mymesh.implicit.tpms` that offers a wider variety of functions [#f1]_. 
 
 
 """
@@ -25,29 +25,30 @@ including :func:`~mymesh.implicit.gyroid`, :func:`~mymesh.implicit.primitive`
 from mymesh import implicit
 import numpy as np
 
-functions = [implicit.primitive, implicit.gyroid]
-bounds = [0,1,0,1,0,1]
+cell_size = 1
+functions = [implicit.tpms('primitive', cell_size), implicit.tpms('S', cell_size)]
+bounds = [0,cell_size,0,cell_size,0,cell_size]
 h = 0.04 # element size
 
 weights1 = [0.25, 1] 
 mixed_topology1 = lambda x,y,z : np.sum([w*f(x,y,z) for w,f in zip(weights1, functions)], axis=0)
-M1 = implicit.TetMesh(implicit.thickenf(mixed_topology1,1), bounds, h)
-M1.plot(bgcolor='white')
+M1 = implicit.TetMesh(implicit.thicken(mixed_topology1,1), bounds, h, interpolation='quadratic')
+M1.plot()
 
 weights2 = [0.5, 0.8] 
 mixed_topology2 = lambda x,y,z : np.sum([w*f(x,y,z) for w,f in zip(weights2, functions)], axis=0)
-M2 = implicit.TetMesh(implicit.thickenf(mixed_topology2,1), bounds, h)
-M2.plot(bgcolor='white')
+M2 = implicit.TetMesh(implicit.thicken(mixed_topology2,1), bounds, h, interpolation='quadratic')
+M2.plot()
 
 weights3 = [0.8, 0.5] 
 mixed_topology3 = lambda x,y,z : np.sum([w*f(x,y,z) for w,f in zip(weights3, functions)], axis=0)
-M3 = implicit.TetMesh(implicit.thickenf(mixed_topology3,1), bounds, h)
-M3.plot(bgcolor='white')
+M3 = implicit.TetMesh(implicit.thicken(mixed_topology3,1), bounds, h, interpolation='quadratic')
+M3.plot()
 
 weights4 = [1, 0.25] 
 mixed_topology4 = lambda x,y,z : np.sum([w*f(x,y,z) for w,f in zip(weights4, functions)], axis=0)
-M4 = implicit.TetMesh(implicit.thickenf(mixed_topology4,1), bounds, h)
-M4.plot(bgcolor='white')
+M4 = implicit.TetMesh(implicit.thicken(mixed_topology4,1), bounds, h, interpolation='quadratic')
+M4.plot()
 # %%
 # .. [#f1] 
 #     To be specific, the implicit function TPMS representations are 
