@@ -47,6 +47,7 @@ Gaussian curvature (:math:`K`) is calculated as
 where :math:`\kappa_1, \kappa_2` are the maximum and minimum principal curvatures, 
 respectively.
 
+.. _theory_shape-index:
 Shape Index
 ^^^^^^^^^^^
 See :func:`~mymesh.curvature.ShapeIndex`
@@ -66,6 +67,7 @@ Shape index (:math:`s`) is calculated as
 where :math:`\kappa_1, \kappa_2` are the maximum and minimum principal curvatures, 
 respectively.
 
+.. _theory_curvedness:
 Curvedness
 ^^^^^^^^^^
 See :func:`~mymesh.curvature.Curvedness`
@@ -180,6 +182,7 @@ The parameters :math:`A, B,` and :math:`C` are the components of the Weingarten 
 
 the eigenvalues of which are the principal curvatures.
 
+.. _theory-cubic-surface-fitting:
 Cubic Surface Fitting
 """""""""""""""""""""
 Reference: :cite:t:`Goldfeather2004`
