@@ -99,7 +99,7 @@ def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=
         axis, and the shortest will be aligned with the x (0) axis. Must be a 
         combination of 0, 1, and 2.
     center : array_like or NoneType, optional
-        If provided, coordinates `[x,y,z]` of where to place to place the center
+        If provided, coordinates `[x,y,z]` of where to place the center
         of the bounding box of the object after transformation. If `None`, the 
         center of the oriented points will be the center of the original points,
         by default None.
@@ -282,8 +282,9 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', scal
         return transform
     return
 
-def Point2Point(points1, points2, T0=None, bounds=None, transform='rigid', metric='icp', 
-    method='icp', decimation=1, transform_args={}, optimizer_args=None, verbose=True):
+def Point2Point(points1, points2, T0=None, bounds=None, transform='rigid',
+    metric='icp', method='icp', decimation=1, prealign=True,
+    transform_args={}, optimizer_args=None, verbose=True):
     """
     Point cloud-to-point cloud alignment. points2 will be aligned to points1.
 
@@ -321,6 +322,8 @@ def Point2Point(points1, points2, T0=None, bounds=None, transform='rigid', metri
         for repeatable results. Note that if verbose=True, the final score
         will be reported for the full point set, not the decimated point set
         used during optimization.
+    prealign : bool, optional
+        Option to pre-align point sets based on axis-alignment. Disregarded if T0 is provided, by default True. 
     transform_args : dict, optional
         Additional arguments for the chosen transformation model, by default {}.
         See :func:`~mymesh.register.rigid`, :func:`~mymesh.register.similarity`,
@@ -340,17 +343,23 @@ def Point2Point(points1, points2, T0=None, bounds=None, transform='rigid', metri
         :code:`new_points = transform_points(points2, T)`
     """
     
-    if T0 is not None:
-        points2T0 = transform_points(points2, T0)
-    else:
-        points2T0 = points2
-        T0 = np.eye(np.shape(points2)[1] + 1)
+    # if T0 is not None:
+    #     points2T0 = transform_points(points2, T0)
+    # else:
+    if prealign:
+        T0a = AxisAlignPoints(points1, center=[0,0,0], return_transform=True, return_transformed=False)
+        T0b = AxisAlignPoints(points2, center=[0,0,0], return_transform=True, return_transformed=False)
+        T0 = np.linalg.inv(T0a) @ T0b
+        # points2T0 = transform_points(points2, T0)
+        # else:
+        #     T0 = np.eye(np.shape(points2)[1] + 1)
+            # points2T0 = points2
     if 0 < decimation <= 1:
         rng = np.random.default_rng(0)
         idx1 = rng.choice(len(points1), size=int(len(points1)*decimation), replace=False)
         idx2 = rng.choice(len(points2), size=int(len(points2)*decimation), replace=False)
         ref_points = points1[idx1]
-        moving_points = points2T0[idx2]
+        moving_points = points2[idx2]
     else:
         raise ValueError(f'decimation must be a scalar value in the range (0,1], not {str(decimation):s}.')
 
@@ -482,11 +491,12 @@ def Point2Point(points1, points2, T0=None, bounds=None, transform='rigid', metri
         _, T = ICP(ref_points, moving_points, T0=T0)
         new_points = transform_points(points2, T)
     else:
+        moving_points = transform_points(moving_points, T0)
         def objective(x):
             objective.k += 1
             if verbose: print('{:5d}'.format(objective.k),end='')
             T = transformation(x)
-            pointsT = transform_points(moving_points)
+            pointsT = transform_points(moving_points, T)
 
             f = obj(points1, pointsT)
             if verbose: 
@@ -512,7 +522,8 @@ def Point2Point(points1, points2, T0=None, bounds=None, transform='rigid', metri
     return new_points, T
 
 def Mesh2Mesh(M1, M2, T0=None, bounds=None, transform='rigid', metric='icp', 
-    method='icp', decimation=1, transform_args={}, optimizer_args=None, verbose=True):
+    method='icp', decimation=1, prealign=True, 
+    transform_args={}, optimizer_args=None, verbose=True):
     """
     Mesh-to-mesh registration. M2 will be aligned to M1.
 
@@ -550,6 +561,8 @@ def Mesh2Mesh(M1, M2, T0=None, bounds=None, transform='rigid', metric='icp',
         for repeatable results. Note that if verbose=True, the final score
         will be reported for the full point set, not the decimated point set
         used during optimization.
+    prealign : bool, optional
+        Option to pre-align meshes based on axis-alignment. Disregarded if T0 is provided, by default True. 
     transform_args : dict, optional
         Additional arguments for the chosen transformation model, by default {}.
         See :func:`~mymesh.register.rigid`, :func:`~mymesh.register.similarity`,
@@ -626,7 +639,7 @@ def Mesh2Mesh(M1, M2, T0=None, bounds=None, transform='rigid', metric='icp',
     points1 = M1.NodeCoords
     points2 = M2.NodeCoords
 
-    new_points2, T = Point2Point(points1, points2, T0=T0, bounds=bounds, transform=transform, metric=metric, method=method, decimation=decimation, transform_args=transform_args, optimizer_args=optimizer_args, verbose=verbose)
+    new_points2, T = Point2Point(points1, points2, T0=T0, bounds=bounds, transform=transform, metric=metric, method=method, decimation=decimation, prealign=prealign, transform_args=transform_args, optimizer_args=optimizer_args, verbose=verbose)
     Mnew = M2.copy()
     Mnew.NodeCoords = new_points2
     return Mnew, T
@@ -757,7 +770,8 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
         img2 = register.transform_image(img1, R)
 
         # Align the two meshes using the iterative closest point (ICP) algorithm
-        img_aligned, T = register.Image2Image(img1, img2, method='icp', threshold=thresh)
+        # img_aligned, T = register.Image2Image(img1, img2, method='icp', threshold=thresh)
+        img_aligned = np.zeros_like(img2)
 
     .. grid:: 2
 
@@ -1439,7 +1453,7 @@ def Image2Mesh3d(img, M, h=1, threshold=None, scale=1, decimation=1, center_mesh
 
     return new_image, T
 
-def ICP(points1, points2, T0=None, tol=1e-8, maxIter=100):
+def ICP(points1, points2, T0=None, tol=1e-8, maxIter=100, maxRestart=5, return_success=False):
     """
     Iterative Closest Point (ICP) algorithm for registering two point sets
 
@@ -1459,6 +1473,7 @@ def ICP(points1, points2, T0=None, tol=1e-8, maxIter=100):
         :code:`new_points = transform_points(points2, T)`
     """
 
+    success = False
     if T0 is not None:
         points2T0 = transform_points(points2, T0)
     else:
@@ -1476,13 +1491,11 @@ def ICP(points1, points2, T0=None, tol=1e-8, maxIter=100):
 
     if np.shape(moving_points)[1] == 3:
         T = np.eye(4)
-        # T[:3,3] = -center_of_mass2
         I = np.eye(3)
         Z = np.zeros(3)
         O = np.array([1])
     elif np.shape(moving_points)[1] == 2:
         T = np.eye(3)
-        # T[:2,2] = -center_of_mass2
         I = np.eye(2)
         Z = np.zeros(2)
         O = np.array([1])
@@ -1493,9 +1506,9 @@ def ICP(points1, points2, T0=None, tol=1e-8, maxIter=100):
     convergence = lambda R : np.allclose(R, I, rtol=0, atol=tol)
     
     R = np.zeros_like(I)
-    # t = np.zeros_like(Z)
 
-    Rtotal = np.eye(len(R))
+    # Rtotal = np.eye(len(R))
+    # ttotal = np.zeros(np.shape(moving_points)[1])
 
     i = 0
     while not convergence(R) and i < maxIter:
@@ -1513,25 +1526,59 @@ def ICP(points1, points2, T0=None, tol=1e-8, maxIter=100):
             R = Vt.T @ U.T
         
         # Update moving points
-        moving_points = (R @ moving_points.T).T # + t
+        moving_points = (R @ moving_points.T).T
+        # Translation based on differences in the center of pass of the points in the correspondence
+        center_of_mass1_ = np.mean(fixed_points[idx1], axis=0)
+        center_of_mass2_ = np.mean(moving_points, axis=0)
+        t = center_of_mass1_ - center_of_mass2_
+        moving_points += t
         
         # Accumulate transformations
-        Rtotal = R @ Rtotal
-
+        Ti = np.block([[R, t[:,None]], [np.zeros_like(t), 1]])
+        T = Ti@T
         i += 1
-    
-    if i == maxIter:
-        warnings.warn('ICP did not converge to the specified tolerance within the maximum number of iterations.', RuntimeWarning)
-    # Perform final translation to center and include T0
-    
-    
-    T[:Rtotal.shape[0],:Rtotal.shape[1]] = Rtotal
-    # move center of points to origin, perform rotation, then move to center of fixed points
-    Tfinal = translation(center_of_mass1)@T@translation(-1*center_of_mass2) @ T0
-    
-    # T = np.block([[Rtotal, (center_of_mass1)[:,None]], [Z, O]]) @ np.block([[I, (-center_of_mass2)[:,None]], [Z, O]]) @ T0
 
+    T_restart = None
+    if i == maxIter:
+        if maxRestart > 0:
+            rng = np.random.default_rng(12345)
+            for r in range(maxRestart):
+                if len(R) == 3:
+                    # 3D
+                    rand_rot = 2*np.pi*rng.random(3)
+                    rand_R = rotation(rand_rot)
+                else:
+                    # 2D
+                    rand_rot = 2*np.pi*rng.random(1)
+                    rand_R = rotation2d(rand_rot)
+                new_points, T_restart, success = ICP(points1, points2, T0=rand_R@T0, tol=tol, maxIter=maxIter, maxRestart=-1, return_success=True)
+                if success:
+                    break
+            if not success:
+                warnings.warn(f'ICP did not converge to the specified tolerance within {maxIter} iterations after {maxRestart} restarts', RuntimeWarning)
+        elif maxRestart == -1:
+            # Skip warning; internal use for handling restarts
+            pass
+        else:
+            warnings.warn(f'ICP did not converge to the specified tolerance within {maxIter} iterations.', RuntimeWarning)
+    else:
+        success = True
+    # Perform final translation to center and include T0
+    if T_restart is None:
+        # T[:Rtotal.shape[0],:Rtotal.shape[1]] = Rtotal
+        # T[:T.shape[0]-1,T.shape[1]-1] = ttotal
+    
+        # move center of points to origin, perform rotation, then move to center of fixed points
+        if np.shape(moving_points)[1] == 3:
+            Tfinal = translation(center_of_mass1)@T@translation(-1*center_of_mass2) @ T0
+        else:
+            Tfinal = translation2d(center_of_mass1)@T@translation2d(-1*center_of_mass2) @ T0
+    else:
+        Tfinal = T_restart
+    
     new_points = transform_points(points2, Tfinal)
+    if return_success:
+        return new_points, Tfinal, success
     return new_points, Tfinal
 
 ### Transformations
