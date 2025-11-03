@@ -3,8 +3,16 @@
 
 ## Unreleased
 
+### Feat
+
+- add TaubinSmoothing
+
 ### Fix
 
+- bugfixes in Image2Image
+- improve ICP performance and robustness
+- improve MVBB by handling 2D rotations
+- convert quadratic triangles to linear for stl write
 - improve efficiency in RaysSurfIntersection
 
 ## 0.1.1 (2025-10-10)

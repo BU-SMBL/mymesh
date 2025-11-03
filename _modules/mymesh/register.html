@@ -497,7 +497,7 @@
 <span class="sd">        axis, and the shortest will be aligned with the x (0) axis. Must be a </span>
 <span class="sd">        combination of 0, 1, and 2.</span>
 <span class="sd">    center : array_like or NoneType, optional</span>
-<span class="sd">        If provided, coordinates `[x,y,z]` of where to place to place the center</span>
+<span class="sd">        If provided, coordinates `[x,y,z]` of where to place the center</span>
 <span class="sd">        of the bounding box of the object after transformation. If `None`, the </span>
 <span class="sd">        center of the oriented points will be the center of the original points,</span>
 <span class="sd">        by default None.</span>
@@ -686,8 +686,9 @@
 
 <div class="viewcode-block" id="Point2Point">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.register.Point2Point.html#mymesh.register.Point2Point">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">Point2Point</span><span class="p">(</span><span class="n">points1</span><span class="p">,</span> <span class="n">points2</span><span class="p">,</span> <span class="n">T0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="s1">&#39;rigid&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;icp&#39;</span><span class="p">,</span> 
-    <span class="n">method</span><span class="o">=</span><span class="s1">&#39;icp&#39;</span><span class="p">,</span> <span class="n">decimation</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">transform_args</span><span class="o">=</span><span class="p">{},</span> <span class="n">optimizer_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Point2Point</span><span class="p">(</span><span class="n">points1</span><span class="p">,</span> <span class="n">points2</span><span class="p">,</span> <span class="n">T0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="s1">&#39;rigid&#39;</span><span class="p">,</span>
+    <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;icp&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;icp&#39;</span><span class="p">,</span> <span class="n">decimation</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">prealign</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">transform_args</span><span class="o">=</span><span class="p">{},</span> <span class="n">optimizer_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Point cloud-to-point cloud alignment. points2 will be aligned to points1.</span>
 
@@ -725,6 +726,8 @@
 <span class="sd">        for repeatable results. Note that if verbose=True, the final score</span>
 <span class="sd">        will be reported for the full point set, not the decimated point set</span>
 <span class="sd">        used during optimization.</span>
+<span class="sd">    prealign : bool, optional</span>
+<span class="sd">        Option to pre-align point sets based on axis-alignment. Disregarded if T0 is provided, by default True. </span>
 <span class="sd">    transform_args : dict, optional</span>
 <span class="sd">        Additional arguments for the chosen transformation model, by default {}.</span>
 <span class="sd">        See :func:`~mymesh.register.rigid`, :func:`~mymesh.register.similarity`,</span>
@@ -744,17 +747,23 @@
 <span class="sd">        :code:`new_points = transform_points(points2, T)`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="k">if</span> <span class="n">T0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">points2T0</span> <span class="o">=</span> <span class="n">transform_points</span><span class="p">(</span><span class="n">points2</span><span class="p">,</span> <span class="n">T0</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">points2T0</span> <span class="o">=</span> <span class="n">points2</span>
-        <span class="n">T0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">points2</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># if T0 is not None:</span>
+    <span class="c1">#     points2T0 = transform_points(points2, T0)</span>
+    <span class="c1"># else:</span>
+    <span class="k">if</span> <span class="n">prealign</span><span class="p">:</span>
+        <span class="n">T0a</span> <span class="o">=</span> <span class="n">AxisAlignPoints</span><span class="p">(</span><span class="n">points1</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">return_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_transformed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">T0b</span> <span class="o">=</span> <span class="n">AxisAlignPoints</span><span class="p">(</span><span class="n">points2</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">return_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_transformed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">T0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">T0a</span><span class="p">)</span> <span class="o">@</span> <span class="n">T0b</span>
+        <span class="c1"># points2T0 = transform_points(points2, T0)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     T0 = np.eye(np.shape(points2)[1] + 1)</span>
+            <span class="c1"># points2T0 = points2</span>
     <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">decimation</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">idx1</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points1</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points1</span><span class="p">)</span><span class="o">*</span><span class="n">decimation</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">idx2</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points2</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points2</span><span class="p">)</span><span class="o">*</span><span class="n">decimation</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">ref_points</span> <span class="o">=</span> <span class="n">points1</span><span class="p">[</span><span class="n">idx1</span><span class="p">]</span>
-        <span class="n">moving_points</span> <span class="o">=</span> <span class="n">points2T0</span><span class="p">[</span><span class="n">idx2</span><span class="p">]</span>
+        <span class="n">moving_points</span> <span class="o">=</span> <span class="n">points2</span><span class="p">[</span><span class="n">idx2</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;decimation must be a scalar value in the range (0,1], not </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">decimation</span><span class="p">)</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
 
@@ -886,11 +895,12 @@
         <span class="n">_</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">ICP</span><span class="p">(</span><span class="n">ref_points</span><span class="p">,</span> <span class="n">moving_points</span><span class="p">,</span> <span class="n">T0</span><span class="o">=</span><span class="n">T0</span><span class="p">)</span>
         <span class="n">new_points</span> <span class="o">=</span> <span class="n">transform_points</span><span class="p">(</span><span class="n">points2</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
+        <span class="n">moving_points</span> <span class="o">=</span> <span class="n">transform_points</span><span class="p">(</span><span class="n">moving_points</span><span class="p">,</span> <span class="n">T0</span><span class="p">)</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">objective</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
             <span class="n">objective</span><span class="o">.</span><span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:5d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">objective</span><span class="o">.</span><span class="n">k</span><span class="p">),</span><span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
             <span class="n">T</span> <span class="o">=</span> <span class="n">transformation</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-            <span class="n">pointsT</span> <span class="o">=</span> <span class="n">transform_points</span><span class="p">(</span><span class="n">moving_points</span><span class="p">)</span>
+            <span class="n">pointsT</span> <span class="o">=</span> <span class="n">transform_points</span><span class="p">(</span><span class="n">moving_points</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
 
             <span class="n">f</span> <span class="o">=</span> <span class="n">obj</span><span class="p">(</span><span class="n">points1</span><span class="p">,</span> <span class="n">pointsT</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> 
@@ -919,7 +929,8 @@
 <div class="viewcode-block" id="Mesh2Mesh">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.register.Mesh2Mesh.html#mymesh.register.Mesh2Mesh">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">Mesh2Mesh</span><span class="p">(</span><span class="n">M1</span><span class="p">,</span> <span class="n">M2</span><span class="p">,</span> <span class="n">T0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="s1">&#39;rigid&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;icp&#39;</span><span class="p">,</span> 
-    <span class="n">method</span><span class="o">=</span><span class="s1">&#39;icp&#39;</span><span class="p">,</span> <span class="n">decimation</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">transform_args</span><span class="o">=</span><span class="p">{},</span> <span class="n">optimizer_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">method</span><span class="o">=</span><span class="s1">&#39;icp&#39;</span><span class="p">,</span> <span class="n">decimation</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">prealign</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+    <span class="n">transform_args</span><span class="o">=</span><span class="p">{},</span> <span class="n">optimizer_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mesh-to-mesh registration. M2 will be aligned to M1.</span>
 
@@ -957,6 +968,8 @@
 <span class="sd">        for repeatable results. Note that if verbose=True, the final score</span>
 <span class="sd">        will be reported for the full point set, not the decimated point set</span>
 <span class="sd">        used during optimization.</span>
+<span class="sd">    prealign : bool, optional</span>
+<span class="sd">        Option to pre-align meshes based on axis-alignment. Disregarded if T0 is provided, by default True. </span>
 <span class="sd">    transform_args : dict, optional</span>
 <span class="sd">        Additional arguments for the chosen transformation model, by default {}.</span>
 <span class="sd">        See :func:`~mymesh.register.rigid`, :func:`~mymesh.register.similarity`,</span>
@@ -1033,7 +1046,7 @@
     <span class="n">points1</span> <span class="o">=</span> <span class="n">M1</span><span class="o">.</span><span class="n">NodeCoords</span>
     <span class="n">points2</span> <span class="o">=</span> <span class="n">M2</span><span class="o">.</span><span class="n">NodeCoords</span>
 
-    <span class="n">new_points2</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">Point2Point</span><span class="p">(</span><span class="n">points1</span><span class="p">,</span> <span class="n">points2</span><span class="p">,</span> <span class="n">T0</span><span class="o">=</span><span class="n">T0</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">decimation</span><span class="o">=</span><span class="n">decimation</span><span class="p">,</span> <span class="n">transform_args</span><span class="o">=</span><span class="n">transform_args</span><span class="p">,</span> <span class="n">optimizer_args</span><span class="o">=</span><span class="n">optimizer_args</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="n">new_points2</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">Point2Point</span><span class="p">(</span><span class="n">points1</span><span class="p">,</span> <span class="n">points2</span><span class="p">,</span> <span class="n">T0</span><span class="o">=</span><span class="n">T0</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">decimation</span><span class="o">=</span><span class="n">decimation</span><span class="p">,</span> <span class="n">prealign</span><span class="o">=</span><span class="n">prealign</span><span class="p">,</span> <span class="n">transform_args</span><span class="o">=</span><span class="n">transform_args</span><span class="p">,</span> <span class="n">optimizer_args</span><span class="o">=</span><span class="n">optimizer_args</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
     <span class="n">Mnew</span> <span class="o">=</span> <span class="n">M2</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">Mnew</span><span class="o">.</span><span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">new_points2</span>
     <span class="k">return</span> <span class="n">Mnew</span><span class="p">,</span> <span class="n">T</span></div>
@@ -1167,7 +1180,7 @@
 <span class="sd">        img2 = register.transform_image(img1, R)</span>
 
 <span class="sd">        # Align the two meshes using the iterative closest point (ICP) algorithm</span>
-<span class="sd">        img_aligned, T = register.Image2Image(img1, img2, method=&#39;icp&#39;, threshold=thresh)</span>
+<span class="sd">        img_aligned, T = register.Image2Image(img1, img2, method=&#39;icp&#39;, threshold=thresh, scale=0.5)</span>
 
 <span class="sd">    .. grid:: 2</span>
 
@@ -1215,74 +1228,74 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Image must be either two or three dimensional.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
-            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;threshold must be defined as a single value or a list/tuple/array of two values (one for each image).&#39;</span>
-            <span class="n">threshold1</span><span class="p">,</span> <span class="n">threshold2</span> <span class="o">=</span> <span class="n">threshold</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;threshold must be defined as a single value or a list/tuple/array of two values (one for each image).&#39;</span>
+        <span class="n">threshold1</span><span class="p">,</span> <span class="n">threshold2</span> <span class="o">=</span> <span class="n">threshold</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">threshold1</span> <span class="o">=</span> <span class="n">threshold2</span> <span class="o">=</span> <span class="n">threshold</span>
+    <span class="c1"># Process threshold input</span>
+    <span class="k">if</span> <span class="n">threshold1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># This option intended for already binarized images (flexible enough to accomodate different types of binarization, e.g. True/False, 1/0, 255/0, ...)</span>
+        <span class="c1"># If the image is not binary, this will assume the midpoint of the range of values as the threshold</span>
+        <span class="n">threshold1</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">img1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">img1</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+    <span class="k">if</span> <span class="n">threshold2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">threshold2</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">img2</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">img2</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+        
+    <span class="c1"># Process T0 input</span>
+    <span class="k">if</span> <span class="n">img2</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">):</span>
+        <span class="c1"># Convert binary to float for better interpolation</span>
+        <span class="n">img2</span> <span class="o">=</span> <span class="n">img2</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">T0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">img2T0</span> <span class="o">=</span> <span class="n">transform_image</span><span class="p">(</span><span class="n">img2</span><span class="p">,</span> <span class="n">T0</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">interpolation_order</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Initialize by centering img2 on img1</span>
+        <span class="n">center_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">center_of_mass</span><span class="p">(</span><span class="n">img1</span> <span class="o">&gt;</span> <span class="n">threshold1</span><span class="p">),</span> <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">center_of_mass</span><span class="p">(</span><span class="n">img2</span> <span class="o">&gt;</span> <span class="n">threshold2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">nD</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">T0</span> <span class="o">=</span> <span class="n">translation</span><span class="p">(</span><span class="n">center_diff</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">threshold1</span> <span class="o">=</span> <span class="n">threshold2</span> <span class="o">=</span> <span class="n">threshold</span>
-        <span class="c1"># Process threshold input</span>
-        <span class="k">if</span> <span class="n">threshold1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># This option intended for already binarized images (flexible enough to accomodate different types of binarization, e.g. True/False, 1/0, 255/0, ...)</span>
-            <span class="c1"># If the image is not binary, this will assume the midpoint of the range of values as the threshold</span>
-            <span class="n">threshold1</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">img1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">img1</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
-        <span class="k">if</span> <span class="n">threshold2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">threshold2</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">img2</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">img2</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
-            
-        <span class="c1"># Process T0 input</span>
-        <span class="k">if</span> <span class="n">img2</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">):</span>
+            <span class="n">T0</span> <span class="o">=</span> <span class="n">translation2d</span><span class="p">(</span><span class="n">center_diff</span><span class="p">)</span>
+        <span class="n">img2T0</span> <span class="o">=</span> <span class="n">transform_image</span><span class="p">(</span><span class="n">img2</span><span class="p">,</span> <span class="n">T0</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">interpolation_order</span><span class="p">))</span>    
+    
+    <span class="c1"># Process scale input</span>
+    <span class="k">if</span> <span class="n">scale</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">img1</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">):</span>
             <span class="c1"># Convert binary to float for better interpolation</span>
-            <span class="n">img2</span> <span class="o">=</span> <span class="n">img2</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">T0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">img2T0</span> <span class="o">=</span> <span class="n">transform_image</span><span class="p">(</span><span class="n">img2</span><span class="p">,</span> <span class="n">T0</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">interpolation_order</span><span class="p">))</span>
+            <span class="n">img1</span> <span class="o">=</span> <span class="n">img1</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">moving_img</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">img2T0</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">interpolation_order</span><span class="p">)</span>
+        <span class="n">fixed_img</span> <span class="o">=</span>  <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">interpolation_order</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">moving_img</span> <span class="o">=</span> <span class="n">img2T0</span>
+        <span class="n">fixed_img</span> <span class="o">=</span> <span class="n">img1</span>
+    
+    <span class="c1"># Process metric input</span>
+    <span class="n">point_based</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">grayscale</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;mutual_information&#39;</span> <span class="ow">or</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;MI&#39;</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">mutual_information</span>
+        <span class="n">grayscale</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;dice&#39;</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">img1</span><span class="p">,</span> <span class="n">img2</span> <span class="p">:</span> <span class="o">-</span><span class="n">dice</span><span class="p">(</span><span class="n">img1</span> <span class="o">&gt;</span> <span class="n">threshold1</span><span class="p">,</span> <span class="n">img2</span> <span class="o">&gt;</span> <span class="n">threshold2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;symmetric_closest_point_mse&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">binarized1</span> <span class="o">=</span> <span class="n">fixed_img</span> <span class="o">&gt;</span> <span class="n">threshold1</span>
+            <span class="n">binarized2</span> <span class="o">=</span> <span class="n">moving_img</span> <span class="o">&gt;</span> <span class="n">threshold2</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Initialize by centering img2 on img1</span>
-            <span class="n">center_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">center_of_mass</span><span class="p">(</span><span class="n">img1</span> <span class="o">&gt;</span> <span class="n">threshold1</span><span class="p">),</span> <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">center_of_mass</span><span class="p">(</span><span class="n">img2</span> <span class="o">&gt;</span> <span class="n">threshold2</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">nD</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">T0</span> <span class="o">=</span> <span class="n">translation</span><span class="p">(</span><span class="n">center_diff</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">T0</span> <span class="o">=</span> <span class="n">translation2d</span><span class="p">(</span><span class="n">center_diff</span><span class="p">)</span>
-            <span class="n">img2T0</span> <span class="o">=</span> <span class="n">transform_image</span><span class="p">(</span><span class="n">img2</span><span class="p">,</span> <span class="n">T0</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">interpolation_order</span><span class="p">))</span>    
-        
-        <span class="c1"># Process scale input</span>
-        <span class="k">if</span> <span class="n">scale</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">img1</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">):</span>
-                <span class="c1"># Convert binary to float for better interpolation</span>
-                <span class="n">img1</span> <span class="o">=</span> <span class="n">img1</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-            <span class="n">moving_img</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">img2T0</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">interpolation_order</span><span class="p">)</span>
-            <span class="n">fixed_img</span> <span class="o">=</span>  <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">interpolation_order</span><span class="p">)</span>
+            <span class="n">binarized1</span> <span class="o">=</span> <span class="n">fixed_img</span>
+            <span class="n">binarized2</span> <span class="o">=</span> <span class="n">moving_img</span>
+        <span class="n">point_based</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">points1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">binarized1</span><span class="p">))</span>
+        <span class="n">points2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">binarized2</span><span class="p">))</span>
+        <span class="c1"># tree1 = scipy.spatial.KDTree(points1) </span>
+        <span class="c1"># Note: can&#39;t precommute tree for the moving points</span>
+        <span class="c1"># obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)</span>
+    <span class="k">elif</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;icp&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">binarized1</span> <span class="o">=</span> <span class="n">fixed_img</span> <span class="o">&gt;</span> <span class="n">threshold1</span>
+            <span class="n">binarized2</span> <span class="o">=</span> <span class="n">moving_img</span> <span class="o">&gt;</span> <span class="n">threshold2</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">moving_img</span> <span class="o">=</span> <span class="n">img2T0</span>
-            <span class="n">fixed_img</span> <span class="o">=</span> <span class="n">img1</span>
-        
-        <span class="c1"># Process metric input</span>
-        <span class="n">point_based</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">grayscale</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;mutual_information&#39;</span> <span class="ow">or</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;MI&#39;</span><span class="p">:</span>
-            <span class="n">obj</span> <span class="o">=</span> <span class="n">mutual_information</span>
-            <span class="n">grayscale</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">elif</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;dice&#39;</span><span class="p">:</span>
-            <span class="n">obj</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">img1</span><span class="p">,</span> <span class="n">img2</span> <span class="p">:</span> <span class="o">-</span><span class="n">dice</span><span class="p">(</span><span class="n">img1</span> <span class="o">&gt;</span> <span class="n">threshold1</span><span class="p">,</span> <span class="n">img2</span> <span class="o">&gt;</span> <span class="n">threshold2</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;symmetric_closest_point_mse&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">binarized1</span> <span class="o">=</span> <span class="n">fixed_img</span> <span class="o">&gt;</span> <span class="n">threshold1</span>
-                <span class="n">binarized2</span> <span class="o">=</span> <span class="n">moving_img</span> <span class="o">&gt;</span> <span class="n">threshold2</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">binarized1</span> <span class="o">=</span> <span class="n">fixed_img</span>
-                <span class="n">binarized2</span> <span class="o">=</span> <span class="n">moving_img</span>
-            <span class="n">point_based</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">points1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">binarized1</span><span class="p">))</span>
-            <span class="n">points2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">binarized2</span><span class="p">))</span>
-            <span class="c1"># tree1 = scipy.spatial.KDTree(points1) </span>
-            <span class="c1"># Note: can&#39;t precommute tree for the moving points</span>
-            <span class="c1"># obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)</span>
-        <span class="k">elif</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;icp&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">binarized1</span> <span class="o">=</span> <span class="n">fixed_img</span> <span class="o">&gt;</span> <span class="n">threshold1</span>
-                <span class="n">binarized2</span> <span class="o">=</span> <span class="n">moving_img</span> <span class="o">&gt;</span> <span class="n">threshold2</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">binarized1</span> <span class="o">=</span> <span class="n">fixed_img</span>
-                <span class="n">binarized2</span> <span class="o">=</span> <span class="n">moving_img</span>
-            <span class="n">point_based</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">binarized1</span> <span class="o">=</span> <span class="n">fixed_img</span>
+            <span class="n">binarized2</span> <span class="o">=</span> <span class="n">moving_img</span>
+        <span class="n">point_based</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;icp&#39;</span> <span class="ow">or</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;icp&#39;</span><span class="p">:</span>
         <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;icp&#39;</span>
         <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;icp&#39;</span>
@@ -1852,7 +1865,7 @@
 
 <div class="viewcode-block" id="ICP">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.register.ICP.html#mymesh.register.ICP">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">ICP</span><span class="p">(</span><span class="n">points1</span><span class="p">,</span> <span class="n">points2</span><span class="p">,</span> <span class="n">T0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">maxIter</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ICP</span><span class="p">(</span><span class="n">points1</span><span class="p">,</span> <span class="n">points2</span><span class="p">,</span> <span class="n">T0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">maxIter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">maxRestart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">return_success</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iterative Closest Point (ICP) algorithm for registering two point sets</span>
 
@@ -1872,6 +1885,7 @@
 <span class="sd">        :code:`new_points = transform_points(points2, T)`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">T0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">points2T0</span> <span class="o">=</span> <span class="n">transform_points</span><span class="p">(</span><span class="n">points2</span><span class="p">,</span> <span class="n">T0</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1889,13 +1903,11 @@
 
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">moving_points</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
         <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-        <span class="c1"># T[:3,3] = -center_of_mass2</span>
         <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
         <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
         <span class="n">O</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">moving_points</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-        <span class="c1"># T[:2,2] = -center_of_mass2</span>
         <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">O</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
@@ -1906,9 +1918,9 @@
     <span class="n">convergence</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">R</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
     
     <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
-    <span class="c1"># t = np.zeros_like(Z)</span>
 
-    <span class="n">Rtotal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">R</span><span class="p">))</span>
+    <span class="c1"># Rtotal = np.eye(len(R))</span>
+    <span class="c1"># ttotal = np.zeros(np.shape(moving_points)[1])</span>
 
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="ow">not</span> <span class="n">convergence</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">maxIter</span><span class="p">:</span>
@@ -1926,25 +1938,66 @@
             <span class="n">R</span> <span class="o">=</span> <span class="n">Vt</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">U</span><span class="o">.</span><span class="n">T</span>
         
         <span class="c1"># Update moving points</span>
-        <span class="n">moving_points</span> <span class="o">=</span> <span class="p">(</span><span class="n">R</span> <span class="o">@</span> <span class="n">moving_points</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="c1"># + t</span>
+        <span class="n">moving_points</span> <span class="o">=</span> <span class="p">(</span><span class="n">R</span> <span class="o">@</span> <span class="n">moving_points</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="c1"># Translation based on differences in the center of pass of the points in the correspondence</span>
+        <span class="n">center_of_mass1_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">fixed_points</span><span class="p">[</span><span class="n">idx1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">center_of_mass2_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">moving_points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">center_of_mass1_</span> <span class="o">-</span> <span class="n">center_of_mass2_</span>
+        <span class="n">moving_points</span> <span class="o">+=</span> <span class="n">t</span>
         
         <span class="c1"># Accumulate transformations</span>
-        <span class="n">Rtotal</span> <span class="o">=</span> <span class="n">R</span> <span class="o">@</span> <span class="n">Rtotal</span>
-
+        <span class="n">Ti</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">block</span><span class="p">([[</span><span class="n">R</span><span class="p">,</span> <span class="n">t</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]],</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">Ti</span><span class="nd">@T</span>
         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-    
-    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">maxIter</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;ICP did not converge to the specified tolerance within the maximum number of iterations.&#39;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
-    <span class="c1"># Perform final translation to center and include T0</span>
-    
-    
-    <span class="n">T</span><span class="p">[:</span><span class="n">Rtotal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],:</span><span class="n">Rtotal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Rtotal</span>
-    <span class="c1"># move center of points to origin, perform rotation, then move to center of fixed points</span>
-    <span class="n">Tfinal</span> <span class="o">=</span> <span class="n">translation</span><span class="p">(</span><span class="n">center_of_mass1</span><span class="p">)</span><span class="nd">@T@translation</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">center_of_mass2</span><span class="p">)</span> <span class="o">@</span> <span class="n">T0</span>
-    
-    <span class="c1"># T = np.block([[Rtotal, (center_of_mass1)[:,None]], [Z, O]]) @ np.block([[I, (-center_of_mass2)[:,None]], [Z, O]]) @ T0</span>
 
+    <span class="n">T_restart</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">maxIter</span><span class="p">:</span>
+        <span class="n">sq_error</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">moving_points</span> <span class="o">-</span> <span class="n">fixed_points</span><span class="p">[</span><span class="n">idx1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))]</span>
+        <span class="n">Ts</span> <span class="o">=</span> <span class="p">[</span><span class="n">T</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">maxRestart</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">12345</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxRestart</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="c1"># 3D</span>
+                    <span class="n">rand_rot</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+                    <span class="n">rand_R</span> <span class="o">=</span> <span class="n">rotation</span><span class="p">(</span><span class="n">rand_rot</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># 2D</span>
+                    <span class="n">rand_rot</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">rand_R</span> <span class="o">=</span> <span class="n">rotation2d</span><span class="p">(</span><span class="n">rand_rot</span><span class="p">)</span>
+                <span class="n">new_points</span><span class="p">,</span> <span class="n">T_restart</span><span class="p">,</span> <span class="n">success</span> <span class="o">=</span> <span class="n">ICP</span><span class="p">(</span><span class="n">points1</span><span class="p">,</span> <span class="n">points2</span><span class="p">,</span> <span class="n">T0</span><span class="o">=</span><span class="n">rand_R</span><span class="nd">@T0</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span> <span class="n">maxIter</span><span class="o">=</span><span class="n">maxIter</span><span class="p">,</span> <span class="n">maxRestart</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_success</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">idx1</span> <span class="o">=</span> <span class="n">tree1</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">new_points</span><span class="p">,</span> <span class="n">workers</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> 
+                <span class="n">Ts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">T_restart</span><span class="p">)</span>
+                <span class="n">sq_error</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">new_points</span> <span class="o">-</span> <span class="n">fixed_points</span><span class="p">[</span><span class="n">idx1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+
+                <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ICP did not converge to the specified tolerance within </span><span class="si">{</span><span class="n">maxIter</span><span class="si">}</span><span class="s1"> iterations after </span><span class="si">{</span><span class="n">maxRestart</span><span class="si">}</span><span class="s1"> restarts&#39;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+            <span class="n">T_restart</span> <span class="o">=</span> <span class="n">Ts</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">sq_error</span><span class="p">)]</span> <span class="c1"># Choose the attempt with the lowest squared error, even if it&#39;s not the one that converged </span>
+        <span class="k">elif</span> <span class="n">maxRestart</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Skip warning; internal use for handling restarts</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ICP did not converge to the specified tolerance within </span><span class="si">{</span><span class="n">maxIter</span><span class="si">}</span><span class="s1"> iterations.&#39;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1"># Perform final translation to center and include T0</span>
+    <span class="k">if</span> <span class="n">T_restart</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># T[:Rtotal.shape[0],:Rtotal.shape[1]] = Rtotal</span>
+        <span class="c1"># T[:T.shape[0]-1,T.shape[1]-1] = ttotal</span>
+    
+        <span class="c1"># move center of points to origin, perform rotation, then move to center of fixed points</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">moving_points</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">Tfinal</span> <span class="o">=</span> <span class="n">translation</span><span class="p">(</span><span class="n">center_of_mass1</span><span class="p">)</span><span class="nd">@T@translation</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">center_of_mass2</span><span class="p">)</span> <span class="o">@</span> <span class="n">T0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Tfinal</span> <span class="o">=</span> <span class="n">translation2d</span><span class="p">(</span><span class="n">center_of_mass1</span><span class="p">)</span><span class="nd">@T@translation2d</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">center_of_mass2</span><span class="p">)</span> <span class="o">@</span> <span class="n">T0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Tfinal</span> <span class="o">=</span> <span class="n">T_restart</span>
+    
     <span class="n">new_points</span> <span class="o">=</span> <span class="n">transform_points</span><span class="p">(</span><span class="n">points2</span><span class="p">,</span> <span class="n">Tfinal</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_success</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">new_points</span><span class="p">,</span> <span class="n">Tfinal</span><span class="p">,</span> <span class="n">success</span>
     <span class="k">return</span> <span class="n">new_points</span><span class="p">,</span> <span class="n">Tfinal</span></div>
 
 

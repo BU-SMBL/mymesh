@@ -537,7 +537,7 @@
 <span class="sd">    .. plot::</span>
 
 <span class="sd">        img = mymesh.demo_image(&#39;bunny&#39;)</span>
-<span class="sd">        voxelsize = 1</span>
+<span class="sd">        voxelsize = (0.337891, 0.337891, 0.5) # mm</span>
 <span class="sd">        V = image.VoxelMesh(img, voxelsize, scalefactor=0.25)</span>
 <span class="sd">        V.Clip(normal=[0,1,0]).plot(scalars=&#39;Image Data&#39;, view=&#39;-x-z&#39;)</span>
 
@@ -547,7 +547,7 @@
 <span class="sd">    .. plot::</span>
 
 <span class="sd">        img = mymesh.demo_image(&#39;bunny&#39;)</span>
-<span class="sd">        voxelsize = 1</span>
+<span class="sd">        voxelsize = (0.337891, 0.337891, 0.5) # mm</span>
 <span class="sd">        V = image.VoxelMesh(img, voxelsize, threshold=100, scalefactor=0.25)</span>
 <span class="sd">        V.plot(view=&#39;-x-z&#39;)</span>
 
@@ -630,7 +630,7 @@
 <span class="sd">    .. plot::</span>
 
 <span class="sd">        img = mymesh.demo_image(&#39;bunny&#39;)</span>
-<span class="sd">        voxelsize = 1</span>
+<span class="sd">        voxelsize = (0.337891, 0.337891, 0.5) # mm</span>
 <span class="sd">        threshold = 100</span>
 <span class="sd">        S = image.SurfaceMesh(img, voxelsize, threshold, scalefactor=0.25)</span>
 <span class="sd">        S.plot(view=&#39;-x-z&#39;)</span>
@@ -713,7 +713,7 @@
 <span class="sd">    .. plot::</span>
 
 <span class="sd">        img = mymesh.demo_image(&#39;bunny&#39;)</span>
-<span class="sd">        voxelsize = 1</span>
+<span class="sd">        voxelsize = (0.337891, 0.337891, 0.5) # mm</span>
 <span class="sd">        threshold = 100</span>
 <span class="sd">        T = image.TetMesh(img, voxelsize, threshold, scalefactor=0.25)</span>
 <span class="sd">        T.plot(view=&#39;-x-z&#39;)</span>

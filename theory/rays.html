@@ -62,7 +62,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'theory/rays';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Examples" href="../examples/index.html" />
+    <link rel="next" title="Register" href="register.html" />
     <link rel="prev" title="Octree" href="octree.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -353,6 +353,7 @@
 <li class="toctree-l1"><a class="reference internal" href="improvement.html">Improvement</a></li>
 <li class="toctree-l1"><a class="reference internal" href="octree.html">Octree</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="register.html">Register</a></li>
 </ul>
 </div>
 </nav></div>
@@ -421,7 +422,7 @@
 and where those intersections occur.</p>
 <section id="ray-triangle-intersection">
 <h3>Ray-Triangle Intersection<a class="headerlink" href="#ray-triangle-intersection" title="Link to this heading">#</a></h3>
-<p><em>The Möller-Trumbore Intersection Test</em> <span id="id1">[<a class="reference internal" href="../guide/ref.html#id35" title="Tomas Möller and Ben Trumbore. Fast, minimum storage ray/triangle intersection. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, pages 7823–7830, 2005. URL: https://www.doi.org/10.1145/1198555.1198746, doi:10.1145/1198555.1198746.">MollerT05</a>]</span></p>
+<p><em>The Möller-Trumbore Intersection Test</em> <span id="id1">[<a class="reference internal" href="../guide/ref.html#id19" title="Tomas Möller and Ben Trumbore. Fast, minimum storage ray/triangle intersection. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, pages 7823–7830, 2005. URL: https://www.doi.org/10.1145/1198555.1198746, doi:10.1145/1198555.1198746.">MollerT05</a>]</span></p>
 <p>See <a class="reference internal" href="../generated/submodules/mymesh.rays.RayTriangleIntersection.html#mymesh.rays.RayTriangleIntersection" title="mymesh.rays.RayTriangleIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RayTriangleIntersection()</span></code></a>,
 <a class="reference internal" href="../generated/submodules/mymesh.rays.RayTrianglesIntersection.html#mymesh.rays.RayTrianglesIntersection" title="mymesh.rays.RayTrianglesIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RayTrianglesIntersection()</span></code></a>,
 <a class="reference internal" href="../generated/submodules/mymesh.rays.RaysTrianglesIntersection.html#mymesh.rays.RaysTrianglesIntersection" title="mymesh.rays.RaysTrianglesIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RaysTrianglesIntersection()</span></code></a>.</p>
@@ -483,7 +484,7 @@ intersection point is then</p>
 </section>
 <section id="ray-box-intersection">
 <h3>Ray-Box Intersection<a class="headerlink" href="#ray-box-intersection" title="Link to this heading">#</a></h3>
-<p><span id="id2">Williams <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id53" title="Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley. An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1):55–60, 2005. URL: https://www.doi.org/10.1145/1198555.1198748, doi:10.1145/1198555.1198748.">WBMS05</a>]</span></p>
+<p><span id="id2">Williams <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id43" title="Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley. An efficient and robust ray-box intersection algorithm. ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005, 10(1):55–60, 2005. URL: https://www.doi.org/10.1145/1198555.1198748, doi:10.1145/1198555.1198748.">WBMS05</a>]</span></p>
 <p>See <a class="reference internal" href="../generated/submodules/mymesh.rays.RayBoxIntersection.html#mymesh.rays.RayBoxIntersection" title="mymesh.rays.RayBoxIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RayBoxIntersection()</span></code></a>,
 <a class="reference internal" href="../generated/submodules/mymesh.rays.RayBoxesIntersection.html#mymesh.rays.RayBoxesIntersection" title="mymesh.rays.RayBoxesIntersection"><code class="xref py py-func docutils literal notranslate"><span class="pre">RayBoxesIntersection()</span></code></a>.</p>
 <p>This test determines whether a ray,
@@ -707,7 +708,7 @@ the boundary an odd number of times, while if it’s outside the boundary it wil
 intersect the ray an even number of times, regardless of how intricate the boundary
 is and how many intersections there are, as long as the boundary is closed and
 not self-intersecting. This is known as the <em>even-odd rule</em> or the <em>parity rule</em>
-<span id="id3">[<a class="reference internal" href="../guide/ref.html#id21" title="Kai Hormann and Alexander Agathos. The point in polygon problem for arbitrary polygons. Computational Geometry: Theory and Applications, 20(3):131–144, 2001. URL: https://www.doi.org/10.1016/S0925-7721(01)00012-8, doi:10.1016/S0925-7721(01)00012-8.">HA01</a>]</span>.</p>
+<span id="id3">[<a class="reference internal" href="../guide/ref.html#id50" title="Kai Hormann and Alexander Agathos. The point in polygon problem for arbitrary polygons. Computational Geometry: Theory and Applications, 20(3):131–144, 2001. URL: https://www.doi.org/10.1016/S0925-7721(01)00012-8, doi:10.1016/S0925-7721(01)00012-8.">HA01</a>]</span>.</p>
 <div class="graphviz"><img src="../_images/graphviz-d37b1e11357a73906b031f0056d43a5068448ada.png" alt="digraph cluster_0 {
 node [shape=point];
 splines=false
@@ -748,7 +749,7 @@ the surface an odd number of times, while if it’s outside the surface it will
 intersect the ray an even number of times, regardless of how intricate the surface
 is and how many intersections there are, as long as the surface is closed and
 not self-intersecting. This is known as the <em>even-odd rule</em> or the <em>parity rule</em>
-<span id="id4">[<a class="reference internal" href="../guide/ref.html#id21" title="Kai Hormann and Alexander Agathos. The point in polygon problem for arbitrary polygons. Computational Geometry: Theory and Applications, 20(3):131–144, 2001. URL: https://www.doi.org/10.1016/S0925-7721(01)00012-8, doi:10.1016/S0925-7721(01)00012-8.">HA01</a>]</span>.</p>
+<span id="id4">[<a class="reference internal" href="../guide/ref.html#id50" title="Kai Hormann and Alexander Agathos. The point in polygon problem for arbitrary polygons. Computational Geometry: Theory and Applications, 20(3):131–144, 2001. URL: https://www.doi.org/10.1016/S0925-7721(01)00012-8, doi:10.1016/S0925-7721(01)00012-8.">HA01</a>]</span>.</p>
 </section>
 </section>
 </section>
@@ -773,11 +774,11 @@ not self-intersecting. This is known as the <em>even-odd rule</em> or the <em>pa
       </div>
     </a>
     <a class="right-next"
-       href="../examples/index.html"
+       href="register.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Examples</p>
+        <p class="prev-next-title">Register</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

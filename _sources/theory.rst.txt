@@ -11,6 +11,7 @@ Theory Guide
     theory/improvement
     theory/octree
     theory/rays
+    theory/register
 
 .. note:: 
     This section is a work in progress.

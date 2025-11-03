@@ -469,7 +469,7 @@ This can add significant computational costs for large images.</p></li>
 <p>Create a voxel mesh of the full image, visualizing the image data
 stored in <cite>V.ElemData[‘Image Data’]</cite>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">img</span> <span class="o">=</span> <span class="n">mymesh</span><span class="o">.</span><span class="n">demo_image</span><span class="p">(</span><span class="s1">&#39;bunny&#39;</span><span class="p">)</span>
-<span class="n">voxelsize</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">voxelsize</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.337891</span><span class="p">,</span> <span class="mf">0.337891</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span> <span class="c1"># mm</span>
 <span class="n">V</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">VoxelMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">voxelsize</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
 <span class="n">V</span><span class="o">.</span><span class="n">Clip</span><span class="p">(</span><span class="n">normal</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">scalars</span><span class="o">=</span><span class="s1">&#39;Image Data&#39;</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="s1">&#39;-x-z&#39;</span><span class="p">)</span>
 </pre></div>
@@ -479,7 +479,7 @@ stored in <cite>V.ElemData[‘Image Data’]</cite>:</p>
 </figure>
 <p>Create a thresholded voxel mesh:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">img</span> <span class="o">=</span> <span class="n">mymesh</span><span class="o">.</span><span class="n">demo_image</span><span class="p">(</span><span class="s1">&#39;bunny&#39;</span><span class="p">)</span>
-<span class="n">voxelsize</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">voxelsize</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.337891</span><span class="p">,</span> <span class="mf">0.337891</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span> <span class="c1"># mm</span>
 <span class="n">V</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">VoxelMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">voxelsize</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
 <span class="n">V</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">view</span><span class="o">=</span><span class="s1">&#39;-x-z&#39;</span><span class="p">)</span>
 </pre></div>

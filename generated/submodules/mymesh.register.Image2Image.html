@@ -534,7 +534,7 @@ to img1.</p></li>
 <span class="n">img2</span> <span class="o">=</span> <span class="n">register</span><span class="o">.</span><span class="n">transform_image</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
 
 <span class="c1"># Align the two meshes using the iterative closest point (ICP) algorithm</span>
-<span class="n">img_aligned</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">register</span><span class="o">.</span><span class="n">Image2Image</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;icp&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">)</span>
+<span class="n">img_aligned</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">register</span><span class="o">.</span><span class="n">Image2Image</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;icp&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">

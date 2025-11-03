@@ -586,6 +586,170 @@
     <span class="k">return</span> <span class="n">Mnew</span></div>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">TaubinSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">Lambda</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">Mu</span><span class="o">=-</span><span class="mf">0.6382</span><span class="p">,</span> <span class="n">pass_band</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs Taubin smoothing :cite:p:`Taubin1995`. </span>
+<span class="sd">    Taubin smoothing uses a two-step smoothing process where Laplacian smoothing</span>
+<span class="sd">    is performed in the first step, with the amount of smoothing weighted by </span>
+<span class="sd">    the parameter Lambda, followed by a second pass of smoothing weighted by </span>
+<span class="sd">    the negative parameter Mu, which counteracts the shrinkage, thus preserving </span>
+<span class="sd">    volume better than Laplacian smoothing.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    M : mymesh.mesh</span>
+<span class="sd">        Mesh object to smooth</span>
+<span class="sd">    Lambda : float, optional</span>
+<span class="sd">        Smoothing coefficient. Must be greater than 0 and less than abs(Mu),</span>
+<span class="sd">        recommended to be less than 1, by default 0.6</span>
+<span class="sd">    Mu : float, optional</span>
+<span class="sd">        Inflation coefficient. Must be less than zero and greater in magnitude than Lambda, by default -0.6382. Ignored if pass_band is given.</span>
+<span class="sd">    pass_band: float, optional</span>
+<span class="sd">        Pass band frequency. The pass band frequency is a function of Lambda</span>
+<span class="sd">        and Mu (kpb = 1/Lambda + 1/Mu). If provided, this will override the value for Mu. By default, None (the default Lambda and Mu give a pass </span>
+<span class="sd">        band frequency of 0.1).</span>
+<span class="sd">    options : dict</span>
+<span class="sd">        Smoothing options. Available options are:</span>
+
+<span class="sd">        method : str</span>
+<span class="sd">            &#39;simultaneous&#39; or &#39;sequential&#39;. Specifies if smoothing is performed</span>
+<span class="sd">            on all nodes at the same time, or one after another. Simultaneous</span>
+<span class="sd">            laplacian smoothing will move nodes to the center of their neighbors&#39;</span>
+<span class="sd">            initial positions, while sequential will use the current positions of</span>
+<span class="sd">            previously smoothed nodes, by default &#39;simultaneous&#39;.</span>
+<span class="sd">        iterate : int or str</span>
+<span class="sd">            Fixed number of iterations to perform, or &#39;converge&#39; to iterate until</span>
+<span class="sd">            convergence, by default &#39;converge&#39;.</span>
+<span class="sd">        tolerance : float</span>
+<span class="sd">            Convergence tolerance. For local Laplacian smoothing, iteration</span>
+<span class="sd">            will terminate if the largest movement of a node is less than the</span>
+<span class="sd">            specified tolerance, by default 1e-6.</span>
+<span class="sd">        maxIter : int</span>
+<span class="sd">            Maximum number of iterations when iterate=&#39;converge&#39;, By default 10.</span>
+<span class="sd">        FixedNodes : set or array_like</span>
+<span class="sd">            Set of nodes that are held fixed during iteration, by default none</span>
+<span class="sd">            are fixed.</span>
+<span class="sd">        FixFeatures : bool</span>
+<span class="sd">            If true, feature nodes on edges or corners (identified by</span>
+<span class="sd">            :func:`~mymesh.utils.DetectFeatures`) will be held in place, by default False.</span>
+<span class="sd">        FixSurf : bool</span>
+<span class="sd">            If true, all nodes on the surface will be held in place and only </span>
+<span class="sd">            interior nodes will be smooLambdathed, by default False.</span>
+<span class="sd">        limit : float</span>
+<span class="sd">            Maximum distance nodes are allowed to move, by default None</span>
+<span class="sd">        constraint : np.ndarray</span>
+<span class="sd">            Constraint array (shape = (m,3)). The first column indicates nodes</span>
+<span class="sd">            that will be constrained, the second column indicates the axis</span>
+<span class="sd">            the constraint will be applied in, and the third column indicates</span>
+<span class="sd">            the displacement of the given node along the given axis (e.g. 0</span>
+<span class="sd">            for no motion in a particular axis))</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Mnew : mymesh.mesh</span>
+<span class="sd">        Mesh object with the new node locations.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    .. plot::</span>
+
+<span class="sd">        M = implicit.SurfaceMesh(implicit.sphere([0,0,0], 1), [-1,1,-1,1,-1,1],  .1)</span>
+<span class="sd">        Mnew = improvement.LocalLaplacianSmoothing(M, options=dict(iterate=1))</span>
+<span class="sd">        </span>
+<span class="sd">        visualize.Subplot([M, Mnew], (1,2), bgcolor=&#39;w&#39;, show_edges=True)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>    
+    
+    <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">M</span>
+    <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
+    <span class="n">NodeNeighbors</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeNeighbors</span>
+    <span class="c1"># ElemConn = M.ElemConn</span>
+    <span class="c1"># SurfConn = M.SurfConn</span>
+    <span class="k">if</span> <span class="n">pass_band</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">pass_band</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Invalid value: </span><span class="si">{</span><span class="n">pass_band</span><span class="si">}</span><span class="s1"> for pass_band. pass_band must be strictly positive.&#39;</span>
+        <span class="n">Mu</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">pass_band</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">Lambda</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">Lambda</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Invalid value: </span><span class="si">{</span><span class="n">Lambda</span><span class="si">}</span><span class="s1"> for Lambda. Lambda must be strictly positive.&#39;</span>
+    <span class="c1"># assert -Mu &gt;= Lambda, f&#39;Invalid combination of Mu and Lambda. -Mu must be greater than or equal to Lambda.&#39;</span>
+    
+    <span class="c1"># Process inputs</span>
+    <span class="n">SmoothOptions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;simultaneous&#39;</span><span class="p">,</span>
+                        <span class="n">iterate</span> <span class="o">=</span> <span class="s1">&#39;converge&#39;</span><span class="p">,</span>
+                        <span class="n">tolerance</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+                        <span class="n">maxIter</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                        <span class="n">FixedNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(),</span>
+                        <span class="n">FixFeatures</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="n">FixSurf</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="n">FixEdge</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="n">qualityFunc</span> <span class="o">=</span> <span class="n">quality</span><span class="o">.</span><span class="n">MeanRatio</span><span class="p">,</span>
+                        <span class="n">limit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+                        <span class="n">constraint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">)),</span>
+                    <span class="p">)</span>
+
+    <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">SmoothOptions</span> <span class="o">=</span> <span class="n">_SmoothingInputParser</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">SmoothOptions</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">FreeNodes</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;FreeNodes&#39;</span><span class="p">]</span>
+    <span class="n">FixedNodes</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;FixedNodes&#39;</span><span class="p">]</span>
+    <span class="n">tolerance</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;tolerance&#39;</span><span class="p">]</span>
+    <span class="n">iterate</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;iterate&#39;</span><span class="p">]</span>
+    <span class="n">qualityFunc</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;qualityFunc&#39;</span><span class="p">]</span>
+    <span class="n">maxIter</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;maxIter&#39;</span><span class="p">]</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">FreeNodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">lens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">NodeNeighbors</span><span class="p">])</span>
+        <span class="n">len_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">lens</span><span class="p">,</span><span class="n">out</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">lens</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span><span class="n">where</span><span class="o">=</span><span class="n">lens</span><span class="o">!=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">NodeNeighbors</span><span class="p">,</span><span class="n">fillval</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">NodeCoords</span><span class="p">,[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]])</span>
+        
+        <span class="k">if</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;iterate&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;converge&#39;</span><span class="p">:</span>
+            <span class="n">condition</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">U</span> <span class="p">:</span> <span class="p">((</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">U</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">maxIter</span><span class="p">)</span> 
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;iterate&#39;</span><span class="p">],</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+            <span class="n">condition</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">U</span> <span class="p">:</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;iterate&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;options[&quot;iterate&quot;] must be &quot;converge&quot; or an integer.&#39;</span><span class="p">)</span>
+        
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">),</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">Utotal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">),</span><span class="mi">3</span><span class="p">))</span>
+        <span class="k">while</span> <span class="n">condition</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">U</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]):</span>
+            
+            <span class="n">Q</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">len_inv</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">ArrayCoords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="kc">None</span><span class="p">,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># Taubin coefficient</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">coeff</span> <span class="o">=</span> <span class="n">Lambda</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">coeff</span> <span class="o">=</span> <span class="n">Mu</span>
+            <span class="n">U</span> <span class="o">*=</span> <span class="n">coeff</span>
+            
+            <span class="n">Utotal</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span> <span class="o">+=</span> <span class="n">U</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span>
+
+            <span class="c1"># enforce limit</span>
+            <span class="n">Unorm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Utotal</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">Utotal</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">[</span><span class="n">Unorm</span> <span class="o">&gt;</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">Utotal</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">[</span><span class="n">Unorm</span> <span class="o">&gt;</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">]]]</span><span class="o">/</span><span class="n">Unorm</span><span class="p">[</span><span class="n">Unorm</span> <span class="o">&gt;</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">]][:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">]</span>
+            
+            <span class="c1"># enforce constraint</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;constraint&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;constraint&#39;</span><span class="p">][:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                <span class="n">axes</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;constraint&#39;</span><span class="p">][:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                <span class="n">magnitudes</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;constraint&#39;</span><span class="p">][:,</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">Utotal</span><span class="p">[</span><span class="n">nodes</span><span class="p">,</span> <span class="n">axes</span><span class="p">]</span> <span class="o">=</span> <span class="n">magnitudes</span>
+            <span class="c1"># apply displacement</span>
+            
+            <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span> <span class="o">+</span> <span class="n">Utotal</span><span class="p">[</span><span class="n">FreeNodes</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+        <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">NodeCoords</span>
+
+    <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+        <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Mnew</span>
+
 <div class="viewcode-block" id="TangentialLaplacianSmoothing">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.improvement.TangentialLaplacianSmoothing.html#mymesh.improvement.TangentialLaplacianSmoothing">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">TangentialLaplacianSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
@@ -3355,8 +3519,6 @@
 
     <span class="n">D</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">mesh2dmesh</span><span class="p">()</span><span class="c1">#(ElemLabels=labels)</span>
 
-
-
 <span class="k">def</span><span class="w"> </span><span class="nf">_Tet32Flip2</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">):</span>
     <span class="k">pass</span>
 
@@ -3522,598 +3684,6 @@
 <span class="c1">#     NewCoords = ArrayCoords.tolist()</span>
 <span class="c1">#     return NewCoords</span>
 
-<span class="c1"># def CollapseSlivers(NodeCoords, NodeConn, skewThreshold=0.9, FixedNodes=set(), verbose=False):</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1">#     Collapse sliver elements above a skewnessthreshold (default 0.9)</span>
- 
-<span class="c1">#     Parameters</span>
-<span class="c1">#     ----------</span>
-<span class="c1">#     NodeCoords : array_like</span>
-<span class="c1">#         Node coordinates</span>
-<span class="c1">#     NodeConn : list, array_like</span>
-<span class="c1">#         Nodal connectivites</span>
-<span class="c1">#     skewThreshold : float, optional</span>
-<span class="c1">#         Skewness threshold to determine whether an element is a sliver,</span>
-<span class="c1">#         by default 0.9</span>
-<span class="c1">#     FixedNodes : set, optional</span>
-<span class="c1">#         Set of nodes to be held in place and not affected by</span>
-<span class="c1">#         the sliver collapse operation, by default set().</span>
-<span class="c1">#     verbose : bool, optional</span>
-<span class="c1">#         If True, will report , by default False</span>
-
-<span class="c1">#     Returns</span>
-<span class="c1">#     -------</span>
-<span class="c1">#     NewCoords : array_like</span>
-<span class="c1">#         New node coordinate array</span>
-<span class="c1">#     NewConn : array_like</span>
-<span class="c1">#         New node connectivity array</span>
-<span class="c1">#     &quot;&quot;&quot;    </span>
-<span class="c1">#     if type(FixedNodes) is list: FixedNodes = set(FixedNodes)</span>
-<span class="c1">#     ArrayCoords = np.asarray(NodeCoords)</span>
-<span class="c1">#     skew = quality.Skewness(ArrayCoords,NodeConn,verbose=False)</span>
-<span class="c1">#     Slivers = np.where(skew&gt;skewThreshold)[0]</span>
-<span class="c1">#     if len(Slivers) &gt; 0:</span>
-
-<span class="c1">#         NewConn = copy.copy(NodeConn)</span>
-<span class="c1">#         RNodeConn = utils.PadRagged(NodeConn)</span>
-        
-<span class="c1">#         Edges, EdgeConn, EdgeElem = converter.solid2edges(ArrayCoords,NodeConn,return_EdgeConn=True,return_EdgeElem=True)</span>
-<span class="c1">#         Edges = np.asarray(Edges)</span>
-<span class="c1">#         REdgeConn = utils.PadRagged(EdgeConn)</span>
-        
-<span class="c1">#         Pt1 = ArrayCoords[Edges[:,0]]; Pt2 = ArrayCoords[Edges[:,1]]</span>
-<span class="c1">#         EdgeLen = np.append(np.linalg.norm(Pt1-Pt2,axis=1),np.infty)</span>
-<span class="c1">#         ElemEdgeLen = EdgeLen[REdgeConn]</span>
-<span class="c1">#         EdgeSort = np.argsort(ElemEdgeLen,axis=1)</span>
-
-<span class="c1">#         for sliver in Slivers:</span>
-<span class="c1">#             for edge in REdgeConn[sliver][EdgeSort[sliver]]:</span>
-<span class="c1">#                 check = [Edges[edge][0] in FixedNodes, Edges[edge][1] in FixedNodes]</span>
-<span class="c1">#                 if check[0] and check[1]:</span>
-<span class="c1">#                     continue</span>
-<span class="c1">#                 elif check[1]:</span>
-<span class="c1">#                     RNodeConn[RNodeConn == Edges[edge][0]] = Edges[edge][1]</span>
-<span class="c1">#                 elif check[0]:</span>
-<span class="c1">#                     RNodeConn[RNodeConn == Edges[edge][1]] = Edges[edge][0]</span>
-<span class="c1">#                 else:</span>
-<span class="c1">#                     ArrayCoords[Edges[edge][0]] = (ArrayCoords[Edges[edge][0]]+ArrayCoords[Edges[edge][1]])/2</span>
-<span class="c1">#                     RNodeConn[RNodeConn == Edges[edge][0]] = Edges[edge][1]</span>
-<span class="c1">#                 break</span>
-<span class="c1">#         NewCoords,NewConn = utils.DeleteDegenerateElements(ArrayCoords,NewConn,strict=True)</span>
-<span class="c1">#         NewCoords = NewCoords</span>
-<span class="c1">#     else:</span>
-<span class="c1">#         NewCoords = NodeCoords</span>
-<span class="c1">#         NewConn = NodeConn</span>
-<span class="c1">#     return NewCoords, NewConn</span>
-
-<span class="c1"># def SliverPeel(NodeCoords, NodeConn, skewThreshold=0.95, FixedNodes=set()):</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1">#     SliverPeel Peel highly skewed surface slivers off of a tetrahedral mesh.</span>
-<span class="c1">#     Only slivers above the skewThreshold with two surface faces will be peeled.</span>
-
-<span class="c1">#     Parameters</span>
-<span class="c1">#     ----------</span>
-<span class="c1">#     NodeCoords : list</span>
-<span class="c1">#         List of nodal coordinates.</span>
-<span class="c1">#     NodeConn : list</span>
-<span class="c1">#         List of nodal connectivities.</span>
-<span class="c1">#     skewThreshold : float, optional</span>
-<span class="c1">#         Skewness threshold above which slivers will be peeled from the surface, by default 0.95.</span>
-
-<span class="c1">#     Returns</span>
-<span class="c1">#     -------</span>
-<span class="c1">#     NewConn : list</span>
-<span class="c1">#         New nodal connectivity list.</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1">#     skew = quality.Skewness(NodeCoords,NodeConn)</span>
-<span class="c1">#     Faces,FaceConn,FaceElem = converter.solid2faces(NodeCoords,NodeConn,return_FaceConn=True,return_FaceElem=True)</span>
-<span class="c1">#     FaceElemConn,UFaces, UFaceConn, UFaceElem, idx, inv = converter.faces2faceelemconn(Faces,FaceConn,FaceElem,return_UniqueFaceInfo=True)</span>
-<span class="c1">#     UFaceConn = utils.PadRagged(UFaceConn)</span>
-<span class="c1">#     ElemNormals = np.array(utils.CalcFaceNormal(NodeCoords,Faces))</span>
-
-<span class="c1">#     where = np.where(np.isnan(FaceElemConn))</span>
-<span class="c1">#     SurfElems = np.asarray(FaceElemConn)[where[0],1-where[1]].astype(int)</span>
-<span class="c1">#     SurfConn = converter.solid2surface(NodeCoords,NodeConn)</span>
-<span class="c1">#     SurfNodes = set([n for e in SurfConn for n in e])</span>
-
-<span class="c1">#     ElemIds = np.arange(len(NodeConn))</span>
-<span class="c1">#     Skew01 = skew&gt;skewThreshold         # Boolean check for if element skewness is greater than threshold</span>
-<span class="c1">#     # Surf01 = np.in1d(ElemIds,SurfElems) # Check if element is on the surface</span>
-<span class="c1">#     Surf01 = np.array([all([n in SurfNodes for n in elem]) for i,elem in enumerate(NodeConn)])</span>
-<span class="c1">#     X = np.isnan(np.append(FaceElemConn,[[np.inf,np.inf]],axis=0)[UFaceConn])</span>
-<span class="c1">#     Face01 = np.sum(X,axis=(1,2))==2 # Check if elem has 2 faces on surface</span>
-<span class="c1">#     # For elems with two surface faces, check if their normals are pointing the same direction</span>
-<span class="c1">#     SurfFacePairs = utils.PadRagged(FaceConn)[Face01][np.any(X,axis=2)[Face01]].reshape((sum(Face01),2))</span>
-<span class="c1">#     dots = np.sum(ElemNormals[SurfFacePairs[:,0]]*ElemNormals[SurfFacePairs[:,1]],axis=1)</span>
-<span class="c1">#     Face01[Face01] = dots &gt; np.sqrt(3)/2</span>
-<span class="c1">#     Feature01 = np.array([sum([n in FixedNodes for n in elem]) &lt; 2 for i,elem in enumerate(NodeConn)])</span>
-
-
-<span class="c1">#     NewConn = np.array(NodeConn,dtype=object)[~(Skew01 &amp; Face01 &amp; Feature01)].tolist()</span>
-<span class="c1">#     return NewConn</span>
-
-    
-<span class="c1"># def ResolveSurfSelfIntersections(NodeCoords,SurfConn,FixedNodes=set(),octree=&#39;generate&#39;,maxIter=10):</span>
-
-<span class="c1">#     if type(FixedNodes) != set:</span>
-<span class="c1">#         FixedNodes = set(FixedNodes)</span>
-
-<span class="c1">#     NewCoords = np.array(NodeCoords)</span>
-<span class="c1">#     SurfConn = np.asarray(SurfConn)</span>
-<span class="c1">#     if octree == &#39;generate&#39;:</span>
-<span class="c1">#         octree = octree.Surface2Octree(NewCoords,SurfConn)</span>
-<span class="c1">#     IntersectionPairs = rays.SurfSelfIntersection(NewCoords,SurfConn,octree=octree)</span>
-<span class="c1">#     Intersected = np.unique(IntersectionPairs).tolist()</span>
-    
-<span class="c1">#     count = 0</span>
-<span class="c1">#     while len(Intersected) &gt; 0 and count &lt; maxIter:</span>
-<span class="c1">#         print(count)</span>
-<span class="c1">#         ElemConn = utils.getElemConnectivity(NewCoords, SurfConn)</span>
-<span class="c1">#         NeighborhoodElems = np.unique([e for i in (SurfConn[Intersected]).flatten() for e in ElemConn[i]])</span>
-<span class="c1">#         PatchConn = SurfConn[NeighborhoodElems]</span>
-<span class="c1">#         BoundaryEdges = converter.surf2edges(NewCoords,PatchConn) </span>
-
-<span class="c1">#         NewCoords = np.asarray(LocalLaplacianSmoothing(NewCoords,PatchConn,2,FixedNodes=FixedNodes.union(set([n for edge in BoundaryEdges for n in edge]))))</span>
-
-<span class="c1">#         IntersectionPairs = rays.SurfSelfIntersection(NewCoords,SurfConn,octree=octree)</span>
-<span class="c1">#         Intersected = np.unique(IntersectionPairs).tolist()</span>
-<span class="c1">#         count += 1</span>
-<span class="c1">#         if len(Intersected) &gt; 0 and count &gt; maxIter:</span>
-<span class="c1">#             warnings.warn(&#39;Unable to resolve surface mesh self intersections.&#39;)</span>
-<span class="c1">#     return NewCoords</span>
-
-<span class="c1"># def FlipEdge(NodeCoords,NodeConn,i,j):</span>
-<span class="c1">#     Si = set(NodeConn[i])</span>
-<span class="c1">#     Sj = set(NodeConn[j])</span>
-<span class="c1">#     shared = list(Si.intersection(Sj))</span>
-<span class="c1">#     assert len(shared)==2, &#39;Elements {:d} &amp; {:d} are not properly connected for an edge flip.&#39;.format(i,j)</span>
-<span class="c1">#     NotIni = Sj.difference(Si).pop()</span>
-<span class="c1">#     NotInj = Si.difference(Sj).pop()</span>
-    
-<span class="c1">#     Newi = [n if n != shared[0] else NotIni for n in NodeConn[i]]</span>
-<span class="c1">#     Newj = [n if n != shared[1] else NotInj for n in NodeConn[j]]</span>
-<span class="c1">#     # SetConn = [set(elem) for elem in NewConn]</span>
-<span class="c1">#     # if set(Newi) not in SetConn and set(Newj) not in SetConn:</span>
-<span class="c1">#     return Newi,Newj</span>
-
-<span class="c1"># def ValenceImprovementFlips(NodeCoords,NodeConn,NodeNeighbors,ElemNeighbors):</span>
-
-<span class="c1">#     Array = np.array(NodeCoords)</span>
-<span class="c1">#     NewConn = copy.copy(NodeConn)</span>
-<span class="c1">#     lens = np.array([len(n) for n in NodeNeighbors])</span>
-<span class="c1">#     R = -1*np.ones([len(NodeNeighbors),2*max(lens)],dtype=int)</span>
-<span class="c1">#     for i,n in enumerate(NodeNeighbors): R[i,:lens[i]] = n</span>
-
-<span class="c1">#     # Contains the number of node neighbors for each node stored at the nodes location within NodeConn</span>
-<span class="c1">#     TriValences = np.sum(R[np.array(NewConn)]&gt;=0,axis=2)</span>
-<span class="c1">#     flips = 1</span>
-<span class="c1">#     while flips&gt;0:</span>
-<span class="c1">#         flips = 0</span>
-<span class="c1">#         for i in range(len(ElemNeighbors)):</span>
-<span class="c1">#             if any(TriValences[i] &lt; 5) or any(TriValences[i] &gt; 7):</span>
-<span class="c1">#                 for j in ElemNeighbors[i]:</span>
-<span class="c1">#                     if len(set(ElemNeighbors[i]).intersection(ElemNeighbors[j])) &gt; 0:</span>
-<span class="c1">#                         # This condition checks if the flip will be legal</span>
-<span class="c1">#                         continue</span>
-<span class="c1">#                     shared = list(set(NewConn[i]).intersection(NewConn[j]))</span>
-<span class="c1">#                     TempConn = copy.copy(NewConn)</span>
-<span class="c1">#                     Newi,Newj = FlipEdge(NodeCoords,NewConn,i,j)</span>
-<span class="c1">#                     if np.all(np.round(np.cross(Array[Newj[0]]-Array[Newj[1]],Array[Newj[0]]-Array[Newj[2]]),15) == [0,0,0]) or np.all(</span>
-<span class="c1">#                         np.round(np.cross(Array[Newi[0]]-Array[Newi[1]],Array[Newi[0]]-Array[Newi[2]]),15) == [0,0,0]):</span>
-<span class="c1">#                         # This condition checks if the flip leads to degenerate triangles</span>
-<span class="c1">#                         continue</span>
-
-
-<span class="c1">#                     TempConn[i] = Newi</span>
-<span class="c1">#                     TempConn[j] = Newj</span>
-<span class="c1">#                     Newshared = list(set(Newi).intersection(Newj))</span>
-
-<span class="c1">#                     if not rays.SegmentSegmentIntersection(Array[shared],Array[Newshared]):</span>
-<span class="c1">#                         # This condition checks if the flipped segment intersects with the old segment.</span>
-<span class="c1">#                         # Flips that don&#39;t pass this check could cause element inversion</span>
-<span class="c1">#                         continue</span>
-
-<span class="c1">#                     tempNeighbors = [</span>
-<span class="c1">#                         copy.copy(NodeNeighbors[shared[0]]),</span>
-<span class="c1">#                         copy.copy(NodeNeighbors[shared[1]]),</span>
-<span class="c1">#                         copy.copy(NodeNeighbors[Newshared[0]]),</span>
-<span class="c1">#                         copy.copy(NodeNeighbors[Newshared[1]]),</span>
-<span class="c1">#                     ]</span>
-<span class="c1">#                     tempNeighbors[0].remove(shared[1])</span>
-<span class="c1">#                     tempNeighbors[1].remove(shared[0])</span>
-<span class="c1">#                     tempNeighbors[2].append(Newshared[1])</span>
-<span class="c1">#                     tempNeighbors[3].append(Newshared[0])</span>
-
-<span class="c1">#                     ## TODO: This could be done more efficiently without copying all of R</span>
-<span class="c1">#                     newR = np.copy(R)</span>
-<span class="c1">#                     newR[[shared[0],shared[1],Newshared[0],Newshared[1]]] = -1*np.ones((4,R.shape[1]))</span>
-<span class="c1">#                     newR[shared[0],:len(tempNeighbors[0])] = tempNeighbors[0]</span>
-<span class="c1">#                     newR[shared[1],:len(tempNeighbors[1])] = tempNeighbors[1]</span>
-<span class="c1">#                     newR[Newshared[0],:len(tempNeighbors[2])] = tempNeighbors[2]</span>
-<span class="c1">#                     newR[Newshared[1],:len(tempNeighbors[3])] = tempNeighbors[3]</span>
-<span class="c1">#                     NewTriValences = np.sum(newR[np.array(TempConn)]&gt;=0,axis=2)</span>
-<span class="c1">#                     if (np.max([TriValences[i],TriValences[j]]) - np.min([TriValences[i],TriValences[j]])) &gt; (</span>
-<span class="c1">#                         np.max([NewTriValences[i],NewTriValences[j]]) - np.min([NewTriValences[i],NewTriValences[j]])):</span>
-<span class="c1">#                         flips += 1</span>
-<span class="c1">#                         NewConn = TempConn</span>
-<span class="c1">#                         R = newR</span>
-<span class="c1">#                         TriValences = NewTriValences</span>
-<span class="c1">#                         NodeNeighbors[shared[0]] = tempNeighbors[0]</span>
-<span class="c1">#                         NodeNeighbors[shared[1]] = tempNeighbors[1]</span>
-<span class="c1">#                         NodeNeighbors[Newshared[0]] = tempNeighbors[2]</span>
-<span class="c1">#                         NodeNeighbors[Newshared[1]] = tempNeighbors[3]</span>
-<span class="c1">#                         ENi = []; ENj = []</span>
-<span class="c1">#                         Si = set(Newi); Sj = set(Newj)</span>
-<span class="c1">#                         for k in np.unique(ElemNeighbors[i] + ElemNeighbors[j]):</span>
-<span class="c1">#                             if i in ElemNeighbors[k]: ElemNeighbors[k].remove(i)</span>
-<span class="c1">#                             if j in ElemNeighbors[k]: ElemNeighbors[k].remove(j)</span>
-<span class="c1">#                             if len(Si.intersection(NewConn[k])) == 2:</span>
-<span class="c1">#                                 ENi.append(k)</span>
-<span class="c1">#                                 ElemNeighbors[k].append(i)</span>
-<span class="c1">#                             if len(Sj.intersection(NewConn[k])) == 2:</span>
-<span class="c1">#                                 ENj.append(k)</span>
-<span class="c1">#                                 ElemNeighbors[k].append(j)</span>
-<span class="c1">#                         ElemNeighbors[i] = ENi; ElemNeighbors[j] = ENj</span>
-<span class="c1">#                         break</span>
-<span class="c1">#         # print(flips)</span>
-
-
-<span class="c1">#     return NewConn, ElemNeighbors</span>
-
-<span class="c1"># def AngleReductionFlips(NodeCoords,NodeConn,NodeNeighbors=None,FixedNodes=[]):</span>
-<span class="c1">#     NewCoords = np.array(NodeCoords)</span>
-<span class="c1">#     NewConn = copy.copy(NodeConn)</span>
-<span class="c1">#     if not NodeNeighbors: NodeNeighbors = utils.getNodeNeighbors(NodeCoords,NodeConn)</span>
-<span class="c1">#     thinking = True</span>
-<span class="c1">#     iter = 0</span>
-<span class="c1">#     while thinking:</span>
-<span class="c1">#         iter += 1</span>
-<span class="c1">#         flips = 0</span>
-        
-<span class="c1">#         Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True)</span>
-<span class="c1">#         UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)</span>
-<span class="c1">#         UEdgeElem = np.asarray(EdgeElem)[UIdx]</span>
-<span class="c1">#         UEdgeConn = UInv[utils.PadRagged(EdgeConn)]</span>
-<span class="c1">#         EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)).astype(int)</span>
-<span class="c1">#         EdgeElemConn = -1*(np.ones((len(UEdges),2),dtype=int))</span>
-<span class="c1">#         EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)</span>
-    
-<span class="c1">#         NewCoords = np.asarray(NewCoords)</span>
-<span class="c1">#         NewConn = np.asarray(NewConn)</span>
-<span class="c1">#         EdgeVectors = NewCoords[UEdges[:,1]] - NewCoords[UEdges[:,0]]</span>
-<span class="c1">#         EdgeLengths = np.linalg.norm(EdgeVectors,axis=1)</span>
-
-<span class="c1">#         ElemVectors = EdgeVectors[UEdgeConn]</span>
-<span class="c1">#         ElemLengths = EdgeLengths[UEdgeConn]</span>
-
-<span class="c1">#         OppositeAngles = np.zeros(ElemLengths.shape)</span>
-<span class="c1">#         OppositeAngles[:,0] = np.arccos(np.sum(ElemVectors[:,2]*-ElemVectors[:,1],axis=1)/(ElemLengths[:,1]*ElemLengths[:,2]))</span>
-<span class="c1">#         OppositeAngles[:,1] = np.arccos(np.sum(ElemVectors[:,0]*-ElemVectors[:,2],axis=1)/(ElemLengths[:,0]*ElemLengths[:,2]))</span>
-<span class="c1">#         OppositeAngles[:,2] = np.arccos(np.sum(ElemVectors[:,1]*-ElemVectors[:,0],axis=1)/(ElemLengths[:,1]*ElemLengths[:,0]))</span>
-        
-<span class="c1">#         EdgeOppositeAngles = np.empty((len(UEdges),2))</span>
-<span class="c1">#         EdgeOppositeAngles[UEdgeConn,EECidx] = OppositeAngles</span>
-
-<span class="c1">#         NonDelaunay = np.where(np.sum(EdgeOppositeAngles,axis=1) &gt; np.pi)[0]    # Indices of edges between two triangles that don&#39;t pass the 2D delaunay criteria (alpha+gamma&lt;180)</span>
-<span class="c1">#         EffectedElems = set()</span>
-<span class="c1">#         nskipped = 0</span>
-<span class="c1">#         for k in NonDelaunay:  </span>
-            
-<span class="c1">#             [i,j] = EdgeElemConn[k]</span>
-<span class="c1">#             Edge = UEdges[k]</span>
-
-<span class="c1">#             if i in EffectedElems or j in EffectedElems:</span>
-<span class="c1">#                 continue</span>
-<span class="c1">#             elif Edge[0] in FixedNodes and Edge[1] in FixedNodes:</span>
-<span class="c1">#                 continue</span>
-
-<span class="c1">#             Newi,Newj = FlipEdge(NodeCoords,NewConn,i,j)</span>
-<span class="c1">#             NewEdge = list(set(Newi).intersection(Newj))</span>
-
-<span class="c1">#             if np.any(np.all(NewEdge==UEdges,axis=1)) or np.any(np.all(NewEdge[::-1]==UEdges,axis=1)):</span>
-<span class="c1">#                 # Edge already exists</span>
-<span class="c1">#                 nskipped += 1</span>
-<span class="c1">#                 continue</span>
-
-<span class="c1">#             if np.all(np.round(np.cross(NewCoords[Newj[0]]-NewCoords[Newj[1]],NewCoords[Newj[0]]-NewCoords[Newj[2]]),15) == [0,0,0]) or np.all(</span>
-<span class="c1">#                 np.round(np.cross(NewCoords[Newi[0]]-NewCoords[Newi[1]],NewCoords[Newi[0]]-NewCoords[Newi[2]]),15) == [0,0,0]):</span>
-<span class="c1">#                 # This condition checks if the flip leads to degenerate triangles</span>
-<span class="c1">#                 a = 1</span>
-<span class="c1">#                 nskipped += 1</span>
-<span class="c1">#                 continue            </span>
-
-<span class="c1">#             if not rays.SegmentSegmentIntersection(NewCoords[Edge],NewCoords[NewEdge]):</span>
-<span class="c1">#                 # This condition checks if the flipped segment intersects with the old segment.</span>
-<span class="c1">#                 # Flips that don&#39;t pass this check could cause element inversion</span>
-<span class="c1">#                 a = 2</span>
-<span class="c1">#                 nskipped += 1</span>
-<span class="c1">#                 continue</span>
-
-<span class="c1">#             if len(NodeNeighbors[UEdges[k,0]]) == 3 or len(NodeNeighbors[UEdges[k,1]]) == 3:</span>
-<span class="c1">#                 # If one of the edge nodes involved has only 3 neighbors, it can cause a topological error</span>
-<span class="c1">#                 nskipped += 1</span>
-<span class="c1">#                 continue</span>
-            
-<span class="c1">#             NewConn[i] = Newi; NewConn[j] = Newj</span>
-<span class="c1">#             EffectedElems.update((i,j))</span>
-            
-<span class="c1">#             Edges[k] = NewEdge</span>
-
-<span class="c1">#             flips += 1</span>
-<span class="c1">#         if flips &lt; len(NonDelaunay)-nskipped:</span>
-<span class="c1">#             thinking = True</span>
-<span class="c1">#             NodeNeighbors = utils.getNodeNeighbors(NewCoords, NewConn)    </span>
-<span class="c1">#         else:</span>
-<span class="c1">#             thinking = False</span>
-
-<span class="c1">#     return NewConn</span>
-
-<span class="c1"># def Split(NodeCoords, NodeConn, h, iterate=&#39;converge&#39;, criteria=[&#39;AbsLongness&#39;,&#39;RelLongness&#39;],thetal=145):</span>
-<span class="c1">#     # Clark, B., Ray, N., &amp; Jiao, X. (2013). Surface mesh optimization, adaption, and untangling with high-order accuracy. Proceedings of the 21st International Meshing Roundtable, IMR 2012, 385–402. https://doi.org/10.1007/978-3-642-33573-0_23</span>
-<span class="c1">#     # Jiao, X., Colombi, A., Ni, X., &amp; Hart, J. (2010). Anisotropic mesh adaptation for evolving triangulated surfaces. Engineering with Computers, 26(4), 363–376. https://doi.org/10.1007/s00366-009-0170-1</span>
-    
-<span class="c1">#     # criteria:</span>
-<span class="c1">#         # AbsLongness</span>
-<span class="c1">#         # RelLongness</span>
-<span class="c1">#         # AbsLargeAngle</span>
-    
-    
-<span class="c1">#     ### Parameters ###</span>
-<span class="c1">#     l = h       # Desired Edge Length</span>
-<span class="c1">#     phil = 0.005</span>
-<span class="c1">#     phiu = 0.07</span>
-<span class="c1">#     r = 0.25    # Small fraction of longest edge in incident triangles (Contraction - Relative shortness)</span>
-<span class="c1">#     R = 0.45    # Fraction of the longest edge in the mesh (Contraction - Relative small triangle)</span>
-<span class="c1">#     rho = np.sqrt(phil/phiu)  </span>
-<span class="c1">#     s = l*rho   # Minimum shortness threshold (Edge splitting - Relative longness)</span>
-<span class="c1">#     S = R*l     # Maximum shortness threshold (Contraction - Absolute small triangle)</span>
-<span class="c1">#     L = 1.5*l   # Maximum longness threshold (Edge splitting - Absolute longness)</span>
-<span class="c1">#     thetas = np.pi/12 # (15 deg) Minimum angle threshold (Contraction - Absolute small angle)</span>
-<span class="c1">#     thetal = thetal*np.pi/180 # (145 deg) Maximum angle threshold (Edge Splitting - Relative longness)</span>
-<span class="c1">#     ### ########## ###</span>
-<span class="c1">#     if type(criteria) is str: criteria = [criteria]</span>
-<span class="c1">#     def do_split(NewCoords,NewConn,EdgeSort,ConnSort,i):</span>
-<span class="c1">#         center = np.mean([NewCoords[EdgeSort[i,0]],NewCoords[EdgeSort[i,1]]],axis=0)</span>
-<span class="c1">#         NewId = len(NewCoords)</span>
-<span class="c1">#         NewCoords = np.vstack([NewCoords,center])</span>
-<span class="c1">#         # Get the node not belonging to the edge</span>
-<span class="c1">#         elem0 = NewConn[ConnSort[i,0]]</span>
-<span class="c1">#         elem1 = NewConn[ConnSort[i,1]]</span>
-<span class="c1">#         if type(elem0[0]) is list or type(elem1[0]) is list:</span>
-<span class="c1">#             return NewCoords, NewConn</span>
-<span class="c1">#         diff0 = set(elem0).difference(EdgeSort[i])</span>
-<span class="c1">#         diff1 = set(elem1).difference(EdgeSort[i])</span>
-<span class="c1">#         if len(diff0) == 0 or len(diff1) == 0:</span>
-<span class="c1">#             return NewCoords, NewConn</span>
-<span class="c1">#         NotShared0 = diff0.pop()</span>
-<span class="c1">#         NotShared1 = diff1.pop()</span>
-<span class="c1">#         # cycle the element definition so that it starts with the non-shared node</span>
-<span class="c1">#         #TODO: Probable Bottleneck</span>
-<span class="c1">#         while elem0[0] != NotShared0: elem0 = [elem0[-1]]+elem0[0:-1]</span>
-<span class="c1">#         while elem1[0] != NotShared1: elem1 = [elem1[-1]]+elem1[0:-1]</span>
-        
-<span class="c1">#         if ConnSort[i,0] &gt;= 0: NewConn[ConnSort[i,0]] = [[elem0[0],elem0[1],NewId],[elem0[0],NewId,elem0[2]]]</span>
-<span class="c1">#         if ConnSort[i,1] &gt;= 0: NewConn[ConnSort[i,1]] = [[elem1[0],elem1[1],NewId],[elem1[0],NewId,elem1[2]]]</span>
-<span class="c1">#         return NewCoords, NewConn</span>
-
-<span class="c1">#     NewCoords = np.array(NodeCoords)</span>
-<span class="c1">#     NewConn = copy.copy(NodeConn)</span>
-<span class="c1">#     if type(NewConn) is np.ndarray: NewConn = NewConn.tolist()</span>
-
-<span class="c1">#     if iterate == &#39;converge&#39;: iterate = np.inf</span>
-
-<span class="c1">#     iter = 0</span>
-<span class="c1">#     while iter &lt; iterate:</span>
-<span class="c1">#         # print(iter)</span>
-<span class="c1">#         iter += 1</span>
-<span class="c1">#         Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True)</span>
-<span class="c1">#         UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)</span>
-<span class="c1">#         UEdgeElem = np.asarray(EdgeElem)[UIdx]</span>
-<span class="c1">#         UEdgeConn = UInv[utils.PadRagged(EdgeConn)]</span>
-<span class="c1">#         EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)).astype(int)</span>
-<span class="c1">#         EdgeElemConn = -1*(np.ones((len(UEdges),2),dtype=int))</span>
-<span class="c1">#         EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)</span>
-
-<span class="c1">#         # EdgeVectors = NewCoords[UEdges[:,1]] - NewCoords[UEdges[:,0]]</span>
-<span class="c1">#         # EdgeLengths = np.linalg.norm(EdgeVectors,axis=1)</span>
-
-<span class="c1">#         # ElemVectors = EdgeVectors[UEdgeConn]</span>
-<span class="c1">#         # ElemLengths = EdgeLengths[UEdgeConn]</span>
-
-<span class="c1">#         # OppositeAngles = -1*np.ones(ElemLengths.shape)</span>
-<span class="c1">#         # # sign = (EECidx-.5)*2</span>
-<span class="c1">#         # OppositeAngles[:,0] = np.clip(np.sum(ElemVectors[:,2]*-ElemVectors[:,1],axis=1)/(ElemLengths[:,1]*ElemLengths[:,2]),-1,1)</span>
-<span class="c1">#         # OppositeAngles[:,1] = np.clip(np.sum(ElemVectors[:,0]*-ElemVectors[:,2],axis=1)/(ElemLengths[:,0]*ElemLengths[:,2]),-1,1)</span>
-<span class="c1">#         # OppositeAngles[:,2] = np.clip(np.sum(ElemVectors[:,1]*-ElemVectors[:,0],axis=1)/(ElemLengths[:,1]*ElemLengths[:,0]),-1,1)</span>
-<span class="c1">#         # OppositeAngles = np.arccos(OppositeAngles)</span>
-
-
-<span class="c1">#         ###</span>
-<span class="c1">#         Edges = np.asarray(Edges); EdgeConn = np.asarray(EdgeConn)</span>
-<span class="c1">#         EdgeVectors = NewCoords[Edges[:,1]] - NewCoords[Edges[:,0]]</span>
-<span class="c1">#         EdgeLengths = np.linalg.norm(EdgeVectors,axis=1)</span>
-
-<span class="c1">#         ElemVectors = EdgeVectors[EdgeConn]</span>
-<span class="c1">#         ElemLengths = EdgeLengths[EdgeConn]</span>
-
-<span class="c1">#         OppositeAngles = -1*np.ones(ElemLengths.shape)</span>
-<span class="c1">#         # sign = (EECidx-.5)*2</span>
-<span class="c1">#         with np.errstate(divide=&#39;ignore&#39;, invalid=&#39;ignore&#39;):</span>
-<span class="c1">#             OppositeAngles[:,0] = np.clip(np.sum(ElemVectors[:,2]*-ElemVectors[:,1],axis=1)/(ElemLengths[:,1]*ElemLengths[:,2]),-1,1)</span>
-<span class="c1">#             OppositeAngles[:,1] = np.clip(np.sum(ElemVectors[:,0]*-ElemVectors[:,2],axis=1)/(ElemLengths[:,0]*ElemLengths[:,2]),-1,1)</span>
-<span class="c1">#             OppositeAngles[:,2] = np.clip(np.sum(ElemVectors[:,1]*-ElemVectors[:,0],axis=1)/(ElemLengths[:,1]*ElemLengths[:,0]),-1,1)</span>
-<span class="c1">#             OppositeAngles = np.arccos(OppositeAngles)</span>
-
-<span class="c1">#         ###</span>
-<span class="c1">#         EdgeOppositeAngles =  -1*np.ones((len(UEdges),2))</span>
-<span class="c1">#         EdgeOppositeAngles[UEdgeConn,EECidx] = OppositeAngles</span>
-
-<span class="c1">#         sortkey = np.argsort(EdgeLengths[UIdx])[::-1]</span>
-<span class="c1">#         LengthSort = EdgeLengths[UIdx][sortkey]</span>
-<span class="c1">#         AngleSort = EdgeOppositeAngles[sortkey]</span>
-<span class="c1">#         EdgeSort = np.asarray(UEdges)[sortkey]</span>
-<span class="c1">#         ConnSort = np.array(EdgeElemConn)[sortkey]</span>
-
-<span class="c1">#         todobool = np.repeat(False,len(sortkey))</span>
-
-<span class="c1">#         if &#39;RelLongness&#39; in criteria: </span>
-<span class="c1">#             RelLongness = (l &lt; LengthSort) &amp; np.any(AngleSort &gt; thetal,axis=1) &amp; (np.min(np.hstack([ElemLengths[ConnSort[:,0]],ElemLengths[ConnSort[:,1]]]),axis=1) &gt;= s)</span>
-<span class="c1">#             todobool = todobool | RelLongness</span>
-<span class="c1">#         if &#39;AbsLongness&#39; in criteria: </span>
-<span class="c1">#             AbsLongness = (L &lt; LengthSort) &amp; (LengthSort == np.max(np.hstack([ElemLengths[ConnSort[:,0]],ElemLengths[ConnSort[:,1]]]),axis=1))</span>
-<span class="c1">#             todobool = todobool | AbsLongness</span>
-<span class="c1">#         if &#39;AbsLargeAngle&#39; in criteria:</span>
-<span class="c1">#             AbsLargeAngle = np.any(AngleSort &gt;= thetal,axis=1)</span>
-<span class="c1">#             todobool = todobool | AbsLargeAngle</span>
-
-<span class="c1">#         todo = np.where(todobool)[0]</span>
-<span class="c1">#         # Splits</span>
-<span class="c1">#         SplitElems = set()</span>
-<span class="c1">#         count = 0</span>
-<span class="c1">#         for i in todo:</span>
-<span class="c1">#             if ConnSort[i,0] in SplitElems or ConnSort[i,1] in SplitElems:</span>
-<span class="c1">#                 continue</span>
-<span class="c1">#             NewCoords,NewConn = do_split(NewCoords,NewConn,EdgeSort,ConnSort,i)</span>
-<span class="c1">#             SplitElems.update(ConnSort[i])</span>
-<span class="c1">#             count += 1</span>
-<span class="c1">#         NewConn = [elem if (type(elem[0]) != list) else elem[0] for elem in NewConn] + [elem[1] for elem in NewConn if (type(elem[0]) == list)]</span>
-<span class="c1">#         if count == 0:</span>
-<span class="c1">#             break</span>
-<span class="c1">#     NewCoords = NewCoords.tolist()</span>
-
-<span class="c1">#     return NewCoords, NewConn</span>
-
-<span class="c1"># def Contract(NodeCoords, NodeConn, h, iterate=&#39;converge&#39;, FixedNodes=set(), FixFeatures=False):</span>
-<span class="c1">#     # Clark, B., Ray, N., &amp; Jiao, X. (2013). Surface mesh optimization, adaption, and untangling with high-order accuracy. Proceedings of the 21st International Meshing Roundtable, IMR 2012, 385–402. https://doi.org/10.1007/978-3-642-33573-0_23</span>
-<span class="c1">#     # Jiao, X., Colombi, A., Ni, X., &amp; Hart, J. (2010). Anisotropic mesh adaptation for evolving triangulated surfaces. Engineering with Computers, 26(4), 363–376. https://doi.org/10.1007/s00366-009-0170-1</span>
-<span class="c1">#     ### Parameters ###</span>
-<span class="c1">#     l = h       # Desired Edge Length</span>
-<span class="c1">#     phil = 0.005</span>
-<span class="c1">#     phiu = 0.07</span>
-<span class="c1">#     r = 0.25    # Small fraction of longest edge in incident triangles (Contraction - Relative shortness)</span>
-<span class="c1">#     R = 0.45    # Fraction of the longest edge in the mesh (Contraction - Relative small triangle)</span>
-<span class="c1">#     rho = np.sqrt(phil/phiu)  </span>
-<span class="c1">#     s = l*rho   # Minimum shortness threshold (Edge splitting - Relative longness)</span>
-<span class="c1">#     S = R*l     # Maximum shortness threshold (Contraction - Absolute small triangle)</span>
-<span class="c1">#     L = 1.5*l   # Maximum longness threshold (Edge splitting - Absolute longness)</span>
-<span class="c1">#     thetas = np.pi/12 # (15 deg) Minimum angle threshold (Contraction - Absolute small angle)</span>
-<span class="c1">#     thetal = 145*np.pi/180 # (145 deg) Maximum angle threshold (Edge Splitting - Relative longness)</span>
-<span class="c1">#     ### ########## ###</span>
-<span class="c1">#     if iterate == &#39;converge&#39;: iterate = np.inf</span>
-    
-    
-<span class="c1">#     NewCoords = np.array(NodeCoords)</span>
-<span class="c1">#     NewConn = np.array(NodeConn)</span>
-<span class="c1">#     Old_NElem = len(NewConn)</span>
-<span class="c1">#     iter = 0</span>
-<span class="c1">#     degenerate = set()</span>
-<span class="c1">#     edges,corners = utils.DetectFeatures(NewCoords,NewConn)</span>
-<span class="c1">#     if FixFeatures:</span>
-<span class="c1">#         FixedNodes.update(edges)</span>
-<span class="c1">#         FixedNodes.update(corners)</span>
-<span class="c1">#     # FeatureRank = [2 if i in corners else 1 if i in edges else 0 for i in range(len(NewCoords))]</span>
-<span class="c1">#     FeatureRank = np.zeros(len(NewCoords))</span>
-<span class="c1">#     FeatureRank[list(corners)] = 2</span>
-<span class="c1">#     FeatureRank[list(edges)] = 1</span>
-    
-<span class="c1">#     while iter &lt; iterate:</span>
-<span class="c1">#         iter += 1</span>
-<span class="c1">#         NodeNeighbors = utils.getNodeNeighbors(NewCoords,NewConn)</span>
-<span class="c1">#         ElemConn = utils.getElemConnectivity(NewCoords,NewConn)</span>
-<span class="c1">#         Edges, EdgeConn, EdgeElem = converter.solid2edges(NewCoords,NewConn,return_EdgeConn=True,return_EdgeElem=True)</span>
-<span class="c1">#         UEdges, UIdx, UInv = converter.edges2unique(Edges,return_idx=True,return_inv=True)</span>
-<span class="c1">#         UEdgeElem = np.asarray(EdgeElem)[UIdx]</span>
-<span class="c1">#         UEdgeConn = UInv[utils.PadRagged(EdgeConn)]</span>
-<span class="c1">#         EECidx = (UEdgeElem[UEdgeConn] == np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)).astype(int)</span>
-<span class="c1">#         EdgeElemConn = -1*(np.ones((len(UEdges),2),dtype=int))</span>
-<span class="c1">#         EdgeElemConn[UEdgeConn,EECidx] = np.repeat(np.arange(len(EdgeConn))[:,None],UEdgeConn.shape[1],axis=1)</span>
-    
-<span class="c1">#         NewCoords = np.asarray(NewCoords)</span>
-<span class="c1">#         NewConn = np.asarray(NewConn)</span>
-<span class="c1">#         EdgeVectors = NewCoords[UEdges[:,1]] - NewCoords[UEdges[:,0]]</span>
-<span class="c1">#         EdgeLengths = np.linalg.norm(EdgeVectors,axis=1)</span>
-
-<span class="c1">#         ElemVectors = EdgeVectors[UEdgeConn]</span>
-<span class="c1">#         ElemLengths = EdgeLengths[UEdgeConn]</span>
-<span class="c1">#         with np.errstate(divide=&#39;ignore&#39;, invalid=&#39;ignore&#39;):</span>
-<span class="c1">#             OppositeAngles = np.zeros(ElemLengths.shape)</span>
-<span class="c1">#             OppositeAngles[:,0] = np.arccos(np.clip(np.sum(ElemVectors[:,2]*-ElemVectors[:,1],axis=1)/(ElemLengths[:,1]*ElemLengths[:,2]),-1,1))</span>
-<span class="c1">#             OppositeAngles[:,1] = np.arccos(np.clip(np.sum(ElemVectors[:,0]*-ElemVectors[:,2],axis=1)/(ElemLengths[:,0]*ElemLengths[:,2]),-1,1))</span>
-<span class="c1">#             OppositeAngles[:,2] = np.arccos(np.clip(np.sum(ElemVectors[:,1]*-ElemVectors[:,0],axis=1)/(ElemLengths[:,1]*ElemLengths[:,0]),-1,1))</span>
-        
-<span class="c1">#         EdgeOppositeAngles = np.empty((len(UEdges),2))</span>
-<span class="c1">#         EdgeOppositeAngles[UEdgeConn,EECidx] = OppositeAngles</span>
-
-<span class="c1">#         # # Feature Edges:</span>
-<span class="c1">#         # FeatureEdgeIds = [i for i,edge in enumerate(UEdges) if (edge[0] in edges or edge[0] in corners) and (edge[1] in edges or edge[1] in corners)]</span>
-<span class="c1">#         # maxFeatureEdgeLength = max(EdgeLengths[FeatureEdgeIds])</span>
-<span class="c1">#         # EdgeLengths[FeatureEdgeIds] -= maxFeatureEdgeLength</span>
-
-<span class="c1">#         sortkey = np.argsort(EdgeLengths)</span>
-<span class="c1">#         LengthSort = EdgeLengths[sortkey]</span>
-<span class="c1">#         AngleSort = EdgeOppositeAngles[sortkey]</span>
-<span class="c1">#         EdgeSort = np.asarray(UEdges)[sortkey]</span>
-<span class="c1">#         ConnSort = np.array(EdgeElemConn)[sortkey]</span>
-<span class="c1">#         MeshMaxLen = LengthSort[-1]</span>
-
-<span class="c1">#         TriMaxLen = np.max([ElemLengths[ConnSort[:,0]],ElemLengths[ConnSort[:,1]]],axis=2).T</span>
-<span class="c1">#         MaxTriMaxLen = np.max(TriMaxLen,axis=1)</span>
-<span class="c1">#         TriMinLen = np.min([ElemLengths[ConnSort[:,0]],ElemLengths[ConnSort[:,1]]],axis=2).T</span>
-<span class="c1">#         MinTriMinLen = np.min(TriMinLen,axis=1)</span>
-        
-<span class="c1">#         AbsSmallAngle = np.any((AngleSort &lt; thetas) &amp; (TriMaxLen &lt; l),axis=1)</span>
-<span class="c1">#         RelShortness = LengthSort &lt; r*MaxTriMaxLen</span>
-<span class="c1">#         AbsSmallTriangle = (LengthSort == MinTriMinLen) &amp; (MaxTriMaxLen &lt; S)</span>
-<span class="c1">#         RelSmallTriangle = (MaxTriMaxLen &lt; R*MeshMaxLen) &amp; (MaxTriMaxLen &lt; l)</span>
-<span class="c1">#         todo = np.where(AbsSmallAngle | RelShortness | AbsSmallTriangle | RelSmallTriangle)[0]</span>
-<span class="c1">#         k=0</span>
-<span class="c1">#         impacted = set()</span>
-<span class="c1">#         for edgeID in todo:</span>
-<span class="c1">#             edge = EdgeSort[edgeID]</span>
-<span class="c1">#             if edge[0] in FixedNodes and edge[1] in FixedNodes:</span>
-<span class="c1">#                 continue</span>
-<span class="c1">#             elif edge[0] in impacted or edge[1] in impacted:</span>
-<span class="c1">#                 continue</span>
-<span class="c1">#             elif edge[0] in FixedNodes:</span>
-<span class="c1">#                 newpoint = NewCoords[edge[0]]</span>
-<span class="c1">#             elif edge[1] in FixedNodes:</span>
-<span class="c1">#                 newpoint = NewCoords[edge[1]]</span>
-<span class="c1">#             elif FeatureRank[edge[0]] == FeatureRank[edge[1]]:</span>
-<span class="c1">#                 newpoint = np.mean([NewCoords[edge[0]],NewCoords[edge[1]]],axis=0)</span>
-<span class="c1">#             elif FeatureRank[edge[0]] &gt; FeatureRank[edge[1]]:</span>
-<span class="c1">#                 newpoint = NewCoords[edge[0]]</span>
-<span class="c1">#             else:</span>
-<span class="c1">#                 newpoint = NewCoords[edge[1]]</span>
-<span class="c1">#             OldCoords = [copy.copy(NewCoords[edge[0]]),copy.copy(NewCoords[edge[1]])]</span>
-<span class="c1">#             OldNormals = utils.CalcFaceNormal(NewCoords,[NewConn[e] for e in (ElemConn[edge[0]]+ElemConn[edge[1]])])</span>
-            
-<span class="c1">#             NewCoords[edge[0]] = newpoint</span>
-<span class="c1">#             NewCoords[edge[1]] = newpoint</span>
-<span class="c1">#             NewNormals = utils.CalcFaceNormal(NewCoords,[NewConn[e] for e in (ElemConn[edge[0]]+ElemConn[edge[1]])])</span>
-<span class="c1">#             if any([np.dot(OldNormals[i],NewNormals[i]) &lt; np.sqrt(3)/2 for i in range(len(OldNormals)) if not(np.any(np.isnan(NewNormals[i])) or np.any(np.isnan(OldNormals[i])))]):</span>
-<span class="c1">#                 NewCoords[edge[0]] = OldCoords[0]</span>
-<span class="c1">#                 NewCoords[edge[1]] = OldCoords[1]</span>
-<span class="c1">#             else:</span>
-<span class="c1">#                 if FeatureRank[edge[0]] &gt;= FeatureRank[edge[1]]:</span>
-<span class="c1">#                     remove = edge[1]</span>
-<span class="c1">#                     keep = edge[0]</span>
-<span class="c1">#                 else:</span>
-<span class="c1">#                     keep = edge[1]</span>
-<span class="c1">#                     remove = edge[0]</span>
-<span class="c1">#                 NewConn[NewConn==remove] = keep</span>
-<span class="c1">#                 EdgeSort[EdgeSort==remove] = keep</span>
-<span class="c1">#                 impacted.update([keep,remove])</span>
-<span class="c1">#                 impacted.update(NodeNeighbors[keep])</span>
-<span class="c1">#                 impacted.update(NodeNeighbors[remove])</span>
-<span class="c1">#                 k+=1</span>
-<span class="c1">#         NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)</span>
-<span class="c1">#         if k == 0:</span>
-<span class="c1">#             break</span>
-
-<span class="c1">#     NewCoords,NewConn = utils.DeleteDuplicateNodes(NewCoords,NewConn)</span>
-
-<span class="c1">#     if type(NewCoords) is np.ndarray: NewCoords = NewCoords.tolist()</span>
-<span class="c1">#     return NewCoords, NewConn</span>
 </pre></div>
 
                 </article>

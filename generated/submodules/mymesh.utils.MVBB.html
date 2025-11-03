@@ -436,11 +436,11 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.utils.MVBB">
 <span class="sig-prename descclassname"><span class="pre">mymesh.utils.</span></span><span class="sig-name descname"><span class="pre">MVBB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/utils.html#MVBB"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.utils.MVBB" title="Link to this definition">#</a></dt>
-<dd><p>Calculate the minimum volume bounding box of the set of points</p>
+<dd><p>Calculate the minimum volume bounding box of the set of points. For a 2D set of points, the minimum area bounding rectangle is given.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>Points</strong> (<em>array_like</em>) – nx3 point coordinates.</p></li>
+<li><p><strong>Points</strong> (<em>array_like</em>) – (n,3) or (n,2) point coordinates.</p></li>
 <li><p><strong>return_matrix</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – option to return the rotation matrix that aligns the input Points with the local coordinate
 system of the MVBB, by default False.</p></li>
 </ul>

@@ -2373,6 +2373,38 @@
 <div class="viewcode-block" id="mesh.getCurvature">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.getCurvature.html#mymesh.mesh.getCurvature">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">getCurvature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Max Principal&#39;</span><span class="p">,</span><span class="s1">&#39;Min Principal&#39;</span><span class="p">,</span> <span class="s1">&#39;Curvedness&#39;</span><span class="p">,</span> <span class="s1">&#39;Shape Index&#39;</span><span class="p">,</span> <span class="s1">&#39;Mean&#39;</span><span class="p">,</span> <span class="s1">&#39;Gaussian&#39;</span><span class="p">],</span> <span class="n">nRings</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">SplitFeatures</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate mesh-based curavature values using :ref:`cubic surface fitting &lt;theory-cubic-surface-fitting&gt;`. See also :func:`mymesh.curvature.CubicFit`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        metrics : list, optional</span>
+<span class="sd">            List of curvature metrics to calculate. Options are:</span>
+<span class="sd">            </span>
+<span class="sd">            - &#39;Max Principal&#39; - Maxiumum principal curvature</span>
+
+<span class="sd">            - &#39;Min Principal&#39; - Minimum principal curvature</span>
+
+<span class="sd">            - &#39;Curvedness&#39; - Curvedness (see :ref:`theory_curvedness`, :cite:`Koenderink1992a`)</span>
+
+<span class="sd">            - &#39;Shape Index&#39; - Shape index (see :ref:`theory_shape-index`, :cite:`Koenderink1992a`)</span>
+
+<span class="sd">            - &#39;Mean&#39; - Mean curvauture</span>
+
+<span class="sd">            - &#39;Gaussian&#39; - Gaussian curvature</span>
+
+<span class="sd">            By default :code:`[&#39;Max Principal&#39;,&#39;Min Principal&#39;, &#39;Curvedness&#39;, &#39;Shape Index&#39;, &#39;Mean&#39;, &#39;Gaussian&#39;]`.</span>
+
+<span class="sd">        nRings : int, optional</span>
+<span class="sd">            Number of neighborhood &#39;rings&#39; about each node to use in calculating the curvature, by default 1</span>
+<span class="sd">        SplitFeatures : bool, optional</span>
+<span class="sd">            If true, will split the mesh along feature edges (see :func:`mymesh.utils.DetectFeatures`) and calculate the curvature of each surface separately, by default False</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Curvature : dict</span>
+<span class="sd">            Dictionary containing selected output curvature values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
         
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span> <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics</span><span class="p">]</span>
         <span class="n">Curvature</span> <span class="o">=</span> <span class="p">{}</span>
@@ -2548,6 +2580,8 @@
                 <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.stl&#39;</span><span class="p">:</span>
                 <span class="c1"># Triangle only support</span>
+                <span class="k">if</span> <span class="s1">&#39;tri6&#39;</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">ElemType</span><span class="p">:</span>
+                    <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">quadratic2linear</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span>
                 <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2tris</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span>

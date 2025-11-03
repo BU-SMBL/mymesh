@@ -436,7 +436,33 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="mymesh.mesh.mesh.getCurvature">
 <span class="sig-prename descclassname"><span class="pre">mesh.</span></span><span class="sig-name descname"><span class="pre">getCurvature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['Max</span> <span class="pre">Principal',</span> <span class="pre">'Min</span> <span class="pre">Principal',</span> <span class="pre">'Curvedness',</span> <span class="pre">'Shape</span> <span class="pre">Index',</span> <span class="pre">'Mean',</span> <span class="pre">'Gaussian']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nRings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SplitFeatures</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mymesh/mesh.html#mesh.getCurvature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.mesh.mesh.getCurvature" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Calculate mesh-based curavature values using <a class="reference internal" href="../theory/curvature.html#theory-cubic-surface-fitting"><span class="std std-ref">cubic surface fitting</span></a>. See also <a class="reference internal" href="submodules/mymesh.curvature.CubicFit.html#mymesh.curvature.CubicFit" title="mymesh.curvature.CubicFit"><code class="xref py py-func docutils literal notranslate"><span class="pre">mymesh.curvature.CubicFit()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metrics</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>optional</em>) – <p>List of curvature metrics to calculate. Options are:</p>
+<ul>
+<li><p>’Max Principal’ - Maxiumum principal curvature</p></li>
+<li><p>’Min Principal’ - Minimum principal curvature</p></li>
+<li><p>’Curvedness’ - Curvedness (see <a class="reference internal" href="../theory/curvature.html#theory-curvedness"><span class="std std-ref">Curvedness</span></a>, <span id="id1">[<a class="reference internal" href="../guide/ref.html#id34" title="Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. Image and Vision Computing, 10(8):557–564, 1992. URL: https://www.doi.org/10.1016/0262-8856(92)90076-F, doi:10.1016/0262-8856(92)90076-F.">KvD92</a>]</span>)</p></li>
+<li><p>’Shape Index’ - Shape index (see <a class="reference internal" href="../theory/curvature.html#theory-shape-index"><span class="std std-ref">Shape Index</span></a>, <span id="id2">[<a class="reference internal" href="../guide/ref.html#id34" title="Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. Image and Vision Computing, 10(8):557–564, 1992. URL: https://www.doi.org/10.1016/0262-8856(92)90076-F, doi:10.1016/0262-8856(92)90076-F.">KvD92</a>]</span>)</p></li>
+<li><p>’Mean’ - Mean curvauture</p></li>
+<li><p>’Gaussian’ - Gaussian curvature</p></li>
+</ul>
+<p>By default <code class="code docutils literal notranslate"><span class="pre">['Max</span> <span class="pre">Principal','Min</span> <span class="pre">Principal',</span> <span class="pre">'Curvedness',</span> <span class="pre">'Shape</span> <span class="pre">Index',</span> <span class="pre">'Mean',</span> <span class="pre">'Gaussian']</span></code>.</p>
+</p></li>
+<li><p><strong>nRings</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of neighborhood ‘rings’ about each node to use in calculating the curvature, by default 1</p></li>
+<li><p><strong>SplitFeatures</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will split the mesh along feature edges (see <a class="reference internal" href="submodules/mymesh.utils.DetectFeatures.html#mymesh.utils.DetectFeatures" title="mymesh.utils.DetectFeatures"><code class="xref py py-func docutils literal notranslate"><span class="pre">mymesh.utils.DetectFeatures()</span></code></a>) and calculate the curvature of each surface separately, by default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Curvature</strong> – Dictionary containing selected output curvature values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 
