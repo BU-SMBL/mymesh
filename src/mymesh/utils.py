@@ -1908,12 +1908,12 @@ def TetMeshVol(NodeCoords, NodeConn):
 
 def MVBB(Points, return_matrix=False):
     """
-    Calculate the minimum volume bounding box of the set of points
+    Calculate the minimum volume bounding box of the set of points. For a 2D set of points, the minimum area bounding rectangle is given.
 
     Parameters
     ----------
     Points : array_like
-        nx3 point coordinates.
+        (n,3) or (n,2) point coordinates.
     return_matrix : bool, optional
         option to return the rotation matrix that aligns the input Points with the local coordinate
         system of the MVBB, by default False.
@@ -1927,21 +1927,34 @@ def MVBB(Points, return_matrix=False):
     
     """    
 
-    # hull = scipy.spatial.ConvexHull(Points)
-    # hull_points, hull_facets,_ = RemoveNodes(Points, hull.simplices)
-    # hull_points = np.asarray(hull_points)
+    if np.shape(Points)[1] == 2:
+        # 2D - minimum area bounding rectangle
+        n = 2
+        pos = [0,1,0]
+        neg = [0,-1,0]
+    else:
+        # 3D - minimum volume bounding box
+        n = 3
+        pos = [0,0,1]
+        neg = [0,0,-1]
+
     hull = delaunay.ConvexHull(Points)
     hull.verbose = False
     hull.NodeCoords, hull.NodeConn, _ = RemoveNodes(*hull) # removes nodes that aren't in the hull
 
     # Calculate rotation matrices to align each hull facet with [0,0,-1] (so that it's rotated to the minimal z plane)
-    normals = hull.ElemNormals
-    rot_axes = np.cross(normals, [0,0,-1])
-    rot_axes[np.all(normals == [0,0,-1], axis=1)] = [0,0,-1]
-    rot_axes[np.all(normals == [0,0,1], axis=1)] = [1,0,0]
+    if n == 2:
+        hull.NodeCoords = np.column_stack((hull.NodeCoords, np.zeros(hull.NNode)))
+        normals = np.cross(np.diff(hull.NodeCoords[hull.NodeConn], axis=1)[:,0,:], [0,0,1])
+        normals /= np.linalg.norm(normals,axis=1)[:,None]
+    else:
+        normals = hull.ElemNormals
+    rot_axes = np.cross(normals, neg)
+    rot_axes[np.all(normals == neg, axis=1)] = neg
+    rot_axes[np.all(normals == pos, axis=1)] = pos
     rot_axes = rot_axes/np.linalg.norm(rot_axes,axis=1)[:,None]
-    thetas = np.arccos(np.sum(normals*[0,0,-1],axis=1))
-    thetas[np.all(normals == [0,0,1], axis=1)] = np.pi
+    thetas = np.arccos(np.sum(normals*neg,axis=1))
+    thetas[np.all(normals == pos, axis=1)] = np.pi
     outer_prod = rot_axes[:, np.newaxis, :] * rot_axes[:, :, np.newaxis]
     cross_prod_matrices = np.zeros((len(hull.NodeConn), 3, 3))
     cross_prod_matrices[:,0,1] = -rot_axes[:,2]
@@ -1956,6 +1969,13 @@ def MVBB(Points, return_matrix=False):
 
     # For each possible rotation, rotate all of the points
     rotated_points = rot_matrices @ hull.NodeCoords.T[None, :, :]
+    if n == 3:
+        # need to now check rotations about z
+        # finding the minimum area bounding rectangle for the projection of the convex hull
+        for i in range(len(rotated_points)):
+            mabr, mat2d = MVBB(rotated_points[i,:2].T, return_matrix=True)
+            rot_matrices[i] = mat2d@rot_matrices[i]
+            rotated_points[i] = mat2d@rotated_points[i,:]
 
     # Get the local coordinate system axis-aligned bounding boxes for each rotation
     mins = np.min(rotated_points, axis=2)
@@ -1963,22 +1983,31 @@ def MVBB(Points, return_matrix=False):
 
     # Calculate the box volumes and find the smallest
     side_lengths = maxs - mins
-    volumes = np.prod(side_lengths,axis=1)
+    volumes = np.prod(side_lengths[:,:n],axis=1)
     min_idx = np.argmin(volumes)
 
     # Get local coordinates of the MVBB
-    rotated_bb = np.array([[mins[min_idx, 0], mins[min_idx, 1], mins[min_idx, 2]],
-                            [maxs[min_idx, 0], mins[min_idx, 1], mins[min_idx, 2]],
-                            [maxs[min_idx, 0], maxs[min_idx, 1], mins[min_idx, 2]],
-                            [mins[min_idx, 0], maxs[min_idx, 1], mins[min_idx, 2]],
-                            [mins[min_idx, 0], mins[min_idx, 1], maxs[min_idx, 2]],
-                            [maxs[min_idx, 0], mins[min_idx, 1], maxs[min_idx, 2]],
-                            [maxs[min_idx, 0], maxs[min_idx, 1], maxs[min_idx, 2]],
-                            [mins[min_idx, 0], maxs[min_idx, 1], maxs[min_idx, 2]],
-                        ])
+    if n == 3:
+        rotated_bb = np.array([
+            [mins[min_idx, 0], mins[min_idx, 1], mins[min_idx, 2]],
+            [maxs[min_idx, 0], mins[min_idx, 1], mins[min_idx, 2]],
+            [maxs[min_idx, 0], maxs[min_idx, 1], mins[min_idx, 2]],
+            [mins[min_idx, 0], maxs[min_idx, 1], mins[min_idx, 2]],
+            [mins[min_idx, 0], mins[min_idx, 1], maxs[min_idx, 2]],
+            [maxs[min_idx, 0], mins[min_idx, 1], maxs[min_idx, 2]],
+            [maxs[min_idx, 0], maxs[min_idx, 1], maxs[min_idx, 2]],
+            [mins[min_idx, 0], maxs[min_idx, 1], maxs[min_idx, 2]],
+            ])
+    else:
+        rotated_bb = np.array([
+            [mins[min_idx, 0], mins[min_idx, 1], mins[min_idx, 2]],
+            [maxs[min_idx, 0], mins[min_idx, 1], mins[min_idx, 2]],
+            [maxs[min_idx, 0], maxs[min_idx, 1], mins[min_idx, 2]],
+            [mins[min_idx, 0], maxs[min_idx, 1], mins[min_idx, 2]],
+            ])
     # Return the MVBB to the original coordinate system
     mat = rot_matrices[min_idx]
-    mvbb = (np.linalg.inv(mat)@rotated_bb.T).T
+    mvbb = ((np.linalg.inv(mat)@rotated_bb.T).T)[:,:n]
 
 
     if return_matrix:
@@ -1999,10 +2028,23 @@ def AABB(Points):
     aabb : np.ndarray
         Coordinates of the corners of the AABB
     """    
+    if np.shape(Points)[1] == 2:
+        # 2D
+        n = 2
+    else:
+        # 3D
+        n = 3
     mins = np.min(Points, axis=0)
     maxs = np.max(Points, axis=0)
 
-    aabb = np.array([[mins[0], mins[1], mins[2]],
+    if n == 2:
+        aabb = np.array([[mins[0], mins[1]],
+                    [maxs[0], mins[1]],
+                    [maxs[0], maxs[1]],
+                    [mins[0], maxs[1]],
+                    ])
+    elif n == 3:
+        aabb = np.array([[mins[0], mins[1], mins[2]],
                     [maxs[0], mins[1], mins[2]],
                     [maxs[0], maxs[1], mins[2]],
                     [mins[0], maxs[1], mins[2]],
