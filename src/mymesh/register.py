@@ -770,8 +770,7 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
         img2 = register.transform_image(img1, R)
 
         # Align the two meshes using the iterative closest point (ICP) algorithm
-        # img_aligned, T = register.Image2Image(img1, img2, method='icp', threshold=thresh)
-        img_aligned = np.zeros_like(img2)
+        img_aligned, T = register.Image2Image(img1, img2, method='icp', threshold=thresh, scale=0.5)
 
     .. grid:: 2
 
@@ -819,74 +818,74 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
     else:
         raise ValueError('Image must be either two or three dimensional.')
 
-        if isinstance(threshold, (list, tuple, np.ndarray)):
-            assert len(threshold) == 2, 'threshold must be defined as a single value or a list/tuple/array of two values (one for each image).'
-            threshold1, threshold2 = threshold
+    if isinstance(threshold, (list, tuple, np.ndarray)):
+        assert len(threshold) == 2, 'threshold must be defined as a single value or a list/tuple/array of two values (one for each image).'
+        threshold1, threshold2 = threshold
+    else:
+        threshold1 = threshold2 = threshold
+    # Process threshold input
+    if threshold1 is None:
+        # This option intended for already binarized images (flexible enough to accomodate different types of binarization, e.g. True/False, 1/0, 255/0, ...)
+        # If the image is not binary, this will assume the midpoint of the range of values as the threshold
+        threshold1 = (np.max(img1) + np.min(img1))/2
+    if threshold2 is None:
+        threshold2 = (np.max(img2) + np.min(img2))/2
+        
+    # Process T0 input
+    if img2.dtype in (bool, int, np.int64, np.int32):
+        # Convert binary to float for better interpolation
+        img2 = img2.astype(np.float32)
+    if T0 is not None:
+        img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))
+    else:
+        # Initialize by centering img2 on img1
+        center_diff = np.subtract(scipy.ndimage.center_of_mass(img1 > threshold1), scipy.ndimage.center_of_mass(img2 > threshold2))
+        if nD == 3:
+            T0 = translation(center_diff)
         else:
-            threshold1 = threshold2 = threshold
-        # Process threshold input
-        if threshold1 is None:
-            # This option intended for already binarized images (flexible enough to accomodate different types of binarization, e.g. True/False, 1/0, 255/0, ...)
-            # If the image is not binary, this will assume the midpoint of the range of values as the threshold
-            threshold1 = (np.max(img1) + np.min(img1))/2
-        if threshold2 is None:
-            threshold2 = (np.max(img2) + np.min(img2))/2
-            
-        # Process T0 input
-        if img2.dtype in (bool, int, np.int64, np.int32):
+            T0 = translation2d(center_diff)
+        img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))    
+    
+    # Process scale input
+    if scale != 1:
+        if img1.dtype in (bool, int, np.int64, np.int32):
             # Convert binary to float for better interpolation
-            img2 = img2.astype(np.float32)
-        if T0 is not None:
-            img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))
+            img1 = img1.astype(np.float32)
+        moving_img = scipy.ndimage.zoom(img2T0, scale, order=interpolation_order)
+        fixed_img =  scipy.ndimage.zoom(img1, scale, order=interpolation_order)
+    else:
+        moving_img = img2T0
+        fixed_img = img1
+    
+    # Process metric input
+    point_based = False
+    grayscale = False
+    if metric.lower() == 'mutual_information' or metric.lower() == 'MI':
+        obj = mutual_information
+        grayscale = True
+    elif metric.lower() == 'dice':
+        obj = lambda img1, img2 : -dice(img1 > threshold1, img2 > threshold2)
+    elif metric.lower() == 'symmetric_closest_point_mse':
+        if threshold is not None:
+            binarized1 = fixed_img > threshold1
+            binarized2 = moving_img > threshold2
         else:
-            # Initialize by centering img2 on img1
-            center_diff = np.subtract(scipy.ndimage.center_of_mass(img1 > threshold1), scipy.ndimage.center_of_mass(img2 > threshold2))
-            if nD == 3:
-                T0 = translation(center_diff)
-            else:
-                T0 = translation2d(center_diff)
-            img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))    
-        
-        # Process scale input
-        if scale != 1:
-            if img1.dtype in (bool, int, np.int64, np.int32):
-                # Convert binary to float for better interpolation
-                img1 = img1.astype(np.float32)
-            moving_img = scipy.ndimage.zoom(img2T0, scale, order=interpolation_order)
-            fixed_img =  scipy.ndimage.zoom(img1, scale, order=interpolation_order)
+            binarized1 = fixed_img
+            binarized2 = moving_img
+        point_based = True
+        points1 = np.column_stack(np.where(binarized1))
+        points2 = np.column_stack(np.where(binarized2))
+        # tree1 = scipy.spatial.KDTree(points1) 
+        # Note: can't precommute tree for the moving points
+        # obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)
+    elif metric.lower() == 'icp':
+        if threshold is not None:
+            binarized1 = fixed_img > threshold1
+            binarized2 = moving_img > threshold2
         else:
-            moving_img = img2T0
-            fixed_img = img1
-        
-        # Process metric input
-        point_based = False
-        grayscale = False
-        if metric.lower() == 'mutual_information' or metric.lower() == 'MI':
-            obj = mutual_information
-            grayscale = True
-        elif metric.lower() == 'dice':
-            obj = lambda img1, img2 : -dice(img1 > threshold1, img2 > threshold2)
-        elif metric.lower() == 'symmetric_closest_point_mse':
-            if threshold is not None:
-                binarized1 = fixed_img > threshold1
-                binarized2 = moving_img > threshold2
-            else:
-                binarized1 = fixed_img
-                binarized2 = moving_img
-            point_based = True
-            points1 = np.column_stack(np.where(binarized1))
-            points2 = np.column_stack(np.where(binarized2))
-            # tree1 = scipy.spatial.KDTree(points1) 
-            # Note: can't precommute tree for the moving points
-            # obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)
-        elif metric.lower() == 'icp':
-            if threshold is not None:
-                binarized1 = fixed_img > threshold1
-                binarized2 = moving_img > threshold2
-            else:
-                binarized1 = fixed_img
-                binarized2 = moving_img
-            point_based = True
+            binarized1 = fixed_img
+            binarized2 = moving_img
+        point_based = True
     if method.lower() == 'icp' or metric.lower() == 'icp':
         method = 'icp'
         metric = 'icp'
@@ -1453,7 +1452,7 @@ def Image2Mesh3d(img, M, h=1, threshold=None, scale=1, decimation=1, center_mesh
 
     return new_image, T
 
-def ICP(points1, points2, T0=None, tol=1e-8, maxIter=100, maxRestart=5, return_success=False):
+def ICP(points1, points2, T0=None, tol=1e-8, maxIter=100, maxRestart=0, return_success=False):
     """
     Iterative Closest Point (ICP) algorithm for registering two point sets
 
@@ -1540,6 +1539,8 @@ def ICP(points1, points2, T0=None, tol=1e-8, maxIter=100, maxRestart=5, return_s
 
     T_restart = None
     if i == maxIter:
+        sq_error = [np.sum(np.linalg.norm(moving_points - fixed_points[idx1],axis=1))]
+        Ts = [T]
         if maxRestart > 0:
             rng = np.random.default_rng(12345)
             for r in range(maxRestart):
@@ -1552,10 +1553,15 @@ def ICP(points1, points2, T0=None, tol=1e-8, maxIter=100, maxRestart=5, return_s
                     rand_rot = 2*np.pi*rng.random(1)
                     rand_R = rotation2d(rand_rot)
                 new_points, T_restart, success = ICP(points1, points2, T0=rand_R@T0, tol=tol, maxIter=maxIter, maxRestart=-1, return_success=True)
+                _, idx1 = tree1.query(new_points, workers=-1) 
+                Ts.append(T_restart)
+                sq_error.append(np.sum(np.linalg.norm(new_points - fixed_points[idx1],axis=1)))
+
                 if success:
                     break
             if not success:
                 warnings.warn(f'ICP did not converge to the specified tolerance within {maxIter} iterations after {maxRestart} restarts', RuntimeWarning)
+            T_restart = Ts[np.argmin(sq_error)] # Choose the attempt with the lowest squared error, even if it's not the one that converged 
         elif maxRestart == -1:
             # Skip warning; internal use for handling restarts
             pass
