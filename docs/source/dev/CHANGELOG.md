@@ -5,10 +5,27 @@
 
 ### Feat
 
+- add TaubinSmoothing
+
+### Fix
+
+- improve ICP performance and robustness
+- improve MVBB by handling 2D rotations
+- convert quadratic triangles to linear for stl write
+- improve efficiency in RaysSurfIntersection
+
+## 0.1.1 (2025-10-10)
+
+### Feat
+
 - add additional surfaces to tpms
 
 ### Fix
 
+- handle sets in mymesh2meshio
+- improve handling of meshes for .ply
+- improve handling of binary option in write
+- support for quadratic surface elements in identify_elem
 - make bounds and h optional when providing background
 
 ## 0.1.0-alpha (2025-09-22)
