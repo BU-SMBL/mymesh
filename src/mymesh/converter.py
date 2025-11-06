@@ -61,6 +61,7 @@ Element type conversion
     wedge2tet
     pyramid2tet
     quad2tri    
+    quad82tri6
     edge32linear
     edge2quadratic
     tri62linear
@@ -684,22 +685,38 @@ def surf2tris(NodeCoords,NodeConn,return_ids=False,return_inv=False):
     Ls = np.array([len(elem) for elem in NodeConn])
     triIdx = np.where(Ls == 3)[0]
     quadIdx = np.where(Ls == 4)[0]
+    tri6Idx = np.where(Ls == 6)[0]
+    quad8Idx = np.where(Ls == 8)[0]
     tris = [NodeConn[i] for i in triIdx]
     quads = [NodeConn[i] for i in quadIdx]
+    tri6s = [NodeConn[i] for i in tri6Idx]
+    quad8s = [NodeConn[i] for i in quad8Idx]
     if len(tris) == 0:
         tris = np.empty((0,3),dtype=int)
+    if len(tri6s) == 0:
+        tri6s = np.empty((0,6),dtype=int)
 
-    TriCoords = NodeCoords
+    # TriCoords = NodeCoords
     _,fromquad = quad2tri(NodeCoords, quads)
+    TriCoords,fromquad8 = quad82tri6(NodeCoords, quad8s)
     TriConn = np.vstack([tris, fromquad])
+    Tri6Conn = np.vstack([tri6s, fromquad8])
+    if len(TriConn) == 0:
+        TriConn = Tri6Conn
+    elif len(Tri6Conn) == 0:
+        pass
+    else:
+        TriConn = TriConn.tolist() + Tri6Conn.tolist()
     if return_ids or return_inv:
-        inv = np.concatenate((triIdx,np.repeat(quadIdx,2)))
+        inv = np.concatenate((triIdx,tri6Idx,np.repeat(quadIdx,2),np.repeat(quad8Idx,2)))
     if return_ids:
         # Element ids of the tris connected to the original elements
         ElemIds_i = inv
         ElemIds_j = np.concatenate((np.repeat(0,len(triIdx)), 
-                np.repeat([[0,1]],len(quadIdx),axis=0).reshape(len(quadIdx)*2),                   
-                ))
+            np.repeat(0,len(tri6Idx)), 
+            np.repeat([[0,1]],len(quadIdx),axis=0).reshape(len(quadIdx)*2),    
+            np.repeat([[0,1]],len(quad8Idx),axis=0).reshape(len(quadIdx)*2),     
+            ))
         ElemIds = -1*np.ones((len(NodeConn),6))
         ElemIds[ElemIds_i,ElemIds_j] = np.arange(len(TriConn))
         ElemIds = utils.ExtractRagged(ElemIds,dtype=int)
@@ -2005,13 +2022,11 @@ def quad2tri(NodeCoords,NodeConn):
 
     Returns
     -------
-    TriConn : list
+    NodeCoords : array_like
+        Unaltered list of node coordinates
+    TriConn : np.ndarray
         list of nodal connectivities for the new triangular mesh.
     """
-    # TriNodeConn = [[] for i in range(2*len(QuadNodeConn))]
-    # for i in range(len(QuadNodeConn)):
-    #     TriNodeConn[2*i] = [QuadNodeConn[i][0], QuadNodeConn[i][1], QuadNodeConn[i][3]]
-    #     TriNodeConn[2*i+1] = [QuadNodeConn[i][1], QuadNodeConn[i][2], QuadNodeConn[i][3]]
 
     if len(NodeConn) == 0:
         return NodeCoords, np.empty((0,3),dtype=int)
@@ -2022,6 +2037,39 @@ def quad2tri(NodeCoords,NodeConn):
     TriConn[1::2] = ArrayConn[:,[1,2,3,]]
     
     return NodeCoords, TriConn
+
+def quad82tri6(NodeCoords,NodeConn):
+    """
+    Converts a quadratic quadrilateral mesh to a quadratic triangular mesh by splitting each quad into 2 tris  
+
+    Parameters
+    ----------
+    NodeCoords : array_like
+        List of nodal coordinates.
+    NodeConn : array_like
+        Nodal connectivity list. All elements should be 8-Node quadrilateral elements.
+
+    Returns
+    -------
+    NewCoords : np.ndarray
+        Updated list of node coordinates. A new node is created at the center
+        of the quadrilateral.
+    TriConn : np.ndarray
+        list of nodal connectivities for the new triangular mesh.
+    """
+
+    if len(NodeConn) == 0:
+        return NodeCoords, np.empty((0,6),dtype=int)
+
+    ArrayConn = np.asarray(NodeConn, dtype=int)
+    ArrayConn = np.column_stack([ArrayConn, np.arange(len(NodeCoords), len(NodeCoords)+len(ArrayConn))])
+    NewNode = np.mean(np.asarray(NodeCoords)[ArrayConn[:,[1,3]]],axis=1)
+    NewCoords = np.vstack((NodeCoords, NewNode))
+    TriConn = -1*np.ones((len(NodeConn)*2,6),dtype=int)
+    TriConn[0::2] = ArrayConn[:,[0,1,3,4,8,7]]
+    TriConn[1::2] = ArrayConn[:,[1,2,3,5,6,8]]
+    
+    return NewCoords, TriConn
 
 def edge32linear(NodeCoords, NodeConn):
     """
