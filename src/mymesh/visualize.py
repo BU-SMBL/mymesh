@@ -46,14 +46,21 @@ except ModuleNotFoundError:
 
 from . import converter, utils, mesh
 
-def View(M, interactive=True, bgcolor=None,
-    color=None, face_alpha=1, color_convert=None, 
-    clim=None, theme='default', scalar_preference='nodes',
-    view='iso', scalars=None,
-    show_edges=False, show_faces=True, show_points=False, point_size=2,
-    line_width=1, line_color=None, 
-    return_image=False, hide=False, shading='flat',
-    size=(800,600)):
+def View(M, 
+    view='iso', 
+    color=None, clim=None, scalars=None, shading='flat',
+    show_faces=True, face_alpha=1,
+    show_edges=False, line_width=1, line_color=None, 
+    show_points=False, point_size=2, point_color='black',
+    hide_free_nodes=True,
+    scalar_preference='nodes',
+    theme='default',  bgcolor=None,
+    size=(800,600),
+    color_convert=None, 
+    interactive=True, 
+    return_image=False, 
+    hide=False, 
+    ):
     """
     Visualize a mesh.
     View uses vispy for visualization.
@@ -192,6 +199,8 @@ def View(M, interactive=True, bgcolor=None,
     
     # Set up mesh
     vertices = np.asarray(M.NodeCoords)# - np.mean(M.NodeCoords,axis=0) # Centering mesh in window
+    if len(M.NodeConn) == 0:
+        M.NodeConn = [[0,0,0]]
     if vertices.shape[1] == 2:
         vertices = np.hstack([vertices, np.zeros((len(vertices),1))])
     if M.Type == 'vol':
@@ -313,9 +322,12 @@ def View(M, interactive=True, bgcolor=None,
         canvasview.add(wireframe)
     if not wireframe_only:
         canvasview.add(vsmesh)
+    if hide_free_nodes:
+        vertices=vertices[M.MeshNodes]
     if show_points:
         if vertex_colors is None:
-            vertex_colors = 'black'
+            vertex_colors = point_color
+            
         points = Markers(pos=vertices, edge_width=0, symbol='o', face_color=vertex_colors, size=point_size, edge_color=vertex_colors)
         points.transform = vsmesh.transform
         canvasview.add(points)
