@@ -1836,6 +1836,90 @@ class mesh:
 
         return M
         
+    def Transform(self, x, transformation='rigid', transform_kwargs={}, InPlace=False):
+        """
+        Apply a transformation to the coordinates of the mesh.
+
+        Parameters
+        ----------
+        x : array_like
+            Transformation parameters. The number of parameters depends on the 
+            transformation being used. For the default (rigid), it should be a
+            6 element array of translations in x, y, and z, and rotations about 
+            x, y, and z, respectively.
+        transformation : str, optional
+            Transformation model to use, by default 'rigid'.
+
+            - :func:`"rigid" <mymesh.register.rigid>`
+            - :func:`"rotation" <mymesh.register.rotation>`
+            - :func:`"translation" <mymesh.register.translation>`
+            - :func:`"similarity" <mymesh.register.similarity>`
+            - :func:`"affine" <mymesh.register.affine>`
+
+        transform_kwargs : dict, optional
+            Optional arguments for transform functions. See available options
+            in the documentation of the specific transform being used, by
+            default {}
+        InPlace : bool, optional
+            If True, the original mesh will be modified in place, otherwise a 
+            copy will be made and modified, leaving the original mesh unaltered.
+            By default False
+
+        Examples
+        --------
+        
+        .. plot::
+            :context: close-figs
+
+            import mymesh
+            import numpy as np
+
+            # Load the stanford bunny
+            m1 = mymesh.demo_mesh('bunny') 
+
+            # Perform a rigid transformation to the mesh
+            m2 = m1.Transform([0.02, 0.2, -0.05, np.pi/6, -np.pi/6, np.pi/6])
+
+        .. plot::
+            :context: close-figs
+            :include-source: False
+
+            mcopy = m1.copy()
+            mcopy.NodeData['label'] = np.zeros(mcopy.NNode)
+            m2.NodeData['label'] = np.ones(m2.NNode)
+            mcopy.merge(m2)
+
+            mcopy.plot(scalars='label', show_colorbar=False, view='xy')
+
+
+        """        
+        if type(transformation) is str:
+            if transformation == 'rotation':
+                T = register.rotation(x, **transform_kwargs)
+            elif transformation == 'translation':
+                T = register.translation(x, **transform_kwargs)
+            elif transformation == 'rigid':
+                T = register.rigid(x, **transform_kwargs)
+            elif transformation == 'similarity':
+                T = register.similarity(x, **transform_kwargs)
+            elif transformation == 'affine':
+                T = register.affine(x, **transform_kwargs)  
+            else:
+                raise ValueError(f'Transformation: "{transformation}" not supported.')
+        else:
+            raise TypeError(f'Transformation must be a string, not {type(transformation)}')
+
+        if InPlace:
+            self.NodeCoords = register.transform_points(self.NodeCoords, T)
+            M = self
+        else:
+            M = self.copy()
+            M.reset()
+            M.NodeCoords = register.transform_points(self.NodeCoords, T)
+        
+        return M
+                
+    
     ## Mesh Measurements Methods
     def getQuality(self,metrics=['Skewness','Aspect Ratio'], verbose=None):
         """
