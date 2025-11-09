@@ -167,6 +167,53 @@ def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=
         return transform
     return
 
+def AxisAlignMesh(M, axis_order=[2,1,0], center=None, return_transformed=True, return_transform=False, method='MVBB'):
+    """
+    Align an mesh to the x, y, z axes based on its coordinates. 
+
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Input mesh
+    axis_order : array_like, optional
+        Orientation of the aligned object in terms of the lengths of each side
+        of the object, by default [0,1,2]. The first axis will correspond to the
+        shortest side of the object and the last index to the longest side. For 
+        example, with [0,1,2], the longest side will be aligned with the z (2) 
+        axis, and the shortest will be aligned with the x (0) axis. Must be a 
+        combination of 0, 1, and 2.
+    center : array_like or NoneType, optional
+        If provided, coordinates `[x,y,z]` of where to place the center
+        of the bounding box of the object after transformation. If `None`, the 
+        center of the oriented mesh will be the center of the original mesh,
+        by default None.
+    return_transformed : bool, optional
+        Option to return the transformed mesh, by default True
+    return_transform : bool, optional
+        Option to return the transformation matrix, by default False
+
+    Returns
+    -------
+    transformed : mymesh.mesh
+        Mesh transformed to be aligned with the axes.
+    transform : np.ndarray, optional
+        Affine transformation matrix (shape=(4,4)) to transform `points` to 
+        `transformed` (`transformed=(transform@points.T).T`). Only returned if
+        `return_transform = True`.
+    """    
+    
+    if return_transformed:
+        transformed = M.copy()
+        transformed.NodeCoords, transform = AxisAlignPoints(M.NodeCoords, return_transform=True, return_transformed=True, axis_order=axis_order, center=center, method=method)
+        if return_transform:
+            return transformed, transform
+        else:
+            return transformed
+    elif return_transform:
+        transform = AxisAlignPoints(M.NodeCoords, return_transform=True, return_transformed=False, axis_order=axis_order, center=center, method=method)
+        return transform
+    return
+
 def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', scale=1, interpolation_order=1, transform_args=None, return_transformed=True, return_transform=False):
     """
     Align an object in an image to the x, y, z axes. This works by identifying
