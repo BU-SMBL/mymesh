@@ -2347,6 +2347,9 @@ def identify_elem(NodeCoords, NodeConn, Type=None):
     ['tri']
 
     """
+    if len(NodeConn) == 0:
+        elems = []
+        return elems
     ambiguous_lengths = {4,6,8} # Element lengths that are ambiguous
     if type(NodeConn) is np.ndarray and NodeConn.dtype is not object:
         lengths = (np.shape(NodeConn)[1],)
