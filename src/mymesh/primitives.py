@@ -141,7 +141,7 @@ def Multiline(points, h=None, n=None, connect_ends=False):
     
     return line
         
-def Box(vertices, n, ElemType='hex', Type='vol'):
+def Box(vertices, n=2, ElemType='hex', Type='vol'):
     """
     Generate a mesh of box. 
 
@@ -149,8 +149,11 @@ def Box(vertices, n, ElemType='hex', Type='vol'):
     ----------
     vertices : list
         Array of box vertices (shape = (8,3)).
-    n : int, tuple
-        Number of elements along each edge of the box.
+        These can be obtained from :meth:`~mymesh.mesh.mesh.aabb` or 
+        :meth:`~mymesh.mesh.mesh.mvbb` (or :func:`mymesh.utils.AABB`, 
+        :func:`mymesh.utils.MVBB`)
+    n : int or tuple, optional
+        Number of nodes along each edge of the box, by default 2.
     ElemType : str, optional
         Specify the element type of the grid mesh. 
     Type : str, optional
@@ -163,6 +166,7 @@ def Box(vertices, n, ElemType='hex', Type='vol'):
         Mesh object containing the box mesh. 
 
     .. note:: 
+    
         Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Box(...)``
 
     Examples
