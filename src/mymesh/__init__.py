@@ -199,19 +199,19 @@ def demo_mesh(name='bunny'):
     Examples
     --------
 
-    .. code-block:: python
+    .. plot::
 
         import mymesh
         bunny = mymesh.demo_mesh("bunny")
         bunny.plot(view='xy')
 
-    .. code-block:: python
+    .. plot::
 
         import mymesh
         dragon = mymesh.demo_mesh("dragon")
         dragon.plot(view='xy')
 
-    .. code-block:: python
+    .. plot::
 
         import mymesh
         lucy = mymesh.demo_mesh("Lucy")

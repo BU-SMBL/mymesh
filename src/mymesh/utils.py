@@ -1924,6 +1924,32 @@ def MVBB(Points, return_matrix=False):
     mat : np.ndarray, optional
         Rotation matrix that aligns the input Points with the local coordinate
         system of the MVBB
+
+    Examples
+    --------
+
+    .. plot::
+        :context: close-figs
+
+        import mymesh
+        import numpy as np
+
+        # Load the stanford bunny
+        m = mymesh.demo_mesh('bunny') 
+
+        # Perform an arbitrary rotation transformation to the mesh
+        m = m.Transform([np.pi/6, -np.pi/6, np.pi/6],
+                        transformation='rotation', InPlace=True)
+
+        mvbb = utils.MVBB(m.NodeCoords)
+        box = mymesh.primitives.Box(mvbb, Type='surf')
+
+    .. plot::
+        :context: close-figs
+        :include-source: False
+
+        m.merge(box)
+        m.plot(show_faces=False, show_points=True, show_edges=True, view='xy')
     
     """    
 
@@ -2027,6 +2053,33 @@ def AABB(Points):
     -------
     aabb : np.ndarray
         Coordinates of the corners of the AABB
+
+    Examples
+    --------
+
+    .. plot::
+        :context: close-figs
+
+        import mymesh
+        import numpy as np
+
+        # Load the stanford bunny
+        m = mymesh.demo_mesh('bunny') 
+
+        # Perform an arbitrary rotation transformation to the mesh
+        m = m.Transform([np.pi/6, -np.pi/6, np.pi/6],
+                        transformation='rotation', InPlace=True)
+
+        mvbb = utils.AABB(m.NodeCoords)
+        box = mymesh.primitives.Box(mvbb, Type='surf')
+
+    .. plot::
+        :context: close-figs
+        :include-source: False
+
+        m.merge(box)
+        m.plot(show_faces=False, show_points=True, show_edges=True, view='xy')
+    
     """    
     if np.shape(Points)[1] == 2:
         # 2D

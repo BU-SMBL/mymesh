@@ -9,7 +9,7 @@ mesh class
 
 """
 
-from . import utils, implicit, improvement, contour, converter, quality, rays, curvature, visualize, check_numba
+from . import utils, implicit, improvement, contour, converter, quality, rays, register, curvature, visualize, check_numba
 from sys import getsizeof
 import scipy
 import numpy as np
@@ -638,7 +638,35 @@ class mesh:
         return self._bounds
     @property
     def aabb(self):
-        """ Axis aligned bounding box of the mesh. """
+        """ 
+        Axis aligned bounding box of the mesh. 
+        See also :func:`mymesh.utils.AABB`.
+
+        Examples
+        --------
+
+        .. plot::
+            :context: close-figs
+
+            import mymesh
+            import numpy as np
+
+            # Load the stanford bunny
+            m = mymesh.demo_mesh('bunny') 
+
+            # Perform an arbitrary rotation transformation to the mesh
+            m = m.Transform([np.pi/6, -np.pi/6, np.pi/6],
+                            transformation='rotation', InPlace=True)
+
+            box = mymesh.primitives.Box(m.aabb, Type='surf')
+
+        .. plot::
+            :context: close-figs
+            :include-source: False
+
+            m.merge(box)
+            m.plot(show_faces=False, show_points=True, show_edges=True, view='xy')
+        """
         if self._aabb is None:
             if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying axis aligned bounding box...',end='')
             self._aabb = utils.AABB(self.NodeCoords[self.MeshNodes])
@@ -646,7 +674,35 @@ class mesh:
         return self._aabb
     @property
     def mvbb(self):
-        """ Minimum volume bounding box of the mesh. """
+        """ 
+        Minimum volume bounding box of the mesh. 
+        See also :func:`mymesh.utils.MVBB`.
+
+        Examples
+        --------
+
+        .. plot::
+            :context: close-figs
+
+            import mymesh
+            import numpy as np
+
+            # Load the stanford bunny
+            m = mymesh.demo_mesh('bunny') 
+
+            # Perform an arbitrary rotation transformation to the mesh
+            m = m.Transform([np.pi/6, -np.pi/6, np.pi/6],
+                            transformation='rotation', InPlace=True)
+
+            box = mymesh.primitives.Box(m.mvbb, Type='surf')
+
+        .. plot::
+            :context: close-figs
+            :include-source: False
+
+            m.merge(box)
+            m.plot(show_faces=False, show_points=True, show_edges=True, view='xy')
+        """
         if self._mvbb is None:
             if self.verbose: print('\n'+'\t'*self._printlevel+'Identifying minimum volume bounding box...',end='')
             self._mvbb = utils.MVBB(self.NodeCoords[self.MeshNodes])
@@ -760,6 +816,10 @@ class mesh:
             if 'Faces' not in keep or 'FaceConn' not in keep: self._FaceConn = []
             if 'Faces' not in keep or 'FaceElemConn' not in keep: self._FaceElemConn = [] 
             if 'Surface' not in keep: self._Surface = None
+            if 'MeshNodes' not in keep: self._MeshNodes = None
+            if 'bounds' not in keep: self._bounds = None
+            if 'aabb' not in keep: self._aabb = None
+            if 'mvbb' not in keep: self._mvbb = None
             
         elif type(properties) is list:
             for prop in properties:
@@ -996,6 +1056,11 @@ class mesh:
                 newshape = np.shape(NodeConn)
             except:
                 self.NodeConn = self.NodeConn.tolist()
+                newshape = (len(NodeConn),-1)
+            if newshape[1] != self.NodeConn.shape[1]:
+                self.NodeConn = self.NodeConn.tolist()
+                if type(NodeConn) is np.ndarray:
+                    NodeConn = NodeConn.tolist()
                 newshape = (len(NodeConn),-1)
         else:
             if type(NodeConn) is np.ndarray:
@@ -1704,9 +1769,7 @@ class mesh:
 
     def Clip(self, pt=None, normal=[1,0,0], exact=False):
         """
-        Clip the mesh along a plane. Clipping with this method will not cut
-        through elements, but rather will only keep elements on one side of
-        the specified plane.
+        Clip the mesh along a plane. 
 
         Parameters
         ----------
@@ -1715,6 +1778,10 @@ class mesh:
             If None, the center of the bounding box of the mesh will be used.
         normal : list, optional
             Normal vector of the clipping plane, by default [1,0,0]
+        exact : bool, optional
+            If True, the mesh will be clipped exactly along the plane, cutting 
+            through elements. Otherwise, elements on one side of the plane will be removed, but no elements will be cut. By default, False. 
+        
 
         Returns
         -------

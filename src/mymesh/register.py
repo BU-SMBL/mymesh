@@ -80,7 +80,7 @@ from mymesh import utils
 def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=True, return_transform=False, method='MVBB'):
     """
     Align an point cloud to the x, y, z axes. This works by identifying
-    the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and 
+    the minimum volume bounding box (see :func:`~mymesh.utils.MVBB`) and 
     aligning that box to the principal axes, so point clouds representing 
     rounded objects with ambiguous orientation may be oriented
     seemingly-arbitrarily. The center of the object (defined as the centroid
@@ -103,9 +103,10 @@ def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=
         of the bounding box of the object after transformation. If `None`, the 
         center of the oriented points will be the center of the original points,
         by default None.
+    return_transformed : bool, optional
+        Option to return the transformed point cloud, by default True
     return_transform : bool, optional
-        Option to return the transformation matrix as well as the transformed
-        point cloud, by default False
+        Option to return the transformation matrix, by default False
 
     Returns
     -------
@@ -115,6 +116,36 @@ def AxisAlignPoints(points, axis_order=[2,1,0], center=None, return_transformed=
         Affine transformation matrix (shape=(4,4)) to transform `points` to 
         `transformed` (`transformed=(transform@points.T).T`). Only returned if
         `return_transform = True`.
+    
+    Examples
+    --------
+
+    .. plot::
+        :context: close-figs
+
+        import mymesh
+        import numpy as np
+
+        # Load the stanford bunny
+        m = mymesh.demo_mesh('bunny') 
+
+        # Perform an arbitrary rotation transformation to the mesh
+        points = mymesh.register.transform_points(m.NodeCoords, mymesh.register.rotation([np.pi/6, -np.pi/6, np.pi/6]))
+
+        transformed_points = mymesh.register.AxisAlignPoints(points)
+
+    .. plot::
+        :context: close-figs
+        :include-source: False
+        
+        mp = mymesh.mesh(points)
+        mp.NodeData['label'] = np.zeros(mp.NNode)
+        m_aligned = mymesh.mesh(transformed_points)
+        m_aligned.NodeData['label'] = np.ones(m_aligned.NNode)
+
+        mp.plot(scalars='label', show_colorbar=False, view='-xy', show_points=True, hide_free_nodes=False, clim=(0,1))
+
+        m_aligned.plot(scalars='label', show_colorbar=False, view='x-y', show_points=True, hide_free_nodes=False, clim=(0,1))
     """    
     assert ValueError(len(axis_order) == 3 and np.array_equal([0,1,2], np.sort(axis_order))), 'axis_order must contain only 0, 1, and 2.'
     
@@ -217,7 +248,7 @@ def AxisAlignMesh(M, axis_order=[2,1,0], center=None, return_transformed=True, r
 def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', scale=1, interpolation_order=1, transform_args=None, return_transformed=True, return_transform=False):
     """
     Align an object in an image to the x, y, z axes. This works by identifying
-    the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and 
+    the minimum volume bounding box (see :func:`~mymesh.utils.MVBB`) and 
     aligning that box to the principal axes, so objects with rounded objects 
     with ambiguous orientation may be oriented seemingly-arbitrarily. 
 
@@ -806,7 +837,7 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
         import numpy as np
         import matplotlib.pyplot as plt
 
-        # Load two the CT scan of the Stanford Bunny
+        # Load the CT scan of the Stanford Bunny
         img1 = mymesh.demo_image('bunny') 
 
         thresh = 100
