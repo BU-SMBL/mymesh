@@ -810,6 +810,8 @@ def tpms(name, cellsize=1):
 
         - 'Lidinoid'
 
+        - 'Neovius'
+
         - 'IWP'
 
         - 'FRD'
@@ -831,6 +833,57 @@ def tpms(name, cellsize=1):
         This function utilizes sympy operators - for a vectorized function, use 
         implicit.wrapfunc(func)
 
+    Examples
+    --------
+
+    .. plot::
+        
+        func = implicit.tpms('gyroid')
+        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)
+        surf.plot()
+    
+    .. plot::
+        
+        func = implicit.tpms('primitive')
+        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)
+        surf.plot()
+
+    .. plot::
+        
+        func = implicit.tpms('diamond')
+        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)
+        surf.plot()
+
+    .. plot::
+        
+        func = implicit.tpms('S')
+        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)
+        surf.plot()
+
+    .. plot::
+        
+        func = implicit.tpms('Lidinoid')
+        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)
+        surf.plot()
+
+    .. plot::
+        
+        func = implicit.tpms('Neovius')
+        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)
+        surf.plot()
+
+    .. plot::
+        
+        func = implicit.tpms('IWP')
+        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)
+        surf.plot()
+
+    .. plot::
+        
+        func = implicit.tpms('FRD')
+        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)
+        surf.plot()  
+
     """    
     
     x, y, z = sp.symbols('x y z', real=True)
@@ -851,14 +904,14 @@ def tpms(name, cellsize=1):
         surf = sp.cos(2*X)*sp.sin(Y)*sp.cos(Z) +\
                sp.cos(X)*sp.cos(2*Y)*sp.sin(Z) +\
                sp.sin(X)*sp.cos(Y)*sp.cos(2*Z)
-    elif name == 'lidinoid':
+    elif name.lower() == 'lidinoid':
         surf = 0.5*(sp.sin(2*X)*sp.cos(Y)*sp.sin(Z) + \
                     sp.sin(2*Y)*sp.cos(Z)*sp.sin(X) + \
                     sp.sin(2*Z)*sp.cos(X)*sp.sin(Y)) - \
                0.5*(sp.cos(2*X)*sp.cos(2*Y) + \
                     sp.cos(2*Y)*sp.cos(2*Z) + \
                     sp.cos(2*Z)*sp.cos(2*X)) + 0.15
-    elif name == 'neovious':
+    elif name.lower() == 'neovius':
         surf = 3*(sp.cos(X) + sp.cos(Y) + sp.cos(Z)) + \
             4*sp.cos(X)*sp.cos(Y)*sp.cos(Z)
     elif name.lower() == 'iwp' or name == 'IP2-J*':
@@ -963,7 +1016,7 @@ def tpms(name, cellsize=1):
     func = sp.lambdify((x, y, z), surf, 'sympy')
     return func
 tpms.options = [
-    'gyroid', 'primitive', 'diamond', 'S', 'lidinoid', 'neovious',
+    'gyroid', 'primitive', 'diamond', 'S', 'lidinoid', 'neovios',
     'IWP', 'FRD', 'F*', 'D*', 'C(D*)', 'P*J*', 'C(Y**)', 'C(S*)', 'I2-Y**',
     'C(I2-Y**)', 'W*', 'Y*', '(YYxxx)*', '(Fxxx)*', '(FFxxx)*', 'Q*'
 ]
