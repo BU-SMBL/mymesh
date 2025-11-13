@@ -84,7 +84,7 @@ def try_njit(func=None, *njit_args, **njit_kwargs):
     
     return decorator(func) if func else decorator
 
-def demo_image(name='bunny', normalize=True):
+def demo_image(name='bunny', normalize=True, scalefactor=1):
     """
     Example image data from online databases
 
@@ -101,6 +101,9 @@ def demo_image(name='bunny', normalize=True):
 
     normalize : bool, optional
         Normalize image data to the range 0-255 in uint8 format, by default True
+    scalefactor : float, optional
+        Upsample or downsample the image, e.g. scalefactor=0.5 will provide an
+        image at half the resolution as the original.
 
     Returns
     -------
@@ -135,7 +138,9 @@ def demo_image(name='bunny', normalize=True):
     if normalize:
         # normalize the image to 0-255, unit8
         img = (img/np.max(img)*255).astype(dtype=np.uint8)
-
+    if scalefactor != 1:
+        import scipy
+        img = scipy.ndimage.zoom(img, scalefactor)
     return img
 
 def demo_mesh(name='bunny'):
