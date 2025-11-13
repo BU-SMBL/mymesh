@@ -676,7 +676,7 @@ def AnalyticalCurvature(func,NodeCoords):
 
     return MaxPrincipal, MinPrincipal, mean, gaussian
 
-def ImageCurvature(I,NodeCoords=None,gaussian_sigma=1,voxelsize=1,brightobject=True, mode='wrap'):
+def ImageCurvature(I,voxelsize=1,NodeCoords=None,gaussian_sigma=1,brightobject=True, mode='wrap'):
     """
     Calculate curvatures based on a 3D image. Curvature values are calculated for all voxels in the image,
     however, these curvature values are only meaningful at the surface of the imaged object(s). This can be used with 
@@ -692,18 +692,21 @@ def ImageCurvature(I,NodeCoords=None,gaussian_sigma=1,voxelsize=1,brightobject=T
     ----------
     I : np.ndarray
         3D array of grayscale voxel data.
+    voxelsize : int, float, or array)like optional
+        Voxel size of the image, by default 1.
+        This is necessary to determine the correct magnitudes of 
+        curvature. By default, the image coordinate system will 
+        be used, so principal curvatures will be in units of
+        (voxel)^-1. For non-isotropic voxel sizes, the element size
+        can be specified as a tuple of three values (hx, hy, hz), 
+        where hz denotes the spacing between slices in the z stack 
+        (images are assumed to data stored in (z,y,x) order).
     NodeCoords : array_like
         If provided, curvature from the grid will be evaluated at these points 
         and returned. If not, the returned values will be of the full image
     gaussian_sigma : int, optional
         Standard deviation used in calculating image gradients (in voxels), by default 1. 
         See scipy.ndimage.gaussian_filter.
-    voxelsize : int, float, optional
-        Voxel size of the image, by default 1.
-        This is necessary to determine the correct magnitudes of 
-        curvature. By default, the image coordinate system will 
-        be used, so principal curvatures will be in units of
-        (voxel)^-1
     brightobject : bool, optional
         Specifies whether the foreground of the image is bright or dark, by default True.
         If the imaged object is darker than the background, set brightobject=False. This 
@@ -733,21 +736,24 @@ def ImageCurvature(I,NodeCoords=None,gaussian_sigma=1,voxelsize=1,brightobject=T
     if not brightobject:
         I = -np.array(I)
     
-    Fx = ndimage.gaussian_filter(I,gaussian_sigma,order=(1,0,0), mode=mode)
-    Fy = ndimage.gaussian_filter(I,gaussian_sigma,order=(0,1,0), mode=mode)
-    Fz = ndimage.gaussian_filter(I,gaussian_sigma,order=(0,0,1), mode=mode)
+    if not isinstance(voxelsize, (list, tuple, np.ndarray)):
+        voxelsize = (voxelsize, voxelsize, voxelsize)
+    
+    Fx = ndimage.gaussian_filter(I,gaussian_sigma,order=(1,0,0), mode=mode)/voxelsize[2]
+    Fy = ndimage.gaussian_filter(I,gaussian_sigma,order=(0,1,0), mode=mode)/voxelsize[1]
+    Fz = ndimage.gaussian_filter(I,gaussian_sigma,order=(0,0,1), mode=mode)/voxelsize[0]
 
-    Fxx = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(1,0,0), mode=mode)
-    Fxy = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(0,1,0), mode=mode)
-    Fxz = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(0,0,1), mode=mode)
+    Fxx = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(1,0,0), mode=mode)/voxelsize[2]
+    Fxy = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(0,1,0), mode=mode)/voxelsize[1]
+    Fxz = ndimage.gaussian_filter(Fx,gaussian_sigma,order=(0,0,1), mode=mode)/voxelsize[0]
     
-    Fyx = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(1,0,0), mode=mode)
-    Fyy = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(0,1,0), mode=mode)
-    Fyz = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(0,0,1), mode=mode)
+    Fyx = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(1,0,0), mode=mode)/voxelsize[2]
+    Fyy = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(0,1,0), mode=mode)/voxelsize[1]
+    Fyz = ndimage.gaussian_filter(Fy,gaussian_sigma,order=(0,0,1), mode=mode)/voxelsize[0]
     
-    Fzx = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(1,0,0), mode=mode)
-    Fzy = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(0,1,0), mode=mode)
-    Fzz = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(0,0,1), mode=mode)
+    Fzx = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(1,0,0), mode=mode)/voxelsize[2]
+    Fzy = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(0,1,0), mode=mode)/voxelsize[1]
+    Fzz = ndimage.gaussian_filter(Fz,gaussian_sigma,order=(0,0,1), mode=mode)/voxelsize[0]
 
 
     Grad = np.transpose(np.array([Fx, Fy, Fz])[None,:,:,:,:],(2,3,4,0,1))
@@ -762,16 +768,17 @@ def ImageCurvature(I,NodeCoords=None,gaussian_sigma=1,voxelsize=1,brightobject=T
                 ]),(2,3,4,0,1))
     with np.errstate(divide='ignore', invalid='ignore'):
         gaussian = np.matmul(np.matmul(Grad,Cof),np.transpose(Grad,(0,1,2,4,3))).reshape(I.shape)/np.linalg.norm(Grad,axis=4).reshape(I.shape)**4
+
         mean = (np.matmul(np.matmul(Grad,Hess),np.transpose(Grad,(0,1,2,4,3))).reshape(I.shape)-np.linalg.norm(Grad,axis=4).reshape(I.shape)**2 * np.trace(Hess,axis1=3,axis2=4))/(2*np.linalg.norm(Grad,axis=4).reshape(I.shape)**3)
 
-    gaussian = gaussian/voxelsize**2    
-    mean = mean/voxelsize
+    # gaussian = gaussian/voxelsize**2    
+    # mean = mean/voxelsize
 
     if NodeCoords is not None:
         NodeCoords = np.asarray(NodeCoords)
-        X = np.arange(I.shape[2])*voxelsize 
-        Y = np.arange(I.shape[1])*voxelsize
-        Z = np.arange(I.shape[0])*voxelsize
+        X = np.arange(I.shape[2])*voxelsize[0]
+        Y = np.arange(I.shape[1])*voxelsize[1]
+        Z = np.arange(I.shape[0])*voxelsize[2]
         
         points = (X,Y,Z)
 
