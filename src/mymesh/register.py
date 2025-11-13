@@ -4,6 +4,8 @@
 """
 Tools for registering or aligning point clouds, meshes, and images.
 
+See also: :ref:`theory_register`
+
 .. currentmodule:: mymesh.register
 
 Registration
@@ -847,7 +849,7 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
                                 center=np.array(img1.shape)/2)
         img2 = register.transform_image(img1, R)
 
-        # Align the two meshes using the iterative closest point (ICP) algorithm
+        # Align the two images using the iterative closest point (ICP) algorithm
         img_aligned, T = register.Image2Image(img1, img2, method='icp', threshold=thresh, scale=0.5)
 
     .. grid:: 2

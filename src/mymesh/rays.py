@@ -4,6 +4,7 @@
 """
 Ray casting and intersection tests
 
+See also: :ref:`theory_rays`
 
 .. currentmodule:: mymesh.rays
 
