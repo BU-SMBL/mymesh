@@ -2461,7 +2461,7 @@ class mesh:
         kwargs['return_image'] = True
         kwargs['interactive'] = False
         kwargs['hide'] = True
-        img = visualize.View(self, **kwargs)
+        img = visualize.View(self, clim=clim, **kwargs)
 
         fig, ax = plt.subplots()
         ax.imshow(img)
