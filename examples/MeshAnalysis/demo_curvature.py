@@ -11,6 +11,7 @@ more closely to the true surface (see
 
 """
 #%%
+import mymesh
 from mymesh import curvature, implicit
 import numpy as np
 import matplotlib.pyplot as plt
@@ -34,8 +35,13 @@ SmoothSphere.verbose=False
 # For a sphere, the :ref:`principal curvatures` (:math:`\kappa_1`, :math:`\kappa_2`) 
 # are theoretically both equal to the inverse of the radius of the sphere.
 
-k1m_sphere, k2m_sphere = curvature.CubicFit(Sphere.NodeCoords, Sphere.NodeConn, Sphere.NodeNeighbors, Sphere.NodeNormals)
-k1m_smooth, k2m_smooth = curvature.CubicFit(SmoothSphere.NodeCoords, SmoothSphere.NodeConn, SmoothSphere.NodeNeighbors, SmoothSphere.NodeNormals)
+k1m_sphere, k2m_sphere = curvature.CubicFit(Sphere.NodeCoords, 
+                                            Sphere.NodeConn, 
+                                            Sphere.NodeNeighbors, 
+                                            Sphere.NodeNormals)
+k1m_smooth, k2m_smooth = curvature.CubicFit(SmoothSphere.NodeCoords, 
+                                            SmoothSphere.NodeConn, 
+                                            SmoothSphere.NodeNeighbors, SmoothSphere.NodeNormals)
 
 k1a_sphere, k2a_sphere, _, _ = curvature.AnalyticalCurvature(implicit.sphere([0,0,0], 1), Sphere.NodeCoords)
 k1a_smooth, k2a_smooth, _, _ = curvature.AnalyticalCurvature(implicit.sphere([0,0,0], 1), SmoothSphere.NodeCoords)
@@ -77,3 +83,40 @@ ax.set_xticklabels(['Mesh-based', 'Analytical'])
 ax.legend()
 ax.set_ylim([10**-4, 10**1])
 plt.show()
+
+#%%
+# Image-based curvature
+# ---------------------
+# For image-based meshes, curvature can be calculated directly from the image 
+# and then evaluated at the nodes of the mesh.
+
+# load the CT scan of the Stanford bunny as an example
+threshold = 100
+scalefactor = 0.5
+bunny_img = mymesh.demo_image('bunny', scalefactor=scalefactor) 
+voxelsize = np.array((0.337891, 0.337891, 0.5))/scalefactor # (mm)
+
+# create a surface mesh of the imaged-object
+bunny_surf = mymesh.image.SurfaceMesh(bunny_img, voxelsize, threshold) 
+
+# calculate image-based curvatures
+sigma = 1 # (voxels) Sets the standard deviation used for calculating derivativess
+maxp, minp, mean, gaussian = curvature.ImageCurvature(bunny_img, voxelsize, 
+                                                     bunny_surf.NodeCoords,
+                                                     gaussian_sigma=sigma)
+bunny_surf.NodeData['Mean Curvature (Image)'] = mean
+
+# calculate mesh-based curvatures for comparison (using a 3-ring neighborhood)
+mesh_curvatures = bunny_surf.getCurvature(nRings=3) 
+bunny_surf.NodeData['Mean Curvature (Mesh)'] = mesh_curvatures['Mean Curvature']
+
+# plotting:
+fig1, ax1 = bunny_surf.plot(scalars='Mean Curvature (Image)', clim=(-.2,.2),
+                             color='coolwarm', show=False, return_fig=True,
+                             view='-x-z')
+ax1.set_title('Bunny - Image-based')
+fig2, ax2 = bunny_surf.plot(scalars='Mean Curvature (Mesh)', clim=(-.2,.2),
+                             color='coolwarm', show=False, return_fig=True,
+                             view='-x-z')
+ax2.set_title('Bunny - Mesh-based')
+
