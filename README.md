@@ -1,12 +1,22 @@
 ![](resources/mymesh_logo.png)
 
-MyMesh is a general purpose toolbox for generating, manipulating, and analyzing 
-meshes for finite element, finite difference, or finite volume simulations. It 
-has particular focuses on implicit function and image-based mesh generation.
+![PyPI - Version](https://img.shields.io/pypi/v/mymesh)
+![Static Badge](https://img.shields.io/badge/doi%20-%20Zenodo%20-%20%20%231A90DE?link=https%3A%2F%2Fzenodo.org%2Frecords%2F17511909)
 
-MyMesh was originally developed in support of the Ph.D. research of Tim 
-Josephson in Elise Morgan’s Skeletal Mechanobiology and Biomechanics Lab at 
-Boston University.
+
+A mesh is a discrete representation of a geometry or computational domain where space is subdivided it into a collection of points (nodes) connected by simple shapes (elements).
+Meshes are used for a variety of purposes, including simulations (e.g. finite element, finite volume, and finite difference methods), visualization & computer graphics, image analysis, and additive manufacturing.
+`mymesh` is a general purpose set of tools for generating, manipulating, and analyzing meshes. `mymesh` is particularly focused on implicit function and image-based meshing, with other functionality including:
+
+- geometric and curvature analysis,
+- intersection and inclusion tests (e.g. ray-surface intersection and point-in-surface tests)
+- mesh boolean operations (intersection, union, difference),
+- sweep construction methods (extrusions, revolutions),
+- point set, mesh, and image registration,
+- mesh quality evaluation and improvement,
+- mesh type conversion (e.g. volume to surface, hexahedral or mixed-element to tetrahedral, first-order elements to second-order elements).
+
+`mymesh` was originally developed in support of research within the Skeletal Mechanobiology and Biomechanics Lab at Boston University. 
 
 # Getting Started
 For more details, see the [full documentation](https://bu-smbl.github.io/mymesh/)
@@ -27,7 +37,7 @@ with `<path>` replaced with the file path to the mymesh root directory.
 
 # Development
 
-## Usage of generative AI
+## Note on the usage of generative AI
 MyMesh was and will continue to be developed by humans. Initial development of
 MyMesh began in the summer of 2021, before the release of OpenAI's ChatGPT 
 (Nov. 30, 2022) and the widespread proliferation of powerful generative AI 
@@ -39,9 +49,8 @@ consulted alongside other resources (e.g. StackExchange) for recommendations
 on how to improve efficiency of certain processes.
 Generative AI has been used in the following ways throughout the development of 
 MyMesh:
-
-    - As a consultant for understanding concepts, alongside academic literature.
-    - As a resource for general-purpose programming concepts, such as methods for improving efficiency of certain operations.
-    - Assistance in setting up packaging infrastructure (e.g. pyproject.toml, github workflows).
-    - Generation of test cases for some unit tests.
+- As a consultant for understanding concepts, alongside academic literature.
+- As a resource for general-purpose programming concepts, such as methods for improving efficiency of certain operations.
+- Assistance in setting up packaging infrastructure (e.g. pyproject.toml, github workflows).
+- Assistance in the creation of test cases for some unit tests.
   

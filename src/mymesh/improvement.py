@@ -17,6 +17,7 @@ Mesh smoothing/node repositioning
     :toctree: submodules/
 
     LocalLaplacianSmoothing
+    TaubinSmoothing
     TangentialLaplacianSmoothing
     SmartLaplacianSmoothing
     GeoTransformSmoothing
@@ -256,7 +257,7 @@ def TaubinSmoothing(M, Lambda=0.6, Mu=-0.6382, pass_band=None, options=dict()):
     .. plot::
 
         M = implicit.SurfaceMesh(implicit.sphere([0,0,0], 1), [-1,1,-1,1,-1,1],  .1)
-        Mnew = improvement.LocalLaplacianSmoothing(M, options=dict(iterate=1))
+        Mnew = improvement.TaubinSmoothing(M, options=dict(iterate=1))
         
         visualize.Subplot([M, Mnew], (1,2), bgcolor='w', show_edges=True)
 
@@ -395,6 +396,16 @@ def TangentialLaplacianSmoothing(M, options=dict()):
     -------
     Mnew : mymesh.mesh
         Mesh object with the new node locations.
+
+    Examples
+    --------
+
+    .. plot::
+
+        M = implicit.SurfaceMesh(implicit.sphere([0,0,0], 1), [-1,1,-1,1,-1,1],  .1)
+        Mnew = improvement.TangentialLaplacianSmoothing(M, options=dict(iterate=1))
+        
+        visualize.Subplot([M, Mnew], (1,2), bgcolor='w', show_edges=True)
     """    
 
     

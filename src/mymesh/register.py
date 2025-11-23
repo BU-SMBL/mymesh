@@ -1712,7 +1712,7 @@ def R2d(theta,center):
     
     For a center other than the origin, :math:`\begin{bmatrix}c_0, c_1 \end{bmatrix}`:
 
-    :math:`\mathbf{R_c} = \mathbf{T}(\begin{bmatrix}c_0, c_1\end{bmatrix}) \mathbf{R}} \mathbf{T}(\begin{bmatrix}-c_0, -c_1 \end{bmatrix})`
+    :math:`\mathbf{R_c} = \mathbf{T}(\begin{bmatrix}c_0, c_1\end{bmatrix}) \mathbf{R} \mathbf{T}(\begin{bmatrix}-c_0, -c_1 \end{bmatrix})`
 
     Parameters
     ----------
@@ -1776,8 +1776,7 @@ def S2d(s0,s1,reference=np.array([0,0])):
 def Sh2d(sh01,sh10,reference=np.array([0,0])):
     r"""
     Generate a shearing matrix
-    ref:https://www.mathworks.com/help/images/matrix-representation-of-geometric-transformations.html
-
+    
     .. math::
 
         \mathbf{Sh} = \begin{bmatrix}
@@ -1971,7 +1970,6 @@ def S3d(s0,s1,s2,reference=np.array([0,0,0])):
 def Sh3d(sh01,sh10,sh02,sh20,sh12,sh21,reference=np.array([0,0,0])):
     r"""
     Generates a shearing matrix
-    ref:https://www.mathworks.com/help/images/matrix-representation-of-geometric-transformations.html
 
     .. math::
 
@@ -2021,7 +2019,7 @@ def scale_uniform(x, center=np.array([0,0,0]), image=False):
     Parameters
     ----------
     x : list
-        list with a single value for uniform scaling
+        list with a single value for uniform scaling :code:`[s]`
         
     center : list or np.ndarary, optional
         Reference point for the scaling
@@ -2047,12 +2045,14 @@ def rotation(x, center=np.array([0,0,0]), rotation_order=[0,1,2], rotation_mode=
     ----------
     x : list
         3 item list, containing the x, y, and z rotations
-        [alpha, beta, gamma], where angles are specified in radians.
+        :code:`[alpha, beta, gamma]`, where angles are specified in radians.
     center : list or np.ndarary, optional
         Reference point for the rotation
     rotation_order : array_like, optional
         Order to perform rotations about the x (0), y (1), and z (2) axes,  by
         default [0,1,2]
+    image : bool, optional
+        Create a transformation matrix for an image, assuming the (0,1,2) dimensions correspond to (z,y,x) by default False.
 
     Returns
     -------
@@ -2078,9 +2078,11 @@ def rotation2d(x, center=np.array([0,0])):
     ----------
     x : array_like
         1 item list, containing the rotation
-        [theta], where angles are specified in radians.
+        :code:`[theta]`, where angles are specified in radians.
     center : list or np.ndarary, optional
         Reference point for the rotation
+    image : bool, optional
+        Create a transformation matrix for an image, assuming the (0,1,2) dimensions correspond to (z,y,x) by default False.
 
     Returns
     -------
@@ -2097,13 +2099,15 @@ def rotation2d(x, center=np.array([0,0])):
 
 def translation(x, image=False):
     """
-    Rigid transformation consisting of translation and rotation in 3D.
+    Rigid translation in 3D.
 
     Parameters
     ----------
     x : list
         3 item list, containing the x, y, and z translations 
-        [t0, t1, t2], where displacements are specified in pixels.
+        :code:`[t0, t1, t2]`.
+    image : bool, optional
+        Create a transformation matrix for an image, assuming the (0,1,2) dimensions correspond to (z,y,x) by default False.
 
     Returns
     -------
@@ -2123,13 +2127,13 @@ def translation(x, image=False):
 
 def translation2d(x, image=False):
     """
-    Rigid transformation consisting of translation and rotation in 2D.
+    Rigid translation in 2D.
 
     Parameters
     ----------
     x : list
         2 item list, containing the x, and y translations 
-        [t0, t1], where displacements are specified in pixels.
+        :code:`[t0, t1]`.
 
     Returns
     -------
@@ -2156,9 +2160,8 @@ def rigid2d(x, center=np.array([0,0]), image=False):
     I : np.ndarray
         numpy array containing the image data
     x : list
-        6 item list, containing the x, y, and z translations and rotations
-        [t0, t1, t2, alpha, beta, gamma], where angles are specified in radians
-        and displacements are specified in pixels.
+        3 item list, containing the x and y translations and rotation about z
+        :code:`[t0, t1, theta]`, where angles are specified in radians.
     center : list or np.ndarary, optional
         Reference point for the rotation
 
@@ -2187,7 +2190,7 @@ def rigid(x, center=np.array([0,0,0]), rotation_order=[0,1,2], rotation_mode='ca
     ----------
     x : list
         6 item list, containing the x, y, and z translations and rotations
-        [t0, t1, t2, alpha, beta, gamma], where angles are specified in radians
+        :code:`[t0, t1, t2, alpha, beta, gamma]`, where angles are specified in radians
         and displacements are specified in pixels.
     center : list or np.ndarary, optional
         Reference point for the rotation
@@ -2210,19 +2213,63 @@ def rigid(x, center=np.array([0,0,0]), rotation_order=[0,1,2], rotation_mode='ca
     return A
 
 def similarity2d(x, center=None, rotation_order=[0,1], rotation_mode='cartesian', image=False):
+    """
+    Similarity transform in 2D.
 
+    The similairy transform consists of a rigid transformation combined with 
+    uniform scalings
+
+    Parameters
+    ----------
+    x : list
+        4 item list, containing the x and y translations and rotation about z, and uniform scaling :code:`[t0, t1, theta, s]`, where angles are specified in radians.
+    center : list or np.ndarary, optional
+        Reference point for the rotation
+    rotation_order : array_like, optional
+        Order to perform rotations about the x (0), y (1), and z (2) axes,  by
+        default [0,1,2]
+    image : bool, optional
+        Create a transformation matrix for an image, assuming the (0,1) dimensions correspond to (y,x), by default False.
+
+    Returns
+    -------
+    A : np.ndarray
+        Affine transformation matrix (shape=(3,3))
+    """
     if image:
         [t1,t0,theta,s0] = x
     else:
-        [t0,t1,t2,theta,s0] = x
+        [t0,t1,theta,s0] = x
     t = T2d(t0,t1)
-    r = R2d(alpha,beta,gamma,np.asarray(center),rotation_order=rotation_order,rotation_mode=rotation_mode)
+    r = R2d(theta,np.asarray(center),rotation_order=rotation_order,rotation_mode=rotation_mode)
     s = S2d(s0, s0, reference=center)
     A = s@t@r
     return A
 
 def similarity(x, center=None, rotation_order=[0,1,2], rotation_mode='cartesian', image=False):
+    """
+    Similarity transform in 3D.
 
+    The similairy transform consists of a rigid transformation combined with 
+    uniform scalings
+
+    Parameters
+    ----------
+    x : list
+        4 item list, containing the x and y translations and rotation about z, and uniform scaling :code:`[t0, t1, t2, alpha, beta, gamma, s]`, where angles are specified in radians.
+    center : list or np.ndarary, optional
+        Reference point for the rotation
+    rotation_order : array_like, optional
+        Order to perform rotations about the x (0), y (1), and z (2) axes,  by
+        default [0,1,2]
+    image : bool, optional
+        Create a transformation matrix for an image, assuming the (0,1,2) dimensions correspond to (z,y,x), by default False.
+
+    Returns
+    -------
+    A : np.ndarray
+        Affine transformation matrix (shape=(3,3))
+    """
     if image:
         [t2,t1,t0,gamma,beta,alpha,s0] = x
     else:
