@@ -30,7 +30,7 @@ Local mesh topology
     :toctree: submodules/
 
     Contract
-    TetSplit
+    Split
     TetFlip
     TetImprove
 
@@ -2019,7 +2019,7 @@ def _do_collapse(D, EdgeStatus, edge, FeatureRank, emin, emax, quadrics=None, al
     success = True
     return success, D, EdgeStatus, to_add, Exit
 
-def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
+def Split(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
     """
     Edge splitting of tetrahedral meshes. Edges with length greater than the 
     specified edge length (`h`) will be split by placing a new node at the 
@@ -2138,7 +2138,7 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
         tqdm_loaded = True
     else:
         tqdm_loaded = False
-    if verbose: print(f'TetSplit:', end='')
+    if verbose: print(f'Split:', end='')
     valid = 0
     invalid = 0
     if verbose and tqdm_loaded:
@@ -2176,7 +2176,7 @@ def TetSplit(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
 
     return Mnew
 
-@try_njit(cache=True)
+@try_njit(cache=False)
 def _do_split(D, edge, L, emin, emax):
 
     node1 = edge[0]
@@ -2192,51 +2192,87 @@ def _do_split(D, edge, L, emin, emax):
         return D, emin, emax, to_add
 
     shared_elems = list(set(elemconn1).intersection(set(elemconn2)))[::-1] # Elements connected to the edge, sorted largest index to smallest
-    NewElems = []
+    if len(shared_elems) == 0:
+        return D, emin, emax, to_add
+    elif len(D.NodeConn[shared_elems[0]]) == 3:
+        elem_type = 'tri'
+    elif len(D.NodeConn[shared_elems[0]]) == 4:
+        elem_type = 'tet'
+    NewTets = []
+    NewTris = []
     for e in shared_elems:
-        
         elem = D.NodeConn[e]
-        a, b, c, d = elem
+        if elem_type == 'tet':
+            a, b, c, d = elem
 
-        lookup_key = np.sum(np.array([1 if n in edge else 0 for n in elem]) * 2**np.arange(0,4)[::-1])
+            lookup_key = np.sum(np.array([1 if n in edge else 0 for n in elem]) * 2**np.arange(0,4)[::-1])
 
-        if lookup_key == 3:
-            new_elems = ((a,b,c,N), (d,b,a,N))
-            newedge1 = (a,N)
-            newedge2 = (b,N)
+            if lookup_key == 3:
+                new_elems = ((a,b,c,N), (d,b,a,N))
+                newedge1 = (a,N)
+                newedge2 = (b,N)
 
-        elif lookup_key == 5:
-            new_elems = ((a,b,c,N), (c,d,a,N))
-            newedge1 = (a,N)
-            newedge2 = (c,N)
-        
-        elif lookup_key == 9:
-            new_elems = ((a,b,c,N), (b,d,c,N))
-            newedge1 = (b,N)
-            newedge2 = (c,N)
-
-        elif lookup_key == 6:
-            new_elems = ((a,d,b,N), (a,c,d,N))
-            newedge1 = (a,N)
-            newedge2 = (d,N)
+            elif lookup_key == 5:
+                new_elems = ((a,b,c,N), (c,d,a,N))
+                newedge1 = (a,N)
+                newedge2 = (c,N)
             
-        elif lookup_key == 10:
-            new_elems = ((a,d,b,N), (b,d,c,N))
-            newedge1 = (b,N)
-            newedge2 = (d,N)
+            elif lookup_key == 9:
+                new_elems = ((a,b,c,N), (b,d,c,N))
+                newedge1 = (b,N)
+                newedge2 = (c,N)
 
-        elif lookup_key == 12:
-            new_elems = ((a,c,d,N), (b,d,c,N))
-            newedge1 = (c,N)
-            newedge2 = (d,N)
+            elif lookup_key == 6:
+                new_elems = ((a,d,b,N), (a,c,d,N))
+                newedge1 = (a,N)
+                newedge2 = (d,N)
+                
+            elif lookup_key == 10:
+                new_elems = ((a,d,b,N), (b,d,c,N))
+                newedge1 = (b,N)
+                newedge2 = (d,N)
+
+            elif lookup_key == 12:
+                new_elems = ((a,c,d,N), (b,d,c,N))
+                newedge1 = (c,N)
+                newedge2 = (d,N)
+            else:
+                raise NotImplementedError('Unexpected behavior in edge splitting - likely related to a bug.')
+            NewTets.append(new_elems)
+        elif elem_type == 'tri':
+            a, b, c = elem
+
+            lookup_key = np.sum(np.array([1 if n in edge else 0 for n in elem]) * 2**np.arange(0,3)[::-1])
+
+            if lookup_key == 3:
+                # (opposite, edge, edge)
+                new_elems = ((a,b,N),(c,a,N))
+                newedge1 = (b,N)
+                newedge2 = (c,N)
+            elif lookup_key == 5:
+                # (edge, opposite, edge)
+                new_elems = ((a,b,N),(b,c,N))
+                newedge1 = (a,N)
+                newedge2 = (c,N)
+            elif lookup_key == 6:
+                # (edge, edge, opposite)
+                new_elems = ((c,a,N),(b,c,N))
+                newedge1 = (a,N)
+                newedge2 = (b,N)
+            else:
+                raise NotImplementedError('Unexpected behavior in edge splitting - likely related to a bug.')
+            NewTris.append(new_elems)
         else:
-            raise NotImplementedError('Unexpected behavior in edge splitting - likely related to a bug.')
-        NewElems.append(new_elems)
+            raise ValueError('Invalid Element Type.')
+        
         newedge1_L = np.linalg.norm(D.NodeCoords[newedge1[0]] - newnode)
         newedge2_L = np.linalg.norm(D.NodeCoords[newedge2[0]] - newnode)
         if newedge1_L < (emin[newedge1[0]] + new_emin)/2 or newedge2_L < (emin[newedge1[0]] + new_emin)/2:
             return D, emin, emax, to_add
-
+    if elem_type == 'tri':
+        NewElems = np.array(NewTris, dtype=np.int64)
+    else:
+        NewElems = np.array(NewTets, dtype=np.int64)
     # Adding node manually instead of using D.addNodes so that emax can be tracked with it
     NewLength = D.NNode + 1
     if len(D._NodeCoords) < NewLength:
@@ -2258,18 +2294,21 @@ def _do_split(D, edge, L, emin, emax):
     emin[D.NNode] = new_emin
 
     D.NNode = NewLength
-    if np.any(quality.tet_volume(D.NodeCoords, np.array(new_elems)) < 0):
-        return D, emin, emax, to_add
+    if elem_type =='tet':
+        # 3D Element inversion check
+        for new_elems in NewElems:
+            if np.any(quality.tet_volume(D.NodeCoords, new_elems) < 0):
+                return D, emin, emax, to_add
     if -L/2 > (emax[node1] + emax[node2])/2:
         # If the split edges still exceed emax, add the new edges to the heap
         # NOTE: L is inverted for proper heap sorting
         to_add.append((L/2,(node1, N)))
         to_add.append((L/2,(node2, N)))
-    for new_elems in NewElems:
+    for i,new_elems in enumerate(NewElems):
         # Add new elements to the mesh
         if len(D.ElemLabels > 0):
             for new_elem in new_elems:
-                D.addElem(new_elem, D.ElemLabels[e])
+                D.addElem(new_elem, D.ElemLabels[shared_elems[i]])
         else:
             for new_elem in new_elems:
                 D.addElem(new_elem)
@@ -2432,7 +2471,7 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
 
             if operation == 's':
                 # Split
-                M = TetSplit(M, 4/3*h, verbose=verbose, labels=labels, sizing=None, QualitySizing=False)
+                M = Split(M, 4/3*h, verbose=verbose, labels=labels, sizing=None, QualitySizing=False)
                 M.verbose=False
             elif operation == 'c':
                 # Contract
