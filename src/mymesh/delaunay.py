@@ -454,9 +454,10 @@ def FanTriangulation(NodeCoords, Hull=None):
     assert HullShape[0] >= 3, 'Convex hull must contain at least 3 elements.'
     assert HullShape[1] == 2, 'Convex hull must be two dimensional, containing line elements (shape(Hull)=(m,2)).'
     
+    idx = np.all(Hull!=Hull[0][0],axis=1)
     NodeConn = np.column_stack([np.repeat(Hull[0][0], len(Hull)-2), 
-                                Hull[1:-1,0],
-                                Hull[1:-1,1]
+                                Hull[idx,0],
+                                Hull[idx,1]
                             ])
     return NodeConn
     
