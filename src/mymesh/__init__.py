@@ -206,21 +206,9 @@ def demo_mesh(name='bunny'):
 
     .. plot::
 
-        import mymesh
         bunny = mymesh.demo_mesh("bunny")
         bunny.plot(view='xy')
 
-    .. plot::
-
-        import mymesh
-        dragon = mymesh.demo_mesh("dragon")
-        dragon.plot(view='xy')
-
-    .. plot::
-
-        import mymesh
-        lucy = mymesh.demo_mesh("Lucy")
-        lucy.plot(view='-xz')
 
     """    
     try:
