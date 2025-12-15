@@ -2168,9 +2168,9 @@ def Split(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
     NewConn = D.NodeConn
     new_labels = D.ElemLabels
     if 'mesh' in dir(mesh):
-        Mnew = mesh.mesh(NewCoords, NewConn, verbose=M.verbose, Type='vol')
+        Mnew = mesh.mesh(NewCoords, NewConn, verbose=M.verbose, Type=M.Type)
     else:
-        Mnew = mesh(NewCoords, NewConn, verbose=M.verbose, Type='vol')
+        Mnew = mesh(NewCoords, NewConn, verbose=M.verbose, Type=M.Type)
     if len(new_labels) > 0:
         Mnew.ElemData[label_str] = new_labels
 
@@ -3135,31 +3135,278 @@ def _Tet44Flip(elemkey, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, t
 
     return  success
 
-def TetFlip2(M):
+def Flip(M, strategy='valence', verbose=True):
+    """
+    Edge/Face flipping of triangular and tetrahedral mesh quality improvement.
 
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Tetrahedral or triangular mesh
+    strategy : str, optional
+        Flipping strategy, by default 'valence'
+    verbose : bool, optional
+        If true, will display progress, by default True
+
+    Returns
+    -------
+    Mnew : mymesh.mesh
+        Updated mesh
+    """    
+
+    elemtypes = M.ElemType
+    if len(elemtypes) > 1:
+        return ValueError('Mesh must be purely triangular or tetrahedral.')
+    if elemtypes[0] == 'tri':
+        mode = 'tri'
+    elif elemtypes[0] == 'tet':
+        mode = 'tet'
+    else:
+        return ValueError('Mesh must be purely triangular or tetrahedral.')
+    
     Edges = np.sort(M.Edges,axis=1).astype(np.int64)
     EdgeTuple = list(map(tuple,Edges))
     EdgeSet = set(EdgeTuple)
 
     D = M.mesh2dmesh()#(ElemLabels=labels)
 
-def _Tet32Flip2(D, edge):
-    pass
+    if verbose and 'tqdm' in sys.modules:
+        tqdm_loaded = True
+        progress = tqdm.tqdm(total=len(EdgeSet))
+    else:
+        tqdm_loaded = False
+    if verbose: print(f'Flip:', end='')
 
-    node1, node2 = edge
+
+    while len(EdgeSet) > 0:
+
+        if verbose and tqdm_loaded:
+            progress.update(1)
+            L1 = len(EdgeSet)
+
+        edge = EdgeSet.pop()
+        if mode == 'tri':
+            D, to_add = _tri_flip(D, edge, strategy=strategy)
+            EdgeSet.update(to_add)
+        else:
+            D, to_add = _tet_flip32(D, edge, strategy=strategy)
+            EdgeSet.update(to_add)
+
+        if verbose and tqdm_loaded:
+            L2 = len(EdgeSet)
+            progress.total += max(0, L2-L1)
+    
+
+    NewCoords = D.NodeCoords
+    NewConn = D.NodeConn
+    # new_labels = D.ElemLabels
+
+    if 'mesh' in dir(mesh):
+        Mnew = mesh.mesh(NewCoords, NewConn, verbose=M.verbose, Type=M.Type)
+    else:
+        Mnew = mesh(NewCoords, NewConn, verbose=M.verbose, Type=M.Type)
+    # if len(new_labels) > 0:
+    #     Mnew.ElemData[label_str] = new_labels
+
+    return Mnew
+
+@try_njit
+def _tri_flip(D, edge, strategy='valence', eps=1e-8):
+
+    to_add = []
+    node1 = edge[0]
+    node2 = edge[1]
+
     elemconn1 = D.getElemConn(node1)
     elemconn2 = D.getElemConn(node2)
+
     shared_elems = list(set(elemconn1).intersection(set(elemconn2)))[::-1] # Elements connected to the edge, sorted largest index to smallest
 
+    # CHECK 1: boundary edge
+    if len(shared_elems) != 2:
+        return D, to_add
+    
+    # opposite nodes 
+    elem1 = D.NodeConn[shared_elems[0]].copy()
+    elem2 = D.NodeConn[shared_elems[1]].copy()
+    node3 = set(elem1).difference(set(edge)).pop()
+    node4 = set(elem2).difference(set(edge)).pop()
+
+    # Reorder elem1 so that node3 is in the middle
+    while elem1[1] != node3: 
+        elem1 = np.roll(elem1,1)
+    # the two triangles make the quadrilateral (a,b,c,d)
+    # original triangles are (a,b,c) and (c, d, a)
+    a,b,c = elem1
+    d = node4
+
+    # new elems are (a,b,d), (c, d, b)
+    new1 = np.array((a,b,d))
+    new2 = np.array((c,d,b))
+
+    # CHECK 2: Area
+    areas = quality.tri_area(D.NodeCoords, np.vstack((new1,new2)))
+    
+    if np.any(areas < eps):
+        return D, to_add
+    # CHECK 3: Normal inversion
+    n1 = utils._tri_normals([D.NodeCoords[elem1]])[0]
+    n2 = utils._tri_normals([D.NodeCoords[elem2]])[0]
+    navg = (n1 + n2)/2
+    n3 = utils._tri_normals([D.NodeCoords[new1]])[0]
+    n4 = utils._tri_normals([D.NodeCoords[new2]])[0]
+    if np.dot(navg,n3) < np.cos(np.pi/12) or np.dot(navg,n4) < np.cos(np.pi/12):
+        return D, to_add
+
+
+    perform_flip = False
+    if strategy == 'valence':
+        valence1 = len(elemconn1)
+        valence2 = len(elemconn2)
+
+        elemconn3 = D.getElemConn(node3)
+        elemconn4 = D.getElemConn(node4)
+
+        valence3 = len(elemconn3)
+        valence4 = len(elemconn4)
+
+        valences = np.array([valence1, valence2, valence3, valence4])
+        max_valence = np.max(valences)
+        min_valence = np.min(valences)
+
+        flipped_valences = np.array([valence1-1, valence2-1, valence3+1, valence4+1])
+        max_valence_flip = np.max(flipped_valences)
+        min_valence_flip = np.min(flipped_valences)
+
+        if max_valence - min_valence > max_valence_flip - min_valence_flip:
+            # Clark et al 2013
+            perform_flip = True
+    elif strategy == 'delaunay':
+        # Flip if sum of opposite angles is reduced (Clark, 2013)
+        # For a planar mesh, equivalent to Delaunay criteria
+        
+        # original opposite angles are abc> and cda>
+        u1 = D.NodeCoords[c]-D.NodeCoords[b]
+        v1 = D.NodeCoords[a] - D.NodeCoords[b]
+        theta1 = np.arccos(np.dot(u1,v1)/(np.linalg.norm(u1)*np.linalg.norm(v1)))
+        u2 = D.NodeCoords[c]-D.NodeCoords[d]
+        v2 = D.NodeCoords[a] - D.NodeCoords[d] 
+        theta2 = np.arccos(np.dot(u2,v2)/(np.linalg.norm(u2)*np.linalg.norm(v2)))
+
+        # flipped opposite angles are bad> and bcd>
+        u3 = D.NodeCoords[b]-D.NodeCoords[a]
+        v3 = D.NodeCoords[d] - D.NodeCoords[a]
+        theta3 = np.arccos(np.dot(u3,v3)/(np.linalg.norm(u3)*np.linalg.norm(v3)))
+        u4 = D.NodeCoords[b]-D.NodeCoords[c]
+        v4 = D.NodeCoords[d] - D.NodeCoords[c] 
+        theta4 = np.arccos(np.dot(u4,v4)/(np.linalg.norm(u4)*np.linalg.norm(v4)))
+
+        if (theta3 + theta4) < (theta1 + theta2):
+            perform_flip = True
+
+
+    else:
+        raise ValueError(f'Strategy: "{strategy}" not supported.')
+    
+
+    if perform_flip:
+        D.removeElems(shared_elems)
+        D.addElem(new1)
+        D.addElem(new2)
+
+        # add adjacent edges to the queue
+        for (p1,p2) in [(a,b), (b,c), (c,d), (d,a), (b,d)]:
+            if p1 < p2:
+                to_add.append((p1,p2))
+            else:
+                to_add.append((p2,p1))
+    return D, to_add
+    
+def _tet_flip32(D, edge, strategy='valence', eps=1e-8):
+
+    to_add = []
+    node_a = edge[0]
+    node_e = edge[1]
+
+    elemconn_a = D.getElemConn(node_a)
+    elemconn_e = D.getElemConn(node_e)
+
+    shared_elems = list(set(elemconn_a).intersection(set(elemconn_e)))[::-1] # Elements connected to the edge, sorted largest index to smallest
+
+    # CHECK 1: Edge not connected to 3 elems
     if len(shared_elems) != 3:
-        # Edge not connected to exactly 3 elements
-        return D
+        return D, to_add
+    
+    # opposite nodes 
+    elem1 = D.NodeConn[shared_elems[0]].copy()
+    elem2 = D.NodeConn[shared_elems[1]].copy()
+    elem3 = D.NodeConn[shared_elems[2]].copy()
+    
+    nodes = set(elem1).union(elem2).union(elem3).difference(edge)
+    # CHECK 2: 5-node hull (5-2 = 3)
+    if len(nodes) != 3:
+        return D, to_add
+    node_b, node_c, node_d = nodes
 
-    # ...
+    # Order the nodes for properly signed volumes (this is probably not optimal for efficiency, but shouldn't be too bad)
+    v1 = quality.tet_volume(D.NodeCoords, np.array(((node_c,node_d,node_e,node_a),)))
+    if  v1[0] < 0: 
+        # swap the order
+        node_b, node_c, node_d = node_d, node_c, node_b
+    
+    # new elements
+    new1 = np.array((node_b, node_c, node_d, node_a))
+    new2 = np.array((node_d, node_c, node_b, node_e))
+
+    # CHECK 2: Volume (note: v1 already ensured to be positive)
+    v2 = quality.tet_volume(D.NodeCoords, np.array((new2,)))
+    if v2[0] < 0:
+        return D, to_add
+
+    perform_flip = False
+    if strategy == 'valence':
+        valence1 = len(elemconn_a)
+        valence2 = len(elemconn_e)
+
+        elemconn_b = D.getElemConn(node_b)
+        elemconn_c = D.getElemConn(node_c)
+        elemconn_d = D.getElemConn(node_d)
+
+        valence3 = len(elemconn_b)
+        valence4 = len(elemconn_c)
+        valence5 = len(elemconn_d)
+
+        valences = np.array([valence1, valence2, valence3, valence4, valence5])
+        max_valence = np.max(valences)
+        min_valence = np.min(valences)
+
+        flipped_valences = np.array([valence1-2, valence2-2, valence3, valence4, valence5])
+        max_valence_flip = np.max(flipped_valences)
+        min_valence_flip = np.min(flipped_valences)
+
+        if max_valence - min_valence > max_valence_flip - min_valence_flip:
+            # Clark et al 2013
+            perform_flip = True
+
+
+    else:
+        raise ValueError(f'Strategy: "{strategy}" not supported.')
     
 
-    
+    if perform_flip:
+        D.removeElems(shared_elems)
+        D.addElem(new1)
+        D.addElem(new2)
 
+        # add adjacent edges to the queue
+        a,b,c,d,e = node_a, node_b, node_c, node_d, node_e
+        for (p1,p2) in [(a,b), (a,c), (a,d), (e,b), (e,c), (e,d), (b,c), (c,d), (d,b)]:
+            if p1 < p2:
+                to_add.append((p1,p2))
+            else:
+                to_add.append((p2,p1))
+
+    return D, to_add
 
 ## Need to be updated or removed
 # Needs update:   
