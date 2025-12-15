@@ -449,18 +449,18 @@ chosen for certain methods.</p>
 of the objective function within specified bounds. The <cite>bounds</cite>
 input is required for all of these methods.</p>
 <ul>
-<li><p><cite>’direct’</cite>: Uses the DIRECT algorithm through <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.direct()</span></code>.</p></li>
-<li><p>’<cite>directl’</cite>: Uses the locally-biased version DIRECT algorthim through <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.direct()</span></code>.
+<li><p><cite>’direct’</cite>: Uses the DIRECT algorithm through <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.direct.html#scipy.optimize.direct" title="(in SciPy v1.16.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.direct()</span></code></a>.</p></li>
+<li><p>’<cite>directl’</cite>: Uses the locally-biased version DIRECT algorthim through <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.direct.html#scipy.optimize.direct" title="(in SciPy v1.16.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.direct()</span></code></a>.
 This is equivalent to using <cite>method=’direct’</cite> with <cite>optimizer_args=dict(locally_biased=True)</cite>.</p></li>
-<li><p><cite>’differential_evolution’</cite>: Uses the differential evolution algorithm through <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.differential_evolution()</span></code></p></li>
+<li><p><cite>’differential_evolution’</cite>: Uses the differential evolution algorithm through <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution" title="(in SciPy v1.16.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.differential_evolution()</span></code></a></p></li>
 <li><p><cite>’brute’</cite>: Uses a brute force approach, evaluating the function at every point within a multidimensional grid
-using <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.brute()</span></code>. It’s recommeded to use the ‘Ns’ option to specify the number of points
+using <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.brute.html#scipy.optimize.brute" title="(in SciPy v1.16.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.brute()</span></code></a>. It’s recommeded to use the ‘Ns’ option to specify the number of points
 to sample along each axis (<cite>optimizer_args=dict(Ns=n)</cite>), the default value of 20 may be too high for many
 registration applications for large datasets. The total number of function evaluations is <cite>Ns**len(x)</cite>.
 By default, the optional ‘finish’ input, which performs local optimization following the conclusion of the
 brute force search, is turned off, but can be reactivated with <cite>optimizer_args=dict(finish=True)</cite></p></li>
 </ul>
-<p>All minimizers available through <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.minimize()</span></code> are available. One exception is that, if pdfo
+<p>All minimizers available through <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize" title="(in SciPy v1.16.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.minimize()</span></code></a> are available. One exception is that, if pdfo
 is installed, it will be used instead of scipy if <cite>method=’cobyla’</cite>.  If <cite>method=’scipy’</cite> is given, the default
 optimizer will be chosen by scipy based on the given problem (depends on the presence of bounds or constraints).</p>
 <p>pdfo, or “Powell’s derivative free optimizers” are a group of algorithms developed by M. J. D. Powell for

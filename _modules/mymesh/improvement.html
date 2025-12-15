@@ -2040,8 +2040,8 @@
 <span class="sd">    .. plot::</span>
 
 <span class="sd">        bunny = mymesh.demo_mesh(&#39;bunny&#39;)</span>
-<span class="sd">        coarse = improvement.Contract(bunny, 0.05, quadric=False, FeatureAngle=None)</span>
-<span class="sd">        quadric = improvement.Contract(bunny, 0.05, quadric=True, FeatureAngle=None)</span>
+<span class="sd">        coarse = improvement.Contract(bunny, 0.025, quadric=False, FeatureAngle=None)</span>
+<span class="sd">        quadric = improvement.Contract(bunny, 0.025, quadric=True, FeatureAngle=None)</span>
 
 <span class="sd">        visualize.Subplot((bunny, coarse, quadric), (1,3), view=&#39;xy&#39;, titles=[&#39;Original&#39;, &#39;quadric=False&#39;, &#39;quadric=True&#39;])</span>
 
