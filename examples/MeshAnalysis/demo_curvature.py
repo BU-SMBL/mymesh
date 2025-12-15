@@ -119,4 +119,5 @@ fig2, ax2 = bunny_surf.plot(scalars='Mean Curvature (Mesh)', clim=(-.2,.2),
                              color='coolwarm', show=False, return_fig=True,
                              view='-x-z')
 ax2.set_title('Bunny - Mesh-based')
+# sphinx_gallery_thumbnail_number = 7
 
