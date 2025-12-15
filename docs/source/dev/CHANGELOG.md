@@ -3,6 +3,8 @@
 
 ## Unreleased
 
+## 0.3.0 (2025-12-15)
+
 ### Feat
 
 - **improvement.Flip**: implement preliminary flipping procedures
