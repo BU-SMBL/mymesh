@@ -5,10 +5,33 @@
 
 ### Feat
 
+- **improvement.Flip**: implement preliminary flipping procedures
+- **mymesh.mesh.dmesh**: add removeElems function
+- **improvement.Split**: add support for triangular mesh edge splitting
+- **curvature.ImageCurvature**: support non-isotropic voxel sizes
+- **demo_image**: add scalefactor option
+- **register**: add AxisAlignMesh
+- **mesh**: add Transform method
+
+### Fix
+
+- **quality.Skewness**: fix type handling
+- **delaunay.FanTriangulation**: fix handling of unordered hull edges
+- **mesh.plot**: fix clim option
+- **visualize.View**: improve plotting of points
+- **primitives.Box**: switch n to optional
+- **utils.identify_elem**: handle empty mesh edge case
+- support quadratic elements in surf2tris
+
+## 0.2.0 (2025-11-03)
+
+### Feat
+
 - add TaubinSmoothing
 
 ### Fix
 
+- bugfixes in Image2Image
 - improve ICP performance and robustness
 - improve MVBB by handling 2D rotations
 - convert quadratic triangles to linear for stl write
