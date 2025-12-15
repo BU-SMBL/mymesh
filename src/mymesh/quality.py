@@ -315,9 +315,9 @@ def Skewness(NodeCoords,NodeConn,verbose=False,simplexmethod='size'):
 
     Parameters
     ----------
-    NodeCoords : list
+    NodeCoords : array_like
         List of nodal coordinates.
-    NodeConn : list
+    NodeConn : list, array_like
         List of nodal connectivities.
     verbose : bool, optional
         If true, will print min, max, and mean element quality, as well 
@@ -354,16 +354,16 @@ def Skewness(NodeCoords,NodeConn,verbose=False,simplexmethod='size'):
             otherIdx = np.where(Ls != 4)[0]
 
         if len(triIdx) > 0:
-            Tris = [NodeConn[i] for i in triIdx]
-            TriSkew = tri_area_skewness(NodeCoords,Tris)
+            Tris = np.array([NodeConn[i] for i in triIdx])
+            TriSkew = tri_area_skewness(np.asarray(NodeCoords),Tris)
             skew[triIdx] = TriSkew
         if len(tetIdx) > 0:
-            Tets = [NodeConn[i] for i in tetIdx]
-            TetSkew = tet_vol_skewness(NodeCoords,Tets)
+            Tets = np.array([NodeConn[i] for i in tetIdx])
+            TetSkew = tet_vol_skewness(np.asarray(NodeCoords),Tets)
             skew[tetIdx] = TetSkew
         if len(otherIdx) > 0:
-            Others = [NodeConn[i] for i in otherIdx]
-            OtherSkew = equiangular_skewness(NodeCoords,Others)
+            Others = np.array([NodeConn[i] for i in otherIdx])
+            OtherSkew = equiangular_skewness(np.asarray(NodeCoords),Others)
             skew[otherIdx] = OtherSkew
 
     else:
@@ -815,7 +815,7 @@ def tri_skewness(NodeCoords,NodeConn):
     skew : np.ndarray
         Array of skewness for each element.
     """
-    points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
+    points = NodeCoords[NodeConn]
     A = points[:,0]
     B = points[:,1]
     C = points[:,2]
@@ -864,7 +864,7 @@ def tri_area_skewness(NodeCoords,NodeConn):
     # Area-based
     if np.shape(NodeCoords)[1] == 2:
         NodeCoords = np.hstack([NodeCoords, np.zeros((len(NodeCoords,1)))])
-    A = Area(NodeCoords,NodeConn)
+    A = tri_area(NodeCoords,NodeConn)
     points = np.asarray(NodeCoords)[np.asarray(NodeConn)]
     # edge lengths
     e1 = points[:,0] - points[:,2]
