@@ -2774,6 +2774,11 @@ if check_numba():
 
             self.NElem -= 1
 
+        def removeElems(self, ElemIds):
+            # This just ensures that elements are removed in the proper order
+            for ElemId in np.sort(ElemIds)[::-1]:
+                self.removeElem(ElemId)
+        
         def swapNode(self, NodeId1, NodeId2):
 
             # Swap all references of Node1 to Node2
