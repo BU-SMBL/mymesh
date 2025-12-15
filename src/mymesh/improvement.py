@@ -1621,8 +1621,8 @@ def Contract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, Fe
     .. plot::
 
         bunny = mymesh.demo_mesh('bunny')
-        coarse = improvement.Contract(bunny, 0.05, quadric=False, FeatureAngle=None)
-        quadric = improvement.Contract(bunny, 0.05, quadric=True, FeatureAngle=None)
+        coarse = improvement.Contract(bunny, 0.025, quadric=False, FeatureAngle=None)
+        quadric = improvement.Contract(bunny, 0.025, quadric=True, FeatureAngle=None)
 
         visualize.Subplot((bunny, coarse, quadric), (1,3), view='xy', titles=['Original', 'quadric=False', 'quadric=True'])
 
