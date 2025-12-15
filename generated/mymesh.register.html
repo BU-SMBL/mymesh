@@ -432,6 +432,7 @@
   <section id="module-mymesh.register">
 <span id="mymesh-register"></span><h1>mymesh.register<a class="headerlink" href="#module-mymesh.register" title="Link to this heading">#</a></h1>
 <p>Tools for registering or aligning point clouds, meshes, and images.</p>
+<p>See also: <span class="xref std std-ref">theory_register</span></p>
 <section id="registration">
 <h2>Registration<a class="headerlink" href="#registration" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
@@ -475,10 +476,10 @@
 <td><p>Rigid rotation in 3D.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.register.translation2d.html#mymesh.register.translation2d" title="mymesh.register.translation2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">translation2d</span></code></a>(x[, image])</p></td>
-<td><p>Rigid transformation consisting of translation and rotation in 2D.</p></td>
+<td><p>Rigid translation in 2D.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.register.translation.html#mymesh.register.translation" title="mymesh.register.translation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">translation</span></code></a>(x[, image])</p></td>
-<td><p>Rigid transformation consisting of translation and rotation in 3D.</p></td>
+<td><p>Rigid translation in 3D.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.register.rigid2d.html#mymesh.register.rigid2d" title="mymesh.register.rigid2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rigid2d</span></code></a>(x[, center, image])</p></td>
 <td><p>Rigid transformation consisting of translation and rotation in 2D.</p></td>
@@ -487,10 +488,10 @@
 <td><p>Rigid transformation consisting of translation and rotation in 3D.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.register.similarity2d.html#mymesh.register.similarity2d" title="mymesh.register.similarity2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">similarity2d</span></code></a>(x[, center, rotation_order, ...])</p></td>
-<td><p></p></td>
+<td><p>Similarity transform in 2D.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.register.similarity.html#mymesh.register.similarity" title="mymesh.register.similarity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">similarity</span></code></a>(x[, center, rotation_order, ...])</p></td>
-<td><p></p></td>
+<td><p>Similarity transform in 3D.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.register.affine2d.html#mymesh.register.affine2d" title="mymesh.register.affine2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">affine2d</span></code></a>(x[, center, image])</p></td>
 <td><p></p></td>
@@ -508,7 +509,7 @@
 <td><p>Generate a scaling matrix</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.register.Sh2d.html#mymesh.register.Sh2d" title="mymesh.register.Sh2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sh2d</span></code></a>(sh01, sh10[, reference])</p></td>
-<td><p>Generate a shearing matrix ref:https://www.mathworks.com/help/images/matrix-representation-of-geometric-transformations.html</p></td>
+<td><p>Generate a shearing matrix</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.register.T3d.html#mymesh.register.T3d" title="mymesh.register.T3d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">T3d</span></code></a>(t0, t1, t2)</p></td>
 <td><p>Generate a translation matrix</p></td>
@@ -520,7 +521,7 @@
 <td><p>Generate a 3d scaling matrix</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.register.Sh3d.html#mymesh.register.Sh3d" title="mymesh.register.Sh3d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sh3d</span></code></a>(sh01, sh10, sh02, sh20, sh12, sh21[, ...])</p></td>
-<td><p>Generates a shearing matrix ref:https://www.mathworks.com/help/images/matrix-representation-of-geometric-transformations.html</p></td>
+<td><p>Generates a shearing matrix</p></td>
 </tr>
 </tbody>
 </table>

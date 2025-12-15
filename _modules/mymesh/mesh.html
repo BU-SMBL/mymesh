@@ -405,7 +405,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">implicit</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">contour</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">visualize</span><span class="p">,</span> <span class="n">check_numba</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">implicit</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">contour</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">register</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">visualize</span><span class="p">,</span> <span class="n">check_numba</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sys</span><span class="w"> </span><span class="kn">import</span> <span class="n">getsizeof</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -1036,7 +1036,35 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">aabb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Axis aligned bounding box of the mesh. &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Axis aligned bounding box of the mesh. </span>
+<span class="sd">        See also :func:`mymesh.utils.AABB`.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        .. plot::</span>
+<span class="sd">            :context: close-figs</span>
+
+<span class="sd">            import mymesh</span>
+<span class="sd">            import numpy as np</span>
+
+<span class="sd">            # Load the stanford bunny</span>
+<span class="sd">            m = mymesh.demo_mesh(&#39;bunny&#39;) </span>
+
+<span class="sd">            # Perform an arbitrary rotation transformation to the mesh</span>
+<span class="sd">            m = m.Transform([np.pi/6, -np.pi/6, np.pi/6],</span>
+<span class="sd">                            transformation=&#39;rotation&#39;, InPlace=True)</span>
+
+<span class="sd">            box = mymesh.primitives.Box(m.aabb, Type=&#39;surf&#39;)</span>
+
+<span class="sd">        .. plot::</span>
+<span class="sd">            :context: close-figs</span>
+<span class="sd">            :include-source: False</span>
+
+<span class="sd">            m.merge(box)</span>
+<span class="sd">            m.plot(show_faces=False, show_points=True, show_edges=True, view=&#39;xy&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aabb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="o">+</span><span class="s1">&#39;Identifying axis aligned bounding box...&#39;</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_aabb</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">AABB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">MeshNodes</span><span class="p">])</span>
@@ -1044,7 +1072,35 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aabb</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">mvbb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Minimum volume bounding box of the mesh. &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Minimum volume bounding box of the mesh. </span>
+<span class="sd">        See also :func:`mymesh.utils.MVBB`.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        .. plot::</span>
+<span class="sd">            :context: close-figs</span>
+
+<span class="sd">            import mymesh</span>
+<span class="sd">            import numpy as np</span>
+
+<span class="sd">            # Load the stanford bunny</span>
+<span class="sd">            m = mymesh.demo_mesh(&#39;bunny&#39;) </span>
+
+<span class="sd">            # Perform an arbitrary rotation transformation to the mesh</span>
+<span class="sd">            m = m.Transform([np.pi/6, -np.pi/6, np.pi/6],</span>
+<span class="sd">                            transformation=&#39;rotation&#39;, InPlace=True)</span>
+
+<span class="sd">            box = mymesh.primitives.Box(m.mvbb, Type=&#39;surf&#39;)</span>
+
+<span class="sd">        .. plot::</span>
+<span class="sd">            :context: close-figs</span>
+<span class="sd">            :include-source: False</span>
+
+<span class="sd">            m.merge(box)</span>
+<span class="sd">            m.plot(show_faces=False, show_points=True, show_edges=True, view=&#39;xy&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mvbb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_printlevel</span><span class="o">+</span><span class="s1">&#39;Identifying minimum volume bounding box...&#39;</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_mvbb</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">MVBB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">MeshNodes</span><span class="p">])</span>
@@ -1166,6 +1222,10 @@
             <span class="k">if</span> <span class="s1">&#39;Faces&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span> <span class="ow">or</span> <span class="s1">&#39;FaceConn&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_FaceConn</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">if</span> <span class="s1">&#39;Faces&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span> <span class="ow">or</span> <span class="s1">&#39;FaceElemConn&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_FaceElemConn</span> <span class="o">=</span> <span class="p">[]</span> 
             <span class="k">if</span> <span class="s1">&#39;Surface&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Surface</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="s1">&#39;MeshNodes&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MeshNodes</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="s1">&#39;bounds&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="s1">&#39;aabb&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aabb</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="s1">&#39;mvbb&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mvbb</span> <span class="o">=</span> <span class="kc">None</span>
             
         <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
@@ -1420,6 +1480,11 @@
                 <span class="n">newshape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">newshape</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">),</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">newshape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+                    <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">NodeConn</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
                 <span class="n">newshape</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">),</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -2152,9 +2217,7 @@
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.Clip.html#mymesh.mesh.Clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">Clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">exact</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Clip the mesh along a plane. Clipping with this method will not cut</span>
-<span class="sd">        through elements, but rather will only keep elements on one side of</span>
-<span class="sd">        the specified plane.</span>
+<span class="sd">        Clip the mesh along a plane. </span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2163,6 +2226,10 @@
 <span class="sd">            If None, the center of the bounding box of the mesh will be used.</span>
 <span class="sd">        normal : list, optional</span>
 <span class="sd">            Normal vector of the clipping plane, by default [1,0,0]</span>
+<span class="sd">        exact : bool, optional</span>
+<span class="sd">            If True, the mesh will be clipped exactly along the plane, cutting </span>
+<span class="sd">            through elements. Otherwise, elements on one side of the plane will be removed, but no elements will be cut. By default, False. </span>
+<span class="sd">        </span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -2291,6 +2358,93 @@
         <span class="k">return</span> <span class="n">M</span></div>
 
         
+<div class="viewcode-block" id="mesh.Transform">
+<a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.Transform.html#mymesh.mesh.Transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="s1">&#39;rigid&#39;</span><span class="p">,</span> <span class="n">transform_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">InPlace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply a transformation to the coordinates of the mesh.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : array_like</span>
+<span class="sd">            Transformation parameters. The number of parameters depends on the </span>
+<span class="sd">            transformation being used. For the default (rigid), it should be a</span>
+<span class="sd">            6 element array of translations in x, y, and z, and rotations about </span>
+<span class="sd">            x, y, and z, respectively.</span>
+<span class="sd">        transformation : str, optional</span>
+<span class="sd">            Transformation model to use, by default &#39;rigid&#39;.</span>
+
+<span class="sd">            - :func:`&quot;rigid&quot; &lt;mymesh.register.rigid&gt;`</span>
+<span class="sd">            - :func:`&quot;rotation&quot; &lt;mymesh.register.rotation&gt;`</span>
+<span class="sd">            - :func:`&quot;translation&quot; &lt;mymesh.register.translation&gt;`</span>
+<span class="sd">            - :func:`&quot;similarity&quot; &lt;mymesh.register.similarity&gt;`</span>
+<span class="sd">            - :func:`&quot;affine&quot; &lt;mymesh.register.affine&gt;`</span>
+
+<span class="sd">        transform_kwargs : dict, optional</span>
+<span class="sd">            Optional arguments for transform functions. See available options</span>
+<span class="sd">            in the documentation of the specific transform being used, by</span>
+<span class="sd">            default {}</span>
+<span class="sd">        InPlace : bool, optional</span>
+<span class="sd">            If True, the original mesh will be modified in place, otherwise a </span>
+<span class="sd">            copy will be made and modified, leaving the original mesh unaltered.</span>
+<span class="sd">            By default False</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        </span>
+<span class="sd">        .. plot::</span>
+<span class="sd">            :context: close-figs</span>
+
+<span class="sd">            import mymesh</span>
+<span class="sd">            import numpy as np</span>
+
+<span class="sd">            # Load the stanford bunny</span>
+<span class="sd">            m1 = mymesh.demo_mesh(&#39;bunny&#39;) </span>
+
+<span class="sd">            # Perform a rigid transformation to the mesh</span>
+<span class="sd">            m2 = m1.Transform([0.02, 0.2, -0.05, np.pi/6, -np.pi/6, np.pi/6])</span>
+
+<span class="sd">        .. plot::</span>
+<span class="sd">            :context: close-figs</span>
+<span class="sd">            :include-source: False</span>
+
+<span class="sd">            mcopy = m1.copy()</span>
+<span class="sd">            mcopy.NodeData[&#39;label&#39;] = np.zeros(mcopy.NNode)</span>
+<span class="sd">            m2.NodeData[&#39;label&#39;] = np.ones(m2.NNode)</span>
+<span class="sd">            mcopy.merge(m2)</span>
+
+<span class="sd">            mcopy.plot(scalars=&#39;label&#39;, show_colorbar=False, view=&#39;xy&#39;)</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">transformation</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">transformation</span> <span class="o">==</span> <span class="s1">&#39;rotation&#39;</span><span class="p">:</span>
+                <span class="n">T</span> <span class="o">=</span> <span class="n">register</span><span class="o">.</span><span class="n">rotation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">transform_kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">transformation</span> <span class="o">==</span> <span class="s1">&#39;translation&#39;</span><span class="p">:</span>
+                <span class="n">T</span> <span class="o">=</span> <span class="n">register</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">transform_kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">transformation</span> <span class="o">==</span> <span class="s1">&#39;rigid&#39;</span><span class="p">:</span>
+                <span class="n">T</span> <span class="o">=</span> <span class="n">register</span><span class="o">.</span><span class="n">rigid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">transform_kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">transformation</span> <span class="o">==</span> <span class="s1">&#39;similarity&#39;</span><span class="p">:</span>
+                <span class="n">T</span> <span class="o">=</span> <span class="n">register</span><span class="o">.</span><span class="n">similarity</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">transform_kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">transformation</span> <span class="o">==</span> <span class="s1">&#39;affine&#39;</span><span class="p">:</span>
+                <span class="n">T</span> <span class="o">=</span> <span class="n">register</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">transform_kwargs</span><span class="p">)</span>  
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Transformation: &quot;</span><span class="si">{</span><span class="n">transformation</span><span class="si">}</span><span class="s1">&quot; not supported.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Transformation must be a string, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">transformation</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">InPlace</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">register</span><span class="o">.</span><span class="n">transform_points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">M</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">register</span><span class="o">.</span><span class="n">transform_points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">M</span></div>
+
+                
+    
     <span class="c1">## Mesh Measurements Methods</span>
 <div class="viewcode-block" id="mesh.getQuality">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.getQuality.html#mymesh.mesh.getQuality">[docs]</a>
@@ -2797,7 +2951,7 @@
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;return_image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;interactive&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;hide&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">img</span> <span class="o">=</span> <span class="n">visualize</span><span class="o">.</span><span class="n">View</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">visualize</span><span class="o">.</span><span class="n">View</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="n">clim</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
@@ -3115,6 +3269,11 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span> <span class="o">-=</span> <span class="mi">1</span>
 
+        <span class="k">def</span><span class="w"> </span><span class="nf">removeElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">):</span>
+            <span class="c1"># This just ensures that elements are removed in the proper order</span>
+            <span class="k">for</span> <span class="n">ElemId</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">ElemIds</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">removeElem</span><span class="p">(</span><span class="n">ElemId</span><span class="p">)</span>
+        
         <span class="k">def</span><span class="w"> </span><span class="nf">swapNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId1</span><span class="p">,</span> <span class="n">NodeId2</span><span class="p">):</span>
 
             <span class="c1"># Swap all references of Node1 to Node2</span>

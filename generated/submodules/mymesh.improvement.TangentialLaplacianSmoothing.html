@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="mymesh.improvement.SmartLaplacianSmoothing" href="mymesh.improvement.SmartLaplacianSmoothing.html" />
-    <link rel="prev" title="mymesh.improvement.LocalLaplacianSmoothing" href="mymesh.improvement.LocalLaplacianSmoothing.html" />
+    <link rel="prev" title="mymesh.improvement.TaubinSmoothing" href="mymesh.improvement.TaubinSmoothing.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -481,6 +481,16 @@ interior nodes will be smoothed, by default False.</p>
 <dd class="field-odd"><p><a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh">mymesh.mesh</a></p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">M</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">implicit</span><span class="o">.</span><span class="n">sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>  <span class="mf">.1</span><span class="p">)</span>
+<span class="n">Mnew</span> <span class="o">=</span> <span class="n">improvement</span><span class="o">.</span><span class="n">TangentialLaplacianSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">iterate</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">visualize</span><span class="o">.</span><span class="n">Subplot</span><span class="p">([</span><span class="n">M</span><span class="p">,</span> <span class="n">Mnew</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../_images/mymesh-improvement-TangentialLaplacianSmoothing-1.png" class="plot-directive" src="../../_images/mymesh-improvement-TangentialLaplacianSmoothing-1.png" />
+</figure>
 </dd></dl>
 
 </section>
@@ -496,12 +506,12 @@ interior nodes will be smoothed, by default False.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mymesh.improvement.LocalLaplacianSmoothing.html"
+       href="mymesh.improvement.TaubinSmoothing.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.improvement.LocalLaplacianSmoothing</p>
+        <p class="prev-next-title">mymesh.improvement.TaubinSmoothing</p>
       </div>
     </a>
     <a class="right-next"

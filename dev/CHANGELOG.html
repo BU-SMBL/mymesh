@@ -416,11 +416,38 @@
 <section id="feat">
 <h3>Feat<a class="headerlink" href="#feat" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p>add TaubinSmoothing</p></li>
+<li><p><strong>improvement.Flip</strong>: implement preliminary flipping procedures</p></li>
+<li><p><strong>mymesh.mesh.dmesh</strong>: add removeElems function</p></li>
+<li><p><strong>improvement.Split</strong>: add support for triangular mesh edge splitting</p></li>
+<li><p><strong>curvature.ImageCurvature</strong>: support non-isotropic voxel sizes</p></li>
+<li><p><strong>demo_image</strong>: add scalefactor option</p></li>
+<li><p><strong>register</strong>: add AxisAlignMesh</p></li>
+<li><p><strong>mesh</strong>: add Transform method</p></li>
 </ul>
 </section>
 <section id="fix">
 <h3>Fix<a class="headerlink" href="#fix" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>quality.Skewness</strong>: fix type handling</p></li>
+<li><p><strong>delaunay.FanTriangulation</strong>: fix handling of unordered hull edges</p></li>
+<li><p><strong>mesh.plot</strong>: fix clim option</p></li>
+<li><p><strong>visualize.View</strong>: improve plotting of points</p></li>
+<li><p><strong>primitives.Box</strong>: switch n to optional</p></li>
+<li><p><strong>utils.identify_elem</strong>: handle empty mesh edge case</p></li>
+<li><p>support quadratic elements in surf2tris</p></li>
+</ul>
+</section>
+</section>
+<section id="id1">
+<h2>0.2.0 (2025-11-03)<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<section id="id2">
+<h3>Feat<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>add TaubinSmoothing</p></li>
+</ul>
+</section>
+<section id="id3">
+<h3>Fix<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>bugfixes in Image2Image</p></li>
 <li><p>improve ICP performance and robustness</p></li>
@@ -430,16 +457,16 @@
 </ul>
 </section>
 </section>
-<section id="id1">
-<h2>0.1.1 (2025-10-10)<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
-<section id="id2">
-<h3>Feat<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<section id="id4">
+<h2>0.1.1 (2025-10-10)<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<section id="id5">
+<h3>Feat<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>add additional surfaces to tpms</p></li>
 </ul>
 </section>
-<section id="id3">
-<h3>Fix<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<section id="id6">
+<h3>Fix<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>handle sets in mymesh2meshio</p></li>
 <li><p>improve handling of meshes for .ply</p></li>
@@ -452,8 +479,8 @@
 <section id="alpha-2025-09-22">
 <h2>0.1.0-alpha (2025-09-22)<a class="headerlink" href="#alpha-2025-09-22" title="Link to this heading">#</a></h2>
 </section>
-<section id="id4">
-<h2>0.0.1 (2024-11-24)<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<section id="id7">
+<h2>0.0.1 (2024-11-24)<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
 </section>
 </section>
 
@@ -509,13 +536,18 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fix">Fix</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">0.1.1 (2025-10-10)</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">0.2.0 (2025-11-03)</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Feat</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Fix</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">0.1.1 (2025-10-10)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Feat</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Fix</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alpha-2025-09-22">0.1.0-alpha (2025-09-22)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">0.0.1 (2024-11-24)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">0.0.1 (2024-11-24)</a></li>
 </ul>
   </nav></div>
 

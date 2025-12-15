@@ -24,6 +24,7 @@ Topological Modifications
     :maxdepth: 1
     :hidden:
 
+    flipstri
     flips23
     edgecontract
 
@@ -35,6 +36,7 @@ contraction and splitting, which can be used to coarsen and refine a mesh,
 respectively. 
 
 
+    * :ref:`Triangular Edge Flips`
     * :ref:`2→3 and 3→2 Flips`
     * :ref:`Edge Contraction`
 

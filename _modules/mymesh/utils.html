@@ -2406,6 +2406,32 @@
 <span class="sd">    mat : np.ndarray, optional</span>
 <span class="sd">        Rotation matrix that aligns the input Points with the local coordinate</span>
 <span class="sd">        system of the MVBB</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        import mymesh</span>
+<span class="sd">        import numpy as np</span>
+
+<span class="sd">        # Load the stanford bunny</span>
+<span class="sd">        m = mymesh.demo_mesh(&#39;bunny&#39;) </span>
+
+<span class="sd">        # Perform an arbitrary rotation transformation to the mesh</span>
+<span class="sd">        m = m.Transform([np.pi/6, -np.pi/6, np.pi/6],</span>
+<span class="sd">                        transformation=&#39;rotation&#39;, InPlace=True)</span>
+
+<span class="sd">        mvbb = utils.MVBB(m.NodeCoords)</span>
+<span class="sd">        box = mymesh.primitives.Box(mvbb, Type=&#39;surf&#39;)</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+<span class="sd">        :include-source: False</span>
+
+<span class="sd">        m.merge(box)</span>
+<span class="sd">        m.plot(show_faces=False, show_points=True, show_edges=True, view=&#39;xy&#39;)</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>    
 
@@ -2512,6 +2538,33 @@
 <span class="sd">    -------</span>
 <span class="sd">    aabb : np.ndarray</span>
 <span class="sd">        Coordinates of the corners of the AABB</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        import mymesh</span>
+<span class="sd">        import numpy as np</span>
+
+<span class="sd">        # Load the stanford bunny</span>
+<span class="sd">        m = mymesh.demo_mesh(&#39;bunny&#39;) </span>
+
+<span class="sd">        # Perform an arbitrary rotation transformation to the mesh</span>
+<span class="sd">        m = m.Transform([np.pi/6, -np.pi/6, np.pi/6],</span>
+<span class="sd">                        transformation=&#39;rotation&#39;, InPlace=True)</span>
+
+<span class="sd">        mvbb = utils.AABB(m.NodeCoords)</span>
+<span class="sd">        box = mymesh.primitives.Box(mvbb, Type=&#39;surf&#39;)</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+<span class="sd">        :include-source: False</span>
+
+<span class="sd">        m.merge(box)</span>
+<span class="sd">        m.plot(show_faces=False, show_points=True, show_edges=True, view=&#39;xy&#39;)</span>
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">Points</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="c1"># 2D</span>
@@ -2850,6 +2903,9 @@
 <span class="sd">    [&#39;tri&#39;]</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">elems</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">elems</span>
     <span class="n">ambiguous_lengths</span> <span class="o">=</span> <span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">}</span> <span class="c1"># Element lengths that are ambiguous</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">and</span> <span class="n">NodeConn</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="p">:</span>
         <span class="n">lengths</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)[</span><span class="mi">1</span><span class="p">],)</span>

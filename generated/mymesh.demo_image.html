@@ -432,7 +432,7 @@
 <h1>mymesh.demo_image<a class="headerlink" href="#mymesh-demo-image" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.demo_image">
-<span class="sig-prename descclassname"><span class="pre">mymesh.</span></span><span class="sig-name descname"><span class="pre">demo_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bunny'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mymesh.html#demo_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.demo_image" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mymesh.</span></span><span class="sig-name descname"><span class="pre">demo_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bunny'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalefactor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mymesh.html#demo_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.demo_image" title="Link to this definition">#</a></dt>
 <dd><p>Example image data from online databases</p>
 <p>Since data is obtained on-demand from online sources, internet connectivity
 is required.</p>
@@ -446,6 +446,8 @@ Available options are:</p>
 </ul>
 </p></li>
 <li><p><strong>normalize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Normalize image data to the range 0-255 in uint8 format, by default True</p></li>
+<li><p><strong>scalefactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Upsample or downsample the image, e.g. scalefactor=0.5 will provide an
+image at half the resolution as the original.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

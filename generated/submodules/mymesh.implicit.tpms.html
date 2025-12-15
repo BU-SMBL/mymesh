@@ -447,6 +447,7 @@
 <li><p>’diamond’ or ‘D’ - Schwarz D</p></li>
 <li><p>’S’ - Fischer-Koch S</p></li>
 <li><p>’Lidinoid’</p></li>
+<li><p>’Neovius’</p></li>
 <li><p>’IWP’</p></li>
 <li><p>’FRD’</p></li>
 <li><p>All 3D nodal surfaces from <span id="id1">von Schnering and Nesper [<a class="reference internal" href="../../guide/ref.html#id28" title="H. G. von Schnering and R. Nesper. Nodal surfaces of Fourier series: Fundamental invariants of structured matter. Zeitschrift für Physik B Condensed Matter, 83(3):407–412, 1991. URL: https://www.doi.org/10.1007/BF01313411, doi:10.1007/BF01313411.">vSN91</a>]</span> (Table 1)
@@ -468,6 +469,71 @@ implicit.wrapfunc(func)</p>
 <dd class="field-odd"><p>callable</p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">func</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">tpms</span><span class="p">(</span><span class="s1">&#39;gyroid&#39;</span><span class="p">)</span>
+<span class="n">surf</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.02</span><span class="p">)</span>
+<span class="n">surf</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../_images/mymesh-implicit-tpms-1.png" class="plot-directive" src="../../_images/mymesh-implicit-tpms-1.png" />
+</figure>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">func</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">tpms</span><span class="p">(</span><span class="s1">&#39;primitive&#39;</span><span class="p">)</span>
+<span class="n">surf</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.02</span><span class="p">)</span>
+<span class="n">surf</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../_images/mymesh-implicit-tpms-2.png" class="plot-directive" src="../../_images/mymesh-implicit-tpms-2.png" />
+</figure>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">func</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">tpms</span><span class="p">(</span><span class="s1">&#39;diamond&#39;</span><span class="p">)</span>
+<span class="n">surf</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.02</span><span class="p">)</span>
+<span class="n">surf</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../_images/mymesh-implicit-tpms-3.png" class="plot-directive" src="../../_images/mymesh-implicit-tpms-3.png" />
+</figure>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">func</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">tpms</span><span class="p">(</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
+<span class="n">surf</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.02</span><span class="p">)</span>
+<span class="n">surf</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../_images/mymesh-implicit-tpms-4.png" class="plot-directive" src="../../_images/mymesh-implicit-tpms-4.png" />
+</figure>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">func</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">tpms</span><span class="p">(</span><span class="s1">&#39;Lidinoid&#39;</span><span class="p">)</span>
+<span class="n">surf</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.02</span><span class="p">)</span>
+<span class="n">surf</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../_images/mymesh-implicit-tpms-5.png" class="plot-directive" src="../../_images/mymesh-implicit-tpms-5.png" />
+</figure>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">func</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">tpms</span><span class="p">(</span><span class="s1">&#39;Neovius&#39;</span><span class="p">)</span>
+<span class="n">surf</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.02</span><span class="p">)</span>
+<span class="n">surf</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../_images/mymesh-implicit-tpms-6.png" class="plot-directive" src="../../_images/mymesh-implicit-tpms-6.png" />
+</figure>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">func</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">tpms</span><span class="p">(</span><span class="s1">&#39;IWP&#39;</span><span class="p">)</span>
+<span class="n">surf</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.02</span><span class="p">)</span>
+<span class="n">surf</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../_images/mymesh-implicit-tpms-7.png" class="plot-directive" src="../../_images/mymesh-implicit-tpms-7.png" />
+</figure>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">func</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">tpms</span><span class="p">(</span><span class="s1">&#39;FRD&#39;</span><span class="p">)</span>
+<span class="n">surf</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.02</span><span class="p">)</span>
+<span class="n">surf</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../_images/mymesh-implicit-tpms-8.png" class="plot-directive" src="../../_images/mymesh-implicit-tpms-8.png" />
+</figure>
 </dd></dl>
 
 </section>

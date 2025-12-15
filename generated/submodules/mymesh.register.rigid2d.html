@@ -441,9 +441,8 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>I</strong> (<em>np.ndarray</em>) – numpy array containing the image data</p></li>
-<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – 6 item list, containing the x, y, and z translations and rotations
-[t0, t1, t2, alpha, beta, gamma], where angles are specified in radians
-and displacements are specified in pixels.</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – 3 item list, containing the x and y translations and rotation about z
+<code class="code docutils literal notranslate"><span class="pre">[t0,</span> <span class="pre">t1,</span> <span class="pre">theta]</span></code>, where angles are specified in radians.</p></li>
 <li><p><strong>center</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> or </em><em>np.ndarary</em><em>, </em><em>optional</em>) – Reference point for the rotation</p></li>
 </ul>
 </dd>

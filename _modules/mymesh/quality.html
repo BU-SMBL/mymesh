@@ -728,9 +728,9 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    NodeCoords : list</span>
+<span class="sd">    NodeCoords : array_like</span>
 <span class="sd">        List of nodal coordinates.</span>
-<span class="sd">    NodeConn : list</span>
+<span class="sd">    NodeConn : list, array_like</span>
 <span class="sd">        List of nodal connectivities.</span>
 <span class="sd">    verbose : bool, optional</span>
 <span class="sd">        If true, will print min, max, and mean element quality, as well </span>
@@ -767,16 +767,16 @@
             <span class="n">otherIdx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ls</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">triIdx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">Tris</span> <span class="o">=</span> <span class="p">[</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">triIdx</span><span class="p">]</span>
-            <span class="n">TriSkew</span> <span class="o">=</span> <span class="n">tri_area_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">Tris</span><span class="p">)</span>
+            <span class="n">Tris</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">triIdx</span><span class="p">])</span>
+            <span class="n">TriSkew</span> <span class="o">=</span> <span class="n">tri_area_skewness</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">),</span><span class="n">Tris</span><span class="p">)</span>
             <span class="n">skew</span><span class="p">[</span><span class="n">triIdx</span><span class="p">]</span> <span class="o">=</span> <span class="n">TriSkew</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tetIdx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">Tets</span> <span class="o">=</span> <span class="p">[</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tetIdx</span><span class="p">]</span>
-            <span class="n">TetSkew</span> <span class="o">=</span> <span class="n">tet_vol_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">Tets</span><span class="p">)</span>
+            <span class="n">Tets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tetIdx</span><span class="p">])</span>
+            <span class="n">TetSkew</span> <span class="o">=</span> <span class="n">tet_vol_skewness</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">),</span><span class="n">Tets</span><span class="p">)</span>
             <span class="n">skew</span><span class="p">[</span><span class="n">tetIdx</span><span class="p">]</span> <span class="o">=</span> <span class="n">TetSkew</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">otherIdx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">Others</span> <span class="o">=</span> <span class="p">[</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">otherIdx</span><span class="p">]</span>
-            <span class="n">OtherSkew</span> <span class="o">=</span> <span class="n">equiangular_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">Others</span><span class="p">)</span>
+            <span class="n">Others</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">otherIdx</span><span class="p">])</span>
+            <span class="n">OtherSkew</span> <span class="o">=</span> <span class="n">equiangular_skewness</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">),</span><span class="n">Others</span><span class="p">)</span>
             <span class="n">skew</span><span class="p">[</span><span class="n">otherIdx</span><span class="p">]</span> <span class="o">=</span> <span class="n">OtherSkew</span>
 
     <span class="k">else</span><span class="p">:</span>
@@ -1255,7 +1255,7 @@
 <span class="sd">    skew : np.ndarray</span>
 <span class="sd">        Array of skewness for each element.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)]</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">]</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">B</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">C</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
@@ -1305,7 +1305,7 @@
     <span class="c1"># Area-based</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="mi">1</span><span class="p">)))])</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="n">Area</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">tri_area</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
     <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)]</span>
     <span class="c1"># edge lengths</span>
     <span class="n">e1</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>

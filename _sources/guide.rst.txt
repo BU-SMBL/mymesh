@@ -18,6 +18,11 @@ User Guide
     guide/matlab
     guide/ref
 
+Getting Started
+---------------
+
+If you're new to MyMesh, see :ref:`Installation` and :ref:`Getting Started`. 
+
 Package Overview
 ----------------
 

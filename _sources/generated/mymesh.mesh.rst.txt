@@ -72,6 +72,7 @@ Methods
             ~mesh.mesh.RenumberFacesBySet
             ~mesh.mesh.RenumberNodesBySet
             ~mesh.mesh.Threshold
+            ~mesh.mesh.Transform
             ~mesh.mesh.addEdges
             ~mesh.mesh.addElems
             ~mesh.mesh.addFaces

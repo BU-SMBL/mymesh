@@ -23,7 +23,7 @@ Examples for analyzing meshes.
   .. image:: /examples/MeshAnalysis/images/thumb/sphx_glr_demo_curvature_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_MeshAnalysis_demo_curvature.py`
+  :doc:`/examples/MeshAnalysis/demo_curvature`
 
 .. raw:: html
 

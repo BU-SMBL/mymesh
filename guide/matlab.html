@@ -424,23 +424,21 @@
 The python environment must be set to an environment where MyMesh has been
 installed (see <a class="reference external" href="https://www.mathworks.com/help/matlab/ref/pyenv.html">pyenv</a>).
 See the <a class="reference external" href="https://www.mathworks.com/support/requirements/python-compatibility.html">list of compatible versions</a>
-to be sure an appropriate python version is set for the MATLAB version being used.
-MyMesh seems to run better when the execution mode is set to “OutOfProcess”.
-(<code class="code docutils literal notranslate"><span class="pre">pyenv(&quot;ExecutionMode&quot;,</span> <span class="pre">&quot;OutOfProcess&quot;)</span></code>)</p>
+to be sure an appropriate python version is set for the MATLAB version being used.</p>
 <p>Once the environment is set, MyMesh commands (or other python functions) can be
 run by adding a <code class="code docutils literal notranslate"><span class="pre">py.</span></code> prefix, for example:</p>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">M</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">py</span><span class="p">.</span><span class="n">mymesh</span><span class="p">.</span><span class="n">primitives</span><span class="p">.</span><span class="n">Torus</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>There is no need to first <cite>import</cite> MyMesh.</p>
+<p>There is no need to first <cite>import</cite> MyMesh like you would in Python; as long as it’s installed in the environment it will be available.</p>
+<p>Only limited testing of MyMesh in Matlab has been performed, so proceed with caution and please report any issues that you encounter.</p>
 <section id="tips-for-using-mymesh-in-matlab">
 <h2>Tips for using MyMesh in MATLAB<a class="headerlink" href="#tips-for-using-mymesh-in-matlab" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>If a <code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code> object is created without being suppressed by a
-semicolon, all properties (e.g. <code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.Centroids</span></code>,
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.NodeNeighbors</span></code>, etc.) will be evaluated. For large meshes,
-this may cause a significant amount of overhead.</p></li>
+<li><p>If a <code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code> object is created without being suppressed by a semicolon, all properties (e.g. <a class="reference internal" href="../generated/mymesh.mesh.mesh.Centroids.html#mymesh.mesh.mesh.Centroids" title="mymesh.mesh.mesh.Centroids"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Centroids</span></code></a>, <a class="reference internal" href="../generated/mymesh.mesh.mesh.NodeNeighbors.html#mymesh.mesh.mesh.NodeNeighbors" title="mymesh.mesh.mesh.NodeNeighbors"><code class="xref py py-attr docutils literal notranslate"><span class="pre">NodeNeighbors</span></code></a>, etc.) will be evaluated. For large meshes, this may cause a significant amount of overhead.</p></li>
+<li><p>MyMesh seems to run better when the execution mode is set to “OutOfProcess”</p></li>
 </ul>
+<p>(<code class="code docutils literal notranslate"><span class="pre">pyenv(&quot;ExecutionMode&quot;,</span> <span class="pre">&quot;OutOfProcess&quot;)</span></code>).</p>
 </section>
 </section>
 

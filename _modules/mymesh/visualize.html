@@ -444,14 +444,21 @@
 
 <div class="viewcode-block" id="View">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.visualize.View.html#mymesh.visualize.View">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">View</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">interactive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">face_alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color_convert</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-    <span class="n">clim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="n">scalar_preference</span><span class="o">=</span><span class="s1">&#39;nodes&#39;</span><span class="p">,</span>
-    <span class="n">view</span><span class="o">=</span><span class="s1">&#39;iso&#39;</span><span class="p">,</span> <span class="n">scalars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_faces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-    <span class="n">line_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-    <span class="n">return_image</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hide</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">,</span>
-    <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">800</span><span class="p">,</span><span class="mi">600</span><span class="p">)):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">View</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> 
+    <span class="n">view</span><span class="o">=</span><span class="s1">&#39;iso&#39;</span><span class="p">,</span> 
+    <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scalars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">,</span>
+    <span class="n">show_faces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">face_alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">show_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">point_color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+    <span class="n">hide_free_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">scalar_preference</span><span class="o">=</span><span class="s1">&#39;nodes&#39;</span><span class="p">,</span>
+    <span class="n">theme</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span>  <span class="n">bgcolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">800</span><span class="p">,</span><span class="mi">600</span><span class="p">),</span>
+    <span class="n">color_convert</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">interactive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+    <span class="n">return_image</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+    <span class="n">hide</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+    <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize a mesh.</span>
 <span class="sd">    View uses vispy for visualization.</span>
@@ -590,6 +597,8 @@
     
     <span class="c1"># Set up mesh</span>
     <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span><span class="c1"># - np.mean(M.NodeCoords,axis=0) # Centering mesh in window</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span>
     <span class="k">if</span> <span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">vertices</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">),</span><span class="mi">1</span><span class="p">))])</span>
     <span class="k">if</span> <span class="n">M</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
@@ -711,9 +720,12 @@
         <span class="n">canvasview</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">wireframe</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">wireframe_only</span><span class="p">:</span>
         <span class="n">canvasview</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vsmesh</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hide_free_nodes</span><span class="p">:</span>
+        <span class="n">vertices</span><span class="o">=</span><span class="n">vertices</span><span class="p">[</span><span class="n">M</span><span class="o">.</span><span class="n">MeshNodes</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">show_points</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">vertex_colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">vertex_colors</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+            <span class="n">vertex_colors</span> <span class="o">=</span> <span class="n">point_color</span>
+            
         <span class="n">points</span> <span class="o">=</span> <span class="n">Markers</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">vertices</span><span class="p">,</span> <span class="n">edge_width</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">face_color</span><span class="o">=</span><span class="n">vertex_colors</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">point_size</span><span class="p">,</span> <span class="n">edge_color</span><span class="o">=</span><span class="n">vertex_colors</span><span class="p">)</span>
         <span class="n">points</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span>
         <span class="n">canvasview</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>

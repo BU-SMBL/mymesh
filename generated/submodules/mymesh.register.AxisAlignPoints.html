@@ -437,7 +437,7 @@
 <dt class="sig sig-object py" id="mymesh.register.AxisAlignPoints">
 <span class="sig-prename descclassname"><span class="pre">mymesh.register.</span></span><span class="sig-name descname"><span class="pre">AxisAlignPoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[2,</span> <span class="pre">1,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_transformed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MVBB'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/register.html#AxisAlignPoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.register.AxisAlignPoints" title="Link to this definition">#</a></dt>
 <dd><p>Align an point cloud to the x, y, z axes. This works by identifying
-the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and
+the minimum volume bounding box (see <a class="reference internal" href="mymesh.utils.MVBB.html#mymesh.utils.MVBB" title="mymesh.utils.MVBB"><code class="xref py py-func docutils literal notranslate"><span class="pre">MVBB()</span></code></a>) and
 aligning that box to the principal axes, so point clouds representing
 rounded objects with ambiguous orientation may be oriented
 seemingly-arbitrarily. The center of the object (defined as the centroid
@@ -457,8 +457,8 @@ combination of 0, 1, and 2.</p></li>
 of the bounding box of the object after transformation. If <cite>None</cite>, the
 center of the oriented points will be the center of the original points,
 by default None.</p></li>
-<li><p><strong>return_transform</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to return the transformation matrix as well as the transformed
-point cloud, by default False</p></li>
+<li><p><strong>return_transformed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to return the transformed point cloud, by default True</p></li>
+<li><p><strong>return_transform</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to return the transformation matrix, by default False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -471,6 +471,25 @@ point cloud, by default False</p></li>
 </p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">mymesh</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># Load the stanford bunny</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">mymesh</span><span class="o">.</span><span class="n">demo_mesh</span><span class="p">(</span><span class="s1">&#39;bunny&#39;</span><span class="p">)</span>
+
+<span class="c1"># Perform an arbitrary rotation transformation to the mesh</span>
+<span class="n">points</span> <span class="o">=</span> <span class="n">mymesh</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">transform_points</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">mymesh</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">rotation</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">6</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">6</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">6</span><span class="p">]))</span>
+
+<span class="n">transformed_points</span> <span class="o">=</span> <span class="n">mymesh</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">AxisAlignPoints</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../_images/mymesh-register-AxisAlignPoints-2_00.png" class="plot-directive" src="../../_images/mymesh-register-AxisAlignPoints-2_00.png" />
+</figure>
+<figure class="align-default">
+<img alt="../../_images/mymesh-register-AxisAlignPoints-2_01.png" class="plot-directive" src="../../_images/mymesh-register-AxisAlignPoints-2_01.png" />
+</figure>
 </dd></dl>
 
 </section>

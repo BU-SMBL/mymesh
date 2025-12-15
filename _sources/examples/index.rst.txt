@@ -39,7 +39,7 @@ Examples for analyzing meshes.
   .. image:: /examples/MeshAnalysis/images/thumb/sphx_glr_demo_curvature_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_MeshAnalysis_demo_curvature.py`
+  :doc:`/examples/MeshAnalysis/demo_curvature`
 
 .. raw:: html
 
@@ -74,7 +74,7 @@ Examples for different methods of generating meshes.
   .. image:: /examples/MeshGeneration/images/thumb/sphx_glr_demo_heart_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_MeshGeneration_demo_heart.py`
+  :doc:`/examples/MeshGeneration/demo_heart`
 
 .. raw:: html
 
@@ -91,7 +91,7 @@ Examples for different methods of generating meshes.
   .. image:: /examples/MeshGeneration/images/thumb/sphx_glr_demo_pasta_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_MeshGeneration_demo_pasta.py`
+  :doc:`/examples/MeshGeneration/demo_pasta`
 
 .. raw:: html
 
@@ -108,7 +108,7 @@ Examples for different methods of generating meshes.
   .. image:: /examples/MeshGeneration/images/thumb/sphx_glr_demo_mixed-top_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_MeshGeneration_demo_mixed-top.py`
+  :doc:`/examples/MeshGeneration/demo_mixed-top`
 
 .. raw:: html
 

@@ -413,6 +413,7 @@
 <span class="sd">    :toctree: submodules/</span>
 
 <span class="sd">    LocalLaplacianSmoothing</span>
+<span class="sd">    TaubinSmoothing</span>
 <span class="sd">    TangentialLaplacianSmoothing</span>
 <span class="sd">    SmartLaplacianSmoothing</span>
 <span class="sd">    GeoTransformSmoothing</span>
@@ -425,7 +426,7 @@
 <span class="sd">    :toctree: submodules/</span>
 
 <span class="sd">    Contract</span>
-<span class="sd">    TetSplit</span>
+<span class="sd">    Split</span>
 <span class="sd">    TetFlip</span>
 <span class="sd">    TetImprove</span>
 
@@ -586,6 +587,8 @@
     <span class="k">return</span> <span class="n">Mnew</span></div>
 
 
+<div class="viewcode-block" id="TaubinSmoothing">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.improvement.TaubinSmoothing.html#mymesh.improvement.TaubinSmoothing">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">TaubinSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">Lambda</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">Mu</span><span class="o">=-</span><span class="mf">0.6382</span><span class="p">,</span> <span class="n">pass_band</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Performs Taubin smoothing :cite:p:`Taubin1995`. </span>
@@ -655,7 +658,7 @@
 <span class="sd">    .. plot::</span>
 
 <span class="sd">        M = implicit.SurfaceMesh(implicit.sphere([0,0,0], 1), [-1,1,-1,1,-1,1],  .1)</span>
-<span class="sd">        Mnew = improvement.LocalLaplacianSmoothing(M, options=dict(iterate=1))</span>
+<span class="sd">        Mnew = improvement.TaubinSmoothing(M, options=dict(iterate=1))</span>
 <span class="sd">        </span>
 <span class="sd">        visualize.Subplot([M, Mnew], (1,2), bgcolor=&#39;w&#39;, show_edges=True)</span>
 
@@ -748,7 +751,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">Mnew</span>
+    <span class="k">return</span> <span class="n">Mnew</span></div>
+
 
 <div class="viewcode-block" id="TangentialLaplacianSmoothing">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.improvement.TangentialLaplacianSmoothing.html#mymesh.improvement.TangentialLaplacianSmoothing">[docs]</a>
@@ -796,6 +800,16 @@
 <span class="sd">    -------</span>
 <span class="sd">    Mnew : mymesh.mesh</span>
 <span class="sd">        Mesh object with the new node locations.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    .. plot::</span>
+
+<span class="sd">        M = implicit.SurfaceMesh(implicit.sphere([0,0,0], 1), [-1,1,-1,1,-1,1],  .1)</span>
+<span class="sd">        Mnew = improvement.TangentialLaplacianSmoothing(M, options=dict(iterate=1))</span>
+<span class="sd">        </span>
+<span class="sd">        visualize.Subplot([M, Mnew], (1,2), bgcolor=&#39;w&#39;, show_edges=True)</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
 
     
@@ -2425,9 +2439,9 @@
     <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">return</span> <span class="n">success</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">EdgeStatus</span><span class="p">,</span> <span class="n">to_add</span><span class="p">,</span> <span class="n">Exit</span>
 
-<div class="viewcode-block" id="TetSplit">
-<a class="viewcode-back" href="../../generated/submodules/mymesh.improvement.TetSplit.html#mymesh.improvement.TetSplit">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">TetSplit</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sizing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">QualitySizing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Split">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.improvement.Split.html#mymesh.improvement.Split">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Split</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sizing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">QualitySizing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Edge splitting of tetrahedral meshes. Edges with length greater than the </span>
 <span class="sd">    specified edge length (`h`) will be split by placing a new node at the </span>
@@ -2546,7 +2560,7 @@
         <span class="n">tqdm_loaded</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">tqdm_loaded</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;TetSplit:&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Split:&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="n">valid</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">invalid</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">tqdm_loaded</span><span class="p">:</span>
@@ -2576,16 +2590,16 @@
     <span class="n">NewConn</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span>
     <span class="n">new_labels</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">ElemLabels</span>
     <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
-        <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
+        <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
+        <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_labels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">Mnew</span><span class="o">.</span><span class="n">ElemData</span><span class="p">[</span><span class="n">label_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_labels</span>
 
     <span class="k">return</span> <span class="n">Mnew</span></div>
 
 
-<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_do_split</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">):</span>
 
     <span class="n">node1</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -2601,51 +2615,87 @@
         <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">to_add</span>
 
     <span class="n">shared_elems</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">elemconn1</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">elemconn2</span><span class="p">)))[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Elements connected to the edge, sorted largest index to smallest</span>
-    <span class="n">NewElems</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shared_elems</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">to_add</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">shared_elems</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">elem_type</span> <span class="o">=</span> <span class="s1">&#39;tri&#39;</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">shared_elems</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">elem_type</span> <span class="o">=</span> <span class="s1">&#39;tet&#39;</span>
+    <span class="n">NewTets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">NewTris</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">shared_elems</span><span class="p">:</span>
-        
         <span class="n">elem</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]</span>
-        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">elem</span>
+        <span class="k">if</span> <span class="n">elem_type</span> <span class="o">==</span> <span class="s1">&#39;tet&#39;</span><span class="p">:</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">elem</span>
 
-        <span class="n">lookup_key</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">edge</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">lookup_key</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">edge</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-        <span class="k">if</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">),</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
-            <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
-            <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">),</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+                <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+                <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
-            <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">),</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
-            <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
-            <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
-        
-        <span class="k">elif</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
-            <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">),</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
-            <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
-            <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
-
-        <span class="k">elif</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
-            <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">),</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
-            <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
-            <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">),</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+                <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+                <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
             
-        <span class="k">elif</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>
-            <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">),</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
-            <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
-            <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+                <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">),</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+                <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+                <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">12</span><span class="p">:</span>
-            <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">N</span><span class="p">),</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
-            <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
-            <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+                <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">),</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+                <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+                <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+                
+            <span class="k">elif</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">),</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+                <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+                <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">12</span><span class="p">:</span>
+                <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">N</span><span class="p">),</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+                <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+                <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Unexpected behavior in edge splitting - likely related to a bug.&#39;</span><span class="p">)</span>
+            <span class="n">NewTets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_elems</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">elem_type</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">elem</span>
+
+            <span class="n">lookup_key</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">edge</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="c1"># (opposite, edge, edge)</span>
+                <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">),(</span><span class="n">c</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+                <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+                <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="c1"># (edge, opposite, edge)</span>
+                <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">),(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+                <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+                <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">lookup_key</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+                <span class="c1"># (edge, edge, opposite)</span>
+                <span class="n">new_elems</span> <span class="o">=</span> <span class="p">((</span><span class="n">c</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">),(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+                <span class="n">newedge1</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+                <span class="n">newedge2</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Unexpected behavior in edge splitting - likely related to a bug.&#39;</span><span class="p">)</span>
+            <span class="n">NewTris</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_elems</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Unexpected behavior in edge splitting - likely related to a bug.&#39;</span><span class="p">)</span>
-        <span class="n">NewElems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_elems</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid Element Type.&#39;</span><span class="p">)</span>
+        
         <span class="n">newedge1_L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">newedge1</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="n">newnode</span><span class="p">)</span>
         <span class="n">newedge2_L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">newedge2</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="n">newnode</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">newedge1_L</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">emin</span><span class="p">[</span><span class="n">newedge1</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="n">new_emin</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="ow">or</span> <span class="n">newedge2_L</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">emin</span><span class="p">[</span><span class="n">newedge1</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="n">new_emin</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">to_add</span>
-
+    <span class="k">if</span> <span class="n">elem_type</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
+        <span class="n">NewElems</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NewTris</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">NewElems</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NewTets</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
     <span class="c1"># Adding node manually instead of using D.addNodes so that emax can be tracked with it</span>
     <span class="n">NewLength</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NNode</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">_NodeCoords</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">NewLength</span><span class="p">:</span>
@@ -2667,18 +2717,21 @@
     <span class="n">emin</span><span class="p">[</span><span class="n">D</span><span class="o">.</span><span class="n">NNode</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_emin</span>
 
     <span class="n">D</span><span class="o">.</span><span class="n">NNode</span> <span class="o">=</span> <span class="n">NewLength</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">quality</span><span class="o">.</span><span class="n">tet_volume</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_elems</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">to_add</span>
+    <span class="k">if</span> <span class="n">elem_type</span> <span class="o">==</span><span class="s1">&#39;tet&#39;</span><span class="p">:</span>
+        <span class="c1"># 3D Element inversion check</span>
+        <span class="k">for</span> <span class="n">new_elems</span> <span class="ow">in</span> <span class="n">NewElems</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">quality</span><span class="o">.</span><span class="n">tet_volume</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">new_elems</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">to_add</span>
     <span class="k">if</span> <span class="o">-</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">emax</span><span class="p">[</span><span class="n">node1</span><span class="p">]</span> <span class="o">+</span> <span class="n">emax</span><span class="p">[</span><span class="n">node2</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span>
         <span class="c1"># If the split edges still exceed emax, add the new edges to the heap</span>
         <span class="c1"># NOTE: L is inverted for proper heap sorting</span>
         <span class="n">to_add</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">,(</span><span class="n">node1</span><span class="p">,</span> <span class="n">N</span><span class="p">)))</span>
         <span class="n">to_add</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">,(</span><span class="n">node2</span><span class="p">,</span> <span class="n">N</span><span class="p">)))</span>
-    <span class="k">for</span> <span class="n">new_elems</span> <span class="ow">in</span> <span class="n">NewElems</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">new_elems</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">NewElems</span><span class="p">):</span>
         <span class="c1"># Add new elements to the mesh</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">ElemLabels</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">new_elem</span> <span class="ow">in</span> <span class="n">new_elems</span><span class="p">:</span>
-                <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">new_elem</span><span class="p">,</span> <span class="n">D</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>
+                <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">new_elem</span><span class="p">,</span> <span class="n">D</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">[</span><span class="n">shared_elems</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">new_elem</span> <span class="ow">in</span> <span class="n">new_elems</span><span class="p">:</span>
                 <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">new_elem</span><span class="p">)</span>
@@ -2846,7 +2899,7 @@
 
             <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span>
                 <span class="c1"># Split</span>
-                <span class="n">M</span> <span class="o">=</span> <span class="n">TetSplit</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">4</span><span class="o">/</span><span class="mi">3</span><span class="o">*</span><span class="n">h</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">sizing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">QualitySizing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="n">Split</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">4</span><span class="o">/</span><span class="mi">3</span><span class="o">*</span><span class="n">h</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">sizing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">QualitySizing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
             <span class="k">elif</span> <span class="n">operation</span> <span class="o">==</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span>
                 <span class="c1"># Contract</span>
@@ -3511,31 +3564,278 @@
 
     <span class="k">return</span>  <span class="n">success</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">TetFlip2</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Flip</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;valence&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Edge/Face flipping of triangular and tetrahedral mesh quality improvement.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    M : mymesh.mesh</span>
+<span class="sd">        Tetrahedral or triangular mesh</span>
+<span class="sd">    strategy : str, optional</span>
+<span class="sd">        Flipping strategy, by default &#39;valence&#39;</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        If true, will display progress, by default True</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Mnew : mymesh.mesh</span>
+<span class="sd">        Updated mesh</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="n">elemtypes</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">ElemType</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemtypes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Mesh must be purely triangular or tetrahedral.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">elemtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;tri&#39;</span>
+    <span class="k">elif</span> <span class="n">elemtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;tet&#39;</span><span class="p">:</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;tet&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Mesh must be purely triangular or tetrahedral.&#39;</span><span class="p">)</span>
+    
     <span class="n">Edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">Edges</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
     <span class="n">EdgeTuple</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span><span class="n">Edges</span><span class="p">))</span>
     <span class="n">EdgeSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">EdgeTuple</span><span class="p">)</span>
 
     <span class="n">D</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">mesh2dmesh</span><span class="p">()</span><span class="c1">#(ElemLabels=labels)</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_Tet32Flip2</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">):</span>
-    <span class="k">pass</span>
+    <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="s1">&#39;tqdm&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+        <span class="n">tqdm_loaded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">progress</span> <span class="o">=</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">EdgeSet</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tqdm_loaded</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Flip:&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
-    <span class="n">node1</span><span class="p">,</span> <span class="n">node2</span> <span class="o">=</span> <span class="n">edge</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">EdgeSet</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">tqdm_loaded</span><span class="p">:</span>
+            <span class="n">progress</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">L1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">EdgeSet</span><span class="p">)</span>
+
+        <span class="n">edge</span> <span class="o">=</span> <span class="n">EdgeSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span> <span class="o">=</span> <span class="n">_tri_flip</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">)</span>
+            <span class="n">EdgeSet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span> <span class="o">=</span> <span class="n">_tet_flip32</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">)</span>
+            <span class="n">EdgeSet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">tqdm_loaded</span><span class="p">:</span>
+            <span class="n">L2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">EdgeSet</span><span class="p">)</span>
+            <span class="n">progress</span><span class="o">.</span><span class="n">total</span> <span class="o">+=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">L2</span><span class="o">-</span><span class="n">L1</span><span class="p">)</span>
+    
+
+    <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span>
+    <span class="n">NewConn</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span>
+    <span class="c1"># new_labels = D.ElemLabels</span>
+
+    <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+        <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+    <span class="c1"># if len(new_labels) &gt; 0:</span>
+    <span class="c1">#     Mnew.ElemData[label_str] = new_labels</span>
+
+    <span class="k">return</span> <span class="n">Mnew</span>
+
+<span class="nd">@try_njit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_tri_flip</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;valence&#39;</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+
+    <span class="n">to_add</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">node1</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">node2</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
     <span class="n">elemconn1</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">node1</span><span class="p">)</span>
     <span class="n">elemconn2</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">node2</span><span class="p">)</span>
+
     <span class="n">shared_elems</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">elemconn1</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">elemconn2</span><span class="p">)))[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Elements connected to the edge, sorted largest index to smallest</span>
 
+    <span class="c1"># CHECK 1: boundary edge</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shared_elems</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span>
+    
+    <span class="c1"># opposite nodes </span>
+    <span class="n">elem1</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">shared_elems</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">elem2</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">shared_elems</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">node3</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">elem1</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">edge</span><span class="p">))</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="n">node4</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">elem2</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">edge</span><span class="p">))</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+    <span class="c1"># Reorder elem1 so that node3 is in the middle</span>
+    <span class="k">while</span> <span class="n">elem1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">node3</span><span class="p">:</span> 
+        <span class="n">elem1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">elem1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># the two triangles make the quadrilateral (a,b,c,d)</span>
+    <span class="c1"># original triangles are (a,b,c) and (c, d, a)</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">elem1</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">node4</span>
+
+    <span class="c1"># new elems are (a,b,d), (c, d, b)</span>
+    <span class="n">new1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">d</span><span class="p">))</span>
+    <span class="n">new2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">b</span><span class="p">))</span>
+
+    <span class="c1"># CHECK 2: Area</span>
+    <span class="n">areas</span> <span class="o">=</span> <span class="n">quality</span><span class="o">.</span><span class="n">tri_area</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">new1</span><span class="p">,</span><span class="n">new2</span><span class="p">)))</span>
+    
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">areas</span> <span class="o">&lt;</span> <span class="n">eps</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span>
+    <span class="c1"># CHECK 3: Normal inversion</span>
+    <span class="n">n1</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">_tri_normals</span><span class="p">([</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem1</span><span class="p">]])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n2</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">_tri_normals</span><span class="p">([</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem2</span><span class="p">]])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">navg</span> <span class="o">=</span> <span class="p">(</span><span class="n">n1</span> <span class="o">+</span> <span class="n">n2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">n3</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">_tri_normals</span><span class="p">([</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">new1</span><span class="p">]])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n4</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">_tri_normals</span><span class="p">([</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">new2</span><span class="p">]])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">navg</span><span class="p">,</span><span class="n">n3</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">12</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">navg</span><span class="p">,</span><span class="n">n4</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">12</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span>
+
+
+    <span class="n">perform_flip</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s1">&#39;valence&#39;</span><span class="p">:</span>
+        <span class="n">valence1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemconn1</span><span class="p">)</span>
+        <span class="n">valence2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemconn2</span><span class="p">)</span>
+
+        <span class="n">elemconn3</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">node3</span><span class="p">)</span>
+        <span class="n">elemconn4</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">node4</span><span class="p">)</span>
+
+        <span class="n">valence3</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemconn3</span><span class="p">)</span>
+        <span class="n">valence4</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemconn4</span><span class="p">)</span>
+
+        <span class="n">valences</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">valence1</span><span class="p">,</span> <span class="n">valence2</span><span class="p">,</span> <span class="n">valence3</span><span class="p">,</span> <span class="n">valence4</span><span class="p">])</span>
+        <span class="n">max_valence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">valences</span><span class="p">)</span>
+        <span class="n">min_valence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">valences</span><span class="p">)</span>
+
+        <span class="n">flipped_valences</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">valence1</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">valence2</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">valence3</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">valence4</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">max_valence_flip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">flipped_valences</span><span class="p">)</span>
+        <span class="n">min_valence_flip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">flipped_valences</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">max_valence</span> <span class="o">-</span> <span class="n">min_valence</span> <span class="o">&gt;</span> <span class="n">max_valence_flip</span> <span class="o">-</span> <span class="n">min_valence_flip</span><span class="p">:</span>
+            <span class="c1"># Clark et al 2013</span>
+            <span class="n">perform_flip</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s1">&#39;delaunay&#39;</span><span class="p">:</span>
+        <span class="c1"># Flip if sum of opposite angles is reduced (Clark, 2013)</span>
+        <span class="c1"># For a planar mesh, equivalent to Delaunay criteria</span>
+        
+        <span class="c1"># original opposite angles are abc&gt; and cda&gt;</span>
+        <span class="n">u1</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">-</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">b</span><span class="p">]</span>
+        <span class="n">v1</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">b</span><span class="p">]</span>
+        <span class="n">theta1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u1</span><span class="p">,</span><span class="n">v1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">u1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v1</span><span class="p">)))</span>
+        <span class="n">u2</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">-</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">d</span><span class="p">]</span>
+        <span class="n">v2</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> 
+        <span class="n">theta2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u2</span><span class="p">,</span><span class="n">v2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">u2</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v2</span><span class="p">)))</span>
+
+        <span class="c1"># flipped opposite angles are bad&gt; and bcd&gt;</span>
+        <span class="n">u3</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">b</span><span class="p">]</span><span class="o">-</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+        <span class="n">v3</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">-</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+        <span class="n">theta3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u3</span><span class="p">,</span><span class="n">v3</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">u3</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v3</span><span class="p">)))</span>
+        <span class="n">u4</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">b</span><span class="p">]</span><span class="o">-</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+        <span class="n">v4</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">-</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> 
+        <span class="n">theta4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u4</span><span class="p">,</span><span class="n">v4</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">u4</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v4</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">theta3</span> <span class="o">+</span> <span class="n">theta4</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">theta1</span> <span class="o">+</span> <span class="n">theta2</span><span class="p">):</span>
+            <span class="n">perform_flip</span> <span class="o">=</span> <span class="kc">True</span>
+
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Strategy: &quot;</span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s1">&quot; not supported.&#39;</span><span class="p">)</span>
+    
+
+    <span class="k">if</span> <span class="n">perform_flip</span><span class="p">:</span>
+        <span class="n">D</span><span class="o">.</span><span class="n">removeElems</span><span class="p">(</span><span class="n">shared_elems</span><span class="p">)</span>
+        <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">new1</span><span class="p">)</span>
+        <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">new2</span><span class="p">)</span>
+
+        <span class="c1"># add adjacent edges to the queue</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">),</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">),</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">),</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">a</span><span class="p">),</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">d</span><span class="p">)]:</span>
+            <span class="k">if</span> <span class="n">p1</span> <span class="o">&lt;</span> <span class="n">p2</span><span class="p">:</span>
+                <span class="n">to_add</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">to_add</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">p2</span><span class="p">,</span><span class="n">p1</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span>
+    
+<span class="k">def</span><span class="w"> </span><span class="nf">_tet_flip32</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;valence&#39;</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+
+    <span class="n">to_add</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">node_a</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">node_e</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">elemconn_a</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">node_a</span><span class="p">)</span>
+    <span class="n">elemconn_e</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">node_e</span><span class="p">)</span>
+
+    <span class="n">shared_elems</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">elemconn_a</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">elemconn_e</span><span class="p">)))[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Elements connected to the edge, sorted largest index to smallest</span>
+
+    <span class="c1"># CHECK 1: Edge not connected to 3 elems</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shared_elems</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="c1"># Edge not connected to exactly 3 elements</span>
-        <span class="k">return</span> <span class="n">D</span>
+        <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span>
+    
+    <span class="c1"># opposite nodes </span>
+    <span class="n">elem1</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">shared_elems</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">elem2</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">shared_elems</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">elem3</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">shared_elems</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    
+    <span class="n">nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">elem1</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">elem2</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">elem3</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+    <span class="c1"># CHECK 2: 5-node hull (5-2 = 3)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span>
+    <span class="n">node_b</span><span class="p">,</span> <span class="n">node_c</span><span class="p">,</span> <span class="n">node_d</span> <span class="o">=</span> <span class="n">nodes</span>
 
-    <span class="c1"># ...</span>
+    <span class="c1"># Order the nodes for properly signed volumes (this is probably not optimal for efficiency, but shouldn&#39;t be too bad)</span>
+    <span class="n">v1</span> <span class="o">=</span> <span class="n">quality</span><span class="o">.</span><span class="n">tet_volume</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(((</span><span class="n">node_c</span><span class="p">,</span><span class="n">node_d</span><span class="p">,</span><span class="n">node_e</span><span class="p">,</span><span class="n">node_a</span><span class="p">),)))</span>
+    <span class="k">if</span>  <span class="n">v1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span> 
+        <span class="c1"># swap the order</span>
+        <span class="n">node_b</span><span class="p">,</span> <span class="n">node_c</span><span class="p">,</span> <span class="n">node_d</span> <span class="o">=</span> <span class="n">node_d</span><span class="p">,</span> <span class="n">node_c</span><span class="p">,</span> <span class="n">node_b</span>
+    
+    <span class="c1"># new elements</span>
+    <span class="n">new1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">node_b</span><span class="p">,</span> <span class="n">node_c</span><span class="p">,</span> <span class="n">node_d</span><span class="p">,</span> <span class="n">node_a</span><span class="p">))</span>
+    <span class="n">new2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">node_d</span><span class="p">,</span> <span class="n">node_c</span><span class="p">,</span> <span class="n">node_b</span><span class="p">,</span> <span class="n">node_e</span><span class="p">))</span>
+
+    <span class="c1"># CHECK 2: Volume (note: v1 already ensured to be positive)</span>
+    <span class="n">v2</span> <span class="o">=</span> <span class="n">quality</span><span class="o">.</span><span class="n">tet_volume</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">new2</span><span class="p">,)))</span>
+    <span class="k">if</span> <span class="n">v2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span>
+
+    <span class="n">perform_flip</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s1">&#39;valence&#39;</span><span class="p">:</span>
+        <span class="n">valence1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemconn_a</span><span class="p">)</span>
+        <span class="n">valence2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemconn_e</span><span class="p">)</span>
+
+        <span class="n">elemconn_b</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">node_b</span><span class="p">)</span>
+        <span class="n">elemconn_c</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">node_c</span><span class="p">)</span>
+        <span class="n">elemconn_d</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">node_d</span><span class="p">)</span>
+
+        <span class="n">valence3</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemconn_b</span><span class="p">)</span>
+        <span class="n">valence4</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemconn_c</span><span class="p">)</span>
+        <span class="n">valence5</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemconn_d</span><span class="p">)</span>
+
+        <span class="n">valences</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">valence1</span><span class="p">,</span> <span class="n">valence2</span><span class="p">,</span> <span class="n">valence3</span><span class="p">,</span> <span class="n">valence4</span><span class="p">,</span> <span class="n">valence5</span><span class="p">])</span>
+        <span class="n">max_valence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">valences</span><span class="p">)</span>
+        <span class="n">min_valence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">valences</span><span class="p">)</span>
+
+        <span class="n">flipped_valences</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">valence1</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="n">valence2</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="n">valence3</span><span class="p">,</span> <span class="n">valence4</span><span class="p">,</span> <span class="n">valence5</span><span class="p">])</span>
+        <span class="n">max_valence_flip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">flipped_valences</span><span class="p">)</span>
+        <span class="n">min_valence_flip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">flipped_valences</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">max_valence</span> <span class="o">-</span> <span class="n">min_valence</span> <span class="o">&gt;</span> <span class="n">max_valence_flip</span> <span class="o">-</span> <span class="n">min_valence_flip</span><span class="p">:</span>
+            <span class="c1"># Clark et al 2013</span>
+            <span class="n">perform_flip</span> <span class="o">=</span> <span class="kc">True</span>
+
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Strategy: &quot;</span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s1">&quot; not supported.&#39;</span><span class="p">)</span>
     
 
-    
+    <span class="k">if</span> <span class="n">perform_flip</span><span class="p">:</span>
+        <span class="n">D</span><span class="o">.</span><span class="n">removeElems</span><span class="p">(</span><span class="n">shared_elems</span><span class="p">)</span>
+        <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">new1</span><span class="p">)</span>
+        <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">new2</span><span class="p">)</span>
 
+        <span class="c1"># add adjacent edges to the queue</span>
+        <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">e</span> <span class="o">=</span> <span class="n">node_a</span><span class="p">,</span> <span class="n">node_b</span><span class="p">,</span> <span class="n">node_c</span><span class="p">,</span> <span class="n">node_d</span><span class="p">,</span> <span class="n">node_e</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">),</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">),</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">d</span><span class="p">),</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span><span class="n">b</span><span class="p">),</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span><span class="n">c</span><span class="p">),</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span><span class="n">d</span><span class="p">),</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">),</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">),</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">b</span><span class="p">)]:</span>
+            <span class="k">if</span> <span class="n">p1</span> <span class="o">&lt;</span> <span class="n">p2</span><span class="p">:</span>
+                <span class="n">to_add</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">to_add</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">p2</span><span class="p">,</span><span class="n">p1</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span>
 
 <span class="c1">## Need to be updated or removed</span>
 <span class="c1"># Needs update:   </span>

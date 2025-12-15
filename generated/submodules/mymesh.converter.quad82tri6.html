@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>mymesh.improvement.TetSplit &#8212; MyMesh vdev Manual</title>
+    <title>mymesh.converter.quad82tri6 &#8212; MyMesh vdev Manual</title>
   
   
   
@@ -58,11 +58,11 @@
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.improvement.TetSplit';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.converter.quad82tri6';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mymesh.improvement.TetFlip" href="mymesh.improvement.TetFlip.html" />
-    <link rel="prev" title="mymesh.improvement.Contract" href="mymesh.improvement.Contract.html" />
+    <link rel="next" title="mymesh.converter.edge32linear" href="mymesh.converter.edge32linear.html" />
+    <link rel="prev" title="mymesh.converter.quad2tri" href="mymesh.converter.quad2tri.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -351,12 +351,12 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.booleans.html">mymesh.booleans</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.contour.html">mymesh.contour</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mymesh.converter.html">mymesh.converter</a></li>
+<li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.converter.html">mymesh.converter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.curvature.html">mymesh.curvature</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.delaunay.html">mymesh.delaunay</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.image.html">mymesh.image</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.implicit.html">mymesh.implicit</a></li>
-<li class="toctree-l1 current active"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.improvement.html">mymesh.improvement</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.tree.html">mymesh.tree</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.primitives.html">mymesh.primitives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.quality.html">mymesh.quality</a></li>
@@ -412,9 +412,9 @@
     <li class="breadcrumb-item"><a href="../../api.html" class="nav-link">API Reference</a></li>
     
     
-    <li class="breadcrumb-item"><a href="../mymesh.improvement.html" class="nav-link">mymesh.improvement</a></li>
+    <li class="breadcrumb-item"><a href="../mymesh.converter.html" class="nav-link">mymesh.converter</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh.improvement.TetSplit</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh.converter.quad82tri6</span></li>
   </ul>
 </nav>
 </div>
@@ -431,54 +431,26 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="mymesh-improvement-tetsplit">
-<h1>mymesh.improvement.TetSplit<a class="headerlink" href="#mymesh-improvement-tetsplit" title="Link to this heading">#</a></h1>
+  <section id="mymesh-converter-quad82tri6">
+<h1>mymesh.converter.quad82tri6<a class="headerlink" href="#mymesh-converter-quad82tri6" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="mymesh.improvement.TetSplit">
-<span class="sig-prename descclassname"><span class="pre">mymesh.improvement.</span></span><span class="sig-name descname"><span class="pre">TetSplit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sizing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">QualitySizing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/improvement.html#TetSplit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.improvement.TetSplit" title="Link to this definition">#</a></dt>
-<dd><p>Edge splitting of tetrahedral meshes. Edges with length greater than the
-specified edge length (<cite>h</cite>) will be split by placing a new node at the
-midpoint of the edge. Tetrahedral edge splitting is inherently interface
-and feature preserving as nodes are only added, not removed or moved.</p>
-<p>This method is inspired by <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id5" title="Noura Faraj, Jean Marc Thiery, and Tamy Boubekeur. Multi-material adaptive volume remesher. Computers and Graphics (Pergamon), 58:150–160, 2016. URL: http://dx.doi.org/10.1016/j.cag.2016.05.019, doi:10.1016/j.cag.2016.05.019.">FTB16</a>]</span> and <span id="id2">[<a class="reference internal" href="../../guide/ref.html#id42" title="Yixin Hu, Qingnan Zhou, Xifeng Gao, Alec Jacobson, Denis Zorin, and Daniele Panozzo. Tetrahedral meshing in the wild. ACM Transactions on Graphics, 2018. doi:10.1145/3197517.3201353.">HZG+18</a>]</span>.</p>
+<dt class="sig sig-object py" id="mymesh.converter.quad82tri6">
+<span class="sig-prename descclassname"><span class="pre">mymesh.converter.</span></span><span class="sig-name descname"><span class="pre">quad82tri6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeConn</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/converter.html#quad82tri6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.converter.quad82tri6" title="Link to this definition">#</a></dt>
+<dd><p>Converts a quadratic quadrilateral mesh to a quadratic triangular mesh by splitting each quad into 2 tris</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>M</strong> (<a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><em>mymesh.mesh</em></a>) – Tetrahedral mesh to be contracted</p></li>
-<li><p><strong>h</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Edge length above which will be split. Using 4/3 of the target
-edge length is often recommended.</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, will display progress, by default True</p></li>
-<li><p><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Element labels used to identify separate regions (e.g. materials) within
-a mesh, by default None. If provided as a string, the string must
-refer to an entry in <cite>M.ElemData</cite>, otherwise must be an array_like with
-the number of entries equal to the number of elements (<cite>M.NElem</cite>).
-Providing labels will preserve the interface and interface features
-between regions of differening labels. The labels of the new mesh will
-be stored in the ElemData of the returned mesh, either in
-ElemData[‘labels’] (if labels were provided as an array), or the entry
-matching the original ElemData entry (if labels were provided as a
-string).</p></li>
-<li><p><strong>sizing</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>callable</em><em>, or </em><em>None</em>) – <p>Option for non-uniform element sizing.</p>
-<p>float - Specify a second target edge length (hi) to be used for edges
-far from the boundary. This will be used following <span id="id3">Faraj <em>et al.</em> [<a class="reference internal" href="../../guide/ref.html#id5" title="Noura Faraj, Jean Marc Thiery, and Tamy Boubekeur. Multi-material adaptive volume remesher. Computers and Graphics (Pergamon), 58:150–160, 2016. URL: http://dx.doi.org/10.1016/j.cag.2016.05.019, doi:10.1016/j.cag.2016.05.019.">FTB16</a>]</span>
-to generate an adaptive sizing field h_node = (hi-h)*D(node)+h, where
-D is a distance field from boundaries/interface evaluated at each
-node. The target edge length is then taken as the average of it’s
-two nodes</p>
-<p>’auto’ - Uses hi = 2*h as the second target edge length and is used
-as described above for floats.</p>
-<p>callable - Uses a callable, vectorized function of three inputs (f(x,y,z))
-where x, y, z can be either scalar or vector coordinates and specifies the
-target edge length for each node and takes the average for an edge</p>
-<p>None - Uniform sizing</p>
-</p></li>
+<li><p><strong>NodeCoords</strong> (<em>array_like</em>) – List of nodal coordinates.</p></li>
+<li><p><strong>NodeConn</strong> (<em>array_like</em>) – Nodal connectivity list. All elements should be 8-Node quadrilateral elements.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>Mnew</strong> – Tetrahedral mesh after edge splitting</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh">mymesh.mesh</a></p>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>NewCoords</strong> (<em>np.ndarray</em>) – Updated list of node coordinates. A new node is created at the center
+of the quadrilateral.</p></li>
+<li><p><strong>TriConn</strong> (<em>np.ndarray</em>) – list of nodal connectivities for the new triangular mesh.</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -496,20 +468,20 @@ target edge length for each node and takes the average for an edge</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mymesh.improvement.Contract.html"
+       href="mymesh.converter.quad2tri.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.improvement.Contract</p>
+        <p class="prev-next-title">mymesh.converter.quad2tri</p>
       </div>
     </a>
     <a class="right-next"
-       href="mymesh.improvement.TetFlip.html"
+       href="mymesh.converter.edge32linear.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">mymesh.improvement.TetFlip</p>
+        <p class="prev-next-title">mymesh.converter.edge32linear</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -532,7 +504,7 @@ target edge length for each node and takes the average for an edge</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mymesh.improvement.TetSplit"><code class="docutils literal notranslate"><span class="pre">TetSplit()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mymesh.converter.quad82tri6"><code class="docutils literal notranslate"><span class="pre">quad82tri6()</span></code></a></li>
 </ul>
   </nav></div>
 
@@ -540,7 +512,7 @@ target edge length for each node and takes the average for an edge</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/generated/submodules/mymesh.improvement.TetSplit.rst.txt"
+      <li><a href="../../_sources/generated/submodules/mymesh.converter.quad82tri6.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

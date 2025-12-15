@@ -75,6 +75,8 @@ Creating a Surface
 
     RFBOutputContext()
 
+    Identifying mesh nodes...Done
+        
 
 
 
@@ -117,13 +119,15 @@ the mesh and more evenly distribute the nodes.
             Done
             RFBOutputContext()
 
+    Identifying mesh nodes...Done
+        
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.578 seconds)
+   **Total running time of the script:** (0 minutes 0.595 seconds)
 
 
 .. _sphx_glr_download_examples_MeshGeneration_demo_heart.py:

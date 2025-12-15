@@ -523,7 +523,7 @@ to img1.</p></li>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="c1"># Load two the CT scan of the Stanford Bunny</span>
+<span class="c1"># Load the CT scan of the Stanford Bunny</span>
 <span class="n">img1</span> <span class="o">=</span> <span class="n">mymesh</span><span class="o">.</span><span class="n">demo_image</span><span class="p">(</span><span class="s1">&#39;bunny&#39;</span><span class="p">)</span>
 
 <span class="n">thresh</span> <span class="o">=</span> <span class="mi">100</span>
@@ -533,7 +533,7 @@ to img1.</p></li>
                         <span class="n">center</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">img2</span> <span class="o">=</span> <span class="n">register</span><span class="o">.</span><span class="n">transform_image</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
 
-<span class="c1"># Align the two meshes using the iterative closest point (ICP) algorithm</span>
+<span class="c1"># Align the two images using the iterative closest point (ICP) algorithm</span>
 <span class="n">img_aligned</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">register</span><span class="o">.</span><span class="n">Image2Image</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;icp&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>

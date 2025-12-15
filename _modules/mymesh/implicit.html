@@ -1220,6 +1220,8 @@
 
 <span class="sd">        - &#39;Lidinoid&#39;</span>
 
+<span class="sd">        - &#39;Neovius&#39;</span>
+
 <span class="sd">        - &#39;IWP&#39;</span>
 
 <span class="sd">        - &#39;FRD&#39;</span>
@@ -1241,6 +1243,57 @@
 <span class="sd">        This function utilizes sympy operators - for a vectorized function, use </span>
 <span class="sd">        implicit.wrapfunc(func)</span>
 
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        </span>
+<span class="sd">        func = implicit.tpms(&#39;gyroid&#39;)</span>
+<span class="sd">        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)</span>
+<span class="sd">        surf.plot()</span>
+<span class="sd">    </span>
+<span class="sd">    .. plot::</span>
+<span class="sd">        </span>
+<span class="sd">        func = implicit.tpms(&#39;primitive&#39;)</span>
+<span class="sd">        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)</span>
+<span class="sd">        surf.plot()</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        </span>
+<span class="sd">        func = implicit.tpms(&#39;diamond&#39;)</span>
+<span class="sd">        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)</span>
+<span class="sd">        surf.plot()</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        </span>
+<span class="sd">        func = implicit.tpms(&#39;S&#39;)</span>
+<span class="sd">        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)</span>
+<span class="sd">        surf.plot()</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        </span>
+<span class="sd">        func = implicit.tpms(&#39;Lidinoid&#39;)</span>
+<span class="sd">        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)</span>
+<span class="sd">        surf.plot()</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        </span>
+<span class="sd">        func = implicit.tpms(&#39;Neovius&#39;)</span>
+<span class="sd">        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)</span>
+<span class="sd">        surf.plot()</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        </span>
+<span class="sd">        func = implicit.tpms(&#39;IWP&#39;)</span>
+<span class="sd">        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)</span>
+<span class="sd">        surf.plot()</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        </span>
+<span class="sd">        func = implicit.tpms(&#39;FRD&#39;)</span>
+<span class="sd">        surf = implicit.SurfaceMesh(func, [0,1,0,1,0,1], 0.02)</span>
+<span class="sd">        surf.plot()  </span>
+
 <span class="sd">    &quot;&quot;&quot;</span>    
     
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;x y z&#39;</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1261,14 +1314,14 @@
         <span class="n">surf</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">X</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">+</span>\
                <span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Y</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">+</span>\
                <span class="n">sp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Z</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;lidinoid&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;lidinoid&#39;</span><span class="p">:</span>
         <span class="n">surf</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">X</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="o">+</span> \
                     <span class="n">sp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Y</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">+</span> \
                     <span class="n">sp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Z</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">Y</span><span class="p">))</span> <span class="o">-</span> \
                <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">X</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Y</span><span class="p">)</span> <span class="o">+</span> \
                     <span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Y</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Z</span><span class="p">)</span> <span class="o">+</span> \
                     <span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Z</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">X</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.15</span>
-    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;neovious&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;neovius&#39;</span><span class="p">:</span>
         <span class="n">surf</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">+</span> <span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">+</span> <span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Z</span><span class="p">))</span> <span class="o">+</span> \
             <span class="mi">4</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;iwp&#39;</span> <span class="ow">or</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;IP2-J*&#39;</span><span class="p">:</span>
@@ -1374,7 +1427,7 @@
     <span class="k">return</span> <span class="n">func</span></div>
 
 <span class="n">tpms</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;gyroid&#39;</span><span class="p">,</span> <span class="s1">&#39;primitive&#39;</span><span class="p">,</span> <span class="s1">&#39;diamond&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;lidinoid&#39;</span><span class="p">,</span> <span class="s1">&#39;neovious&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;gyroid&#39;</span><span class="p">,</span> <span class="s1">&#39;primitive&#39;</span><span class="p">,</span> <span class="s1">&#39;diamond&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;lidinoid&#39;</span><span class="p">,</span> <span class="s1">&#39;neovios&#39;</span><span class="p">,</span>
     <span class="s1">&#39;IWP&#39;</span><span class="p">,</span> <span class="s1">&#39;FRD&#39;</span><span class="p">,</span> <span class="s1">&#39;F*&#39;</span><span class="p">,</span> <span class="s1">&#39;D*&#39;</span><span class="p">,</span> <span class="s1">&#39;C(D*)&#39;</span><span class="p">,</span> <span class="s1">&#39;P*J*&#39;</span><span class="p">,</span> <span class="s1">&#39;C(Y**)&#39;</span><span class="p">,</span> <span class="s1">&#39;C(S*)&#39;</span><span class="p">,</span> <span class="s1">&#39;I2-Y**&#39;</span><span class="p">,</span>
     <span class="s1">&#39;C(I2-Y**)&#39;</span><span class="p">,</span> <span class="s1">&#39;W*&#39;</span><span class="p">,</span> <span class="s1">&#39;Y*&#39;</span><span class="p">,</span> <span class="s1">&#39;(YYxxx)*&#39;</span><span class="p">,</span> <span class="s1">&#39;(Fxxx)*&#39;</span><span class="p">,</span> <span class="s1">&#39;(FFxxx)*&#39;</span><span class="p">,</span> <span class="s1">&#39;Q*&#39;</span>
 <span class="p">]</span>

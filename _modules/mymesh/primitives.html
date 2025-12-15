@@ -545,7 +545,7 @@
         
 <div class="viewcode-block" id="Box">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.primitives.Box.html#mymesh.primitives.Box">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">Box</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;hex&#39;</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Box</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;hex&#39;</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a mesh of box. </span>
 
@@ -553,8 +553,11 @@
 <span class="sd">    ----------</span>
 <span class="sd">    vertices : list</span>
 <span class="sd">        Array of box vertices (shape = (8,3)).</span>
-<span class="sd">    n : int, tuple</span>
-<span class="sd">        Number of elements along each edge of the box.</span>
+<span class="sd">        These can be obtained from :meth:`~mymesh.mesh.mesh.aabb` or </span>
+<span class="sd">        :meth:`~mymesh.mesh.mesh.mvbb` (or :func:`mymesh.utils.AABB`, </span>
+<span class="sd">        :func:`mymesh.utils.MVBB`)</span>
+<span class="sd">    n : int or tuple, optional</span>
+<span class="sd">        Number of nodes along each edge of the box, by default 2.</span>
 <span class="sd">    ElemType : str, optional</span>
 <span class="sd">        Specify the element type of the grid mesh. </span>
 <span class="sd">    Type : str, optional</span>
@@ -567,6 +570,7 @@
 <span class="sd">        Mesh object containing the box mesh. </span>
 
 <span class="sd">    .. note:: </span>
+<span class="sd">    </span>
 <span class="sd">        Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Box(...)``</span>
 
 <span class="sd">    Examples</span>

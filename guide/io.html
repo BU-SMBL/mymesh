@@ -425,13 +425,13 @@
 <p>Reading and writing meshes from various file types is supported through the use
 of the <a class="reference external" href="https://github.com/nschloe/meshio">meshio</a> package which can read and
 write to a variety of common filetypes, including .vtu, .stl, .obj, and .inp.
-The <a class="reference internal" href="../generated/mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code></a> class provides <code class="xref py py-func docutils literal notranslate"><span class="pre">read()</span></code> and
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code> methods which utilize meshio to read and write from
+The <a class="reference internal" href="../generated/mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code></a> class provides <a class="reference internal" href="../generated/mymesh.mesh.mesh.read.html#mymesh.mesh.mesh.read" title="mymesh.mesh.mesh.read"><code class="xref py py-func docutils literal notranslate"><span class="pre">read()</span></code></a> and
+<a class="reference internal" href="../generated/mymesh.mesh.mesh.write.html#mymesh.mesh.mesh.write" title="mymesh.mesh.mesh.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> methods which utilize meshio to read and write from
 any meshio-supported format.
 Additionally, <a class="reference internal" href="../generated/mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code></a> objects can be converted
-to/from meshio’s mesh class using <code class="xref py py-meth docutils literal notranslate"><span class="pre">to_meshio()</span></code> and
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">meshio2mymesh()</span></code>.</p>
-<p>The VTK “.vtu” file format is recommend for saving meshes as it supports the storage of node and element data, can be reliable saved and re-loaded without alteration, and can be used for visualization with paraview.</p>
+to/from meshio’s mesh class using <a class="reference internal" href="../generated/mymesh.mesh.mesh.to_meshio.html#mymesh.mesh.mesh.to_meshio" title="mymesh.mesh.mesh.to_meshio"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_meshio()</span></code></a> and
+<a class="reference internal" href="../generated/mymesh.mesh.mesh.meshio2mymesh.html#mymesh.mesh.mesh.meshio2mymesh" title="mymesh.mesh.mesh.meshio2mymesh"><code class="xref py py-meth docutils literal notranslate"><span class="pre">meshio2mymesh()</span></code></a>.</p>
+<p>The VTK “.vtu” file format is recommend for saving meshes as it supports the storage of node and element data, can be reliable saved and re-loaded without alteration, and can be used for visualization with <a class="reference external" href="https://www.paraview.org/">ParaView</a>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mymesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mesh</span>
 <span class="n">m</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;example.stl&#39;</span><span class="p">)</span>
 <span class="n">m</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;example.vtu&#39;</span><span class="p">)</span>

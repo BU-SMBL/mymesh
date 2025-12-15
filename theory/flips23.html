@@ -62,7 +62,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Edge Contraction" href="edgecontract.html" />
-    <link rel="prev" title="Spring-based Smoothing" href="springsmooth.html" />
+    <link rel="prev" title="Triangular Edge Flips" href="flipstri.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -502,192 +502,6 @@ polyhedron, all the two non-face nodes lie on the same side of the face.
 Similarly, edges connected to three elements are candidates for a 3→2 flip if
 those three elements form a convex, 5-node polyhedron.</p>
 </section>
-<section id="data-structure">
-<h2>Data Structure<a class="headerlink" href="#data-structure" title="Link to this heading">#</a></h2>
-<p>Efficient flipping requires a data structure that can be easily queried and
-modified to facilitate traversing the mesh, finding potentially flippable
-elements, and performing the flip. There are several such data structures
-with various trade-offs in terms of memory usage, efficiency, and complexity.</p>
-<p>The data structure used here utilizes three hash tables (python dictionaries) that
-store element, face, and edge connectivity information, in addition to the
-standard node coordinate array. Each table is keyed by the sorted node
-connectivity of its features. Sorting ensures that redundant features aren’t
-stored and each element, face, and edge can be unambiguously identified by
-its nodes. This means that at a face where two elements meet, there is a single
-face (rather than two half-faces). It also means that the keys of tetrahedra
-may not be properly ordered and could be interpreted as inverted elements. For
-this reason, each entry in the element table stores a properly ordered
-(un-inverted) version of the element.</p>
-<p>The element table also stores table keys to the face and edge table entries
-of the connected faces and edges (<code class="docutils literal notranslate"><span class="pre">FaceConn</span></code> and <code class="docutils literal notranslate"><span class="pre">EdgeConn</span></code>, see
-<a class="reference internal" href="../guide/connectivity.html#connectivity"><span class="std std-ref">Connectivity Representations</span></a>). The face and edge tables likewise store the keys to
-the element table entries of their connected elements (<code class="docutils literal notranslate"><span class="pre">FaceElemConn</span></code>,
-<code class="docutils literal notranslate"><span class="pre">EdgeElemConn</span></code>). Through this structure, an element’s neighbors can be identified
-by querying the connected elements of each of the element’s faces, and likewise
-with edges. To minimize the need for recalculation, the element table also stores
-the volume, element quality, and status (whether the element is active in the
-mesh) of each element, and the face table stores the normal vector of each
-face. While elements, faces, and edges may be added to the tables over the
-course of the flipping procedure, they are never removed, only the status
-value of the elements is changed. Whether or not a face or edge is active
-in the mesh is inferred from the element table as inactive faces/edges will
-never be reached. As the mesh topology changes, the relevant entries in the
-tables are updated so that the connectivity information accurately represents
-the updated mesh.</p>
-<p>An example data structure for the tetrahedra depicted above is shown here for
-both possible configurations. Note that in a larger mesh, the face and edge
-tables will also contain entries for other neighboring elements.</p>
-<div class="pst-scrollable-table-container"><table class="table table-center" id="id1">
-<caption><span class="caption-text"><strong>Element Table</strong></span><a class="headerlink" href="#id1" title="Link to this table">#</a></caption>
-<thead>
-<tr class="row-odd"><th class="head"><p>Element</p></th>
-<th class="head"><p>Faces</p></th>
-<th class="head"><p>Edges</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><strong>Configuration 1</strong></p></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>(a, b, c, d)</p></td>
-<td><p>(a, b, c), (a, c, d), (a, b, d), (b, c, d)</p></td>
-<td><p>(b, c), (c, d), (b, d), (a, b), (a, c), (a, d)</p></td>
-</tr>
-<tr class="row-even"><td><p>(b, c, d, e)</p></td>
-<td><p>(b, c, e), (c, d, e), (b, d, e), (b, c, d)</p></td>
-<td><p>(b, c), (c, d), (b, d), (b, e), (c, e), (d, e)</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Configuration 2</strong></p></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>(a, b, c, e)</p></td>
-<td><p>(a, b, c), (b, c, e), (a, b, e), (a, c, e)</p></td>
-<td><p>(a, b), (a, c), (b, e), (c, e), (b, c), (a, e)</p></td>
-</tr>
-<tr class="row-odd"><td><p>(a, b, d, e)</p></td>
-<td><p>(a, b, d), (b, d, e), (a, b, e), (a, d, e)</p></td>
-<td><p>(a, b), (a, d), (b, e), (d, e), (b, d), (a, e)</p></td>
-</tr>
-<tr class="row-even"><td><p>(a, c, d, e)</p></td>
-<td><p>(a, c, d), (c, d, e), (a, c, e), (a, d, e)</p></td>
-<td><p>(a, c), (a, d), (c, e), (d, e), (c, d), (a, e)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="pst-scrollable-table-container"><table class="table table-center" id="id2">
-<caption><span class="caption-text"><strong>Face Table</strong></span><a class="headerlink" href="#id2" title="Link to this table">#</a></caption>
-<thead>
-<tr class="row-odd"><th class="head"></th>
-<th class="head"><p><strong>Configuration 1</strong></p></th>
-<th class="head"><p><strong>Configuration 2</strong></p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><strong>Face</strong></p></td>
-<td colspan="2"><p><strong>Elements</strong></p></td>
-</tr>
-<tr class="row-odd"><td><p>(a, b, c)</p></td>
-<td><p>(a, b, c, d)</p></td>
-<td><p>(a, b, c, e)</p></td>
-</tr>
-<tr class="row-even"><td><p>(a, c, d)</p></td>
-<td><p>(a, b, c, d)</p></td>
-<td><p>(a, c, d, e)</p></td>
-</tr>
-<tr class="row-odd"><td><p>(a, b, d)</p></td>
-<td><p>(a, b, c, d)</p></td>
-<td><p>(a, b, d, e)</p></td>
-</tr>
-<tr class="row-even"><td><p>(b, c, e)</p></td>
-<td><p>(b, c, d, e)</p></td>
-<td><p>(a, b, c, e)</p></td>
-</tr>
-<tr class="row-odd"><td><p>(c, d, e)</p></td>
-<td><p>(b, c, d, e)</p></td>
-<td><p>(a, c, d, e)</p></td>
-</tr>
-<tr class="row-even"><td><p>(b, d, e)</p></td>
-<td><p>(b, c, d, e)</p></td>
-<td><p>(a, b, d, e)</p></td>
-</tr>
-<tr class="row-odd"><td><p>(b, c, d)</p></td>
-<td><p>(a, b, c, d), (b, c, d, e)</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>(a, b, e)</p></td>
-<td></td>
-<td><p>(a, b, d, e), (a, b, c, e)</p></td>
-</tr>
-<tr class="row-odd"><td><p>(a, c, e)</p></td>
-<td></td>
-<td><p>(a, b, c, e), (a, c, d, e)</p></td>
-</tr>
-<tr class="row-even"><td><p>(a, d, e)</p></td>
-<td></td>
-<td><p>(a, c, d, e), (a, b, d, e)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="pst-scrollable-table-container"><table class="table table-center" id="id3">
-<caption><span class="caption-text"><strong>Edge Table</strong></span><a class="headerlink" href="#id3" title="Link to this table">#</a></caption>
-<thead>
-<tr class="row-odd"><th class="head"></th>
-<th class="head"><p><strong>Configuration 1</strong></p></th>
-<th class="head"><p><strong>Configuration 2</strong></p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><strong>Edge</strong></p></td>
-<td colspan="2"><p><strong>Elements</strong></p></td>
-</tr>
-<tr class="row-odd"><td><p>(a, b)</p></td>
-<td><p>(a, b, c, d)</p></td>
-<td><p>(a, b, c, e), (a, b, d, e)</p></td>
-</tr>
-<tr class="row-even"><td><p>(a, c)</p></td>
-<td><p>(a, b, c, d)</p></td>
-<td><p>(a, b, c, e), (a, c, d, e)</p></td>
-</tr>
-<tr class="row-odd"><td><p>(a, d)</p></td>
-<td><p>(a, b, c, d)</p></td>
-<td><p>(a, c, d, e), (a, b, d, e)</p></td>
-</tr>
-<tr class="row-even"><td><p>(b, c)</p></td>
-<td><p>(a, b, c, d), (b, c, d, e)</p></td>
-<td><p>(a, b, c, e)</p></td>
-</tr>
-<tr class="row-odd"><td><p>(b, d)</p></td>
-<td><p>(a, b, c, d), (b, c, d, e)</p></td>
-<td><p>(a, b, d, e)</p></td>
-</tr>
-<tr class="row-even"><td><p>(c, d)</p></td>
-<td><p>(a, b, c, d), (b, c, d, e)</p></td>
-<td><p>(a, c, d, e)</p></td>
-</tr>
-<tr class="row-odd"><td><p>(b, e)</p></td>
-<td><p>(b, c, d, e)</p></td>
-<td><p>(a, b, c, e), (a, b, d, e)</p></td>
-</tr>
-<tr class="row-even"><td><p>(c, e)</p></td>
-<td><p>(b, c, d, e)</p></td>
-<td><p>(a, b, c, e), (a, c, d, e)</p></td>
-</tr>
-<tr class="row-odd"><td><p>(d, e)</p></td>
-<td><p>(b, c, d, e)</p></td>
-<td><p>(a, c, d, e), (a, b, d, e)</p></td>
-</tr>
-<tr class="row-even"><td><p>(a, e)</p></td>
-<td></td>
-<td><p>(a, b, c, e), (a, b, d, e), (a, c, d, e)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
 </section>
 
 
@@ -701,12 +515,12 @@ tables will also contain entries for other neighboring elements.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="springsmooth.html"
+       href="flipstri.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Spring-based Smoothing</p>
+        <p class="prev-next-title">Triangular Edge Flips</p>
       </div>
     </a>
     <a class="right-next"
@@ -738,7 +552,6 @@ tables will also contain entries for other neighboring elements.</p>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flipping-procedure">Flipping Procedure</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-structure">Data Structure</a></li>
 </ul>
   </nav></div>
 

@@ -479,7 +479,7 @@
 
 <div class="viewcode-block" id="demo_image">
 <a class="viewcode-back" href="../submodules/mymesh.demo_image.html#mymesh.demo_image">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">demo_image</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;bunny&#39;</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">demo_image</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;bunny&#39;</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Example image data from online databases</span>
 
@@ -496,6 +496,9 @@
 
 <span class="sd">    normalize : bool, optional</span>
 <span class="sd">        Normalize image data to the range 0-255 in uint8 format, by default True</span>
+<span class="sd">    scalefactor : float, optional</span>
+<span class="sd">        Upsample or downsample the image, e.g. scalefactor=0.5 will provide an</span>
+<span class="sd">        image at half the resolution as the original.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -530,7 +533,9 @@
     <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
         <span class="c1"># normalize the image to 0-255, unit8</span>
         <span class="n">img</span> <span class="o">=</span> <span class="p">(</span><span class="n">img</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">img</span><span class="p">)</span><span class="o">*</span><span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
-
+    <span class="k">if</span> <span class="n">scalefactor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">scalefactor</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">img</span></div>
 
 
@@ -597,23 +602,11 @@
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 
-<span class="sd">    .. code-block:: python</span>
+<span class="sd">    .. plot::</span>
 
-<span class="sd">        import mymesh</span>
 <span class="sd">        bunny = mymesh.demo_mesh(&quot;bunny&quot;)</span>
 <span class="sd">        bunny.plot(view=&#39;xy&#39;)</span>
 
-<span class="sd">    .. code-block:: python</span>
-
-<span class="sd">        import mymesh</span>
-<span class="sd">        dragon = mymesh.demo_mesh(&quot;dragon&quot;)</span>
-<span class="sd">        dragon.plot(view=&#39;xy&#39;)</span>
-
-<span class="sd">    .. code-block:: python</span>
-
-<span class="sd">        import mymesh</span>
-<span class="sd">        lucy = mymesh.demo_mesh(&quot;Lucy&quot;)</span>
-<span class="sd">        lucy.plot(view=&#39;-xz&#39;)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">try</span><span class="p">:</span>

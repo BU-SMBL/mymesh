@@ -415,22 +415,53 @@
                 <article class="bd-article">
                   
   <section id="register">
-<h1>Register<a class="headerlink" href="#register" title="Link to this heading">#</a></h1>
+<span id="theory-register"></span><h1>Register<a class="headerlink" href="#register" title="Link to this heading">#</a></h1>
+<p>Registration involves the alignment of one object (the “moving” object) to a reference (or “fixed”) object.</p>
+<p>Common instances of registration include point cloud registration and image registration.
+Registration can be used to align different scans/images of an object (e.g. a CT scan and an MRI scan), images of the same object taken at different times, different variations of the same kind of object (e.g. CT scans of bones belonging different individuals), or any other situation where you have two or more objects that can be aligned.
+Registration can be useful for detecting and measuring differences between objects, stitching together overlapping parts of a larger object, and more.</p>
+<p>Registration is an optimization process, by which some measure of similarity is maximized (or some measure of distance is minimized).
+As such, it requires an objective function (a way to score the similarity/distance), a parameter space (a set of parameters that can be used to move the object), and an algorithm by which the parameter space can be explored in order to find the optimal set of parameters for the chosen objective function.</p>
+<p>Registration strategies will often consider one “fixed” object which is held in place while the other “moving” object is transformed to line up with the fixed object.</p>
+<section id="types-of-registration">
+<h2>Types of registration<a class="headerlink" href="#types-of-registration" title="Link to this heading">#</a></h2>
+<p>There are a few ways to classify different approaches to registration.</p>
+<section id="classification-by-modality">
+<h3>Classification by modality<a class="headerlink" href="#classification-by-modality" title="Link to this heading">#</a></h3>
+<p>Registration strategies can be classified by what types of data are being aligned.</p>
+<ul class="simple">
+<li><p>Image registration: The alignment of two or more images (see also: <a class="reference internal" href="../generated/submodules/mymesh.register.Image2Image.html#mymesh.register.Image2Image" title="mymesh.register.Image2Image"><code class="xref py py-func docutils literal notranslate"><span class="pre">Image2Image()</span></code></a>)</p></li>
+<li><p>Point cloud registration: The alignment of two or more sets of points (see also: <a class="reference internal" href="../generated/submodules/mymesh.register.Point2Point.html#mymesh.register.Point2Point" title="mymesh.register.Point2Point"><code class="xref py py-func docutils literal notranslate"><span class="pre">Point2Point()</span></code></a>)</p></li>
+</ul>
+</section>
+<section id="classification-by-transformation">
+<h3>Classification by transformation<a class="headerlink" href="#classification-by-transformation" title="Link to this heading">#</a></h3>
+<p>Registration strategies can also be classified by what type of transformation (i.e. parameter space) is used to align the objects.</p>
+<ul class="simple">
+<li><p>Rigid registration: The object is moved by translations and rotations, but not deformed.</p></li>
+<li><p>Similarity registration: The object is moved by translations and rotations, and can be uniformly scaled.</p></li>
+<li><p>Affine registration: The object is moved by translations and rotations, can be scaled in each direction, and can undergo shearing deformations.</p></li>
+<li><p>Elastic registration: The object can be deformed during the alignment process (note: currently not available in mymesh).</p></li>
+</ul>
+</section>
+</section>
 <section id="iterative-closest-point-icp">
 <h2>Iterative Closest Point (ICP)<a class="headerlink" href="#iterative-closest-point-icp" title="Link to this heading">#</a></h2>
-<section id="finding-closest-point-correspondences">
-<h3>Finding closest point correspondences<a class="headerlink" href="#finding-closest-point-correspondences" title="Link to this heading">#</a></h3>
-</section>
+<p>Reference: <span id="id1"></span></p>
+<p>The iterative closest point algorithm is a classic and popular method for rigid registration of point sets.</p>
+<p>The ICP algorithm involves the repetition of two key steps:
+1. Identifying the “closest point” correspondences; and
+2. Minimizing the distance between corresponding points.</p>
 <section id="minimizing-the-distance-between-corresponding-points">
 <h3>Minimizing the distance between corresponding points<a class="headerlink" href="#minimizing-the-distance-between-corresponding-points" title="Link to this heading">#</a></h3>
-<p>Reference: <span id="id1">Arun <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id55" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-Squares Fitting of Two 3-D Point Sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9(5):698–700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span></p>
+<p>Reference: <span id="id2">Arun <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id55" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-Squares Fitting of Two 3-D Point Sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9(5):698–700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span></p>
 <p>Once pairs of corresponding points have been identified, the squared error between a set of <span class="math notranslate nohighlight">\(N\)</span> fixed points (<span class="math notranslate nohighlight">\(p^f = \{p_i^f\}\)</span>) and a corresponding set of <span class="math notranslate nohighlight">\(N\)</span> moving points (<span class="math notranslate nohighlight">\(p^m = \{p_i^m\}\)</span>) is written:</p>
 <div class="math notranslate nohighlight">
 \[\Sigma^2 = \sum_{i=1}^{N} ||p_i^f - (\mathbf{R} p_i^m + \mathbf{T})||^2\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathbf{R}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{T}\)</span> are rotation and translation matrices, respectively.
 The objective is to find <span class="math notranslate nohighlight">\(\mathbf{R}, \ \mathbf{T}\)</span> that minimize the squared error: <span class="math notranslate nohighlight">\(\underset{\mathbf{R}, \ \mathbf{T}}{\min}\Sigma^2\)</span>.
 Before attempting to minimize this squared error, we can simplify the problem by separating translation and rotation.
-At the least squares minimum of <span class="math notranslate nohighlight">\(\Sigma^2\)</span>, the centroid of the moving points (<span class="math notranslate nohighlight">\(c(p^m) = \frac{1}{N}\sum_{i=1}^{N}p_i^m\)</span>) will be equal to that of the fixed points (<span class="math notranslate nohighlight">\(c(p^f) = \frac{1}{N}\sum_{i=1}^{N}p_i^f\)</span>) <span id="id2">[<a class="reference internal" href="../guide/ref.html#id55" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-Squares Fitting of Two 3-D Point Sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9(5):698–700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span>, meaning the rotation can first be solved by centering both sets of points at the origin by subtracting the centroids from the points:</p>
+At the least squares minimum of <span class="math notranslate nohighlight">\(\Sigma^2\)</span>, the centroid of the moving points (<span class="math notranslate nohighlight">\(c(p^m) = \frac{1}{N}\sum_{i=1}^{N}p_i^m\)</span>) will be equal to that of the fixed points (<span class="math notranslate nohighlight">\(c(p^f) = \frac{1}{N}\sum_{i=1}^{N}p_i^f\)</span>) <span id="id3">[<a class="reference internal" href="../guide/ref.html#id55" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-Squares Fitting of Two 3-D Point Sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9(5):698–700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span>, meaning the rotation can first be solved by centering both sets of points at the origin by subtracting the centroids from the points:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}q_i^f =  p_i^f - c(p^f), \\
 q_i^m = p_i^m - c(p^m),\end{split}\]</div>
@@ -440,7 +471,7 @@ q_i^m = p_i^m - c(p^m),\end{split}\]</div>
 <p>The translation can subsequently be determined as</p>
 <div class="math notranslate nohighlight">
 \[\mathbf{T} = c(p^f) - \mathbf{R}c(p^m).\]</div>
-<p>The rotation can be found by performing, <a class="reference external" href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> of the cross covariance matrix (see <span id="id3">Arun <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id55" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-Squares Fitting of Two 3-D Point Sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9(5):698–700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span> for derivation)</p>
+<p>The rotation can be found by performing <a class="reference external" href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> of the cross covariance matrix (see <span id="id4">Arun <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id55" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-Squares Fitting of Two 3-D Point Sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9(5):698–700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span> for derivation)</p>
 <div class="math notranslate nohighlight">
 \[H = \sum_{i=1}^{N} q_i^m (q_i^f)^t = \mathbf{U \Sigma V}^t.\]</div>
 <p>The rotation <span class="math notranslate nohighlight">\(\mathbf{R}\)</span> is then</p>
@@ -529,8 +560,12 @@ q_i^m = p_i^m - c(p^m),\end{split}\]</div>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#types-of-registration">Types of registration</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#classification-by-modality">Classification by modality</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#classification-by-transformation">Classification by transformation</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#iterative-closest-point-icp">Iterative Closest Point (ICP)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#finding-closest-point-correspondences">Finding closest point correspondences</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#minimizing-the-distance-between-corresponding-points">Minimizing the distance between corresponding points</a></li>
 </ul>
 </li>

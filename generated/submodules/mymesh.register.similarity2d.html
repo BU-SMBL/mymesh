@@ -436,7 +436,27 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.register.similarity2d">
 <span class="sig-prename descclassname"><span class="pre">mymesh.register.</span></span><span class="sig-name descname"><span class="pre">similarity2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cartesian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/register.html#similarity2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.register.similarity2d" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Similarity transform in 2D.</p>
+<p>The similairy transform consists of a rigid transformation combined with
+uniform scalings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – 4 item list, containing the x and y translations and rotation about z, and uniform scaling <code class="code docutils literal notranslate"><span class="pre">[t0,</span> <span class="pre">t1,</span> <span class="pre">theta,</span> <span class="pre">s]</span></code>, where angles are specified in radians.</p></li>
+<li><p><strong>center</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> or </em><em>np.ndarary</em><em>, </em><em>optional</em>) – Reference point for the rotation</p></li>
+<li><p><strong>rotation_order</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Order to perform rotations about the x (0), y (1), and z (2) axes,  by
+default [0,1,2]</p></li>
+<li><p><strong>image</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Create a transformation matrix for an image, assuming the (0,1) dimensions correspond to (y,x), by default False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>A</strong> – Affine transformation matrix (shape=(3,3))</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

@@ -400,6 +400,8 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Tools for registering or aligning point clouds, meshes, and images.</span>
 
+<span class="sd">See also: :ref:`theory_register`</span>
+
 <span class="sd">.. currentmodule:: mymesh.register</span>
 
 <span class="sd">Registration</span>
@@ -478,7 +480,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">AxisAlignPoints</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">axis_order</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_transformed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_transform</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;MVBB&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Align an point cloud to the x, y, z axes. This works by identifying</span>
-<span class="sd">    the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and </span>
+<span class="sd">    the minimum volume bounding box (see :func:`~mymesh.utils.MVBB`) and </span>
 <span class="sd">    aligning that box to the principal axes, so point clouds representing </span>
 <span class="sd">    rounded objects with ambiguous orientation may be oriented</span>
 <span class="sd">    seemingly-arbitrarily. The center of the object (defined as the centroid</span>
@@ -501,9 +503,10 @@
 <span class="sd">        of the bounding box of the object after transformation. If `None`, the </span>
 <span class="sd">        center of the oriented points will be the center of the original points,</span>
 <span class="sd">        by default None.</span>
+<span class="sd">    return_transformed : bool, optional</span>
+<span class="sd">        Option to return the transformed point cloud, by default True</span>
 <span class="sd">    return_transform : bool, optional</span>
-<span class="sd">        Option to return the transformation matrix as well as the transformed</span>
-<span class="sd">        point cloud, by default False</span>
+<span class="sd">        Option to return the transformation matrix, by default False</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -513,6 +516,36 @@
 <span class="sd">        Affine transformation matrix (shape=(4,4)) to transform `points` to </span>
 <span class="sd">        `transformed` (`transformed=(transform@points.T).T`). Only returned if</span>
 <span class="sd">        `return_transform = True`.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        import mymesh</span>
+<span class="sd">        import numpy as np</span>
+
+<span class="sd">        # Load the stanford bunny</span>
+<span class="sd">        m = mymesh.demo_mesh(&#39;bunny&#39;) </span>
+
+<span class="sd">        # Perform an arbitrary rotation transformation to the mesh</span>
+<span class="sd">        points = mymesh.register.transform_points(m.NodeCoords, mymesh.register.rotation([np.pi/6, -np.pi/6, np.pi/6]))</span>
+
+<span class="sd">        transformed_points = mymesh.register.AxisAlignPoints(points)</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+<span class="sd">        :include-source: False</span>
+<span class="sd">        </span>
+<span class="sd">        mp = mymesh.mesh(points)</span>
+<span class="sd">        mp.NodeData[&#39;label&#39;] = np.zeros(mp.NNode)</span>
+<span class="sd">        m_aligned = mymesh.mesh(transformed_points)</span>
+<span class="sd">        m_aligned.NodeData[&#39;label&#39;] = np.ones(m_aligned.NNode)</span>
+
+<span class="sd">        mp.plot(scalars=&#39;label&#39;, show_colorbar=False, view=&#39;-xy&#39;, show_points=True, hide_free_nodes=False, clim=(0,1))</span>
+
+<span class="sd">        m_aligned.plot(scalars=&#39;label&#39;, show_colorbar=False, view=&#39;x-y&#39;, show_points=True, hide_free_nodes=False, clim=(0,1))</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">assert</span> <span class="ne">ValueError</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axis_order</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">axis_order</span><span class="p">))),</span> <span class="s1">&#39;axis_order must contain only 0, 1, and 2.&#39;</span>
     
@@ -566,12 +599,59 @@
     <span class="k">return</span></div>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">AxisAlignMesh</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">axis_order</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_transformed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_transform</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;MVBB&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Align an mesh to the x, y, z axes based on its coordinates. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    M : mymesh.mesh</span>
+<span class="sd">        Input mesh</span>
+<span class="sd">    axis_order : array_like, optional</span>
+<span class="sd">        Orientation of the aligned object in terms of the lengths of each side</span>
+<span class="sd">        of the object, by default [0,1,2]. The first axis will correspond to the</span>
+<span class="sd">        shortest side of the object and the last index to the longest side. For </span>
+<span class="sd">        example, with [0,1,2], the longest side will be aligned with the z (2) </span>
+<span class="sd">        axis, and the shortest will be aligned with the x (0) axis. Must be a </span>
+<span class="sd">        combination of 0, 1, and 2.</span>
+<span class="sd">    center : array_like or NoneType, optional</span>
+<span class="sd">        If provided, coordinates `[x,y,z]` of where to place the center</span>
+<span class="sd">        of the bounding box of the object after transformation. If `None`, the </span>
+<span class="sd">        center of the oriented mesh will be the center of the original mesh,</span>
+<span class="sd">        by default None.</span>
+<span class="sd">    return_transformed : bool, optional</span>
+<span class="sd">        Option to return the transformed mesh, by default True</span>
+<span class="sd">    return_transform : bool, optional</span>
+<span class="sd">        Option to return the transformation matrix, by default False</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    transformed : mymesh.mesh</span>
+<span class="sd">        Mesh transformed to be aligned with the axes.</span>
+<span class="sd">    transform : np.ndarray, optional</span>
+<span class="sd">        Affine transformation matrix (shape=(4,4)) to transform `points` to </span>
+<span class="sd">        `transformed` (`transformed=(transform@points.T).T`). Only returned if</span>
+<span class="sd">        `return_transform = True`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    
+    <span class="k">if</span> <span class="n">return_transformed</span><span class="p">:</span>
+        <span class="n">transformed</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">transformed</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="n">AxisAlignPoints</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">return_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_transformed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis_order</span><span class="o">=</span><span class="n">axis_order</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="n">center</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">return_transform</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">transformed</span><span class="p">,</span> <span class="n">transform</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">transformed</span>
+    <span class="k">elif</span> <span class="n">return_transform</span><span class="p">:</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">AxisAlignPoints</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">return_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_transformed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">axis_order</span><span class="o">=</span><span class="n">axis_order</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="n">center</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">transform</span>
+    <span class="k">return</span>
+
 <div class="viewcode-block" id="AxisAlignImage">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.register.AxisAlignImage.html#mymesh.register.AxisAlignImage">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">AxisAlignImage</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">axis_order</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interpolation_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">transform_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_transformed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_transform</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Align an object in an image to the x, y, z axes. This works by identifying</span>
-<span class="sd">    the minimum volume bounding box (see :func:~`mymesh.utils.MVBB`) and </span>
+<span class="sd">    the minimum volume bounding box (see :func:`~mymesh.utils.MVBB`) and </span>
 <span class="sd">    aligning that box to the principal axes, so objects with rounded objects </span>
 <span class="sd">    with ambiguous orientation may be oriented seemingly-arbitrarily. </span>
 
@@ -1169,7 +1249,7 @@
 <span class="sd">        import numpy as np</span>
 <span class="sd">        import matplotlib.pyplot as plt</span>
 
-<span class="sd">        # Load two the CT scan of the Stanford Bunny</span>
+<span class="sd">        # Load the CT scan of the Stanford Bunny</span>
 <span class="sd">        img1 = mymesh.demo_image(&#39;bunny&#39;) </span>
 
 <span class="sd">        thresh = 100</span>
@@ -1179,7 +1259,7 @@
 <span class="sd">                                center=np.array(img1.shape)/2)</span>
 <span class="sd">        img2 = register.transform_image(img1, R)</span>
 
-<span class="sd">        # Align the two meshes using the iterative closest point (ICP) algorithm</span>
+<span class="sd">        # Align the two images using the iterative closest point (ICP) algorithm</span>
 <span class="sd">        img_aligned, T = register.Image2Image(img1, img2, method=&#39;icp&#39;, threshold=thresh, scale=0.5)</span>
 
 <span class="sd">    .. grid:: 2</span>
@@ -2051,7 +2131,7 @@
 <span class="sd">    </span>
 <span class="sd">    For a center other than the origin, :math:`\begin{bmatrix}c_0, c_1 \end{bmatrix}`:</span>
 
-<span class="sd">    :math:`\mathbf{R_c} = \mathbf{T}(\begin{bmatrix}c_0, c_1\end{bmatrix}) \mathbf{R}} \mathbf{T}(\begin{bmatrix}-c_0, -c_1 \end{bmatrix})`</span>
+<span class="sd">    :math:`\mathbf{R_c} = \mathbf{T}(\begin{bmatrix}c_0, c_1\end{bmatrix}) \mathbf{R} \mathbf{T}(\begin{bmatrix}-c_0, -c_1 \end{bmatrix})`</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -2121,8 +2201,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">Sh2d</span><span class="p">(</span><span class="n">sh01</span><span class="p">,</span><span class="n">sh10</span><span class="p">,</span><span class="n">reference</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a shearing matrix</span>
-<span class="sd">    ref:https://www.mathworks.com/help/images/matrix-representation-of-geometric-transformations.html</span>
-
+<span class="sd">    </span>
 <span class="sd">    .. math::</span>
 
 <span class="sd">        \mathbf{Sh} = \begin{bmatrix}</span>
@@ -2328,7 +2407,6 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">Sh3d</span><span class="p">(</span><span class="n">sh01</span><span class="p">,</span><span class="n">sh10</span><span class="p">,</span><span class="n">sh02</span><span class="p">,</span><span class="n">sh20</span><span class="p">,</span><span class="n">sh12</span><span class="p">,</span><span class="n">sh21</span><span class="p">,</span><span class="n">reference</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a shearing matrix</span>
-<span class="sd">    ref:https://www.mathworks.com/help/images/matrix-representation-of-geometric-transformations.html</span>
 
 <span class="sd">    .. math::</span>
 
@@ -2379,7 +2457,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    x : list</span>
-<span class="sd">        list with a single value for uniform scaling</span>
+<span class="sd">        list with a single value for uniform scaling :code:`[s]`</span>
 <span class="sd">        </span>
 <span class="sd">    center : list or np.ndarary, optional</span>
 <span class="sd">        Reference point for the scaling</span>
@@ -2407,12 +2485,14 @@
 <span class="sd">    ----------</span>
 <span class="sd">    x : list</span>
 <span class="sd">        3 item list, containing the x, y, and z rotations</span>
-<span class="sd">        [alpha, beta, gamma], where angles are specified in radians.</span>
+<span class="sd">        :code:`[alpha, beta, gamma]`, where angles are specified in radians.</span>
 <span class="sd">    center : list or np.ndarary, optional</span>
 <span class="sd">        Reference point for the rotation</span>
 <span class="sd">    rotation_order : array_like, optional</span>
 <span class="sd">        Order to perform rotations about the x (0), y (1), and z (2) axes,  by</span>
 <span class="sd">        default [0,1,2]</span>
+<span class="sd">    image : bool, optional</span>
+<span class="sd">        Create a transformation matrix for an image, assuming the (0,1,2) dimensions correspond to (z,y,x) by default False.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -2441,9 +2521,11 @@
 <span class="sd">    ----------</span>
 <span class="sd">    x : array_like</span>
 <span class="sd">        1 item list, containing the rotation</span>
-<span class="sd">        [theta], where angles are specified in radians.</span>
+<span class="sd">        :code:`[theta]`, where angles are specified in radians.</span>
 <span class="sd">    center : list or np.ndarary, optional</span>
 <span class="sd">        Reference point for the rotation</span>
+<span class="sd">    image : bool, optional</span>
+<span class="sd">        Create a transformation matrix for an image, assuming the (0,1,2) dimensions correspond to (z,y,x) by default False.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -2463,13 +2545,15 @@
 <a class="viewcode-back" href="../../generated/submodules/mymesh.register.translation.html#mymesh.register.translation">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">translation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Rigid transformation consisting of translation and rotation in 3D.</span>
+<span class="sd">    Rigid translation in 3D.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    x : list</span>
 <span class="sd">        3 item list, containing the x, y, and z translations </span>
-<span class="sd">        [t0, t1, t2], where displacements are specified in pixels.</span>
+<span class="sd">        :code:`[t0, t1, t2]`.</span>
+<span class="sd">    image : bool, optional</span>
+<span class="sd">        Create a transformation matrix for an image, assuming the (0,1,2) dimensions correspond to (z,y,x) by default False.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -2492,13 +2576,13 @@
 <a class="viewcode-back" href="../../generated/submodules/mymesh.register.translation2d.html#mymesh.register.translation2d">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">translation2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Rigid transformation consisting of translation and rotation in 2D.</span>
+<span class="sd">    Rigid translation in 2D.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    x : list</span>
 <span class="sd">        2 item list, containing the x, and y translations </span>
-<span class="sd">        [t0, t1], where displacements are specified in pixels.</span>
+<span class="sd">        :code:`[t0, t1]`.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -2528,9 +2612,8 @@
 <span class="sd">    I : np.ndarray</span>
 <span class="sd">        numpy array containing the image data</span>
 <span class="sd">    x : list</span>
-<span class="sd">        6 item list, containing the x, y, and z translations and rotations</span>
-<span class="sd">        [t0, t1, t2, alpha, beta, gamma], where angles are specified in radians</span>
-<span class="sd">        and displacements are specified in pixels.</span>
+<span class="sd">        3 item list, containing the x and y translations and rotation about z</span>
+<span class="sd">        :code:`[t0, t1, theta]`, where angles are specified in radians.</span>
 <span class="sd">    center : list or np.ndarary, optional</span>
 <span class="sd">        Reference point for the rotation</span>
 
@@ -2562,7 +2645,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    x : list</span>
 <span class="sd">        6 item list, containing the x, y, and z translations and rotations</span>
-<span class="sd">        [t0, t1, t2, alpha, beta, gamma], where angles are specified in radians</span>
+<span class="sd">        :code:`[t0, t1, t2, alpha, beta, gamma]`, where angles are specified in radians</span>
 <span class="sd">        and displacements are specified in pixels.</span>
 <span class="sd">    center : list or np.ndarary, optional</span>
 <span class="sd">        Reference point for the rotation</span>
@@ -2588,13 +2671,35 @@
 <div class="viewcode-block" id="similarity2d">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.register.similarity2d.html#mymesh.register.similarity2d">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">similarity2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rotation_order</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">rotation_mode</span><span class="o">=</span><span class="s1">&#39;cartesian&#39;</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Similarity transform in 2D.</span>
 
+<span class="sd">    The similairy transform consists of a rigid transformation combined with </span>
+<span class="sd">    uniform scalings</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : list</span>
+<span class="sd">        4 item list, containing the x and y translations and rotation about z, and uniform scaling :code:`[t0, t1, theta, s]`, where angles are specified in radians.</span>
+<span class="sd">    center : list or np.ndarary, optional</span>
+<span class="sd">        Reference point for the rotation</span>
+<span class="sd">    rotation_order : array_like, optional</span>
+<span class="sd">        Order to perform rotations about the x (0), y (1), and z (2) axes,  by</span>
+<span class="sd">        default [0,1,2]</span>
+<span class="sd">    image : bool, optional</span>
+<span class="sd">        Create a transformation matrix for an image, assuming the (0,1) dimensions correspond to (y,x), by default False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    A : np.ndarray</span>
+<span class="sd">        Affine transformation matrix (shape=(3,3))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">image</span><span class="p">:</span>
         <span class="p">[</span><span class="n">t1</span><span class="p">,</span><span class="n">t0</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">s0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="p">[</span><span class="n">t0</span><span class="p">,</span><span class="n">t1</span><span class="p">,</span><span class="n">t2</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">s0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="p">[</span><span class="n">t0</span><span class="p">,</span><span class="n">t1</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">s0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">T2d</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span><span class="n">t1</span><span class="p">)</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">R2d</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span><span class="n">beta</span><span class="p">,</span><span class="n">gamma</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">center</span><span class="p">),</span><span class="n">rotation_order</span><span class="o">=</span><span class="n">rotation_order</span><span class="p">,</span><span class="n">rotation_mode</span><span class="o">=</span><span class="n">rotation_mode</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">R2d</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">center</span><span class="p">),</span><span class="n">rotation_order</span><span class="o">=</span><span class="n">rotation_order</span><span class="p">,</span><span class="n">rotation_mode</span><span class="o">=</span><span class="n">rotation_mode</span><span class="p">)</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">S2d</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">s0</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">s</span><span class="nd">@t@r</span>
     <span class="k">return</span> <span class="n">A</span></div>
@@ -2603,7 +2708,29 @@
 <div class="viewcode-block" id="similarity">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.register.similarity.html#mymesh.register.similarity">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">similarity</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rotation_order</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">rotation_mode</span><span class="o">=</span><span class="s1">&#39;cartesian&#39;</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Similarity transform in 3D.</span>
 
+<span class="sd">    The similairy transform consists of a rigid transformation combined with </span>
+<span class="sd">    uniform scalings</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : list</span>
+<span class="sd">        4 item list, containing the x and y translations and rotation about z, and uniform scaling :code:`[t0, t1, t2, alpha, beta, gamma, s]`, where angles are specified in radians.</span>
+<span class="sd">    center : list or np.ndarary, optional</span>
+<span class="sd">        Reference point for the rotation</span>
+<span class="sd">    rotation_order : array_like, optional</span>
+<span class="sd">        Order to perform rotations about the x (0), y (1), and z (2) axes,  by</span>
+<span class="sd">        default [0,1,2]</span>
+<span class="sd">    image : bool, optional</span>
+<span class="sd">        Create a transformation matrix for an image, assuming the (0,1,2) dimensions correspond to (z,y,x), by default False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    A : np.ndarray</span>
+<span class="sd">        Affine transformation matrix (shape=(3,3))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">image</span><span class="p">:</span>
         <span class="p">[</span><span class="n">t2</span><span class="p">,</span><span class="n">t1</span><span class="p">,</span><span class="n">t0</span><span class="p">,</span><span class="n">gamma</span><span class="p">,</span><span class="n">beta</span><span class="p">,</span><span class="n">alpha</span><span class="p">,</span><span class="n">s0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
     <span class="k">else</span><span class="p">:</span>
