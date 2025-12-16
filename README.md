@@ -1,6 +1,6 @@
 ![](resources/mymesh_logo.png)
 
-![PyPI - Version](https://img.shields.io/pypi/v/mymesh)
+[![PyPI - Version](https://img.shields.io/pypi/v/mymesh)](https://pypi.org/project/mymesh/)
 ![Static Badge](https://img.shields.io/badge/doi%20-%20Zenodo%20-%20%20%231A90DE?link=https%3A%2F%2Fzenodo.org%2Frecords%2F17511909)
 
 
