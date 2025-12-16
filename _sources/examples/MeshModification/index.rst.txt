@@ -1,0 +1,63 @@
+
+
+.. _sphx_glr_examples_MeshModification:
+
+Mesh Modification Examples
+==========================
+
+Examples for modifying/manipulating meshes.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates the effects of different smoothing methods. Smoothing a mesh can serve two purposes - the first is to smooth the geometry, rounding out sharp features; the second is to redistribute nodes, often in pursuit of improved element quality. When attempting to improve element quality, often the goal is to redistribute the nodes while having a minimal effect on the geometry. Different smoothing methods have different effects on the geometry.">
+
+.. only:: html
+
+  .. image:: /examples/MeshModification/images/thumb/sphx_glr_demo_smoothing_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshModification/demo_smoothing`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Mesh Smoothing</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates registration of meshes and images using the Stanford Bunny.">
+
+.. only:: html
+
+  .. image:: /examples/MeshModification/images/thumb/sphx_glr_demo_registration_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshModification/demo_registration`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Registration</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/MeshModification/demo_smoothing
+   /examples/MeshModification/demo_registration
+
