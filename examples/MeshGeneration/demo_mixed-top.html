@@ -419,12 +419,12 @@ to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="mixed-topology-tpms">
 <span id="sphx-glr-examples-meshgeneration-demo-mixed-top-py"></span><h1>Mixed-Topology TPMS<a class="headerlink" href="#mixed-topology-tpms" title="Link to this heading">#</a></h1>
-<p>Mixed-topology surfaces <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id17" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1–18, jul 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span> combine multiple implicit
+<p>Mixed-topology surfaces <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id24" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1-18, 7 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span> combine multiple implicit
 functions by taking weighted sums of the functions. By controlling the weights,
 the resulting surface can be varied continuously between the set of surfaces.
 Depending on the set of surfaces, this can constitute a low-parameter,
 topology-varying design space that can be used for design optimization (as in
-<span id="id2">[<a class="reference internal" href="../../guide/ref.html#id17" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1–18, jul 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span>).</p>
+<span id="id2">[<a class="reference internal" href="../../guide/ref.html#id24" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1-18, 7 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span>).</p>
 <p>Triply periodic minimal surfaces (TPMS) are particularly
 interesting subjects for a mixed-topology approach because the resultant surface
 will remain triply periodic (though not minimal) as long as the periodicities
@@ -487,14 +487,14 @@ Identifying mesh nodes...Done
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
 <p>To be specific, the implicit function TPMS representations are
 Fourier series approximations (also known as periodic nodal surfaces
-<span id="id4">[<a class="reference internal" href="../../guide/ref.html#id28" title="H. G. von Schnering and R. Nesper. Nodal surfaces of Fourier series: Fundamental invariants of structured matter. Zeitschrift für Physik B Condensed Matter, 83(3):407–412, 1991. URL: https://www.doi.org/10.1007/BF01313411, doi:10.1007/BF01313411.">vSN91</a>]</span>) and are not <em>truly</em> minimal surfaces (though they
+<span id="id4">[<a class="reference internal" href="../../guide/ref.html#id51" title="H. G. von Schnering and R. Nesper. Nodal surfaces of fourier series: fundamental invariants of structured matter. Zeitschrift für Physik B Condensed Matter, 83:407-412, 1991. URL: https://www.doi.org/10.1007/BF01313411, doi:10.1007/BF01313411.">vSN91</a>]</span>) and are not <em>truly</em> minimal surfaces (though they
 are truly triply periodic). This can be seen by measuring the surface curvature
 (<a class="reference internal" href="../../generated/mymesh.curvature.html#module-mymesh.curvature" title="mymesh.curvature"><code class="xref py py-mod docutils literal notranslate"><span class="pre">curvature</span></code></a>) and observing that the mean curvature is not zero at
 all points. Nevertheless, these are reasonably accurate and commonly used
 approximations.</p>
 </aside>
 </aside>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 8.393 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 8.162 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshgeneration-demo-mixed-top-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/188cf3c47a11ac8ef0666307cef28cf2/demo_mixed-top.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">demo_mixed-top.ipynb</span></code></a></p>

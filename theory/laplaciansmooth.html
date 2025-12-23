@@ -420,7 +420,7 @@
   <section id="laplacian-smoothing">
 <h1>Laplacian Smoothing<a class="headerlink" href="#laplacian-smoothing" title="Link to this heading">#</a></h1>
 <p>See <a class="reference internal" href="../generated/submodules/mymesh.improvement.LocalLaplacianSmoothing.html#mymesh.improvement.LocalLaplacianSmoothing" title="mymesh.improvement.LocalLaplacianSmoothing"><code class="xref py py-func docutils literal notranslate"><span class="pre">LocalLaplacianSmoothing()</span></code></a>
-<span id="id1">[<a class="reference internal" href="../guide/ref.html#id2" title="James C. Cavendish. Automatic triangulation of arbitrary planar domains for the finite element method. International Journal for Numerical Methods in Engineering, 8(4):679–696, 1974. doi:10.1002/nme.1620080402.">Cav74</a>]</span></p>
+<span id="id1">[<a class="reference internal" href="../guide/ref.html#id13" title="James C. Cavendish. Automatic triangulation of arbitrary planar domains for the finite element method. International Journal for Numerical Methods in Engineering, 8:679-696, 1974. doi:10.1002/nme.1620080402.">Cav74</a>]</span></p>
 <p>Laplacian smoothing is a classic smoothing method that works by moving each node
 to the center of its <span class="math notranslate nohighlight">\(n_i\)</span> neighboring nodes.</p>
 <div class="math notranslate nohighlight">
@@ -500,7 +500,7 @@ algorithm.</p>
 <section id="tangential-laplacian-smoothing">
 <h2>Tangential Laplacian Smoothing<a class="headerlink" href="#tangential-laplacian-smoothing" title="Link to this heading">#</a></h2>
 <p>See <a class="reference internal" href="../generated/submodules/mymesh.improvement.TangentialLaplacianSmoothing.html#mymesh.improvement.TangentialLaplacianSmoothing" title="mymesh.improvement.TangentialLaplacianSmoothing"><code class="xref py py-func docutils literal notranslate"><span class="pre">TangentialLaplacianSmoothing()</span></code></a>
-<span id="id2">[<a class="reference internal" href="../guide/ref.html#id22" title="Yutaka Ohtake, Alexander Belyaev, and Alexander Pasko. Dynamic mesh optimization for polygonized implicit surfaces with sharp features. Visual Computer, 19(2-3):115–126, 2003. doi:10.1007/s00371-002-0181-z.">OBP03</a>]</span></p>
+<span id="id2">[<a class="reference internal" href="../guide/ref.html#id57" title="Yutaka Ohtake, Alexander Belyaev, and Alexander Pasko. Dynamic mesh optimization for polygonized implicit surfaces with sharp features. Visual Computer, 19:115-126, 2003. doi:10.1007/s00371-002-0181-z.">OBP03</a>]</span></p>
 <p>Tangential Laplacian smoothing mitigates shrinkage by only moving nodes on the
 plane tangent to the surface at that point, better preserving the original
 geometry while still smoothing.</p>
@@ -519,7 +519,7 @@ projection of the displacement <span class="math notranslate nohighlight">\(\mat
 <section id="smart-laplacian-smoothing">
 <h2>Smart Laplacian Smoothing<a class="headerlink" href="#smart-laplacian-smoothing" title="Link to this heading">#</a></h2>
 <p>See <a class="reference internal" href="../generated/submodules/mymesh.improvement.SmartLaplacianSmoothing.html#mymesh.improvement.SmartLaplacianSmoothing" title="mymesh.improvement.SmartLaplacianSmoothing"><code class="xref py py-func docutils literal notranslate"><span class="pre">SmartLaplacianSmoothing()</span></code></a>
-<span id="id3">[<a class="reference internal" href="../guide/ref.html#id25" title="Lori A. Freitag. On combining laplacian and optimization-based mesh smoothing techniques. American Society of Mechanical Engineers, Applied Mechanics Division, AMD, 220:37–43, 1997.">Fre97</a>]</span></p>
+<span id="id3">[<a class="reference internal" href="../guide/ref.html#id36" title="Lori A. Freitag. On combining laplacian and optimization-based mesh smoothing techniques. American Society of Mechanical Engineers, Applied Mechanics Division, AMD, 220:37-43, 1997.">Fre97</a>]</span></p>
 <p>“Smart” Laplacian smoothing follows the same approach as the standard local
 Laplacian smoothing, but vertex movement is only accepted if the quality
 of the connected elements is improved. Different strategies can be employed,

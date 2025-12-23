@@ -83,47 +83,39 @@ meshes. It's particularly focused on :mod:`~mymesh.implicit` function and
 - Mesh :mod:`~mymesh.curvature` analysis,
 - Mesh :ref:`boolean<mymesh.booleans>` operations (intersection, union, difference).
 
-MyMesh was originally developed in support of the Ph.D. research of 
-`Tim Josephson <https://scholar.google.com/citations?user=ZsqbtjQAAAAJ&hl=en>`_ 
-in `Elise Morgan <https://scholar.google.com/citations?user=hLf0lzEAAAAJ&hl=en&oi=ao>`_'s 
-`Skeletal Mechanobiology and Biomechanics Lab <https://morganresearchlab.org/>`_ 
-at Boston University. MyMesh was used extensively in the scaffold design 
-optimization research by :cite:t:`Josephson2024b` and is currently 
-being used in various ongoing projects at Boston University, including vertebral 
-modeling (Andre Gutierrez Marty, Neilesh Frings), hip fracture modeling (Joshua 
-Auger, Ariella Blake), mechanobiologically-driven growth modeling of skeletal 
-tissue (Tim Josephson, Vivian Shi), and analysis of micro CT-scanned teeth 
-(Sydney Holder, Shadi Mohebi). 
+MyMesh was originally developed in support of research within the Skeletal Mechanobiology and Biomechanics Lab at Boston University. 
+It was used extensively in the scaffold design optimization research by :cite:t:`Josephson2024b` and is currently being used in various ongoing projects, including vertebral modeling, hip fracture modeling, growth modeling of skeletal tissue, and analysis of objects imaged using micro-computed tomography (μCT). 
+MyMesh has proven useful in a variety of research applications, well beyond those that inspired its original development, and we expect it to remain a valuable tool in future research efforts. 
 
 Statement of need
 -----------------
 
-There are a variety of software packages for working with and generating 
-meshes. 
-Some are general purpose, like CGAL, VTK, and gmsh, and others are more focused and do specific tasks very well, such as triangular (Triangle :cite:p:`Shewchuk1996`) or tetrahedral (TetGen :cite:p:`Si2015`) mesh generation. 
-In Python, most meshing packages depend on (or are direct wrappers to) one or more of these libraries, such as PyVista (a pythonic interface to VTK), PyMesh (which depends on CGAL, Triangle, TetGen, and others), and MeshPy (which interfaces to Triangle and TetGen). 
-While these interfaces are useful and provide access to powerful mesh generation tools, their reliance on external, compiled dependencies 
-limits code readability and makes it difficult to build upon and extend the 
-algorithms. 
-A notable exception is TriMesh, a pure-python library focused on 
-triangular surfaces meshes. 
+Mesh-based representations of geometries are essential in a wide variety of research applications, and as such, there is a need for robust, efficient, and easy-to-use software for creating, analyzing, and manipulating meshes.
+There are a variety of software packages for working with and generating meshes. 
+Some are general purpose, like `CGAL <https://www.cgal.org/>`_, `VTK <https://vtk.org/>`_ :cite:p:`Schroeder2006`, and Gmsh :cite:p:`Geuzaine2009`, while others are more focused on specific tasks, such as triangular or tetrahedral mesh generation (e.g. Triangle :cite:p:`Shewchuk1996` and TetGen :cite:p:`Si2015`, respectively). 
+In Python, most meshing packages depend on (or are direct wrappers to) one or more of these libraries, such as `PyVista <https://pyvista.org/>`_ :cite:p:`Sullivan2019` (a pythonic interface to VTK), `MeshPy <https://github.com/inducer/meshpy>`_ (which interfaces to Triangle and TetGen), and `PyMesh <https://pymesh.readthedocs.io/en/latest/>`_ (which depends on CGAL, Triangle, TetGen, and others). 
+While these interfaces are useful and provide access to powerful mesh generation tools, their reliance on external dependencies can make them less easy to use and limit code readability, making it more difficult to understand how the code works. 
+`TriMesh <https://trimesh.org/>`_ stands out as a capable, pure-Python library focused on triangular surface meshes, but it isn't intended for use with quadrilateral, mixed-element, or volumetric meshes. 
+There is thus a need for a full-featured, accessible, and easy to use Python package for creating and working with meshes.
 
-MyMesh strives to be a comprehensive library of meshing tools, written in Python with clear documentation that makes it both easy to use and easy to understand.
-MyMesh has a particular focus on implicit function and image-based meshes, but also supplies a wide variety of general purpose meshing tools. Rather than wrapping other libraries, algorithms are implemented from scratch, either directly based on, or loosely inspired by, published algorithms and research. 
-
+MyMesh strives to meet this need as a library of meshing tools, written in Python, with clear documentation that makes it both easy to use and easy to understand.
+MyMesh has a particular focus on implicit function and image-based meshes, but also supplies a wide variety of general purpose tools. 
+Rather than wrapping other libraries, algorithms are implemented from scratch, often based on or inspired by published algorithms and research. 
+By providing an easily usable interface to both high-level and low-level functionality, we hope to provide both complete solutions and a set of building blocks for the development of other mesh-related tools.
 
 .. Note::
-    MyMesh is intended for research purposes. Any applications of MyMesh should
+    MyMesh is intended for research purposes. Any uses of MyMesh should
     be validated and verified appropriately. 
 
 Examples
 --------
 
+See the gallery of :ref:`examples <Mesh Analysis Examples>` to see some of the ways MyMesh can be used.
 
 Acknowledgements
 ----------------
-MyMesh was initially developed to further the aims of research funded by the 
-National Institutes of Health (Grant #AG073671). 
+This work was developed with funding support from the National Institutes of Health (Grant #AG073671). 
+We are additionally grateful to all of the users who have tested the code, reported bugs, requested features, and provided feedback which has been vital to the development of MyMesh.
 
 Colors used throughout this documentation are based on the 
 `Nord Theme <https://www.nordtheme.com/>`_

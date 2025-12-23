@@ -447,21 +447,21 @@ As such, it requires an objective function (a way to score the similarity/distan
 </section>
 <section id="iterative-closest-point-icp">
 <h2>Iterative Closest Point (ICP)<a class="headerlink" href="#iterative-closest-point-icp" title="Link to this heading">#</a></h2>
-<p>Reference: <span id="id1"></span></p>
+<p>Reference: <span id="id1">Besl and McKay [<a class="reference internal" href="../guide/ref.html#id9" title="Paul J. Besl and Neil D. McKay. A method for registration of 3-d shapes. IEEE Transactions on Pattern Analysis and Machine Intelligence, 14:239-256, 1992. doi:10.1109/34.121791.">BM92</a>]</span></p>
 <p>The iterative closest point algorithm is a classic and popular method for rigid registration of point sets.</p>
 <p>The ICP algorithm involves the repetition of two key steps:
 1. Identifying the “closest point” correspondences; and
 2. Minimizing the distance between corresponding points.</p>
 <section id="minimizing-the-distance-between-corresponding-points">
 <h3>Minimizing the distance between corresponding points<a class="headerlink" href="#minimizing-the-distance-between-corresponding-points" title="Link to this heading">#</a></h3>
-<p>Reference: <span id="id2">Arun <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id55" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-Squares Fitting of Two 3-D Point Sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9(5):698–700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span></p>
+<p>Reference: <span id="id2">Arun <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id7" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-squares fitting of two 3-d point sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9:698-700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span></p>
 <p>Once pairs of corresponding points have been identified, the squared error between a set of <span class="math notranslate nohighlight">\(N\)</span> fixed points (<span class="math notranslate nohighlight">\(p^f = \{p_i^f\}\)</span>) and a corresponding set of <span class="math notranslate nohighlight">\(N\)</span> moving points (<span class="math notranslate nohighlight">\(p^m = \{p_i^m\}\)</span>) is written:</p>
 <div class="math notranslate nohighlight">
 \[\Sigma^2 = \sum_{i=1}^{N} ||p_i^f - (\mathbf{R} p_i^m + \mathbf{T})||^2\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathbf{R}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{T}\)</span> are rotation and translation matrices, respectively.
 The objective is to find <span class="math notranslate nohighlight">\(\mathbf{R}, \ \mathbf{T}\)</span> that minimize the squared error: <span class="math notranslate nohighlight">\(\underset{\mathbf{R}, \ \mathbf{T}}{\min}\Sigma^2\)</span>.
 Before attempting to minimize this squared error, we can simplify the problem by separating translation and rotation.
-At the least squares minimum of <span class="math notranslate nohighlight">\(\Sigma^2\)</span>, the centroid of the moving points (<span class="math notranslate nohighlight">\(c(p^m) = \frac{1}{N}\sum_{i=1}^{N}p_i^m\)</span>) will be equal to that of the fixed points (<span class="math notranslate nohighlight">\(c(p^f) = \frac{1}{N}\sum_{i=1}^{N}p_i^f\)</span>) <span id="id3">[<a class="reference internal" href="../guide/ref.html#id55" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-Squares Fitting of Two 3-D Point Sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9(5):698–700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span>, meaning the rotation can first be solved by centering both sets of points at the origin by subtracting the centroids from the points:</p>
+At the least squares minimum of <span class="math notranslate nohighlight">\(\Sigma^2\)</span>, the centroid of the moving points (<span class="math notranslate nohighlight">\(c(p^m) = \frac{1}{N}\sum_{i=1}^{N}p_i^m\)</span>) will be equal to that of the fixed points (<span class="math notranslate nohighlight">\(c(p^f) = \frac{1}{N}\sum_{i=1}^{N}p_i^f\)</span>) <span id="id3">[<a class="reference internal" href="../guide/ref.html#id7" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-squares fitting of two 3-d point sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9:698-700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span>, meaning the rotation can first be solved by centering both sets of points at the origin by subtracting the centroids from the points:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}q_i^f =  p_i^f - c(p^f), \\
 q_i^m = p_i^m - c(p^m),\end{split}\]</div>
@@ -471,7 +471,7 @@ q_i^m = p_i^m - c(p^m),\end{split}\]</div>
 <p>The translation can subsequently be determined as</p>
 <div class="math notranslate nohighlight">
 \[\mathbf{T} = c(p^f) - \mathbf{R}c(p^m).\]</div>
-<p>The rotation can be found by performing <a class="reference external" href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> of the cross covariance matrix (see <span id="id4">Arun <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id55" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-Squares Fitting of Two 3-D Point Sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9(5):698–700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span> for derivation)</p>
+<p>The rotation can be found by performing <a class="reference external" href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> of the cross covariance matrix (see <span id="id4">Arun <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id7" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-squares fitting of two 3-d point sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9:698-700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span> for derivation)</p>
 <div class="math notranslate nohighlight">
 \[H = \sum_{i=1}^{N} q_i^m (q_i^f)^t = \mathbf{U \Sigma V}^t.\]</div>
 <p>The rotation <span class="math notranslate nohighlight">\(\mathbf{R}\)</span> is then</p>
