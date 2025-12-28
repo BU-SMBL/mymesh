@@ -92,7 +92,7 @@ Octree Querying
 import numpy as np
 from . import rays, utils, mesh
 import sympy as sp
-import copy
+import copy, heapq
 
 class TreeNode:
     def __init__(self,parent=None,data=None,level=0,state='unknown'):
@@ -434,8 +434,8 @@ class QuadtreeNode(TreeNode):
             for child in self.children:
                 ptIds = child.ContainsPts(points)
                 ptsInChild = points[ptIds]#[points[idx] for idx in ptIds]
-                if self.data:
-                    child.data = [self.data[idx] for idx in ptIds]
+                # if self.data:
+                #     child.data = [self.data[idx] for idx in ptIds]
                 if len(ptsInChild) > 1: 
                     if child.size/2 <= minsize:
                         child.state = 'leaf'
@@ -445,6 +445,7 @@ class QuadtreeNode(TreeNode):
                 elif len(ptsInChild) == 1:
                     if child.size <= maxsize:
                         child.state = 'leaf'
+                        child.data = ptsInChild
                     else:
                         child.makeChildrenPts(ptsInChild,minsize=minsize,maxsize=maxsize)
                         child.state = 'branch'
@@ -492,6 +493,69 @@ class QuadtreeNode(TreeNode):
                     child.state = 'leaf'
             elif len(edgesInChild) == 0:
                 child.state = 'empty'
+
+    def search_pt(self, x):
+
+        if self.PointInNode(x):
+            if len(self.children) == 0:
+                return self
+            for child in self.children:
+                out = child.search_pt(x)
+                if out is not None:
+                    return out
+        else:
+            return None
+        
+    def node_distance(self, x):
+        # closest distance between  between a node in the tree and a point
+        limits = self.getLimits()
+        nearest_point = np.clip(x, limits[:, 0], limits[:, 1])
+        
+        dist = np.linalg.norm(np.asarray(x) - nearest_point)
+        return dist
+
+
+    def query_knn(self, x, k=1):
+
+        # Get point-root distance
+        if self.PointInNode(x):
+            dist = 0
+        else:
+            dist = self.node_distance(x)
+
+        # Initialize queue
+        queue = [] 
+        heapq.heappush(queue, (dist, self))
+        result = []
+
+        # loop
+        while len(result) < k and len(queue) > 0:
+            item = heapq.heappop(queue)
+            if type(item[1]) is QuadtreeNode:
+                node = item[1]
+                if node.state == 'leaf':
+                    for pt in node.data:
+                        pt = np.asarray(pt)
+                        dist = np.linalg.norm(np.asarray(x) - pt)
+
+                        heapq.heappush(queue, (dist, pt))
+                else:
+                    for child in node.children:
+                        if child.PointInNode(x):
+                            dist = 0
+                        else:
+                            dist = child.node_distance(x)
+                        heapq.heappush(queue, (dist,child))
+            else:
+                # Because of the priority queue, this must be one of the 
+                # k-nearest points
+                result.append(item)
+        out = list(zip(*result))
+        out[0] = np.array(out[0])
+        out = tuple(out)
+
+        return result
+
 
 class OctreeNode(TreeNode):
           

@@ -2634,7 +2634,7 @@ def PointsInSurf(pts, NodeCoords, SurfConn, ElemNormals=None, Octree='generate',
                 Insides[i] = True
     return Insides
 
-@try_njit
+@try_njit(cache=True)
 def PointInBox2D(pt, xlim, ylim, inclusive=True):
     """
     Test whether a point is inside a 2 dimensional box
