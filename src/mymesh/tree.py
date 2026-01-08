@@ -90,7 +90,7 @@ Octree Querying
 
 """
 import numpy as np
-from . import rays, utils, mesh
+from . import rays, utils, mesh, primitives
 import sympy as sp
 import copy, heapq
 
@@ -220,7 +220,6 @@ class TreeNode:
                 node.children = []
         return pruned        
 
-
 class QuadtreeNode(TreeNode):
           
     def __init__(self,centroid,size,parent=None,data=None,level=0,state='unknown'):
@@ -349,7 +348,8 @@ class QuadtreeNode(TreeNode):
             the node, otherwise False.
         """
         limits = self.getLimits()
-        inside =  np.array([rays.PointInBox2D(point, *limits, inclusive=inclusive) for point in points])
+        # inside =  np.array([rays.PointInBox2D(point, *limits, inclusive=inclusive) for point in points])
+        inside = rays.PointsInBox2D(points, *limits, inclusive=inclusive)
         
         return inside
     
@@ -367,7 +367,9 @@ class QuadtreeNode(TreeNode):
         out : list
             List of indices of the points that are contained within the node
         """
-        out = [idx for idx,point in enumerate(points) if self.PointInNode(point)]
+        # out = [idx for idx,point in enumerate(points) if self.PointInNode(point)]
+        inside = self.PointsInNode(points)
+        out = np.where(inside) # can probably skip where and use logical indexing (which would kinda make this whole function obsolete?)
 
         return out
      
@@ -494,29 +496,48 @@ class QuadtreeNode(TreeNode):
             elif len(edgesInChild) == 0:
                 child.state = 'empty'
 
-    def search_pt(self, x):
-
-        if self.PointInNode(x):
-            if len(self.children) == 0:
-                return self
-            for child in self.children:
-                out = child.search_pt(x)
-                if out is not None:
-                    return out
-        else:
-            return None
-        
     def node_distance(self, x):
-        # closest distance between  between a node in the tree and a point
+        """
+        Calculate the nearest distance between a point and a quadtree node.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            Point coordinates (shape=(2,))
+
+        Returns
+        -------
+        dist : float
+            Distance between a point and the node.
+        """        
         limits = self.getLimits()
         nearest_point = np.clip(x, limits[:, 0], limits[:, 1])
         
         dist = np.linalg.norm(np.asarray(x) - nearest_point)
         return dist
 
-
     def query_knn(self, x, k=1):
+        """
+        Find the k-nearest neighbor points in the tree to a point.
+        Note: This currently only works for a point cloud tree (e.g. created
+        with :func:`Points2Quadtree`)
 
+        Parameters
+        ----------
+        x : np.ndarray
+            Point coordinates (shape=(2,))
+        k : int, optional
+            Number of nearest neighbor points to identify, by default 1
+
+        Returns
+        -------
+        dist : np.ndarray
+            Array of distance between :code:`x` and the nearest neighbors 
+            (shape=(k,))
+        coordinates : np.ndarray
+            Array of coordinates for the nearest neighbor points
+            (shape=(k,2))
+        """        
         # Get point-root distance
         if self.PointInNode(x):
             dist = 0
@@ -545,17 +566,20 @@ class QuadtreeNode(TreeNode):
                             dist = 0
                         else:
                             dist = child.node_distance(x)
-                        heapq.heappush(queue, (dist,child))
+                        if len(queue) >= k:
+                            if dist <= queue[0][0]:
+                                heapq.heappush(queue, (dist,child))
+                        else:
+                            heapq.heappush(queue, (dist,child))
             else:
                 # Because of the priority queue, this must be one of the 
                 # k-nearest points
                 result.append(item)
         out = list(zip(*result))
         out[0] = np.array(out[0])
-        out = tuple(out)
+        dist, coordinates = out
 
-        return result
-
+        return dist, coordinates
 
 class OctreeNode(TreeNode):
           
@@ -687,7 +711,9 @@ class OctreeNode(TreeNode):
             the node, otherwise False.
         """
         limits = self.getLimits()
-        inside =  np.array([rays.PointInBox(point, *limits, inclusive=inclusive) for point in points])
+        # inside =  np.array([rays.PointInBox(point, *limits, inclusive=inclusive) for point in points])
+        inside = rays.PointsInBox(points, *limits, inclusive=inclusive)
+
         
         return inside
     
@@ -698,14 +724,16 @@ class OctreeNode(TreeNode):
         Parameters
         ----------
         points : array_like
-            Coordinates of the points (shape=(n,3))
+            Coordinates of the points (shape=(n,3))>
 
         Returns
         -------
         out : list
             List of indices of the points that are contained within the node
         """
-        out = [idx for idx,point in enumerate(points) if self.PointInNode(point)]
+        # out = [idx for idx,point in enumerate(points) if self.PointInNode(point)]
+        inside = self.PointsInNode(points)
+        out = np.where(inside)
 
         return out
     
@@ -768,7 +796,9 @@ class OctreeNode(TreeNode):
         self.children = []
         # Note other things (e.g. Function2Octree) depend on this ordering not changing 
         for xSign,ySign,zSign in [(-1,-1,-1),(1,-1,-1),(1,1,-1),(-1,1,-1),(-1,-1,1),(1,-1,1),(1,1,1),(-1,1,1)]:
-            centroid = np.array([self.centroid[0]+xSign*self.size/4, self.centroid[1]+ySign*self.size/4, self.centroid[2]+zSign*self.size/4])
+            centroid = np.array([self.centroid[0]+xSign*self.size/4, 
+                                 self.centroid[1]+ySign*self.size/4, 
+                                 self.centroid[2]+zSign*self.size/4])
             self.children.append(OctreeNode(centroid,childSize,parent=self,data=[],level=self.level+1,state=childstate))
             
     def makeChildrenPts(self, points, minsize=0, maxsize=np.inf, maxdepth=np.inf):
@@ -792,8 +822,8 @@ class OctreeNode(TreeNode):
             for child in self.children:
                 ptIds = child.ContainsPts(points)
                 ptsInChild = points[ptIds]#[points[idx] for idx in ptIds]
-                if self.data:
-                    child.data = [self.data[idx] for idx in ptIds]
+                # if self.data:
+                #     child.data = [self.data[idx] for idx in ptIds]
                 if len(ptsInChild) > 1: 
                     if child.size/2 < minsize:
                         child.state = 'leaf'
@@ -803,6 +833,7 @@ class OctreeNode(TreeNode):
                 elif len(ptsInChild) == 1:
                     if child.size <= maxsize:
                         child.state = 'leaf'
+                        child.data = ptsInChild
                     else:
                         child.makeChildrenPts(ptsInChild,minsize=minsize,maxsize=maxsize)
                         child.state = 'branch'
@@ -887,6 +918,189 @@ class OctreeNode(TreeNode):
                     child.state = 'leaf'
             elif len(boxesInChild) == 0:
                 child.state = 'empty'
+
+    def node_distance(self, x):
+        """
+        Calculate the nearest distance between a point and an octree node.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            Point coordinates (shape=(3,))
+
+        Returns
+        -------
+        dist : float
+            Distance between a point and the node.
+        """        
+        limits = self.getLimits()
+        nearest_point = np.clip(x, limits[:, 0], limits[:, 1])
+        
+        dist = np.linalg.norm(np.asarray(x) - nearest_point)
+        return dist
+
+    def query_knn(self, x, k=1):
+        """
+        Find the k-nearest neighbor points in the tree to a point.
+        Note: This currently only works for a point cloud tree (e.g. created
+        with :func:`Points2Octree`)
+
+        Parameters
+        ----------
+        x : np.ndarray
+            Point coordinates (shape=(3,))
+        k : int, optional
+            Number of nearest neighbor points to identify, by default 1
+
+        Returns
+        -------
+        dist : np.ndarray
+            Array of distance between :code:`x` and the nearest neighbors 
+            (shape=(k,))
+        coordinates : np.ndarray
+            Array of coordinates for the nearest neighbor points
+            (shape=(k,3))
+        """        
+        # Get point-root distance
+        if self.PointInNode(x):
+            dist = 0
+        else:
+            dist = self.node_distance(x)
+
+        # Initialize queue
+        queue = [] 
+        heapq.heappush(queue, (dist, self))
+        result = []
+
+        # loop
+        while len(result) < k and len(queue) > 0:
+            item = heapq.heappop(queue)
+            if type(item[1]) is OctreeNode:
+                node = item[1]
+                if node.state == 'leaf':
+                    for pt in node.data:
+                        pt = np.asarray(pt)
+                        dist = np.linalg.norm(np.asarray(x) - pt)
+
+                        heapq.heappush(queue, (dist, pt))
+                else:
+                    for child in node.children:
+                        if child.PointInNode(x):
+                            dist = 0
+                        else:
+                            dist = child.node_distance(x)
+                        if len(queue) >= k:
+                            if dist <= queue[0][0]:
+                                heapq.heappush(queue, (dist,child))
+                        else:
+                            heapq.heappush(queue, (dist,child))
+            else:
+                # Because of the priority queue, this must be one of the 
+                # k-nearest points
+                result.append(item)
+        out = list(zip(*result))
+        out[0] = np.array(out[0])
+        dist, coordinates = out
+
+        return dist, coordinates
+    
+class KDtreeNode(TreeNode):
+
+    def __init__(self,location,axis=0,parent=None,data=None,level=0,state='unknown', K=None):
+        """
+        The KDtreeNode is the basic unit of the KD-tree data structure. 
+        The structure consists of a series of nodes that reference their parent
+        and child nodes, allowing for traversal of the tree structure.
+
+        Parameters
+        ----------
+        location : array_like
+            Location of the node. This is only a single coordinate defining the
+            location of the hyperplane along the axis.
+        axis : int, optional
+            Index of the axis along which the data will be split (0=x, 1=y,...).
+            By default, 0.
+        parent : tree.KDtreeNode, optional
+            The KDtree node that contains this node, by default None
+        data : list or dict, optional
+            Data associated with the KDtree node. The type of data depends on 
+            the how the KDtree was created, by default None.
+        level : int, optional
+            Depth within the tree structure, by default 0.
+            The root node is at level 0, the root's children are at level 1, etc.
+        state : str, optional
+            Specifies whether the node's place in the tree structure, by default
+            'unknown'.
+
+            Possible states are:
+
+            - 'root': This node is the root of the octree
+
+            - 'branch': This is node is an intermediate node between the root and leaves
+
+            - 'leaf': This is node is a terminal end and has no children.
+
+            - 'empty': No data is contained within this node, and it has no children
+
+            - 'unknown': State hasn't been specified.
+        
+        """  
+        self.children = []
+        self.parent = parent
+        self.state = state
+        self.data = data
+        self.level = level
+        self.location = location
+        self.axis = axis
+        self.limits = None
+        self.vertices = None
+        self.K = K # number of dimensions
+
+    def __repr__(self):
+        out = f'KDtree Node ({self.state:s})\nLocation: {str(self.location):s}\nAxis: {self.axis:f} \n'
+        return out
+    
+    def makeChildrenPts(self, points, maxdepth=np.inf, leafsize=10, axismode='cyclic'):
+        """
+        Initialize child nodes for the current node
+
+        Parameters
+        ----------
+        axismode : str, optional
+            method use for selecting the next splitting axis, by default 
+            'cyclic'.
+
+            Currenty no other options are implemented.
+
+        """        
+
+        if axismode.lower() == 'cyclic':
+            childaxis = (self.axis + 1) % self.K
+
+        negative_indices = points[:,self.axis] < self.location
+        points_negative = points[negative_indices]
+        points_positive = points[~negative_indices]
+        median_negative = np.median(points_negative[:,childaxis])
+        median_positive = np.median(points_positive[:,childaxis])
+        child_negative = KDtreeNode(median_negative, childaxis, parent=self, level=self.level+1, K=self.K)
+        child_positive = KDtreeNode(median_positive, childaxis, parent=self, level=self.level+1, K=self.K)
+        self.children = [child_negative, child_positive]
+
+        if len(points_negative) <= leafsize or child_negative.level >= maxdepth:
+            child_negative.state = 'leaf'
+            child_negative.data = points_negative
+        else:
+            child_negative.state = 'branch'
+            child_negative.makeChildrenPts(points_negative, maxdepth=maxdepth, leafsize=leafsize, axismode=axismode)
+        
+        if len(points_negative) <= leafsize or child_negative.level >= maxdepth:
+            child_positive.state = 'leaf'
+            child_positive.data = points_positive
+        else:
+            child_positive.state = 'branch'
+            child_positive.makeChildrenPts(points_positive, maxdepth=maxdepth, leafsize=leafsize, axismode=axismode)
+            
+
 
 # Octree Functions               
 def isInsideOctree(pt,node,inclusive=True):  
@@ -1993,6 +2207,28 @@ def Quadtree2Dual(root, method='centroid'):
         Dual = mesh(DualCoords, DualConn)
     Dual.cleanup()
     return Dual
+
+# KD Tree Functions
+def Points2KDtree(Points, maxdepth=10, leafsize=10):
+
+    axis = 0
+    location = np.median(Points[:,axis])
+    root = KDtreeNode(location, axis, state='root', K=np.shape(Points)[1])
+    root.makeChildrenPts(Points, maxdepth=maxdepth, leafsize=leafsize)
+    return root
+
+def VisualizeKDtree(root):
+
+    leaves = getAllLeaf(root)
+    if root.K == 2:
+        boxes = mesh()
+        for leaf in leaves:
+            points = leaf.data
+            grid = primitives.Grid2D([np.min(points[:,0]), np.max(points[:,0]),np.min(points[:,1]), np.max(points[:,1])], h=.0001)
+            boxes.merge(grid.Boundary)
+
+    return boxes
+
 
 # Generic Tree Functions
 def getAllLeaf(root, include_empty=False):
