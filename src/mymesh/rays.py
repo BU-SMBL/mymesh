@@ -2642,11 +2642,14 @@ def PointInBox2D(pt, xlim, ylim, inclusive=True):
     Parameters
     ----------
     pt : array_like
-        3D coordinates of a point, shape=(3,)
+        2D coordinates of a point, shape=(2,)
     xlim : array_like
         Lower and upper x limits (e.g. [xmin, xmax])
     ylim : array_like
         Lower and upper y limits (e.g. [ymin, ymax])
+    inclusive : bool
+        If true, points exactly on the boundary will be considered inside, 
+        by default, True.
 
     Returns
     -------
@@ -2664,6 +2667,41 @@ def PointInBox2D(pt, xlim, ylim, inclusive=True):
             if not lims[d][0] < pt[d] < lims[d][1]:
                 inside = False
                 break
+    return inside
+
+@try_njit(cache=True)
+def PointsInBox2D(pts, xlim, ylim, inclusive=True):
+    """
+    Test whether points are inside a 2 dimensional box
+
+    Parameters
+    ----------
+    pt : np.ndarray
+        3D coordinates of the points, shape=(n,2)
+    xlim : array_like
+        Lower and upper x limits (e.g. [xmin, xmax])
+    ylim : array_like
+        Lower and upper y limits (e.g. [ymin, ymax])
+    inclusive : bool
+        If true, points exactly on the boundary will be considered inside, 
+        by default, True.
+
+    Returns
+    -------
+    inside : np.ndarray
+        Boolean array, of Trues for points inside the box and Falses for 
+        outside the box.
+    """
+    if inclusive:
+        inside = (
+            (xlim[0] <= pts[:,0]) & (pts[:,0] <= xlim[1]) &
+            (ylim[0] <= pts[:,1]) & (pts[:,1] <= ylim[1])
+        )
+    else:
+        inside = (
+            (xlim[0] < pts[:,0]) & (pts[:,0] < xlim[1]) &
+            (ylim[0] < pts[:,1]) & (pts[:,1] < ylim[1])
+        )
     return inside
 
 @try_njit
@@ -2698,6 +2736,45 @@ def PointInBox(pt, xlim, ylim, zlim, inclusive=True):
             if not lims[d][0] < pt[d] < lims[d][1]:
                 inside = False
                 break
+    return inside
+
+@try_njit(cache=True)
+def PointsInBox(pts, xlim, ylim, zlim, inclusive=True):
+    """
+    Test whether points are inside a 3 dimensional box
+
+    Parameters
+    ----------
+    pt : np.ndarray
+        3D coordinates of the points, shape=(n,3)
+    xlim : array_like
+        Lower and upper x limits (e.g. [xmin, xmax])
+    ylim : array_like
+        Lower and upper y limits (e.g. [ymin, ymax])
+    zlim : array_like
+        Lower and upper z limits (e.g. [zmin, zmax])
+    inclusive : bool
+        If true, points exactly on the boundary will be considered inside, 
+        by default, True.
+
+    Returns
+    -------
+    inside : np.ndarray
+        Boolean array, of Trues for points inside the box and Falses for 
+        outside the box.
+    """
+    if inclusive:
+        inside = (
+            (xlim[0] <= pts[:,0]) & (pts[:,0] <= xlim[1]) &
+            (ylim[0] <= pts[:,1]) & (pts[:,1] <= ylim[1]) &
+            (zlim[0] <= pts[:,2]) & (pts[:,2] <= zlim[1])
+        )
+    else:
+        inside = (
+            (xlim[0] < pts[:,0]) & (pts[:,0] < xlim[1]) &
+            (ylim[0] < pts[:,1]) & (pts[:,1] < ylim[1]) &
+            (zlim[0] < pts[:,2]) & (pts[:,2] < zlim[1])
+        )
     return inside
 
 def PointsInVoxel(pts, VoxelCoords, VoxelConn, inclusive=True):    
