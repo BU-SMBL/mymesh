@@ -112,9 +112,9 @@ While generative AI was never used to generate the code for `mymesh`, it was in 
 Generative AI has been used in the following ways throughout the development of 
 `mymesh`:
 
-- As a resource for some mesh-specific and general-purpose programming concepts, such as methods for improving efficiency of certain operations.
-- Assistance in setting up packaging infrastructure (e.g. pyproject.toml, github workflows).
-- Assistance in the creation of test cases for some unit tests.
+- as a resource for some mesh-specific and general-purpose programming concepts, such as methods for improving efficiency of certain operations,
+- assistance in setting up packaging infrastructure (e.g. pyproject.toml, github workflows),
+- assistance in the creation of test cases for some unit tests.
   
 
 # Acknowledgements
