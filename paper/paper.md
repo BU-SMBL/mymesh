@@ -34,7 +34,7 @@ Meshes are used for a variety of purposes, including simulations (e.g. finite el
 `mymesh` is particularly focused on implicit function and image-based meshing, with other functionality including:
 
 - geometric and curvature analysis,
-- intersection and inclusion tests (e.g. ray-surface intersection and point-in-surface tests)
+- intersection and inclusion tests (e.g. ray-surface intersection and point-in-surface tests),
 - mesh boolean operations (intersection, union, difference),
 - sweep construction methods (extrusions, revolutions),
 - point set, mesh, and image registration,
@@ -111,6 +111,7 @@ Initial development of `mymesh` began in the summer of 2021, before the release 
 While generative AI was never used to generate the code for `mymesh`, it was in some instances consulted alongside other resources (e.g. scientific literature, StackExchange).
 Generative AI has been used in the following ways throughout the development of 
 `mymesh`:
+
 - As a resource for some mesh-specific and general-purpose programming concepts, such as methods for improving efficiency of certain operations.
 - Assistance in setting up packaging infrastructure (e.g. pyproject.toml, github workflows).
 - Assistance in the creation of test cases for some unit tests.
