@@ -30,7 +30,8 @@ bibliography: paper.bib
 
 A mesh is a discrete representation that subdivides a geometry or computational domain into a collection of points (nodes) connected by simple shapes (elements).
 Meshes are used for a variety of purposes, including simulations (e.g. finite element, finite volume, and finite difference methods), visualization & computer graphics, image analysis, and additive manufacturing.
-`mymesh` is a general purpose set of tools for generating, manipulating, and analyzing meshes. `mymesh` is particularly focused on implicit function and image-based meshing, with other functionality including:
+`mymesh` is a general purpose set of tools for generating, manipulating, and analyzing meshes. 
+`mymesh` is particularly focused on implicit function and image-based meshing, with other functionality including:
 
 - geometric and curvature analysis,
 - intersection and inclusion tests (e.g. ray-surface intersection and point-in-surface tests)
@@ -40,10 +41,6 @@ Meshes are used for a variety of purposes, including simulations (e.g. finite el
 - mesh quality evaluation and improvement,
 - mesh type conversion (e.g. volume to surface, hexahedral or mixed-element to tetrahedral, first-order elements to second-order elements).
 
-`mymesh` was originally developed in support of research within the Skeletal Mechanobiology and Biomechanics Lab at Boston University. 
-It was used extensively in the scaffold design optimization research by @Josephson2024b and is currently being used in various ongoing projects, including vertebral modeling, hip fracture modeling, growth modeling of skeletal tissue, and analysis of objects imaged using micro-computed tomography (μCT). 
-`mymesh` has proven useful in a variety of research applications, well beyond those that inspired its original development, and we expect it to remain a valuable tool in future research efforts.  
-
 # Statement of need
 
 Mesh-based representations of geometries are essential in a wide variety of research applications, and as such, there is a need for robust, efficient, and easy-to-use software for creating, analyzing, and manipulating meshes.
@@ -52,12 +49,32 @@ Some are general purpose, like CGAL [@cgal], VTK [@Schroeder2006], and Gmsh [@Ge
 In Python, most meshing packages depend on (or are direct wrappers to) one or more of these libraries, such as PyVista [@Sullivan2019] (a pythonic interface to VTK), MeshPy (which interfaces to Triangle and TetGen), and PyMesh (which depends on CGAL, Triangle, TetGen, and others). 
 While these interfaces are useful and provide access to powerful mesh generation tools, their reliance on external dependencies can make them less easy to use and limit code readability, making it more difficult to understand how the code works. 
 TriMesh [@trimesh] stands out as a capable, pure-Python library focused on triangular surface meshes, but it isn't intended for use with quadrilateral, mixed-element, or volumetric meshes. 
-There is thus a need for a full-featured, accessible, and easy to use Python package for creating and working with meshes.
+Given the intended focus and/or design philosophies of these existing softwares, it was determined that building `mymesh`, rather than making contributions to existing software, was the best way to achieve a full-featured, accessible, and easy to use Python package for creating and working with meshes. 
 
 `mymesh` strives to meet this need as a library of meshing tools, written in Python, with clear documentation that makes it both easy to use and easy to understand.
 `mymesh` has a particular focus on implicit function and image-based meshes, but also supplies a wide variety of general purpose tools. 
 Rather than wrapping other libraries, algorithms are implemented from scratch, often based on or inspired by published algorithms and research. 
 By providing an easily usable interface to both high-level and low-level functionality, we hope to provide both complete solutions and a set of building blocks for the development of other mesh-related tools.
+
+# Research impact statement
+
+`mymesh` was originally developed in support of research within the Skeletal Mechanobiology and Biomechanics Lab at Boston University. 
+It was used extensively in the scaffold design optimization research by @Josephson2024b and is currently being used in various ongoing projects within multiple labs and institutions, including vertebral modeling, hip fracture modeling, growth modeling of skeletal tissue, and analysis of objects imaged using micro-computed tomography (μCT). 
+`mymesh` has proven useful in a variety of research applications, well beyond those that inspired its original development, and we expect it to remain a valuable tool in future research efforts.  
+
+# Software design
+
+The `mymesh` package is designed around meshes defined by two fundamental components, the coordinates of nodes (`NodeCoords` or `points`) and the connectivity of those nodes to form elements (`NodeConn` or `cells`).
+These components are stored in the `mesh` object, which contains a variety of convenience functions and cached properties (e.g. `Centroids`, `NodeNormals`) that can be calculated on-demand and stored for future use.
+`mymesh` was developed from the beginning to support various element types and mixed-element meshes, so the node connectivity can be defined as either a `numpy` array or a non-rectangular list of lists, with the code designed to take advantage of the added efficiency of `numpy` arrays when possible without being reliant on them in a way that would prohibit mixed-element meshes.
+
+In addition to overall ease of use, the framework of `mymesh` was designed to be easy to get into and out of, so that users can easily utilize the strengths and benefits of other code or software. 
+The `mesh` object facilitates conversion to the data structures of two other popular meshing softwares, `meshio` and `pyvista`, and, through `meshio`, facilitates the reading and writing of the mesh to and from many different file formats (`mesh.read(filename)`, `mesh.write(filename)`). 
+Additionally, most low-level functions in `mymesh` operate on just the node coordinates and connectivity, making it easy for users of other software/packages to directly utilize individual functions, without needing to convert to `mymesh`'s `mesh` data structure.
+
+Python was chosen as the programming language for `mymesh` because of its popularity in computational research and focus on factors such as simplicity and readability.
+Many other languages, such as Matlab and Julia, as well as finite element softwares, such as Abaqus and FEniCS, interface with python, extending the value of `mymesh` beyond Python users. 
+While Python is often regarded as relatively inefficient compared to other languages, vectorization with `numpy` and just-in-time compilation with `numba` are used in performance-critical operations to achieve efficiency competitive with other languages.   
 
 # Features and Examples
 
@@ -87,27 +104,17 @@ In addition to the capabilities of the software itself, the documentation featur
 It is available on [PyPI](https://pypi.org/project/mymesh/) and [GitHub](https://github.com/BU-SMBL/mymesh), and is archived on [Zenodo](https://zenodo.org/records/17511909). 
 The [documentation](https://bu-smbl.github.io/mymesh/) provides guides for getting started, examples, and detailed usage information for each function.
 
-<!-- 
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
+# AI usage disclosure
 
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-
-# Figures
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% } -->
+Generative AI was not used in the writing of `mymesh` code or this paper. 
+Initial development of `mymesh` began in the summer of 2021, before the release of OpenAI's ChatGPT (Nov. 30, 2022) and the widespread proliferation of powerful generative AI chatbots.
+While generative AI was never used to generate the code for `mymesh`, it was in some instances consulted alongside other resources (e.g. scientific literature, StackExchange).
+Generative AI has been used in the following ways throughout the development of 
+`mymesh`:
+- As a resource for some mesh-specific and general-purpose programming concepts, such as methods for improving efficiency of certain operations.
+- Assistance in setting up packaging infrastructure (e.g. pyproject.toml, github workflows).
+- Assistance in the creation of test cases for some unit tests.
+  
 
 # Acknowledgements
 
