@@ -567,7 +567,7 @@ class QuadtreeNode(TreeNode):
                         else:
                             dist = child.node_distance(x)
                         if len(queue) >= k:
-                            if dist <= queue[0][0]:
+                            if dist <= queue[-1][0]:
                                 heapq.heappush(queue, (dist,child))
                         else:
                             heapq.heappush(queue, (dist,child))
@@ -990,7 +990,7 @@ class OctreeNode(TreeNode):
                         else:
                             dist = child.node_distance(x)
                         if len(queue) >= k:
-                            if dist <= queue[0][0]:
+                            if dist <= queue[-1][0]:
                                 heapq.heappush(queue, (dist,child))
                         else:
                             heapq.heappush(queue, (dist,child))
@@ -1100,7 +1100,89 @@ class KDtreeNode(TreeNode):
             child_positive.state = 'branch'
             child_positive.makeChildrenPts(points_positive, maxdepth=maxdepth, leafsize=leafsize, axismode=axismode)
             
+    def node_distance(self, x):
+        """
+        Calculate the nearest distance between a point and the location of the splitting plane of the current node.
 
+        Parameters
+        ----------
+        x : np.ndarray
+            Point coordinates (shape=(3,))
+
+        Returns
+        -------
+        dist : float
+            Distance between a point and the splitting plane.
+        """        
+                
+        dist = x[self.axis] - self.location
+        return dist
+    
+    def query_knn(self, x, k=1):
+        """
+        Find the k-nearest neighbor points in the tree to a point.
+        Note: This currently only works for a point cloud tree (e.g. created
+        with :func:`Points2KDtree`)
+
+        Parameters
+        ----------
+        x : np.ndarray
+            Point coordinates (shape=(2,) or shape=(3,))
+        k : int, optional
+            Number of nearest neighbor points to identify, by default 1
+
+        Returns
+        -------
+        dist : np.ndarray
+            Array of distance between :code:`x` and the nearest neighbors 
+            (shape=(k,))
+        coordinates : np.ndarray
+            Array of coordinates for the nearest neighbor points
+            (shape=(k,3))
+        """        
+
+        # Initialize queue
+        queue = [] 
+        heapq.heappush(queue, (0, self))
+        result = []
+
+        # loop
+        while len(result) < k and len(queue) > 0:
+            item = heapq.heappop(queue)
+            if type(item[1]) is KDtreeNode:
+                # Item is a tree node
+                node = item[1]
+                if node.state == 'leaf':
+                    for pt in node.data:
+                        pt = np.asarray(pt)
+                        dist = np.linalg.norm(np.asarray(x) - pt)
+
+                        heapq.heappush(queue, (dist, pt))
+                else:
+                    dist = node.node_distance(x)
+                    if dist < 0:
+                        Next = node.children[0]
+                        Other = node.children[1]
+                    else:
+                        Next = node.children[1]
+                        Other = node.children[0]
+                    heapq.heappush(queue, (0, Next))
+
+                    if len(queue) >= k:
+                        if np.abs(dist) <= queue[-1][0]:
+                            heapq.heappush(queue, (np.abs(dist),Other))
+                    else:
+                        heapq.heappush(queue, (np.abs(dist),Other))
+            else:
+                # Item is a point
+                # Because of the priority queue, this must be one of the 
+                # k-nearest points
+                result.append(item)
+        out = list(zip(*result))
+        out[0] = np.array(out[0])
+        dist, coordinates = out
+
+        return dist, coordinates
 
 # Octree Functions               
 def isInsideOctree(pt,node,inclusive=True):  
