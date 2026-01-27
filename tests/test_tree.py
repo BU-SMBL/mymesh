@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import scipy
 from mymesh import implicit, primitives, quality, tree
 
 @pytest.mark.parametrize("points", [
@@ -187,7 +188,26 @@ def test_getAllLeaf(root):
             raise Exception('Non-leaf included.')
         elif len(leaf.children) > 0:
             raise Exception('Node marked as leaf but has children.')
-        
+
+@pytest.mark.parametrize("points", [
+    (
+        primitives.Circle([0,0,0], 1, Type='line').NodeCoords
+    ),
+    (
+        primitives.Sphere([0,0,0], 1, Type='surf').NodeCoords
+    ),
+    (
+        primitives.Sphere([0,0,0], 1, Type='vol').NodeCoords
+    ),
+    
+])
+def test_Points2KDtree(points):
+    try:
+        root = tree.Points2KDtree(points)
+    except Exception as e:
+        print(e)
+        raise Exception('Failed to create kdtree')
+
 @pytest.mark.parametrize("root", [
     (
         tree.Surface2Octree(*primitives.Sphere([0,0,0],1, ElemType='tri'))
@@ -198,3 +218,96 @@ def test_getAllLeaf(root):
 ])
 def test_Print(root):
     tree.Print(root)
+
+@pytest.mark.parametrize("n, k", [
+    (
+        int(1e3), 1
+    ),
+    (
+        int(1e6), 3
+    ),
+])
+def test_Octree_query_knn(n, k):
+
+    rng = np.random.default_rng(seed=0)
+    points = rng.random((n,3))
+    x = rng.random(3)
+
+    # octree knn
+    root = tree.Points2Octree(points)
+    octree_out = root.query_knn(x, k=k)
+
+
+    # brute-force
+    dist = scipy.spatial.distance.cdist(points, np.atleast_2d(x)).flatten()
+    indices = np.argpartition(dist, k)[:k]
+    distances = dist[indices]
+    brute_out = (distances, points[indices])
+
+    assert len(octree_out[0]) == k, 'Incorrect number of nearest points'
+    assert np.all(np.equal(octree_out[1], brute_out[1])), 'Incorrect nearest-points'
+    assert np.all(np.equal(octree_out[0], brute_out[0])), 'Incorrect nearest-point distances'    
+
+@pytest.mark.parametrize("n, k", [
+    (
+        int(1e3), 1
+    ),
+    (
+        int(1e6), 3
+    ),
+])
+def test_Quadtree_query_knn(n, k):
+
+    rng = np.random.default_rng(seed=0)
+    points = rng.random((n,2))
+    x = rng.random(2)
+
+    # octree knn
+    root = tree.Points2Quadtree(points)
+    quadtree_out = root.query_knn(x, k=k)
+
+
+    # brute-force
+    dist = scipy.spatial.distance.cdist(points, np.atleast_2d(x)).flatten()
+    indices = np.argpartition(dist, k)[:k]
+    distances = dist[indices]
+    brute_out = (distances, points[indices])
+
+    assert len(quadtree_out[0]) == k, 'Incorrect number of nearest points'
+    assert np.all(np.equal(quadtree_out[1], brute_out[1])), 'Incorrect nearest-points'
+    assert np.all(np.equal(quadtree_out[0], brute_out[0])), 'Incorrect nearest-point distances' 
+
+@pytest.mark.parametrize("n, k, d", [
+    (
+        int(1e3), 1, 2
+    ),
+    (
+        int(1e6), 3, 2
+    ),
+    (
+        int(1e3), 1, 3
+    ),
+    (
+        int(1e6), 3, 3
+    ),
+])
+def test_KDtree_query_knn(n, k, d):
+
+    rng = np.random.default_rng(seed=0)
+    points = rng.random((n,d))
+    x = rng.random(d)
+
+    # octree knn
+    root = tree.Points2KDtree(points)
+    kdtree_out = root.query_knn(x, k=k)
+
+
+    # brute-force
+    dist = scipy.spatial.distance.cdist(points, np.atleast_2d(x)).flatten()
+    indices = np.argpartition(dist, k)[:k]
+    distances = dist[indices]
+    brute_out = (distances, points[indices])
+
+    assert len(kdtree_out[0]) == k, 'Incorrect number of nearest points'
+    assert np.all(np.equal(kdtree_out[1], brute_out[1])), 'Incorrect nearest-points'
+    assert np.all(np.equal(kdtree_out[0], brute_out[0])), 'Incorrect nearest-point distances' 
