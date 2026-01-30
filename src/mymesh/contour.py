@@ -4412,7 +4412,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
             
     return NewCoords, NewConn
 
-def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',method='33',flip=False, return_anchors=False):
+def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpolation='linear',method='33',flip=False, return_anchors=False, cleanup_tol=1e-10, cleanup=True):
     """
     Marching cubes algorithm :cite:p:`Lorensen1987` for extracting an isosurface from a hexahedral mesh.
 
@@ -4440,6 +4440,12 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         algorithm or '33' for the marching cubes 33 algorithm :cite:p:`Chernyaev1995`.
     flip : bool, optional
         Flip the interior/exterior of the mesh, by default False. By default, values less than the threshold are assumed to be the “inside” of the mesh. If the inside is denoted by values greater than the threshold, set flip=True.
+    cleanup_tol : float, optional
+        Tolerance value used to classify whether two nodes are sufficiently close 
+        to be considered a single node (see :func:`mymesh.utils.DeleteDuplicateNodes`), 
+        by default 1e-10.
+    cleanup : bool, optional
+        If True, duplicate nodes will be merged, by default True.
 
     Returns
     -------
@@ -4467,7 +4473,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         _MarchingCubesLookup.LookupTable = MC_Lookup
     else:
         raise Exception('Unknown method "{:s}"'.format(method))
-    edgeLookup = [
+    edgeLookup = np.array([
         [0, 1],  # Edge 0 - Between nodes 0 and 1
         [1, 2],  # Edge 1
         [2, 3],  # Edge 2
@@ -4480,95 +4486,173 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         [5, 6],  # Edge 9
         [6, 7],  # Edge 10
         [7, 4],  # Edge 11
-        []       # Center
-        ]
-    arrayCoords = np.array(VoxelNodeCoords)
-    for e in range(len(VoxelNodeConn)):
-        vals = np.array([NodeValues[node] for node in VoxelNodeConn[e]])
-        inside = [1 if v <= 0 else 0 for v in vals]
-        i = int("".join(str(j) for j in inside), 2)
-        if method == 'original':
-            TriElems = _MarchingCubesLookup(i)
-        elif method == '33':
-            TriElems = _MarchingCubes33Lookup(i,vals)
-        else:
-            raise Exception('Invalid method')
+        [0, 6]   # Center
+        ])
+    # arrayCoords = np.asarray(VoxelNodeCoords)
+
+    HexVals = NodeValues[VoxelNodeConn]
+    inside = HexVals <= 0
+    ints = np.sum(inside * 2**np.arange(0,8)[::-1], axis=1)
+    if method.lower() == 'original' or method.lower() == 'mc':
+        flip = ints > 127
+        ints[flip] = 128 - (ints[flip] - 127)
+        element_lists = MC_Lookup[ints]
+    elif method.lower() == '33' or method.lower() == 'mc33':
+        # cases = MC33_Cases[ints]
+        # ambiguities = np.isin(cases, (3, 4, 6, 7, 10, 12, 13))
+        # element_lists = [_MarchingCubes33Lookup(cases[i],vals) if ambiguities[i] else MC33_Lookup[cases[i]][0] for i,vals in enumerate(HexVals)]
+        element_lists = [_MarchingCubes33Lookup(ints[i],vals) for i,vals in enumerate(HexVals)]
+    else:
+        raise ValueError(f'Invalid method:{method}, must be "original" or "33"')
+
+
+    # Process lookup results
+    hexnum, elem = zip(*[(i,e) for i,lst in enumerate(element_lists) for e in lst if len(lst[0]) > 0])
+    hexnum = np.array(hexnum)
+    nelem = len(hexnum)
+
+    relevant_hexs = VoxelNodeConn[hexnum]
     
-        if len(TriElems) > 0:
-            for t in TriElems:
-                elem = []
-                for n in t:
-                    if n == 12:
-                        newNode = np.mean([VoxelNodeCoords[node] for node in VoxelNodeConn[e]], axis=0)
-                        elem.append(len(TriNodeCoords))
-                        TriNodeCoords.append(newNode)
-                    else:
-                        node1 = VoxelNodeConn[e][edgeLookup[n][0]]
-                        node2 = VoxelNodeConn[e][edgeLookup[n][1]]
-                        coords1 = VoxelNodeCoords[node1]
-                        coords2 = VoxelNodeCoords[node2]
-                        v1 = NodeValues[node1]
-                        v2 = NodeValues[node2]
-                        if interpolation == 'midpoint' or v1 == v2:
-                            newNode = [
-                                (coords1[0] + coords2[0])/2,
-                                (coords1[1] + coords2[1])/2,
-                                (coords1[2] + coords2[2])/2
-                                ]
-                            elem.append(len(TriNodeCoords))
-                            TriNodeCoords.append(newNode)
-                        elif interpolation == 'linear':
-                            newNode = [
-                                coords1[0] + (0-v1)*(coords2[0]-coords1[0])/(v2-v1),
-                                coords1[1] + (0-v1)*(coords2[1]-coords1[1])/(v2-v1),
-                                coords1[2] + (0-v1)*(coords2[2]-coords1[2])/(v2-v1)
-                                ]
-                            if np.sign(v2) == np.sign(v1):
-                                print('Marching cubes fuckup')
-                                print(str(e) + str(np.sign(vals)) + str(edgeLookup[n]))
-                            elem.append(len(TriNodeCoords))
-                            TriNodeCoords.append(newNode)                            
-                        else:
-                            raise Exception('Invalid interpolation method')
-                        if return_anchors:
-                            if flip:
-                                anchor = [node1,node2][np.argmax([v1,v2])] # Pick the point in positive domain
-                            else:
-                                anchor = [node1,node2][np.argmin([v1,v2])] # Pick the point in negative domain
-                            Anchors.append(anchor)
+    PadElem = utils.PadRagged(elem)
+    pad_relevant_hexs = np.hstack([relevant_hexs, -1*np.ones((len(elem),1),dtype=np.int32)])
+    
+    ninterppts = 2
+    lookup_indices = pad_relevant_hexs[:, edgeLookup]
+    interpolation_pairs = (lookup_indices[np.arange(len(elem))[:, None], PadElem]).reshape((np.prod(PadElem.shape),ninterppts))
+    # interpolation_pairs = (interpolation_pairs[np.any(interpolation_pairs!=-1,axis=1)]).astype(int)
+    
+    uinterpolation_pairs,inv = np.unique(np.sort(interpolation_pairs,axis=1),axis=0,return_inverse=True)
 
-                            if n == 0 or n == 2 or n == 8 or n == 10:
-                                AnchorAxis.append(0)
-                            elif n == 1 or n == 3 or n == 9 or n == 11:
-                                AnchorAxis.append(1)    
-                            elif n == 4 or n == 5 or n == 6 or n == 7:
-                                AnchorAxis.append(2)
-                            else:
-                                AnchorAxis.append(-1)
+    # Interpolation
+    if interpolation.lower() == 'midpoint':
+        TriNodeCoords = np.mean(VoxelNodeCoords[uinterpolation_pairs],axis=1)
+        # if return_NodeValues: 
+        #     NewValues = np.zeros(len(NodeCoords))
+        #     NewValues = np.mean(NodeValues[uinterpolation_pairs],axis=1)
 
-                            mid = np.array([
-                                (coords1[0] + coords2[0])/2,
-                                (coords1[1] + coords2[1])/2,
-                                (coords1[2] + coords2[2])/2
-                                ])
-                            if np.all(mid-VoxelNodeCoords[anchor] >= 0):
-                                AnchorDir.append(1)
-                            else:
-                                AnchorDir.append(-1)
+    elif interpolation.lower() == 'linear':
+        coords1 = VoxelNodeCoords[uinterpolation_pairs[:,0]]
+        coords2 = VoxelNodeCoords[uinterpolation_pairs[:,1]]
+        vals1 = NodeValues[uinterpolation_pairs[:,0]]#[:,None]
+        vals2 = NodeValues[uinterpolation_pairs[:,1]]#[:,None]
+        # TriNodeCoords = np.copy(VoxelNodeCoords[uinterpolation_pairs[:,0]]).astype(float)
+        
+        coefficient = ((0 - vals1)/(vals2-vals1))[:,None]
+        position = coords1 + coefficient*(coords2 - coords1)
+        position[coefficient.flatten() >= 1] = coords2[coefficient.flatten() >= 1]  # This is to prevent floating pt errors inverting elements
+        TriNodeCoords = position
 
-                if len(elem) > 0:
-                    TriNodeConn.append(elem)  
+        # if return_NodeValues: 
+        #     NewValues = np.zeros(len(NodeCoords))
+        #     NewValues[~check] = NodeValues[uinterpolation_pairs[~check,0]]
+
+    
+    TriNodeConn = inv[np.reshape(np.arange(nelem*3), (nelem, 3))]
+    
+    if method.lower() == 'original' or method.lower() == 'mc':
+        # handle flips
+        TriNodeConn[flip[hexnum],:] = TriNodeConn[flip[hexnum],::-1]
+    elif (method.lower() == '33' or method.lower() == 'mc33') and method != 'midpoint':
+        # handle additional node - put at element centroid
+        additional_node = np.array(elem) == 12
+        TriNodeCoords[TriNodeConn[additional_node]] = np.mean(VoxelNodeCoords[VoxelNodeConn[hexnum[np.any(additional_node,axis=1)]]],axis=1)
+
+
+    if cleanup: 
+        TriNodeCoords,TriNodeConn,Idx = utils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,return_idx=True, tol=cleanup_tol)
+        # if return_NodeValues:
+        #     NewValues = NewValues[Idx]
+        TriNodeCoords,TriNodeConn,EIdx = utils.CleanupDegenerateElements(TriNodeCoords,TriNodeConn,Type='surf', return_idx=True)
+        # if return_ParentIds:
+        #     ParentIds = ParentIds[EIdx]
+
+    ####
+    # for e in range(len(VoxelNodeConn)):
+    #     vals = np.array([NodeValues[node] for node in VoxelNodeConn[e]])
+    #     inside = [1 if v <= 0 else 0 for v in vals]
+    #     i = int("".join(str(j) for j in inside), 2)
+    #     if method == 'original':
+    #         TriElems = _MarchingCubesLookup(i)
+    #     elif method == '33':
+    #         TriElems = _MarchingCubes33Lookup(i,vals)
+    #     else:
+    #         raise Exception('Invalid method')
+    
+    #     if len(TriElems) > 0:
+    #         for t in TriElems:
+    #             elem = []
+    #             for n in t:
+    #                 if n == 12:
+    #                     newNode = np.mean([VoxelNodeCoords[node] for node in VoxelNodeConn[e]], axis=0)
+    #                     elem.append(len(TriNodeCoords))
+    #                     TriNodeCoords.append(newNode)
+    #                 else:
+    #                     node1 = VoxelNodeConn[e][edgeLookup[n][0]]
+    #                     node2 = VoxelNodeConn[e][edgeLookup[n][1]]
+    #                     coords1 = VoxelNodeCoords[node1]
+    #                     coords2 = VoxelNodeCoords[node2]
+    #                     v1 = NodeValues[node1]
+    #                     v2 = NodeValues[node2]
+    #                     if interpolation == 'midpoint' or v1 == v2:
+    #                         newNode = [
+    #                             (coords1[0] + coords2[0])/2,
+    #                             (coords1[1] + coords2[1])/2,
+    #                             (coords1[2] + coords2[2])/2
+    #                             ]
+    #                         elem.append(len(TriNodeCoords))
+    #                         TriNodeCoords.append(newNode)
+    #                     elif interpolation == 'linear':
+    #                         newNode = [
+    #                             coords1[0] + (0-v1)*(coords2[0]-coords1[0])/(v2-v1),
+    #                             coords1[1] + (0-v1)*(coords2[1]-coords1[1])/(v2-v1),
+    #                             coords1[2] + (0-v1)*(coords2[2]-coords1[2])/(v2-v1)
+    #                             ]
+    #                         if np.sign(v2) == np.sign(v1):
+    #                             print('Marching cubes fuckup')
+    #                             print(str(e) + str(np.sign(vals)) + str(edgeLookup[n]))
+    #                         elem.append(len(TriNodeCoords))
+    #                         TriNodeCoords.append(newNode)                            
+    #                     else:
+    #                         raise Exception('Invalid interpolation method')
+    #                     if return_anchors:
+    #                         if flip:
+    #                             anchor = [node1,node2][np.argmax([v1,v2])] # Pick the point in positive domain
+    #                         else:
+    #                             anchor = [node1,node2][np.argmin([v1,v2])] # Pick the point in negative domain
+    #                         Anchors.append(anchor)
+
+    #                         if n == 0 or n == 2 or n == 8 or n == 10:
+    #                             AnchorAxis.append(0)
+    #                         elif n == 1 or n == 3 or n == 9 or n == 11:
+    #                             AnchorAxis.append(1)    
+    #                         elif n == 4 or n == 5 or n == 6 or n == 7:
+    #                             AnchorAxis.append(2)
+    #                         else:
+    #                             AnchorAxis.append(-1)
+
+    #                         mid = np.array([
+    #                             (coords1[0] + coords2[0])/2,
+    #                             (coords1[1] + coords2[1])/2,
+    #                             (coords1[2] + coords2[2])/2
+    #                             ])
+    #                         if np.all(mid-VoxelNodeCoords[anchor] >= 0):
+    #                             AnchorDir.append(1)
+    #                         else:
+    #                             AnchorDir.append(-1)
+
+    #             if len(elem) > 0:
+    #                 TriNodeConn.append(elem)  
                       
-    TriNodeCoords,TriNodeConn,Idx = utils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,return_idx=True)
-    if interpolation=='linear':
-        TriNodeCoords,TriNodeConn = utils.DeleteDegenerateElements(TriNodeCoords,TriNodeConn,strict=True)
-    TriNodeCoords = np.asarray(TriNodeCoords)
-    if return_anchors: 
-        Anchors = np.array(Anchors)
-        AnchorAxis = np.array(AnchorAxis)
-        AnchorDir = np.array(AnchorDir)
-        return TriNodeCoords, TriNodeConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
-    return np.asarray(TriNodeCoords), TriNodeConn
+    # TriNodeCoords,TriNodeConn,Idx = utils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,return_idx=True)
+    # if interpolation=='linear':
+    #     TriNodeCoords,TriNodeConn = utils.DeleteDegenerateElements(TriNodeCoords,TriNodeConn,strict=True)
+    # TriNodeCoords = np.asarray(TriNodeCoords)
+    # if return_anchors: 
+    #     Anchors = np.array(Anchors)
+    #     AnchorAxis = np.array(AnchorAxis)
+    #     AnchorDir = np.array(AnchorDir)
+    #     return TriNodeCoords, TriNodeConn, Anchors[Idx], AnchorAxis[Idx], AnchorDir[Idx]
+    return TriNodeCoords, TriNodeConn
 
 def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', Type='surf', mixed_elements=False, flip=False, return_NodeValues=False, return_ParentIds=False, cleanup_tol=1e-10, cleanup=True):
     """
@@ -4620,7 +4704,9 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     cleanup_tol : float, optional
         Tolerance value used to classify whether two nodes are sufficiently close 
         to be considered a single node (see :func:`mymesh.utils.DeleteDuplicateNodes`), 
-        by default 1e-12.
+        by default 1e-10.
+    cleanup : bool, optional
+        If True, duplicate nodes will be merged, by default True.
     Returns
     -------
     NodeCoords : np.ndarray
@@ -4783,7 +4869,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     relevant_tets = TetNodeConn[tetnum]
     
     PadElem = utils.PadRagged(elem)
-    pad_relevant_tets = np.hstack([relevant_tets, -1*np.ones((len(elem),1))])
+    pad_relevant_tets = np.hstack([relevant_tets, -1*np.ones((len(elem),1),dtype=np.int32)])
     
     lookup_indices = pad_relevant_tets[:, PadEdgeLookup]
     interpolation_pairs = (lookup_indices[np.arange(len(elem))[:, None], PadElem]).reshape((np.prod(PadElem.shape),ninterppts))
