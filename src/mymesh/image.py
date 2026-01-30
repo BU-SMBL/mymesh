@@ -255,8 +255,10 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
         voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)
 
         if method == 'mc33':
-            SurfCoords, SurfConn = contour.MarchingCubes(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['Image Data'], method='33', threshold=threshold, flip=flip)
-
+            SurfCoords, SurfConn = contour.MarchingCubes(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['Image Data'], method='33', threshold=threshold, flip=flip, interpolation=interpolation)
+        elif method == 'original':
+            # this option is primarily for debugging, it should give the same results as 'mc' but less efficiently
+            SurfCoords, SurfConn = contour.MarchingCubes(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['Image Data'], method='original', threshold=threshold, flip=flip, interpolation=interpolation)
         elif method == 'mt':
             NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
             SurfCoords, SurfConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['Image Data'], Type='surf', threshold=threshold, flip=flip)
