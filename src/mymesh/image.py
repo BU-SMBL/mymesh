@@ -95,7 +95,7 @@ def PixelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scal
 
     return pixel
 
-def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, return_nodedata=False):
+def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, voxel_mode='elem', return_nodedata=False):
     """
     Generate voxel mesh of an image
 
@@ -116,8 +116,14 @@ def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scal
     scaleorder : int, optional
         Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.
         Must be 0-5.
+    voxel_mode : str, optional
+        Determines whether image voxels are mapped to nodes or elements, by default "elem".
+
+        - "elem": Each image voxel is considered to be a cube (or rectangular prism) element. An image with shape (l,m,n) will have l*m*n elements.
+        
+        - "node": Each image voxel is considered to be a discrete point (node). An image with shape (l,m,n) will have l*m*n nodes.
     return_nodedata : bool, optional
-        Option to interpolate image data to the nodes rather than just the voxels, by default False.
+        Option to interpolate image data to the nodes rather than just the voxels (if voxel_mode="elem"), by default False.
         This can add significant computational costs for large images.
 
     Returns
@@ -155,8 +161,8 @@ def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scal
     if not isinstance(h, (list, tuple, np.ndarray)):
         h = (h,h,h)
 
-    if return_nodedata:
-        VoxelCoords, VoxelConn, VoxelData, NodeData = converter.im2voxel(img, h,scalefactor=scalefactor, scaleorder=scaleorder, threshold=threshold, threshold_direction=threshold_direction, return_nodedata=True)
+    if voxel_mode.lower()=='elem' and return_nodedata:
+        VoxelCoords, VoxelConn, VoxelData, NodeData = converter.im2voxel(img, h,scalefactor=scalefactor, scaleorder=scaleorder, threshold=threshold, threshold_direction=threshold_direction, voxel_mode='elem', return_nodedata=True)
 
         if 'mesh' in dir(mesh):
             voxel = mesh.mesh(VoxelCoords, VoxelConn)
@@ -167,17 +173,16 @@ def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scal
         voxel.ElemData['Image Data'] = VoxelData
 
     else:
-        VoxelCoords, VoxelConn, VoxelData = converter.im2voxel(img, h,scalefactor=scalefactor, scaleorder=scaleorder, threshold=threshold, threshold_direction=threshold_direction)
+        VoxelCoords, VoxelConn, Data = converter.im2voxel(img, h,scalefactor=scalefactor, scaleorder=scaleorder, threshold=threshold, threshold_direction=threshold_direction, voxel_mode=voxel_mode)
 
         if 'mesh' in dir(mesh):
-            voxel = mesh.mesh(VoxelCoords, VoxelConn)
+            voxel = mesh.mesh(VoxelCoords, VoxelConn, Type='vol')
         else:
-            voxel = mesh(VoxelCoords, VoxelConn)
-
-        voxel.ElemData['Image Data'] = VoxelData
-
-    
-    
+            voxel = mesh(VoxelCoords, VoxelConn, Type='vol')
+        if voxel_mode.lower() == 'elem':
+            voxel.ElemData['Image Data'] = Data
+        else:
+            voxel.NodeData['Image Data'] = Data
 
     return voxel
 
@@ -250,11 +255,12 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
             warnings.warn('Using cubic interpolation overrides contour method to be marching cubes ("mc").')
         
         
-        SurfCoords, SurfConn = contour.MarchingCubesImage(img, h=h, threshold=threshold, flip=flip, method='original', interpolation=interpolation,VertexValues=False)
+        SurfCoords, SurfConn = contour.MarchingCubesImage(img, h=h, threshold=threshold, flip=flip, method='original', interpolation=interpolation,VertexValues=True)
     else:
-        voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)
+        # voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)
+        voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, voxel_mode='node')
 
-        if method == 'mc33':
+        if method == 'mc33' or method == '33':
             SurfCoords, SurfConn = contour.MarchingCubes(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['Image Data'], method='33', threshold=threshold, flip=flip, interpolation=interpolation)
         elif method == 'original':
             # this option is primarily for debugging, it should give the same results as 'mc' but less efficiently
@@ -262,12 +268,14 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
         elif method == 'mt':
             NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
             SurfCoords, SurfConn = contour.MarchingTetrahedra(NodeCoords, NodeConn, voxel.NodeData['Image Data'], Type='surf', threshold=threshold, flip=flip)
+        else:
+            raise ValueError(f'Invalid method: {method}')
 
     
     if 'mesh' in dir(mesh):
-        surface = mesh.mesh(SurfCoords, SurfConn)
+        surface = mesh.mesh(SurfCoords, SurfConn, Type='surf')
     else:
-        surface = mesh(SurfCoords, SurfConn)
+        surface = mesh(SurfCoords, SurfConn, Type='surf')
         
     return surface
 
@@ -335,9 +343,9 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
 
 
     if 'mesh' in dir(mesh):
-        tet = mesh.mesh(TetCoords, TetConn)
+        tet = mesh.mesh(TetCoords, TetConn, Type='vol')
     else:
-        tet = mesh(TetCoords, TetConn)
+        tet = mesh(TetCoords, TetConn, Type='vol')
     tet.NodeData['Image Data'] = Values
     return tet
 

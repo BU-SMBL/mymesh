@@ -3022,7 +3022,7 @@ def im2pixel(img, pixelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         PixelData = (PixelData,GradData)
     return PixelCoords, PixelConn, PixelData
 
-def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1):
+def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_gradient=False, gaussian_sigma=1, threshold=None, crop=None, threshold_direction=1, voxel_mode='elem', return_nodedata=False):
     """
     Convert 3D image data to a cubic mesh. Each voxel will be represented by an element.
 
@@ -3043,6 +3043,14 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
     threshold : float, optional
         Voxel intensity threshold, by default None.
         If given, elements with all nodes less than threshold will be discarded.
+    voxel_mode : str, optional
+        Determines whether image voxels are mapped to nodes or elements, by default "elem".
+
+        - "elem": Each image voxel is considered to be a cube (or rectangular prism) element. An image with shape (l,m,n) will have l*m*n elements.
+        
+        - "node": Each image voxel is considered to be a discrete point (node). An image with shape (l,m,n) will have l*m*n nodes.
+    return_nodedata : bool, optional
+        If True and if :code:`voxel_mode = "elem"`, node data will be averaged from adjacent voxels. 
 
     Returns
     -------
@@ -3052,8 +3060,10 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         Node connectivity for the voxel mesh
     VoxelData : numpy.ndarray
         Image intensity data for each voxel.
+        Returned if :code:`voxel_mode = "elem"` 
     NodeData : numpy.ndarray
         Image intensity data for each node, averaged from connected voxels.
+        Returned if :code:`voxel_mode = "node"` or :code:`return_nodedata = True`.
 
     """    
     multichannel = False
@@ -3081,21 +3091,29 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
     
     if crop is None:
         (nz,ny,nx) = img.shape
-        xlims = [0,(nx)*voxelsize]
-        ylims = [0,(ny)*voxelsize]
-        zlims = [0,(nz)*voxelsize]
+        
+        if voxel_mode.lower() == 'node':
+            shift = -1
+        else:
+            shift = 0
+        xlims = [0,(nx+shift)*voxelsize]
+        ylims = [0,(ny+shift)*voxelsize]
+        zlims = [0,(nz+shift)*voxelsize]
         bounds = [xlims[0],xlims[1],ylims[0],ylims[1],zlims[0],zlims[1]]
         VoxelCoords, VoxelConn = primitives.Grid(bounds, voxelsize, exact_h=False)
         if multichannel:
-            VoxelData = np.column_stack([I.flatten(order='F') for I in multiimg])
+            Data = np.column_stack([I.flatten(order='F') for I in multiimg])
         else:
-            VoxelData = img.flatten(order='F')
+            Data = img.flatten(order='F')
         if return_gradient:
             gradx = ndimage.gaussian_filter(img,gaussian_sigma,order=(1,0,0))
             grady = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,1,0))
             gradz = ndimage.gaussian_filter(img,gaussian_sigma,order=(0,0,1))
             GradData = np.vstack([gradx.flatten(order='F'),grady.flatten(order='F'),gradz.flatten(order='F')]).T
     else:
+        if voxel_mode == 'node':
+            # TODO
+            raise NotImplementedError('Cropping not yet implemented for voxel_mode="node".')
         # Adjust crop values to only get whole voxels
         crop[:-1:2] = np.floor(np.asarray(crop)[:-1:2]/voxelsize)*voxelsize
         crop[1::2] = np.ceil(np.asarray(crop)[1::2]/voxelsize)*voxelsize
@@ -3125,22 +3143,42 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
         VoxelCoords[:,2] = VoxelCoords[:,2]*zscale
         
     if threshold is not None:
-        if threshold_direction == 1:
-            VoxelConn = VoxelConn[VoxelData>=threshold]
-            VoxelData = VoxelData[VoxelData>=threshold]
-            if return_gradient: GradData = GradData[VoxelData>=threshold]
-            VoxelCoords,VoxelConn,_ = utils.RemoveNodes(VoxelCoords,VoxelConn)
-            VoxelConn = np.asarray(VoxelConn)
+        if voxel_mode.lower() == 'node':
+            if threshold_direction == 1:
+                VoxelConn = VoxelConn[np.any(Data[VoxelConn],axis=1)>=threshold]
+                # Data = Data[Data>=threshold]
+                # if return_gradient: GradData = GradData[Data>=threshold]
+                VoxelCoords,VoxelConn,ids = utils.RemoveNodes(VoxelCoords,VoxelConn)
+                Data = Data[ids]
+                GradData = GradData[ids]
+                VoxelConn = np.asarray(VoxelConn)
 
-        elif threshold_direction == -1:
-            VoxelConn = VoxelConn[VoxelData<=threshold]
-            VoxelData = VoxelData[VoxelData<=threshold]
-            if return_gradient: GradData = GradData[VoxelData<=threshold]
-            VoxelCoords,VoxelConn,_ = utils.RemoveNodes(VoxelCoords,VoxelConn)
-            VoxelConn = np.asarray(VoxelConn)
+            elif threshold_direction == -1:
+                VoxelConn = VoxelConn[Data<=threshold]
+                Data = Data[Data<=threshold]
+                if return_gradient: GradData = GradData[Data<=threshold]
+                VoxelCoords,VoxelConn,_ = utils.RemoveNodes(VoxelCoords,VoxelConn)
+                VoxelConn = np.asarray(VoxelConn)
+            else:
+                raise Exception('threshold_direction must be 1 or -1, where 1 indicates that values >= threshold will be kept and -1 indicates that values <= threshold will be kept.')
         else:
-            raise Exception('threshold_direction must be 1 or -1, where 1 indicates that values >= threshold will be kept and -1 indicates that values <= threshold will be kept.')
-    if return_nodedata:
+            if threshold_direction == 1:
+                VoxelConn = VoxelConn[Data>=threshold]
+                Data = Data[Data>=threshold]
+                if return_gradient: GradData = GradData[Data>=threshold]
+                VoxelCoords,VoxelConn,_ = utils.RemoveNodes(VoxelCoords,VoxelConn)
+                VoxelConn = np.asarray(VoxelConn)
+
+            elif threshold_direction == -1:
+                VoxelConn = VoxelConn[Data<=threshold]
+                Data = Data[Data<=threshold]
+                if return_gradient: GradData = GradData[Data<=threshold]
+                VoxelCoords,VoxelConn,_ = utils.RemoveNodes(VoxelCoords,VoxelConn)
+                VoxelConn = np.asarray(VoxelConn)
+            else:
+                raise Exception('threshold_direction must be 1 or -1, where 1 indicates that values >= threshold will be kept and -1 indicates that values <= threshold will be kept.')
+    if return_nodedata and voxel_mode.lower() == 'elem':
+        VoxelData = Data
         rows = VoxelConn.flatten()
         cols = np.repeat(np.arange(len(VoxelConn)),8)
         data = np.ones(len(rows))
@@ -3159,8 +3197,8 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_nodedata=False,
             
         return VoxelCoords, VoxelConn, VoxelData, NodeData
     if return_gradient:
-        VoxelData = (VoxelData,GradData)
-    return VoxelCoords, VoxelConn, VoxelData
+        VoxelData = (Data,GradData)
+    return VoxelCoords, VoxelConn, Data
         
 def surf2voxel(SurfCoords,SurfConn,h,Octree='generate',mode='any'):
     """
