@@ -186,7 +186,7 @@ def VoxelMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scal
 
     return voxel
 
-def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, method='mc', interpolation='linear'):
+def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, method='mc', interpolation='linear', voxel_mode='node'):
     """
     Generate a surface mesh of an image function 
 
@@ -216,6 +216,12 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
         'mt' : Marching tetrahedra (see contour.MarchingTetrahedra)
     interpolation : str, optional
         Method of interpolation used for placing the vertices on the approximated isosurface. This can be 'midpoint', 'linear', or 'cubic', by default 'linear'. If 'cubic' is selected, method is overridden to be 'mc'. 
+    voxel_mode : str, optional
+        Determines whether image voxels are mapped to nodes or elements, by default "node".
+
+        - "elem": Each image voxel is considered to be a cube (or rectangular prism) element. An image with shape (l,m,n) will have l*m*n elements. Note that this has a 'smoothing' effect on the image/surface
+        
+        - "node": Each image voxel is considered to be a discrete point (node). An image with shape (l,m,n) will have l*m*n nodes.
     
 
     Returns
@@ -254,11 +260,15 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
         if method != 'mc':
             warnings.warn('Using cubic interpolation overrides contour method to be marching cubes ("mc").')
         
-        
-        SurfCoords, SurfConn = contour.MarchingCubesImage(img, h=h, threshold=threshold, flip=flip, method='original', interpolation=interpolation,VertexValues=True)
+        if voxel_mode.lower() == 'node':
+            VertexValues = True
+        else:
+            VertexValues = False
+        SurfCoords, SurfConn = contour.MarchingCubesImage(img, h=h, threshold=threshold, flip=flip, method='original', interpolation=interpolation,VertexValues=VertexValues)
     else:
         # voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)
-        voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, voxel_mode='node')
+        return_nodedata = True if voxel_mode.lower()=='elem' else False
+        voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, voxel_mode=voxel_mode,return_nodedata=return_nodedata)
 
         if method == 'mc33' or method == '33':
             SurfCoords, SurfConn = contour.MarchingCubes(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['Image Data'], method='33', threshold=threshold, flip=flip, interpolation=interpolation)
@@ -279,7 +289,7 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
         
     return surface
 
-def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, interpolation='linear'):
+def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleorder=1, interpolation='linear', voxel_mode='node'):
     """
     Generate a tetrahedral mesh of an image  
 
@@ -302,6 +312,12 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
         Must be 0-5.
     interpolation : str, optional
         Method of interpolation used for placing the vertices on the approximated isosurface. This can be 'midpoint' or 'linear', by default 'linear'. 
+    voxel_mode : str, optional
+        Determines whether image voxels are mapped to nodes or elements, by default "node".
+
+        - "elem": Each image voxel is considered to be a cube (or rectangular prism) element. An image with shape (l,m,n) will have l*m*n elements. Note that this has a 'smoothing' effect on the image/surface
+        
+        - "node": Each image voxel is considered to be a discrete point (node). An image with shape (l,m,n) will have l*m*n nodes.
 
     Returns
     -------
@@ -335,7 +351,9 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
     img = read(img, scalefactor=scalefactor, scaleorder=scaleorder)
     h = tuple([hi/scalefactor for hi in h])
 
-    voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)
+    # voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)
+    return_nodedata = True if voxel_mode.lower()=='elem' else False
+    voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, voxel_mode=voxel_mode,return_nodedata=return_nodedata)
     NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
     if interpolation == 'quadratic':
         raise NotImplementedError('Quadratic interpolation of images not yet supported.')
