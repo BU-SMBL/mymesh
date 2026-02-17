@@ -269,7 +269,13 @@ def SurfaceMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, sc
         # voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)
         return_nodedata = True if voxel_mode.lower()=='elem' else False
         voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, voxel_mode=voxel_mode,return_nodedata=return_nodedata)
-
+        # Buffer the voxels of interest and discard the others
+        if flip:
+            buffer = ndimage.binary_dilation(img >= threshold, iterations=3)
+        else:
+            buffer = ndimage.binary_dilation(img <= threshold, iterations=3)
+        voxel.Threshold(buffer.flatten(order='F'), 0.5, '>', InPlace=True)
+        
         if method == 'mc33' or method == '33':
             SurfCoords, SurfConn = contour.MarchingCubes(voxel.NodeCoords, voxel.NodeConn, voxel.NodeData['Image Data'], method='33', threshold=threshold, flip=flip, interpolation=interpolation)
         elif method == 'original':
@@ -354,6 +360,13 @@ def TetMesh(img, h, threshold=None, threshold_direction=1, scalefactor=1, scaleo
     # voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)
     return_nodedata = True if voxel_mode.lower()=='elem' else False
     voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, voxel_mode=voxel_mode,return_nodedata=return_nodedata)
+    # Buffer the voxels of interest and discard the others
+    if flip:
+        buffer = ndimage.binary_dilation(img >= threshold, iterations=3)
+    else:
+        buffer = ndimage.binary_dilation(img <= threshold, iterations=3)
+    voxel.Threshold(buffer.flatten(order='F'), 0.5, '>', InPlace=True)
+    
     NodeCoords, NodeConn = converter.hex2tet(voxel.NodeCoords, voxel.NodeConn, method='1to6')
     if interpolation == 'quadratic':
         raise NotImplementedError('Quadratic interpolation of images not yet supported.')
