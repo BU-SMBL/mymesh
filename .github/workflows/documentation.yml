@@ -157,19 +157,59 @@ jobs:
       run: |
         pip install commitizen
         cz changelog
+    - name: Determine Version
+      id: set_version
+      shell: bash -l {0}
+      env:
+        # Pass the version to conf.py so pydata-sphinx-theme highlights the right dropdown item
+        SPHINX_DOC_VERSION: ${{ env.DOC_VERSION }}
+      run: |
+        # If triggered by a release, use the release tag. Otherwise, use 'dev'.
+        if [ "${{ github.event_name }}" == "release" ]; then
+          echo "DOC_VERSION=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+        else
+          echo "DOC_VERSION=dev" >> $GITHUB_ENV
+        fi
     - name: Build documentation
       shell: bash -l {0}
       run: |
         export DISPLAY=:99.0
         sphinx-build -b html ./docs/source ./docs/build
-    - name: Deploy to GitHub Pages
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/build
     - name: Run tests
       shell: bash -l {0}
       run: |
         pip install pytest
         pytest
+    - name: Prepare Versioned Folders
+      # Only run staging/deployment on main branch pushes or releases (not PRs)
+      if: github.event_name == 'release' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      shell: bash -l {0}
+      run: |
+        # create a staging area
+        mkdir -p staging/${{ env.DOC_VERSION }}
+        
+        # copy the html to versioned subfolder
+        cp -r ./docs/build/* staging/${{ env.DOC_VERSION }}/
+        
+        # copy switcher.json to the root of the site
+        if [ -f "./docs/source/_static/switcher.json" ]; then
+          cp ./docs/source/_static/switcher.json staging/switcher.json
+        fi
+        
+        # create root redirect if this is a published release (making it the latest stable)
+        if [ "${{ github.event_name }}" == "release" ]; then
+          cat <<EOF > staging/index.html
+        <!DOCTYPE html>
+        <html>
+          <head><meta http-equiv="refresh" content="0; url=./${{ env.DOC_VERSION }}/index.html"></head>
+          <body><p>Redirecting to <a href="./${{ env.DOC_VERSION }}/">latest documentation</a>...</p></body>
+        </html>
+        EOF
+        fi
+    - name: Deploy to GitHub Pages
+      if: github.event_name == 'release' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./staging
+        keep_files: true

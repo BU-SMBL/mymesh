@@ -83,7 +83,12 @@ html_theme_options = dict(collapse_navigation=True,
                                  "type": "fontawesome",
                               },],
                            pygments_light_style=pygments_light_style, 
-                           pygments_dark_style=pygments_dark_style
+                           pygments_dark_style=pygments_dark_style,
+                           switcher={
+                              "json_url" : "https://bu-smbl.github.io/mymesh/switcher.json",
+                              "version_match" : version
+                           },
+                           navbar_start=["navbar-logo", "version-switcher"]
                         )
 
 
