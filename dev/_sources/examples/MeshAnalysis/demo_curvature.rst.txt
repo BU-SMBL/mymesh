@@ -129,12 +129,8 @@ are theoretically both equal to the inverse of the radius of the sphere.
 
  .. code-block:: none
 
-    /home/runner/work/mymesh/mymesh/src/mymesh/utils.py:595: RuntimeWarning: invalid value encountered in arccos
-      alpha = np.arccos(cosAlpha, out=np.nan*np.ones_like(cosAlpha), where=(cosAlpha>=-1)|(cosAlpha<=1))*Masknan
     /home/runner/work/mymesh/mymesh/src/mymesh/curvature.py:501: NumbaPerformanceWarning: np.dot() is faster on contiguous arrays, called on (Array(float64, 2, 'F', False, aligned=True), Array(float64, 2, 'A', False, aligned=True))
       MaxPrincipalDirection = np.dot(np.linalg.inv(R[:3,:3]), np.append(x[:,np.argmax(v)],0)[:,None])[:,0]
-    /home/runner/work/mymesh/mymesh/src/mymesh/utils.py:595: RuntimeWarning: invalid value encountered in arccos
-      alpha = np.arccos(cosAlpha, out=np.nan*np.ones_like(cosAlpha), where=(cosAlpha>=-1)|(cosAlpha<=1))*Masknan
     RFBOutputContext()
     RFBOutputContext()
     RFBOutputContext()
@@ -273,7 +269,7 @@ and then evaluated at the nodes of the mesh.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 25.896 seconds)
+   **Total running time of the script:** (1 minutes 21.918 seconds)
 
 
 .. _sphx_glr_download_examples_MeshAnalysis_demo_curvature.py:

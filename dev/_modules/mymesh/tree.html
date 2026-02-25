@@ -58,6 +58,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mymesh/tree';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -132,6 +139,26 @@
   
 </a></div>
     
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
   </div>
   
   <div class="col-lg-9 navbar-header-items">
@@ -176,6 +203,23 @@
   </a>
 </li>
 
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
+    Verification
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -294,6 +338,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../dev.html">
     Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../verify.html">
+    Verification
   </a>
 </li>
 
@@ -486,9 +537,9 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">rays</span><span class="p">,</span> <span class="n">utils</span><span class="p">,</span> <span class="n">mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">rays</span><span class="p">,</span> <span class="n">utils</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">primitives</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span><span class="o">,</span><span class="w"> </span><span class="nn">heapq</span>
 
 <div class="viewcode-block" id="TreeNode">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.tree.TreeNode.html#mymesh.tree.TreeNode">[docs]</a>
@@ -634,7 +685,6 @@
 </div>
 
 
-
 <div class="viewcode-block" id="QuadtreeNode">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.tree.QuadtreeNode.html#mymesh.tree.QuadtreeNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">QuadtreeNode</span><span class="p">(</span><span class="n">TreeNode</span><span class="p">):</span>
@@ -776,7 +826,8 @@
 <span class="sd">            the node, otherwise False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLimits</span><span class="p">()</span>
-        <span class="n">inside</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rays</span><span class="o">.</span><span class="n">PointInBox2D</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="o">*</span><span class="n">limits</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="n">inclusive</span><span class="p">)</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span>
+        <span class="c1"># inside =  np.array([rays.PointInBox2D(point, *limits, inclusive=inclusive) for point in points])</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="n">rays</span><span class="o">.</span><span class="n">PointsInBox2D</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="o">*</span><span class="n">limits</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="n">inclusive</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="n">inside</span></div>
 
@@ -797,7 +848,9 @@
 <span class="sd">        out : list</span>
 <span class="sd">            List of indices of the points that are contained within the node</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">point</span><span class="p">)]</span>
+        <span class="c1"># out = [idx for idx,point in enumerate(points) if self.PointInNode(point)]</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PointsInNode</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">inside</span><span class="p">)</span> <span class="c1"># can probably skip where and use logical indexing (which would kinda make this whole function obsolete?)</span>
 
         <span class="k">return</span> <span class="n">out</span></div>
 
@@ -873,8 +926,8 @@
             <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
                 <span class="n">ptIds</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">ContainsPts</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
                 <span class="n">ptsInChild</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">ptIds</span><span class="p">]</span><span class="c1">#[points[idx] for idx in ptIds]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-                    <span class="n">child</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">ptIds</span><span class="p">]</span>
+                <span class="c1"># if self.data:</span>
+                <span class="c1">#     child.data = [self.data[idx] for idx in ptIds]</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptsInChild</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> 
                     <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">minsize</span><span class="p">:</span>
                         <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
@@ -884,6 +937,7 @@
                 <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptsInChild</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="n">maxsize</span><span class="p">:</span>
                         <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
+                        <span class="n">child</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ptsInChild</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">child</span><span class="o">.</span><span class="n">makeChildrenPts</span><span class="p">(</span><span class="n">ptsInChild</span><span class="p">,</span><span class="n">minsize</span><span class="o">=</span><span class="n">minsize</span><span class="p">,</span><span class="n">maxsize</span><span class="o">=</span><span class="n">maxsize</span><span class="p">)</span>
                         <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;branch&#39;</span>
@@ -934,6 +988,97 @@
                     <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">edgesInChild</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;empty&#39;</span></div>
+
+
+<div class="viewcode-block" id="QuadtreeNode.node_distance">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.tree.QuadtreeNode.node_distance.html#mymesh.tree.QuadtreeNode.node_distance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">node_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the nearest distance between a point and a quadtree node.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : np.ndarray</span>
+<span class="sd">            Point coordinates (shape=(2,))</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dist : float</span>
+<span class="sd">            Distance between a point and the node.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLimits</span><span class="p">()</span>
+        <span class="n">nearest_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">limits</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">limits</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">nearest_point</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+
+
+<div class="viewcode-block" id="QuadtreeNode.query_knn">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.tree.QuadtreeNode.query_knn.html#mymesh.tree.QuadtreeNode.query_knn">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">query_knn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the k-nearest neighbor points in the tree to a point.</span>
+<span class="sd">        Note: This currently only works for a point cloud tree (e.g. created</span>
+<span class="sd">        with :func:`Points2Quadtree`)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : np.ndarray</span>
+<span class="sd">            Point coordinates (shape=(2,))</span>
+<span class="sd">        k : int, optional</span>
+<span class="sd">            Number of nearest neighbor points to identify, by default 1</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dist : np.ndarray</span>
+<span class="sd">            Array of distance between :code:`x` and the nearest neighbors </span>
+<span class="sd">            (shape=(k,))</span>
+<span class="sd">        coordinates : np.ndarray</span>
+<span class="sd">            Array of coordinates for the nearest neighbor points</span>
+<span class="sd">            (shape=(k,2))</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="c1"># Get point-root distance</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_distance</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># Initialize queue</span>
+        <span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span> 
+        <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># loop</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">k</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">heappop</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">is</span> <span class="n">QuadtreeNode</span><span class="p">:</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                        <span class="n">pt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+                        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">pt</span><span class="p">)</span>
+
+                        <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">pt</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                            <span class="n">dist</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">dist</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">node_distance</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">k</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;=</span> <span class="n">queue</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+                                <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">dist</span><span class="p">,</span><span class="n">child</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">dist</span><span class="p">,</span><span class="n">child</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Because of the priority queue, this must be one of the </span>
+                <span class="c1"># k-nearest points</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">result</span><span class="p">))</span>
+        <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">dist</span><span class="p">,</span> <span class="n">coordinates</span> <span class="o">=</span> <span class="n">out</span>
+
+        <span class="k">return</span> <span class="n">dist</span><span class="p">,</span> <span class="n">coordinates</span></div>
 </div>
 
 
@@ -1080,7 +1225,9 @@
 <span class="sd">            the node, otherwise False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLimits</span><span class="p">()</span>
-        <span class="n">inside</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rays</span><span class="o">.</span><span class="n">PointInBox</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="o">*</span><span class="n">limits</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="n">inclusive</span><span class="p">)</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span>
+        <span class="c1"># inside =  np.array([rays.PointInBox(point, *limits, inclusive=inclusive) for point in points])</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="n">rays</span><span class="o">.</span><span class="n">PointsInBox</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="o">*</span><span class="n">limits</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="n">inclusive</span><span class="p">)</span>
+
         
         <span class="k">return</span> <span class="n">inside</span></div>
 
@@ -1094,14 +1241,16 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        points : array_like</span>
-<span class="sd">            Coordinates of the points (shape=(n,3))</span>
+<span class="sd">            Coordinates of the points (shape=(n,3))&gt;</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        out : list</span>
 <span class="sd">            List of indices of the points that are contained within the node</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">point</span><span class="p">)]</span>
+        <span class="c1"># out = [idx for idx,point in enumerate(points) if self.PointInNode(point)]</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PointsInNode</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">inside</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">out</span></div>
 
@@ -1173,7 +1322,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Note other things (e.g. Function2Octree) depend on this ordering not changing </span>
         <span class="k">for</span> <span class="n">xSign</span><span class="p">,</span><span class="n">ySign</span><span class="p">,</span><span class="n">zSign</span> <span class="ow">in</span> <span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">),(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">),(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)]:</span>
-            <span class="n">centroid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">xSign</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">ySign</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">zSign</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">centroid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">xSign</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> 
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">ySign</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> 
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">zSign</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">4</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OctreeNode</span><span class="p">(</span><span class="n">centroid</span><span class="p">,</span><span class="n">childSize</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="p">[],</span><span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">state</span><span class="o">=</span><span class="n">childstate</span><span class="p">))</span></div>
 
             
@@ -1200,8 +1351,8 @@
             <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
                 <span class="n">ptIds</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">ContainsPts</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
                 <span class="n">ptsInChild</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">ptIds</span><span class="p">]</span><span class="c1">#[points[idx] for idx in ptIds]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-                    <span class="n">child</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">ptIds</span><span class="p">]</span>
+                <span class="c1"># if self.data:</span>
+                <span class="c1">#     child.data = [self.data[idx] for idx in ptIds]</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptsInChild</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> 
                     <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span> <span class="o">&lt;</span> <span class="n">minsize</span><span class="p">:</span>
                         <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
@@ -1211,6 +1362,7 @@
                 <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptsInChild</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="n">maxsize</span><span class="p">:</span>
                         <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
+                        <span class="n">child</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ptsInChild</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">child</span><span class="o">.</span><span class="n">makeChildrenPts</span><span class="p">(</span><span class="n">ptsInChild</span><span class="p">,</span><span class="n">minsize</span><span class="o">=</span><span class="n">minsize</span><span class="p">,</span><span class="n">maxsize</span><span class="o">=</span><span class="n">maxsize</span><span class="p">)</span>
                         <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;branch&#39;</span>
@@ -1301,8 +1453,279 @@
                     <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">boxesInChild</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">child</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;empty&#39;</span></div>
+
+
+<div class="viewcode-block" id="OctreeNode.node_distance">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.tree.OctreeNode.node_distance.html#mymesh.tree.OctreeNode.node_distance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">node_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the nearest distance between a point and an octree node.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : np.ndarray</span>
+<span class="sd">            Point coordinates (shape=(3,))</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dist : float</span>
+<span class="sd">            Distance between a point and the node.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLimits</span><span class="p">()</span>
+        <span class="n">nearest_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">limits</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">limits</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">nearest_point</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+
+
+<div class="viewcode-block" id="OctreeNode.query_knn">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.tree.OctreeNode.query_knn.html#mymesh.tree.OctreeNode.query_knn">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">query_knn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the k-nearest neighbor points in the tree to a point.</span>
+<span class="sd">        Note: This currently only works for a point cloud tree (e.g. created</span>
+<span class="sd">        with :func:`Points2Octree`)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : np.ndarray</span>
+<span class="sd">            Point coordinates (shape=(3,))</span>
+<span class="sd">        k : int, optional</span>
+<span class="sd">            Number of nearest neighbor points to identify, by default 1</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dist : np.ndarray</span>
+<span class="sd">            Array of distance between :code:`x` and the nearest neighbors </span>
+<span class="sd">            (shape=(k,))</span>
+<span class="sd">        coordinates : np.ndarray</span>
+<span class="sd">            Array of coordinates for the nearest neighbor points</span>
+<span class="sd">            (shape=(k,3))</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="c1"># Get point-root distance</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_distance</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># Initialize queue</span>
+        <span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span> 
+        <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># loop</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">k</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">heappop</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">is</span> <span class="n">OctreeNode</span><span class="p">:</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                        <span class="n">pt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+                        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">pt</span><span class="p">)</span>
+
+                        <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">pt</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">PointInNode</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                            <span class="n">dist</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">dist</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">node_distance</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">k</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;=</span> <span class="n">queue</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+                                <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">dist</span><span class="p">,</span><span class="n">child</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">dist</span><span class="p">,</span><span class="n">child</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Because of the priority queue, this must be one of the </span>
+                <span class="c1"># k-nearest points</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">result</span><span class="p">))</span>
+        <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">dist</span><span class="p">,</span> <span class="n">coordinates</span> <span class="o">=</span> <span class="n">out</span>
+
+        <span class="k">return</span> <span class="n">dist</span><span class="p">,</span> <span class="n">coordinates</span></div>
 </div>
 
+    
+<span class="k">class</span><span class="w"> </span><span class="nc">KDtreeNode</span><span class="p">(</span><span class="n">TreeNode</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">location</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">state</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The KDtreeNode is the basic unit of the KD-tree data structure. </span>
+<span class="sd">        The structure consists of a series of nodes that reference their parent</span>
+<span class="sd">        and child nodes, allowing for traversal of the tree structure.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        location : array_like</span>
+<span class="sd">            Location of the node. This is only a single coordinate defining the</span>
+<span class="sd">            location of the hyperplane along the axis.</span>
+<span class="sd">        axis : int, optional</span>
+<span class="sd">            Index of the axis along which the data will be split (0=x, 1=y,...).</span>
+<span class="sd">            By default, 0.</span>
+<span class="sd">        parent : tree.KDtreeNode, optional</span>
+<span class="sd">            The KDtree node that contains this node, by default None</span>
+<span class="sd">        data : list or dict, optional</span>
+<span class="sd">            Data associated with the KDtree node. The type of data depends on </span>
+<span class="sd">            the how the KDtree was created, by default None.</span>
+<span class="sd">        level : int, optional</span>
+<span class="sd">            Depth within the tree structure, by default 0.</span>
+<span class="sd">            The root node is at level 0, the root&#39;s children are at level 1, etc.</span>
+<span class="sd">        state : str, optional</span>
+<span class="sd">            Specifies whether the node&#39;s place in the tree structure, by default</span>
+<span class="sd">            &#39;unknown&#39;.</span>
+
+<span class="sd">            Possible states are:</span>
+
+<span class="sd">            - &#39;root&#39;: This node is the root of the octree</span>
+
+<span class="sd">            - &#39;branch&#39;: This is node is an intermediate node between the root and leaves</span>
+
+<span class="sd">            - &#39;leaf&#39;: This is node is a terminal end and has no children.</span>
+
+<span class="sd">            - &#39;empty&#39;: No data is contained within this node, and it has no children</span>
+
+<span class="sd">            - &#39;unknown&#39;: State hasn&#39;t been specified.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="n">level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">location</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">=</span> <span class="n">K</span> <span class="c1"># number of dimensions</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;KDtree Node (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">Location: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">)</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="se">\n</span><span class="s1">Axis: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="si">:</span><span class="s1">f</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">out</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">makeChildrenPts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">leafsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">axismode</span><span class="o">=</span><span class="s1">&#39;cyclic&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize child nodes for the current node</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        axismode : str, optional</span>
+<span class="sd">            method use for selecting the next splitting axis, by default </span>
+<span class="sd">            &#39;cyclic&#39;.</span>
+
+<span class="sd">            Currenty no other options are implemented.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="k">if</span> <span class="n">axismode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;cyclic&#39;</span><span class="p">:</span>
+            <span class="n">childaxis</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span>
+
+        <span class="n">negative_indices</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">location</span>
+        <span class="n">points_negative</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">negative_indices</span><span class="p">]</span>
+        <span class="n">points_positive</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="o">~</span><span class="n">negative_indices</span><span class="p">]</span>
+        <span class="n">median_negative</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">points_negative</span><span class="p">[:,</span><span class="n">childaxis</span><span class="p">])</span>
+        <span class="n">median_positive</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">points_positive</span><span class="p">[:,</span><span class="n">childaxis</span><span class="p">])</span>
+        <span class="n">child_negative</span> <span class="o">=</span> <span class="n">KDtreeNode</span><span class="p">(</span><span class="n">median_negative</span><span class="p">,</span> <span class="n">childaxis</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>
+        <span class="n">child_positive</span> <span class="o">=</span> <span class="n">KDtreeNode</span><span class="p">(</span><span class="n">median_positive</span><span class="p">,</span> <span class="n">childaxis</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="n">child_negative</span><span class="p">,</span> <span class="n">child_positive</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">points_negative</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">leafsize</span> <span class="ow">or</span> <span class="n">child_negative</span><span class="o">.</span><span class="n">level</span> <span class="o">&gt;=</span> <span class="n">maxdepth</span><span class="p">:</span>
+            <span class="n">child_negative</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
+            <span class="n">child_negative</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">points_negative</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">child_negative</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;branch&#39;</span>
+            <span class="n">child_negative</span><span class="o">.</span><span class="n">makeChildrenPts</span><span class="p">(</span><span class="n">points_negative</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="n">maxdepth</span><span class="p">,</span> <span class="n">leafsize</span><span class="o">=</span><span class="n">leafsize</span><span class="p">,</span> <span class="n">axismode</span><span class="o">=</span><span class="n">axismode</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">points_negative</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">leafsize</span> <span class="ow">or</span> <span class="n">child_negative</span><span class="o">.</span><span class="n">level</span> <span class="o">&gt;=</span> <span class="n">maxdepth</span><span class="p">:</span>
+            <span class="n">child_positive</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;leaf&#39;</span>
+            <span class="n">child_positive</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">points_positive</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">child_positive</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;branch&#39;</span>
+            <span class="n">child_positive</span><span class="o">.</span><span class="n">makeChildrenPts</span><span class="p">(</span><span class="n">points_positive</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="n">maxdepth</span><span class="p">,</span> <span class="n">leafsize</span><span class="o">=</span><span class="n">leafsize</span><span class="p">,</span> <span class="n">axismode</span><span class="o">=</span><span class="n">axismode</span><span class="p">)</span>
+            
+    <span class="k">def</span><span class="w"> </span><span class="nf">node_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the nearest distance between a point and the location of the splitting plane of the current node.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : np.ndarray</span>
+<span class="sd">            Point coordinates (shape=(3,))</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dist : float</span>
+<span class="sd">            Distance between a point and the splitting plane.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+                
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">location</span>
+        <span class="k">return</span> <span class="n">dist</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">query_knn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the k-nearest neighbor points in the tree to a point.</span>
+<span class="sd">        Note: This currently only works for a point cloud tree (e.g. created</span>
+<span class="sd">        with :func:`Points2KDtree`)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : np.ndarray</span>
+<span class="sd">            Point coordinates (shape=(2,) or shape=(3,))</span>
+<span class="sd">        k : int, optional</span>
+<span class="sd">            Number of nearest neighbor points to identify, by default 1</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dist : np.ndarray</span>
+<span class="sd">            Array of distance between :code:`x` and the nearest neighbors </span>
+<span class="sd">            (shape=(k,))</span>
+<span class="sd">        coordinates : np.ndarray</span>
+<span class="sd">            Array of coordinates for the nearest neighbor points</span>
+<span class="sd">            (shape=(k,3))</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="c1"># Initialize queue</span>
+        <span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span> 
+        <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># loop</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">k</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">heappop</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">is</span> <span class="n">KDtreeNode</span><span class="p">:</span>
+                <span class="c1"># Item is a tree node</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;leaf&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                        <span class="n">pt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+                        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">pt</span><span class="p">)</span>
+
+                        <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">pt</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dist</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">node_distance</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">Next</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">Other</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">Next</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">Other</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Next</span><span class="p">))</span>
+
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">k</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">queue</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+                            <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dist</span><span class="p">),</span><span class="n">Other</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dist</span><span class="p">),</span><span class="n">Other</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Item is a point</span>
+                <span class="c1"># Because of the priority queue, this must be one of the </span>
+                <span class="c1"># k-nearest points</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">result</span><span class="p">))</span>
+        <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">dist</span><span class="p">,</span> <span class="n">coordinates</span> <span class="o">=</span> <span class="n">out</span>
+
+        <span class="k">return</span> <span class="n">dist</span><span class="p">,</span> <span class="n">coordinates</span>
 
 <span class="c1"># Octree Functions               </span>
 <span class="k">def</span><span class="w"> </span><span class="nf">isInsideOctree</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">node</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>  
@@ -2444,6 +2867,28 @@
         <span class="n">Dual</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">DualCoords</span><span class="p">,</span> <span class="n">DualConn</span><span class="p">)</span>
     <span class="n">Dual</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">Dual</span></div>
+
+
+<span class="c1"># KD Tree Functions</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Points2KDtree</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">leafsize</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+
+    <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">location</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">Points</span><span class="p">[:,</span><span class="n">axis</span><span class="p">])</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">KDtreeNode</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">Points</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">makeChildrenPts</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="n">maxdepth</span><span class="p">,</span> <span class="n">leafsize</span><span class="o">=</span><span class="n">leafsize</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">root</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">VisualizeKDtree</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+
+    <span class="n">leaves</span> <span class="o">=</span> <span class="n">getAllLeaf</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">K</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">boxes</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="n">leaves</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="n">leaf</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid2D</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]),</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])],</span> <span class="n">h</span><span class="o">=</span><span class="mf">.0001</span><span class="p">)</span>
+            <span class="n">boxes</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">Boundary</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">boxes</span>
 
 
 <span class="c1"># Generic Tree Functions</span>

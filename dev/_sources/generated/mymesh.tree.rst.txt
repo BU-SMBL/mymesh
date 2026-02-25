@@ -13,6 +13,8 @@
 
    .. .. autosummary::
    .. 
+   ..    KDtreeNode
+   ..
    ..    OctreeNode
    ..
    ..    QuadtreeNode

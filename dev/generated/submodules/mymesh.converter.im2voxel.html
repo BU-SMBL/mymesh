@@ -59,6 +59,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.converter.im2voxel';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="mymesh.converter.mesh2im" href="mymesh.converter.mesh2im.html" />
@@ -135,6 +142,26 @@
   
 </a></div>
     
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
   </div>
   
   <div class="col-lg-9 navbar-header-items">
@@ -179,6 +206,23 @@
   </a>
 </li>
 
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
+    Verification
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -299,6 +343,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../dev.html">
     Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../verify.html">
+    Verification
   </a>
 </li>
 
@@ -435,7 +486,7 @@
 <h1>mymesh.converter.im2voxel<a class="headerlink" href="#mymesh-converter-im2voxel" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.converter.im2voxel">
-<span class="sig-prename descclassname"><span class="pre">mymesh.converter.</span></span><span class="sig-name descname"><span class="pre">im2voxel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalefactor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaleorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_nodedata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_gradient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/converter.html#im2voxel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.converter.im2voxel" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mymesh.converter.</span></span><span class="sig-name descname"><span class="pre">im2voxel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalefactor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaleorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_gradient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'elem'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_nodedata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/converter.html#im2voxel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.converter.im2voxel" title="Link to this definition">#</a></dt>
 <dd><p>Convert 3D image data to a cubic mesh. Each voxel will be represented by an element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -450,14 +501,23 @@ If a tuple, should be specified as (hx,hy,hz)</p></li>
 Must be 0-5.</p></li>
 <li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Voxel intensity threshold, by default None.
 If given, elements with all nodes less than threshold will be discarded.</p></li>
+<li><p><strong>voxel_mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Determines whether image voxels are mapped to nodes or elements, by default “elem”.</p>
+<ul>
+<li><p>”elem”: Each image voxel is considered to be a cube (or rectangular prism) element. An image with shape (l,m,n) will have l*m*n elements.</p></li>
+<li><p>”node”: Each image voxel is considered to be a discrete point (node). An image with shape (l,m,n) will have l*m*n nodes.</p></li>
+</ul>
+</p></li>
+<li><p><strong>return_nodedata</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If True and if <code class="code docutils literal notranslate"><span class="pre">voxel_mode</span> <span class="pre">=</span> <span class="pre">&quot;elem&quot;</span></code>, node data will be averaged from adjacent voxels.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>VoxelCoords</strong> (<em>list</em>) – Node coordinates for the voxel mesh</p></li>
 <li><p><strong>VoxelConn</strong> (<em>list</em>) – Node connectivity for the voxel mesh</p></li>
-<li><p><strong>VoxelData</strong> (<em>numpy.ndarray</em>) – Image intensity data for each voxel.</p></li>
-<li><p><strong>NodeData</strong> (<em>numpy.ndarray</em>) – Image intensity data for each node, averaged from connected voxels.</p></li>
+<li><p><strong>VoxelData</strong> (<em>numpy.ndarray</em>) – Image intensity data for each voxel.
+Returned if <code class="code docutils literal notranslate"><span class="pre">voxel_mode</span> <span class="pre">=</span> <span class="pre">&quot;elem&quot;</span></code></p></li>
+<li><p><strong>NodeData</strong> (<em>numpy.ndarray</em>) – Image intensity data for each node, averaged from connected voxels.
+Returned if <code class="code docutils literal notranslate"><span class="pre">voxel_mode</span> <span class="pre">=</span> <span class="pre">&quot;node&quot;</span></code> or <code class="code docutils literal notranslate"><span class="pre">return_nodedata</span> <span class="pre">=</span> <span class="pre">True</span></code>.</p></li>
 </ul>
 </p>
 </dd>

@@ -58,6 +58,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mymesh/rays';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -132,6 +139,26 @@
   
 </a></div>
     
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
   </div>
   
   <div class="col-lg-9 navbar-header-items">
@@ -176,6 +203,23 @@
   </a>
 </li>
 
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
+    Verification
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -294,6 +338,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../dev.html">
     Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../verify.html">
+    Verification
   </a>
 </li>
 
@@ -3128,7 +3179,7 @@
 
 <div class="viewcode-block" id="PointInBox2D">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PointInBox2D.html#mymesh.rays.PointInBox2D">[docs]</a>
-<span class="nd">@try_njit</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">PointInBox2D</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Test whether a point is inside a 2 dimensional box</span>
@@ -3136,11 +3187,14 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    pt : array_like</span>
-<span class="sd">        3D coordinates of a point, shape=(3,)</span>
+<span class="sd">        2D coordinates of a point, shape=(2,)</span>
 <span class="sd">    xlim : array_like</span>
 <span class="sd">        Lower and upper x limits (e.g. [xmin, xmax])</span>
 <span class="sd">    ylim : array_like</span>
 <span class="sd">        Lower and upper y limits (e.g. [ymin, ymax])</span>
+<span class="sd">    inclusive : bool</span>
+<span class="sd">        If true, points exactly on the boundary will be considered inside, </span>
+<span class="sd">        by default, True.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -3160,6 +3214,41 @@
                 <span class="k">break</span>
     <span class="k">return</span> <span class="n">inside</span></div>
 
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PointsInBox2D</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test whether points are inside a 2 dimensional box</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pt : np.ndarray</span>
+<span class="sd">        3D coordinates of the points, shape=(n,2)</span>
+<span class="sd">    xlim : array_like</span>
+<span class="sd">        Lower and upper x limits (e.g. [xmin, xmax])</span>
+<span class="sd">    ylim : array_like</span>
+<span class="sd">        Lower and upper y limits (e.g. [ymin, ymax])</span>
+<span class="sd">    inclusive : bool</span>
+<span class="sd">        If true, points exactly on the boundary will be considered inside, </span>
+<span class="sd">        by default, True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    inside : np.ndarray</span>
+<span class="sd">        Boolean array, of Trues for points inside the box and Falses for </span>
+<span class="sd">        outside the box.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">inclusive</span><span class="p">:</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">xlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">xlim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span>
+            <span class="p">(</span><span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">xlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">xlim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span>
+            <span class="p">(</span><span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">inside</span>
 
 <div class="viewcode-block" id="PointInBox">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PointInBox.html#mymesh.rays.PointInBox">[docs]</a>
@@ -3197,6 +3286,45 @@
                 <span class="k">break</span>
     <span class="k">return</span> <span class="n">inside</span></div>
 
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PointsInBox</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test whether points are inside a 3 dimensional box</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pt : np.ndarray</span>
+<span class="sd">        3D coordinates of the points, shape=(n,3)</span>
+<span class="sd">    xlim : array_like</span>
+<span class="sd">        Lower and upper x limits (e.g. [xmin, xmax])</span>
+<span class="sd">    ylim : array_like</span>
+<span class="sd">        Lower and upper y limits (e.g. [ymin, ymax])</span>
+<span class="sd">    zlim : array_like</span>
+<span class="sd">        Lower and upper z limits (e.g. [zmin, zmax])</span>
+<span class="sd">    inclusive : bool</span>
+<span class="sd">        If true, points exactly on the boundary will be considered inside, </span>
+<span class="sd">        by default, True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    inside : np.ndarray</span>
+<span class="sd">        Boolean array, of Trues for points inside the box and Falses for </span>
+<span class="sd">        outside the box.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">inclusive</span><span class="p">:</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">xlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">xlim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span>
+            <span class="p">(</span><span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span>
+            <span class="p">(</span><span class="n">zlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pts</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">zlim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">xlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">xlim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span>
+            <span class="p">(</span><span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span>
+            <span class="p">(</span><span class="n">zlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">pts</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pts</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">zlim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">inside</span>
 
 <div class="viewcode-block" id="PointsInVoxel">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.rays.PointsInVoxel.html#mymesh.rays.PointsInVoxel">[docs]</a>
