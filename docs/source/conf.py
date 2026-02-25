@@ -88,7 +88,7 @@ html_theme_options = dict(collapse_navigation=True,
                               "json_url" : "https://bu-smbl.github.io/mymesh/switcher.json",
                               "version_match" : version
                            },
-                           navbar_end=["navbar-logo", "version-switcher"]
+                           navbar_end=["version-switcher"]
                         )
 
 
