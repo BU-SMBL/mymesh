@@ -1,0 +1,6 @@
+mymesh.register.R3d
+===================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: R3d

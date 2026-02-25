@@ -1,0 +1,6 @@
+mymesh.tree.Function2Octree
+===========================
+
+.. currentmodule:: mymesh.tree
+
+.. autofunction:: Function2Octree

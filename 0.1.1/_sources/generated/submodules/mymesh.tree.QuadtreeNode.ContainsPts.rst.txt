@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.ContainsPts
+====================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.ContainsPts

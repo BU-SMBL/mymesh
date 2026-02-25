@@ -1,0 +1,6 @@
+mymesh.converter.wdg2quadratic
+==============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: wdg2quadratic

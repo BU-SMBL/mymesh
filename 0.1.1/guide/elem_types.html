@@ -1,0 +1,1134 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Element Types &#8212; MyMesh vdev Manual</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=4ea706d9"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'guide/elem_types';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Connectivity Representations" href="connectivity.html" />
+    <link rel="prev" title="Working with the mesh class" href="mesh_class.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="dev" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/mymesh_logo.png" class="logo__image only-light" alt="MyMesh vdev Manual - Home"/>
+    <img src="../_static/mymesh_logo.png" class="logo__image only-dark pst-js-only" alt="MyMesh vdev Manual - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="what_mesh.html">What is a mesh?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh_class.html">Working with the <code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code> class</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Element Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="connectivity.html">Connectivity Representations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="implicit_meshing.html">Implicit Meshing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image_meshing.html">Image-based Meshing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="csg.html">Constructive Solid Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">File Input/Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ref.html">References</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../guide.html" class="nav-link">User Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Element Types</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="element-types">
+<h1>Element Types<a class="headerlink" href="#element-types" title="Link to this heading">#</a></h1>
+<p>MyMesh infers the element type by the length of each element’s node connectivity,
+allowing for flexible handling of mixed element meshes. Some ambiguities exist
+between meshes of different Types (<code class="docutils literal notranslate"><span class="pre">line</span></code>, <code class="docutils literal notranslate"><span class="pre">surf</span></code>, <code class="docutils literal notranslate"><span class="pre">vol</span></code>), for example
+between a 4-node quadrilateral and a 4-node tetrahedron. These ambiguities get
+resolved by the <a class="reference internal" href="../generated/mymesh.mesh.html#mymesh.mesh.Type" title="mymesh.mesh.Type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">mymesh.mesh.Type</span></code></a> attribute or an optional <code class="docutils literal notranslate"><span class="pre">Type</span></code> input
+for relevant functions (see also <a class="reference internal" href="../generated/submodules/mymesh.utils.identify_type.html#mymesh.utils.identify_type" title="mymesh.utils.identify_type"><code class="xref py py-func docutils literal notranslate"><span class="pre">mymesh.utils.identify_type()</span></code></a>).</p>
+<p>MyMesh primarily uses linear (first order) elements (e.g. 3 node tris, 4 node
+tets, etc.) but also has limited support for quadratic elements (e.g. 6 node
+tris, 10 node tets, etc.). Meshes can be converted to/from quadratic elements
+(see <a class="reference internal" href="../generated/mymesh.converter.html#module-mymesh.converter" title="mymesh.converter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mymesh.converter</span></code></a>), but not all functions are set up to handle meshes
+with quadratic elements</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Number of Nodes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Edge (<code class="docutils literal notranslate"><span class="pre">edge</span></code>)</p></td>
+<td><p>Line (<code class="docutils literal notranslate"><span class="pre">line</span></code>)</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quadratic Edge (<code class="docutils literal notranslate"><span class="pre">edge3</span></code>)</p></td>
+<td><p>Line (<code class="docutils literal notranslate"><span class="pre">line</span></code>)</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>Triangle (<code class="docutils literal notranslate"><span class="pre">tri</span></code>)</p></td>
+<td><p>Surface (<code class="docutils literal notranslate"><span class="pre">surf</span></code>)</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quadratic Triangle (<code class="docutils literal notranslate"><span class="pre">tri6</span></code>)</p></td>
+<td><p>Surface (<code class="docutils literal notranslate"><span class="pre">surf</span></code>)</p></td>
+<td><p>6</p></td>
+</tr>
+<tr class="row-even"><td><p>Quadrilateral (<code class="docutils literal notranslate"><span class="pre">quad</span></code>)</p></td>
+<td><p>Surface (<code class="docutils literal notranslate"><span class="pre">surf</span></code>)</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quadratic Quadrilateral (<code class="docutils literal notranslate"><span class="pre">quad8</span></code>)</p></td>
+<td><p>Surface (<code class="docutils literal notranslate"><span class="pre">surf</span></code>)</p></td>
+<td><p>8</p></td>
+</tr>
+<tr class="row-even"><td><p>Tetrahedron (<code class="docutils literal notranslate"><span class="pre">tet</span></code>)</p></td>
+<td><p>Volume (<code class="docutils literal notranslate"><span class="pre">vol</span></code>)</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quadratic Tetrahedron (<code class="docutils literal notranslate"><span class="pre">tet10</span></code>)</p></td>
+<td><p>Volume (<code class="docutils literal notranslate"><span class="pre">vol</span></code>)</p></td>
+<td><p>10</p></td>
+</tr>
+<tr class="row-even"><td><p>Pyramid (<code class="docutils literal notranslate"><span class="pre">pyr</span></code>)</p></td>
+<td><p>Volume (<code class="docutils literal notranslate"><span class="pre">vol</span></code>)</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quadratic Pyramid (<code class="docutils literal notranslate"><span class="pre">pyr13</span></code>)</p></td>
+<td><p>Volume (<code class="docutils literal notranslate"><span class="pre">vol</span></code>)</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>Wedge (<code class="docutils literal notranslate"><span class="pre">wdg</span></code>)</p></td>
+<td><p>Volume (<code class="docutils literal notranslate"><span class="pre">vol</span></code>)</p></td>
+<td><p>6</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quadratic Wedge (<code class="docutils literal notranslate"><span class="pre">wdg15</span></code>)</p></td>
+<td><p>Volume  (<code class="docutils literal notranslate"><span class="pre">vol</span></code>)</p></td>
+<td><p>15</p></td>
+</tr>
+<tr class="row-even"><td><p>Hexahedron (<code class="docutils literal notranslate"><span class="pre">hex</span></code>)</p></td>
+<td><p>Volume (<code class="docutils literal notranslate"><span class="pre">vol</span></code>)</p></td>
+<td><p>8</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quadratic Hexahedron (<code class="docutils literal notranslate"><span class="pre">hex20</span></code>)</p></td>
+<td><p>Volume (<code class="docutils literal notranslate"><span class="pre">vol</span></code>)</p></td>
+<td><p>20</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 sd-border-1 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-e16453362bd4a3b57f4bc823f0aa33ceff0555ff.png" alt="graph edge2 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+0 [pos=&quot;0,0!&quot;];
+1 [pos=&quot;1,0.1!&quot;];
+
+
+0 -- 1;
+
+label0 [label=&quot;0&quot;, pos=&quot;0,-0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;1,-0.05!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+}" class="graphviz" /></div>
+<p>Edge</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-98d86e64937e8bbd8c2ace361c731f2eb1773e3d.png" alt="graph edge3 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+0 [pos=&quot;0,0!&quot;];
+1 [pos=&quot;0.5,.05!&quot;, color=&quot;#5E81AC&quot;];
+2 [pos=&quot;1,0.1!&quot;];
+
+
+0 -- 2;
+
+label0 [label=&quot;0&quot;, pos=&quot;0,-0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;0.5,-0.1!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;1,-0.05!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+}" class="graphviz" /></div>
+<p>Quadratic Edge</p>
+</div>
+</div>
+</div>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 sd-border-1 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-61e87b718934635026a3830a6e71d297e7a84803.png" alt="graph tri {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+0 [pos=&quot;0,0!&quot;];
+1 [pos=&quot;1,0.1!&quot;];
+2 [pos=&quot;0.5,0.8!&quot;];
+
+0 -- 1;
+1 -- 2;
+2 -- 0;
+
+label0 [label=&quot;0&quot;, pos=&quot;0,-0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;1,-0.05!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;0.5,0.9!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+}" class="graphviz" /></div>
+<p>Triangle</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-c7f071bcf11100b36407e45e8928ba8a6746db2c.png" alt="graph tri6 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+0 [pos=&quot;0,0!&quot;];
+1 [pos=&quot;1,0.1!&quot;];
+2 [pos=&quot;0.5,0.8!&quot;];
+3 [pos=&quot;0.5,0.05!&quot;, color=&quot;#5E81AC&quot;];
+4 [pos=&quot;0.75,0.45!&quot;, color=&quot;#5E81AC&quot;];
+5 [pos=&quot;0.25,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+0 -- 1;
+1 -- 2;
+2 -- 0;
+
+label0 [label=&quot;0&quot;, pos=&quot;0,-0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;1,-0.05!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;0.5,0.9!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label3 [label=&quot;3&quot;, pos=&quot;0.5,-0.1!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label4 [label=&quot;4&quot;, pos=&quot;0.8,0.55!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label5 [label=&quot;5&quot;, pos=&quot;0.15,0.4!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+}" class="graphviz" /></div>
+<p>Quadratic Triangle</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-93f92b5a8415ea16902d2af8d8ecb436458a24e3.png" alt="graph quad {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+0 [pos=&quot;0,0!&quot;];
+1 [pos=&quot;1,0.1!&quot;];
+2 [pos=&quot;0.9,0.9!&quot;];
+3 [pos=&quot;-0.1,1.0!&quot;];
+
+0 -- 1;
+1 -- 2;
+2 -- 3;
+3 -- 0;
+
+label0 [label=&quot;0&quot;, pos=&quot;0,-0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;1,-0.05!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;1.0,1.0!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label3 [label=&quot;3&quot;, pos=&quot;-0.1,1.1!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+
+}" class="graphviz" /></div>
+<p>Quadrilateral</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-64d7792d2421888ab0ee9e4bc5e3dd2ae1d34e87.png" alt="graph quad {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+0 [pos=&quot;0,0!&quot;];
+1 [pos=&quot;1,0.1!&quot;];
+2 [pos=&quot;0.9,0.9!&quot;];
+3 [pos=&quot;-0.1,1.0!&quot;];
+4 [pos=&quot;0.5,0.05!&quot;, color=&quot;#5E81AC&quot;];
+5 [pos=&quot;0.95,0.5!&quot;, color=&quot;#5E81AC&quot;];
+6 [pos=&quot;0.4,0.95!&quot;, color=&quot;#5E81AC&quot;];
+7 [pos=&quot;-0.05,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+0 -- 1;
+1 -- 2;
+2 -- 3;
+3 -- 0;
+
+label0 [label=&quot;0&quot;, pos=&quot;0,-0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;1,-0.05!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;1.0,1.0!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label3 [label=&quot;3&quot;, pos=&quot;-0.1,1.1!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label4 [label=&quot;4&quot;, pos=&quot;0.5,-0.1!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label5 [label=&quot;5&quot;, pos=&quot;1.1,0.5!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label6 [label=&quot;6&quot;, pos=&quot;0.4,1.1!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label7 [label=&quot;7&quot;, pos=&quot;-0.15,0.5!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+
+}" class="graphviz" /></div>
+<p>Quadratic Quadrilateral</p>
+</div>
+</div>
+</div>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 sd-border-1 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-3a5f73391bda6b23cd6232a6073b5da40cac1e2b.png" alt="graph tet {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+0 [pos=&quot;0,0!&quot;];
+1 [pos=&quot;1,0.1!&quot;];
+2 [pos=&quot;0.9,0.9!&quot;];
+3 [pos=&quot;-0.1,1.0!&quot;];
+
+0 -- 1;
+1 -- 2;
+2 -- 0 [style=dotted];
+0 -- 3;
+1 -- 3;
+2 -- 3;
+
+label0 [label=&quot;0&quot;, pos=&quot;0,-0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;1,-0.05!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;1.0,1.0!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label3 [label=&quot;3&quot;, pos=&quot;-0.1,1.1!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+
+}" class="graphviz" /></div>
+<p>Tetrahedron</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-a3a7d9f52557f15aceb58f8c466eb30264319133.png" alt="graph tet10 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+0 [pos=&quot;0,0!&quot;];
+1 [pos=&quot;1,0.1!&quot;];
+2 [pos=&quot;0.9,0.9!&quot;];
+3 [pos=&quot;-0.1,1.0!&quot;];
+
+4 [pos=&quot;.5,0.05!&quot;,color=&quot;#5E81AC&quot;];
+5 [pos=&quot;.95,0.5!&quot;,color=&quot;#5E81AC&quot;];
+6 [pos=&quot;.45,0.45!&quot;,color=&quot;#5E81AC&quot;];
+7 [pos=&quot;-.05, 0.5!&quot;,color=&quot;#5E81AC&quot;];
+8 [pos=&quot;.55, 0.46!&quot;,color=&quot;#5E81AC&quot;];
+9 [pos=&quot;.4, 0.95!&quot;,color=&quot;#5E81AC&quot;];
+
+0 -- 1;
+1 -- 2;
+2 -- 0 [style=dotted];
+0 -- 3;
+1 -- 3;
+2 -- 3;
+
+label0 [label=&quot;0&quot;, pos=&quot;0,-0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;1,-0.05!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;1.0,1.0!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label3 [label=&quot;3&quot;, pos=&quot;-0.1,1.1!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+
+label4 [label=&quot;4&quot;, pos=&quot;.5,-.075!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label5 [label=&quot;5&quot;, pos=&quot;1.05,.5!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label6 [label=&quot;6&quot;, pos=&quot;.3,.4!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label7 [label=&quot;7&quot;, pos=&quot;-0.15,.5!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label8 [label=&quot;8&quot;, pos=&quot;.65,.45!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label9 [label=&quot;9&quot;, pos=&quot;0.4,1.05!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+}" class="graphviz" /></div>
+<p>Quadratic Tetrahedron</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-70fe79b1a6120afcb9fe44fd5522c113e13c1702.png" alt="graph pyr {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+0 [pos=&quot;.3,0!&quot;];
+1 [pos=&quot;0.8,0.3!&quot;];
+2 [pos=&quot;0.55,0.5!&quot;];
+3 [pos=&quot;0,0.4!&quot;];
+4 [pos=&quot;.4,1!&quot;]
+
+0 -- 1;
+1 -- 2 [style=dotted];
+2 -- 3 [style=dotted];
+3 -- 0;
+0 -- 4;
+1 -- 4;
+2 -- 4 [style=dotted];
+3 -- 4;
+
+label0 [label=&quot;0&quot;, pos=&quot;0.3,-0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;0.9,0.3!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;0.45,0.35!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label3 [label=&quot;3&quot;, pos=&quot;-0.1,0.4!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label4 [label=&quot;4&quot;, pos=&quot;0.4,1.1!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+
+}" class="graphviz" /></div>
+<p>Pyramid</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-3194501a3914a981d2df45f8fb5a67ac3488b774.png" alt="graph pyr13 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+0 [pos=&quot;.3,0!&quot;];
+1 [pos=&quot;0.8,0.3!&quot;];
+2 [pos=&quot;0.55,0.5!&quot;];
+3 [pos=&quot;0,0.4!&quot;];
+4 [pos=&quot;.4,1!&quot;];
+
+5 [pos=&quot;0.55,0.15!&quot;, color=&quot;#5E81AC&quot;];
+6 [pos=&quot;0.675,0.4!&quot;, color=&quot;#5E81AC&quot;];
+7 [pos=&quot;0.275,0.45!&quot;, color=&quot;#5E81AC&quot;];
+8 [pos=&quot;0.15,0.2!&quot;, color=&quot;#5E81AC&quot;];
+9 [pos=&quot;0.35,0.5!&quot;, color=&quot;#5E81AC&quot;];
+10 [pos=&quot;0.6,0.65!&quot;, color=&quot;#5E81AC&quot;];
+11 [pos=&quot;0.475,0.75!&quot;, color=&quot;#5E81AC&quot;];
+12 [pos=&quot;0.2,0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+0 -- 1;
+1 -- 2 [style=dotted];
+2 -- 3 [style=dotted];
+3 -- 0;
+0 -- 4;
+1 -- 4;
+2 -- 4 [style=dotted];
+3 -- 4;
+
+label0 [label=&quot;0&quot;, pos=&quot;0.3,-0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;0.9,0.3!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;0.45,0.35!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label3 [label=&quot;3&quot;, pos=&quot;-0.1,0.4!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label4 [label=&quot;4&quot;, pos=&quot;0.4,1.1!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+
+label5 [label=&quot;5&quot;, pos=&quot;0.65,0.05!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label6 [label=&quot;6&quot;, pos=&quot;0.6,0.3!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label7 [label=&quot;7&quot;, pos=&quot;0.225,0.55!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label8 [label=&quot;8&quot;, pos=&quot;0.05,0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label9 [label=&quot;9&quot;, pos=&quot;0.425,0.55!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label10 [label=&quot;10&quot;, pos=&quot;0.75,0.65!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label11 [label=&quot;11&quot;, pos=&quot;0.55,0.85!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label12 [label=&quot;12&quot;, pos=&quot;0.05,0.7!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+}" class="graphviz" /></div>
+<p>Quadratic Pyramid</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-830a7b484afd7d0d2a1e50887def18c7de9ec99f.png" alt="graph wdg {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+
+0 [pos=&quot;0.4,0.3!&quot;];
+1 [pos=&quot;1,1!&quot;];
+2 [pos=&quot;0.1,0.8!&quot;];
+3 [pos=&quot;0.4,1.1!&quot;];
+4 [pos=&quot;1,1.8!&quot;];
+5 [pos=&quot;.1,1.6!&quot;];
+
+
+0 -- 1;
+1 -- 2 [style=dotted];
+2 -- 0;
+3 -- 4;
+4 -- 5;
+5 -- 3;
+0 -- 3;
+1 -- 4;
+2 -- 5;
+
+label0 [label=&quot;0&quot;, pos=&quot;0.3,0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;1.15,1!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;0.05,0.65!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+
+label3 [label=&quot;3&quot;, pos=&quot;0.4,1.25!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label4 [label=&quot;4&quot;, pos=&quot;1,1.9!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label5 [label=&quot;5&quot;, pos=&quot;0.1,1.7!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+
+}" class="graphviz" /></div>
+<p>Wedge</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-54719087bfe3d5a7790beeabfda2e2be834f7881.png" alt="graph wdg15 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+
+0 [pos=&quot;0.4,0.3!&quot;];
+1 [pos=&quot;1,1!&quot;];
+2 [pos=&quot;0.1,0.8!&quot;];
+3 [pos=&quot;0.4,1.1!&quot;];
+4 [pos=&quot;1,1.8!&quot;];
+5 [pos=&quot;.1,1.6!&quot;];
+
+6 [pos=&quot;0.7,0.65!&quot;, color=&quot;#5E81AC&quot;];
+7 [pos=&quot;0.55,0.9!&quot;, color=&quot;#5E81AC&quot;];
+8 [pos=&quot;0.25,0.55!&quot;, color=&quot;#5E81AC&quot;];
+9 [pos=&quot;0.7,1.45!&quot;, color=&quot;#5E81AC&quot;];
+10 [pos=&quot;0.55,1.7!&quot;, color=&quot;#5E81AC&quot;];
+11 [pos=&quot;0.25,1.35!&quot;, color=&quot;#5E81AC&quot;];
+
+12 [pos=&quot;0.4,0.7!&quot;, color=&quot;#5E81AC&quot;];
+13 [pos=&quot;1,1.4!&quot;, color=&quot;#5E81AC&quot;];
+14 [pos=&quot;0.1,1.2!&quot;, color=&quot;#5E81AC&quot;];
+
+
+0 -- 1;
+1 -- 2 [style=dotted];
+2 -- 0;
+3 -- 4;
+4 -- 5;
+5 -- 3;
+0 -- 3;
+1 -- 4;
+2 -- 5;
+
+label0 [label=&quot;0&quot;, pos=&quot;0.3,0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;1.15,1!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;0.05,0.65!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+
+label3 [label=&quot;3&quot;, pos=&quot;0.4,1.25!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label4 [label=&quot;4&quot;, pos=&quot;1,1.9!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label5 [label=&quot;5&quot;, pos=&quot;0.1,1.7!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+
+label6 [label=&quot;6&quot;, pos=&quot;0.85,0.65!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label7 [label=&quot;7&quot;, pos=&quot;0.6,1.0!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label8 [label=&quot;8&quot;, pos=&quot;0.2,0.4!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label9 [label=&quot;9&quot;, pos=&quot;0.775,1.325!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label10 [label=&quot;10&quot;, pos=&quot;0.55,1.85!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label11 [label=&quot;11&quot;, pos=&quot;0.325,1.45!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+
+label12 [label=&quot;12&quot;, pos=&quot;0.3,0.75!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label13 [label=&quot;13&quot;, pos=&quot;1.15,1.4!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label14 [label=&quot;14&quot;, pos=&quot;-.05,1.2!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+
+}" class="graphviz" /></div>
+<p>Quadratic Wedge</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-0892daa85b28719cf4d542aaa3a0bb6873d9bd8a.png" alt="graph hex {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+0 [pos=&quot;0,0!&quot;];
+1 [pos=&quot;1,0.1!&quot;];
+2 [pos=&quot;1.6,0.6!&quot;];
+3 [pos=&quot;.6,0.5!&quot;];
+4 [pos=&quot;-0.1,1.0!&quot;];
+5 [pos=&quot;0.9,0.9!&quot;];
+6 [pos=&quot;1.5,1.4!&quot;];
+7 [pos=&quot;0.5,1.5!&quot;];
+
+0 -- 4;
+1 -- 5;
+2 -- 6;
+3 -- 7 [style=dotted];
+4 -- 5;
+5 -- 6;
+6 -- 7;
+7 -- 4;
+0 -- 1;
+1 -- 2;
+2 -- 3 [style=dotted];
+3 -- 0 [style=dotted];
+
+label0 [label=&quot;0&quot;, pos=&quot;0,-0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;1,-0.05!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;1.75,0.6!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label3 [label=&quot;3&quot;, pos=&quot;.5,0.6!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label4 [label=&quot;4&quot;, pos=&quot;-0.15,1.1!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label5 [label=&quot;5&quot;, pos=&quot;0.9,1.0!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label6 [label=&quot;6&quot;, pos=&quot;1.6,1.5!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label7 [label=&quot;7&quot;, pos=&quot;0.4,1.6!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+}" class="graphviz" /></div>
+<p>Hexahedron</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-50b4bbb4e58e75487740f92e6f5e42710c18e323.png" alt="graph hex20 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid];
+
+0 [pos=&quot;0,0!&quot;];
+1 [pos=&quot;1,0.1!&quot;];
+2 [pos=&quot;1.6,0.6!&quot;];
+3 [pos=&quot;.6,0.5!&quot;];
+4 [pos=&quot;-0.1,1.0!&quot;];
+5 [pos=&quot;0.9,0.9!&quot;];
+6 [pos=&quot;1.5,1.4!&quot;];
+7 [pos=&quot;0.5,1.5!&quot;];
+
+8 [pos=&quot;0.5,0.05!&quot;, color=&quot;#5E81AC&quot;];
+9 [pos=&quot;1.3,0.35!&quot;, color=&quot;#5E81AC&quot;];
+10 [pos=&quot;1.1,0.55!&quot;, color=&quot;#5E81AC&quot;];
+11 [pos=&quot;0.3,0.25!&quot;, color=&quot;#5E81AC&quot;];
+
+12 [pos=&quot;0.4,0.95!&quot;, color=&quot;#5E81AC&quot;];
+13 [pos=&quot;1.2,1.15!&quot;, color=&quot;#5E81AC&quot;];
+14 [pos=&quot;1.0,1.45!&quot;, color=&quot;#5E81AC&quot;];
+15 [pos=&quot;0.2,1.25!&quot;, color=&quot;#5E81AC&quot;];
+
+16 [pos=&quot;-.05,0.5!&quot;, color=&quot;#5E81AC&quot;];
+17 [pos=&quot;.95,0.5!&quot;, color=&quot;#5E81AC&quot;];
+18 [pos=&quot;1.55,1!&quot;, color=&quot;#5E81AC&quot;];
+19 [pos=&quot;0.55,1!&quot;, color=&quot;#5E81AC&quot;];
+
+0 -- 4;
+1 -- 5;
+2 -- 6;
+3 -- 7 [style=dotted];
+4 -- 5;
+5 -- 6;
+6 -- 7;
+7 -- 4;
+0 -- 1;
+1 -- 2;
+2 -- 3 [style=dotted];
+3 -- 0 [style=dotted];
+
+label0 [label=&quot;0&quot;, pos=&quot;0,-0.15!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label1 [label=&quot;1&quot;, pos=&quot;1,-0.05!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label2 [label=&quot;2&quot;, pos=&quot;1.75,0.6!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label3 [label=&quot;3&quot;, pos=&quot;.5,0.6!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label4 [label=&quot;4&quot;, pos=&quot;-0.15,1.1!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label5 [label=&quot;5&quot;, pos=&quot;0.9,1.0!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label6 [label=&quot;6&quot;, pos=&quot;1.6,1.5!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+label7 [label=&quot;7&quot;, pos=&quot;0.4,1.6!&quot;, shape=none, fontname=&quot;source code pro&quot;]
+
+label8 [label=&quot;8&quot;, pos=&quot;0.5,-.1!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label9 [label=&quot;9&quot;, pos=&quot;1.45,0.35!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label10 [label=&quot;10&quot;, pos=&quot;1.1,0.65!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label11 [label=&quot;11&quot;, pos=&quot;0.15,0.25!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+
+label12 [label=&quot;12&quot;, pos=&quot;0.35,0.8!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label13 [label=&quot;13&quot;, pos=&quot;1.225,1.!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label14 [label=&quot;14&quot;, pos=&quot;1.0,1.6!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label15 [label=&quot;15&quot;, pos=&quot;0.05,1.25!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+
+label16 [label=&quot;16&quot;, pos=&quot;-.2,0.5!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label17 [label=&quot;17&quot;, pos=&quot;.825,0.375!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label18 [label=&quot;18&quot;, pos=&quot;1.7,1!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+label19 [label=&quot;19&quot;, pos=&quot;0.65,1.1!&quot;, shape=none, fontname=&quot;source code pro&quot;, fontcolor=&quot;#5E81AC&quot;]
+}" class="graphviz" /></div>
+<p>Quadratic Hexahedron</p>
+</div>
+</div>
+</div>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="mesh_class.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Working with the <code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code> class</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="connectivity.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Connectivity Representations</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/guide/elem_types.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Timothy O. Josephson.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

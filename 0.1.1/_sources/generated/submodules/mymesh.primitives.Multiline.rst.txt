@@ -1,0 +1,6 @@
+mymesh.primitives.Multiline
+===========================
+
+.. currentmodule:: mymesh.primitives
+
+.. autofunction:: Multiline

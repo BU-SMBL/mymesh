@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.getMaxDepth
+====================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.getMaxDepth

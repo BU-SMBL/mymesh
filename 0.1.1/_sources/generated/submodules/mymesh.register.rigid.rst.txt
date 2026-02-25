@@ -1,0 +1,6 @@
+mymesh.register.rigid
+=====================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: rigid

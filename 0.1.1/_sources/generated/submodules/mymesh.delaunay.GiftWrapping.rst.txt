@@ -1,0 +1,6 @@
+mymesh.delaunay.GiftWrapping
+============================
+
+.. currentmodule:: mymesh.delaunay
+
+.. autofunction:: GiftWrapping

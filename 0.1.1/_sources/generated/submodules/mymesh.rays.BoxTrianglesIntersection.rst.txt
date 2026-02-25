@@ -1,0 +1,6 @@
+mymesh.rays.BoxTrianglesIntersection
+====================================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: BoxTrianglesIntersection
