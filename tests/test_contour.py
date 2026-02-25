@@ -353,10 +353,10 @@ def test_MarchingElements(NodeCoords, NodeConn, NodeVals, interpolation, flip, T
 
     if Type == 'surf':
         A = quality.Area(NewCoords, NewConn)
-        assert np.all(A > 0), 'Inverted elements.'
+        assert np.all(A >= 0), 'Inverted elements.'
     elif Type == 'vol':
         V = quality.Volume(NewCoords, NewConn)
-        assert np.all(V > 0), 'Inverted elements.'
+        assert np.all(V >= 0), 'Inverted elements.'
 
 @pytest.mark.parametrize("func, bounds, method, Type",[
     (

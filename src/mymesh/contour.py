@@ -4111,8 +4111,8 @@ def MarchingTriangles(TriNodeCoords, TriNodeConn, NodeValues, threshold=0, inter
         if return_NodeValues:
             NewValues = NewValues[Idx]
         # NodeCoords,NodeConn,EIdx = utils.CleanupDegenerateElements(NodeCoords,NodeConn,Type=Type, return_idx=True)
-        if return_ParentIds:
-            ParentIds = ParentIds[EIdx]
+        # if return_ParentIds:
+        #     ParentIds = ParentIds[EIdx]
 
     if return_NodeValues:
         if flip:
@@ -4992,6 +4992,7 @@ def MarchingElements(NodeCoords, NodeConn, NodeValues, threshold=0, interpolatio
     NewConn = np.empty((0,3))
 
     for conn in SplitConn:
+        conn = np.asarray(conn)
         if InputType == 'surf':
             if np.shape(conn)[1] == 3:
                 # Marching Triangles
