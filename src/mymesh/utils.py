@@ -592,7 +592,7 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
         norms = np.nanprod(np.linalg.norm(x,axis=3),axis=2)
         # cos(alpha) = dot(u,v)/(norm(u)*norm(v))
         cosAlpha = dots/norms
-        alpha = np.arccos(cosAlpha, out=np.nan*np.ones_like(cosAlpha), where=(cosAlpha>=-1)|(cosAlpha<=1))*Masknan
+        alpha = np.arccos(cosAlpha, out=np.nan*np.ones_like(cosAlpha), where=(cosAlpha>=-1)&(cosAlpha<=1))*Masknan
 
         sumAlphaN = np.nansum(alpha[:,:,None]*Ns,axis=1)
         NodeNormals = np.nan*np.ones_like(NodeCoords)
