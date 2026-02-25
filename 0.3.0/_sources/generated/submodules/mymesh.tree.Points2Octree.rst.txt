@@ -1,0 +1,6 @@
+mymesh.tree.Points2Octree
+=========================
+
+.. currentmodule:: mymesh.tree
+
+.. autofunction:: Points2Octree

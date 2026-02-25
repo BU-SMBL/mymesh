@@ -1,0 +1,6 @@
+mymesh.utils.getElemNeighbors
+=============================
+
+.. currentmodule:: mymesh.utils
+
+.. autofunction:: getElemNeighbors

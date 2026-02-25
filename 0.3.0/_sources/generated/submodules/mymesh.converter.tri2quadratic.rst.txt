@@ -1,0 +1,6 @@
+mymesh.converter.tri2quadratic
+==============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: tri2quadratic

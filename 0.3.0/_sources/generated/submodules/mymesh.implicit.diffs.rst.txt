@@ -1,0 +1,6 @@
+mymesh.implicit.diffs
+=====================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: diffs

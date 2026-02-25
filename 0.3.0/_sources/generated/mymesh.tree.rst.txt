@@ -1,0 +1,30 @@
+﻿mymesh.tree
+===========
+
+.. automodule:: mymesh.tree
+
+   
+   
+   
+
+   .. 
+   .. 
+   .. .. rubric:: Classes
+
+   .. .. autosummary::
+   .. 
+   ..    OctreeNode
+   ..
+   ..    QuadtreeNode
+   ..
+   ..    TreeNode
+   ..
+   .. 
+   .. 
+
+   
+   
+   
+
+
+

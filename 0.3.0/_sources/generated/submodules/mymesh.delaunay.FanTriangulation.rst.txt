@@ -1,0 +1,6 @@
+mymesh.delaunay.FanTriangulation
+================================
+
+.. currentmodule:: mymesh.delaunay
+
+.. autofunction:: FanTriangulation

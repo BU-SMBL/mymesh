@@ -1,0 +1,6 @@
+mymesh.implicit.thickenf
+========================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: thickenf

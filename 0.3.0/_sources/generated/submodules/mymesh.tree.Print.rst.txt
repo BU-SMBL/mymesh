@@ -1,0 +1,6 @@
+mymesh.tree.Print
+=================
+
+.. currentmodule:: mymesh.tree
+
+.. autofunction:: Print

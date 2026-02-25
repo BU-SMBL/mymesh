@@ -1,0 +1,6 @@
+mymesh.register.symmetric\_closest\_point\_MSE
+==============================================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: symmetric_closest_point_MSE

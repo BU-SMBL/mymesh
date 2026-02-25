@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.mvbb
+=====================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.mvbb

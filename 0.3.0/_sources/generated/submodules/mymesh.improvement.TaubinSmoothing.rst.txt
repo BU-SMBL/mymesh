@@ -1,0 +1,6 @@
+﻿mymesh.improvement.TaubinSmoothing
+==================================
+
+.. currentmodule:: mymesh.improvement
+
+.. autofunction:: TaubinSmoothing

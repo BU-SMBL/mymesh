@@ -1,0 +1,6 @@
+﻿mymesh.improvement.Split
+========================
+
+.. currentmodule:: mymesh.improvement
+
+.. autofunction:: Split

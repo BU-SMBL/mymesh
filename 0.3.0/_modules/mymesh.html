@@ -1,0 +1,758 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mymesh &#8212; MyMesh vdev Manual</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=4ea706d9"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mymesh';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="dev" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/mymesh_logo.png" class="logo__image only-light" alt="MyMesh vdev Manual - Home"/>
+    <img src="../_static/mymesh_logo.png" class="logo__image only-dark pst-js-only" alt="MyMesh vdev Manual - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for mymesh</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># Created on Thu Mar 24 13:51:50 2022</span>
+<span class="c1"># @author: toj</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+
+<span class="sd">Objects</span>
+<span class="sd">=======</span>
+<span class="sd">.. autosummary::</span>
+<span class="sd">    :toctree: generated/</span>
+
+<span class="sd">    .. currentmodule:: mymesh.mesh</span>
+
+<span class="sd">    mesh</span>
+
+
+<span class="sd">.. currentmodule:: mymesh</span>
+
+<span class="sd">Submodules</span>
+<span class="sd">==========</span>
+<span class="sd">.. autosummary::</span>
+<span class="sd">    :toctree: generated/</span>
+
+<span class="sd">    booleans  </span>
+<span class="sd">    contour</span>
+<span class="sd">    converter</span>
+<span class="sd">    curvature</span>
+<span class="sd">    delaunay</span>
+<span class="sd">    image</span>
+<span class="sd">    implicit</span>
+<span class="sd">    improvement</span>
+<span class="sd">    tree</span>
+<span class="sd">    primitives</span>
+<span class="sd">    quality</span>
+<span class="sd">    rays</span>
+<span class="sd">    register</span>
+<span class="sd">    utils</span>
+<span class="sd">    visualize</span>
+
+<span class="sd">Functions</span>
+<span class="sd">=========</span>
+<span class="sd">.. autosummary::</span>
+<span class="sd">    :toctree: generated/</span>
+
+<span class="sd">    demo_mesh  </span>
+<span class="sd">    demo_image</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span><span class="o">,</span><span class="w"> </span><span class="nn">urllib</span><span class="o">,</span><span class="w"> </span><span class="nn">tarfile</span><span class="o">,</span><span class="w"> </span><span class="nn">io</span><span class="o">,</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="k">try</span><span class="p">:</span> 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">njit</span>
+    <span class="n">_MYMESH_USE_NUMBA</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">njit</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_MYMESH_USE_NUMBA</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">use_numba</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">_MYMESH_USE_NUMBA</span>
+    <span class="k">if</span> <span class="n">njit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;numba is not available for import. Install with `conda install numba` or `pip install numba`.&#39;</span><span class="p">)</span>
+    <span class="n">_MYMESH_USE_NUMBA</span> <span class="o">=</span> <span class="n">enabled</span> <span class="ow">and</span> <span class="p">(</span><span class="n">njit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">check_numba</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">_MYMESH_USE_NUMBA</span>
+    <span class="k">if</span> <span class="n">_MYMESH_USE_NUMBA</span> <span class="ow">and</span> <span class="p">(</span><span class="n">njit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">check</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">try_njit</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">njit_args</span><span class="p">,</span> <span class="o">**</span><span class="n">njit_kwargs</span><span class="p">):</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">check_numba</span><span class="p">():</span>
+            <span class="n">jit_func</span> <span class="o">=</span> <span class="n">njit</span><span class="p">(</span><span class="o">*</span><span class="n">njit_args</span><span class="p">,</span> <span class="o">**</span><span class="n">njit_kwargs</span><span class="p">)(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">jit_func</span> <span class="o">=</span> <span class="n">func</span>
+        
+        <span class="k">return</span> <span class="n">jit_func</span>
+    
+    <span class="k">return</span> <span class="n">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="n">func</span> <span class="k">else</span> <span class="n">decorator</span>
+
+<div class="viewcode-block" id="demo_image">
+<a class="viewcode-back" href="../submodules/mymesh.demo_image.html#mymesh.demo_image">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">demo_image</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;bunny&#39;</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example image data from online databases</span>
+
+<span class="sd">    Since data is obtained on-demand from online sources, internet connectivity </span>
+<span class="sd">    is required.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        Name of the image to access, by default &#39;bunny&#39;.</span>
+<span class="sd">        Available options are:</span>
+
+<span class="sd">        - &quot;bunny&quot; - CT scan of the Stanford Bunny from the Stanford volume data archive</span>
+
+<span class="sd">    normalize : bool, optional</span>
+<span class="sd">        Normalize image data to the range 0-255 in uint8 format, by default True</span>
+<span class="sd">    scalefactor : float, optional</span>
+<span class="sd">        Upsample or downsample the image, e.g. scalefactor=0.5 will provide an</span>
+<span class="sd">        image at half the resolution as the original.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    img : np.ndarray</span>
+<span class="sd">        Image array</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;bunny&#39;</span><span class="p">:</span>
+        <span class="c1"># CT scan of &quot;Stanford Bunny&quot; from the Stanford volume data archive</span>
+        <span class="c1"># https://graphics.stanford.edu/data/voldata/voldata.html</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://graphics.stanford.edu/data/voldata/bunny-ctscan.tar.gz&#39;</span>
+
+        <span class="c1"># Get data and extract archive</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">tar_bytes</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">tar_file</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fileobj</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">tar_bytes</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r:gz&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Parse file names</span>
+        <span class="n">file_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">tar_file</span><span class="o">.</span><span class="n">getnames</span><span class="p">()</span> <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;bunny/[0-9]&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        <span class="n">file_numbers</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">file_names</span><span class="p">]</span>
+        <span class="n">file_names</span> <span class="o">=</span> <span class="n">file_names</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">file_numbers</span><span class="p">)]</span>
+
+        <span class="c1"># Load image data - &quot;The data is raw 512x512 slices, unsigned, 12 bit data stored as 16bit (2-byte) pixels.&quot;</span>
+        <span class="c1"># Binary data stored in big-endian &quot;&gt;u2&quot; format</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">tar_file</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&gt;u2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">512</span><span class="p">,</span><span class="mi">512</span><span class="p">))</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_names</span><span class="p">])</span>
+        <span class="n">img</span><span class="p">[</span><span class="n">img</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">img</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Set the outer boundary to 0 (&quot;black&quot;)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown image option: </span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    
+    <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
+        <span class="c1"># normalize the image to 0-255, unit8</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="p">(</span><span class="n">img</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">img</span><span class="p">)</span><span class="o">*</span><span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">scalefactor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">scalefactor</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">img</span></div>
+
+
+<div class="viewcode-block" id="demo_mesh">
+<a class="viewcode-back" href="../submodules/mymesh.demo_mesh.html#mymesh.demo_mesh">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">demo_mesh</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;bunny&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example mesh models from online databases</span>
+<span class="sd">    </span>
+<span class="sd">    Since data is obtained on-demand from online sources, internet connectivity </span>
+<span class="sd">    is required.</span>
+
+<span class="sd">    The Stanford models (bunny, dragon, Lucy) are obtained from the </span>
+<span class="sd">    `Stanford Computer Graphics Library &lt;https://graphics.stanford.edu/data/3Dscanrep/&gt;`__.</span>
+<span class="sd">    The following notices from the library&#39;s website apply to these models:</span>
+
+<span class="sd">        Please be sure to acknowledge the source of the data and models you take </span>
+<span class="sd">        from this repository. In each of the listings below, we have cited the </span>
+<span class="sd">        source of the range data and reconstructed models. You are welcome to </span>
+<span class="sd">        use the data and models for research purposes. You are also welcome to </span>
+<span class="sd">        mirror or redistribute them for free. Finally, you may publish images </span>
+<span class="sd">        made using these models, or the images on this web site, in a scholarly</span>
+<span class="sd">        article or book - as long as credit is given to the Stanford Computer </span>
+<span class="sd">        Graphics Laboratory. However, such models or images are not to be used </span>
+<span class="sd">        for commercial purposes, nor should they appear in a product for sale </span>
+<span class="sd">        (with the exception of scholarly journals or books), without our </span>
+<span class="sd">        permission. </span>
+
+<span class="sd">        As you browse this repository and think about how you might use our 3D </span>
+<span class="sd">        models and range datasets, please remember that several of these </span>
+<span class="sd">        artifacts have religious or cultural significance. Aside from the buddha, </span>
+<span class="sd">        which is a religious symbol revered by hundreds of millions of people, </span>
+<span class="sd">        the dragon is a symbol of Chinese culture, the Thai statue contains </span>
+<span class="sd">        elements of religious significance to Hindus, and Lucy is a Christian </span>
+<span class="sd">        angel; statues like her are commonly seen in Italian churches. Keep your </span>
+<span class="sd">        renderings and other uses of these particular models in good taste. </span>
+<span class="sd">        Don&#39;t animate or morph them, don&#39;t apply Boolean operators to them, and </span>
+<span class="sd">        don&#39;t simulate nasty things happening to them (like breaking, exploding, </span>
+<span class="sd">        melting, etc.). Choose another model for these sorts of experiments. </span>
+<span class="sd">        (You can do anything you want to the Stanford bunny or the armadillo.) </span>
+<span class="sd">    </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        Name of the image to access, by default &#39;bunny&#39;.</span>
+<span class="sd">        Available options are:</span>
+
+<span class="sd">        - &quot;bunny&quot; - Stanford Bunny from the Stanford 3D Scanning Repository.</span>
+<span class="sd">            - Coarser versions of the model are available as &quot;bunny_res2&quot;, &quot;bunny_res3&quot;, &quot;bunny_res4&quot;</span>
+<span class="sd">            - This is a non-manifold surface, the mesh has several holes on the bottom</span>
+
+<span class="sd">        - &quot;dragon&quot; - Stanford Dragon from the Stanford 3D Scanning Repository </span>
+<span class="sd">            - Coarser versions of the model are available as &quot;dragon_res2&quot;, &quot;dragon_res3&quot;, &quot;dragon_res4&quot;</span>
+<span class="sd">            - This is a non-manifold surface, the mesh has numerous small holes</span>
+
+<span class="sd">        - &quot;Lucy&quot; - &quot;Angel of Light&quot; statue from the Stanford 3D Scanning Repository</span>
+<span class="sd">            - This surface is hole free but has some topological defects/bridging</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    M : mymesh.mesh</span>
+<span class="sd">        Mesh object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    .. plot::</span>
+
+<span class="sd">        bunny = mymesh.demo_mesh(&quot;bunny&quot;)</span>
+<span class="sd">        bunny.plot(view=&#39;xy&#39;)</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">meshio</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;meshio library is required to load demo meshes. Install with: pip install meshio&#39;</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="s1">&#39;bunny&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="c1"># &quot;Stanford Bunny&quot; from the Stanford 3D Scanning Repository</span>
+        <span class="c1"># https://graphics.stanford.edu/data/3Dscanrep/</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://graphics.stanford.edu/pub/3Dscanrep/bunny.tar.gz&#39;</span>
+
+        <span class="c1"># Get data and extract archive</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">tar_bytes</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">tar_file</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fileobj</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">tar_bytes</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r:gz&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;res2&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">tar_file</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;bunny/reconstruction/bun_zipper_res2.ply&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">&#39;res3&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">tar_file</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;bunny/reconstruction/bun_zipper_res3.ply&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">&#39;res4&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">tar_file</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;bunny/reconstruction/bun_zipper_res4.ply&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">tar_file</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;bunny/reconstruction/bun_zipper.ply&#39;</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">meshio</span><span class="o">.</span><span class="n">ply</span><span class="o">.</span><span class="n">_ply</span><span class="o">.</span><span class="n">read_buffer</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">meshio2mymesh</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="s1">&#39;dragon&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="c1"># &quot;Stanford Dragon&quot; from the Stanford 3D Scanning Repository</span>
+        <span class="c1"># https://graphics.stanford.edu/data/3Dscanrep/</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://graphics.stanford.edu/pub/3Dscanrep/dragon/dragon_recon.tar.gz&#39;</span>
+
+        <span class="c1"># Get data and extract archive</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">tar_bytes</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">tar_file</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fileobj</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">tar_bytes</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r:gz&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;res2&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">tar_file</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;dragon_recon/dragon_vrip_res2.ply&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">&#39;res3&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">tar_file</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;dragon_recon/dragon_vrip_res3.ply&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">&#39;res4&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">tar_file</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;dragon_recon/dragon_vrip_res4.ply&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">tar_file</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;dragon_recon/dragon_vrip.ply&#39;</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">meshio</span><span class="o">.</span><span class="n">ply</span><span class="o">.</span><span class="n">_ply</span><span class="o">.</span><span class="n">read_buffer</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">meshio2mymesh</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="s1">&#39;Lucy&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="c1"># Lucy statue from the Stanford 3D Scanning Repository</span>
+        <span class="c1"># https://graphics.stanford.edu/data/3Dscanrep/</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://graphics.stanford.edu/data/3Dscanrep/lucy.tar.gz&#39;</span>
+
+        <span class="c1"># Get data and extract archive</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">tar_bytes</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">tar_file</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fileobj</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">tar_bytes</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r:gz&quot;</span><span class="p">)</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="n">tar_file</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;lucy.ply&#39;</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">meshio</span><span class="o">.</span><span class="n">ply</span><span class="o">.</span><span class="n">_ply</span><span class="o">.</span><span class="n">read_buffer</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">meshio2mymesh</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown image option: </span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    
+    <span class="k">return</span> <span class="n">M</span></div>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">booleans</span><span class="p">,</span> <span class="n">contour</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">delaunay</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">implicit</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">primitives</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">register</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">utils</span><span class="p">,</span> <span class="n">visualize</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;check_numba&quot;</span><span class="p">,</span> <span class="s2">&quot;use_numba&quot;</span><span class="p">,</span> <span class="s2">&quot;try_njit&quot;</span><span class="p">,</span> <span class="s2">&quot;mesh&quot;</span><span class="p">,</span> <span class="s2">&quot;booleans&quot;</span><span class="p">,</span> <span class="s2">&quot;contour&quot;</span><span class="p">,</span> <span class="s2">&quot;converter&quot;</span><span class="p">,</span>
+<span class="s2">&quot;curvature&quot;</span><span class="p">,</span> <span class="s2">&quot;delaunay&quot;</span><span class="p">,</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="s2">&quot;implicit&quot;</span><span class="p">,</span> <span class="s2">&quot;improvement&quot;</span><span class="p">,</span> 
+<span class="s2">&quot;primitives&quot;</span><span class="p">,</span> <span class="s2">&quot;quality&quot;</span><span class="p">,</span> <span class="s2">&quot;rays&quot;</span><span class="p">,</span> <span class="s2">&quot;register&quot;</span><span class="p">,</span> <span class="s2">&quot;tree&quot;</span><span class="p">,</span> <span class="s2">&quot;utils&quot;</span><span class="p">,</span> <span class="s2">&quot;visualize&quot;</span><span class="p">]</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Timothy O. Josephson.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

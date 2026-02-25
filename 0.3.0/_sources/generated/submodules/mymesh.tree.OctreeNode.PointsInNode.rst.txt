@@ -1,0 +1,6 @@
+mymesh.tree.OctreeNode.PointsInNode
+===================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: OctreeNode.PointsInNode
