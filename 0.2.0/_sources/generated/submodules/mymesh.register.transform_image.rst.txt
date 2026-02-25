@@ -1,0 +1,6 @@
+mymesh.register.transform\_image
+================================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: transform_image

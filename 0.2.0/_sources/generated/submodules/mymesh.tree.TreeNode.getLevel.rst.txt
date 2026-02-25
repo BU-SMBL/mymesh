@@ -1,0 +1,6 @@
+mymesh.tree.TreeNode.getLevel
+=============================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: TreeNode.getLevel

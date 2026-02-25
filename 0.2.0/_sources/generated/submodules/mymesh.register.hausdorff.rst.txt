@@ -1,0 +1,6 @@
+mymesh.register.hausdorff
+=========================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: hausdorff

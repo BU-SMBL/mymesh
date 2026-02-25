@@ -1,0 +1,6 @@
+mymesh.quality.Volume
+=====================
+
+.. currentmodule:: mymesh.quality
+
+.. autofunction:: Volume

@@ -1,0 +1,6 @@
+mymesh.tree.OctreeNode.getMaxDepth
+==================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: OctreeNode.getMaxDepth

@@ -1,0 +1,43 @@
+mymesh.tree.OctreeNode
+======================
+
+.. currentmodule:: mymesh.tree
+
+.. autoclass:: OctreeNode
+    :no-members:
+    :no-inherited-members:
+    :show-inheritance:
+    :no-special-members:
+
+Properties
+----------
+
+
+
+
+
+Methods
+-------
+
+
+    .. autosummary::
+        :toctree:
+
+    
+                OctreeNode.ContainsBoxes
+                OctreeNode.ContainsPts
+                OctreeNode.ContainsTris
+                OctreeNode.PointInNode
+                OctreeNode.PointsInNode
+                OctreeNode.clearData
+                OctreeNode.getLevel
+                OctreeNode.getLimits
+                OctreeNode.getMaxDepth
+                OctreeNode.getVertices
+                OctreeNode.hasChildren
+                OctreeNode.makeChildren
+                OctreeNode.makeChildrenBoxes
+                OctreeNode.makeChildrenPts
+                OctreeNode.makeChildrenTris
+                OctreeNode.prune
+    

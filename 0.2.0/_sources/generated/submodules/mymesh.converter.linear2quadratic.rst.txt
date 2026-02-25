@@ -1,0 +1,6 @@
+mymesh.converter.linear2quadratic
+=================================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: linear2quadratic

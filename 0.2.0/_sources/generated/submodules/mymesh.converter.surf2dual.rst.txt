@@ -1,0 +1,6 @@
+mymesh.converter.surf2dual
+==========================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: surf2dual

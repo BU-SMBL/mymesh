@@ -1,0 +1,6 @@
+mymesh.utils.MirrorMesh
+=======================
+
+.. currentmodule:: mymesh.utils
+
+.. autofunction:: MirrorMesh

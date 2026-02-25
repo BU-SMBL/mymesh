@@ -1,0 +1,1014 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mymesh.visualize &#8212; MyMesh vdev Manual</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=4ea706d9"></script>
+    <script src="../../_static/thebelab-helper.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mymesh/visualize';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="dev" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/mymesh_logo.png" class="logo__image only-light" alt="MyMesh vdev Manual - Home"/>
+    <img src="../../_static/mymesh_logo.png" class="logo__image only-dark pst-js-only" alt="MyMesh vdev Manual - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../mymesh.html" class="nav-link">mymesh</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mymesh.visualize</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for mymesh.visualize</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># Created on Sun Feb 25 14:07:16 2024</span>
+<span class="c1"># @author: toj</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Mesh visualization and plotting</span>
+
+<span class="sd">:mod:`mymesh.visualize` is still experimental and may not work as expected</span>
+<span class="sd">on all systems or in all development environments. For more stable and</span>
+<span class="sd">full-featured mesh visualization, a mymesh mesh object (:code:`M`) can be </span>
+<span class="sd">converted to a `pyvista &lt;https://pyvista.org/&gt;`_ mesh for visualization:</span>
+
+<span class="sd">.. code-block::</span>
+
+<span class="sd">    import pyvista as pv</span>
+<span class="sd">    pv_mesh = M.to_pyvista()</span>
+<span class="sd">    pv_mesh.plot()</span>
+
+<span class="sd">Visualization</span>
+<span class="sd">=============</span>
+<span class="sd">.. autosummary::</span>
+<span class="sd">    :toctree: submodules/</span>
+
+<span class="sd">    View</span>
+<span class="sd">    Subplot</span>
+
+<span class="sd">Visualization Utilities</span>
+<span class="sd">=======================</span>
+<span class="sd">.. autosummary::</span>
+<span class="sd">    :toctree: submodules/</span>
+
+<span class="sd">    FaceColor</span>
+<span class="sd">    ParseColor</span>
+<span class="sd">    GetTheme</span>
+<span class="sd">    set_vispy_backend</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#%%</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span><span class="o">,</span><span class="w"> </span><span class="nn">re</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Matplotlib is used for mesh visualization. If needed, install with `pip install matplotlib`.&#39;</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">converter</span><span class="p">,</span> <span class="n">utils</span><span class="p">,</span> <span class="n">mesh</span>
+
+<div class="viewcode-block" id="View">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.visualize.View.html#mymesh.visualize.View">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">View</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">interactive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">face_alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color_convert</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">clim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="n">scalar_preference</span><span class="o">=</span><span class="s1">&#39;nodes&#39;</span><span class="p">,</span>
+    <span class="n">view</span><span class="o">=</span><span class="s1">&#39;iso&#39;</span><span class="p">,</span> <span class="n">scalars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_faces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">line_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">return_image</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hide</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">shading</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">,</span>
+    <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">800</span><span class="p">,</span><span class="mi">600</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Visualize a mesh.</span>
+<span class="sd">    View uses vispy for visualization.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    M : mymesh.mesh</span>
+<span class="sd">        Mesh object to be viewed</span>
+<span class="sd">    interactive : bool, optional</span>
+<span class="sd">        View mesh in an interactive window, allowing for panning, rotation, etc.</span>
+<span class="sd">        By default True.</span>
+<span class="sd">    bgcolor : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    color : str, array_like, or NoneType, optional</span>
+<span class="sd">        Color of the surface, specified as a named color (see :func:`ParseColor`,</span>
+<span class="sd">        hex color code, or RGBA list/tuple/array). If None, the color will</span>
+<span class="sd">        be chosen based on the `theme`, by default None.</span>
+<span class="sd">    face_alpha : Float, optional</span>
+<span class="sd">        Alpha value controlling face opacity - 0 = transparent, 1 = opaque, by </span>
+<span class="sd">        default 1.</span>
+<span class="sd">    color_convert : str or NoneType, optional</span>
+<span class="sd">        Convert the colors to simulate different types of color vision. Available </span>
+<span class="sd">        options are &quot;deuteranomaly&quot;, &quot;protanomaly&quot;, &quot;tritanomaly&quot;, or &quot;grayscale&quot;,</span>
+<span class="sd">        by default None. Color conversion is performed using </span>
+<span class="sd">        `Colorspacious &lt;https://github.com/njsmith/colorspacious&gt;`_</span>
+<span class="sd">    clim : tuple or NoneType, optional</span>
+<span class="sd">        Color range bounds if displaying scalar data, by default None.</span>
+<span class="sd">    theme : str, optional</span>
+<span class="sd">        Select a theme (see :func:`GetTheme`), by default &#39;default&#39;.</span>
+<span class="sd">    scalar_preference : str, optional</span>
+<span class="sd">        In the even that `scalars` is specified by a string that references</span>
+<span class="sd">        an entry in both M.NodeData and M.ElemData, this will decide which </span>
+<span class="sd">        is chosen. Specified as either &#39;nodes&#39; or &#39;elements&#39;, by default &#39;nodes&#39;.</span>
+<span class="sd">    view : str, optional</span>
+<span class="sd">        Named orientation for viewing the mesh, by default &#39;iso&#39;</span>
+
+<span class="sd">        Options are:</span>
+<span class="sd">        </span>
+<span class="sd">        - &quot;iso&quot; or &quot;isometric&quot; : isometric view</span>
+<span class="sd">        - &quot;dimetric&quot; : dimetric view</span>
+<span class="sd">        - &quot;trimetric&quot; : trimetric view</span>
+<span class="sd">        - &quot;xy&quot; : View of the x-y plane with +x to the right and +y up</span>
+<span class="sd">        - &quot;xz&quot; : View of the x-z plane with +x to the right and +z ups</span>
+
+<span class="sd">    scalars : str, array_like, or None, optional</span>
+<span class="sd">        Scalar values to color the mesh by. If specified by a string, the string</span>
+<span class="sd">        should be an entry in either M.NodeData or M.ElemData. If the string is </span>
+<span class="sd">        present in both, `scalar_preference` will be used determine whether node</span>
+<span class="sd">        or element data will be displayed (node by default). If specified by an</span>
+<span class="sd">        array_like (numpy ndarray or list), the length of the array_like most be</span>
+<span class="sd">        equal to either the number of nodes or the number of elements in the </span>
+<span class="sd">        mesh. If None, the mesh will be given a solid color following `color`.  </span>
+<span class="sd">        By default None.</span>
+<span class="sd">    show_edges : bool, optional</span>
+<span class="sd">        Show lines denoting element edges. For a wireframe view, set </span>
+<span class="sd">        `show_edges=True`, `show_faces=False`, by default False.</span>
+<span class="sd">    show_faces : bool, optional</span>
+<span class="sd">        Show element faces in the mesh. For a wireframe view, set </span>
+<span class="sd">        `show_edges=True`, `show_faces=False`, by default True</span>
+<span class="sd">    line_width : int, optional</span>
+<span class="sd">        Width of lines shown if show_edges=True, by default 1</span>
+<span class="sd">    line_color : None, optional</span>
+<span class="sd">        Color of edges shown if show_edges=True, by default None.</span>
+<span class="sd">        If None, color will be selected based on theme.</span>
+<span class="sd">    point_size : float, optional</span>
+<span class="sd">        Size of points, if show_points=True, by default 2.</span>
+<span class="sd">    return_image : bool, optional</span>
+<span class="sd">        If true, image array of the plot will be returned, by default False</span>
+<span class="sd">    hide : bool, optional</span>
+<span class="sd">        If true, plot will not be shown, by default False</span>
+<span class="sd">    shading : str, optional</span>
+<span class="sd">        Shading mode, by default &#39;flat&#39;</span>
+<span class="sd">        Options are &#39;flat&#39;, &#39;smooth&#39;, None</span>
+<span class="sd">    size : tuple, optional</span>
+<span class="sd">        Figure size (width, height) in pixels. By default, (800, 600)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    img_data : np.ndarray, optional</span>
+<span class="sd">        Image array of the plot. Only returned if return_image=True.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">vispy</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">vispy</span><span class="w"> </span><span class="kn">import</span> <span class="n">app</span><span class="p">,</span> <span class="n">scene</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">vispy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_mesh</span><span class="p">,</span> <span class="n">load_data_file</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">vispy.scene.visuals</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mesh</span> <span class="k">as</span> <span class="n">vispymesh</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">vispy.scene.visuals</span><span class="w"> </span><span class="kn">import</span> <span class="n">Line</span><span class="p">,</span> <span class="n">Markers</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">vispy.scene</span><span class="w"> </span><span class="kn">import</span> <span class="n">transforms</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">vispy.visuals.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShadingFilter</span><span class="p">,</span> <span class="n">WireframeFilter</span><span class="p">,</span> <span class="n">FacePickingFilter</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;vispy is needed for visualization. Install with: pip install vispy&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;PIL needed. Install with: pip install pillow&#39;</span><span class="p">)</span>
+    <span class="c1"># determine execution environment</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">IPython</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">IPython</span><span class="o">.</span><span class="n">get_ipython</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># IPython is installed, but not active</span>
+            <span class="n">ipython</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ipython</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">ipython</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># set backend</span>
+    <span class="k">if</span> <span class="n">hide</span><span class="p">:</span>
+        <span class="n">interactive</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># if ipython and interactive:</span>
+    <span class="c1">#     chosen = set_vispy_backend(&#39;jupyter_rfb&#39;)</span>
+    <span class="c1">#     if chosen != &#39;jupyter_rfb&#39;:</span>
+    <span class="c1">#         warnings.warn(f&#39;jupyter_rfb is needed for interactive visualization in IPython. \nInstall with: pip install jupyter_rfb. \nFalling back to {chosen:s} backend.&#39;)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     chosen = set_vispy_backend()</span>
+    <span class="n">chosen</span> <span class="o">=</span> <span class="n">set_vispy_backend</span><span class="p">(</span><span class="s1">&#39;jupyter_rfb&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Set Theme (Need to handle this better)</span>
+    <span class="n">theme</span> <span class="o">=</span> <span class="n">GetTheme</span><span class="p">(</span><span class="n">theme</span><span class="p">,</span> <span class="n">scalars</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">theme</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">bgcolor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bgcolor</span> <span class="o">=</span> <span class="n">theme</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">line_color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">line_color</span> <span class="o">=</span> <span class="n">theme</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    
+    <span class="c1"># Create canvas</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">SceneCanvas</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="s1">&#39;interactive&#39;</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="n">ParseColor</span><span class="p">(</span><span class="n">bgcolor</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;MyMesh Viewer&#39;</span><span class="p">,</span><span class="n">show</span><span class="o">=</span><span class="n">interactive</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="c1"># Set view mode</span>
+    <span class="n">viewmode</span><span class="o">=</span><span class="s1">&#39;arcball&#39;</span>
+    <span class="n">canvasview</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">central_widget</span><span class="o">.</span><span class="n">add_view</span><span class="p">()</span>
+    <span class="n">canvasview</span><span class="o">.</span><span class="n">camera</span> <span class="o">=</span> <span class="n">viewmode</span>
+    
+    <span class="c1"># Set up mesh</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span><span class="c1"># - np.mean(M.NodeCoords,axis=0) # Centering mesh in window</span>
+    <span class="k">if</span> <span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">vertices</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">),</span><span class="mi">1</span><span class="p">))])</span>
+    <span class="k">if</span> <span class="n">M</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+        <span class="n">SurfConn</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2surface</span><span class="p">(</span><span class="o">*</span><span class="n">M</span><span class="p">,</span> <span class="n">return_SurfElem</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span><span class="n">faces</span><span class="p">,</span> <span class="n">inv</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2tris</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">return_inv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># TODO: Need to properly use ids and tri_ids to transfer element data to the surface</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span><span class="n">faces</span><span class="p">,</span> <span class="n">inv</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2tris</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">SurfConn</span><span class="p">,</span> <span class="n">return_inv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Process scalars</span>
+    <span class="k">if</span> <span class="n">scalars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">scalars</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">scalar_preference</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;nodes&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">scalars</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeData</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">scalars</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="n">scalars</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">scalars</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">ElemData</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">scalars</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">ElemData</span><span class="p">[</span><span class="n">scalars</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Scalar </span><span class="si">{</span><span class="n">scalars</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1"> not present in mesh.&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">scalar_preference</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;elements&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">scalars</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">ElemData</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">scalars</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">ElemData</span><span class="p">[</span><span class="n">scalars</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">scalars</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeData</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">scalars</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="n">scalars</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Scalar </span><span class="si">{</span><span class="n">scalars</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1"> not present in mesh.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;scalar_preference must be &quot;nodes&quot; or &quot;elements&quot;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">clim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">clim</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">scalars</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">scalars</span><span class="p">))</span>
+        <span class="c1"># TODO: Might want a clipping option</span>
+        <span class="n">color_scalars</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">clim</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">clim</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)(</span><span class="n">scalars</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalars</span><span class="p">)</span> <span class="o">==</span> <span class="n">M</span><span class="o">.</span><span class="n">NElem</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">M</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+                <span class="n">scalars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">scalars</span><span class="p">)[</span><span class="n">ids</span><span class="p">[</span><span class="n">inv</span><span class="p">]]</span>
+                <span class="n">color_scalars</span> <span class="o">=</span> <span class="n">color_scalars</span><span class="p">[</span><span class="n">ids</span><span class="p">[</span><span class="n">inv</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">scalars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">scalars</span><span class="p">)[</span><span class="n">inv</span><span class="p">]</span>
+                <span class="n">color_scalars</span> <span class="o">=</span> <span class="n">color_scalars</span><span class="p">[</span><span class="n">inv</span><span class="p">]</span>
+            <span class="n">face_colors</span> <span class="o">=</span> <span class="n">FaceColor</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">faces</span><span class="p">),</span> <span class="n">color</span><span class="p">,</span> <span class="n">face_alpha</span><span class="p">,</span> <span class="n">scalars</span><span class="o">=</span><span class="n">color_scalars</span><span class="p">,</span> <span class="n">color_convert</span><span class="o">=</span><span class="n">color_convert</span><span class="p">)</span>
+
+            <span class="n">vertex_colors</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">scalars</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">):</span>
+            <span class="n">vertex_colors</span> <span class="o">=</span> <span class="n">FaceColor</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">),</span> <span class="n">color</span><span class="p">,</span> <span class="n">face_alpha</span><span class="p">,</span> <span class="n">scalars</span><span class="o">=</span><span class="n">color_scalars</span><span class="p">,</span> <span class="n">color_convert</span><span class="o">=</span><span class="n">color_convert</span><span class="p">)</span>
+            <span class="n">face_colors</span> <span class="o">=</span> <span class="kc">None</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">face_colors</span> <span class="o">=</span> <span class="n">FaceColor</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">faces</span><span class="p">),</span> <span class="n">color</span><span class="p">,</span> <span class="n">face_alpha</span><span class="p">,</span> <span class="n">color_convert</span><span class="o">=</span><span class="n">color_convert</span><span class="p">)</span>
+        <span class="n">vertex_colors</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">vsmesh</span> <span class="o">=</span> <span class="n">vispymesh</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vertices</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">faces</span><span class="p">),</span> <span class="n">face_colors</span><span class="o">=</span><span class="n">face_colors</span><span class="p">,</span> <span class="n">vertex_colors</span><span class="o">=</span><span class="n">vertex_colors</span><span class="p">)</span>
+    
+    <span class="c1"># Set edges</span>
+    <span class="k">if</span> <span class="n">show_edges</span> <span class="ow">and</span> <span class="n">show_faces</span><span class="p">:</span>
+        <span class="n">wireframe_enabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">wireframe_only</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">faces_only</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">show_edges</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">show_faces</span><span class="p">:</span>
+        <span class="n">wireframe_enabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">wireframe_only</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">faces_only</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">show_edges</span> <span class="ow">and</span> <span class="n">show_faces</span><span class="p">:</span>
+        <span class="n">wireframe_enabled</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">wireframe_only</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">faces_only</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">wireframe_enabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">wireframe_only</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">faces_only</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">line_width</span> <span class="o">=</span> <span class="mi">0</span>
+    
+
+    <span class="k">if</span> <span class="n">wireframe_enabled</span><span class="p">:</span>
+        <span class="n">wireframe</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Surface</span><span class="o">.</span><span class="n">Edges</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">ParseColor</span><span class="p">(</span><span class="n">line_color</span><span class="p">))</span>
+
+    <span class="c1"># Set initial position</span>
+    <span class="n">canvasview</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">depth_value</span> <span class="o">=</span> <span class="mf">1e3</span>
+
+    <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">MatrixTransform</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">view</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+        <span class="c1"># vsmesh.transform.rotate(120, (1, 0, 0))</span>
+        <span class="c1"># vsmesh.transform.rotate(-30, (0, 0, 1))</span>
+    <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="s1">&#39;iso&#39;</span> <span class="ow">or</span> <span class="n">view</span> <span class="o">==</span> <span class="s1">&#39;isometric&#39;</span><span class="p">:</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">45</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>     
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mf">35.264</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="s1">&#39;dimetric&#39;</span><span class="p">:</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">45</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>      <span class="c1"># 45 degrees around X-axis</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mf">20.705</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="s1">&#39;trimetric&#39;</span><span class="p">:</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>      <span class="c1"># 60 degrees around X-axis</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="s1">&#39;xy&#39;</span><span class="p">:</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="s1">&#39;-xy&#39;</span><span class="p">:</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">180</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="s1">&#39;xz&#39;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="s1">&#39;-xz&#39;</span><span class="p">:</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">180</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="s1">&#39;x-z&#39;</span><span class="p">:</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">180</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="s1">&#39;-x-z&#39;</span><span class="p">:</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">180</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="s1">&#39;yz&#39;</span><span class="p">:</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="s1">&#39;-yz&#39;</span><span class="p">:</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="n">wireframe_enabled</span><span class="p">:</span>
+        <span class="n">vsmesh</span><span class="o">.</span><span class="n">set_gl_state</span><span class="p">(</span><span class="n">polygon_offset_fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                               <span class="n">polygon_offset</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">depth_test</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">wireframe</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span>
+        <span class="c1"># wireframe.set_gl_state(depth_test=True)</span>
+        <span class="n">canvasview</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">wireframe</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">wireframe_only</span><span class="p">:</span>
+        <span class="n">canvasview</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vsmesh</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">show_points</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">vertex_colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vertex_colors</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">Markers</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">vertices</span><span class="p">,</span> <span class="n">edge_width</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">face_color</span><span class="o">=</span><span class="n">vertex_colors</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">point_size</span><span class="p">,</span> <span class="n">edge_color</span><span class="o">=</span><span class="n">vertex_colors</span><span class="p">)</span>
+        <span class="n">points</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span>
+        <span class="n">canvasview</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+    
+    
+    <span class="c1"># Set shading/lighting</span>
+    <span class="n">shading_filter</span> <span class="o">=</span> <span class="n">ShadingFilter</span><span class="p">()</span>
+    <span class="n">vsmesh</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">shading_filter</span><span class="p">)</span>
+    <span class="n">shading_filter</span><span class="o">.</span><span class="n">shading</span> <span class="o">=</span> <span class="n">shading</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">attach_headlight</span><span class="p">(</span><span class="n">canvasview</span><span class="p">):</span>
+        <span class="n">light_dir</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
+        <span class="n">shading_filter</span><span class="o">.</span><span class="n">light_dir</span> <span class="o">=</span> <span class="n">light_dir</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">initial_light_dir</span> <span class="o">=</span> <span class="n">canvasview</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">imap</span><span class="p">(</span><span class="n">light_dir</span><span class="p">)</span>
+
+        <span class="nd">@canvasview</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">changed</span><span class="o">.</span><span class="n">connect</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">on_transform_change</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="n">canvasview</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">transform</span>
+            <span class="n">shading_filter</span><span class="o">.</span><span class="n">light_dir</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">initial_light_dir</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="n">attach_headlight</span><span class="p">(</span><span class="n">canvasview</span><span class="p">)</span>
+    
+    <span class="n">AABB</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">AABB</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span>
+    <span class="n">aabb</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">vsmesh</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">matrix</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">AABB</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">))])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">mins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">aabb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">maxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">aabb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">diffs</span> <span class="o">=</span> <span class="n">maxs</span><span class="o">-</span><span class="n">mins</span>
+    <span class="n">canvasview</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">set_range</span><span class="p">((</span><span class="n">mins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">0.85</span><span class="o">*</span><span class="n">diffs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">maxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.85</span><span class="o">*</span><span class="n">diffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> 
+                                <span class="p">(</span><span class="n">mins</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.85</span><span class="o">*</span><span class="n">diffs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">maxs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mf">0.85</span><span class="o">*</span><span class="n">diffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> 
+                                <span class="p">(</span><span class="n">mins</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="mf">0.85</span><span class="o">*</span><span class="n">diffs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">maxs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="mf">0.85</span><span class="o">*</span><span class="n">diffs</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    
+    <span class="c1"># Render</span>
+    <span class="k">if</span> <span class="n">chosen</span> <span class="o">==</span> <span class="s1">&#39;jupyter_rfb&#39;</span> <span class="ow">and</span> <span class="n">interactive</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">canvas</span>
+    <span class="k">elif</span> <span class="n">interactive</span><span class="p">:</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">chosen</span> <span class="o">==</span> <span class="s1">&#39;jupyter_rfb&#39;</span><span class="p">:</span>
+        <span class="n">img_data</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">img_data</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">render</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">img_data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ipython</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">hide</span><span class="p">:</span>
+        <span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">return_image</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">img_data</span></div>
+
+
+<div class="viewcode-block" id="Subplot">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.visualize.Subplot.html#mymesh.visualize.Subplot">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Subplot</span><span class="p">(</span><span class="n">meshes</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_fig</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">titles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="c1"># Plotting:</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">titles</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">meshes</span><span class="p">))]</span>
+    <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">title</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">meshes</span><span class="p">,</span> <span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">titles</span><span class="p">):</span>
+        <span class="n">subfig</span><span class="p">,</span> <span class="n">subax</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_fig</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">subax</span><span class="o">.</span><span class="n">get_images</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_array</span><span class="p">())</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">subfig</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">return_fig</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="FaceColor">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.visualize.FaceColor.html#mymesh.visualize.FaceColor">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">FaceColor</span><span class="p">(</span><span class="n">NFaces</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">face_alpha</span><span class="p">,</span> <span class="n">scalars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color_convert</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="n">scalars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">ParseColor</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">face_alpha</span><span class="p">)</span>
+            <span class="n">face_colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">color</span><span class="p">,(</span><span class="n">NFaces</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">color</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">color</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span>
+            <span class="n">face_colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">color</span><span class="p">,(</span><span class="n">NFaces</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">ParseColor</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">face_alpha</span><span class="p">)</span>
+            <span class="n">face_colors</span> <span class="o">=</span> <span class="n">color</span><span class="p">(</span><span class="n">scalars</span><span class="p">,</span> <span class="n">face_alpha</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">color_convert</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">colorspacious</span><span class="w"> </span><span class="kn">import</span> <span class="n">cspace_convert</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;The colorspacious package is required for color conversion. To install: pip install colorspacious.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">color_convert</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">color_convert</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">severity</span> <span class="o">=</span> <span class="n">color_convert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">color_convert</span> <span class="o">=</span> <span class="n">color_convert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">severity</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">color_convert</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">color_convert</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;deuteranomaly&#39;</span><span class="p">,</span> <span class="s1">&#39;protanomaly&#39;</span><span class="p">,</span> <span class="s1">&#39;tritanomaly&#39;</span><span class="p">]:</span>
+                <span class="n">cvd_space</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span>    <span class="p">:</span> <span class="s2">&quot;sRGB1+CVD&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;cvd_type&quot;</span> <span class="p">:</span> <span class="s2">&quot;deuteranomaly&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;severity&quot;</span> <span class="p">:</span> <span class="n">severity</span><span class="p">}</span>
+                <span class="n">face_colors</span> <span class="o">=</span> <span class="n">cspace_convert</span><span class="p">(</span><span class="n">face_colors</span><span class="p">[:,:</span><span class="mi">3</span><span class="p">],</span> <span class="n">cvd_space</span><span class="p">,</span> <span class="s2">&quot;sRGB1&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">color_convert</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;grayscale&#39;</span><span class="p">,</span><span class="s1">&#39;greyscale&#39;</span><span class="p">]:</span>
+                <span class="n">face_colors_JCh</span> <span class="o">=</span> <span class="n">cspace_convert</span><span class="p">(</span><span class="n">face_colors</span><span class="p">[:,:</span><span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;sRGB1&quot;</span><span class="p">,</span> <span class="s2">&quot;JCh&quot;</span><span class="p">)</span>
+                <span class="n">face_colors_JCh</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">face_colors</span><span class="p">[:,:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">cspace_convert</span><span class="p">(</span><span class="n">face_colors_JCh</span><span class="p">,</span> <span class="s2">&quot;JCh&quot;</span><span class="p">,</span> <span class="s2">&quot;sRGB1&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">face_colors</span></div>
+
+
+<div class="viewcode-block" id="ParseColor">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.visualize.ParseColor.html#mymesh.visualize.ParseColor">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ParseColor</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="p">):</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">matplotlib_colors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">BASE_COLORS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">+</span>\
+                            <span class="nb">list</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">CSS4_COLORS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">+</span>\
+                            <span class="nb">list</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">TABLEAU_COLORS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">+</span>\
+                            <span class="nb">list</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">XKCD_COLORS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="c1"># Single color</span>
+        <span class="k">if</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">matplotlib_colors</span><span class="p">:</span>
+            <span class="c1"># Check matplotlib colors</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+        
+        <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^#(?:[0-9a-fA-F]</span><span class="si">{3}</span><span class="s1">){1,2}$&#39;</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+            <span class="c1"># Check if hex color code</span>
+            <span class="n">hexstr</span> <span class="o">=</span> <span class="n">color</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hexstr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">hexstr</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">digit</span><span class="o">*</span><span class="mi">2</span> <span class="k">for</span> <span class="n">digit</span> <span class="ow">in</span> <span class="n">hexstr</span><span class="p">])</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">hexstr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">hexstr</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="mi">16</span><span class="p">)</span><span class="o">/</span><span class="mi">255</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">alpha</span><span class="p">,)</span>
+
+        <span class="c1"># Colormaps</span>
+        <span class="k">elif</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">plt</span><span class="o">.</span><span class="n">colormaps</span><span class="p">():</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+    
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="c1"># Single color</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">color</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">color</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)):</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">color</span> <span class="o">+=</span> <span class="p">(</span><span class="n">alpha</span><span class="p">,)</span>
+        
+        <span class="c1"># Colormaps</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">color</span></div>
+
+
+<div class="viewcode-block" id="GetTheme">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.visualize.GetTheme.html#mymesh.visualize.GetTheme">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">GetTheme</span><span class="p">(</span><span class="n">theme</span><span class="p">,</span> <span class="n">scalars</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">theme</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
+        <span class="n">bgcolor</span> <span class="o">=</span> <span class="s1">&#39;white&#39;</span>
+        <span class="k">if</span> <span class="n">scalars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;white&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;coolwarm&#39;</span>
+        <span class="n">linecolor</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+    
+    <span class="k">if</span> <span class="n">theme</span> <span class="o">==</span> <span class="s1">&#39;nord&#39;</span><span class="p">:</span>
+        <span class="n">bgcolor</span> <span class="o">=</span> <span class="s1">&#39;#2E3440&#39;</span>
+        <span class="k">if</span> <span class="n">scalars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;white&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;cividis&#39;</span>
+        <span class="n">linecolor</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+    <span class="k">return</span> <span class="n">color</span><span class="p">,</span> <span class="n">bgcolor</span><span class="p">,</span> <span class="n">linecolor</span></div>
+
+
+<div class="viewcode-block" id="set_vispy_backend">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.visualize.set_vispy_backend.html#mymesh.visualize.set_vispy_backend">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_vispy_backend</span><span class="p">(</span><span class="n">preference</span><span class="o">=</span><span class="s1">&#39;glfw&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the backend for VisPy. Can only be set once.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    preference : str, optional</span>
+<span class="sd">        Preferred vispy backend, by default &#39;PyGlet&#39;. If not available, an </span>
+<span class="sd">        alternative will be attempted.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    chosen : str</span>
+<span class="sd">        The name of the backend that was selected</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">vispy</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;vispy is needed for visualization. Install with: pip install vispy&#39;</span><span class="p">)</span>
+
+    <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pyqt6&#39;</span><span class="p">,</span> <span class="s1">&#39;glfw&#39;</span><span class="p">,</span> <span class="s1">&#39;pyside6&#39;</span><span class="p">,</span> <span class="s1">&#39;pyqt5&#39;</span><span class="p">,</span> <span class="s1">&#39;pyqt4&#39;</span><span class="p">,</span> <span class="s1">&#39;pyglet&#39;</span><span class="p">,</span> <span class="s1">&#39;pyside&#39;</span><span class="p">,</span> <span class="s1">&#39;pyside2&#39;</span><span class="p">,</span> <span class="s1">&#39;sdl2&#39;</span><span class="p">,</span> <span class="s1">&#39;osmesa&#39;</span><span class="p">,</span> <span class="s1">&#39;jupyter_rfb&#39;</span><span class="p">]</span>
+
+    <span class="n">preference</span> <span class="o">=</span> <span class="n">preference</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">preference</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">preference</span><span class="p">)</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">preference</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;VisPy backend must be one of </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">options</span><span class="p">)</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">. </span><span class="si">{</span><span class="n">preference</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1"> is not supported.&#39;</span><span class="p">)</span>
+
+    <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">chosen</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vispy</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">app</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">chosen</span> <span class="o">=</span> <span class="n">backend</span>
+            <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;Can only select a backend once, already using&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">chosen</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+                <span class="k">break</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;A valid vispy backend must be installed. Glfw is recommended: pip install glfw&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">chosen</span></div>
+
+    
+
+    
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Timothy O. Josephson.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
