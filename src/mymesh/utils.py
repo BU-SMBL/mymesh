@@ -2441,6 +2441,10 @@ def identify_elem(NodeCoords, NodeConn, Type=None):
             elems.append('hex')
         elif l == 10:
             elems.append('tet10')
+        elif l == 13:
+            elems.append('pyr13')
+        elif l == 15:
+            elems.append('wdg15')
         elif l == 20:
             elems.append('hex20')
         else:
