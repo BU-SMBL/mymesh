@@ -37,5 +37,7 @@ Methods
                 QuadtreeNode.makeChildren
                 QuadtreeNode.makeChildrenEdges
                 QuadtreeNode.makeChildrenPts
+                QuadtreeNode.node_distance
                 QuadtreeNode.prune
+                QuadtreeNode.query_knn
     

@@ -58,6 +58,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mymesh/image';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -132,6 +139,26 @@
   
 </a></div>
     
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
   </div>
   
   <div class="col-lg-9 navbar-header-items">
@@ -176,6 +203,23 @@
   </a>
 </li>
 
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
+    Verification
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -294,6 +338,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../dev.html">
     Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../verify.html">
+    Verification
   </a>
 </li>
 
@@ -496,7 +547,7 @@
 
 <div class="viewcode-block" id="VoxelMesh">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.image.VoxelMesh.html#mymesh.image.VoxelMesh">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">VoxelMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">VoxelMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">voxel_mode</span><span class="o">=</span><span class="s1">&#39;elem&#39;</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate voxel mesh of an image</span>
 
@@ -517,8 +568,14 @@
 <span class="sd">    scaleorder : int, optional</span>
 <span class="sd">        Interpolation order for scaling the image (see scipy.ndimage.zoom), by default 1.</span>
 <span class="sd">        Must be 0-5.</span>
+<span class="sd">    voxel_mode : str, optional</span>
+<span class="sd">        Determines whether image voxels are mapped to nodes or elements, by default &quot;elem&quot;.</span>
+
+<span class="sd">        - &quot;elem&quot;: Each image voxel is considered to be a cube (or rectangular prism) element. An image with shape (l,m,n) will have l*m*n elements.</span>
+<span class="sd">        </span>
+<span class="sd">        - &quot;node&quot;: Each image voxel is considered to be a discrete point (node). An image with shape (l,m,n) will have l*m*n nodes.</span>
 <span class="sd">    return_nodedata : bool, optional</span>
-<span class="sd">        Option to interpolate image data to the nodes rather than just the voxels, by default False.</span>
+<span class="sd">        Option to interpolate image data to the nodes rather than just the voxels (if voxel_mode=&quot;elem&quot;), by default False.</span>
 <span class="sd">        This can add significant computational costs for large images.</span>
 
 <span class="sd">    Returns</span>
@@ -556,8 +613,8 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
         <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">return_nodedata</span><span class="p">:</span>
-        <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">VoxelData</span><span class="p">,</span> <span class="n">NodeData</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">im2voxel</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span><span class="n">scalefactor</span><span class="o">=</span><span class="n">scalefactor</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="n">scaleorder</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="n">threshold_direction</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">voxel_mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;elem&#39;</span> <span class="ow">and</span> <span class="n">return_nodedata</span><span class="p">:</span>
+        <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">VoxelData</span><span class="p">,</span> <span class="n">NodeData</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">im2voxel</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span><span class="n">scalefactor</span><span class="o">=</span><span class="n">scalefactor</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="n">scaleorder</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="n">threshold_direction</span><span class="p">,</span> <span class="n">voxel_mode</span><span class="o">=</span><span class="s1">&#39;elem&#39;</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
             <span class="n">voxel</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">)</span>
@@ -568,24 +625,23 @@
         <span class="n">voxel</span><span class="o">.</span><span class="n">ElemData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">VoxelData</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">VoxelData</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">im2voxel</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span><span class="n">scalefactor</span><span class="o">=</span><span class="n">scalefactor</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="n">scaleorder</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="n">threshold_direction</span><span class="p">)</span>
+        <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">Data</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">im2voxel</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span><span class="n">scalefactor</span><span class="o">=</span><span class="n">scalefactor</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="n">scaleorder</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="n">threshold_direction</span><span class="p">,</span> <span class="n">voxel_mode</span><span class="o">=</span><span class="n">voxel_mode</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
-            <span class="n">voxel</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">)</span>
+            <span class="n">voxel</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">voxel</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">)</span>
-
-        <span class="n">voxel</span><span class="o">.</span><span class="n">ElemData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">VoxelData</span>
-
-    
-    
+            <span class="n">voxel</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">voxel_mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;elem&#39;</span><span class="p">:</span>
+            <span class="n">voxel</span><span class="o">.</span><span class="n">ElemData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">voxel</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Data</span>
 
     <span class="k">return</span> <span class="n">voxel</span></div>
 
 
 <div class="viewcode-block" id="SurfaceMesh">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.image.SurfaceMesh.html#mymesh.image.SurfaceMesh">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">SurfaceMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mc&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SurfaceMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mc&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">voxel_mode</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a surface mesh of an image function </span>
 
@@ -615,6 +671,12 @@
 <span class="sd">        &#39;mt&#39; : Marching tetrahedra (see contour.MarchingTetrahedra)</span>
 <span class="sd">    interpolation : str, optional</span>
 <span class="sd">        Method of interpolation used for placing the vertices on the approximated isosurface. This can be &#39;midpoint&#39;, &#39;linear&#39;, or &#39;cubic&#39;, by default &#39;linear&#39;. If &#39;cubic&#39; is selected, method is overridden to be &#39;mc&#39;. </span>
+<span class="sd">    voxel_mode : str, optional</span>
+<span class="sd">        Determines whether image voxels are mapped to nodes or elements, by default &quot;node&quot;.</span>
+
+<span class="sd">        - &quot;elem&quot;: Each image voxel is considered to be a cube (or rectangular prism) element. An image with shape (l,m,n) will have l*m*n elements. Note that this has a &#39;smoothing&#39; effect on the image/surface</span>
+<span class="sd">        </span>
+<span class="sd">        - &quot;node&quot;: Each image voxel is considered to be a discrete point (node). An image with shape (l,m,n) will have l*m*n nodes.</span>
 <span class="sd">    </span>
 
 <span class="sd">    Returns</span>
@@ -653,30 +715,45 @@
         <span class="k">if</span> <span class="n">method</span> <span class="o">!=</span> <span class="s1">&#39;mc&#39;</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Using cubic interpolation overrides contour method to be marching cubes (&quot;mc&quot;).&#39;</span><span class="p">)</span>
         
-        
-        <span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">MarchingCubesImage</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;original&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span><span class="n">VertexValues</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">voxel_mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;node&#39;</span><span class="p">:</span>
+            <span class="n">VertexValues</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">VertexValues</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">MarchingCubesImage</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;original&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span><span class="n">VertexValues</span><span class="o">=</span><span class="n">VertexValues</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">voxel</span> <span class="o">=</span> <span class="n">VoxelMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;mc33&#39;</span><span class="p">:</span>
-            <span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">MarchingCubes</span><span class="p">(</span><span class="n">voxel</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;33&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">)</span>
-
+        <span class="c1"># voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)</span>
+        <span class="n">return_nodedata</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">voxel_mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;elem&#39;</span> <span class="k">else</span> <span class="kc">False</span>
+        <span class="n">voxel</span> <span class="o">=</span> <span class="n">VoxelMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">voxel_mode</span><span class="o">=</span><span class="n">voxel_mode</span><span class="p">,</span><span class="n">return_nodedata</span><span class="o">=</span><span class="n">return_nodedata</span><span class="p">)</span>
+        <span class="c1"># Buffer the voxels of interest and discard the others</span>
+        <span class="k">if</span> <span class="n">flip</span><span class="p">:</span>
+            <span class="n">buffer</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">binary_dilation</span><span class="p">(</span><span class="n">img</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">buffer</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">binary_dilation</span><span class="p">(</span><span class="n">img</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">voxel</span><span class="o">.</span><span class="n">Threshold</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">),</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="n">InPlace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;mc33&#39;</span> <span class="ow">or</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;33&#39;</span><span class="p">:</span>
+            <span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">MarchingCubes</span><span class="p">(</span><span class="n">voxel</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;33&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;original&#39;</span><span class="p">:</span>
+            <span class="c1"># this option is primarily for debugging, it should give the same results as &#39;mc&#39; but less efficiently</span>
+            <span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">MarchingCubes</span><span class="p">(</span><span class="n">voxel</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;original&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;mt&#39;</span><span class="p">:</span>
             <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">hex2tet</span><span class="p">(</span><span class="n">voxel</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;1to6&#39;</span><span class="p">)</span>
             <span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">MarchingTetrahedra</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">],</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid method: </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     
     <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
-        <span class="n">surface</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">)</span>
+        <span class="n">surface</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">surface</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">)</span>
+        <span class="n">surface</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">SurfCoords</span><span class="p">,</span> <span class="n">SurfConn</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
         
     <span class="k">return</span> <span class="n">surface</span></div>
 
 
 <div class="viewcode-block" id="TetMesh">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.image.TetMesh.html#mymesh.image.TetMesh">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">TetMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">TetMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">voxel_mode</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a tetrahedral mesh of an image  </span>
 
@@ -699,6 +776,12 @@
 <span class="sd">        Must be 0-5.</span>
 <span class="sd">    interpolation : str, optional</span>
 <span class="sd">        Method of interpolation used for placing the vertices on the approximated isosurface. This can be &#39;midpoint&#39; or &#39;linear&#39;, by default &#39;linear&#39;. </span>
+<span class="sd">    voxel_mode : str, optional</span>
+<span class="sd">        Determines whether image voxels are mapped to nodes or elements, by default &quot;node&quot;.</span>
+
+<span class="sd">        - &quot;elem&quot;: Each image voxel is considered to be a cube (or rectangular prism) element. An image with shape (l,m,n) will have l*m*n elements. Note that this has a &#39;smoothing&#39; effect on the image/surface</span>
+<span class="sd">        </span>
+<span class="sd">        - &quot;node&quot;: Each image voxel is considered to be a discrete point (node). An image with shape (l,m,n) will have l*m*n nodes.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -732,7 +815,16 @@
     <span class="n">img</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="n">scalefactor</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="n">scaleorder</span><span class="p">)</span>
     <span class="n">h</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">hi</span><span class="o">/</span><span class="n">scalefactor</span> <span class="k">for</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">h</span><span class="p">])</span>
 
-    <span class="n">voxel</span> <span class="o">=</span> <span class="n">VoxelMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># voxel = VoxelMesh(img, h, threshold=None, scalefactor=1, scaleorder=1, return_nodedata=True)</span>
+    <span class="n">return_nodedata</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">voxel_mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;elem&#39;</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="n">voxel</span> <span class="o">=</span> <span class="n">VoxelMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">voxel_mode</span><span class="o">=</span><span class="n">voxel_mode</span><span class="p">,</span><span class="n">return_nodedata</span><span class="o">=</span><span class="n">return_nodedata</span><span class="p">)</span>
+    <span class="c1"># Buffer the voxels of interest and discard the others</span>
+    <span class="k">if</span> <span class="n">flip</span><span class="p">:</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">binary_dilation</span><span class="p">(</span><span class="n">img</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">binary_dilation</span><span class="p">(</span><span class="n">img</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">voxel</span><span class="o">.</span><span class="n">Threshold</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">),</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="n">InPlace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
     <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">hex2tet</span><span class="p">(</span><span class="n">voxel</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">voxel</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;1to6&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">interpolation</span> <span class="o">==</span> <span class="s1">&#39;quadratic&#39;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Quadratic interpolation of images not yet supported.&#39;</span><span class="p">)</span>
@@ -740,9 +832,9 @@
 
 
     <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
-        <span class="n">tet</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">TetCoords</span><span class="p">,</span> <span class="n">TetConn</span><span class="p">)</span>
+        <span class="n">tet</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">TetCoords</span><span class="p">,</span> <span class="n">TetConn</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">tet</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">TetCoords</span><span class="p">,</span> <span class="n">TetConn</span><span class="p">)</span>
+        <span class="n">tet</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">TetCoords</span><span class="p">,</span> <span class="n">TetConn</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
     <span class="n">tet</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;Image Data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Values</span>
     <span class="k">return</span> <span class="n">tet</span></div>
 

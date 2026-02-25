@@ -58,6 +58,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mymesh/converter';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -132,6 +139,26 @@
   
 </a></div>
     
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
   </div>
   
   <div class="col-lg-9 navbar-header-items">
@@ -176,6 +203,23 @@
   </a>
 </li>
 
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
+    Verification
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -294,6 +338,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../dev.html">
     Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../verify.html">
+    Verification
   </a>
 </li>
 
@@ -3552,7 +3603,7 @@
 
 <div class="viewcode-block" id="im2voxel">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.converter.im2voxel.html#mymesh.converter.im2voxel">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">im2voxel</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">voxelsize</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_gradient</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gaussian_sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">im2voxel</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">voxelsize</span><span class="p">,</span> <span class="n">scalefactor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scaleorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_gradient</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gaussian_sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">voxel_mode</span><span class="o">=</span><span class="s1">&#39;elem&#39;</span><span class="p">,</span> <span class="n">return_nodedata</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert 3D image data to a cubic mesh. Each voxel will be represented by an element.</span>
 
@@ -3573,6 +3624,14 @@
 <span class="sd">    threshold : float, optional</span>
 <span class="sd">        Voxel intensity threshold, by default None.</span>
 <span class="sd">        If given, elements with all nodes less than threshold will be discarded.</span>
+<span class="sd">    voxel_mode : str, optional</span>
+<span class="sd">        Determines whether image voxels are mapped to nodes or elements, by default &quot;elem&quot;.</span>
+
+<span class="sd">        - &quot;elem&quot;: Each image voxel is considered to be a cube (or rectangular prism) element. An image with shape (l,m,n) will have l*m*n elements.</span>
+<span class="sd">        </span>
+<span class="sd">        - &quot;node&quot;: Each image voxel is considered to be a discrete point (node). An image with shape (l,m,n) will have l*m*n nodes.</span>
+<span class="sd">    return_nodedata : bool, optional</span>
+<span class="sd">        If True and if :code:`voxel_mode = &quot;elem&quot;`, node data will be averaged from adjacent voxels. </span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -3582,8 +3641,10 @@
 <span class="sd">        Node connectivity for the voxel mesh</span>
 <span class="sd">    VoxelData : numpy.ndarray</span>
 <span class="sd">        Image intensity data for each voxel.</span>
+<span class="sd">        Returned if :code:`voxel_mode = &quot;elem&quot;` </span>
 <span class="sd">    NodeData : numpy.ndarray</span>
 <span class="sd">        Image intensity data for each node, averaged from connected voxels.</span>
+<span class="sd">        Returned if :code:`voxel_mode = &quot;node&quot;` or :code:`return_nodedata = True`.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="n">multichannel</span> <span class="o">=</span> <span class="kc">False</span>
@@ -3611,21 +3672,29 @@
     
     <span class="k">if</span> <span class="n">crop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="p">(</span><span class="n">nz</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span><span class="n">nx</span><span class="p">)</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">xlims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,(</span><span class="n">nx</span><span class="p">)</span><span class="o">*</span><span class="n">voxelsize</span><span class="p">]</span>
-        <span class="n">ylims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,(</span><span class="n">ny</span><span class="p">)</span><span class="o">*</span><span class="n">voxelsize</span><span class="p">]</span>
-        <span class="n">zlims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,(</span><span class="n">nz</span><span class="p">)</span><span class="o">*</span><span class="n">voxelsize</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">voxel_mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;node&#39;</span><span class="p">:</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">xlims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,(</span><span class="n">nx</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span><span class="o">*</span><span class="n">voxelsize</span><span class="p">]</span>
+        <span class="n">ylims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,(</span><span class="n">ny</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span><span class="o">*</span><span class="n">voxelsize</span><span class="p">]</span>
+        <span class="n">zlims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,(</span><span class="n">nz</span><span class="o">+</span><span class="n">shift</span><span class="p">)</span><span class="o">*</span><span class="n">voxelsize</span><span class="p">]</span>
         <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">xlims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">xlims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">ylims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">ylims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">zlims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">zlims</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
         <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">voxelsize</span><span class="p">,</span> <span class="n">exact_h</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">multichannel</span><span class="p">:</span>
-            <span class="n">VoxelData</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">I</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">multiimg</span><span class="p">])</span>
+            <span class="n">Data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">I</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">multiimg</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">VoxelData</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+            <span class="n">Data</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">return_gradient</span><span class="p">:</span>
             <span class="n">gradx</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">gaussian_sigma</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
             <span class="n">grady</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">gaussian_sigma</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
             <span class="n">gradz</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">gaussian_sigma</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
             <span class="n">GradData</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">gradx</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">),</span><span class="n">grady</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">),</span><span class="n">gradz</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)])</span><span class="o">.</span><span class="n">T</span>
     <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">voxel_mode</span> <span class="o">==</span> <span class="s1">&#39;node&#39;</span><span class="p">:</span>
+            <span class="c1"># TODO</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Cropping not yet implemented for voxel_mode=&quot;node&quot;.&#39;</span><span class="p">)</span>
         <span class="c1"># Adjust crop values to only get whole voxels</span>
         <span class="n">crop</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">crop</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="n">voxelsize</span><span class="p">)</span><span class="o">*</span><span class="n">voxelsize</span>
         <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">crop</span><span class="p">)[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="n">voxelsize</span><span class="p">)</span><span class="o">*</span><span class="n">voxelsize</span>
@@ -3655,22 +3724,42 @@
         <span class="n">VoxelCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">VoxelCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">zscale</span>
         
     <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">threshold_direction</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">VoxelConn</span><span class="p">[</span><span class="n">VoxelData</span><span class="o">&gt;=</span><span class="n">threshold</span><span class="p">]</span>
-            <span class="n">VoxelData</span> <span class="o">=</span> <span class="n">VoxelData</span><span class="p">[</span><span class="n">VoxelData</span><span class="o">&gt;=</span><span class="n">threshold</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">return_gradient</span><span class="p">:</span> <span class="n">GradData</span> <span class="o">=</span> <span class="n">GradData</span><span class="p">[</span><span class="n">VoxelData</span><span class="o">&gt;=</span><span class="n">threshold</span><span class="p">]</span>
-            <span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">RemoveNodes</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">)</span>
-            <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">VoxelConn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">voxel_mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;node&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">threshold_direction</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">VoxelConn</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">Data</span><span class="p">[</span><span class="n">VoxelConn</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">&gt;=</span><span class="n">threshold</span><span class="p">]</span>
+                <span class="c1"># Data = Data[Data&gt;=threshold]</span>
+                <span class="c1"># if return_gradient: GradData = GradData[Data&gt;=threshold]</span>
+                <span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">,</span><span class="n">ids</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">RemoveNodes</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">)</span>
+                <span class="n">Data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span>
+                <span class="n">GradData</span> <span class="o">=</span> <span class="n">GradData</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span>
+                <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">VoxelConn</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">threshold_direction</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">VoxelConn</span><span class="p">[</span><span class="n">VoxelData</span><span class="o">&lt;=</span><span class="n">threshold</span><span class="p">]</span>
-            <span class="n">VoxelData</span> <span class="o">=</span> <span class="n">VoxelData</span><span class="p">[</span><span class="n">VoxelData</span><span class="o">&lt;=</span><span class="n">threshold</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">return_gradient</span><span class="p">:</span> <span class="n">GradData</span> <span class="o">=</span> <span class="n">GradData</span><span class="p">[</span><span class="n">VoxelData</span><span class="o">&lt;=</span><span class="n">threshold</span><span class="p">]</span>
-            <span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">RemoveNodes</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">)</span>
-            <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">VoxelConn</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">threshold_direction</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">VoxelConn</span><span class="p">[</span><span class="n">Data</span><span class="o">&lt;=</span><span class="n">threshold</span><span class="p">]</span>
+                <span class="n">Data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">[</span><span class="n">Data</span><span class="o">&lt;=</span><span class="n">threshold</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">return_gradient</span><span class="p">:</span> <span class="n">GradData</span> <span class="o">=</span> <span class="n">GradData</span><span class="p">[</span><span class="n">Data</span><span class="o">&lt;=</span><span class="n">threshold</span><span class="p">]</span>
+                <span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">RemoveNodes</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">)</span>
+                <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">VoxelConn</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;threshold_direction must be 1 or -1, where 1 indicates that values &gt;= threshold will be kept and -1 indicates that values &lt;= threshold will be kept.&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;threshold_direction must be 1 or -1, where 1 indicates that values &gt;= threshold will be kept and -1 indicates that values &lt;= threshold will be kept.&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">return_nodedata</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">threshold_direction</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">VoxelConn</span><span class="p">[</span><span class="n">Data</span><span class="o">&gt;=</span><span class="n">threshold</span><span class="p">]</span>
+                <span class="n">Data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">[</span><span class="n">Data</span><span class="o">&gt;=</span><span class="n">threshold</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">return_gradient</span><span class="p">:</span> <span class="n">GradData</span> <span class="o">=</span> <span class="n">GradData</span><span class="p">[</span><span class="n">Data</span><span class="o">&gt;=</span><span class="n">threshold</span><span class="p">]</span>
+                <span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">RemoveNodes</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">)</span>
+                <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">VoxelConn</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">threshold_direction</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">VoxelConn</span><span class="p">[</span><span class="n">Data</span><span class="o">&lt;=</span><span class="n">threshold</span><span class="p">]</span>
+                <span class="n">Data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">[</span><span class="n">Data</span><span class="o">&lt;=</span><span class="n">threshold</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">return_gradient</span><span class="p">:</span> <span class="n">GradData</span> <span class="o">=</span> <span class="n">GradData</span><span class="p">[</span><span class="n">Data</span><span class="o">&lt;=</span><span class="n">threshold</span><span class="p">]</span>
+                <span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">RemoveNodes</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">)</span>
+                <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">VoxelConn</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;threshold_direction must be 1 or -1, where 1 indicates that values &gt;= threshold will be kept and -1 indicates that values &lt;= threshold will be kept.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_nodedata</span> <span class="ow">and</span> <span class="n">voxel_mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;elem&#39;</span><span class="p">:</span>
+        <span class="n">VoxelData</span> <span class="o">=</span> <span class="n">Data</span>
         <span class="n">rows</span> <span class="o">=</span> <span class="n">VoxelConn</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
         <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">VoxelConn</span><span class="p">)),</span><span class="mi">8</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">))</span>
@@ -3689,8 +3778,8 @@
             
         <span class="k">return</span> <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">VoxelData</span><span class="p">,</span> <span class="n">NodeData</span>
     <span class="k">if</span> <span class="n">return_gradient</span><span class="p">:</span>
-        <span class="n">VoxelData</span> <span class="o">=</span> <span class="p">(</span><span class="n">VoxelData</span><span class="p">,</span><span class="n">GradData</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">VoxelData</span></div>
+        <span class="n">VoxelData</span> <span class="o">=</span> <span class="p">(</span><span class="n">Data</span><span class="p">,</span><span class="n">GradData</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">VoxelCoords</span><span class="p">,</span> <span class="n">VoxelConn</span><span class="p">,</span> <span class="n">Data</span></div>
 
         
 <div class="viewcode-block" id="surf2voxel">

@@ -3,6 +3,24 @@
 
 ## Unreleased
 
+### Feat
+
+- **contour**: add voxel_mode option to SurfaceMesh and TetMesh
+- **tree**: Add KDTree query_knn
+- **tree**: add KDtree and KNN search for octree
+- **rays**: add PintsInBox, PointsInBox2D
+- **QuadtreeNode**: set up preliminary nearest neighbor search
+
+### Fix
+
+- **utils.identify_elem**: add pyr13 and wdg15 to identify_elem
+- **utils.Face2NodeNormal**: fix nan handling
+- **contour**: bug fix in MarchingElements
+- **image**: reduce number of unnecessary voxels going to marching cubes/tets
+- **contour**: additional efficiency improvements for contouring
+- **SurfaceMesh**: fix some options for MarchingCubes
+- **MarchingCubes**: improve efficiency
+
 ## 0.3.0 (2025-12-15)
 
 ### Feat

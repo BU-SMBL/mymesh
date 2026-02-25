@@ -59,6 +59,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.register.symmetric_closest_point_MSE';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="mymesh.register.optimize" href="mymesh.register.optimize.html" />
@@ -135,6 +142,26 @@
   
 </a></div>
     
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
   </div>
   
   <div class="col-lg-9 navbar-header-items">
@@ -179,6 +206,23 @@
   </a>
 </li>
 
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
+    Verification
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -299,6 +343,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../dev.html">
     Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../verify.html">
+    Verification
   </a>
 </li>
 
@@ -444,9 +495,9 @@ i.e. closest_point_MSE(points1, points2) == closest_point_MSE(points2, points1).
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>points1</strong> (<em>array_like</em>) – Coordinates of the first point set</p></li>
 <li><p><strong>points2</strong> (<em>array_like</em>) – Coordinates of the second point set</p></li>
-<li><p><strong>tree1</strong> (<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html#scipy.spatial.KDTree" title="(in SciPy v1.16.2)"><em>scipy.spatial.KDTree</em></a><em>, </em><em>optional</em>) – Optional pre-computed KDTree structure of points1, by default None.
+<li><p><strong>tree1</strong> (<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html#scipy.spatial.KDTree" title="(in SciPy v1.17.0)"><em>scipy.spatial.KDTree</em></a><em>, </em><em>optional</em>) – Optional pre-computed KDTree structure of points1, by default None.
 (<cite>tree1 = scipy.spatial.KDTree(points1)</cite>)</p></li>
-<li><p><strong>tree2</strong> (<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html#scipy.spatial.KDTree" title="(in SciPy v1.16.2)"><em>scipy.spatial.KDTree</em></a><em>, </em><em>optional</em>) – Optional pre-computed KDTree structure of points2, by default None
+<li><p><strong>tree2</strong> (<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html#scipy.spatial.KDTree" title="(in SciPy v1.17.0)"><em>scipy.spatial.KDTree</em></a><em>, </em><em>optional</em>) – Optional pre-computed KDTree structure of points2, by default None
 (<cite>tree2 = scipy.spatial.KDTree(points2)</cite>)</p></li>
 </ul>
 </dd>

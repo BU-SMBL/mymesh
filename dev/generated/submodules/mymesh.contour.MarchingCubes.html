@@ -59,6 +59,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/submodules/mymesh.contour.MarchingCubes';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="mymesh.contour.MarchingCubesImage" href="mymesh.contour.MarchingCubesImage.html" />
@@ -135,6 +142,26 @@
   
 </a></div>
     
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
   </div>
   
   <div class="col-lg-9 navbar-header-items">
@@ -179,6 +206,23 @@
   </a>
 </li>
 
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
+    Verification
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -299,6 +343,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../dev.html">
     Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../verify.html">
+    Verification
   </a>
 </li>
 
@@ -435,7 +486,7 @@
 <h1>mymesh.contour.MarchingCubes<a class="headerlink" href="#mymesh-contour-marchingcubes" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.contour.MarchingCubes">
-<span class="sig-prename descclassname"><span class="pre">mymesh.contour.</span></span><span class="sig-name descname"><span class="pre">MarchingCubes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">VoxelNodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VoxelNodeConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'33'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_anchors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/contour.html#MarchingCubes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.contour.MarchingCubes" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mymesh.contour.</span></span><span class="sig-name descname"><span class="pre">MarchingCubes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">VoxelNodeCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VoxelNodeConn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NodeValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'33'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_anchors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/contour.html#MarchingCubes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.contour.MarchingCubes" title="Link to this definition">#</a></dt>
 <dd><p>Marching cubes algorithm <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id49" title="William E. Lorensen and Harvey E. Cline. Marching cubes: a high resolution 3d surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21:163-169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span> for extracting an isosurface from a hexahedral mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -453,6 +504,10 @@ from primitives.Grid) of hexahedra.</p></li>
 <li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Mesh generation method, either ‘original’ for the original marching cubes
 algorithm or ‘33’ for the marching cubes 33 algorithm <span id="id2">[<a class="reference internal" href="../../guide/ref.html#id56" title="Ev Chernyaev. Marching cubes 33: construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1-8, 1995.">Che95</a>]</span>.</p></li>
 <li><p><strong>flip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Flip the interior/exterior of the mesh, by default False. By default, values less than the threshold are assumed to be the “inside” of the mesh. If the inside is denoted by values greater than the threshold, set flip=True.</p></li>
+<li><p><strong>cleanup_tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Tolerance value used to classify whether two nodes are sufficiently close
+to be considered a single node (see <a class="reference internal" href="mymesh.utils.DeleteDuplicateNodes.html#mymesh.utils.DeleteDuplicateNodes" title="mymesh.utils.DeleteDuplicateNodes"><code class="xref py py-func docutils literal notranslate"><span class="pre">mymesh.utils.DeleteDuplicateNodes()</span></code></a>),
+by default 1e-10.</p></li>
+<li><p><strong>cleanup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, duplicate nodes will be merged, by default True.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

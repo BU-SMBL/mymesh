@@ -39,5 +39,7 @@ Methods
                 OctreeNode.makeChildrenBoxes
                 OctreeNode.makeChildrenPts
                 OctreeNode.makeChildrenTris
+                OctreeNode.node_distance
                 OctreeNode.prune
+                OctreeNode.query_knn
     

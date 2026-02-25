@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.node\_distance
+=======================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.node_distance

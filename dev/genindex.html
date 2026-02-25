@@ -58,6 +58,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -132,6 +139,26 @@
   
 </a></div>
     
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
   </div>
   
   <div class="col-lg-9 navbar-header-items">
@@ -176,6 +203,23 @@
   </a>
 </li>
 
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="verify.html">
+    Verification
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -294,6 +338,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="dev.html">
     Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="verify.html">
+    Verification
   </a>
 </li>
 
@@ -1068,10 +1119,16 @@
 </li>
       <li><a href="generated/mymesh.mesh.mesh.NNode.html#mymesh.mesh.mesh.NNode">NNode (mymesh.mesh.mesh property)</a>
 </li>
-      <li><a href="generated/mymesh.mesh.html#mymesh.mesh.NodeConn">NodeConn (mymesh.mesh attribute)</a>
+      <li><a href="generated/submodules/mymesh.tree.OctreeNode.node_distance.html#mymesh.tree.OctreeNode.node_distance">node_distance() (mymesh.tree.OctreeNode method)</a>
+
+      <ul>
+        <li><a href="generated/submodules/mymesh.tree.QuadtreeNode.node_distance.html#mymesh.tree.QuadtreeNode.node_distance">(mymesh.tree.QuadtreeNode method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/mymesh.mesh.html#mymesh.mesh.NodeConn">NodeConn (mymesh.mesh attribute)</a>
+</li>
       <li><a href="generated/mymesh.mesh.html#mymesh.mesh.NodeCoords">NodeCoords (mymesh.mesh attribute)</a>
 </li>
       <li><a href="generated/mymesh.mesh.html#mymesh.mesh.NodeData">NodeData (mymesh.mesh attribute)</a>
@@ -1218,10 +1275,10 @@
 </li>
       <li><a href="generated/submodules/mymesh.converter.quad82tri6.html#mymesh.converter.quad82tri6">quad82tri6() (in module mymesh.converter)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/submodules/mymesh.quality.quad_skewness.html#mymesh.quality.quad_skewness">quad_skewness() (in module mymesh.quality)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/submodules/mymesh.curvature.QuadFit.html#mymesh.curvature.QuadFit">QuadFit() (in module mymesh.curvature)</a>
 </li>
       <li><a href="generated/submodules/mymesh.converter.quadratic2linear.html#mymesh.converter.quadratic2linear">quadratic2linear() (in module mymesh.converter)</a>
@@ -1232,6 +1289,12 @@
 </li>
       <li><a href="generated/submodules/mymesh.tree.QuadtreeNode.html#mymesh.tree.QuadtreeNode">QuadtreeNode (class in mymesh.tree)</a>
 </li>
+      <li><a href="generated/submodules/mymesh.tree.OctreeNode.query_knn.html#mymesh.tree.OctreeNode.query_knn">query_knn() (mymesh.tree.OctreeNode method)</a>
+
+      <ul>
+        <li><a href="generated/submodules/mymesh.tree.QuadtreeNode.query_knn.html#mymesh.tree.QuadtreeNode.query_knn">(mymesh.tree.QuadtreeNode method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 

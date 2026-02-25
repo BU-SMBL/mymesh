@@ -60,6 +60,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/MeshAnalysis/demo_curvature';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Mesh Generation Examples" href="../MeshGeneration/index.html" />
@@ -136,6 +143,26 @@
   
 </a></div>
     
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
   </div>
   
   <div class="col-lg-9 navbar-header-items">
@@ -180,6 +207,23 @@
   </a>
 </li>
 
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
+    Verification
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -300,6 +344,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../dev.html">
     Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../verify.html">
+    Verification
   </a>
 </li>
 
@@ -479,12 +530,8 @@ are theoretically both equal to the inverse of the radius of the sphere.</p>
 <li><img src="../../_images/sphx_glr_demo_curvature_003.png" srcset="../../_images/sphx_glr_demo_curvature_003.png" alt="Sphere - Analytical" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_demo_curvature_004.png" srcset="../../_images/sphx_glr_demo_curvature_004.png" alt="Smooth Sphere - Analytical" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/mymesh/mymesh/src/mymesh/utils.py:595: RuntimeWarning: invalid value encountered in arccos
-  alpha = np.arccos(cosAlpha, out=np.nan*np.ones_like(cosAlpha), where=(cosAlpha&gt;=-1)|(cosAlpha&lt;=1))*Masknan
-/home/runner/work/mymesh/mymesh/src/mymesh/curvature.py:501: NumbaPerformanceWarning: np.dot() is faster on contiguous arrays, called on (Array(float64, 2, &#39;F&#39;, False, aligned=True), Array(float64, 2, &#39;A&#39;, False, aligned=True))
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/mymesh/mymesh/src/mymesh/curvature.py:501: NumbaPerformanceWarning: np.dot() is faster on contiguous arrays, called on (Array(float64, 2, &#39;F&#39;, False, aligned=True), Array(float64, 2, &#39;A&#39;, False, aligned=True))
   MaxPrincipalDirection = np.dot(np.linalg.inv(R[:3,:3]), np.append(x[:,np.argmax(v)],0)[:,None])[:,0]
-/home/runner/work/mymesh/mymesh/src/mymesh/utils.py:595: RuntimeWarning: invalid value encountered in arccos
-  alpha = np.arccos(cosAlpha, out=np.nan*np.ones_like(cosAlpha), where=(cosAlpha&gt;=-1)|(cosAlpha&lt;=1))*Masknan
 RFBOutputContext()
 RFBOutputContext()
 RFBOutputContext()
@@ -570,7 +617,7 @@ Identifying mesh nodes...Done
         RFBOutputContext()
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 25.896 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 21.918 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshanalysis-demo-curvature-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/1a68b0cd70492d12df39b16d43bc050a/demo_curvature.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">demo_curvature.ipynb</span></code></a></p>
