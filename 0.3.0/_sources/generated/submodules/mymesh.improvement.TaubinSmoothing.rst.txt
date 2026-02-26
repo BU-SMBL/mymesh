@@ -1,4 +1,4 @@
-﻿mymesh.improvement.TaubinSmoothing
+mymesh.improvement.TaubinSmoothing
 ==================================
 
 .. currentmodule:: mymesh.improvement

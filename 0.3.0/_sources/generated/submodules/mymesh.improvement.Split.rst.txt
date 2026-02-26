@@ -1,4 +1,4 @@
-﻿mymesh.improvement.Split
+mymesh.improvement.Split
 ========================
 
 .. currentmodule:: mymesh.improvement

@@ -1,4 +1,4 @@
-﻿mymesh.converter.quad82tri6
+mymesh.converter.quad82tri6
 ===========================
 
 .. currentmodule:: mymesh.converter

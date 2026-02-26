@@ -108,10 +108,18 @@ including :func:`~mymesh.implicit.gyroid`, :func:`~mymesh.implicit.primitive`
  .. code-block:: none
 
     RFBOutputContext()
-    RFBOutputContext()
-    RFBOutputContext()
-    RFBOutputContext()
 
+    Identifying mesh nodes...Done
+            RFBOutputContext()
+
+    Identifying mesh nodes...Done
+            RFBOutputContext()
+
+    Identifying mesh nodes...Done
+            RFBOutputContext()
+
+    Identifying mesh nodes...Done
+        
 
 
 
@@ -129,7 +137,7 @@ including :func:`~mymesh.implicit.gyroid`, :func:`~mymesh.implicit.primitive`
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 12.941 seconds)
+   **Total running time of the script:** (0 minutes 8.596 seconds)
 
 
 .. _sphx_glr_download_examples_MeshGeneration_demo_mixed-top.py:

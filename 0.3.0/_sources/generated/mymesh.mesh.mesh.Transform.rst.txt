@@ -1,4 +1,4 @@
-﻿mymesh.mesh.mesh.Transform
+mymesh.mesh.mesh.Transform
 ==========================
 
 .. currentmodule:: mymesh.mesh
