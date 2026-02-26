@@ -664,113 +664,10 @@ def Face2NodeNormal(NodeCoords,NodeConn,ElemConn,ElemNormals,method='Angle'):
 
     else:
         raise ValueError(f'Invalid method: {method:s}')
-        # NodeNormals = [[] for i in range(len(NodeCoords))]      # Normal vectors for each vertex
-        # NodeSet = {n for elem in NodeConn for n in elem}
-        # for i in range(len(NodeCoords)):
-        #     if i not in NodeSet:
-        #         NodeNormals[i] = [np.nan,np.nan,np.nan]
-        #         continue
-        #     angles = [0 for j in range(len(ElemConn[i]))]
-        #     elemnormals = [np.array(ElemNormals[elem]) for elem in ElemConn[i]]
-
-        #     if method == 'MostVisible_Loop':
-                
-        #         # This is kept for readability; 'MostVisible' is a vectorized equivalent that performs significantly faster
-                
-        #         # Note: this code uses dot(Ni,Nj) as a surrogate for radius; since Ni,Nj are both unit vectors
-        #         # cos(theta) = dot(Ni,Nj) -> theta = arccos(dot(Ni,Nj)). Since arccos is a monotonically 
-        #         # decreasing function, if dot(Ni,Nj) < dot(Ni,Nk), then rij > rik
-        #         eps = -1e-8
-        #         scalmin = -1
-        #         C = [np.nan,np.nan,np.nan]
-        #         for ii in range(len(elemnormals)-1):
-        #             # Check the 2 point circles
-        #             Ni = np.array(elemnormals[ii])
-        #             for j in range(ii+1,len(elemnormals)):
-        #                 Nj = np.array(elemnormals[j])
-        #                 Nb = Ni+Nj
-        #                 Nb = Nb/np.linalg.norm(Nb)
-        #                 scal = np.dot(Nb,Ni)
-        #                 if scal < scalmin:      
-        #                     pass
-        #                 elif any((np.dot(Nl,Nb) - scal) < eps for Nl in elemnormals):
-        #                     pass
-        #                 else:
-        #                     C = Nb.tolist()
-        #                     scalmin = scal
-        #         for ii in range(len(elemnormals)-2): 
-        #             # Check the 3 point circles
-        #             Ni = elemnormals[ii]
-        #             for j in range(ii+1,len(elemnormals)-1):
-        #                 Nj = elemnormals[j]
-        #                 for k in range(j+1,len(elemnormals)):
-        #                     Nk = elemnormals[k]
-
-        #                     denom = (2*np.linalg.norm(np.cross(Ni-Nk,Nj-Nk))**2) 
-        #                     if denom == 0:
-        #                         continue
-        #                     Nc = np.cross(np.linalg.norm(Ni-Nk)**2 * (Nj-Nk) - np.linalg.norm(Nj-Nk)**2 * (Ni-Nk), np.cross(Ni-Nk,Nj-Nk))/denom + Nk
-        #                     nNc = np.linalg.norm(Nc)
-        #                     if nNc == 0:
-        #                         continue
-        #                     Nc = Nc/nNc
-                            
-
-        #                     scal = np.dot(Nc, Ni)
-        #                     if scal < 0:
-        #                         Nc = [-1*n for n in Nc]
-        #                         scal = -scal
-        #                     if scal < scalmin:
-        #                         pass
-        #                     elif any((np.dot(Nl,Nc) - scal) < eps for Nl in elemnormals):
-        #                         pass   
-        #                     else:
-        #                         C = Nc
-        #                         scalmin = scal
-        #         NodeNormals[i] = C    
-        #         if np.any(np.isnan(C)):
-        #             print(i)
-                
-        #     elif method == 'MostVisible_Iter':
-                
-        #         conv = 1e-3
-        #         beta = 0.5
-                
-        #         # Initial weights
-        #         ws = [1/len(elemnormals) for i in range(len(elemnormals))]
-        #         # Compute initial guess normal
-        #         Sp = sum([w*n for w,n in zip(ws,elemnormals)])
-        #         Np = Sp/np.linalg.norm(Sp)
-                
-        #         k = 0
-        #         thinking = True
-        #         while thinking:
-        #             k+=1
-        #             alphas = [np.arccos(np.clip(np.dot(Np,Ni),-1,1)) for Ni in elemnormals]
-        #             Salpha = sum(alphas)
-        #             if Salpha == 0:
-        #                 thinking = False
-        #             else:
-        #                 ws = [w*alpha/Salpha for w,alpha in zip(ws,alphas)]
-        #                 Sw = sum(ws)
-        #                 ws = [w/Sw for w in ws]
-        #                 Spnew = sum([w*n for w,n in zip(ws,elemnormals)])
-        #                 if np.linalg.norm(Spnew) == 0:
-        #                     print('merp3')
-        #                 Npnew = Spnew/np.linalg.norm(Spnew)
-                        
-        #                 # Relax
-        #                 Nprel = beta*Npnew + (1-beta)*Np
-        #                 if np.linalg.norm(Np-Nprel) < conv or k > 100:
-        #                     thinking = False
-        #                 Np = Nprel
-        #         if any(np.isnan(Np)) and len(elemnormals)>0:
-        #             merp = 2
-        #         NodeNormals[i] = Np.tolist()
     return NodeNormals
 
-@try_njit
-def BaryTri(Nodes, Pt):
+@try_njit(inline='always', cache=True)
+def BaryTri(Nodes, Pt, d=None):
     """
     Returns the bary centric coordinates of a point (Pt) relative to 
     a triangle (Nodes)
@@ -781,6 +678,10 @@ def BaryTri(Nodes, Pt):
         List of coordinates of the triangle vertices.
     Pt : np.ndarray
         Coordinates of the point.
+    d : int, NoneType
+        Number of dimensions (2 or 3). For points and triangles in a plane,
+        barycentric coordinates can be calculated more efficiency. 
+        In performance-critical applications, always specify either 2 or 3.
 
     Returns
     -------
@@ -792,26 +693,55 @@ def BaryTri(Nodes, Pt):
         Third barycentric coordinate.
 
     """
-    Nodes = np.asarray(Nodes, dtype=np.float64)
-    Pt = np.asarray(Pt, dtype=np.float64)
+    if d is None:
+        d = len(Pt)
+    if d == 2:
+        # Cross product/area method
+        Ax, Ay = Nodes[0,0], Nodes[0,1]
+        Bx, By = Nodes[1,0], Nodes[1,1]
+        Cx, Cy = Nodes[2,0], Nodes[2,1]
 
-    A = Nodes[0]
-    B = Nodes[1]
-    C = Nodes[2]
-    BA = np.subtract(B,A)
-    # CB = np.subtract(C,B)
-    # AC = np.subtract(A,C)
-    CA = np.subtract(C,A)    
-    BABA = np.dot(BA, BA)
-    BACA = np.dot(BA, CA)
-    CACA = np.dot(CA, CA)
-    PABA = np.dot(np.subtract(Pt,A), BA)
-    PACA = np.dot(np.subtract(Pt,A), CA)
-    d = (BABA * CACA - BACA * BACA)
-    denom = 1/d
-    beta = (CACA * PABA - BACA * PACA) * denom
-    gamma = (BABA * PACA - BACA * PABA) * denom
-    alpha = 1 - gamma - beta
+        # 2*Area of ABC
+        BAx, BAy = Bx-Ax, By-Ay
+        CAx, CAy = Cx-Ax, Cy-Ay
+        ABC = BAx*CAy - BAy*CAx
+
+        # 2*Area of APC
+        PtAx, PtAy = Pt[0]-Ax, Pt[1]-Ay
+        APC = PtAx*CAy - CAx*PtAy
+
+        # 2*Area of ABP
+        ABP = BAx*PtAy - BAy*PtAx
+
+        # Barycentric coordinates = area ratios
+        denom = 1/ABC
+        beta = APC * denom
+        gamma = ABP * denom
+        alpha = 1 - (gamma + beta)
+
+    elif d == 3:
+        # Dot product/projection method
+        Ax, Ay, Az = Nodes[0,0], Nodes[0,1], Nodes[0,2]
+        Bx, By, Bz = Nodes[1,0], Nodes[1,1], Nodes[1,2]
+        Cx, Cy, Cz = Nodes[2,0], Nodes[2,1], Nodes[2,2]
+
+        # Edges AB, CA, Pt-A
+        BAx, BAy, BAz = Bx - Ax, By - Ay, Bz - Az
+        CAx, CAy, CAz = Cx - Ax, Cy - Ay, Cz - Az
+        PtAx, PtAy, PtAz = Pt[0] - Ax, Pt[1] - Ay, Pt[2] - Az
+
+        # dot products
+        BABA = BAx*BAx + BAy*BAy + BAz*BAz
+        BACA = BAx*CAx + BAy*CAy + BAz*CAz
+        CACA = CAx*CAx + CAy*CAy + CAz*CAz
+        PABA = PtAx*BAx + PtAy*BAy + PtAz*BAz
+        PACA = PtAx*CAx + PtAy*CAy+ PtAz*CAz
+
+        det = (BABA * CACA - BACA * BACA)
+        denom = 1/det
+        beta = (CACA * PABA - BACA * PACA) * denom
+        gamma = (BABA * PACA - BACA * PABA) * denom
+        alpha = 1 - (gamma + beta)
     
     return alpha, beta, gamma
 
@@ -862,7 +792,7 @@ def BaryTris(Tris, Pt):
     
     return alpha, beta, gamma
 
-@try_njit
+@try_njit(cache=True)
 def BaryTet(Nodes, Pt):
     """
     Returns the bary centric coordinates of a point (Pt) relative to 
