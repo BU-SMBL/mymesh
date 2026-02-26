@@ -31,8 +31,7 @@ Local mesh topology
 
     Contract
     Split
-    TetFlip
-    TetImprove
+    Flip
 
 
 """
@@ -1644,29 +1643,54 @@ def Contract(M, h, FixedNodes=set(), verbose=True, cleanup=True, labels=None, Fe
                 raise ValueError('If provided as a string, labels must correspond to an entry in M.ElemData')
         else:
             label_str = 'labels'
+            M.ElemData[label_str] = labels
         assert len(labels) == M.NElem, 'labels must correspond to the number of elements.'
-        if 'mesh' in dir(mesh):
-            MultiSurface = mesh.mesh(verbose=False)
-        else:
-            MultiSurface = mesh(verbose=False)
-        ulabels = np.unique(labels)
-        label_nodes = np.zeros((len(ulabels),M.NNode),dtype=int) # For each label, boolean indicator of whether each node is touching an element with that label
-        mesh_nodes = np.arange(M.NNode)
-        for i,label in enumerate(ulabels):
+        if M.Type == 'vol':
             if 'mesh' in dir(mesh):
-                m = mesh.mesh(M.NodeCoords, M.NodeConn[labels == label], verbose=False)
+                MultiSurface = mesh.mesh(verbose=False)
             else:
-                m = mesh(M.NodeCoords, M.NodeConn[labels == label], verbose=False)
-            
-            MultiSurface.addElems(m.SurfConn)
-            label_nodes[i,np.unique(m.NodeConn)] = 1
-        MultiSurface.NodeCoords = M.NodeCoords    
-        MultiSurface.Type = 'surf'
-        MultiSurface.NodeConn = MultiSurface.Faces  # This prevents doubling of surface elements at interfaces
-        SurfConn = MultiSurface.NodeConn
-        SurfEdges = np.sort(MultiSurface.Edges)
-        JunctionEdges = MultiSurface.Edges[np.array([len(conn) > 2 for conn in MultiSurface.EdgeElemConn])]
-        JunctionNodes = np.unique(JunctionEdges)
+                MultiSurface = mesh(verbose=False)
+            ulabels = np.unique(labels)
+            label_nodes = np.zeros((len(ulabels),M.NNode),dtype=int) # For each label, boolean indicator of whether each node is touching an element with that label
+            mesh_nodes = np.arange(M.NNode)
+            for i,label in enumerate(ulabels):
+                if 'mesh' in dir(mesh):
+                    m = mesh.mesh(M.NodeCoords, np.asarray(M.NodeConn)[labels == label], verbose=False)
+                else:
+                    m = mesh(M.NodeCoords, np.asarray(M.NodeConn)[labels == label], verbose=False)
+                
+                MultiSurface.addElems(m.SurfConn)
+                label_nodes[i,np.unique(m.NodeConn)] = 1
+            MultiSurface.NodeCoords = M.NodeCoords    
+            MultiSurface.Type = 'surf'
+            MultiSurface.NodeConn = MultiSurface.Faces  # This prevents doubling of surface elements at interfaces
+            SurfConn = MultiSurface.NodeConn
+            SurfEdges = np.sort(MultiSurface.Edges)
+            JunctionEdges = MultiSurface.Edges[np.array([len(conn) > 2 for conn in MultiSurface.EdgeElemConn])]
+            JunctionNodes = np.unique(JunctionEdges)
+        elif M.Type == 'surf':
+            if 'mesh' in dir(mesh):
+                MultiBoundary = mesh.mesh(verbose=False)
+            else:
+                MultiBoundary = mesh(verbose=False)
+            ulabels = np.unique(labels)
+            label_nodes = np.zeros((len(ulabels),M.NNode),dtype=int) # For each label, boolean indicator of whether each node is touching an element with that label
+            mesh_nodes = np.arange(M.NNode)
+            for i,label in enumerate(ulabels):
+                if 'mesh' in dir(mesh):
+                    m = mesh.mesh(M.NodeCoords, np.asarray(M.NodeConn)[labels == label], verbose=False)
+                else:
+                    m = mesh(M.NodeCoords, M.NodeConn[labels == label], verbose=False)
+                
+                MultiBoundary.addElems(m.BoundaryConn)
+                label_nodes[i,np.unique(m.NodeConn)] = 1
+            MultiBoundary.NodeCoords = M.NodeCoords    
+            MultiBoundary.Type = 'line'
+            MultiBoundary.NodeConn = MultiBoundary.Edges  # This prevents doubling of surface elements at interfaces
+            SurfConn = M.NodeConn
+            SurfEdges = np.sort(M.Edges)
+            JunctionEdges = MultiBoundary.NodeConn
+            JunctionNodes = np.unique(JunctionEdges)
 
     if type(sizing) is str and sizing == 'auto':
         sizing = 2*h
@@ -2084,6 +2108,7 @@ def Split(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
                 raise ValueError('If provided as a string, labels must correspond to an entry in M.ElemData')
         else:
             label_str = 'labels'
+            M.ElemData[label_str] = labels.astype(np.int64)
         assert len(labels) == M.NElem, 'labels must correspond to the number of elements.'
     else:
         labels = np.empty(0, np.int64)
@@ -2166,7 +2191,7 @@ def Split(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
 
     NewCoords = D.NodeCoords
     NewConn = D.NodeConn
-    new_labels = D.ElemLabels
+    new_labels = D.ElemLabels[:D.NElem]
     if 'mesh' in dir(mesh):
         Mnew = mesh.mesh(NewCoords, NewConn, verbose=M.verbose, Type=M.Type)
     else:
@@ -2176,7 +2201,7 @@ def Split(M, h, verbose=True, labels=None, sizing=None, QualitySizing=False):
 
     return Mnew
 
-@try_njit(cache=False)
+@try_njit(cache=True)
 def _do_split(D, edge, L, emin, emax):
 
     node1 = edge[0]
@@ -2273,27 +2298,17 @@ def _do_split(D, edge, L, emin, emax):
         NewElems = np.array(NewTris, dtype=np.int64)
     else:
         NewElems = np.array(NewTets, dtype=np.int64)
-    # Adding node manually instead of using D.addNodes so that emax can be tracked with it
-    NewLength = D.NNode + 1
-    if len(D._NodeCoords) < NewLength:
-        # Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.
-        # If the new addition is more than double the current length, the array will be extended 
-        # to exactly fit the new nodes
-        newsize = np.maximum(NewLength,len(D._NodeCoords)*2)
-        D._NodeCoords = np.resize(D._NodeCoords, (newsize,3))
-        emax = np.resize(emax, newsize)
-        emin = np.resize(emin, newsize)
-        # update the ElemConn structure as well
-        D.ElemConn_head = np.resize(D.ElemConn_head, newsize)
-        D.ElemConn_tail = np.resize(D.ElemConn_tail, newsize)
-    
-    D.ElemConn_head[D.NNode] = -1
-    D.ElemConn_tail[D.NNode] = -1
-    D._NodeCoords[D.NNode] = newnode
-    emax[D.NNode] = new_emax
-    emin[D.NNode] = new_emin
 
-    D.NNode = NewLength
+    old_length = len(D.raw_NodeCoords)
+    D.addNodes(newnode[None,:])
+    new_length = len(D.raw_NodeCoords)
+    if new_length > old_length:
+        # doubling
+        emax = np.resize(emax, new_length)
+        emin = np.resize(emin, new_length)
+    emax[D.NNode-1] = new_emax
+    emin[D.NNode-1] = new_emin
+
     if elem_type =='tet':
         # 3D Element inversion check
         for new_elems in NewElems:
@@ -2311,6 +2326,8 @@ def _do_split(D, edge, L, emin, emax):
                 D.addElem(new_elem, D.ElemLabels[shared_elems[i]])
         else:
             for new_elem in new_elems:
+                if len(np.unique(new_elem)) < 3:
+                    merp =2 
                 D.addElem(new_elem)
     for e in shared_elems:
         D.removeElem(e)
@@ -2322,6 +2339,81 @@ def _do_split(D, edge, L, emin, emax):
     if newedge2_L > (emax[newedge2[0]] + emax[newedge2[1]])/2:
         to_add.append((-newedge2_L, newedge2))
     return D, emin, emax, to_add
+
+def Flip(M, strategy='valence', verbose=True):
+    """
+    Edge/Face flipping of triangular and tetrahedral mesh quality improvement.
+
+    Parameters
+    ----------
+    M : mymesh.mesh
+        Tetrahedral or triangular mesh
+    strategy : str, optional
+        Flipping strategy, by default 'valence'
+    verbose : bool, optional
+        If true, will display progress, by default True
+
+    Returns
+    -------
+    Mnew : mymesh.mesh
+        Updated mesh
+    """    
+
+    elemtypes = M.ElemType
+    if len(elemtypes) > 1:
+        return ValueError('Mesh must be purely triangular or tetrahedral.')
+    if elemtypes[0] == 'tri':
+        mode = 'tri'
+    elif elemtypes[0] == 'tet':
+        mode = 'tet'
+    else:
+        return ValueError('Mesh must be purely triangular or tetrahedral.')
+    
+    Edges = np.sort(M.Edges,axis=1).astype(np.int64)
+    EdgeTuple = list(map(tuple,Edges))
+    EdgeSet = set(EdgeTuple)
+
+    D = M.mesh2dmesh()#(ElemLabels=labels)
+
+    if verbose and 'tqdm' in sys.modules:
+        tqdm_loaded = True
+        progress = tqdm.tqdm(total=len(EdgeSet))
+    else:
+        tqdm_loaded = False
+    if verbose: print(f'Flip:', end='')
+
+
+    while len(EdgeSet) > 0:
+
+        if verbose and tqdm_loaded:
+            progress.update(1)
+            L1 = len(EdgeSet)
+
+        edge = EdgeSet.pop()
+        if mode == 'tri':
+            D, to_add = _tri_flip(D, edge, strategy=strategy)
+            EdgeSet.update(to_add)
+        else:
+            D, to_add = _tet_flip32(D, edge, strategy=strategy)
+            EdgeSet.update(to_add)
+
+        if verbose and tqdm_loaded:
+            L2 = len(EdgeSet)
+            progress.total += max(0, L2-L1)
+    
+
+    NewCoords = D.NodeCoords
+    NewConn = D.NodeConn
+    # new_labels = D.ElemLabels
+
+    if 'mesh' in dir(mesh):
+        Mnew = mesh.mesh(NewCoords, NewConn, verbose=M.verbose, Type=M.Type)
+    else:
+        Mnew = mesh(NewCoords, NewConn, verbose=M.verbose, Type=M.Type)
+    # if len(new_labels) > 0:
+    #     Mnew.ElemData[label_str] = new_labels
+
+    return Mnew
 
 def TetFlip(M, iterate='converge', QualityMetric='Skewness', target='min', flips=['4-4','3-2','2-3'], verbose=False):
 
@@ -3134,81 +3226,6 @@ def _Tet44Flip(elemkey, NodeCoords, ElemTable, FaceTable, EdgeTable, qualfunc, t
             break
 
     return  success
-
-def Flip(M, strategy='valence', verbose=True):
-    """
-    Edge/Face flipping of triangular and tetrahedral mesh quality improvement.
-
-    Parameters
-    ----------
-    M : mymesh.mesh
-        Tetrahedral or triangular mesh
-    strategy : str, optional
-        Flipping strategy, by default 'valence'
-    verbose : bool, optional
-        If true, will display progress, by default True
-
-    Returns
-    -------
-    Mnew : mymesh.mesh
-        Updated mesh
-    """    
-
-    elemtypes = M.ElemType
-    if len(elemtypes) > 1:
-        return ValueError('Mesh must be purely triangular or tetrahedral.')
-    if elemtypes[0] == 'tri':
-        mode = 'tri'
-    elif elemtypes[0] == 'tet':
-        mode = 'tet'
-    else:
-        return ValueError('Mesh must be purely triangular or tetrahedral.')
-    
-    Edges = np.sort(M.Edges,axis=1).astype(np.int64)
-    EdgeTuple = list(map(tuple,Edges))
-    EdgeSet = set(EdgeTuple)
-
-    D = M.mesh2dmesh()#(ElemLabels=labels)
-
-    if verbose and 'tqdm' in sys.modules:
-        tqdm_loaded = True
-        progress = tqdm.tqdm(total=len(EdgeSet))
-    else:
-        tqdm_loaded = False
-    if verbose: print(f'Flip:', end='')
-
-
-    while len(EdgeSet) > 0:
-
-        if verbose and tqdm_loaded:
-            progress.update(1)
-            L1 = len(EdgeSet)
-
-        edge = EdgeSet.pop()
-        if mode == 'tri':
-            D, to_add = _tri_flip(D, edge, strategy=strategy)
-            EdgeSet.update(to_add)
-        else:
-            D, to_add = _tet_flip32(D, edge, strategy=strategy)
-            EdgeSet.update(to_add)
-
-        if verbose and tqdm_loaded:
-            L2 = len(EdgeSet)
-            progress.total += max(0, L2-L1)
-    
-
-    NewCoords = D.NodeCoords
-    NewConn = D.NodeConn
-    # new_labels = D.ElemLabels
-
-    if 'mesh' in dir(mesh):
-        Mnew = mesh.mesh(NewCoords, NewConn, verbose=M.verbose, Type=M.Type)
-    else:
-        Mnew = mesh(NewCoords, NewConn, verbose=M.verbose, Type=M.Type)
-    # if len(new_labels) > 0:
-    #     Mnew.ElemData[label_str] = new_labels
-
-    return Mnew
 
 @try_njit
 def _tri_flip(D, edge, strategy='valence', eps=1e-8):
