@@ -293,10 +293,11 @@ def Triangle(NodeCoords,Constraints=None, steiner=0):
     # Uses Triangle by Jonathan Shewchuk
     if Constraints is None or len(Constraints)==0:
         In = dict(vertices=NodeCoords)
+        Out = triangle.triangulate(In,f'qS{steiner:d}')
     else:
         In = dict(vertices=NodeCoords,segments=Constraints)
-    try:
         Out = triangle.triangulate(In,f'pqS{steiner:d}')
+    try:
         NodeConn = Out['triangles']
         # NodeCoords = Out['vertices']
         if len(Out['vertices']) != len(NodeCoords):
@@ -309,6 +310,7 @@ def Triangle(NodeCoords,Constraints=None, steiner=0):
             if np.any(NodeConn >= len(NodeCoords)):
                 NodeCoords = Out['vertices']
     except:
+        warnings.warn('Error using Triangle, falling back to SciPy')
         NodeConn = SciPy(NodeCoords)
 
     return NodeCoords, NodeConn
@@ -491,7 +493,7 @@ def TriangleSplitting(NodeCoords, Hull=None):
 
     return NodeConn
         
-def BowyerWatson2d(NodeCoords):
+def BowyerWatson2d(NodeCoords, nsample=3):
     """
     Bowyer-Watson algorithm for 2D Delaunay triangulation
 
@@ -508,12 +510,8 @@ def BowyerWatson2d(NodeCoords):
     NodeConn : np.ndarray
         mx3 array of node connectivities for the Delaunay triangulation
     """
-    if check_numba():
-        import numba
-        from numba.typed import Dict
-    else:
-        warnings.warn('Using numba is strongly recommended for efficiency of BowyerWatson2d. Activate with `mymesh.use_numba(True)`')
-        Dict = dict
+    if not check_numba():
+        warnings.warn('Using numba is strongly recommended for efficiency of BowyerWatson2d.')
 
     NodeCoords = np.asarray(NodeCoords)
     assert NodeCoords.shape[0] >= 3, 'At least three points are required.'
@@ -526,14 +524,15 @@ def BowyerWatson2d(NodeCoords):
     nPts = len(NodeCoords)
 
     # Random insertion order for points
-    indices = list(range(nPts))
-    rng = np.random.default_rng()
-    rng.shuffle(indices)
+    # indices = list(range(nPts))
+    # rng = np.random.default_rng()
+    # rng.shuffle(indices)
+    indices = _bin_sort_2d(NodeCoords)
 
     # Get super triangle - triangle with incircle that bounds the point set
     center = np.mean(TempCoords, axis=0)
     r = np.max(np.sqrt((TempCoords[:,0]-center[0])**2 + (TempCoords[:,1]-center[1])**2))
-    R = r + 1*r/10
+    R = 10*r
 
     super_triangle_points = np.array([
                                     [center[0], center[1]-2*R],
@@ -543,41 +542,20 @@ def BowyerWatson2d(NodeCoords):
     TempCoords = np.hstack([np.vstack([TempCoords, super_triangle_points]), np.repeat(0,nPts+3)[:,None]])
     super_tri = (nPts, nPts+1, nPts+2)
 
-    ElemTable = Dict()
-    # Elem table links elements to tuples of (oriented) edges
-    # e.g. ElemTable[(0,1,2)] = ((0,1),(1,2),(2,0))
-    ElemTable[super_tri] = ((nPts, nPts+1), (nPts+1, nPts+2), (nPts+2, nPts)) 
+    
+    if 'mesh' in dir(mesh):
+        m = mesh.mesh(TempCoords, [super_tri], Type='surf', verbose=False)
+    else:
+        m = mesh(TempCoords, [super_tri], Type='surf', verbose=False)
+    
+    d = m.mesh2dmesh()
 
-    EdgeTable = Dict()
-    # Edge table links oriented (half) edges to their one connected element
-    # e.g. EdgeTable[(0,1)] = (0,1,2)
-    EdgeTable[(nPts, nPts+1)] = super_tri
-    EdgeTable[(nPts+1, nPts+2)] = super_tri
-    EdgeTable[(nPts+2, nPts)] = super_tri
+    d = _bowyer_watson_loop_2d(d, indices, nsample)
 
-    for i in indices:
-        newPt = TempCoords[i]
-
-        tri = _walk_2d(TempCoords, ElemTable, EdgeTable, newPt, nsample=1)
-        # Breadth first search of adjacent triangles to find all invalid triangles
-        # Initiate a queue of the edges
-        bad_triangles, cavity_edges = _build_cavity_2d(TempCoords, ElemTable, EdgeTable, tri, newPt)
-        # Remove triangles and edges
-        for t in bad_triangles:
-            for e in ElemTable[t]:
-                del EdgeTable[e]
-            del ElemTable[t]
-
-        # Create new triangles and edges
-        for e in cavity_edges:
-            t = (e[0], e[1], i)
-            edges = (e, (e[1], i), (i, e[0]))
-            ElemTable[t] = edges
-            for edge in edges:
-                EdgeTable[edge] = t
-
-    NodeConn = np.array(list(ElemTable.keys()))
-    Super = np.any(NodeConn == nPts, axis=1) | np.any(NodeConn == (nPts+1), axis=1) | np.any(NodeConn == (nPts+2), axis=1)
+    NodeConn = d.NodeConn
+    Super = np.any(NodeConn == nPts, axis=1) | \
+        np.any(NodeConn == (nPts+1), axis=1) | \
+        np.any(NodeConn == (nPts+2), axis=1)
     NodeConn = NodeConn[~Super]
     
     return NodeConn
@@ -866,71 +844,228 @@ def AlphaPeel3d(NodeCoords, alpha, method='scipy', Type='surf'):
     return T
 
 ## Utils ##
-@try_njit
-def _walk_2d(TempCoords, ElemTable, EdgeTable, newPt, nsample=1):
-    # Walking algorithm to find triangle containing the new point
-    tri = list(ElemTable.keys())[np.random.randint(0,len(ElemTable))]
-    minL = np.linalg.norm(TempCoords[tri[0]]-newPt)
-    for i in range(min(nsample-1,len(ElemTable)-1)):
-        t = list(ElemTable.keys())[np.random.randint(0,len(ElemTable))]
-        L = np.linalg.norm(TempCoords[t[0]]-newPt)
-        if L < minL:
-            tri = t
-    alpha, beta, gamma = utils.BaryTri(TempCoords[np.array(list(tri))], newPt)
+@try_njit(inline='always', cache=True)
+def _bin_sort_2d(points):
+    # based on sloan 1992
+    P = np.empty(points.shape, dtype=np.float32)
+    # Psort = np.empty(points.shape, dtype=np.float32)
+    indices = np.empty(len(points),dtype=np.uint64)
+    n = int(np.ceil(len(P)**(1/4)))
+    b = np.empty(len(P), dtype=np.uint32)
+    bin_counts = np.zeros(n*n, dtype=np.uint32)
+    xmax, xmin = points[:,0].max(), points[:,0].min()
+    ymax, ymin = points[:,1].max(), points[:,1].min()
+    dmax = np.maximum(xmax-xmin, xmax-ymin)
+    invdmax = 1/dmax
+    
+    _xmax = (xmax - xmin)*invdmax
+    _ymax = (ymax - ymin)*invdmax
+
+    for idx in range(len(P)):
+        P[idx, 0] = (points[idx, 0] - xmin) * invdmax
+        P[idx, 1] = (points[idx, 1] - ymin) * invdmax
+        i = int(0.99 * n * P[idx,1]/_ymax)
+        j = int(0.99 * n * P[idx,0]/_xmax)
+
+        if i%2 == 0:
+            b[idx] = i * n + j
+        else:
+            b[idx] = (i + 1) * n - j - 1
+        bin_counts[b[idx]] += 1
+    
+    bin_starts = np.zeros(n*n, dtype=np.uint64)
+    for bin_idx in range(1, n*n):
+        bin_starts[bin_idx] = bin_counts[bin_idx-1] + bin_starts[bin_idx-1]
+    
+    for idx,bidx in enumerate(b):
+        indices[bin_starts[bidx]] = idx
+        bin_starts[bidx] += 1
+    
+    return indices
+
+# from numba import objmode
+# import time
+@try_njit(inline='always', cache=True)
+def _bowyer_watson_loop_2d(d, indices, nsample):
+    # with objmode(walk_time='float64'): walk_time = 0
+    # with objmode(bcavity_time='float64'): bcavity_time = 0
+    # with objmode(dcavity_time='float64'): dcavity_time = 0
+    for i in indices:
+        newPt = d.raw_NodeCoords[i]
+        # with objmode(t0='float64'): t0 = time.time()
+        tri_id = _walk_2d(d, newPt, tri_id=d.NElem-1, nsample=nsample)
+        # with objmode(walk_time='float64'): walk_time += time.time() - t0
+        # Breadth first search of adjacent triangles to find all invalid triangles
+        # with objmode(t0='float64'): t0 = time.time()
+        bad_triangles, cavity_edges = _build_cavity_2d(d, tri_id, newPt)
+        # with objmode(bcavity_time='float64'): bcavity_time += time.time() - t0
+        
+        # with objmode(t0='float64'): t0 = time.time()
+        # Remove triangles and edges
+        d.removeElems(bad_triangles)
+
+        # Create new triangles and edges
+        for e in cavity_edges:
+            d.addElem([e[0], e[1], i])
+        
+        # with objmode(dcavity_time='float64'): dcavity_time += time.time() - t0
+    # with objmode(): print(walk_time, bcavity_time, dcavity_time, bcavity_time+dcavity_time)
+    return d
+
+@try_njit(inline='always', cache=True)
+def _walk_2d(d, newPt, tri_id=None, nsample=1):
+
+    if tri_id is None:
+        tri_id = np.random.randint(0,d.NElem)
+        tri = d.raw_NodeConn[tri_id]
+        if nsample > 1:
+            # Try multiple start points and choose the closest
+            minL = (d.raw_NodeCoords[tri[0],0] - newPt[0])**2 + (d.raw_NodeCoords[tri[0],1] - newPt[1])**2 # squared distance
+            if nsample > d.NElem:
+                nsample = d.NElem
+            for i in range(nsample-1):
+                t_id = np.random.randint(0,d.NElem)
+                t = d.raw_NodeConn[t_id]
+                L = (d.raw_NodeCoords[t[0],0] - newPt[0])**2 + (d.raw_NodeCoords[t[0],1] - newPt[1])**2 # squared distance
+                if L < minL:
+                    tri = t
+                    tri_id = t_id
+    else:
+        tri = d.raw_NodeConn[tri_id]
+    alpha, beta, gamma = utils.BaryTri(d.raw_NodeCoords[tri], newPt, d=2)
     while not (alpha >= 0 and beta >= 0 and gamma >= 0):
         # find node with smallest (most negative) barycentric coordinate
-        bcoords = [alpha,beta,gamma]
-        nodeid = tri[bcoords.index(min(bcoords))]
-
-        # find edge opposite that node
-        if nodeid not in ElemTable[tri][0]:
-            edge = ElemTable[tri][0]
-        elif nodeid not in ElemTable[tri][1]:
-            edge = ElemTable[tri][1]
+        if alpha <= beta and alpha <= gamma:
+            # alpha is min
+            edge_n1 = tri[1]
+            edge_n2 = tri[2]
+        elif beta <= alpha and beta <= gamma:
+            # beta is min
+            edge_n1 = tri[0]
+            edge_n2 = tri[2]
         else:
-            edge = ElemTable[tri][2]
+            # gamma is min
+            edge_n1 = tri[0]
+            edge_n2 = tri[1]
+        
+        # step into the neighboring triangle 
+        # directly using the linked lists rather than getElemConn to minimize
+        # overhead and enable early exits
+        next_tri_id = -1
+        i = d.ElemConn_head[edge_n1]
+        while i != -1:
+            next_elem = d.ElemConn_elem[i]
+            # iterate through elem conn for the first node in the edge
+            if next_elem != tri_id:
+                # skip the current triangle
+                t = d.raw_NodeConn[next_elem]
+                if (t[0] == edge_n2) or (t[1] == edge_n2) or (t[2] == edge_n2):
+                    # element is opposite a shared edge, step into it
+                    next_tri_id = next_elem
+                    break                    
+            i = d.ElemConn_next[i] 
+        if next_tri_id != -1:
+            tri_id = next_tri_id
+            tri = t            
+            
+        alpha, beta, gamma = utils.BaryTri(d.raw_NodeCoords[tri], newPt)
+    return tri_id
 
-        # step to the neighboring triangle across that edge
-        tri = EdgeTable[edge[::-1]]
-        alpha, beta, gamma = utils.BaryTri(TempCoords[np.array(list(tri))], newPt)
-    return tri
+@try_njit(inline='always', cache=True)
+def _build_cavity_2d(d, tri_id, newPt):
 
-@try_njit
-def _build_cavity_2d(TempCoords, ElemTable, EdgeTable, tri, newPt):
-    bad_triangles = [tri]
+    tri = d.raw_NodeConn[tri_id]
+    # Queue contains the id of a triangle followed by the two vertices that define an edge of that triangle
+    queue = [(tri_id, tri[0], tri[1]),
+             (tri_id, tri[1], tri[2]),
+             (tri_id, tri[2], tri[0])]
+    visited = [tri_id,]
+    bad_triangles = [tri_id,]
     cavity_edges = []
-    queue = set(ElemTable[tri])
-    s1 = len(TempCoords) - 1; s2 = len(TempCoords) - 2; s3 = len(TempCoords) - 3;
-    while len(queue) > 0:
-        edge = queue.pop()
-        twin = edge[::-1]
+   
+    # super triangle nodes
+    super_cutoff = d.NNode - 3 # nodes >= super_cutoff are part of the super triangle
 
-        if twin in EdgeTable:
-            t = EdgeTable[twin]
-            # Check if triangle is connected to the super triangle
-            if sum([s1 in t, s2 in t, s3 in t]) == 1 and sum([s1 in twin, s2 in twin, s3 in twin]) == 0:
-                # mark this edge as a cavity boundary
-                cavity_edges.append(edge)
-                continue
-            # test circumcircle
-            mat = np.array([
-                [TempCoords[t[0], 0] - newPt[0], TempCoords[t[0], 1] - newPt[1], (TempCoords[t[0], 0] - newPt[0])**2 + (TempCoords[t[0], 1] - newPt[1])**2],
-                [TempCoords[t[1], 0] - newPt[0], TempCoords[t[1], 1] - newPt[1], (TempCoords[t[1], 0] - newPt[0])**2 + (TempCoords[t[1], 1] - newPt[1])**2],
-                [TempCoords[t[2], 0] - newPt[0], TempCoords[t[2], 1] - newPt[1], (TempCoords[t[2], 0] - newPt[0])**2 + (TempCoords[t[2], 1] - newPt[1])**2]
-            ])
-            invalid = np.linalg.det(mat) > 0
-            if invalid:
-                # mark invalid triangles for deletion
-                bad_triangles.append(t)
-                # add adjacent neighbors to queue
-                queue.update([e for e in ElemTable[t] if e != twin])
+    while len(queue) > 0:
+
+        prev_t_id, e0, e1 = queue.pop() # triangle ID, edge vertex 1, edge vertex 2
+
+        next_t_id = -1
+        i = d.ElemConn_head[e0]
+        while i != -1:
+            next_elem = d.ElemConn_elem[i]
+            # iterate through elem conn for the first node in the edge
+            if next_elem != prev_t_id:
+                # skip the current triangle
+                t = d.raw_NodeConn[next_elem]
+                if (t[0] == e1) or (t[1] == e1) or (t[2] == e1):
+                    # element is opposite a shared edge, step into it
+                    next_t_id = next_elem
+                    break                    
+            i = d.ElemConn_next[i] 
+        if next_t_id == -1:
+            # boundary edge
+            cavity_edges.append((e0, e1))
+            continue
+
+        if next_t_id in visited:
+            # triangle has already been checked
+            if prev_t_id in bad_triangles and next_t_id not in bad_triangles:
+                cavity_edges.append((e0, e1))
+            continue
+
+        tri = d.raw_NodeConn[next_t_id]
+
+        if ((tri[0] >= super_cutoff) ^ (tri[1] >= super_cutoff) ^ (tri[2] >= super_cutoff)) and (e0 < super_cutoff and e1 < super_cutoff):
+            # ^ = XOR
+            # TODO: verify that this is necessary/correct
+            # triangle is connected to super triangle, mark boundary
+            cavity_edges.append((e0, e1))
+            visited.append(next_t_id)
+            continue
+            
+        # test circumcircle
+        # manual determinant of matrix [[A,B,C],[D,E,F],[G,H,I]]
+        A = d.raw_NodeCoords[tri[0], 0] - newPt[0]
+        B = d.raw_NodeCoords[tri[0], 1] - newPt[1]
+        C = (d.raw_NodeCoords[tri[0], 0] - newPt[0])**2 + (d.raw_NodeCoords[tri[0], 1] - newPt[1])**2
+
+        D = d.raw_NodeCoords[tri[1], 0] - newPt[0]
+        E = d.raw_NodeCoords[tri[1], 1] - newPt[1]
+        F = (d.raw_NodeCoords[tri[1], 0] - newPt[0])**2 + (d.raw_NodeCoords[tri[1], 1] - newPt[1])**2
+
+        G = d.raw_NodeCoords[tri[2], 0] - newPt[0]
+        H = d.raw_NodeCoords[tri[2], 1] - newPt[1]
+        I = (d.raw_NodeCoords[tri[2], 0] - newPt[0])**2 + (d.raw_NodeCoords[tri[2], 1] - newPt[1])**2
+
+        det = A*(E*I-F*H) - B*(D*I-F*G) + C*(D*H-E*G)
+
+        if det > 0:
+            # point in cicrumcircle of tri; add edges to queue (except for the edge that was just used)
+            bad_triangles.append(next_t_id)
+            
+            if (
+            (tri[0] == e0 or tri[0] == e1) and (tri[1] == e0 or tri[1] == e1)
+            ):
+                # old edge is (tri[0], tri[1])
+                queue.append((next_t_id, tri[1], tri[2]))
+                queue.append((next_t_id, tri[2], tri[0]))
+            elif(
+            (tri[1] == e0 or tri[1] == e1) and (tri[2] == e0 or tri[2] == e1)
+            ):
+                # old edge is (tri[1], tri[2])
+                queue.append((next_t_id, tri[0], tri[1]))
+                queue.append((next_t_id, tri[2], tri[0]))
             else:
-                # mark this edge as a cavity boundary
-                cavity_edges.append(edge)
+                # old edge is (tri[0], tri[2])
+                queue.append((next_t_id, tri[0], tri[1]))
+                queue.append((next_t_id, tri[1], tri[2]))
 
         else:
-            # boundary edge, add to cavity
-            cavity_edges.append(edge)
+            # boundary between a valid and invalid triangle
+            cavity_edges.append((e0, e1))
+            
+        visited.append(next_t_id)
     return bad_triangles, cavity_edges
 
 
