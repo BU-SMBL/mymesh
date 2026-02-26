@@ -48,7 +48,8 @@ Functions
 
 """
 from functools import wraps
-import warnings, urllib, tarfile, io, re
+import warnings, tarfile, io, re, os
+import urllib.request
 import numpy as np
 
 try: 
