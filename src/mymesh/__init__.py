@@ -54,7 +54,10 @@ import numpy as np
 
 try: 
     from numba import njit
-    _MYMESH_USE_NUMBA = True
+    if "NUMBA_DISABLE_JIT" in os.environ and os.environ["NUMBA_DISABLE_JIT"] == "1":
+        _MYMESH_USE_NUMBA = False
+    else:
+        _MYMESH_USE_NUMBA = True
 except ImportError:
     njit = None
     _MYMESH_USE_NUMBA = False
@@ -280,8 +283,8 @@ def demo_mesh(name='bunny'):
     
     return M
 
-from .mesh import mesh
+from .mesh import mesh, dmesh
 from . import booleans, contour, converter, curvature, delaunay, image, implicit, improvement, primitives, quality, rays, register, tree, utils, visualize
-__all__ = ["check_numba", "use_numba", "try_njit", "mesh", "booleans", "contour", "converter",
+__all__ = ["check_numba", "use_numba", "try_njit", "mesh", "dmesh", "booleans", "contour", "converter",
 "curvature", "delaunay", "image", "implicit", "improvement", 
 "primitives", "quality", "rays", "register", "tree", "utils", "visualize"]
