@@ -1,3 +1,5 @@
+.. _theory_curvature:
+
 Curvature
 =========
 
@@ -6,6 +8,7 @@ Curvature Metrics
 
 Principal Curvatures
 ^^^^^^^^^^^^^^^^^^^^
+
 The principal curvatures are the maximum (:math:`\kappa_1`) and minimum 
 (:math:`\kappa_2`) curvatures of a surface at a particular point. When both 
 principal curvatures are positive, the surface is convex at that point, when
@@ -20,6 +23,7 @@ Gaussian (:math:`K`) curvatures as
 
 Mean Curvature
 ^^^^^^^^^^^^^^
+
 See :func:`~mymesh.curvature.MeanCurvature`
 
 Mean curvature is the average of the two principal curvatures
@@ -32,6 +36,7 @@ respectively.
 
 Gaussian Curvature
 ^^^^^^^^^^^^^^^^^^
+
 See :func:`~mymesh.curvature.GaussianCurvature`
 
 Gaussian curvature of a surface is unchanged when a surface is bent without
@@ -48,8 +53,10 @@ where :math:`\kappa_1, \kappa_2` are the maximum and minimum principal curvature
 respectively.
 
 .. _theory_shape-index:
+
 Shape Index
 ^^^^^^^^^^^
+
 See :func:`~mymesh.curvature.ShapeIndex`
 
 Shape index :cite:p:`Koenderink1992a` describes the directionality of curvature, 
@@ -68,8 +75,10 @@ where :math:`\kappa_1, \kappa_2` are the maximum and minimum principal curvature
 respectively.
 
 .. _theory_curvedness:
+
 Curvedness
 ^^^^^^^^^^
+
 See :func:`~mymesh.curvature.Curvedness`
 
 Curvedness :cite:p:`Koenderink1992a` complements shape index by capturing the 
@@ -88,6 +97,7 @@ respectively.
 
 Conventions
 ^^^^^^^^^^^
+
 Some measures of curvature are coordinate system and/or reference frame 
 independent, while others are not. For example, a sphere may be considered
 concave or convex depending on whether it's being viewed from the inside
@@ -110,6 +120,7 @@ objects are bright (as is the case in CT scans of bone).
 
 Interpretation
 ^^^^^^^^^^^^^^
+
 +---------------------+--------------------------------------+-----------------------------------------+-----------------------+
 | Classification      | Principal Curvatures                 | Gaussian (:math:`K`) & Mean (:math:`H`) | Shape Index           |
 +=====================+======================================+=========================================+=======================+
@@ -125,6 +136,7 @@ Calculating Curvature
 
 Mesh-Based Curvature
 ^^^^^^^^^^^^^^^^^^^^
+
 Mesh-based curvature calculation relies only on the mesh itself to estimate 
 local curvature. This relies on looking at neighborhoods of points around a 
 point of interest, most commonly the "one-ring" neighborhood of nodes directly
@@ -136,6 +148,7 @@ resulting in spurious results.
 
 Quadratic Surface Fitting
 """""""""""""""""""""""""
+
 Reference: :cite:t:`Goldfeather2004`
 
 Quadratic surface fitting (see :func:`~mymesh.curvature.QuadFit`) locally fits a quadratic
@@ -183,8 +196,10 @@ The parameters :math:`A, B,` and :math:`C` are the components of the Weingarten 
 the eigenvalues of which are the principal curvatures.
 
 .. _theory-cubic-surface-fitting:
+
 Cubic Surface Fitting
 """""""""""""""""""""
+
 Reference: :cite:t:`Goldfeather2004`
 
 Cubic surface fitting (see :func:`~mymesh.curvature.CubicFit`) locally fits a cubic
@@ -266,6 +281,7 @@ the eigenvalues of which are the principal curvatures.
 
 Analytical Curvature
 ^^^^^^^^^^^^^^^^^^^^
+
 Reference: :cite:t:`Goldman2005`
 
 

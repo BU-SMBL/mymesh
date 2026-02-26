@@ -1,7 +1,7 @@
 .. currentmodule:: mymesh.mesh
 
 Working with the :class:`mesh` class
-==========================================
+====================================
 
 
 The :class:`mesh` class, at its core, stores the definition of a mesh. A
@@ -114,7 +114,7 @@ mesh won't modify the other.
     M2.plot(show_edges=False, view='trimetric', bgcolor='w')
 
 :meth:`~mesh.Threshold`
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 :meth:`~mesh.Threshold` generates a new mesh that keeps elements from the 
 original mesh based on scalar values and the chosen thresholding rule.
 
@@ -125,7 +125,8 @@ original mesh based on scalar values and the chosen thresholding rule.
     M2.plot(show_edges=False, view='trimetric', bgcolor='w')
 
 :meth:`~mesh.Contour`
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+
 :meth:`~mesh.Contour` generates a new mesh that contours the 
 original mesh based on scalar values. 
 

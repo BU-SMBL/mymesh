@@ -88,6 +88,20 @@ Octree Querying
     SearchOctree
     SearchOctreeTri
 
+KD Tree
+=======
+.. autosummary::
+    :toctree: submodules/
+
+    KDtreeNode
+
+KD Tree Creation
+----------------
+.. autosummary::
+    :toctree: submodules/
+    
+    Points2KDtree
+    
 """
 import numpy as np
 from . import rays, utils, mesh, primitives
@@ -2292,7 +2306,23 @@ def Quadtree2Dual(root, method='centroid'):
 
 # KD Tree Functions
 def Points2KDtree(Points, maxdepth=10, leafsize=10):
+    """
+    Generate a KD tree structure from a set of points. 
 
+    Parameters
+    ----------
+    Points : array_like
+        Point coordinates (shape = (n,k))
+    maxdepth : int, optional
+        Maximum depth of the kd tree, by default 10
+    leafsize : int, optional
+        Maximum number of points in a leaf node, by default 10.
+
+    Returns
+    -------
+    root : tree.KDtreeNode
+        Root node of the generated octree structure.
+    """    
     axis = 0
     location = np.median(Points[:,axis])
     root = KDtreeNode(location, axis, state='root', K=np.shape(Points)[1])

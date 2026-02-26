@@ -290,7 +290,7 @@ def AxisAlignImage(img, axis_order=[2,1,0], threshold=None, center='image', scal
         and scaling (if used). Must be an integer in the range 0-5. Lower order
         is more efficient at the cost of quality. By default, 1. 
     transform_args : dict, optional
-        Optional input arguments passed to `scipy.ndimage.affine_transform <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html>`_, by 
+        Optional input arguments passed to :func:`scipy.ndimage.affine_transform`, by 
         default `dict(mode='constant', order=interpolation_order)`.
     return_transform : bool, optional
         Option to return the transformation matrix as well as the transformed
@@ -790,7 +790,7 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
         1. The returned image will still be of the original resolution.
     interpolation_order : int, optional
         Interpolation order used in image transformation (see 
-        `scipy.ndimage.affine_transform <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html#affine-transform>`_)
+        :func:`scipy.ndimage.affine_transform`)
         and scaling (if used). Must be an integer in the range 0-5. Lower order
         is more efficient at the cost of quality. By default, 1. 
     threshold : NoneType, float, or tuple, optional
@@ -804,7 +804,7 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
         threshold value will be the midpoint of the range of values for each image (which may
         not give the intended result). By default, None.
     transform_args : dict, optional
-        Optional input arguments passed to `scipy.ndimage.affine_transform <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html>`_, by 
+        Optional input arguments passed to :func:`scipy.ndimage.affine_transform`, by 
         default `dict(mode='constant', order=interpolation_order)`.
     optimizer_args : dict, optional
         Additional arguments for the chosen optimizer, by default None. See 
@@ -2360,7 +2360,7 @@ def transform_points(points, T):
 def transform_image(image, T, options=dict()):
     """
     Apply transformation matrix to an image. This is essentially an interface
-    to `scipy.ndimage.affine_transform <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html>`_
+    to :func:`scipy.ndimage.affine_transform`
     but takes into account the need to invert the transformation matrix for 
     consistency between the "pull" resampling performed by `affine_transform`
     and the "push" transformations used to transform points. The `options` input
@@ -2373,7 +2373,7 @@ def transform_image(image, T, options=dict()):
     T : array_like
         Transformation matrix (either 3x3 or 4x4).
     options : dict, optional
-        Options to be used by `scipy.ndimage.affine_transform <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html>`_. If none are
+        Options to be used by :func:`scipy.ndimage.affine_transform`. If none are
         provide, all defaults will be used, by default dict(). Common options 
         that may be used are `mode` to allow wrapping ('grid-wrap') or mirroring 
         ('mirror') to change what happens when the contents of the image are
@@ -2600,8 +2600,8 @@ def optimize(objective, method, x0=None, bounds=None, optimizer_args=None):
         to either scipy.optimize or pdfo, however some predefined options are
         chosen for certain methods.
 
-        scipy global optimizers:
-        ------------------------
+        **scipy global optimizers:**
+        
         These are global optimization methods that see the global minimum
         of the objective function within specified bounds. The `bounds`
         input is required for all of these methods.
@@ -2623,14 +2623,14 @@ def optimize(objective, method, x0=None, bounds=None, optimizer_args=None):
             By default, the optional 'finish' input, which performs local optimization following the conclusion of the 
             brute force search, is turned off, but can be reactivated with `optimizer_args=dict(finish=True)`
 
-        scipy local optimizers:
-        -----------------------
+        **scipy local optimizers:**
+        
         All minimizers available through :func:`scipy.optimize.minimize` are available. One exception is that, if pdfo
         is installed, it will be used instead of scipy if `method='cobyla'`.  If `method='scipy'` is given, the default
         optimizer will be chosen by scipy based on the given problem (depends on the presence of bounds or constraints).
 
-        pdfo local optimizers:
-        ----------------------
+        **pdfo local optimizers:**
+        
         pdfo, or "Powell's derivative free optimizers" are a group of algorithms developed by M. J. D. Powell for 
         gradient/derivative free optimization. pdfo offers a scipy-like interface to Powell's algorithms.
 
@@ -2659,9 +2659,7 @@ def optimize(objective, method, x0=None, bounds=None, optimizer_args=None):
             `optimizer_args = dict(maxiter=100, fatol=1e-3)`
 
         Note that the optional arguments or methods differ. Some have an `options` input, 
-        which must be defined within `optimizer_args`
-        Example (`method='powell'`):
-            `optimizer_args = dict(options=dict(maxiter=100))`
+        which must be defined within `optimizer_args`. For example, with :code:`method='powell'`: :code:`optimizer_args = dict(options=dict(maxiter=100))`
 
     Returns
     -------

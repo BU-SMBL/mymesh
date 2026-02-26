@@ -1,3 +1,5 @@
+.. _guide_image:
+
 Image-based Meshing
 ===================
 

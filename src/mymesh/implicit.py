@@ -1023,13 +1023,13 @@ tpms.options = [
 
 def mixed_topology(functions, weights, cellsize=1):
     """
-    Mixed-topology surfaces :cite:p:`Josephson2024`.
+    Mixed-topology surfaces :cite:p:`Josephson2024b`.
     A weighted sum of a set of functions, such as :func:`tpms` functions.
 
     Parameters
     ----------
     functions : callable, str
-        Callable implicit function or name of a TPMS (see :fun:`tpms`).
+        Callable implicit function or name of a TPMS (see :func:`tpms`).
     weights : array_like
         Weights to assign to each function
     cellsize : int, optional

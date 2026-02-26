@@ -66,6 +66,7 @@ Mesh Cleanup
     DeleteDegenerateElements
     CleanupDegenerateElements
     RelabelNodes
+    RemoveNodes
 
 Miscellaneous 
 =============
@@ -2284,7 +2285,7 @@ def identify_type(NodeCoords, NodeConn):
         a triangle (3 nodes). In the case of a mesh containing both triangular
         and volume elements, the mesh will be classified arbitrarily by whichever
         appears first in NodeConn. A ``line`` mesh is identified if any line (2
-         node) elements are present.
+        node) elements are present.
 
         This approach has a chance of mislabeling the mesh in some rare or 
         non-standard scenarios, but attempts to be as efficient as possible
