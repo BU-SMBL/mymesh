@@ -13,6 +13,7 @@ Objects
     .. currentmodule:: mymesh.mesh
 
     mesh
+    dmesh
 
 
 .. currentmodule:: mymesh

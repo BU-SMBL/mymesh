@@ -1,5 +1,7 @@
 .. currentmodule:: mymesh.mesh
 
+.. _Working_with_the_mesh_class:
+
 Working with the :class:`mesh` class
 ====================================
 

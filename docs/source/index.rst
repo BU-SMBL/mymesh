@@ -15,8 +15,8 @@ MyMesh: General purpose, implicit, and image-based meshing in python
    api
    theory
    examples/index
+   perf
    dev
-   verify
 
 
 .. grid:: 1 1 3 3

@@ -9,8 +9,8 @@ Spatial tree structures can dramatically speed up nearest neighbor searching com
 If only a single search needs to be performed, the brute-force approach may be the most efficient option, but if performing multiple searches, or other operations that can utilize the tree structure, performance can be enhanced significantly.
 
 Here the performance of multiple tree structures are compared to a brute-force search.
-A `quadtree <QuadtreeNode>`,  `KD tree <KDtreeNode>`, and SciPy's implementation of a `KD tree <https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html>`_ are compared to a brute force search for 2D point data.
-For 3D point data, an `octree <OctreeNode>`, is used in place of the quadtree.
+A quadtree (:class:`~mymesh.tree.QuadtreeNode`),  KD tree (:class:`~mymesh.tree.KDtreeNode`), and SciPy's implementation of a :class:`scipy.spatial.KDTree` are compared to a brute force search for 2D point data.
+For 3D point data, an octree (:class:`~mymesh.tree.OctreeNode`), is used in place of the quadtree.
 Note that the KD tree can be used for any k-dimensional data.
 
 2D Point Data

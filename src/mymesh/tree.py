@@ -109,43 +109,38 @@ import sympy as sp
 import copy, heapq
 
 class TreeNode:
+    """
+    The TreeNode is the base class for several different spatial tree structures. 
+    The structure consists of a series of nodes that reference their parent and child nodes, allowing for traversal of the tree structure.
+
+    Parameters
+    ----------
+    parent : tree.TreeNode, optional
+        The tree node that contains this node, by default None
+    data : list or dict, optional
+        Data associated with the tree node. The type of data depends on 
+        the how the tree was created, by default None.
+    level : int, optional
+        Depth within the tree structure, by default 0.
+        The root node is at level 0, the root's children are at level 1, etc.
+    state : str, optional
+        Specifies whether the node's place in the tree structure, by default
+        'unknown'.
+
+        Possible states are:
+
+        - 'root': This node is the root of the tree
+
+        - 'branch': This is node is an intermediate node between the root and leaves
+
+        - 'leaf': This is node is a terminal end and has no children.
+
+        - 'empty': No data is contained within this node, and it has no children
+
+        - 'unknown': State hasn't been specified.
+
+    """  
     def __init__(self,parent=None,data=None,level=0,state='unknown'):
-        """
-        .. autoclass:: TreeNode
-            :members:
-            :inherited-members:
-
-        The OctreeNode is the basic unit of the octree data structure. The structure
-        consists of a series of nodes that reference their parent and child nodes, 
-        allowing for traversal of the tree structure.
-
-        Parameters
-        ----------
-        parent : tree.TreeNode, optional
-            The tree node that contains this node, by default None
-        data : list or dict, optional
-            Data associated with the tree node. The type of data depends on 
-            the how the tree was created, by default None.
-        level : int, optional
-            Depth within the tree structure, by default 0.
-            The root node is at level 0, the root's children are at level 1, etc.
-        state : str, optional
-            Specifies whether the node's place in the tree structure, by default
-            'unknown'.
-
-            Possible states are:
-
-            - 'root': This node is the root of the tree
-
-            - 'branch': This is node is an intermediate node between the root and leaves
-
-            - 'leaf': This is node is a terminal end and has no children.
-
-            - 'empty': No data is contained within this node, and it has no children
-
-            - 'unknown': State hasn't been specified.
-
-        """  
         self.children = []
         self.parent = parent
         self.state = state
@@ -235,50 +230,49 @@ class TreeNode:
         return pruned        
 
 class QuadtreeNode(TreeNode):
-          
+    """
+
+    The QuadtreeNode is the basic unit of the quadtree data structure. The structure
+    consists of a series of nodes that reference their parent and child nodes, 
+    allowing for traversal of the tree structure.
+
+    Parameters
+    ----------
+    parent : tree.QuadtreeNode, optional
+        The quadtree node that contains this node, by default None
+    data : list or dict, optional
+        Data associated with the quadtree node. The type of data depends on 
+        the how the quadtree was created, by default None.
+    level : int, optional
+        Depth within the tree structure, by default 0.
+        The root node is at level 0, the root's children are at level 1, etc.
+    state : str, optional
+        Specifies whether the node's place in the tree structure, by default
+        'unknown'.
+
+        Possible states are:
+
+        - 'root': This node is the root of the quadtree
+
+        - 'branch': This is node is an intermediate node between the root and leaves
+
+        - 'leaf': This is node is a terminal end and has no children.
+
+        - 'empty': No data is contained within this node, and it has no children
+
+        - 'unknown': State hasn't been specified.
+    
+    centroid : array_like
+        Location of the center of the quadtree node
+    size : float
+        Side length of the cube associated with the quadtree node
+    limits : list
+        bounds of the quadtree node
+    vertices : np.ndarray
+        Coordinates of the vertices of the quadtree node
+
+    """  
     def __init__(self,centroid,size,parent=None,data=None,level=0,state='unknown'):
-        """
-
-        The QuadtreeNode is the basic unit of the quadtree data structure. The structure
-        consists of a series of nodes that reference their parent and child nodes, 
-        allowing for traversal of the tree structure.
-
-        Parameters
-        ----------
-        parent : tree.QuadtreeNode, optional
-            The quadtree node that contains this node, by default None
-        data : list or dict, optional
-            Data associated with the quadtree node. The type of data depends on 
-            the how the quadtree was created, by default None.
-        level : int, optional
-            Depth within the tree structure, by default 0.
-            The root node is at level 0, the root's children are at level 1, etc.
-        state : str, optional
-            Specifies whether the node's place in the tree structure, by default
-            'unknown'.
-
-            Possible states are:
-
-            - 'root': This node is the root of the quadtree
-
-            - 'branch': This is node is an intermediate node between the root and leaves
-
-            - 'leaf': This is node is a terminal end and has no children.
-
-            - 'empty': No data is contained within this node, and it has no children
-
-            - 'unknown': State hasn't been specified.
-        
-        centroid : array_like
-            Location of the center of the quadtree node
-        size : float
-            Side length of the cube associated with the quadtree node
-        limits : list
-            bounds of the quadtree node
-        vertices : np.ndarray
-            Coordinates of the vertices of the quadtree node
-
-        """  
         self.children = []
         self.parent = parent
         self.state = state
@@ -596,49 +590,49 @@ class QuadtreeNode(TreeNode):
         return dist, coordinates
 
 class OctreeNode(TreeNode):
-          
+    """
+    The OctreeNode is the basic unit of the octree data structure. The structure
+    consists of a series of nodes that reference their parent and child nodes, 
+    allowing for traversal of the tree structure.
+
+    Parameters
+    ----------
+    parent : tree.OctreeNode, optional
+        The octree node that contains this node, by default None
+    data : list or dict, optional
+        Data associated with the octree node. The type of data depends on 
+        the how the octree was created, by default None.
+    level : int, optional
+        Depth within the tree structure, by default 0.
+        The root node is at level 0, the root's children are at level 1, etc.
+    state : str, optional
+        Specifies whether the node's place in the tree structure, by default
+        'unknown'.
+
+        Possible states are:
+
+        - 'root': This node is the root of the octree
+
+        - 'branch': This is node is an intermediate node between the root and leaves
+
+        - 'leaf': This is node is a terminal end and has no children.
+
+        - 'empty': No data is contained within this node, and it has no children
+
+        - 'unknown': State hasn't been specified.
+    
+    centroid : array_like
+        Location of the center of the octree node
+    size : float
+        Side length of the cube associated with the octree node
+    limits : list
+        bounds of the octree node
+    vertices : np.ndarray
+        Coordinates of the vertices of the octree node
+
+    """  
     def __init__(self,centroid,size,parent=None,data=None,level=0,state='unknown'):
-        """
-        The OctreeNode is the basic unit of the octree data structure. The structure
-        consists of a series of nodes that reference their parent and child nodes, 
-        allowing for traversal of the tree structure.
-
-        Parameters
-        ----------
-        parent : tree.OctreeNode, optional
-            The octree node that contains this node, by default None
-        data : list or dict, optional
-            Data associated with the octree node. The type of data depends on 
-            the how the octree was created, by default None.
-        level : int, optional
-            Depth within the tree structure, by default 0.
-            The root node is at level 0, the root's children are at level 1, etc.
-        state : str, optional
-            Specifies whether the node's place in the tree structure, by default
-            'unknown'.
-
-            Possible states are:
-
-            - 'root': This node is the root of the octree
-
-            - 'branch': This is node is an intermediate node between the root and leaves
-
-            - 'leaf': This is node is a terminal end and has no children.
-
-            - 'empty': No data is contained within this node, and it has no children
-
-            - 'unknown': State hasn't been specified.
         
-        centroid : array_like
-            Location of the center of the octree node
-        size : float
-            Side length of the cube associated with the octree node
-        limits : list
-            bounds of the octree node
-        vertices : np.ndarray
-            Coordinates of the vertices of the octree node
-
-        """  
         self.children = []
         self.parent = parent
         self.state = state
@@ -1019,46 +1013,46 @@ class OctreeNode(TreeNode):
         return dist, coordinates
     
 class KDtreeNode(TreeNode):
+    """
+    The KDtreeNode is the basic unit of the KD-tree data structure. 
+    The structure consists of a series of nodes that reference their parent
+    and child nodes, allowing for traversal of the tree structure.
 
+    Parameters
+    ----------
+    location : array_like
+        Location of the node. This is only a single coordinate defining the
+        location of the hyperplane along the axis.
+    axis : int, optional
+        Index of the axis along which the data will be split (0=x, 1=y,...).
+        By default, 0.
+    parent : tree.KDtreeNode, optional
+        The KDtree node that contains this node, by default None
+    data : list or dict, optional
+        Data associated with the KDtree node. The type of data depends on 
+        the how the KDtree was created, by default None.
+    level : int, optional
+        Depth within the tree structure, by default 0.
+        The root node is at level 0, the root's children are at level 1, etc.
+    state : str, optional
+        Specifies whether the node's place in the tree structure, by default
+        'unknown'.
+
+        Possible states are:
+
+        - 'root': This node is the root of the octree
+
+        - 'branch': This is node is an intermediate node between the root and leaves
+
+        - 'leaf': This is node is a terminal end and has no children.
+
+        - 'empty': No data is contained within this node, and it has no children
+
+        - 'unknown': State hasn't been specified.
+    
+    """  
     def __init__(self,location,axis=0,parent=None,data=None,level=0,state='unknown', K=None):
-        """
-        The KDtreeNode is the basic unit of the KD-tree data structure. 
-        The structure consists of a series of nodes that reference their parent
-        and child nodes, allowing for traversal of the tree structure.
-
-        Parameters
-        ----------
-        location : array_like
-            Location of the node. This is only a single coordinate defining the
-            location of the hyperplane along the axis.
-        axis : int, optional
-            Index of the axis along which the data will be split (0=x, 1=y,...).
-            By default, 0.
-        parent : tree.KDtreeNode, optional
-            The KDtree node that contains this node, by default None
-        data : list or dict, optional
-            Data associated with the KDtree node. The type of data depends on 
-            the how the KDtree was created, by default None.
-        level : int, optional
-            Depth within the tree structure, by default 0.
-            The root node is at level 0, the root's children are at level 1, etc.
-        state : str, optional
-            Specifies whether the node's place in the tree structure, by default
-            'unknown'.
-
-            Possible states are:
-
-            - 'root': This node is the root of the octree
-
-            - 'branch': This is node is an intermediate node between the root and leaves
-
-            - 'leaf': This is node is a terminal end and has no children.
-
-            - 'empty': No data is contained within this node, and it has no children
-
-            - 'unknown': State hasn't been specified.
         
-        """  
         self.children = []
         self.parent = parent
         self.state = state

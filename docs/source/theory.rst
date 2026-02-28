@@ -9,6 +9,7 @@ Theory Guide
     theory/curvature
     theory/delaunay
     theory/improvement
+    theory/mesh
     theory/octree
     theory/rays
     theory/register
