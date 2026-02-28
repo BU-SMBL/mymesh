@@ -2426,7 +2426,7 @@ class mesh:
         """        
         out = visualize.View(self, **kwargs)   
         return out 
-    def plot(self, show=True, return_fig=False, clim=None, show_colorbar=True, **kwargs):
+    def plot(self, show=True, return_fig=False, clim=None, show_colorbar=True, title=None, **kwargs):
         """
         Generate a static plot of the mesh. See :func:`mymesh.visualize.view` 
         for a full list of optional arguments.
@@ -2499,6 +2499,8 @@ class mesh:
             scale.set_clim(cmin, cmax)
             if show_colorbar:
                 colorbar = matplotlib.pyplot.colorbar(scale, ax=ax)
+        if title is not None:
+            plt.title(title)
         if show:
             plt.show()
         if return_fig:
@@ -2880,6 +2882,8 @@ if check_numba():
         It's recommended that a :class:`dmesh` object is created from a :class:`mesh` 
         object using :meth:`mesh.mesh2dmesh`. Incorrect initialization of the mesh
         will likely lead to misbehavior. 
+
+        See also: :ref:`Dynamic mesh`
 
         Parameters
         ----------
