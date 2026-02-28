@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**03:26.950** total execution time for 6 files **from all galleries**:
+**03:10.967** total execution time for 6 files **from all galleries**:
 
 .. container::
 
@@ -33,20 +33,20 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_MeshAnalysis_demo_curvature.py` (``../../examples/MeshAnalysis/demo_curvature.py``)
-     - 01:34.907
+     - 01:21.915
      - 0.0
    * - :ref:`sphx_glr_examples_MeshModification_demo_registration.py` (``../../examples/MeshModification/demo_registration.py``)
-     - 01:19.648
+     - 01:15.381
      - 0.0
    * - :ref:`sphx_glr_examples_MeshModification_demo_smoothing.py` (``../../examples/MeshModification/demo_smoothing.py``)
-     - 00:14.436
+     - 00:15.621
      - 0.0
    * - :ref:`sphx_glr_examples_MeshGeneration_demo_pasta.py` (``../../examples/MeshGeneration/demo_pasta.py``)
-     - 00:09.302
+     - 00:09.390
      - 0.0
    * - :ref:`sphx_glr_examples_MeshGeneration_demo_mixed-top.py` (``../../examples/MeshGeneration/demo_mixed-top.py``)
-     - 00:08.072
+     - 00:08.069
      - 0.0
    * - :ref:`sphx_glr_examples_MeshGeneration_demo_heart.py` (``../../examples/MeshGeneration/demo_heart.py``)
-     - 00:00.584
+     - 00:00.590
      - 0.0
