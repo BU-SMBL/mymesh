@@ -58,6 +58,12 @@ all = [
     "PyQt6>=6.2.3",
     "PyGlet>=2.0.10",
     "pyvista>=0.45.2",
+    "triangle>=20250106",
+    "tetgen>=0.8.2",
+    ]
+test = [
+    "pytest>=8.3.4",
+    "trimesh>=4.11.2",
     ]
 
 [project.urls]
