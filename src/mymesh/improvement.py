@@ -32,6 +32,7 @@ Local mesh topology
     Contract
     Split
     Flip
+    Improve
 
 
 """
@@ -2512,7 +2513,7 @@ def TetFlip(M, iterate='converge', QualityMetric='Skewness', target='min', flips
         tet = mesh(NodeCoords, NewConn)
     return tet
 
-def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLaplacianSmoothing', smooth_kwargs={}, verbose=True, FeatureAngle=25, ContractIter=5):
+def Improve(M, h, schedule='scfS', repeat=2, labels=None, smoother=None, smooth_kwargs={}, verbose=True, FeatureAngle=25):
     """
     Tetrahedral mesh quality improvement using multiple local operations. 
 
@@ -2529,18 +2530,19 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
         Possible operations:
             - 's' - Splitting (:func:`Split`)
             - 'c' - Contraction (:func:`Contract`)
-            - 'f' - Flipping (:func:`TetFlip`)
+            - 'f' - Flipping (:func:`Flip`)
             - 'S' - Smoothing 
 
     repeat : int, optional
-        Number of times to repeat the schedule, by default 1
+        Number of times to repeat the schedule, by default 2
     labels : str, array_like, or NoneType, optional
         Element labels indicating different regions. If specified,
         region interfaces will be preserved. This can be specified as 
         an array_like with M.NElem entries or a string corresponding to
         an entry in M.ElemData, by default None.
     smoother : str, optional
-        Specify which smoothing operation to use, by default 'SmartLaplacianSmoothing'
+        Specify which smoothing operation to use, by default None.
+        If not specified, :func:`~mymesh.improvement.SmartLaplacianSmoothing` is used for tetrahedral meshes and :func:`~mymesh.improvement.TangentialLaplacianSmoothing` is used for triangular meshes.
     smooth_kwargs : dict, optional
         Key word arguments to be passed to the smoother, by default {}
     verbose : bool, optional
@@ -2549,14 +2551,17 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
         FeatureAngle : int, optional
         Angle (in degrees) used to identify features, by default 25. See
         :func:`~mymesh.utils.DetectFeatures` for more information., by default 25
-    ContractIter : int, optional
-        Maximum number of iterations to perform in the contraction step, by default 5
 
     Returns
     -------
     Mnew : mymesh.mesh
         Tetrahedral mesh after quality improvement
     """    
+    if smoother is None:
+        if M.Type == 'vol':
+            smoother = 'SmartLaplacianSmoothing'
+        else:
+            smoother = 'TangentialLaplacianSmoothing'
     M.verbose=False
     for loop in range(repeat):
         for operation in schedule:
@@ -2567,16 +2572,27 @@ def TetImprove(M, h, schedule='scfS', repeat=1, labels=None, smoother='SmartLapl
                 M.verbose=False
             elif operation == 'c':
                 # Contract
-                M = Contract(M, 4/5*h, verbose=verbose, labels=labels, FeatureAngle=FeatureAngle, maxIter=ContractIter)
+                M = Contract(M, 4/5*h, verbose=verbose, labels=labels, FeatureAngle=FeatureAngle)
                 M.verbose=False
-            # elif operation == 'f':
-            #     # Flip
-            #     M = TetFlip(M, flips=['3-2','2-3'], verbose=verbose)
-            #     M.verbose=False
+            elif operation == 'f':
+                # Flip
+                M = Flip(M, verbose=verbose)
+                M.verbose=False
             elif operation == 'S':
                 if smoother == 'SmartLaplacianSmoothing':
-                    M = SmartLaplacianSmoothing(M, TangentialSurface=True, labels=labels, options=dict(FixFeatures=True))
+                    M = SmartLaplacianSmoothing(M, TangentialSurface=True, labels=labels, options=smooth_kwargs)
                     M.verbose=False
+                elif smoother == 'TangentialLaplacianSmoothing':
+                    M = TangentialLaplacianSmoothing(M, options=smooth_kwargs)
+                    M.verbose=False
+                elif smoother == 'TaubinSmoothing':
+                    M = TaubinSmoothing(M, options=smooth_kwargs)
+                    M.verbose=False
+                elif smoother == 'LocalLaplacianSmoothing':
+                    M = LocalLaplacianSmoothing(M, options=smooth_kwargs)
+                    M.verbose=False
+                else:
+                    raise ValueError(f'Invalid smoother: {smoother}')
     return M
 
 ## Utilities
