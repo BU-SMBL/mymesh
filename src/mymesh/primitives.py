@@ -1089,7 +1089,8 @@ def Revolve(m, angle, anglestep, center=[0,0,0], shift=0, axis=2, ElemType=None)
         assert isinstance(axis, (list, tuple, np.ndarray)), 'axis must be either 0, 1, or 2 (indicating x, y, z axes) or a 3 element vector.'
         axis = axis/np.linalg.norm(axis)
     
-    thetas = np.arange(0, angle+anglestep, anglestep)
+    # thetas = np.arange(0, angle+anglestep, anglestep)
+    thetas = np.linspace(0, angle, int(np.round(angle/anglestep)))
     outer_prod = np.outer(axis,axis)
     cross_prod_matrix = np.zeros((3,3))
     cross_prod_matrix[0,1] = -axis[2]
