@@ -4409,7 +4409,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     NewConn = np.fliplr(np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F'))
     if cleanup:
         NewCoords,NewConn,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
-        if (interpolation=='linear' or interpolation=='cubic') and method=='triangle':
+        if (interpolation=='linear' or interpolation=='cubic'):
             NewCoords,NewConn = utils.DeleteDegenerateElements(NewCoords,NewConn,strict=True)
             
     return NewCoords, NewConn
@@ -4989,7 +4989,7 @@ def MarchingElements(NodeCoords, NodeConn, NodeValues, threshold=0, interpolatio
     SplitConn = utils.SplitRaggedByLength(NodeConn)
 
     NewCoords = np.empty((0,3))
-    NewConn = np.empty((0,3))
+    NewConn = np.empty((0,3), dtype=np.int64)
 
     for conn in SplitConn:
         conn = np.asarray(conn)
