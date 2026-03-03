@@ -41,17 +41,19 @@ Meshes are used for a variety of purposes, including simulations (e.g. finite el
 - mesh quality evaluation and improvement,
 - mesh type conversion (e.g. volume to surface, hexahedral or mixed-element to tetrahedral, first-order elements to second-order elements).
 
-# Statement of need
+# State of the field
 
 Mesh-based representations of geometries are essential in a wide variety of research applications, and as such, there is a need for robust, efficient, and easy-to-use software for creating, analyzing, and manipulating meshes.
 There are a variety of software packages for working with and generating meshes. 
 Some are general purpose, like CGAL [@cgal], VTK [@Schroeder2006], and Gmsh [@Geuzaine2009], while others are more focused on specific tasks, such as triangular or tetrahedral mesh generation (e.g. Triangle [@Shewchuk1996] and TetGen [@Si2015], respectively). 
-In Python, most meshing packages depend on (or are direct wrappers to) one or more of these libraries, such as PyVista [@Sullivan2019] (a pythonic interface to VTK), MeshPy (which interfaces to Triangle and TetGen), and PyMesh (which depends on CGAL, Triangle, TetGen, and others). 
+In Python, most meshing packages depend on (or are direct wrappers to) one or more of these libraries, such as PyVista [@Sullivan2019] (a pythonic interface to VTK), pygalmesh (a pythonic interface to CGAL [@Schlomer2021]), nanomesh (an image-based meshing workflow tool that utilizes Triangle and TetGen, [@Smeets2022b]), MeshPy (which interfaces to Triangle and TetGen), and PyMesh (which depends on CGAL, Triangle, TetGen, and others). 
 While these interfaces are useful and provide access to powerful mesh generation tools, their reliance on external dependencies can make them less easy to use and limit code readability, making it more difficult to understand how the code works. 
 TriMesh [@trimesh] stands out as a capable, pure-Python library focused on triangular surface meshes, but it isn't intended for use with quadrilateral, mixed-element, or volumetric meshes. 
 Given the intended focus and/or design philosophies of these existing softwares, it was determined that building `mymesh`, rather than making contributions to existing software, was the best way to achieve a full-featured, accessible, and easy to use Python package for creating and working with meshes. 
 
-`mymesh` strives to meet this need as a library of meshing tools, written in Python, with clear documentation that makes it both easy to use and easy to understand.
+# Statement of need
+
+`mymesh` strives to meet the need for a library of meshing tools, written in Python, with clear documentation that makes it both easy to use and easy to understand.
 `mymesh` has a particular focus on implicit function and image-based meshes, but also supplies a wide variety of general purpose tools. 
 Rather than wrapping other libraries, algorithms are implemented from scratch, often based on or inspired by published algorithms and research. 
 By providing an easily usable interface to both high-level and low-level functionality, we hope to provide both complete solutions and a set of building blocks for the development of other mesh-related tools.
@@ -88,7 +90,7 @@ Implicit meshing approaches can also be used for boolean operations to merge or 
 
 ![Examples of implicit mesh generation: (a) the Fischer-Koch S TPMS surface shown as both a function evaluated over a domain and the meshed surface at $f(x,y,z)=0$ and (b) a geometry constructed by subtracting an implicit representation of a sphere from a cube.\label{fig:implicit}](./figures/implicit.jpg)
 
-![Image-based meshing of the CT-scanned Stanford Bunny ([The Stanford volume data archive](https://graphics.stanford.edu/data/voldata/voldata.html#bunny)): (a) One mid-plane of the 3D image, (b) a coarsened voxel mesh, (c) a triangular surface mesh, and (d) a cross-sectional view of a tetrahedral volume mesh. \label{fig:image}](./figures/image.jpg)
+![Image-based meshing of the CT-scanned Stanford Bunny ([The Stanford volume data archive](https://graphics.stanford.edu/data/voldata/voldata.html#bunny)): (a) One mid-plane of the 3D image, (b) a coarsened voxel mesh, (c) a triangular surface mesh, and (d) a cross-sectional view of a tetrahedral volume mesh. A zoomed in region shows the mesh edges to illustrate the arrangement of the tetrahedral mesh. \label{fig:image}](./figures/image.jpg)
 
 While implicit and image-based meshing is a focus of `mymesh`, it is not the only functionality. 
 `mymesh` has a variety of low-level capabilities, like determining node/element connectivity and adjacency information, calculating surface normal vectors, and conversion between meshes of different types, which can be useful building blocks for more complex meshing algorithms. 
@@ -116,6 +118,10 @@ Generative AI has been used in the following ways throughout the development of
 - assistance in setting up packaging infrastructure (e.g. pyproject.toml, github workflows),
 - assistance in the creation of test cases for some unit tests.
   
+
+# CRediT Author Statement
+
+**Timothy O. Josephson:** Conceptualization, Software, Methodology, Writing - Original Draft. **Elise F. Morgan:** Conceptualization, Supervision, Resources, Funding acquisition, Writing - Review & Editing
 
 # Acknowledgements
 
