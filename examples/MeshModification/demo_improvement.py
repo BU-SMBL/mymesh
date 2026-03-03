@@ -71,7 +71,7 @@ S2.plot(scalars='skew', clim=(0,1), show_edges=True, view='trimetric',
 S = implicit.TetMesh(implicit.sphere([0,0,0], 1), [-1,1,-1,1,-1,1], .1)
 S.ElemData['skew'] = quality.Skewness(*S)
 
-target_edge_length = 0.2
+target_edge_length = 0.25
 S2 = improvement.Improve(S, target_edge_length, schedule='scfS', 
                          repeat=20, verbose=False)
 S2.ElemData['skew'] = quality.Skewness(*S2)

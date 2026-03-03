@@ -472,7 +472,7 @@ def TangentialLaplacianSmoothing(M, options=dict()):
 
     return Mnew
 
-def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=None, options=dict()):
+def SmartLaplacianSmoothing(M, TangentialSurface=True, labels=None, options=dict()):
     """
     Performs smart Laplacian smoothing :cite:p:`Freitag1997a`, repositioning 
     each node to the center of its adjacent nodes only if doing so doesn't
@@ -482,14 +482,6 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
     ----------
     M : mymesh.mesh
         Mesh object to smooth
-    target : str
-        Determines whether criteria for repositioning a node, by default 'mean'. 
-
-        'mean' - repositioning is allowed if the average quality of the connected
-        elements doesn't decrease.
-
-        'min' - repositioning is allowed if the minimum quality of the connected
-        elements doesn't decrease.
     TangentialSurface : bool, optional
         Option to use tangential Laplacian smoothing on the surface (and interfaces, 
         if labels are provided), by default True.
@@ -520,9 +512,6 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
         FixSurf : bool
             If true, all nodes on the surface will be held in place and only 
             interior nodes will be smoothed, by default False.
-        qualityFunc : function
-            Function used for computing quality. It is assumed that a larger
-            number corresponds to higher quality, be default quality.MeanRatio
         InPlace : bool
             If True, the input mesh is modified directly, otherwise a new copy of the mesh
             is created, by default False.
@@ -586,7 +575,6 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
                         FixFeatures = False,
                         FixSurf = False,
                         FixEdge = True,
-                        qualityFunc = quality.MeanRatio,
                         InPlace = False
                     )
 
@@ -595,13 +583,11 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
     FixedNodes = SmoothOptions['FixedNodes']
     tolerance = SmoothOptions['tolerance']
     iterate = SmoothOptions['iterate']
-    qualityFunc = SmoothOptions['qualityFunc']
     maxIter = SmoothOptions['maxIter']
     method = SmoothOptions['method']
     InPlace = SmoothOptions['InPlace']
 
     # Initialize
-    lens = np.array([len(n) for n in NodeNeighbors])
     NodeConn = np.asarray(NodeConn)
     if TangentialSurface:
         SurfNodes = set([n for elem in SurfConn for n in elem])
@@ -615,94 +601,24 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
         for i in EdgeNodes:
             NodeNeighbors[i] = EdgeNodeNeighbors[i]
 
-    q = qualityFunc(NodeCoords, NodeConn)
+    nneighbors = np.array([len(ns) for ns in M.NodeNeighbors])
+    neighbor_indices = np.insert(np.cumsum(nneighbors),0,0)
+    flat_neighbors = np.array([n for ns in M.NodeNeighbors for n in ns])
+
+    conn_indices = np.insert(np.cumsum([len(ns) for ns in M.ElemConn]),0,0)
+    flat_conn = np.array([n for ns in M.ElemConn for n in ns])
+
+    q = quality.ModifiedMeanRatio(NodeCoords, NodeConn)
     qmin = np.nanmin(q)
     qmean = np.nanmean(q)
 
-    # Smoothing Functions
-    def SequentialSmoother(NodeCoords, q):
-        
-        for inode in FreeNodes:
-            oldnode = np.copy(NodeCoords[inode])
-            oldq = q[ElemConn[inode]]
-            # NodeCoords[inode] = np.mean(NodeCoords[NodeNeighbors[inode]], axis=0)
-
-            Q = NodeCoords[NodeNeighbors[inode]]
-            if TangentialSurface and inode in SurfNodes:
-                u = (1/lens[inode]) * np.sum(Q - NodeCoords[inode],axis=0)
-                U = 1*(u - np.sum(u*NodeNormals[inode],axis=0)*NodeNormals[inode])
-            else:
-                U = (1/lens[inode]) * np.sum(Q - NodeCoords[inode],axis=0)
-            NodeCoords[inode] += U
-
-            q[ElemConn[inode]] = qualityFunc(NodeCoords, NodeConn[ElemConn[inode]])
-
-            newqmin = np.min(q[ElemConn[inode]])
-            oldqmin = np.min(oldq)
-            if target == 'mean':
-                oldqmean = np.mean(oldq)
-                newqmean = np.mean(q[ElemConn[inode]])
-
-                if (newqmean < oldqmean) | ((newqmin < oldqmin) & (newqmin < 0)):
-                    # If mean gets worse or a negative min gets worse
-                    NodeCoords[inode] = oldnode
-                    q[ElemConn[inode]] = oldq
-            elif target == 'min':
-                # if min gets worse
-                if (oldqmin < newqmin):
-                    NodeCoords[inode] = oldnode
-                    q[ElemConn[inode]] = oldq
-
-        return NodeCoords, q
-
-    def SimultaneousSmoother(NodeCoords, q):
-        # TODO: NOT SET UP YET - apply all movements simultaneously, then for elements that degrade, selectively determine which node movements need to be reverted
-        for inode in FreeNodes:
-            oldnode = np.copy(NodeCoords[inode])
-            oldq = q[ElemConn[inode]]
-            # NodeCoords[inode] = np.mean(NodeCoords[NodeNeighbors[inode]], axis=0)
-
-            Q = NodeCoords[NodeNeighbors[inode]]
-            if TangentialSurface and inode in SurfNodes:
-                u = (1/lens[inode]) * np.sum(Q - NodeCoords[inode],axis=0)
-                U = 1*(u - np.sum(u*NodeNormals[inode],axis=0)*NodeNormals[inode])
-            else:
-                U = (1/lens[inode]) * np.sum(Q - NodeCoords[inode],axis=0)
-            NodeCoords[inode] += U
-
-            q[ElemConn[inode]] = qualityFunc(NodeCoords, NodeConn[ElemConn[inode]])
-
-            newqmin = np.min(q[ElemConn[inode]])
-            oldqmin = np.min(oldq)
-            if target == 'mean':
-                oldqmean = np.mean(oldq)
-                newqmean = np.mean(q[ElemConn[inode]])
-
-                if (newqmean < oldqmean) | ((newqmin < oldqmin) & (newqmin < 0)):
-                    # If mean gets worse or a negative min gets worse
-                    NodeCoords[inode] = oldnode
-                    q[ElemConn[inode]] = oldq
-            elif target == 'min':
-                # if min gets worse
-                if (oldqmin < newqmin):
-                    NodeCoords[inode] = oldnode
-                    q[ElemConn[inode]] = oldq
-
-        return NodeCoords, q
-
-    if method == 'sequential':
-        smoother = SequentialSmoother
-    else:
-        raise ValueError(f'Invalid method "{str(method):s}", must be "sequential".')
-
     # Iterate
-    # qmin_hist = [qmin]
-    # qmean_hist = [qmean]
-    
-    if SmoothOptions['iterate'] == 'converge':
-        condition = lambda i, q, qmin, qmean : (i == 0) | (i < maxIter) & ((np.sum(np.abs(np.min(q) - qmin)) > tolerance) | (np.sum(np.abs(np.mean(q) - qmean)) > tolerance))
-    elif isinstance(SmoothOptions['iterate'], (int, np.integer)):
-        condition = lambda i, q, qmin, qmean : i < SmoothOptions['iterate']
+    if iterate == 'converge':
+        condition = lambda i, q, qmin, qmean : (i == 0) | (i < maxIter) & \
+            ((np.sum(np.abs(np.min(q) - qmin)) > tolerance) | \
+             (np.sum(np.abs(np.mean(q) - qmean)) > tolerance))
+    elif isinstance(iterate, (int, np.integer)):
+        condition = lambda i, q, qmin, qmean : i < iterate
     else:
         raise ValueError('options["iterate"] must be "converge" or an integer.')
     
@@ -712,9 +628,7 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
 
         qmin = np.min(q)
         qmean = np.mean(q)
-        # qmin_hist.append(qmin)
-        # qmean_hist.append(qmean)
-        NodeCoords, q = smoother(NodeCoords, q)
+        NodeCoords, q = _SmartLaplacianSmoothing_iterate(NodeCoords, NodeConn, q, FreeNodes, SurfNodes, NodeNormals, flat_neighbors, neighbor_indices, flat_conn, conn_indices, TangentialSurface, nneighbors)
 
     if InPlace:
         Mnew = M
@@ -723,6 +637,35 @@ def SmartLaplacianSmoothing(M, target='mean', TangentialSurface=True, labels=Non
     Mnew.NodeCoords = NodeCoords
 
     return Mnew
+
+# @try_njit
+def _SmartLaplacianSmoothing_iterate(NodeCoords, NodeConn, q, FreeNodes, SurfNodes, NodeNormals, flat_neighbors, neighbor_indices, flat_conn, conn_indices, TangentialSurface, nneighbors):
+    
+    for inode in FreeNodes:
+        this_elemconn = flat_conn[conn_indices[inode]:conn_indices[inode+1]]
+        oldq = q[this_elemconn].copy()
+
+        Q = NodeCoords[flat_neighbors[neighbor_indices[inode]:neighbor_indices[inode+1]]]
+        if TangentialSurface and inode in SurfNodes:
+            u = (1/nneighbors[inode]) * np.sum(Q - NodeCoords[inode],axis=0)
+            U = 1*(u - np.sum(u*NodeNormals[inode],axis=0)*NodeNormals[inode])
+        else:
+            U = (1/nneighbors[inode]) * np.sum(Q - NodeCoords[inode],axis=0)
+        NodeCoords[inode] += U
+
+        oldqmin = np.min(q[this_elemconn])
+        for i,e in enumerate(this_elemconn):
+            newq = quality._ModifiedMeanRatio(NodeCoords, NodeConn[e])
+            if newq < oldqmin or quality._tet_volume(NodeCoords,NodeConn[e])<=0:
+                # revert and terminate
+                for j,ee in enumerate(this_elemconn[:i+1]):
+                    q[ee] = oldq[j]
+                NodeCoords[inode] -= U
+                break
+            else:
+                q[e] = newq
+
+    return NodeCoords, q
 
 def GeoTransformSmoothing(M, sigma_min=None, sigma_max=None, eta=None, rho=None, qualityThreshold=.2, options=dict()):
     """

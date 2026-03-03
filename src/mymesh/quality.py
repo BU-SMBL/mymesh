@@ -520,23 +520,134 @@ def MeanRatio(NodeCoords,NodeConn,verbose=False):
 
     return q
 
+def ModifiedMeanRatio(NodeCoords, NodeConn, verbose=False):
+
+    NodeCoords = np.asarray(NodeCoords)
+    NodeConn = np.asarray(NodeConn)
+
+    D = np.empty((len(NodeConn),3,3))
+    D[:,0,:] = NodeCoords[NodeConn[:,1]] - NodeCoords[NodeConn[:,0]]
+    D[:,1,:] = NodeCoords[NodeConn[:,2]] - NodeCoords[NodeConn[:,0]]
+    D[:,2,:] = NodeCoords[NodeConn[:,3]] - NodeCoords[NodeConn[:,0]]
+
+    # W = np.array([
+    #     [1, 1/2, 1/2],
+    #     [0, np.sqrt(3)/2, np.sqrt(3)/6],
+    #     [0, 0, np.sqrt(2/3)]
+    # ])            
+    Winv = np.array([[ 1.        , -0.57735027, -0.40824829],
+                    [ 0.        ,  1.15470054, -0.40824829],
+                    [ 0.        ,  0.        ,  1.22474487]])
+    
+    # Matrix multiplication in a numba-friendly style
+    S = np.dot(D.reshape(-1,3), Winv).reshape(D.shape)
+
+    Sfrob = np.linalg.norm(S, ord='fro', axis=(1,2))
+    det = np.linalg.det(S)
+    eps = np.finfo(float).eps
+    delta = np.sqrt(eps*(eps - det.min())) if det.min() < eps else 0
+    h = 0.5 * (det + np.sqrt(det**2 + 4*delta**2))
+
+    q = 3*h**(2/3) / Sfrob**2
+
+    if verbose:
+        minq = min(q)
+        maxq = max(q)
+        meanq = np.mean(q)
+        print('------------------------------------------')
+        print(f'Minimum Mean Ratio: {minq:.3f} on Element {np.where(q==minq)[0][0]:.0f}')
+        print(f'Maximum Mean Ratio: {maxq:.3f} on Element {np.where(q==maxq)[0][0]:.0f}')
+        print(f'Mean Mean Ratio: {meanq:.3f}')
+        print('------------------------------------------')
+    return q
+
 @try_njit
-def _MeanRatio(NodeCoords, NodeConn):
+def _MeanRatio(NodeCoords, elem):
 
-    W = np.array([
-        [1, 1/2, 1/2],
-        [0, np.sqrt(3)/2, np.sqrt(3)/6],
-        [0, 0, np.sqrt(2/3)]
-    ])            
-    Winv = np.linalg.inv(W)
+    # W = np.array([
+    #     [1, 1/2, 1/2],
+    #     [0, np.sqrt(3)/2, np.sqrt(3)/6],
+    #     [0, 0, np.sqrt(2/3)]
+    # ])            
+    # W inverse
+    w00, w01, w02 = 1, -0.57735027, -0.40824829
+    w10, w11, w12 = 0,  1.15470054, -0.40824829
+    w20, w21, w22 = 0,  0,  1.22474487
 
-    q = np.zeros(len(NodeConn))
-    for i in range(len(NodeConn)):
-        D = NodeCoords[NodeConn[i,np.array([1,2,3])]] - NodeCoords[NodeConn[i,0]] 
-        S = D @ Winv
-        Sfrob = np.sqrt(np.sum(S ** 2)) # Frobenius norm
-        det = np.linalg.det(S)
-        q[i] = 3*det**(2/3) / Sfrob**2
+    D00 = NodeCoords[elem[1], 0] - NodeCoords[elem[0], 0]
+    D01 = NodeCoords[elem[1], 1] - NodeCoords[elem[0], 1]
+    D02 = NodeCoords[elem[1], 2] - NodeCoords[elem[0], 2]
+    D10 = NodeCoords[elem[2], 0] - NodeCoords[elem[0], 0]
+    D11 = NodeCoords[elem[2], 1] - NodeCoords[elem[0], 1]
+    D12 = NodeCoords[elem[2], 2] - NodeCoords[elem[0], 2]
+    D20 = NodeCoords[elem[3], 0] - NodeCoords[elem[0], 0]
+    D21 = NodeCoords[elem[3], 1] - NodeCoords[elem[0], 1]
+    D22 = NodeCoords[elem[3], 2] - NodeCoords[elem[0], 2]
+
+    S00 = D00*w00 + D01*w10 + D02*w20
+    S01 = D00*w01 + D01*w11 + D02*w21
+    S02 = D00*w02 + D01*w12 + D02*w22
+    S10 = D10*w00 + D11*w10 + D12*w20
+    S11 = D10*w01 + D11*w11 + D12*w21
+    S12 = D10*w02 + D11*w12 + D12*w22
+    S20 = D20*w00 + D21*w10 + D22*w20
+    S21 = D20*w01 + D21*w11 + D22*w21
+    S22 = D20*w02 + D21*w12 + D22*w22
+
+    Sfrob = np.sqrt(S00**2 + S01**2 + S02**2 + \
+                    S10**2 + S11**2 + S12**2 + \
+                    S20**2 + S21**2 + S22**2)
+
+    det = S00*(S11*S22 - S21*S12) - S01*(S10*S22 - S12*S20) + S02*(S10*S21 - S20*S11)
+
+    q = 3*det**(2/3) / Sfrob**2
+
+    return q
+
+@try_njit
+def _ModifiedMeanRatio(NodeCoords, elem):
+
+    # W = np.array([
+    #     [1, 1/2, 1/2],
+    #     [0, np.sqrt(3)/2, np.sqrt(3)/6],
+    #     [0, 0, np.sqrt(2/3)]
+    # ])            
+    # W inverse
+    w00, w01, w02 = 1, -0.57735027, -0.40824829
+    w10, w11, w12 = 0,  1.15470054, -0.40824829
+    w20, w21, w22 = 0,  0,  1.22474487
+
+    D00 = NodeCoords[elem[1], 0] - NodeCoords[elem[0], 0]
+    D01 = NodeCoords[elem[1], 1] - NodeCoords[elem[0], 1]
+    D02 = NodeCoords[elem[1], 2] - NodeCoords[elem[0], 2]
+    D10 = NodeCoords[elem[2], 0] - NodeCoords[elem[0], 0]
+    D11 = NodeCoords[elem[2], 1] - NodeCoords[elem[0], 1]
+    D12 = NodeCoords[elem[2], 2] - NodeCoords[elem[0], 2]
+    D20 = NodeCoords[elem[3], 0] - NodeCoords[elem[0], 0]
+    D21 = NodeCoords[elem[3], 1] - NodeCoords[elem[0], 1]
+    D22 = NodeCoords[elem[3], 2] - NodeCoords[elem[0], 2]
+
+    S00 = D00*w00 + D01*w10 + D02*w20
+    S01 = D00*w01 + D01*w11 + D02*w21
+    S02 = D00*w02 + D01*w12 + D02*w22
+    S10 = D10*w00 + D11*w10 + D12*w20
+    S11 = D10*w01 + D11*w11 + D12*w21
+    S12 = D10*w02 + D11*w12 + D12*w22
+    S20 = D20*w00 + D21*w10 + D22*w20
+    S21 = D20*w01 + D21*w11 + D22*w21
+    S22 = D20*w02 + D21*w12 + D22*w22
+
+    Sfrob = np.sqrt(S00**2 + S01**2 + S02**2 + \
+                    S10**2 + S11**2 + S12**2 + \
+                    S20**2 + S21**2 + S22**2)
+
+    det = S00*(S11*S22 - S21*S12) - S01*(S10*S22 - S12*S20) + S02*(S10*S21 - S20*S11)
+
+    eps = 2.220446049250313e-16 # np.finfo(float).eps
+    delta2 = eps*(eps - det) if det < eps else 0.
+    h = 0.5 * (det + np.sqrt(det**2 + 4*delta2))
+
+    q = 3*h**(2/3) / Sfrob**2
 
     return q
 
@@ -747,6 +858,40 @@ def tet_volume(NodeCoords, NodeConn):
     pt3 = NodeCoords[NodeConn[:,3]]
     vol = -np.sum((pt0-pt1)*np.cross((pt1-pt3),(pt2-pt3)),axis=1)/6
 
+    return vol
+
+@try_njit(cache=True)
+def _tet_volume(NodeCoords, elem):
+    """
+    Element volume for a single tetrahedron.
+
+    .. math::
+
+        V = -\\frac{(v_0 - v_1)\\cdot ((v_1 - v_3) \\times (v_2 - v_3))}{6}
+
+    where :math:`v_0`, :math:`v_1`, :math:`v_2`, and :math:`v_3` are the coordinates
+    :math:`(x,y,z)` of the vertices.
+
+    Parameters
+    ----------
+    NodeCoords : np.ndarray
+        Node coordinates (shape=(n,3))
+    elem : np.ndarray
+        Node connectivity of a single element (shape=(4,), dtype=int)
+
+    Returns
+    -------
+    vol : float
+        Volume of each tetrahedron
+    """   
+    pt0 = NodeCoords[elem[0]]
+    pt1 = NodeCoords[elem[1]]
+    pt2 = NodeCoords[elem[2]]
+    pt3 = NodeCoords[elem[3]]
+    v0x, v0y, v0z = pt0 - pt1
+    v1x, v1y, v1z = pt1 - pt3
+    v2x, v2y, v2z = pt2 - pt3
+    vol = -(v0x * (v1y*v2z - v1z*v2y) - v0y * (v1x*v2z - v1z*v2x) + v0z * (v1x*v2y - v1y*v2x))/6
     return vol
 
 def tet_circumradius(NodeCoords, NodeConn, V=None):
