@@ -21,7 +21,7 @@ voxelsize = (0.337891, 0.337891, 0.5) # mm
 # The full image can be converted to a voxel mesh, with an element for every voxel, or a threshold can be applied to extract an object from the image.
 # The image can also be coarsened (or refined) with the :code:`scalefactor` input to create a coarser mesh.
 # For images other than the demo image, files (or directories of files, such as DICOMs) can be read with :func:mymesh.image.read, or 3D numpy arrays can be used directly (see also: :ref:`guide_image`)
-bunny_voxel = image.VoxelMesh(bunny_img, voxelsize, scalefactor=0.75)
+bunny_voxel = image.VoxelMesh(bunny_img, voxelsize, scalefactor=0.5)
 half_voxel = bunny_voxel.Clip(normal=[0,1,0])
 
 bunny_voxel2 = image.VoxelMesh(bunny_img, voxelsize, threshold, scalefactor=0.2)
