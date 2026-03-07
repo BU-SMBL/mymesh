@@ -3150,7 +3150,7 @@ def im2voxel(img, voxelsize, scalefactor=1, scaleorder=1, return_gradient=False,
                 # if return_gradient: GradData = GradData[Data>=threshold]
                 VoxelCoords,VoxelConn,ids = utils.RemoveNodes(VoxelCoords,VoxelConn)
                 Data = Data[ids]
-                GradData = GradData[ids]
+                if return_gradient: GradData = GradData[ids]
                 VoxelConn = np.asarray(VoxelConn)
 
             elif threshold_direction == -1:
