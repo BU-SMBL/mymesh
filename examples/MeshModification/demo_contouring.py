@@ -42,7 +42,7 @@ bunny_img = demo_image('bunny')
 
 voxelsize = (0.337891, 0.337891, 0.5) # mm
 threshold = 100
-bunny_tet = image.TetMesh(bunny_img, voxelsize, threshold, scalefactor=0.5, interpolation='linear', voxel_mode='elem')
+bunny_tet = image.TetMesh(bunny_img, voxelsize, threshold, scalefactor=0.35, interpolation='linear', voxel_mode='elem')
 bunny_tet.plot(view='-x-z')
 
 fischer_koch_S = implicit.wrapfunc(implicit.thicken(implicit.tpms('S', 20), 1))
