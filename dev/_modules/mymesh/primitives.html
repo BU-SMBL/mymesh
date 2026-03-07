@@ -178,8 +178,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -192,8 +192,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -312,15 +312,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -1546,7 +1546,8 @@
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)),</span> <span class="s1">&#39;axis must be either 0, 1, or 2 (indicating x, y, z axes) or a 3 element vector.&#39;</span>
         <span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
     
-    <span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">angle</span><span class="o">+</span><span class="n">anglestep</span><span class="p">,</span> <span class="n">anglestep</span><span class="p">)</span>
+    <span class="c1"># thetas = np.arange(0, angle+anglestep, anglestep)</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="n">anglestep</span><span class="p">)))</span>
     <span class="n">outer_prod</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span><span class="n">axis</span><span class="p">)</span>
     <span class="n">cross_prod_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
     <span class="n">cross_prod_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">axis</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>

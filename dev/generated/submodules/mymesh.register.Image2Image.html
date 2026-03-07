@@ -181,8 +181,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -195,8 +195,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -317,15 +317,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -370,6 +370,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.mesh.html">mymesh.mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.dmesh.html">mymesh.dmesh</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.booleans.html">mymesh.booleans</a></li>
@@ -503,7 +504,7 @@ variant (e.g. ‘rigid’ -&gt; ‘rigid2d’)</p>
 or increase (scale &gt; 1) the size/resolution of the image, by default
 1. The returned image will still be of the original resolution.</p></li>
 <li><p><strong>interpolation_order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Interpolation order used in image transformation (see
-<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html#affine-transform">scipy.ndimage.affine_transform</a>)
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html#scipy.ndimage.affine_transform" title="(in SciPy v1.17.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.affine_transform()</span></code></a>)
 and scaling (if used). Must be an integer in the range 0-5. Lower order
 is more efficient at the cost of quality. By default, 1.</p></li>
 <li><p><strong>threshold</strong> (<em>NoneType</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>, </em><em>optional</em>) – Threshold value(s) to binarize the images. Images are binarized by <cite>img &gt; threshold</cite>.
@@ -515,9 +516,8 @@ is chosen). Images can be binarized arbitrarily, consisting of <cite>True</cite>
 <cite>255</cite>/<cite>0</cite>, etc. If the image is not already binarized and no threshold is given, the
 threshold value will be the midpoint of the range of values for each image (which may
 not give the intended result). By default, None.</p></li>
-<li><p><strong>transform_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – <p>Optional input arguments passed to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html">scipy.ndimage.affine_transform</a>, by
-default <cite>dict(mode=’constant’, order=interpolation_order)</cite>.</p>
-</p></li>
+<li><p><strong>transform_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Optional input arguments passed to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html#scipy.ndimage.affine_transform" title="(in SciPy v1.17.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.affine_transform()</span></code></a>, by
+default <cite>dict(mode=’constant’, order=interpolation_order)</cite>.</p></li>
 <li><p><strong>optimizer_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Additional arguments for the chosen optimizer, by default None. See
 <a class="reference internal" href="mymesh.register.optimize.html#mymesh.register.optimize" title="mymesh.register.optimize"><code class="xref py py-func docutils literal notranslate"><span class="pre">optimize()</span></code></a> for details.</p></li>
 <li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Verbosity, by default True. If True, iteration progress will be printed.</p></li>

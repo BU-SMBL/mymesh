@@ -181,8 +181,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -195,8 +195,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -317,15 +317,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -370,6 +370,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.mesh.html">mymesh.mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.dmesh.html">mymesh.dmesh</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.booleans.html">mymesh.booleans</a></li>
@@ -458,7 +459,7 @@
 <h1>mymesh.improvement.SmartLaplacianSmoothing<a class="headerlink" href="#mymesh-improvement-smartlaplaciansmoothing" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.improvement.SmartLaplacianSmoothing">
-<span class="sig-prename descclassname"><span class="pre">mymesh.improvement.</span></span><span class="sig-name descname"><span class="pre">SmartLaplacianSmoothing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TangentialSurface</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/improvement.html#SmartLaplacianSmoothing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.improvement.SmartLaplacianSmoothing" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mymesh.improvement.</span></span><span class="sig-name descname"><span class="pre">SmartLaplacianSmoothing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TangentialSurface</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/improvement.html#SmartLaplacianSmoothing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.improvement.SmartLaplacianSmoothing" title="Link to this definition">#</a></dt>
 <dd><p>Performs smart Laplacian smoothing <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id36" title="Lori A. Freitag. On combining laplacian and optimization-based mesh smoothing techniques. American Society of Mechanical Engineers, Applied Mechanics Division, AMD, 220:37-43, 1997.">Fre97</a>]</span>, repositioning
 each node to the center of its adjacent nodes only if doing so doesn’t
 reduce the element quality.</p>
@@ -466,12 +467,6 @@ reduce the element quality.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>M</strong> (<a class="reference internal" href="../mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><em>mymesh.mesh</em></a>) – Mesh object to smooth</p></li>
-<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – <p>Determines whether criteria for repositioning a node, by default ‘mean’.</p>
-<p>’mean’ - repositioning is allowed if the average quality of the connected
-elements doesn’t decrease.</p>
-<p>’min’ - repositioning is allowed if the minimum quality of the connected
-elements doesn’t decrease.</p>
-</p></li>
 <li><p><strong>TangentialSurface</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Option to use tangential Laplacian smoothing on the surface (and interfaces,
 if labels are provided), by default True.</p></li>
 <li><p><strong>options</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – <p>Smoothing options. Available options are:</p>
@@ -499,9 +494,6 @@ are fixed.</p>
 </dd>
 <dt>FixSurf<span class="classifier">bool</span></dt><dd><p>If true, all nodes on the surface will be held in place and only
 interior nodes will be smoothed, by default False.</p>
-</dd>
-<dt>qualityFunc<span class="classifier">function</span></dt><dd><p>Function used for computing quality. It is assumed that a larger
-number corresponds to higher quality, be default quality.MeanRatio</p>
 </dd>
 <dt>InPlace<span class="classifier">bool</span></dt><dd><p>If True, the input mesh is modified directly, otherwise a new copy of the mesh
 is created, by default False.</p>

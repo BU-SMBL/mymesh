@@ -181,8 +181,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
@@ -195,8 +195,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -317,15 +317,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -370,6 +370,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="mymesh.mesh.html">mymesh.mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.dmesh.html">mymesh.dmesh</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="mymesh.booleans.html">mymesh.booleans</a></li>
@@ -551,7 +552,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.utils.Project2Surface.html#mymesh.utils.Project2Surface" title="mymesh.utils.Project2Surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Project2Surface</span></code></a>(Points, Normals, NodeCoords, ...)</p></td>
 <td><p>Projects a node along its normal vector onto a surface.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.utils.BaryTri.html#mymesh.utils.BaryTri" title="mymesh.utils.BaryTri"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaryTri</span></code></a>(Nodes, Pt)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.utils.BaryTri.html#mymesh.utils.BaryTri" title="mymesh.utils.BaryTri"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaryTri</span></code></a>(Nodes, Pt[, d])</p></td>
 <td><p>Returns the bary centric coordinates of a point (Pt) relative to a triangle (Nodes)</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.utils.BaryTris.html#mymesh.utils.BaryTris" title="mymesh.utils.BaryTris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaryTris</span></code></a>(Tris, Pt)</p></td>
@@ -579,6 +580,9 @@
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.utils.RelabelNodes.html#mymesh.utils.RelabelNodes" title="mymesh.utils.RelabelNodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RelabelNodes</span></code></a>(NodeCoords, NodeConn, newIds[, ...])</p></td>
 <td><p>Relabel the nodes in the mesh according to the newIds list</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.utils.RemoveNodes.html#mymesh.utils.RemoveNodes" title="mymesh.utils.RemoveNodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RemoveNodes</span></code></a>(NodeCoords, NodeConn)</p></td>
+<td><p>Removes nodes that aren't held by any element</p></td>
 </tr>
 </tbody>
 </table>

@@ -68,8 +68,8 @@
         </script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Mesh Smoothing" href="demo_smoothing.html" />
-    <link rel="prev" title="Mixed-Topology TPMS" href="../MeshGeneration/demo_mixed-top.html" />
+    <link rel="next" title="Conversion" href="demo_conversion.html" />
+    <link rel="prev" title="Image-based Meshing" href="../MeshGeneration/demo_image-based.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -181,8 +181,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -195,8 +195,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -317,15 +317,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -435,12 +435,24 @@
   <section id="mesh-modification-examples">
 <span id="sphx-glr-examples-meshmodification"></span><h1>Mesh Modification Examples<a class="headerlink" href="#mesh-modification-examples" title="Link to this heading">#</a></h1>
 <p>Examples for modifying/manipulating meshes.</p>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="This example illustrates the effects of different smoothing methods. Smoothing a mesh can serve two purposes - the first is to smooth the geometry, rounding out sharp features; the second is to redistribute nodes, often in pursuit of improved element quality. When attempting to improve element quality, often the goal is to redistribute the nodes while having a minimal effect on the geometry. Different smoothing methods have different effects on the geometry."><img alt="" src="../../_images/sphx_glr_demo_smoothing_thumb.png" />
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="The mymesh.converter module contains many functions to convert between different types of meshes. This example will highlight a few of them."><img alt="" src="../../_images/sphx_glr_demo_conversion_thumb.png" />
+<p><a class="reference internal" href="demo_conversion.html"><span class="doc">Conversion</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Conversion</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Contouring can be used to create meshes from images, implicit functions, or other scalar fields.  It can also be used to modify existing meshes, for example by evaluating  implicit functions at the nodes of the mesh."><img alt="" src="../../_images/sphx_glr_demo_contouring_thumb.png" />
+<p><a class="reference internal" href="demo_contouring.html"><span class="doc">Contouring</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Contouring</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Mesh coarsening can be performed as part of a mesh quality improvement process, or to reduce the resolution/complexity of a mesh for various other purposes. The Contract function supports coarsening of either tetrahedral or triangular meshes by contracting edges to achieve the desired edge length. For non-triangular or non-tetrahedral meshes, they can be first  converted using solid2tets or surf2tris (see also Conversion)."><img alt="" src="../../_images/sphx_glr_demo_coarsening_thumb.png" />
+<p><a class="reference internal" href="demo_coarsening.html"><span class="doc">Coarsening</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Coarsening</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example illustrates the effects of different smoothing methods. Smoothing a mesh can serve two purposes - the first is to smooth the geometry, rounding out sharp features; the second is to redistribute nodes, often in pursuit of improved element quality. When attempting to improve element quality, often the goal is to redistribute the nodes while having a minimal effect on the geometry. Different smoothing methods have different effects on the geometry."><img alt="" src="../../_images/sphx_glr_demo_smoothing_thumb.png" />
 <p><a class="reference internal" href="demo_smoothing.html"><span class="doc">Mesh Smoothing</span></a></p>
   <div class="sphx-glr-thumbnail-title">Mesh Smoothing</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This example illustrates registration of meshes and images using the Stanford Bunny."><img alt="" src="../../_images/sphx_glr_demo_registration_thumb.png" />
 <p><a class="reference internal" href="demo_registration.html"><span class="doc">Registration</span></a></p>
   <div class="sphx-glr-thumbnail-title">Registration</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="See also: improvement, quality, theory_improvement"><img alt="" src="../../_images/sphx_glr_demo_improvement_thumb.png" />
+<p><a class="reference internal" href="demo_improvement.html"><span class="doc">Mesh quality improvement</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Mesh quality improvement</div>
 </div></div><div class="toctree-wrapper compound">
 </div>
 </section>
@@ -456,20 +468,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../MeshGeneration/demo_mixed-top.html"
+       href="../MeshGeneration/demo_image-based.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Mixed-Topology TPMS</p>
+        <p class="prev-next-title">Image-based Meshing</p>
       </div>
     </a>
     <a class="right-next"
-       href="demo_smoothing.html"
+       href="demo_conversion.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Mesh Smoothing</p>
+        <p class="prev-next-title">Conversion</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

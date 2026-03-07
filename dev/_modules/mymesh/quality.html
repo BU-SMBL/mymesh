@@ -178,8 +178,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -192,8 +192,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -312,15 +312,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -966,23 +966,134 @@
     <span class="k">return</span> <span class="n">q</span></div>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">ModifiedMeanRatio</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
+    <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span>
+
+    <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">),</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">D</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">D</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">D</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]]</span>
+
+    <span class="c1"># W = np.array([</span>
+    <span class="c1">#     [1, 1/2, 1/2],</span>
+    <span class="c1">#     [0, np.sqrt(3)/2, np.sqrt(3)/6],</span>
+    <span class="c1">#     [0, 0, np.sqrt(2/3)]</span>
+    <span class="c1"># ])            </span>
+    <span class="n">Winv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span> <span class="mf">1.</span>        <span class="p">,</span> <span class="o">-</span><span class="mf">0.57735027</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.40824829</span><span class="p">],</span>
+                    <span class="p">[</span> <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">1.15470054</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.40824829</span><span class="p">],</span>
+                    <span class="p">[</span> <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">1.22474487</span><span class="p">]])</span>
+    
+    <span class="c1"># Matrix multiplication in a numba-friendly style</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">Winv</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="n">Sfrob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="s1">&#39;fro&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">det</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eps</span><span class="o">*</span><span class="p">(</span><span class="n">eps</span> <span class="o">-</span> <span class="n">det</span><span class="o">.</span><span class="n">min</span><span class="p">()))</span> <span class="k">if</span> <span class="n">det</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">eps</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">det</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">det</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">delta</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">q</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">h</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="n">Sfrob</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">minq</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">maxq</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">meanq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimum Mean Ratio: </span><span class="si">{</span><span class="n">minq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">q</span><span class="o">==</span><span class="n">minq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum Mean Ratio: </span><span class="si">{</span><span class="n">maxq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">q</span><span class="o">==</span><span class="n">maxq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Mean Ratio: </span><span class="si">{</span><span class="n">meanq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">q</span>
+
 <span class="nd">@try_njit</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_MeanRatio</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_MeanRatio</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
 
-    <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>
-        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="mi">6</span><span class="p">],</span>
-        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)]</span>
-    <span class="p">])</span>            
-    <span class="n">Winv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
+    <span class="c1"># W = np.array([</span>
+    <span class="c1">#     [1, 1/2, 1/2],</span>
+    <span class="c1">#     [0, np.sqrt(3)/2, np.sqrt(3)/6],</span>
+    <span class="c1">#     [0, 0, np.sqrt(2/3)]</span>
+    <span class="c1"># ])            </span>
+    <span class="c1"># W inverse</span>
+    <span class="n">w00</span><span class="p">,</span> <span class="n">w01</span><span class="p">,</span> <span class="n">w02</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.57735027</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.40824829</span>
+    <span class="n">w10</span><span class="p">,</span> <span class="n">w11</span><span class="p">,</span> <span class="n">w12</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>  <span class="mf">1.15470054</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.40824829</span>
+    <span class="n">w20</span><span class="p">,</span> <span class="n">w21</span><span class="p">,</span> <span class="n">w22</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>  <span class="mf">1.22474487</span>
 
-    <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)):</span>
-        <span class="n">D</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])]]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span> 
-        <span class="n">S</span> <span class="o">=</span> <span class="n">D</span> <span class="o">@</span> <span class="n">Winv</span>
-        <span class="n">Sfrob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">S</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="c1"># Frobenius norm</span>
-        <span class="n">det</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
-        <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">det</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="n">Sfrob</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">D00</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">D01</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">D02</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">D10</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">D11</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">D12</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">D20</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">D21</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">D22</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">S00</span> <span class="o">=</span> <span class="n">D00</span><span class="o">*</span><span class="n">w00</span> <span class="o">+</span> <span class="n">D01</span><span class="o">*</span><span class="n">w10</span> <span class="o">+</span> <span class="n">D02</span><span class="o">*</span><span class="n">w20</span>
+    <span class="n">S01</span> <span class="o">=</span> <span class="n">D00</span><span class="o">*</span><span class="n">w01</span> <span class="o">+</span> <span class="n">D01</span><span class="o">*</span><span class="n">w11</span> <span class="o">+</span> <span class="n">D02</span><span class="o">*</span><span class="n">w21</span>
+    <span class="n">S02</span> <span class="o">=</span> <span class="n">D00</span><span class="o">*</span><span class="n">w02</span> <span class="o">+</span> <span class="n">D01</span><span class="o">*</span><span class="n">w12</span> <span class="o">+</span> <span class="n">D02</span><span class="o">*</span><span class="n">w22</span>
+    <span class="n">S10</span> <span class="o">=</span> <span class="n">D10</span><span class="o">*</span><span class="n">w00</span> <span class="o">+</span> <span class="n">D11</span><span class="o">*</span><span class="n">w10</span> <span class="o">+</span> <span class="n">D12</span><span class="o">*</span><span class="n">w20</span>
+    <span class="n">S11</span> <span class="o">=</span> <span class="n">D10</span><span class="o">*</span><span class="n">w01</span> <span class="o">+</span> <span class="n">D11</span><span class="o">*</span><span class="n">w11</span> <span class="o">+</span> <span class="n">D12</span><span class="o">*</span><span class="n">w21</span>
+    <span class="n">S12</span> <span class="o">=</span> <span class="n">D10</span><span class="o">*</span><span class="n">w02</span> <span class="o">+</span> <span class="n">D11</span><span class="o">*</span><span class="n">w12</span> <span class="o">+</span> <span class="n">D12</span><span class="o">*</span><span class="n">w22</span>
+    <span class="n">S20</span> <span class="o">=</span> <span class="n">D20</span><span class="o">*</span><span class="n">w00</span> <span class="o">+</span> <span class="n">D21</span><span class="o">*</span><span class="n">w10</span> <span class="o">+</span> <span class="n">D22</span><span class="o">*</span><span class="n">w20</span>
+    <span class="n">S21</span> <span class="o">=</span> <span class="n">D20</span><span class="o">*</span><span class="n">w01</span> <span class="o">+</span> <span class="n">D21</span><span class="o">*</span><span class="n">w11</span> <span class="o">+</span> <span class="n">D22</span><span class="o">*</span><span class="n">w21</span>
+    <span class="n">S22</span> <span class="o">=</span> <span class="n">D20</span><span class="o">*</span><span class="n">w02</span> <span class="o">+</span> <span class="n">D21</span><span class="o">*</span><span class="n">w12</span> <span class="o">+</span> <span class="n">D22</span><span class="o">*</span><span class="n">w22</span>
+
+    <span class="n">Sfrob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">S00</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">S01</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">S02</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> \
+                    <span class="n">S10</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">S11</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">S12</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> \
+                    <span class="n">S20</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">S21</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">S22</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">det</span> <span class="o">=</span> <span class="n">S00</span><span class="o">*</span><span class="p">(</span><span class="n">S11</span><span class="o">*</span><span class="n">S22</span> <span class="o">-</span> <span class="n">S21</span><span class="o">*</span><span class="n">S12</span><span class="p">)</span> <span class="o">-</span> <span class="n">S01</span><span class="o">*</span><span class="p">(</span><span class="n">S10</span><span class="o">*</span><span class="n">S22</span> <span class="o">-</span> <span class="n">S12</span><span class="o">*</span><span class="n">S20</span><span class="p">)</span> <span class="o">+</span> <span class="n">S02</span><span class="o">*</span><span class="p">(</span><span class="n">S10</span><span class="o">*</span><span class="n">S21</span> <span class="o">-</span> <span class="n">S20</span><span class="o">*</span><span class="n">S11</span><span class="p">)</span>
+
+    <span class="n">q</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">det</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="n">Sfrob</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">q</span>
+
+<span class="nd">@try_njit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_ModifiedMeanRatio</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+
+    <span class="c1"># W = np.array([</span>
+    <span class="c1">#     [1, 1/2, 1/2],</span>
+    <span class="c1">#     [0, np.sqrt(3)/2, np.sqrt(3)/6],</span>
+    <span class="c1">#     [0, 0, np.sqrt(2/3)]</span>
+    <span class="c1"># ])            </span>
+    <span class="c1"># W inverse</span>
+    <span class="n">w00</span><span class="p">,</span> <span class="n">w01</span><span class="p">,</span> <span class="n">w02</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.57735027</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.40824829</span>
+    <span class="n">w10</span><span class="p">,</span> <span class="n">w11</span><span class="p">,</span> <span class="n">w12</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>  <span class="mf">1.15470054</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.40824829</span>
+    <span class="n">w20</span><span class="p">,</span> <span class="n">w21</span><span class="p">,</span> <span class="n">w22</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>  <span class="mf">1.22474487</span>
+
+    <span class="n">D00</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">D01</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">D02</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">D10</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">D11</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">D12</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">D20</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">D21</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">D22</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">S00</span> <span class="o">=</span> <span class="n">D00</span><span class="o">*</span><span class="n">w00</span> <span class="o">+</span> <span class="n">D01</span><span class="o">*</span><span class="n">w10</span> <span class="o">+</span> <span class="n">D02</span><span class="o">*</span><span class="n">w20</span>
+    <span class="n">S01</span> <span class="o">=</span> <span class="n">D00</span><span class="o">*</span><span class="n">w01</span> <span class="o">+</span> <span class="n">D01</span><span class="o">*</span><span class="n">w11</span> <span class="o">+</span> <span class="n">D02</span><span class="o">*</span><span class="n">w21</span>
+    <span class="n">S02</span> <span class="o">=</span> <span class="n">D00</span><span class="o">*</span><span class="n">w02</span> <span class="o">+</span> <span class="n">D01</span><span class="o">*</span><span class="n">w12</span> <span class="o">+</span> <span class="n">D02</span><span class="o">*</span><span class="n">w22</span>
+    <span class="n">S10</span> <span class="o">=</span> <span class="n">D10</span><span class="o">*</span><span class="n">w00</span> <span class="o">+</span> <span class="n">D11</span><span class="o">*</span><span class="n">w10</span> <span class="o">+</span> <span class="n">D12</span><span class="o">*</span><span class="n">w20</span>
+    <span class="n">S11</span> <span class="o">=</span> <span class="n">D10</span><span class="o">*</span><span class="n">w01</span> <span class="o">+</span> <span class="n">D11</span><span class="o">*</span><span class="n">w11</span> <span class="o">+</span> <span class="n">D12</span><span class="o">*</span><span class="n">w21</span>
+    <span class="n">S12</span> <span class="o">=</span> <span class="n">D10</span><span class="o">*</span><span class="n">w02</span> <span class="o">+</span> <span class="n">D11</span><span class="o">*</span><span class="n">w12</span> <span class="o">+</span> <span class="n">D12</span><span class="o">*</span><span class="n">w22</span>
+    <span class="n">S20</span> <span class="o">=</span> <span class="n">D20</span><span class="o">*</span><span class="n">w00</span> <span class="o">+</span> <span class="n">D21</span><span class="o">*</span><span class="n">w10</span> <span class="o">+</span> <span class="n">D22</span><span class="o">*</span><span class="n">w20</span>
+    <span class="n">S21</span> <span class="o">=</span> <span class="n">D20</span><span class="o">*</span><span class="n">w01</span> <span class="o">+</span> <span class="n">D21</span><span class="o">*</span><span class="n">w11</span> <span class="o">+</span> <span class="n">D22</span><span class="o">*</span><span class="n">w21</span>
+    <span class="n">S22</span> <span class="o">=</span> <span class="n">D20</span><span class="o">*</span><span class="n">w02</span> <span class="o">+</span> <span class="n">D21</span><span class="o">*</span><span class="n">w12</span> <span class="o">+</span> <span class="n">D22</span><span class="o">*</span><span class="n">w22</span>
+
+    <span class="n">Sfrob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">S00</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">S01</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">S02</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> \
+                    <span class="n">S10</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">S11</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">S12</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> \
+                    <span class="n">S20</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">S21</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">S22</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">det</span> <span class="o">=</span> <span class="n">S00</span><span class="o">*</span><span class="p">(</span><span class="n">S11</span><span class="o">*</span><span class="n">S22</span> <span class="o">-</span> <span class="n">S21</span><span class="o">*</span><span class="n">S12</span><span class="p">)</span> <span class="o">-</span> <span class="n">S01</span><span class="o">*</span><span class="p">(</span><span class="n">S10</span><span class="o">*</span><span class="n">S22</span> <span class="o">-</span> <span class="n">S12</span><span class="o">*</span><span class="n">S20</span><span class="p">)</span> <span class="o">+</span> <span class="n">S02</span><span class="o">*</span><span class="p">(</span><span class="n">S10</span><span class="o">*</span><span class="n">S21</span> <span class="o">-</span> <span class="n">S20</span><span class="o">*</span><span class="n">S11</span><span class="p">)</span>
+
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">2.220446049250313e-16</span> <span class="c1"># np.finfo(float).eps</span>
+    <span class="n">delta2</span> <span class="o">=</span> <span class="n">eps</span><span class="o">*</span><span class="p">(</span><span class="n">eps</span> <span class="o">-</span> <span class="n">det</span><span class="p">)</span> <span class="k">if</span> <span class="n">det</span> <span class="o">&lt;</span> <span class="n">eps</span> <span class="k">else</span> <span class="mf">0.</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">det</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">det</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">delta2</span><span class="p">))</span>
+
+    <span class="n">q</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">h</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="n">Sfrob</span><span class="o">**</span><span class="mi">2</span>
 
     <span class="k">return</span> <span class="n">q</span>
 
@@ -1206,6 +1317,40 @@
 
     <span class="k">return</span> <span class="n">vol</span></div>
 
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_tet_volume</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Element volume for a single tetrahedron.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        V = -\\frac{(v_0 - v_1)\\cdot ((v_1 - v_3) \\times (v_2 - v_3))}{6}</span>
+
+<span class="sd">    where :math:`v_0`, :math:`v_1`, :math:`v_2`, and :math:`v_3` are the coordinates</span>
+<span class="sd">    :math:`(x,y,z)` of the vertices.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    NodeCoords : np.ndarray</span>
+<span class="sd">        Node coordinates (shape=(n,3))</span>
+<span class="sd">    elem : np.ndarray</span>
+<span class="sd">        Node connectivity of a single element (shape=(4,), dtype=int)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    vol : float</span>
+<span class="sd">        Volume of each tetrahedron</span>
+<span class="sd">    &quot;&quot;&quot;</span>   
+    <span class="n">pt0</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">pt1</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">pt2</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+    <span class="n">pt3</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+    <span class="n">v0x</span><span class="p">,</span> <span class="n">v0y</span><span class="p">,</span> <span class="n">v0z</span> <span class="o">=</span> <span class="n">pt0</span> <span class="o">-</span> <span class="n">pt1</span>
+    <span class="n">v1x</span><span class="p">,</span> <span class="n">v1y</span><span class="p">,</span> <span class="n">v1z</span> <span class="o">=</span> <span class="n">pt1</span> <span class="o">-</span> <span class="n">pt3</span>
+    <span class="n">v2x</span><span class="p">,</span> <span class="n">v2y</span><span class="p">,</span> <span class="n">v2z</span> <span class="o">=</span> <span class="n">pt2</span> <span class="o">-</span> <span class="n">pt3</span>
+    <span class="n">vol</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">v0x</span> <span class="o">*</span> <span class="p">(</span><span class="n">v1y</span><span class="o">*</span><span class="n">v2z</span> <span class="o">-</span> <span class="n">v1z</span><span class="o">*</span><span class="n">v2y</span><span class="p">)</span> <span class="o">-</span> <span class="n">v0y</span> <span class="o">*</span> <span class="p">(</span><span class="n">v1x</span><span class="o">*</span><span class="n">v2z</span> <span class="o">-</span> <span class="n">v1z</span><span class="o">*</span><span class="n">v2x</span><span class="p">)</span> <span class="o">+</span> <span class="n">v0z</span> <span class="o">*</span> <span class="p">(</span><span class="n">v1x</span><span class="o">*</span><span class="n">v2y</span> <span class="o">-</span> <span class="n">v1y</span><span class="o">*</span><span class="n">v2x</span><span class="p">))</span><span class="o">/</span><span class="mi">6</span>
+    <span class="k">return</span> <span class="n">vol</span>
 
 <div class="viewcode-block" id="tet_circumradius">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.tet_circumradius.html#mymesh.quality.tet_circumradius">[docs]</a>

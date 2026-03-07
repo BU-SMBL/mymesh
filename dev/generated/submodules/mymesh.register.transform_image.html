@@ -181,8 +181,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -195,8 +195,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -317,15 +317,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -370,6 +370,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.mesh.html">mymesh.mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.dmesh.html">mymesh.dmesh</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.booleans.html">mymesh.booleans</a></li>
@@ -460,7 +461,7 @@
 <dt class="sig sig-object py" id="mymesh.register.transform_image">
 <span class="sig-prename descclassname"><span class="pre">mymesh.register.</span></span><span class="sig-name descname"><span class="pre">transform_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/register.html#transform_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.register.transform_image" title="Link to this definition">#</a></dt>
 <dd><p>Apply transformation matrix to an image. This is essentially an interface
-to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html">scipy.ndimage.affine_transform</a>
+to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html#scipy.ndimage.affine_transform" title="(in SciPy v1.17.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.affine_transform()</span></code></a>
 but takes into account the need to invert the transformation matrix for
 consistency between the “pull” resampling performed by <cite>affine_transform</cite>
 and the “push” transformations used to transform points. The <cite>options</cite> input
@@ -470,14 +471,13 @@ allows for inputting any of the keyword arguments used by <cite>affine_transform
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>image</strong> (<em>array_like</em>) – Image array</p></li>
 <li><p><strong>T</strong> (<em>array_like</em>) – Transformation matrix (either 3x3 or 4x4).</p></li>
-<li><p><strong>options</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – <p>Options to be used by <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html">scipy.ndimage.affine_transform</a>. If none are
+<li><p><strong>options</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Options to be used by <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html#scipy.ndimage.affine_transform" title="(in SciPy v1.17.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.affine_transform()</span></code></a>. If none are
 provide, all defaults will be used, by default dict(). Common options
 that may be used are <cite>mode</cite> to allow wrapping (‘grid-wrap’) or mirroring
 (‘mirror’) to change what happens when the contents of the image are
 moved beyond the bounds of the image, and <cite>order</cite> which changes the
 interpolation order of the transformation (the default is 3,
-transformations can be performed more efficiently by reducing to 1).</p>
-</p></li>
+transformations can be performed more efficiently by reducing to 1).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

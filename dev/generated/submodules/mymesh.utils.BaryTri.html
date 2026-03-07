@@ -181,8 +181,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -195,8 +195,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -317,15 +317,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -370,6 +370,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.mesh.html">mymesh.mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.dmesh.html">mymesh.dmesh</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.booleans.html">mymesh.booleans</a></li>
@@ -458,7 +459,7 @@
 <h1>mymesh.utils.BaryTri<a class="headerlink" href="#mymesh-utils-barytri" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.utils.BaryTri">
-<span class="sig-prename descclassname"><span class="pre">mymesh.utils.</span></span><span class="sig-name descname"><span class="pre">BaryTri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Pt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/utils.html#BaryTri"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.utils.BaryTri" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mymesh.utils.</span></span><span class="sig-name descname"><span class="pre">BaryTri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Pt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/utils.html#BaryTri"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.utils.BaryTri" title="Link to this definition">#</a></dt>
 <dd><p>Returns the bary centric coordinates of a point (Pt) relative to
 a triangle (Nodes)</p>
 <dl class="field-list simple">
@@ -466,6 +467,9 @@ a triangle (Nodes)</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>Nodes</strong> (<em>np.ndarray</em>) – List of coordinates of the triangle vertices.</p></li>
 <li><p><strong>Pt</strong> (<em>np.ndarray</em>) – Coordinates of the point.</p></li>
+<li><p><strong>d</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>NoneType</em>) – Number of dimensions (2 or 3). For points and triangles in a plane,
+barycentric coordinates can be calculated more efficiency.
+In performance-critical applications, always specify either 2 or 3.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

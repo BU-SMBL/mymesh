@@ -32,6 +32,23 @@ Examples for analyzing meshes.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Local (for every node) measurements of pore size and thickness can be obtained by performing ray-surface intersections between the surface node normals and the surface.  This test is, by default, bidirectional, meaning it will find intersections in both the outward direction and the inward direction. Inward intersections correspond to measures of thickness (the rays pass through the &quot;inside&quot; of the surface) while the outward intersections correspond to pore size measurements (the rays pass through the empty pore space and find the next intersection with the object).">
+
+.. only:: html
+
+  .. image:: /examples/MeshAnalysis/images/thumb/sphx_glr_demo_pore-thickness_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshAnalysis/demo_pore-thickness`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Pore size & Thickness measurements</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Curvature Analysis">
 
 .. only:: html
@@ -116,6 +133,23 @@ Examples for different methods of generating meshes.
     </div>
 
 
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example generates different types of image-based meshes using the Stanford bunny as an example.">
+
+.. only:: html
+
+  .. image:: /examples/MeshGeneration/images/thumb/sphx_glr_demo_image-based_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshGeneration/demo_image-based`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Image-based Meshing</div>
+    </div>
+
+
 .. thumbnail-parent-div-close
 
 .. raw:: html
@@ -133,6 +167,57 @@ Examples for modifying/manipulating meshes.
     <div class="sphx-glr-thumbnails">
 
 .. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The mymesh.converter module contains many functions to convert between different types of meshes. This example will highlight a few of them.">
+
+.. only:: html
+
+  .. image:: /examples/MeshModification/images/thumb/sphx_glr_demo_conversion_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshModification/demo_conversion`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Conversion</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Contouring can be used to create meshes from images, implicit functions, or other scalar fields.  It can also be used to modify existing meshes, for example by evaluating  implicit functions at the nodes of the mesh.">
+
+.. only:: html
+
+  .. image:: /examples/MeshModification/images/thumb/sphx_glr_demo_contouring_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshModification/demo_contouring`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Contouring</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Mesh coarsening can be performed as part of a mesh quality improvement process, or to reduce the resolution/complexity of a mesh for various other purposes. The Contract function supports coarsening of either tetrahedral or triangular meshes by contracting edges to achieve the desired edge length. For non-triangular or non-tetrahedral meshes, they can be first  converted using solid2tets or surf2tris (see also Conversion).">
+
+.. only:: html
+
+  .. image:: /examples/MeshModification/images/thumb/sphx_glr_demo_coarsening_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshModification/demo_coarsening`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Coarsening</div>
+    </div>
+
 
 .. raw:: html
 
@@ -165,6 +250,23 @@ Examples for modifying/manipulating meshes.
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Registration</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="See also: improvement, quality, theory_improvement">
+
+.. only:: html
+
+  .. image:: /examples/MeshModification/images/thumb/sphx_glr_demo_improvement_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshModification/demo_improvement`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Mesh quality improvement</div>
     </div>
 
 

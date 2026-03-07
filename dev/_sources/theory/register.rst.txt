@@ -1,4 +1,5 @@
-.. _theory-register:
+.. _theory_register:
+
 Register
 ========
 

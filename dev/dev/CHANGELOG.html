@@ -180,9 +180,9 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
@@ -194,9 +194,9 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../verify.html">
-    Verification
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -316,16 +316,16 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../verify.html">
-    Verification
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -439,6 +439,8 @@
 <section id="feat">
 <h3>Feat<a class="headerlink" href="#feat" title="Link to this heading">#</a></h3>
 <ul class="simple">
+<li><p><strong>improvement.Improve</strong>: update TetImprove to Improve, add tests</p></li>
+<li><p><strong>mesh.plot</strong>: add optional input for title</p></li>
 <li><p><strong>contour</strong>: add voxel_mode option to SurfaceMesh and TetMesh</p></li>
 <li><p><strong>tree</strong>: Add KDTree query_knn</p></li>
 <li><p><strong>tree</strong>: add KDtree and KNN search for octree</p></li>
@@ -449,6 +451,17 @@
 <section id="fix">
 <h3>Fix<a class="headerlink" href="#fix" title="Link to this heading">#</a></h3>
 <ul class="simple">
+<li><p><strong>converter.im2voxel</strong>: fix bug in im2voxel</p></li>
+<li><p><strong>improvement.SmartLaplacianSmoothing</strong>: update and speed up smart laplacian smoothing</p></li>
+<li><p>update dependencies</p></li>
+<li><p><strong>primitives.Revolve</strong>: fix occasional overlapping elements</p></li>
+<li><p><strong>contour.MarchingCubesImage</strong>: fix bug in cleanup</p></li>
+<li><p><strong><strong>init</strong></strong>: Update optional numba logic, export dmesh</p></li>
+<li><p><strong>improvement</strong>: update Contract, Split, Flip to new dmesh class, other bug fixes</p></li>
+<li><p><strong>delaunay.BowyerWatson2d</strong>: major efficiency improvements</p></li>
+<li><p><strong>mymesh.dmesh</strong>: convert from jitclass to StructRef</p></li>
+<li><p><strong><strong>init</strong></strong>: fix urllib import</p></li>
+<li><p><strong>utils.BaryTri</strong>: Improve barycentric coordinate efficiency</p></li>
 <li><p><strong>utils.identify_elem</strong>: add pyr13 and wdg15 to identify_elem</p></li>
 <li><p><strong>utils.Face2NodeNormal</strong>: fix nan handling</p></li>
 <li><p><strong>contour</strong>: bug fix in MarchingElements</p></li>

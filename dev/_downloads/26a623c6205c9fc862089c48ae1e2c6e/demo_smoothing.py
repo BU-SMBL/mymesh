@@ -68,3 +68,4 @@ fig2, ax1 = bunny_taubin10.plot(view='xy', show=False, return_fig=True)
 ax1.set_title('10 Iterations')
 fig2, ax2 = bunny_taubin100.plot(view='xy', show=False, return_fig=True)
 ax2.set_title('100 Iterations')
+# sphinx_gallery_thumbnail_number = 2

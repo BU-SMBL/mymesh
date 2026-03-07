@@ -65,6 +65,23 @@ Examples for different methods of generating meshes.
     </div>
 
 
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example generates different types of image-based meshes using the Stanford bunny as an example.">
+
+.. only:: html
+
+  .. image:: /examples/MeshGeneration/images/thumb/sphx_glr_demo_image-based_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshGeneration/demo_image-based`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Image-based Meshing</div>
+    </div>
+
+
 .. thumbnail-parent-div-close
 
 .. raw:: html
@@ -78,4 +95,5 @@ Examples for different methods of generating meshes.
    /examples/MeshGeneration/demo_heart
    /examples/MeshGeneration/demo_pasta
    /examples/MeshGeneration/demo_mixed-top
+   /examples/MeshGeneration/demo_image-based
 

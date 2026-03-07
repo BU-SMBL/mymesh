@@ -181,8 +181,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
@@ -195,8 +195,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -317,15 +317,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -458,7 +458,11 @@ then run:</p>
 </pre></div>
 </div>
 <p>with <code class="code docutils literal notranslate"><span class="pre">&lt;path&gt;</span></code> replaced with the file path to the mymesh root directory.
-To install with only the required dependencies, the <code class="code docutils literal notranslate"><span class="pre">[all]</span></code> can be omitted.</p>
+To install with only the required dependencies, the <code class="code docutils literal notranslate"><span class="pre">[all]</span></code> can be omitted.
+To install additional dependencies used for testing, documentation, and benchmarking,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;/</span><span class="n">mymesh</span><span class="p">[</span><span class="nb">all</span><span class="p">,</span><span class="n">test</span><span class="p">]</span>
+</pre></div>
+</div>
 </section>
 <section id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">#</a></h2>
@@ -498,25 +502,25 @@ specific functions or use-cases.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/nschloe/meshio">meshio</a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="http://numba.pydata.org/">numba</a></p></td>
+<td><p>Enhanced efficiency</p></td>
+<td><p><a class="reference internal" href="../generated/mymesh.delaunay.html#module-mymesh.delaunay" title="mymesh.delaunay"><code class="xref py py-mod docutils literal notranslate"><span class="pre">delaunay</span></code></a>, <a class="reference internal" href="../generated/mymesh.utils.html#module-mymesh.utils" title="mymesh.utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a>, <a class="reference internal" href="../generated/mymesh.improvement.html#module-mymesh.improvement" title="mymesh.improvement"><code class="xref py py-mod docutils literal notranslate"><span class="pre">improvement</span></code></a>, <a class="reference internal" href="../generated/mymesh.quality.html#module-mymesh.quality" title="mymesh.quality"><code class="xref py py-mod docutils literal notranslate"><span class="pre">quality</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">numba</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/nschloe/meshio">meshio</a></p></td>
 <td><p>Mesh file I/O</p></td>
 <td><p><a class="reference internal" href="../generated/mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">meshio</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="http://numba.pydata.org/">numba</a></p></td>
-<td><p>Enhanced efficiency</p></td>
-<td><p><a class="reference internal" href="../generated/mymesh.delaunay.html#module-mymesh.delaunay" title="mymesh.delaunay"><code class="xref py py-mod docutils literal notranslate"><span class="pre">delaunay</span></code></a>, <a class="reference internal" href="../generated/mymesh.utils.html#module-mymesh.utils" title="mymesh.utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a>, <a class="reference internal" href="../generated/mymesh.quality.html#module-mymesh.quality" title="mymesh.quality"><code class="xref py py-mod docutils literal notranslate"><span class="pre">quality</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">numba</span></code></p></td>
-</tr>
 <tr class="row-even"><td><p><a class="reference external" href="https://github.com/pydicom/pydicom">pydicom</a></p></td>
 <td><p>DICOM image file I/O</p></td>
 <td><p><a class="reference internal" href="../generated/mymesh.image.html#module-mymesh.image" title="mymesh.image"><code class="xref py py-mod docutils literal notranslate"><span class="pre">image</span></code></a></p></td>
-<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pydicom</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference external" href="https://github.com/cgohlke/tifffile/">tifffile</a></p></td>
 <td><p>TIFF image file I/O</p></td>
 <td><p><a class="reference internal" href="../generated/mymesh.image.html#module-mymesh.image" title="mymesh.image"><code class="xref py py-mod docutils literal notranslate"><span class="pre">image</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pydicom</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">tifffile</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference external" href="https://github.com/opencv/opencv-python">opencv (cv2)</a></p></td>
 <td><p>Image file I/O</p></td>
@@ -557,6 +561,16 @@ specific functions or use-cases.</p>
 <td><p>Mesh visualization</p></td>
 <td><p><a class="reference internal" href="../generated/mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pyvista</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/drufat/triangle">triangle</a></p></td>
+<td><p>Triangulation</p></td>
+<td><p><a class="reference internal" href="../generated/mymesh.delaunay.html#module-mymesh.delaunay" title="mymesh.delaunay"><code class="xref py py-mod docutils literal notranslate"><span class="pre">delaunay</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">triangle</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/pyvista/tetgen">tetgen</a></p></td>
+<td><p>Tetrahedralization</p></td>
+<td><p><a class="reference internal" href="../generated/mymesh.delaunay.html#module-mymesh.delaunay" title="mymesh.delaunay"><code class="xref py py-mod docutils literal notranslate"><span class="pre">delaunay</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">tetgen</span></code></p></td>
 </tr>
 </tbody>
 </table>

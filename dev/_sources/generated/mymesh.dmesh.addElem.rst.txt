@@ -1,0 +1,6 @@
+mymesh.dmesh.addElem
+====================
+
+.. currentmodule:: mymesh
+
+.. automethod:: dmesh.addElem

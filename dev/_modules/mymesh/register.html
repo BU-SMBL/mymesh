@@ -178,8 +178,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -192,8 +192,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -312,15 +312,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -714,7 +714,7 @@
 <span class="sd">        and scaling (if used). Must be an integer in the range 0-5. Lower order</span>
 <span class="sd">        is more efficient at the cost of quality. By default, 1. </span>
 <span class="sd">    transform_args : dict, optional</span>
-<span class="sd">        Optional input arguments passed to `scipy.ndimage.affine_transform &lt;https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html&gt;`_, by </span>
+<span class="sd">        Optional input arguments passed to :func:`scipy.ndimage.affine_transform`, by </span>
 <span class="sd">        default `dict(mode=&#39;constant&#39;, order=interpolation_order)`.</span>
 <span class="sd">    return_transform : bool, optional</span>
 <span class="sd">        Option to return the transformation matrix as well as the transformed</span>
@@ -1223,7 +1223,7 @@
 <span class="sd">        1. The returned image will still be of the original resolution.</span>
 <span class="sd">    interpolation_order : int, optional</span>
 <span class="sd">        Interpolation order used in image transformation (see </span>
-<span class="sd">        `scipy.ndimage.affine_transform &lt;https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html#affine-transform&gt;`_)</span>
+<span class="sd">        :func:`scipy.ndimage.affine_transform`)</span>
 <span class="sd">        and scaling (if used). Must be an integer in the range 0-5. Lower order</span>
 <span class="sd">        is more efficient at the cost of quality. By default, 1. </span>
 <span class="sd">    threshold : NoneType, float, or tuple, optional</span>
@@ -1237,7 +1237,7 @@
 <span class="sd">        threshold value will be the midpoint of the range of values for each image (which may</span>
 <span class="sd">        not give the intended result). By default, None.</span>
 <span class="sd">    transform_args : dict, optional</span>
-<span class="sd">        Optional input arguments passed to `scipy.ndimage.affine_transform &lt;https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html&gt;`_, by </span>
+<span class="sd">        Optional input arguments passed to :func:`scipy.ndimage.affine_transform`, by </span>
 <span class="sd">        default `dict(mode=&#39;constant&#39;, order=interpolation_order)`.</span>
 <span class="sd">    optimizer_args : dict, optional</span>
 <span class="sd">        Additional arguments for the chosen optimizer, by default None. See </span>
@@ -2856,7 +2856,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">transform_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply transformation matrix to an image. This is essentially an interface</span>
-<span class="sd">    to `scipy.ndimage.affine_transform &lt;https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html&gt;`_</span>
+<span class="sd">    to :func:`scipy.ndimage.affine_transform`</span>
 <span class="sd">    but takes into account the need to invert the transformation matrix for </span>
 <span class="sd">    consistency between the &quot;pull&quot; resampling performed by `affine_transform`</span>
 <span class="sd">    and the &quot;push&quot; transformations used to transform points. The `options` input</span>
@@ -2869,7 +2869,7 @@
 <span class="sd">    T : array_like</span>
 <span class="sd">        Transformation matrix (either 3x3 or 4x4).</span>
 <span class="sd">    options : dict, optional</span>
-<span class="sd">        Options to be used by `scipy.ndimage.affine_transform &lt;https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html&gt;`_. If none are</span>
+<span class="sd">        Options to be used by :func:`scipy.ndimage.affine_transform`. If none are</span>
 <span class="sd">        provide, all defaults will be used, by default dict(). Common options </span>
 <span class="sd">        that may be used are `mode` to allow wrapping (&#39;grid-wrap&#39;) or mirroring </span>
 <span class="sd">        (&#39;mirror&#39;) to change what happens when the contents of the image are</span>
@@ -3117,8 +3117,8 @@
 <span class="sd">        to either scipy.optimize or pdfo, however some predefined options are</span>
 <span class="sd">        chosen for certain methods.</span>
 
-<span class="sd">        scipy global optimizers:</span>
-<span class="sd">        ------------------------</span>
+<span class="sd">        **scipy global optimizers:**</span>
+<span class="sd">        </span>
 <span class="sd">        These are global optimization methods that see the global minimum</span>
 <span class="sd">        of the objective function within specified bounds. The `bounds`</span>
 <span class="sd">        input is required for all of these methods.</span>
@@ -3140,14 +3140,14 @@
 <span class="sd">            By default, the optional &#39;finish&#39; input, which performs local optimization following the conclusion of the </span>
 <span class="sd">            brute force search, is turned off, but can be reactivated with `optimizer_args=dict(finish=True)`</span>
 
-<span class="sd">        scipy local optimizers:</span>
-<span class="sd">        -----------------------</span>
+<span class="sd">        **scipy local optimizers:**</span>
+<span class="sd">        </span>
 <span class="sd">        All minimizers available through :func:`scipy.optimize.minimize` are available. One exception is that, if pdfo</span>
 <span class="sd">        is installed, it will be used instead of scipy if `method=&#39;cobyla&#39;`.  If `method=&#39;scipy&#39;` is given, the default</span>
 <span class="sd">        optimizer will be chosen by scipy based on the given problem (depends on the presence of bounds or constraints).</span>
 
-<span class="sd">        pdfo local optimizers:</span>
-<span class="sd">        ----------------------</span>
+<span class="sd">        **pdfo local optimizers:**</span>
+<span class="sd">        </span>
 <span class="sd">        pdfo, or &quot;Powell&#39;s derivative free optimizers&quot; are a group of algorithms developed by M. J. D. Powell for </span>
 <span class="sd">        gradient/derivative free optimization. pdfo offers a scipy-like interface to Powell&#39;s algorithms.</span>
 
@@ -3176,9 +3176,7 @@
 <span class="sd">            `optimizer_args = dict(maxiter=100, fatol=1e-3)`</span>
 
 <span class="sd">        Note that the optional arguments or methods differ. Some have an `options` input, </span>
-<span class="sd">        which must be defined within `optimizer_args`</span>
-<span class="sd">        Example (`method=&#39;powell&#39;`):</span>
-<span class="sd">            `optimizer_args = dict(options=dict(maxiter=100))`</span>
+<span class="sd">        which must be defined within `optimizer_args`. For example, with :code:`method=&#39;powell&#39;`: :code:`optimizer_args = dict(options=dict(maxiter=100))`</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>

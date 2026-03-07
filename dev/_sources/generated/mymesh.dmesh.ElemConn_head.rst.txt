@@ -1,0 +1,6 @@
+mymesh.dmesh.ElemConn\_head
+===========================
+
+.. currentmodule:: mymesh
+
+.. autoproperty:: dmesh.ElemConn_head

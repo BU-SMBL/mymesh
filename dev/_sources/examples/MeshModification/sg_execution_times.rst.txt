@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**01:34.735** total execution time for 2 files **from examples/MeshModification**:
+**05:30.890** total execution time for 6 files **from examples/MeshModification**:
 
 .. container::
 
@@ -32,9 +32,21 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
+   * - :ref:`sphx_glr_examples_MeshModification_demo_contouring.py` (``demo_contouring.py``)
+     - 01:51.163
+     - 0.0
+   * - :ref:`sphx_glr_examples_MeshModification_demo_coarsening.py` (``demo_coarsening.py``)
+     - 01:29.765
+     - 0.0
    * - :ref:`sphx_glr_examples_MeshModification_demo_registration.py` (``demo_registration.py``)
-     - 01:18.579
+     - 01:17.869
+     - 0.0
+   * - :ref:`sphx_glr_examples_MeshModification_demo_improvement.py` (``demo_improvement.py``)
+     - 00:35.747
      - 0.0
    * - :ref:`sphx_glr_examples_MeshModification_demo_smoothing.py` (``demo_smoothing.py``)
-     - 00:16.156
+     - 00:16.046
+     - 0.0
+   * - :ref:`sphx_glr_examples_MeshModification_demo_conversion.py` (``demo_conversion.py``)
+     - 00:00.298
      - 0.0

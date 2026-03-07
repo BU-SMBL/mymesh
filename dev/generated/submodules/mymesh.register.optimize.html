@@ -181,8 +181,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -195,8 +195,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -317,15 +317,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -370,6 +370,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.mesh.html">mymesh.mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.dmesh.html">mymesh.dmesh</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.booleans.html">mymesh.booleans</a></li>
@@ -468,6 +469,7 @@ optimizers from scipy.optimize and pdfo.</p>
 <li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – <p>Optimization algorithm. For the most part, these are direct interfaces
 to either scipy.optimize or pdfo, however some predefined options are
 chosen for certain methods.</p>
+<p><strong>scipy global optimizers:</strong></p>
 <p>These are global optimization methods that see the global minimum
 of the objective function within specified bounds. The <cite>bounds</cite>
 input is required for all of these methods.</p>
@@ -483,9 +485,11 @@ registration applications for large datasets. The total number of function evalu
 By default, the optional ‘finish’ input, which performs local optimization following the conclusion of the
 brute force search, is turned off, but can be reactivated with <cite>optimizer_args=dict(finish=True)</cite></p></li>
 </ul>
+<p><strong>scipy local optimizers:</strong></p>
 <p>All minimizers available through <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize" title="(in SciPy v1.17.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.minimize()</span></code></a> are available. One exception is that, if pdfo
 is installed, it will be used instead of scipy if <cite>method=’cobyla’</cite>.  If <cite>method=’scipy’</cite> is given, the default
 optimizer will be chosen by scipy based on the given problem (depends on the presence of bounds or constraints).</p>
+<p><strong>pdfo local optimizers:</strong></p>
 <p>pdfo, or “Powell’s derivative free optimizers” are a group of algorithms developed by M. J. D. Powell for
 gradient/derivative free optimization. pdfo offers a scipy-like interface to Powell’s algorithms.</p>
 <ul>
@@ -513,11 +517,7 @@ See available options in the documentation of scipy or pdfo.</p>
 </dd>
 </dl>
 <p>Note that the optional arguments or methods differ. Some have an <cite>options</cite> input,
-which must be defined within <cite>optimizer_args</cite>
-Example (<cite>method=’powell’</cite>):</p>
-<blockquote>
-<div><p><cite>optimizer_args = dict(options=dict(maxiter=100))</cite></p>
-</div></blockquote>
+which must be defined within <cite>optimizer_args</cite>. For example, with <code class="code docutils literal notranslate"><span class="pre">method='powell'</span></code>: <code class="code docutils literal notranslate"><span class="pre">optimizer_args</span> <span class="pre">=</span> <span class="pre">dict(options=dict(maxiter=100))</span></code></p>
 </dd>
 </dl>
 <dl class="field-list simple">

@@ -178,8 +178,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -192,8 +192,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -312,15 +312,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -507,6 +507,20 @@
 <span class="sd">    SearchOctree</span>
 <span class="sd">    SearchOctreeTri</span>
 
+<span class="sd">KD Tree</span>
+<span class="sd">=======</span>
+<span class="sd">.. autosummary::</span>
+<span class="sd">    :toctree: submodules/</span>
+
+<span class="sd">    KDtreeNode</span>
+
+<span class="sd">KD Tree Creation</span>
+<span class="sd">----------------</span>
+<span class="sd">.. autosummary::</span>
+<span class="sd">    :toctree: submodules/</span>
+<span class="sd">    </span>
+<span class="sd">    Points2KDtree</span>
+<span class="sd">    </span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">rays</span><span class="p">,</span> <span class="n">utils</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">primitives</span>
@@ -516,43 +530,38 @@
 <div class="viewcode-block" id="TreeNode">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.tree.TreeNode.html#mymesh.tree.TreeNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TreeNode</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The TreeNode is the base class for several different spatial tree structures. </span>
+<span class="sd">    The structure consists of a series of nodes that reference their parent and child nodes, allowing for traversal of the tree structure.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : tree.TreeNode, optional</span>
+<span class="sd">        The tree node that contains this node, by default None</span>
+<span class="sd">    data : list or dict, optional</span>
+<span class="sd">        Data associated with the tree node. The type of data depends on </span>
+<span class="sd">        the how the tree was created, by default None.</span>
+<span class="sd">    level : int, optional</span>
+<span class="sd">        Depth within the tree structure, by default 0.</span>
+<span class="sd">        The root node is at level 0, the root&#39;s children are at level 1, etc.</span>
+<span class="sd">    state : str, optional</span>
+<span class="sd">        Specifies whether the node&#39;s place in the tree structure, by default</span>
+<span class="sd">        &#39;unknown&#39;.</span>
+
+<span class="sd">        Possible states are:</span>
+
+<span class="sd">        - &#39;root&#39;: This node is the root of the tree</span>
+
+<span class="sd">        - &#39;branch&#39;: This is node is an intermediate node between the root and leaves</span>
+
+<span class="sd">        - &#39;leaf&#39;: This is node is a terminal end and has no children.</span>
+
+<span class="sd">        - &#39;empty&#39;: No data is contained within this node, and it has no children</span>
+
+<span class="sd">        - &#39;unknown&#39;: State hasn&#39;t been specified.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">state</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        .. autoclass:: TreeNode</span>
-<span class="sd">            :members:</span>
-<span class="sd">            :inherited-members:</span>
-
-<span class="sd">        The OctreeNode is the basic unit of the octree data structure. The structure</span>
-<span class="sd">        consists of a series of nodes that reference their parent and child nodes, </span>
-<span class="sd">        allowing for traversal of the tree structure.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        parent : tree.TreeNode, optional</span>
-<span class="sd">            The tree node that contains this node, by default None</span>
-<span class="sd">        data : list or dict, optional</span>
-<span class="sd">            Data associated with the tree node. The type of data depends on </span>
-<span class="sd">            the how the tree was created, by default None.</span>
-<span class="sd">        level : int, optional</span>
-<span class="sd">            Depth within the tree structure, by default 0.</span>
-<span class="sd">            The root node is at level 0, the root&#39;s children are at level 1, etc.</span>
-<span class="sd">        state : str, optional</span>
-<span class="sd">            Specifies whether the node&#39;s place in the tree structure, by default</span>
-<span class="sd">            &#39;unknown&#39;.</span>
-
-<span class="sd">            Possible states are:</span>
-
-<span class="sd">            - &#39;root&#39;: This node is the root of the tree</span>
-
-<span class="sd">            - &#39;branch&#39;: This is node is an intermediate node between the root and leaves</span>
-
-<span class="sd">            - &#39;leaf&#39;: This is node is a terminal end and has no children.</span>
-
-<span class="sd">            - &#39;empty&#39;: No data is contained within this node, and it has no children</span>
-
-<span class="sd">            - &#39;unknown&#39;: State hasn&#39;t been specified.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>  
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
@@ -660,50 +669,49 @@
 <div class="viewcode-block" id="QuadtreeNode">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.tree.QuadtreeNode.html#mymesh.tree.QuadtreeNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">QuadtreeNode</span><span class="p">(</span><span class="n">TreeNode</span><span class="p">):</span>
-          
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    The QuadtreeNode is the basic unit of the quadtree data structure. The structure</span>
+<span class="sd">    consists of a series of nodes that reference their parent and child nodes, </span>
+<span class="sd">    allowing for traversal of the tree structure.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : tree.QuadtreeNode, optional</span>
+<span class="sd">        The quadtree node that contains this node, by default None</span>
+<span class="sd">    data : list or dict, optional</span>
+<span class="sd">        Data associated with the quadtree node. The type of data depends on </span>
+<span class="sd">        the how the quadtree was created, by default None.</span>
+<span class="sd">    level : int, optional</span>
+<span class="sd">        Depth within the tree structure, by default 0.</span>
+<span class="sd">        The root node is at level 0, the root&#39;s children are at level 1, etc.</span>
+<span class="sd">    state : str, optional</span>
+<span class="sd">        Specifies whether the node&#39;s place in the tree structure, by default</span>
+<span class="sd">        &#39;unknown&#39;.</span>
+
+<span class="sd">        Possible states are:</span>
+
+<span class="sd">        - &#39;root&#39;: This node is the root of the quadtree</span>
+
+<span class="sd">        - &#39;branch&#39;: This is node is an intermediate node between the root and leaves</span>
+
+<span class="sd">        - &#39;leaf&#39;: This is node is a terminal end and has no children.</span>
+
+<span class="sd">        - &#39;empty&#39;: No data is contained within this node, and it has no children</span>
+
+<span class="sd">        - &#39;unknown&#39;: State hasn&#39;t been specified.</span>
+<span class="sd">    </span>
+<span class="sd">    centroid : array_like</span>
+<span class="sd">        Location of the center of the quadtree node</span>
+<span class="sd">    size : float</span>
+<span class="sd">        Side length of the cube associated with the quadtree node</span>
+<span class="sd">    limits : list</span>
+<span class="sd">        bounds of the quadtree node</span>
+<span class="sd">    vertices : np.ndarray</span>
+<span class="sd">        Coordinates of the vertices of the quadtree node</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">centroid</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">state</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        The QuadtreeNode is the basic unit of the quadtree data structure. The structure</span>
-<span class="sd">        consists of a series of nodes that reference their parent and child nodes, </span>
-<span class="sd">        allowing for traversal of the tree structure.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        parent : tree.QuadtreeNode, optional</span>
-<span class="sd">            The quadtree node that contains this node, by default None</span>
-<span class="sd">        data : list or dict, optional</span>
-<span class="sd">            Data associated with the quadtree node. The type of data depends on </span>
-<span class="sd">            the how the quadtree was created, by default None.</span>
-<span class="sd">        level : int, optional</span>
-<span class="sd">            Depth within the tree structure, by default 0.</span>
-<span class="sd">            The root node is at level 0, the root&#39;s children are at level 1, etc.</span>
-<span class="sd">        state : str, optional</span>
-<span class="sd">            Specifies whether the node&#39;s place in the tree structure, by default</span>
-<span class="sd">            &#39;unknown&#39;.</span>
-
-<span class="sd">            Possible states are:</span>
-
-<span class="sd">            - &#39;root&#39;: This node is the root of the quadtree</span>
-
-<span class="sd">            - &#39;branch&#39;: This is node is an intermediate node between the root and leaves</span>
-
-<span class="sd">            - &#39;leaf&#39;: This is node is a terminal end and has no children.</span>
-
-<span class="sd">            - &#39;empty&#39;: No data is contained within this node, and it has no children</span>
-
-<span class="sd">            - &#39;unknown&#39;: State hasn&#39;t been specified.</span>
-<span class="sd">        </span>
-<span class="sd">        centroid : array_like</span>
-<span class="sd">            Location of the center of the quadtree node</span>
-<span class="sd">        size : float</span>
-<span class="sd">            Side length of the cube associated with the quadtree node</span>
-<span class="sd">        limits : list</span>
-<span class="sd">            bounds of the quadtree node</span>
-<span class="sd">        vertices : np.ndarray</span>
-<span class="sd">            Coordinates of the vertices of the quadtree node</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>  
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
@@ -1057,49 +1065,49 @@
 <div class="viewcode-block" id="OctreeNode">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.tree.OctreeNode.html#mymesh.tree.OctreeNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OctreeNode</span><span class="p">(</span><span class="n">TreeNode</span><span class="p">):</span>
-          
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The OctreeNode is the basic unit of the octree data structure. The structure</span>
+<span class="sd">    consists of a series of nodes that reference their parent and child nodes, </span>
+<span class="sd">    allowing for traversal of the tree structure.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : tree.OctreeNode, optional</span>
+<span class="sd">        The octree node that contains this node, by default None</span>
+<span class="sd">    data : list or dict, optional</span>
+<span class="sd">        Data associated with the octree node. The type of data depends on </span>
+<span class="sd">        the how the octree was created, by default None.</span>
+<span class="sd">    level : int, optional</span>
+<span class="sd">        Depth within the tree structure, by default 0.</span>
+<span class="sd">        The root node is at level 0, the root&#39;s children are at level 1, etc.</span>
+<span class="sd">    state : str, optional</span>
+<span class="sd">        Specifies whether the node&#39;s place in the tree structure, by default</span>
+<span class="sd">        &#39;unknown&#39;.</span>
+
+<span class="sd">        Possible states are:</span>
+
+<span class="sd">        - &#39;root&#39;: This node is the root of the octree</span>
+
+<span class="sd">        - &#39;branch&#39;: This is node is an intermediate node between the root and leaves</span>
+
+<span class="sd">        - &#39;leaf&#39;: This is node is a terminal end and has no children.</span>
+
+<span class="sd">        - &#39;empty&#39;: No data is contained within this node, and it has no children</span>
+
+<span class="sd">        - &#39;unknown&#39;: State hasn&#39;t been specified.</span>
+<span class="sd">    </span>
+<span class="sd">    centroid : array_like</span>
+<span class="sd">        Location of the center of the octree node</span>
+<span class="sd">    size : float</span>
+<span class="sd">        Side length of the cube associated with the octree node</span>
+<span class="sd">    limits : list</span>
+<span class="sd">        bounds of the octree node</span>
+<span class="sd">    vertices : np.ndarray</span>
+<span class="sd">        Coordinates of the vertices of the octree node</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">centroid</span><span class="p">,</span><span class="n">size</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">state</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The OctreeNode is the basic unit of the octree data structure. The structure</span>
-<span class="sd">        consists of a series of nodes that reference their parent and child nodes, </span>
-<span class="sd">        allowing for traversal of the tree structure.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        parent : tree.OctreeNode, optional</span>
-<span class="sd">            The octree node that contains this node, by default None</span>
-<span class="sd">        data : list or dict, optional</span>
-<span class="sd">            Data associated with the octree node. The type of data depends on </span>
-<span class="sd">            the how the octree was created, by default None.</span>
-<span class="sd">        level : int, optional</span>
-<span class="sd">            Depth within the tree structure, by default 0.</span>
-<span class="sd">            The root node is at level 0, the root&#39;s children are at level 1, etc.</span>
-<span class="sd">        state : str, optional</span>
-<span class="sd">            Specifies whether the node&#39;s place in the tree structure, by default</span>
-<span class="sd">            &#39;unknown&#39;.</span>
-
-<span class="sd">            Possible states are:</span>
-
-<span class="sd">            - &#39;root&#39;: This node is the root of the octree</span>
-
-<span class="sd">            - &#39;branch&#39;: This is node is an intermediate node between the root and leaves</span>
-
-<span class="sd">            - &#39;leaf&#39;: This is node is a terminal end and has no children.</span>
-
-<span class="sd">            - &#39;empty&#39;: No data is contained within this node, and it has no children</span>
-
-<span class="sd">            - &#39;unknown&#39;: State hasn&#39;t been specified.</span>
-<span class="sd">        </span>
-<span class="sd">        centroid : array_like</span>
-<span class="sd">            Location of the center of the octree node</span>
-<span class="sd">        size : float</span>
-<span class="sd">            Side length of the cube associated with the octree node</span>
-<span class="sd">        limits : list</span>
-<span class="sd">            bounds of the octree node</span>
-<span class="sd">        vertices : np.ndarray</span>
-<span class="sd">            Coordinates of the vertices of the octree node</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>  
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
@@ -1519,47 +1527,49 @@
 </div>
 
     
+<div class="viewcode-block" id="KDtreeNode">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.tree.KDtreeNode.html#mymesh.tree.KDtreeNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">KDtreeNode</span><span class="p">(</span><span class="n">TreeNode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The KDtreeNode is the basic unit of the KD-tree data structure. </span>
+<span class="sd">    The structure consists of a series of nodes that reference their parent</span>
+<span class="sd">    and child nodes, allowing for traversal of the tree structure.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    location : array_like</span>
+<span class="sd">        Location of the node. This is only a single coordinate defining the</span>
+<span class="sd">        location of the hyperplane along the axis.</span>
+<span class="sd">    axis : int, optional</span>
+<span class="sd">        Index of the axis along which the data will be split (0=x, 1=y,...).</span>
+<span class="sd">        By default, 0.</span>
+<span class="sd">    parent : tree.KDtreeNode, optional</span>
+<span class="sd">        The KDtree node that contains this node, by default None</span>
+<span class="sd">    data : list or dict, optional</span>
+<span class="sd">        Data associated with the KDtree node. The type of data depends on </span>
+<span class="sd">        the how the KDtree was created, by default None.</span>
+<span class="sd">    level : int, optional</span>
+<span class="sd">        Depth within the tree structure, by default 0.</span>
+<span class="sd">        The root node is at level 0, the root&#39;s children are at level 1, etc.</span>
+<span class="sd">    state : str, optional</span>
+<span class="sd">        Specifies whether the node&#39;s place in the tree structure, by default</span>
+<span class="sd">        &#39;unknown&#39;.</span>
+
+<span class="sd">        Possible states are:</span>
+
+<span class="sd">        - &#39;root&#39;: This node is the root of the octree</span>
+
+<span class="sd">        - &#39;branch&#39;: This is node is an intermediate node between the root and leaves</span>
+
+<span class="sd">        - &#39;leaf&#39;: This is node is a terminal end and has no children.</span>
+
+<span class="sd">        - &#39;empty&#39;: No data is contained within this node, and it has no children</span>
+
+<span class="sd">        - &#39;unknown&#39;: State hasn&#39;t been specified.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>  
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">location</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">state</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The KDtreeNode is the basic unit of the KD-tree data structure. </span>
-<span class="sd">        The structure consists of a series of nodes that reference their parent</span>
-<span class="sd">        and child nodes, allowing for traversal of the tree structure.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        location : array_like</span>
-<span class="sd">            Location of the node. This is only a single coordinate defining the</span>
-<span class="sd">            location of the hyperplane along the axis.</span>
-<span class="sd">        axis : int, optional</span>
-<span class="sd">            Index of the axis along which the data will be split (0=x, 1=y,...).</span>
-<span class="sd">            By default, 0.</span>
-<span class="sd">        parent : tree.KDtreeNode, optional</span>
-<span class="sd">            The KDtree node that contains this node, by default None</span>
-<span class="sd">        data : list or dict, optional</span>
-<span class="sd">            Data associated with the KDtree node. The type of data depends on </span>
-<span class="sd">            the how the KDtree was created, by default None.</span>
-<span class="sd">        level : int, optional</span>
-<span class="sd">            Depth within the tree structure, by default 0.</span>
-<span class="sd">            The root node is at level 0, the root&#39;s children are at level 1, etc.</span>
-<span class="sd">        state : str, optional</span>
-<span class="sd">            Specifies whether the node&#39;s place in the tree structure, by default</span>
-<span class="sd">            &#39;unknown&#39;.</span>
-
-<span class="sd">            Possible states are:</span>
-
-<span class="sd">            - &#39;root&#39;: This node is the root of the octree</span>
-
-<span class="sd">            - &#39;branch&#39;: This is node is an intermediate node between the root and leaves</span>
-
-<span class="sd">            - &#39;leaf&#39;: This is node is a terminal end and has no children.</span>
-
-<span class="sd">            - &#39;empty&#39;: No data is contained within this node, and it has no children</span>
-
-<span class="sd">            - &#39;unknown&#39;: State hasn&#39;t been specified.</span>
-<span class="sd">        </span>
-<span class="sd">        &quot;&quot;&quot;</span>  
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
@@ -1575,6 +1585,8 @@
         <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;KDtree Node (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">Location: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">)</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="se">\n</span><span class="s1">Axis: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="si">:</span><span class="s1">f</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="k">return</span> <span class="n">out</span>
     
+<div class="viewcode-block" id="KDtreeNode.makeChildrenPts">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.tree.KDtreeNode.makeChildrenPts.html#mymesh.tree.KDtreeNode.makeChildrenPts">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">makeChildrenPts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">leafsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">axismode</span><span class="o">=</span><span class="s1">&#39;cyclic&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize child nodes for the current node</span>
@@ -1613,8 +1625,11 @@
             <span class="n">child_positive</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">points_positive</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">child_positive</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;branch&#39;</span>
-            <span class="n">child_positive</span><span class="o">.</span><span class="n">makeChildrenPts</span><span class="p">(</span><span class="n">points_positive</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="n">maxdepth</span><span class="p">,</span> <span class="n">leafsize</span><span class="o">=</span><span class="n">leafsize</span><span class="p">,</span> <span class="n">axismode</span><span class="o">=</span><span class="n">axismode</span><span class="p">)</span>
+            <span class="n">child_positive</span><span class="o">.</span><span class="n">makeChildrenPts</span><span class="p">(</span><span class="n">points_positive</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="n">maxdepth</span><span class="p">,</span> <span class="n">leafsize</span><span class="o">=</span><span class="n">leafsize</span><span class="p">,</span> <span class="n">axismode</span><span class="o">=</span><span class="n">axismode</span><span class="p">)</span></div>
+
             
+<div class="viewcode-block" id="KDtreeNode.node_distance">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.tree.KDtreeNode.node_distance.html#mymesh.tree.KDtreeNode.node_distance">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">node_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the nearest distance between a point and the location of the splitting plane of the current node.</span>
@@ -1631,8 +1646,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>        
                 
         <span class="n">dist</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">location</span>
-        <span class="k">return</span> <span class="n">dist</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+
     
+<div class="viewcode-block" id="KDtreeNode.query_knn">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.tree.KDtreeNode.query_knn.html#mymesh.tree.KDtreeNode.query_knn">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">query_knn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find the k-nearest neighbor points in the tree to a point.</span>
@@ -1697,7 +1715,9 @@
         <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">dist</span><span class="p">,</span> <span class="n">coordinates</span> <span class="o">=</span> <span class="n">out</span>
 
-        <span class="k">return</span> <span class="n">dist</span><span class="p">,</span> <span class="n">coordinates</span>
+        <span class="k">return</span> <span class="n">dist</span><span class="p">,</span> <span class="n">coordinates</span></div>
+</div>
+
 
 <span class="c1"># Octree Functions               </span>
 <span class="k">def</span><span class="w"> </span><span class="nf">isInsideOctree</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="n">node</span><span class="p">,</span><span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>  
@@ -2842,13 +2862,32 @@
 
 
 <span class="c1"># KD Tree Functions</span>
+<div class="viewcode-block" id="Points2KDtree">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.tree.Points2KDtree.html#mymesh.tree.Points2KDtree">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">Points2KDtree</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">leafsize</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a KD tree structure from a set of points. </span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Points : array_like</span>
+<span class="sd">        Point coordinates (shape = (n,k))</span>
+<span class="sd">    maxdepth : int, optional</span>
+<span class="sd">        Maximum depth of the kd tree, by default 10</span>
+<span class="sd">    leafsize : int, optional</span>
+<span class="sd">        Maximum number of points in a leaf node, by default 10.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    root : tree.KDtreeNode</span>
+<span class="sd">        Root node of the generated octree structure.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
     <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">location</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">Points</span><span class="p">[:,</span><span class="n">axis</span><span class="p">])</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">KDtreeNode</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">Points</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">root</span><span class="o">.</span><span class="n">makeChildrenPts</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="n">maxdepth</span><span class="p">,</span> <span class="n">leafsize</span><span class="o">=</span><span class="n">leafsize</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">root</span>
+    <span class="k">return</span> <span class="n">root</span></div>
+
 
 <span class="k">def</span><span class="w"> </span><span class="nf">VisualizeKDtree</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
 

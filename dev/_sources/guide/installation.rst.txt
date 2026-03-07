@@ -20,6 +20,11 @@ then run:
 
 with :code:`<path>` replaced with the file path to the mymesh root directory. 
 To install with only the required dependencies, the :code:`[all]` can be omitted.
+To install additional dependencies used for testing, documentation, and benchmarking,
+
+.. code-block::
+
+    pip install -e <path>/mymesh[all,test]
 
 Dependencies
 ------------
@@ -42,22 +47,24 @@ Package          Install
 Optional dependencies
 ^^^^^^^^^^^^^^^^^^^^^
 
-================ ==================== ===================================================================== =============================
-Package          Purpose              Used in                                                               Install
-================ ==================== ===================================================================== =============================
-`meshio`_        Mesh file I/O        :class:`~mymesh.mesh`                                                 ``pip install meshio``
-`numba`_         Enhanced efficiency  :mod:`~mymesh.delaunay`, :mod:`~mymesh.utils`, :mod:`~mymesh.quality` ``pip install numba``
-`pydicom`_       DICOM image file I/O :mod:`~mymesh.image`       
-`tifffile`_      TIFF image file I/O  :mod:`~mymesh.image`                                                  ``pip install pydicom``  
-`opencv (cv2)`_  Image file I/O       :mod:`~mymesh.image`                                                  ``pip install opencv-python``
-`triangle`_      Constrained Delaunay :mod:`~mymesh.delaunay`                                               ``pip install triangle``
-`vispy`_         Mesh visualization   :mod:`~mymesh.visualize`                                              ``pip install vispy``
-`matplotlib`_    Mesh visualization   :mod:`~mymesh.visualize`                                              ``pip install matplotlib``
-`pillow`_        Mesh visualization   :mod:`~mymesh.visualize`                                              ``pip install pillow``
-`jupyter_rfb`_   Mesh visualization   :mod:`~mymesh.visualize`                                              ``pip install jupyter_rfb``
-`colorspacious`_ Mesh visualization   :mod:`~mymesh.visualize`                                              ``pip install colorspacious``
-`pyvista`_       Mesh visualization   :class:`~mymesh.mesh`                                                 ``pip install pyvista``
-================ ==================== ===================================================================== =============================
+================ ==================== ================================================================================================= =============================
+Package          Purpose              Used in                                                                                           Install
+================ ==================== ================================================================================================= =============================
+`numba`_         Enhanced efficiency  :mod:`~mymesh.delaunay`, :mod:`~mymesh.utils`, :mod:`~mymesh.improvement`, :mod:`~mymesh.quality` ``pip install numba``
+`meshio`_        Mesh file I/O        :class:`~mymesh.mesh`                                                                             ``pip install meshio``
+`pydicom`_       DICOM image file I/O :mod:`~mymesh.image`                                                                              ``pip install pydicom``  
+`tifffile`_      TIFF image file I/O  :mod:`~mymesh.image`                                                                              ``pip install tifffile``  
+`opencv (cv2)`_  Image file I/O       :mod:`~mymesh.image`                                                                              ``pip install opencv-python``
+`triangle`_      Constrained Delaunay :mod:`~mymesh.delaunay`                                                                           ``pip install triangle``
+`vispy`_         Mesh visualization   :mod:`~mymesh.visualize`                                                                          ``pip install vispy``
+`matplotlib`_    Mesh visualization   :mod:`~mymesh.visualize`                                                                          ``pip install matplotlib``
+`pillow`_        Mesh visualization   :mod:`~mymesh.visualize`                                                                          ``pip install pillow``
+`jupyter_rfb`_   Mesh visualization   :mod:`~mymesh.visualize`                                                                          ``pip install jupyter_rfb``
+`colorspacious`_ Mesh visualization   :mod:`~mymesh.visualize`                                                                          ``pip install colorspacious``
+`pyvista`_       Mesh visualization   :class:`~mymesh.mesh`                                                                             ``pip install pyvista``
+`triangle`_      Triangulation        :mod:`~mymesh.delaunay`                                                                           ``pip install triangle``
+`tetgen`_        Tetrahedralization   :mod:`~mymesh.delaunay`                                                                           ``pip install tetgen``
+================ ==================== ================================================================================================= =============================
 
 MyMesh can be used without these optional dependencies and if a function requires them, an error will be raised instructing the user to install the needed dependency.
 
@@ -76,3 +83,5 @@ MyMesh can be used without these optional dependencies and if a function require
 .. _jupyter_rfb: https://github.com/vispy/jupyter_rfb
 .. _colorspacious: https://github.com/njsmith/colorspacious
 .. _pyvista: https://pyvista.org/
+.. _triangle: https://github.com/drufat/triangle
+.. _tetgen: https://github.com/pyvista/tetgen

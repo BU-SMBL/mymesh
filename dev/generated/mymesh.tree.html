@@ -69,7 +69,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="mymesh.tree.TreeNode" href="submodules/mymesh.tree.TreeNode.html" />
-    <link rel="prev" title="mymesh.improvement.TetImprove" href="submodules/mymesh.improvement.TetImprove.html" />
+    <link rel="prev" title="mymesh.improvement.Improve" href="submodules/mymesh.improvement.Improve.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -181,8 +181,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
@@ -195,8 +195,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -317,15 +317,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -370,6 +370,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="mymesh.mesh.html">mymesh.mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.dmesh.html">mymesh.dmesh</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="mymesh.booleans.html">mymesh.booleans</a></li>
@@ -471,7 +472,7 @@ test for intersections between the ray and any of the triangles within that node
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.tree.TreeNode.html#mymesh.tree.TreeNode" title="mymesh.tree.TreeNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TreeNode</span></code></a>([parent, data, level, state])</p></td>
-<td><p></p></td>
+<td><p>The TreeNode is the base class for several different spatial tree structures.</p></td>
 </tr>
 </tbody>
 </table>
@@ -496,7 +497,7 @@ test for intersections between the ray and any of the triangles within that node
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.tree.QuadtreeNode.html#mymesh.tree.QuadtreeNode" title="mymesh.tree.QuadtreeNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">QuadtreeNode</span></code></a>(centroid, size[, parent, data, ...])</p></td>
-<td><p></p></td>
+<td><p>The QuadtreeNode is the basic unit of the quadtree data structure.</p></td>
 </tr>
 </tbody>
 </table>
@@ -535,7 +536,7 @@ test for intersections between the ray and any of the triangles within that node
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.tree.OctreeNode.html#mymesh.tree.OctreeNode" title="mymesh.tree.OctreeNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OctreeNode</span></code></a>(centroid, size[, parent, data, ...])</p></td>
-<td><p></p></td>
+<td><p>The OctreeNode is the basic unit of the octree data structure.</p></td>
 </tr>
 </tbody>
 </table>
@@ -589,6 +590,28 @@ test for intersections between the ray and any of the triangles within that node
 </div>
 </section>
 </section>
+<section id="kd-tree">
+<h2>KD Tree<a class="headerlink" href="#kd-tree" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.tree.KDtreeNode.html#mymesh.tree.KDtreeNode" title="mymesh.tree.KDtreeNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KDtreeNode</span></code></a>(location[, axis, parent, data, ...])</p></td>
+<td><p>The KDtreeNode is the basic unit of the KD-tree data structure.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="kd-tree-creation">
+<h3>KD Tree Creation<a class="headerlink" href="#kd-tree-creation" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.tree.Points2KDtree.html#mymesh.tree.Points2KDtree" title="mymesh.tree.Points2KDtree"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Points2KDtree</span></code></a>(Points[, maxdepth, leafsize])</p></td>
+<td><p>Generate a KD tree structure from a set of points.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
 </section>
 
 
@@ -602,12 +625,12 @@ test for intersections between the ray and any of the triangles within that node
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="submodules/mymesh.improvement.TetImprove.html"
+       href="submodules/mymesh.improvement.Improve.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">mymesh.improvement.TetImprove</p>
+        <p class="prev-next-title">mymesh.improvement.Improve</p>
       </div>
     </a>
     <a class="right-next"
@@ -651,6 +674,10 @@ test for intersections between the ray and any of the triangles within that node
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#octree-creation">Octree Creation</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#conversion-from-octree">Conversion From Octree</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#octree-querying">Octree Querying</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kd-tree">KD Tree</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#kd-tree-creation">KD Tree Creation</a></li>
 </ul>
 </li>
 </ul>

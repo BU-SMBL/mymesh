@@ -1,4 +1,5 @@
-.. _theory-rays:
+.. _theory_rays:
+
 Rays
 ====
 

@@ -5,6 +5,8 @@
 
 ### Feat
 
+- **improvement.Improve**: update TetImprove to Improve, add tests
+- **mesh.plot**: add optional input for title
 - **contour**: add voxel_mode option to SurfaceMesh and TetMesh
 - **tree**: Add KDTree query_knn
 - **tree**: add KDtree and KNN search for octree
@@ -13,6 +15,17 @@
 
 ### Fix
 
+- **converter.im2voxel**: fix bug in im2voxel
+- **improvement.SmartLaplacianSmoothing**: update and speed up smart laplacian smoothing
+- update dependencies
+- **primitives.Revolve**: fix occasional overlapping elements
+- **contour.MarchingCubesImage**: fix bug in cleanup
+- **__init__**: Update optional numba logic, export dmesh
+- **improvement**: update Contract, Split, Flip to new dmesh class, other bug fixes
+- **delaunay.BowyerWatson2d**: major efficiency improvements
+- **mymesh.dmesh**: convert from jitclass to StructRef
+- **__init__**: fix urllib import
+- **utils.BaryTri**: Improve barycentric coordinate efficiency
 - **utils.identify_elem**: add pyr13 and wdg15 to identify_elem
 - **utils.Face2NodeNormal**: fix nan handling
 - **contour**: bug fix in MarchingElements

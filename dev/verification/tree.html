@@ -68,7 +68,8 @@
         </script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Verification" href="../verify.html" />
+    <link rel="next" title="Development" href="../dev.html" />
+    <link rel="prev" title="Delaunay" href="delaunay.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -179,9 +180,9 @@
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
@@ -193,9 +194,9 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-<li class=" current active">
-  <a class="nav-link dropdown-item nav-internal" href="../verify.html">
-    Verification
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -315,16 +316,16 @@
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="../verify.html">
-    Verification
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -368,6 +369,9 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="contour.html">Contour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="curvature.html">Curvature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="delaunay.html">Delaunay</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Tree</a></li>
 </ul>
 </div>
@@ -410,7 +414,7 @@
       </a>
     </li>
     
-    <li class="breadcrumb-item"><a href="../verify.html" class="nav-link">Verification</a></li>
+    <li class="breadcrumb-item"><a href="../perf.html" class="nav-link">Performance</a></li>
     
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tree</span></li>
   </ul>
@@ -436,8 +440,8 @@
 <p>Spatial tree structures can dramatically speed up nearest neighbor searching compared to brute-force approaches that require distances between all points to be calculated, however, there is an added up-front cost of constructing the tree.
 If only a single search needs to be performed, the brute-force approach may be the most efficient option, but if performing multiple searches, or other operations that can utilize the tree structure, performance can be enhanced significantly.</p>
 <p>Here the performance of multiple tree structures are compared to a brute-force search.
-A <cite>quadtree &lt;QuadtreeNode&gt;</cite>,  <cite>KD tree &lt;KDtreeNode&gt;</cite>, and SciPy’s implementation of a <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html">KD tree</a> are compared to a brute force search for 2D point data.
-For 3D point data, an <cite>octree &lt;OctreeNode&gt;</cite>, is used in place of the quadtree.
+A quadtree (<a class="reference internal" href="../generated/submodules/mymesh.tree.QuadtreeNode.html#mymesh.tree.QuadtreeNode" title="mymesh.tree.QuadtreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuadtreeNode</span></code></a>),  KD tree (<a class="reference internal" href="../generated/submodules/mymesh.tree.KDtreeNode.html#mymesh.tree.KDtreeNode" title="mymesh.tree.KDtreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">KDtreeNode</span></code></a>), and SciPy’s implementation of a <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html#scipy.spatial.KDTree" title="(in SciPy v1.17.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.spatial.KDTree</span></code></a> are compared to a brute force search for 2D point data.
+For 3D point data, an octree (<a class="reference internal" href="../generated/submodules/mymesh.tree.OctreeNode.html#mymesh.tree.OctreeNode" title="mymesh.tree.OctreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">OctreeNode</span></code></a>), is used in place of the quadtree.
 Note that the KD tree can be used for any k-dimensional data.</p>
 <section id="d-point-data">
 <h3>2D Point Data<a class="headerlink" href="#d-point-data" title="Link to this heading">#</a></h3>
@@ -529,13 +533,22 @@ Note that the KD tree can be used for any k-dimensional data.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../verify.html"
+       href="delaunay.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Verification</p>
+        <p class="prev-next-title">Delaunay</p>
       </div>
+    </a>
+    <a class="right-next"
+       href="../dev.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Development</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>

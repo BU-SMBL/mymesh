@@ -181,8 +181,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
@@ -195,8 +195,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -317,15 +317,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -370,6 +370,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="mymesh.mesh.html">mymesh.mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mymesh.dmesh.html">mymesh.dmesh</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="mymesh.booleans.html">mymesh.booleans</a></li>
@@ -469,7 +470,7 @@ robustness.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.improvement.TangentialLaplacianSmoothing.html#mymesh.improvement.TangentialLaplacianSmoothing" title="mymesh.improvement.TangentialLaplacianSmoothing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TangentialLaplacianSmoothing</span></code></a>(M[, options])</p></td>
 <td><p>Performs tangential Laplacian smoothing <span id="id2">[<a class="reference internal" href="../guide/ref.html#id57" title="Yutaka Ohtake, Alexander Belyaev, and Alexander Pasko. Dynamic mesh optimization for polygonized implicit surfaces with sharp features. Visual Computer, 19:115-126, 2003. doi:10.1007/s00371-002-0181-z.">OBP03</a>]</span>, repositioning each node to the center of its adjacent nodes in the plane tangent to the surface.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.improvement.SmartLaplacianSmoothing.html#mymesh.improvement.SmartLaplacianSmoothing" title="mymesh.improvement.SmartLaplacianSmoothing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SmartLaplacianSmoothing</span></code></a>(M[, target, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.improvement.SmartLaplacianSmoothing.html#mymesh.improvement.SmartLaplacianSmoothing" title="mymesh.improvement.SmartLaplacianSmoothing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SmartLaplacianSmoothing</span></code></a>(M[, ...])</p></td>
 <td><p>Performs smart Laplacian smoothing <span id="id3">[<a class="reference internal" href="../guide/ref.html#id36" title="Lori A. Freitag. On combining laplacian and optimization-based mesh smoothing techniques. American Society of Mechanical Engineers, Applied Mechanics Division, AMD, 220:37-43, 1997.">Fre97</a>]</span>, repositioning each node to the center of its adjacent nodes only if doing so doesn't reduce the element quality.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.improvement.GeoTransformSmoothing.html#mymesh.improvement.GeoTransformSmoothing" title="mymesh.improvement.GeoTransformSmoothing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoTransformSmoothing</span></code></a>(M[, sigma_min, ...])</p></td>
@@ -495,10 +496,10 @@ robustness.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.improvement.Split.html#mymesh.improvement.Split" title="mymesh.improvement.Split"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Split</span></code></a>(M, h[, verbose, labels, sizing, ...])</p></td>
 <td><p>Edge splitting of tetrahedral meshes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.improvement.TetFlip.html#mymesh.improvement.TetFlip" title="mymesh.improvement.TetFlip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TetFlip</span></code></a>(M[, iterate, QualityMetric, target, ...])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="submodules/mymesh.improvement.Flip.html#mymesh.improvement.Flip" title="mymesh.improvement.Flip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Flip</span></code></a>(M[, strategy, verbose])</p></td>
+<td><p>Edge/Face flipping of triangular and tetrahedral mesh quality improvement.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.improvement.TetImprove.html#mymesh.improvement.TetImprove" title="mymesh.improvement.TetImprove"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TetImprove</span></code></a>(M, h[, schedule, repeat, labels, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="submodules/mymesh.improvement.Improve.html#mymesh.improvement.Improve" title="mymesh.improvement.Improve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Improve</span></code></a>(M, h[, schedule, repeat, labels, ...])</p></td>
 <td><p>Tetrahedral mesh quality improvement using multiple local operations.</p></td>
 </tr>
 </tbody>

@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**01:23.660** total execution time for 1 file **from examples/MeshAnalysis**:
+**03:23.216** total execution time for 2 files **from examples/MeshAnalysis**:
 
 .. container::
 
@@ -32,6 +32,9 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
+   * - :ref:`sphx_glr_examples_MeshAnalysis_demo_pore-thickness.py` (``demo_pore-thickness.py``)
+     - 02:05.871
+     - 0.0
    * - :ref:`sphx_glr_examples_MeshAnalysis_demo_curvature.py` (``demo_curvature.py``)
-     - 01:23.660
+     - 01:17.345
      - 0.0

@@ -178,8 +178,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
@@ -192,8 +192,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -312,15 +312,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
   </a>
 </li>
 
@@ -429,6 +429,7 @@
 <span class="sd">    .. currentmodule:: mymesh.mesh</span>
 
 <span class="sd">    mesh</span>
+<span class="sd">    dmesh</span>
 
 
 <span class="sd">.. currentmodule:: mymesh</span>
@@ -464,12 +465,16 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span><span class="o">,</span><span class="w"> </span><span class="nn">urllib</span><span class="o">,</span><span class="w"> </span><span class="nn">tarfile</span><span class="o">,</span><span class="w"> </span><span class="nn">io</span><span class="o">,</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span><span class="o">,</span><span class="w"> </span><span class="nn">tarfile</span><span class="o">,</span><span class="w"> </span><span class="nn">io</span><span class="o">,</span><span class="w"> </span><span class="nn">re</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="k">try</span><span class="p">:</span> 
     <span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">njit</span>
-    <span class="n">_MYMESH_USE_NUMBA</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="s2">&quot;NUMBA_DISABLE_JIT&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;NUMBA_DISABLE_JIT&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
+        <span class="n">_MYMESH_USE_NUMBA</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_MYMESH_USE_NUMBA</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="n">njit</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">_MYMESH_USE_NUMBA</span> <span class="o">=</span> <span class="kc">False</span>
@@ -701,9 +706,9 @@
     <span class="k">return</span> <span class="n">M</span></div>
 
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">dmesh</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">booleans</span><span class="p">,</span> <span class="n">contour</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">delaunay</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">implicit</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">primitives</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">register</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">utils</span><span class="p">,</span> <span class="n">visualize</span>
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;check_numba&quot;</span><span class="p">,</span> <span class="s2">&quot;use_numba&quot;</span><span class="p">,</span> <span class="s2">&quot;try_njit&quot;</span><span class="p">,</span> <span class="s2">&quot;mesh&quot;</span><span class="p">,</span> <span class="s2">&quot;booleans&quot;</span><span class="p">,</span> <span class="s2">&quot;contour&quot;</span><span class="p">,</span> <span class="s2">&quot;converter&quot;</span><span class="p">,</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;check_numba&quot;</span><span class="p">,</span> <span class="s2">&quot;use_numba&quot;</span><span class="p">,</span> <span class="s2">&quot;try_njit&quot;</span><span class="p">,</span> <span class="s2">&quot;mesh&quot;</span><span class="p">,</span> <span class="s2">&quot;dmesh&quot;</span><span class="p">,</span> <span class="s2">&quot;booleans&quot;</span><span class="p">,</span> <span class="s2">&quot;contour&quot;</span><span class="p">,</span> <span class="s2">&quot;converter&quot;</span><span class="p">,</span>
 <span class="s2">&quot;curvature&quot;</span><span class="p">,</span> <span class="s2">&quot;delaunay&quot;</span><span class="p">,</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="s2">&quot;implicit&quot;</span><span class="p">,</span> <span class="s2">&quot;improvement&quot;</span><span class="p">,</span> 
 <span class="s2">&quot;primitives&quot;</span><span class="p">,</span> <span class="s2">&quot;quality&quot;</span><span class="p">,</span> <span class="s2">&quot;rays&quot;</span><span class="p">,</span> <span class="s2">&quot;register&quot;</span><span class="p">,</span> <span class="s2">&quot;tree&quot;</span><span class="p">,</span> <span class="s2">&quot;utils&quot;</span><span class="p">,</span> <span class="s2">&quot;visualize&quot;</span><span class="p">]</span>
 </pre></div>

@@ -1,0 +1,53 @@
+﻿mymesh.dmesh
+============
+
+.. currentmodule:: mymesh
+
+.. autoclass:: dmesh
+    :no-members:
+    :no-inherited-members:
+    :show-inheritance:
+    :no-special-members:
+
+Properties
+----------
+
+
+
+    .. autosummary::
+        :toctree:
+            
+    
+            dmesh.ElemConn_elem
+            dmesh.ElemConn_head
+            dmesh.ElemConn_next
+            dmesh.ElemConn_prev
+            dmesh.ElemConn_size
+            dmesh.ElemConn_tail
+            dmesh.ElemLabels
+            dmesh.NElem
+            dmesh.NNode
+            dmesh.NodeConn
+            dmesh.NodeCoords
+            dmesh.raw_NodeConn
+            dmesh.raw_NodeCoords
+
+
+
+Methods
+-------
+
+
+    .. autosummary::
+        :toctree:
+
+    
+                dmesh.addElem
+                dmesh.addElemConn
+                dmesh.addNodes
+                dmesh.getElemConn
+                dmesh.removeElem
+                dmesh.removeElemConn
+                dmesh.removeElems
+                dmesh.swapNode
+    

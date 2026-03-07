@@ -1,0 +1,6 @@
+mymesh.dmesh.raw\_NodeCoords
+============================
+
+.. currentmodule:: mymesh
+
+.. autoproperty:: dmesh.raw_NodeCoords

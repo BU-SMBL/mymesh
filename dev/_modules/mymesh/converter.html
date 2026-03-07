@@ -178,8 +178,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -192,8 +192,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -312,15 +312,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -744,27 +744,27 @@
 <span class="sd">    ElemType : str, optional</span>
 <span class="sd">        Specifies the element type contained within the mesh, by default &#39;auto&#39;.</span>
 
-<span class="sd">        - &#39;auto&#39; or &#39;mixed&#39; - Will detect element type by the number of nodes present in each element using :func:`~mymesh.utils.identify_type`. </span>
+<span class="sd">        - &#39;auto&#39; or &#39;mixed&#39;: Will detect element type by the number of nodes present in each element using :func:`~mymesh.utils.identify_type`. </span>
 
-<span class="sd">        - &#39;surf&#39; - Will detect element type by the number of nodes present in each </span>
+<span class="sd">        - &#39;surf&#39;: Will detect element type by the number of nodes present in each </span>
 <span class="sd">        element, assuming four node elements are quads</span>
 
-<span class="sd">        - &#39;vol&#39; - Will detect element type by the number of nodes present in each </span>
+<span class="sd">        - &#39;vol&#39;: Will detect element type by the number of nodes present in each </span>
 <span class="sd">        element, assuming four node elements are tets (functionally the ame as &#39;auto&#39;)</span>
 
-<span class="sd">        - &#39;tri&#39; - All elements treated as 3-node triangular elements.</span>
+<span class="sd">        - &#39;tri&#39;: All elements treated as 3-node triangular elements.</span>
 
-<span class="sd">        - &#39;quad&#39; - All elements treated as 4-node quadrilateral elements.</span>
+<span class="sd">        - &#39;quad&#39;: All elements treated as 4-node quadrilateral elements.</span>
 
-<span class="sd">        - &#39;tet&#39; - All elements treated as 4-node tetrahedral elements.</span>
+<span class="sd">        - &#39;tet&#39;: All elements treated as 4-node tetrahedral elements.</span>
 
-<span class="sd">        - &#39;pyramid&#39; - All elements treated as 5-node wedge elements.</span>
+<span class="sd">        - &#39;pyramid&#39;: All elements treated as 5-node wedge elements.</span>
 
-<span class="sd">        - &#39;wedge&#39; - All elements treated as 6-node quadrilateral elements.</span>
+<span class="sd">        - &#39;wedge&#39;: All elements treated as 6-node quadrilateral elements.</span>
 
-<span class="sd">        - &#39;hex&#39; - All elements treated as 8-node quadrilateral elements.</span>
+<span class="sd">        - &#39;hex&#39;: All elements treated as 8-node quadrilateral elements.</span>
 
-<span class="sd">        - &#39;polygon&#39; - All elements treated as n-node polygonal elements. TODO: add support for return_EdgeConn and return_EdgeElem</span>
+<span class="sd">        - &#39;polygon&#39;: All elements treated as n-node polygonal elements. TODO: add support for return_EdgeConn and return_EdgeElem</span>
 
 <span class="sd">    return_EdgeConn : bool, optional</span>
 <span class="sd">        If true, will return EdgeConn, the Edge Connectivity of each element.</span>
@@ -964,7 +964,7 @@
 <span class="sd">    ElementEdges : list</span>
 <span class="sd">        Edge connectivity, grouped by element</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="n">Edges</span><span class="p">,</span> <span class="n">EdgeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2edges</span><span class="p">(</span><span class="o">*</span><span class="n">S</span><span class="p">,</span> <span class="n">return_EdgeConn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="n">ElemType</span><span class="p">)</span>
+    <span class="n">Edges</span><span class="p">,</span> <span class="n">EdgeConn</span> <span class="o">=</span> <span class="n">solid2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">return_EdgeConn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="n">ElemType</span><span class="p">)</span>
     <span class="n">ElementEdges</span> <span class="o">=</span> <span class="p">[</span><span class="n">Edges</span><span class="p">[</span><span class="n">ec</span><span class="p">]</span> <span class="k">for</span> <span class="n">ec</span> <span class="ow">in</span> <span class="n">EdgeConn</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">ElementEdges</span></div>
 
@@ -3703,7 +3703,7 @@
                 <span class="c1"># if return_gradient: GradData = GradData[Data&gt;=threshold]</span>
                 <span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">,</span><span class="n">ids</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">RemoveNodes</span><span class="p">(</span><span class="n">VoxelCoords</span><span class="p">,</span><span class="n">VoxelConn</span><span class="p">)</span>
                 <span class="n">Data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span>
-                <span class="n">GradData</span> <span class="o">=</span> <span class="n">GradData</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">return_gradient</span><span class="p">:</span> <span class="n">GradData</span> <span class="o">=</span> <span class="n">GradData</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span>
                 <span class="n">VoxelConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">VoxelConn</span><span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">threshold_direction</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>

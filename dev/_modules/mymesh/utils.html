@@ -178,8 +178,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -192,8 +192,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -312,15 +312,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -485,6 +485,7 @@
 <span class="sd">    DeleteDegenerateElements</span>
 <span class="sd">    CleanupDegenerateElements</span>
 <span class="sd">    RelabelNodes</span>
+<span class="sd">    RemoveNodes</span>
 
 <span class="sd">Miscellaneous </span>
 <span class="sd">=============</span>
@@ -1111,116 +1112,13 @@
 
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid method: </span><span class="si">{</span><span class="n">method</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="c1"># NodeNormals = [[] for i in range(len(NodeCoords))]      # Normal vectors for each vertex</span>
-        <span class="c1"># NodeSet = {n for elem in NodeConn for n in elem}</span>
-        <span class="c1"># for i in range(len(NodeCoords)):</span>
-        <span class="c1">#     if i not in NodeSet:</span>
-        <span class="c1">#         NodeNormals[i] = [np.nan,np.nan,np.nan]</span>
-        <span class="c1">#         continue</span>
-        <span class="c1">#     angles = [0 for j in range(len(ElemConn[i]))]</span>
-        <span class="c1">#     elemnormals = [np.array(ElemNormals[elem]) for elem in ElemConn[i]]</span>
-
-        <span class="c1">#     if method == &#39;MostVisible_Loop&#39;:</span>
-                
-        <span class="c1">#         # This is kept for readability; &#39;MostVisible&#39; is a vectorized equivalent that performs significantly faster</span>
-                
-        <span class="c1">#         # Note: this code uses dot(Ni,Nj) as a surrogate for radius; since Ni,Nj are both unit vectors</span>
-        <span class="c1">#         # cos(theta) = dot(Ni,Nj) -&gt; theta = arccos(dot(Ni,Nj)). Since arccos is a monotonically </span>
-        <span class="c1">#         # decreasing function, if dot(Ni,Nj) &lt; dot(Ni,Nk), then rij &gt; rik</span>
-        <span class="c1">#         eps = -1e-8</span>
-        <span class="c1">#         scalmin = -1</span>
-        <span class="c1">#         C = [np.nan,np.nan,np.nan]</span>
-        <span class="c1">#         for ii in range(len(elemnormals)-1):</span>
-        <span class="c1">#             # Check the 2 point circles</span>
-        <span class="c1">#             Ni = np.array(elemnormals[ii])</span>
-        <span class="c1">#             for j in range(ii+1,len(elemnormals)):</span>
-        <span class="c1">#                 Nj = np.array(elemnormals[j])</span>
-        <span class="c1">#                 Nb = Ni+Nj</span>
-        <span class="c1">#                 Nb = Nb/np.linalg.norm(Nb)</span>
-        <span class="c1">#                 scal = np.dot(Nb,Ni)</span>
-        <span class="c1">#                 if scal &lt; scalmin:      </span>
-        <span class="c1">#                     pass</span>
-        <span class="c1">#                 elif any((np.dot(Nl,Nb) - scal) &lt; eps for Nl in elemnormals):</span>
-        <span class="c1">#                     pass</span>
-        <span class="c1">#                 else:</span>
-        <span class="c1">#                     C = Nb.tolist()</span>
-        <span class="c1">#                     scalmin = scal</span>
-        <span class="c1">#         for ii in range(len(elemnormals)-2): </span>
-        <span class="c1">#             # Check the 3 point circles</span>
-        <span class="c1">#             Ni = elemnormals[ii]</span>
-        <span class="c1">#             for j in range(ii+1,len(elemnormals)-1):</span>
-        <span class="c1">#                 Nj = elemnormals[j]</span>
-        <span class="c1">#                 for k in range(j+1,len(elemnormals)):</span>
-        <span class="c1">#                     Nk = elemnormals[k]</span>
-
-        <span class="c1">#                     denom = (2*np.linalg.norm(np.cross(Ni-Nk,Nj-Nk))**2) </span>
-        <span class="c1">#                     if denom == 0:</span>
-        <span class="c1">#                         continue</span>
-        <span class="c1">#                     Nc = np.cross(np.linalg.norm(Ni-Nk)**2 * (Nj-Nk) - np.linalg.norm(Nj-Nk)**2 * (Ni-Nk), np.cross(Ni-Nk,Nj-Nk))/denom + Nk</span>
-        <span class="c1">#                     nNc = np.linalg.norm(Nc)</span>
-        <span class="c1">#                     if nNc == 0:</span>
-        <span class="c1">#                         continue</span>
-        <span class="c1">#                     Nc = Nc/nNc</span>
-                            
-
-        <span class="c1">#                     scal = np.dot(Nc, Ni)</span>
-        <span class="c1">#                     if scal &lt; 0:</span>
-        <span class="c1">#                         Nc = [-1*n for n in Nc]</span>
-        <span class="c1">#                         scal = -scal</span>
-        <span class="c1">#                     if scal &lt; scalmin:</span>
-        <span class="c1">#                         pass</span>
-        <span class="c1">#                     elif any((np.dot(Nl,Nc) - scal) &lt; eps for Nl in elemnormals):</span>
-        <span class="c1">#                         pass   </span>
-        <span class="c1">#                     else:</span>
-        <span class="c1">#                         C = Nc</span>
-        <span class="c1">#                         scalmin = scal</span>
-        <span class="c1">#         NodeNormals[i] = C    </span>
-        <span class="c1">#         if np.any(np.isnan(C)):</span>
-        <span class="c1">#             print(i)</span>
-                
-        <span class="c1">#     elif method == &#39;MostVisible_Iter&#39;:</span>
-                
-        <span class="c1">#         conv = 1e-3</span>
-        <span class="c1">#         beta = 0.5</span>
-                
-        <span class="c1">#         # Initial weights</span>
-        <span class="c1">#         ws = [1/len(elemnormals) for i in range(len(elemnormals))]</span>
-        <span class="c1">#         # Compute initial guess normal</span>
-        <span class="c1">#         Sp = sum([w*n for w,n in zip(ws,elemnormals)])</span>
-        <span class="c1">#         Np = Sp/np.linalg.norm(Sp)</span>
-                
-        <span class="c1">#         k = 0</span>
-        <span class="c1">#         thinking = True</span>
-        <span class="c1">#         while thinking:</span>
-        <span class="c1">#             k+=1</span>
-        <span class="c1">#             alphas = [np.arccos(np.clip(np.dot(Np,Ni),-1,1)) for Ni in elemnormals]</span>
-        <span class="c1">#             Salpha = sum(alphas)</span>
-        <span class="c1">#             if Salpha == 0:</span>
-        <span class="c1">#                 thinking = False</span>
-        <span class="c1">#             else:</span>
-        <span class="c1">#                 ws = [w*alpha/Salpha for w,alpha in zip(ws,alphas)]</span>
-        <span class="c1">#                 Sw = sum(ws)</span>
-        <span class="c1">#                 ws = [w/Sw for w in ws]</span>
-        <span class="c1">#                 Spnew = sum([w*n for w,n in zip(ws,elemnormals)])</span>
-        <span class="c1">#                 if np.linalg.norm(Spnew) == 0:</span>
-        <span class="c1">#                     print(&#39;merp3&#39;)</span>
-        <span class="c1">#                 Npnew = Spnew/np.linalg.norm(Spnew)</span>
-                        
-        <span class="c1">#                 # Relax</span>
-        <span class="c1">#                 Nprel = beta*Npnew + (1-beta)*Np</span>
-        <span class="c1">#                 if np.linalg.norm(Np-Nprel) &lt; conv or k &gt; 100:</span>
-        <span class="c1">#                     thinking = False</span>
-        <span class="c1">#                 Np = Nprel</span>
-        <span class="c1">#         if any(np.isnan(Np)) and len(elemnormals)&gt;0:</span>
-        <span class="c1">#             merp = 2</span>
-        <span class="c1">#         NodeNormals[i] = Np.tolist()</span>
     <span class="k">return</span> <span class="n">NodeNormals</span></div>
 
 
 <div class="viewcode-block" id="BaryTri">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.utils.BaryTri.html#mymesh.utils.BaryTri">[docs]</a>
-<span class="nd">@try_njit</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">BaryTri</span><span class="p">(</span><span class="n">Nodes</span><span class="p">,</span> <span class="n">Pt</span><span class="p">):</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="s1">&#39;always&#39;</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">BaryTri</span><span class="p">(</span><span class="n">Nodes</span><span class="p">,</span> <span class="n">Pt</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the bary centric coordinates of a point (Pt) relative to </span>
 <span class="sd">    a triangle (Nodes)</span>
@@ -1231,6 +1129,10 @@
 <span class="sd">        List of coordinates of the triangle vertices.</span>
 <span class="sd">    Pt : np.ndarray</span>
 <span class="sd">        Coordinates of the point.</span>
+<span class="sd">    d : int, NoneType</span>
+<span class="sd">        Number of dimensions (2 or 3). For points and triangles in a plane,</span>
+<span class="sd">        barycentric coordinates can be calculated more efficiency. </span>
+<span class="sd">        In performance-critical applications, always specify either 2 or 3.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1242,26 +1144,55 @@
 <span class="sd">        Third barycentric coordinate.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">Nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Nodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-    <span class="n">Pt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Pt</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">d</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Pt</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c1"># Cross product/area method</span>
+        <span class="n">Ax</span><span class="p">,</span> <span class="n">Ay</span> <span class="o">=</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">Bx</span><span class="p">,</span> <span class="n">By</span> <span class="o">=</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">Cx</span><span class="p">,</span> <span class="n">Cy</span> <span class="o">=</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 
-    <span class="n">A</span> <span class="o">=</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">B</span> <span class="o">=</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-    <span class="n">BA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">A</span><span class="p">)</span>
-    <span class="c1"># CB = np.subtract(C,B)</span>
-    <span class="c1"># AC = np.subtract(A,C)</span>
-    <span class="n">CA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="n">A</span><span class="p">)</span>    
-    <span class="n">BABA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">BA</span><span class="p">,</span> <span class="n">BA</span><span class="p">)</span>
-    <span class="n">BACA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">BA</span><span class="p">,</span> <span class="n">CA</span><span class="p">)</span>
-    <span class="n">CACA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">CA</span><span class="p">,</span> <span class="n">CA</span><span class="p">)</span>
-    <span class="n">PABA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">Pt</span><span class="p">,</span><span class="n">A</span><span class="p">),</span> <span class="n">BA</span><span class="p">)</span>
-    <span class="n">PACA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">Pt</span><span class="p">,</span><span class="n">A</span><span class="p">),</span> <span class="n">CA</span><span class="p">)</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">BABA</span> <span class="o">*</span> <span class="n">CACA</span> <span class="o">-</span> <span class="n">BACA</span> <span class="o">*</span> <span class="n">BACA</span><span class="p">)</span>
-    <span class="n">denom</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">d</span>
-    <span class="n">beta</span> <span class="o">=</span> <span class="p">(</span><span class="n">CACA</span> <span class="o">*</span> <span class="n">PABA</span> <span class="o">-</span> <span class="n">BACA</span> <span class="o">*</span> <span class="n">PACA</span><span class="p">)</span> <span class="o">*</span> <span class="n">denom</span>
-    <span class="n">gamma</span> <span class="o">=</span> <span class="p">(</span><span class="n">BABA</span> <span class="o">*</span> <span class="n">PACA</span> <span class="o">-</span> <span class="n">BACA</span> <span class="o">*</span> <span class="n">PABA</span><span class="p">)</span> <span class="o">*</span> <span class="n">denom</span>
-    <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">gamma</span> <span class="o">-</span> <span class="n">beta</span>
+        <span class="c1"># 2*Area of ABC</span>
+        <span class="n">BAx</span><span class="p">,</span> <span class="n">BAy</span> <span class="o">=</span> <span class="n">Bx</span><span class="o">-</span><span class="n">Ax</span><span class="p">,</span> <span class="n">By</span><span class="o">-</span><span class="n">Ay</span>
+        <span class="n">CAx</span><span class="p">,</span> <span class="n">CAy</span> <span class="o">=</span> <span class="n">Cx</span><span class="o">-</span><span class="n">Ax</span><span class="p">,</span> <span class="n">Cy</span><span class="o">-</span><span class="n">Ay</span>
+        <span class="n">ABC</span> <span class="o">=</span> <span class="n">BAx</span><span class="o">*</span><span class="n">CAy</span> <span class="o">-</span> <span class="n">BAy</span><span class="o">*</span><span class="n">CAx</span>
+
+        <span class="c1"># 2*Area of APC</span>
+        <span class="n">PtAx</span><span class="p">,</span> <span class="n">PtAy</span> <span class="o">=</span> <span class="n">Pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">Ax</span><span class="p">,</span> <span class="n">Pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Ay</span>
+        <span class="n">APC</span> <span class="o">=</span> <span class="n">PtAx</span><span class="o">*</span><span class="n">CAy</span> <span class="o">-</span> <span class="n">CAx</span><span class="o">*</span><span class="n">PtAy</span>
+
+        <span class="c1"># 2*Area of ABP</span>
+        <span class="n">ABP</span> <span class="o">=</span> <span class="n">BAx</span><span class="o">*</span><span class="n">PtAy</span> <span class="o">-</span> <span class="n">BAy</span><span class="o">*</span><span class="n">PtAx</span>
+
+        <span class="c1"># Barycentric coordinates = area ratios</span>
+        <span class="n">denom</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">ABC</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">APC</span> <span class="o">*</span> <span class="n">denom</span>
+        <span class="n">gamma</span> <span class="o">=</span> <span class="n">ABP</span> <span class="o">*</span> <span class="n">denom</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">+</span> <span class="n">beta</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># Dot product/projection method</span>
+        <span class="n">Ax</span><span class="p">,</span> <span class="n">Ay</span><span class="p">,</span> <span class="n">Az</span> <span class="o">=</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">Bx</span><span class="p">,</span> <span class="n">By</span><span class="p">,</span> <span class="n">Bz</span> <span class="o">=</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">Cx</span><span class="p">,</span> <span class="n">Cy</span><span class="p">,</span> <span class="n">Cz</span> <span class="o">=</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">Nodes</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># Edges AB, CA, Pt-A</span>
+        <span class="n">BAx</span><span class="p">,</span> <span class="n">BAy</span><span class="p">,</span> <span class="n">BAz</span> <span class="o">=</span> <span class="n">Bx</span> <span class="o">-</span> <span class="n">Ax</span><span class="p">,</span> <span class="n">By</span> <span class="o">-</span> <span class="n">Ay</span><span class="p">,</span> <span class="n">Bz</span> <span class="o">-</span> <span class="n">Az</span>
+        <span class="n">CAx</span><span class="p">,</span> <span class="n">CAy</span><span class="p">,</span> <span class="n">CAz</span> <span class="o">=</span> <span class="n">Cx</span> <span class="o">-</span> <span class="n">Ax</span><span class="p">,</span> <span class="n">Cy</span> <span class="o">-</span> <span class="n">Ay</span><span class="p">,</span> <span class="n">Cz</span> <span class="o">-</span> <span class="n">Az</span>
+        <span class="n">PtAx</span><span class="p">,</span> <span class="n">PtAy</span><span class="p">,</span> <span class="n">PtAz</span> <span class="o">=</span> <span class="n">Pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Ax</span><span class="p">,</span> <span class="n">Pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Ay</span><span class="p">,</span> <span class="n">Pt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">Az</span>
+
+        <span class="c1"># dot products</span>
+        <span class="n">BABA</span> <span class="o">=</span> <span class="n">BAx</span><span class="o">*</span><span class="n">BAx</span> <span class="o">+</span> <span class="n">BAy</span><span class="o">*</span><span class="n">BAy</span> <span class="o">+</span> <span class="n">BAz</span><span class="o">*</span><span class="n">BAz</span>
+        <span class="n">BACA</span> <span class="o">=</span> <span class="n">BAx</span><span class="o">*</span><span class="n">CAx</span> <span class="o">+</span> <span class="n">BAy</span><span class="o">*</span><span class="n">CAy</span> <span class="o">+</span> <span class="n">BAz</span><span class="o">*</span><span class="n">CAz</span>
+        <span class="n">CACA</span> <span class="o">=</span> <span class="n">CAx</span><span class="o">*</span><span class="n">CAx</span> <span class="o">+</span> <span class="n">CAy</span><span class="o">*</span><span class="n">CAy</span> <span class="o">+</span> <span class="n">CAz</span><span class="o">*</span><span class="n">CAz</span>
+        <span class="n">PABA</span> <span class="o">=</span> <span class="n">PtAx</span><span class="o">*</span><span class="n">BAx</span> <span class="o">+</span> <span class="n">PtAy</span><span class="o">*</span><span class="n">BAy</span> <span class="o">+</span> <span class="n">PtAz</span><span class="o">*</span><span class="n">BAz</span>
+        <span class="n">PACA</span> <span class="o">=</span> <span class="n">PtAx</span><span class="o">*</span><span class="n">CAx</span> <span class="o">+</span> <span class="n">PtAy</span><span class="o">*</span><span class="n">CAy</span><span class="o">+</span> <span class="n">PtAz</span><span class="o">*</span><span class="n">CAz</span>
+
+        <span class="n">det</span> <span class="o">=</span> <span class="p">(</span><span class="n">BABA</span> <span class="o">*</span> <span class="n">CACA</span> <span class="o">-</span> <span class="n">BACA</span> <span class="o">*</span> <span class="n">BACA</span><span class="p">)</span>
+        <span class="n">denom</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">det</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="p">(</span><span class="n">CACA</span> <span class="o">*</span> <span class="n">PABA</span> <span class="o">-</span> <span class="n">BACA</span> <span class="o">*</span> <span class="n">PACA</span><span class="p">)</span> <span class="o">*</span> <span class="n">denom</span>
+        <span class="n">gamma</span> <span class="o">=</span> <span class="p">(</span><span class="n">BABA</span> <span class="o">*</span> <span class="n">PACA</span> <span class="o">-</span> <span class="n">BACA</span> <span class="o">*</span> <span class="n">PABA</span><span class="p">)</span> <span class="o">*</span> <span class="n">denom</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">+</span> <span class="n">beta</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span></div>
 
@@ -1318,7 +1249,7 @@
 
 <div class="viewcode-block" id="BaryTet">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.utils.BaryTet.html#mymesh.utils.BaryTet">[docs]</a>
-<span class="nd">@try_njit</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">BaryTet</span><span class="p">(</span><span class="n">Nodes</span><span class="p">,</span> <span class="n">Pt</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the bary centric coordinates of a point (Pt) relative to </span>
@@ -1674,6 +1605,8 @@
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">output</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">output</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">((</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">inv</span><span class="p">))</span> <span class="k">if</span> <span class="n">returns</span><span class="p">[</span><span class="n">i</span><span class="p">])</span></div>
 
 
+<div class="viewcode-block" id="RemoveNodes">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.utils.RemoveNodes.html#mymesh.utils.RemoveNodes">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">RemoveNodes</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Removes nodes that aren&#39;t held by any element</span>
@@ -1717,7 +1650,8 @@
         <span class="n">Newiter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">New</span><span class="p">)</span>
         <span class="n">NewNodeConn</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">Newiter</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)))</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">NodeConn</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="n">NewNodeCoords</span><span class="p">,</span> <span class="n">NewNodeConn</span><span class="p">,</span> <span class="n">OriginalIds</span>
+    <span class="k">return</span> <span class="n">NewNodeCoords</span><span class="p">,</span> <span class="n">NewNodeConn</span><span class="p">,</span> <span class="n">OriginalIds</span></div>
+
 
 <div class="viewcode-block" id="RelabelNodes">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.utils.RelabelNodes.html#mymesh.utils.RelabelNodes">[docs]</a>
@@ -2807,7 +2741,7 @@
 <span class="sd">        a triangle (3 nodes). In the case of a mesh containing both triangular</span>
 <span class="sd">        and volume elements, the mesh will be classified arbitrarily by whichever</span>
 <span class="sd">        appears first in NodeConn. A ``line`` mesh is identified if any line (2</span>
-<span class="sd">         node) elements are present.</span>
+<span class="sd">        node) elements are present.</span>
 
 <span class="sd">        This approach has a chance of mislabeling the mesh in some rare or </span>
 <span class="sd">        non-standard scenarios, but attempts to be as efficient as possible</span>

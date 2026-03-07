@@ -181,8 +181,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -195,8 +195,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -317,15 +317,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -370,6 +370,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.mesh.html">mymesh.mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mymesh.dmesh.html">mymesh.dmesh</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../mymesh.booleans.html">mymesh.booleans</a></li>
@@ -459,12 +460,12 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="mymesh.implicit.mixed_topology">
 <span class="sig-prename descclassname"><span class="pre">mymesh.implicit.</span></span><span class="sig-name descname"><span class="pre">mixed_topology</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cellsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mymesh/implicit.html#mixed_topology"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mymesh.implicit.mixed_topology" title="Link to this definition">#</a></dt>
-<dd><p>Mixed-topology surfaces <span id="id1">[]</span>.
+<dd><p>Mixed-topology surfaces <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id24" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1-18, 7 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span>.
 A weighted sum of a set of functions, such as <a class="reference internal" href="mymesh.implicit.tpms.html#mymesh.implicit.tpms" title="mymesh.implicit.tpms"><code class="xref py py-func docutils literal notranslate"><span class="pre">tpms()</span></code></a> functions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>functions</strong> (<em>callable</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Callable implicit function or name of a TPMS (see <a href="#id2"><span class="problematic" id="id3">:fun:`tpms`</span></a>).</p></li>
+<li><p><strong>functions</strong> (<em>callable</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Callable implicit function or name of a TPMS (see <a class="reference internal" href="mymesh.implicit.tpms.html#mymesh.implicit.tpms" title="mymesh.implicit.tpms"><code class="xref py py-func docutils literal notranslate"><span class="pre">tpms()</span></code></a>).</p></li>
 <li><p><strong>weights</strong> (<em>array_like</em>) – Weights to assign to each function</p></li>
 <li><p><strong>cellsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Unit cell size if using TPMS names, by default 1</p></li>
 </ul>

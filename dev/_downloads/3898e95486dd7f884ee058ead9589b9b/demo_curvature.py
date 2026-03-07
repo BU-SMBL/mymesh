@@ -47,13 +47,16 @@ k1a_sphere, k2a_sphere, _, _ = curvature.AnalyticalCurvature(implicit.sphere([0,
 k1a_smooth, k2a_smooth, _, _ = curvature.AnalyticalCurvature(implicit.sphere([0,0,0], 1), SmoothSphere.NodeCoords)
 
 # Plotting:
-fig1, ax1 = Sphere.plot(scalars=k1m_sphere, bgcolor='white', show_edges=True, color='coolwarm', show=False, return_fig=True)
+fig1, ax1 = Sphere.plot(scalars=k1m_sphere, bgcolor='white', show_edges=True,
+                        color='coolwarm', show=False, return_fig=True)
 ax1.set_title('Sphere - Mesh-based')
 fig2, ax2 = SmoothSphere.plot(scalars=k1m_smooth, bgcolor='white', show_edges=True, color='coolwarm', show=False, return_fig=True)
 ax2.set_title('Smooth Sphere - Mesh-based')
-fig3, ax3 = Sphere.plot(scalars=k1a_sphere, bgcolor='white', show_edges=True, color='coolwarm', show=False, return_fig=True)
+fig3, ax3 = Sphere.plot(scalars=k1a_sphere, bgcolor='white', show_edges=True,
+                        color='coolwarm', show=False, return_fig=True)
 ax3.set_title('Sphere - Analytical')
-fig4, ax4 = SmoothSphere.plot(scalars=k1a_smooth, bgcolor='white', show_edges=True, color='coolwarm', show=False, return_fig=True)
+fig4, ax4 = SmoothSphere.plot(scalars=k1a_smooth,bgcolor='white',show_edges=True, 
+                              color='coolwarm', show=False, return_fig=True)
 ax4.set_title('Smooth Sphere - Analytical')
 
 # %%
@@ -88,7 +91,18 @@ plt.show()
 # Image-based curvature
 # ---------------------
 # For image-based meshes, curvature can be calculated directly from the image 
-# and then evaluated at the nodes of the mesh.
+# and then evaluated at the nodes of the mesh. 
+# Calculating the curvature from the image eliminates the dependency of the
+# calculated values from the quality of the elements, the noise or artifacts
+# in the image can influence the quality of the results. 
+# It could also be used to calculate curvature values from the full resolution
+# image but only evaluate them on a coarsened mesh, without loss of accuracy.
+#
+# For mesh-based curvature, the length scale of the calculated curvature depends
+# on both the edge length of the mesh and the number of rings used in the 
+# curvature calculation. For image-based curvature, it depends on the image
+# resolution (voxel size) and the gaussian sigma value used in the gradient
+# calculations.
 
 # load the CT scan of the Stanford bunny as an example
 threshold = 100

@@ -178,8 +178,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -192,8 +192,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -312,15 +312,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -450,8 +450,8 @@
 
 <span class="sd">    Contract</span>
 <span class="sd">    Split</span>
-<span class="sd">    TetFlip</span>
-<span class="sd">    TetImprove</span>
+<span class="sd">    Flip</span>
+<span class="sd">    Improve</span>
 
 
 <span class="sd">&quot;&quot;&quot;</span>
@@ -902,7 +902,7 @@
 
 <div class="viewcode-block" id="SmartLaplacianSmoothing">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.improvement.SmartLaplacianSmoothing.html#mymesh.improvement.SmartLaplacianSmoothing">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">SmartLaplacianSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">TangentialSurface</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SmartLaplacianSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">TangentialSurface</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Performs smart Laplacian smoothing :cite:p:`Freitag1997a`, repositioning </span>
 <span class="sd">    each node to the center of its adjacent nodes only if doing so doesn&#39;t</span>
@@ -912,14 +912,6 @@
 <span class="sd">    ----------</span>
 <span class="sd">    M : mymesh.mesh</span>
 <span class="sd">        Mesh object to smooth</span>
-<span class="sd">    target : str</span>
-<span class="sd">        Determines whether criteria for repositioning a node, by default &#39;mean&#39;. </span>
-
-<span class="sd">        &#39;mean&#39; - repositioning is allowed if the average quality of the connected</span>
-<span class="sd">        elements doesn&#39;t decrease.</span>
-
-<span class="sd">        &#39;min&#39; - repositioning is allowed if the minimum quality of the connected</span>
-<span class="sd">        elements doesn&#39;t decrease.</span>
 <span class="sd">    TangentialSurface : bool, optional</span>
 <span class="sd">        Option to use tangential Laplacian smoothing on the surface (and interfaces, </span>
 <span class="sd">        if labels are provided), by default True.</span>
@@ -950,9 +942,6 @@
 <span class="sd">        FixSurf : bool</span>
 <span class="sd">            If true, all nodes on the surface will be held in place and only </span>
 <span class="sd">            interior nodes will be smoothed, by default False.</span>
-<span class="sd">        qualityFunc : function</span>
-<span class="sd">            Function used for computing quality. It is assumed that a larger</span>
-<span class="sd">            number corresponds to higher quality, be default quality.MeanRatio</span>
 <span class="sd">        InPlace : bool</span>
 <span class="sd">            If True, the input mesh is modified directly, otherwise a new copy of the mesh</span>
 <span class="sd">            is created, by default False.</span>
@@ -1016,7 +1005,6 @@
                         <span class="n">FixFeatures</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                         <span class="n">FixSurf</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                         <span class="n">FixEdge</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                        <span class="n">qualityFunc</span> <span class="o">=</span> <span class="n">quality</span><span class="o">.</span><span class="n">MeanRatio</span><span class="p">,</span>
                         <span class="n">InPlace</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="p">)</span>
 
@@ -1025,13 +1013,11 @@
     <span class="n">FixedNodes</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;FixedNodes&#39;</span><span class="p">]</span>
     <span class="n">tolerance</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;tolerance&#39;</span><span class="p">]</span>
     <span class="n">iterate</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;iterate&#39;</span><span class="p">]</span>
-    <span class="n">qualityFunc</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;qualityFunc&#39;</span><span class="p">]</span>
     <span class="n">maxIter</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;maxIter&#39;</span><span class="p">]</span>
     <span class="n">method</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">]</span>
     <span class="n">InPlace</span> <span class="o">=</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;InPlace&#39;</span><span class="p">]</span>
 
     <span class="c1"># Initialize</span>
-    <span class="n">lens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">NodeNeighbors</span><span class="p">])</span>
     <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">TangentialSurface</span><span class="p">:</span>
         <span class="n">SurfNodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">n</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">SurfConn</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">])</span>
@@ -1045,94 +1031,24 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">EdgeNodes</span><span class="p">:</span>
             <span class="n">NodeNeighbors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">EdgeNodeNeighbors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-    <span class="n">q</span> <span class="o">=</span> <span class="n">qualityFunc</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">)</span>
+    <span class="n">nneighbors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">ns</span><span class="p">)</span> <span class="k">for</span> <span class="n">ns</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeNeighbors</span><span class="p">])</span>
+    <span class="n">neighbor_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">nneighbors</span><span class="p">),</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">flat_neighbors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n</span> <span class="k">for</span> <span class="n">ns</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeNeighbors</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ns</span><span class="p">])</span>
+
+    <span class="n">conn_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">ns</span><span class="p">)</span> <span class="k">for</span> <span class="n">ns</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">ElemConn</span><span class="p">]),</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">flat_conn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n</span> <span class="k">for</span> <span class="n">ns</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">ElemConn</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ns</span><span class="p">])</span>
+
+    <span class="n">q</span> <span class="o">=</span> <span class="n">quality</span><span class="o">.</span><span class="n">ModifiedMeanRatio</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">)</span>
     <span class="n">qmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
     <span class="n">qmean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
 
-    <span class="c1"># Smoothing Functions</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">SequentialSmoother</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        
-        <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="n">FreeNodes</span><span class="p">:</span>
-            <span class="n">oldnode</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">])</span>
-            <span class="n">oldq</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]]</span>
-            <span class="c1"># NodeCoords[inode] = np.mean(NodeCoords[NodeNeighbors[inode]], axis=0)</span>
-
-            <span class="n">Q</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeNeighbors</span><span class="p">[</span><span class="n">inode</span><span class="p">]]</span>
-            <span class="k">if</span> <span class="n">TangentialSurface</span> <span class="ow">and</span> <span class="n">inode</span> <span class="ow">in</span> <span class="n">SurfNodes</span><span class="p">:</span>
-                <span class="n">u</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">lens</span><span class="p">[</span><span class="n">inode</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                <span class="n">U</span> <span class="o">=</span> <span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">u</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">u</span><span class="o">*</span><span class="n">NodeNormals</span><span class="p">[</span><span class="n">inode</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">NodeNormals</span><span class="p">[</span><span class="n">inode</span><span class="p">])</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">U</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">lens</span><span class="p">[</span><span class="n">inode</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span> <span class="o">+=</span> <span class="n">U</span>
-
-            <span class="n">q</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]]</span> <span class="o">=</span> <span class="n">qualityFunc</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]])</span>
-
-            <span class="n">newqmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]])</span>
-            <span class="n">oldqmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">oldq</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
-                <span class="n">oldqmean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">oldq</span><span class="p">)</span>
-                <span class="n">newqmean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]])</span>
-
-                <span class="k">if</span> <span class="p">(</span><span class="n">newqmean</span> <span class="o">&lt;</span> <span class="n">oldqmean</span><span class="p">)</span> <span class="o">|</span> <span class="p">((</span><span class="n">newqmin</span> <span class="o">&lt;</span> <span class="n">oldqmin</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">newqmin</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)):</span>
-                    <span class="c1"># If mean gets worse or a negative min gets worse</span>
-                    <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span> <span class="o">=</span> <span class="n">oldnode</span>
-                    <span class="n">q</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]]</span> <span class="o">=</span> <span class="n">oldq</span>
-            <span class="k">elif</span> <span class="n">target</span> <span class="o">==</span> <span class="s1">&#39;min&#39;</span><span class="p">:</span>
-                <span class="c1"># if min gets worse</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">oldqmin</span> <span class="o">&lt;</span> <span class="n">newqmin</span><span class="p">):</span>
-                    <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span> <span class="o">=</span> <span class="n">oldnode</span>
-                    <span class="n">q</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]]</span> <span class="o">=</span> <span class="n">oldq</span>
-
-        <span class="k">return</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">q</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">SimultaneousSmoother</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="c1"># TODO: NOT SET UP YET - apply all movements simultaneously, then for elements that degrade, selectively determine which node movements need to be reverted</span>
-        <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="n">FreeNodes</span><span class="p">:</span>
-            <span class="n">oldnode</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">])</span>
-            <span class="n">oldq</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]]</span>
-            <span class="c1"># NodeCoords[inode] = np.mean(NodeCoords[NodeNeighbors[inode]], axis=0)</span>
-
-            <span class="n">Q</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeNeighbors</span><span class="p">[</span><span class="n">inode</span><span class="p">]]</span>
-            <span class="k">if</span> <span class="n">TangentialSurface</span> <span class="ow">and</span> <span class="n">inode</span> <span class="ow">in</span> <span class="n">SurfNodes</span><span class="p">:</span>
-                <span class="n">u</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">lens</span><span class="p">[</span><span class="n">inode</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                <span class="n">U</span> <span class="o">=</span> <span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">u</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">u</span><span class="o">*</span><span class="n">NodeNormals</span><span class="p">[</span><span class="n">inode</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">NodeNormals</span><span class="p">[</span><span class="n">inode</span><span class="p">])</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">U</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">lens</span><span class="p">[</span><span class="n">inode</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span> <span class="o">+=</span> <span class="n">U</span>
-
-            <span class="n">q</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]]</span> <span class="o">=</span> <span class="n">qualityFunc</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]])</span>
-
-            <span class="n">newqmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]])</span>
-            <span class="n">oldqmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">oldq</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
-                <span class="n">oldqmean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">oldq</span><span class="p">)</span>
-                <span class="n">newqmean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]])</span>
-
-                <span class="k">if</span> <span class="p">(</span><span class="n">newqmean</span> <span class="o">&lt;</span> <span class="n">oldqmean</span><span class="p">)</span> <span class="o">|</span> <span class="p">((</span><span class="n">newqmin</span> <span class="o">&lt;</span> <span class="n">oldqmin</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">newqmin</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)):</span>
-                    <span class="c1"># If mean gets worse or a negative min gets worse</span>
-                    <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span> <span class="o">=</span> <span class="n">oldnode</span>
-                    <span class="n">q</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]]</span> <span class="o">=</span> <span class="n">oldq</span>
-            <span class="k">elif</span> <span class="n">target</span> <span class="o">==</span> <span class="s1">&#39;min&#39;</span><span class="p">:</span>
-                <span class="c1"># if min gets worse</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">oldqmin</span> <span class="o">&lt;</span> <span class="n">newqmin</span><span class="p">):</span>
-                    <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span> <span class="o">=</span> <span class="n">oldnode</span>
-                    <span class="n">q</span><span class="p">[</span><span class="n">ElemConn</span><span class="p">[</span><span class="n">inode</span><span class="p">]]</span> <span class="o">=</span> <span class="n">oldq</span>
-
-        <span class="k">return</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">q</span>
-
-    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;sequential&#39;</span><span class="p">:</span>
-        <span class="n">smoother</span> <span class="o">=</span> <span class="n">SequentialSmoother</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid method &quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">method</span><span class="p">)</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">&quot;, must be &quot;sequential&quot;.&#39;</span><span class="p">)</span>
-
     <span class="c1"># Iterate</span>
-    <span class="c1"># qmin_hist = [qmin]</span>
-    <span class="c1"># qmean_hist = [qmean]</span>
-    
-    <span class="k">if</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;iterate&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;converge&#39;</span><span class="p">:</span>
-        <span class="n">condition</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qmin</span><span class="p">,</span> <span class="n">qmean</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">maxIter</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">-</span> <span class="n">qmin</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">-</span> <span class="n">qmean</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">))</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;iterate&#39;</span><span class="p">],</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
-        <span class="n">condition</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qmin</span><span class="p">,</span> <span class="n">qmean</span> <span class="p">:</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">SmoothOptions</span><span class="p">[</span><span class="s1">&#39;iterate&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">iterate</span> <span class="o">==</span> <span class="s1">&#39;converge&#39;</span><span class="p">:</span>
+        <span class="n">condition</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qmin</span><span class="p">,</span> <span class="n">qmean</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">maxIter</span><span class="p">)</span> <span class="o">&amp;</span> \
+            <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">-</span> <span class="n">qmin</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">)</span> <span class="o">|</span> \
+             <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">-</span> <span class="n">qmean</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">iterate</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+        <span class="n">condition</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qmin</span><span class="p">,</span> <span class="n">qmean</span> <span class="p">:</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">iterate</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;options[&quot;iterate&quot;] must be &quot;converge&quot; or an integer.&#39;</span><span class="p">)</span>
     
@@ -1142,9 +1058,7 @@
 
         <span class="n">qmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
         <span class="n">qmean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-        <span class="c1"># qmin_hist.append(qmin)</span>
-        <span class="c1"># qmean_hist.append(qmean)</span>
-        <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="n">smoother</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+        <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="n">_SmartLaplacianSmoothing_iterate</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">FreeNodes</span><span class="p">,</span> <span class="n">SurfNodes</span><span class="p">,</span> <span class="n">NodeNormals</span><span class="p">,</span> <span class="n">flat_neighbors</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">flat_conn</span><span class="p">,</span> <span class="n">conn_indices</span><span class="p">,</span> <span class="n">TangentialSurface</span><span class="p">,</span> <span class="n">nneighbors</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">InPlace</span><span class="p">:</span>
         <span class="n">Mnew</span> <span class="o">=</span> <span class="n">M</span>
@@ -1154,6 +1068,35 @@
 
     <span class="k">return</span> <span class="n">Mnew</span></div>
 
+
+<span class="c1"># @try_njit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_SmartLaplacianSmoothing_iterate</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">FreeNodes</span><span class="p">,</span> <span class="n">SurfNodes</span><span class="p">,</span> <span class="n">NodeNormals</span><span class="p">,</span> <span class="n">flat_neighbors</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">flat_conn</span><span class="p">,</span> <span class="n">conn_indices</span><span class="p">,</span> <span class="n">TangentialSurface</span><span class="p">,</span> <span class="n">nneighbors</span><span class="p">):</span>
+    
+    <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="n">FreeNodes</span><span class="p">:</span>
+        <span class="n">this_elemconn</span> <span class="o">=</span> <span class="n">flat_conn</span><span class="p">[</span><span class="n">conn_indices</span><span class="p">[</span><span class="n">inode</span><span class="p">]:</span><span class="n">conn_indices</span><span class="p">[</span><span class="n">inode</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">oldq</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="n">this_elemconn</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">flat_neighbors</span><span class="p">[</span><span class="n">neighbor_indices</span><span class="p">[</span><span class="n">inode</span><span class="p">]:</span><span class="n">neighbor_indices</span><span class="p">[</span><span class="n">inode</span><span class="o">+</span><span class="mi">1</span><span class="p">]]]</span>
+        <span class="k">if</span> <span class="n">TangentialSurface</span> <span class="ow">and</span> <span class="n">inode</span> <span class="ow">in</span> <span class="n">SurfNodes</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">nneighbors</span><span class="p">[</span><span class="n">inode</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">u</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">u</span><span class="o">*</span><span class="n">NodeNormals</span><span class="p">[</span><span class="n">inode</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">NodeNormals</span><span class="p">[</span><span class="n">inode</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">nneighbors</span><span class="p">[</span><span class="n">inode</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span> <span class="o">+=</span> <span class="n">U</span>
+
+        <span class="n">oldqmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">this_elemconn</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">this_elemconn</span><span class="p">):</span>
+            <span class="n">newq</span> <span class="o">=</span> <span class="n">quality</span><span class="o">.</span><span class="n">_ModifiedMeanRatio</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">newq</span> <span class="o">&lt;</span> <span class="n">oldqmin</span> <span class="ow">or</span> <span class="n">quality</span><span class="o">.</span><span class="n">_tet_volume</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">])</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># revert and terminate</span>
+                <span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">ee</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">this_elemconn</span><span class="p">[:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="n">q</span><span class="p">[</span><span class="n">ee</span><span class="p">]</span> <span class="o">=</span> <span class="n">oldq</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">NodeCoords</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span> <span class="o">-=</span> <span class="n">U</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">newq</span>
+
+    <span class="k">return</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">q</span>
 
 <div class="viewcode-block" id="GeoTransformSmoothing">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.improvement.GeoTransformSmoothing.html#mymesh.improvement.GeoTransformSmoothing">[docs]</a>
@@ -2086,29 +2029,54 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;If provided as a string, labels must correspond to an entry in M.ElemData&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">label_str</span> <span class="o">=</span> <span class="s1">&#39;labels&#39;</span>
+            <span class="n">M</span><span class="o">.</span><span class="n">ElemData</span><span class="p">[</span><span class="n">label_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">==</span> <span class="n">M</span><span class="o">.</span><span class="n">NElem</span><span class="p">,</span> <span class="s1">&#39;labels must correspond to the number of elements.&#39;</span>
-        <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
-            <span class="n">MultiSurface</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">MultiSurface</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">ulabels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
-        <span class="n">label_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ulabels</span><span class="p">),</span><span class="n">M</span><span class="o">.</span><span class="n">NNode</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="c1"># For each label, boolean indicator of whether each node is touching an element with that label</span>
-        <span class="n">mesh_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NNode</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ulabels</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">M</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
-                <span class="n">m</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">MultiSurface</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">m</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            
-            <span class="n">MultiSurface</span><span class="o">.</span><span class="n">addElems</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">SurfConn</span><span class="p">)</span>
-            <span class="n">label_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">MultiSurface</span><span class="o">.</span><span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span>    
-        <span class="n">MultiSurface</span><span class="o">.</span><span class="n">Type</span> <span class="o">=</span> <span class="s1">&#39;surf&#39;</span>
-        <span class="n">MultiSurface</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="n">MultiSurface</span><span class="o">.</span><span class="n">Faces</span>  <span class="c1"># This prevents doubling of surface elements at interfaces</span>
-        <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">MultiSurface</span><span class="o">.</span><span class="n">NodeConn</span>
-        <span class="n">SurfEdges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">MultiSurface</span><span class="o">.</span><span class="n">Edges</span><span class="p">)</span>
-        <span class="n">JunctionEdges</span> <span class="o">=</span> <span class="n">MultiSurface</span><span class="o">.</span><span class="n">Edges</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">conn</span> <span class="ow">in</span> <span class="n">MultiSurface</span><span class="o">.</span><span class="n">EdgeElemConn</span><span class="p">])]</span>
-        <span class="n">JunctionNodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">JunctionEdges</span><span class="p">)</span>
+                <span class="n">MultiSurface</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">ulabels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+            <span class="n">label_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ulabels</span><span class="p">),</span><span class="n">M</span><span class="o">.</span><span class="n">NNode</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="c1"># For each label, boolean indicator of whether each node is touching an element with that label</span>
+            <span class="n">mesh_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NNode</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ulabels</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                
+                <span class="n">MultiSurface</span><span class="o">.</span><span class="n">addElems</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">SurfConn</span><span class="p">)</span>
+                <span class="n">label_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">MultiSurface</span><span class="o">.</span><span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span>    
+            <span class="n">MultiSurface</span><span class="o">.</span><span class="n">Type</span> <span class="o">=</span> <span class="s1">&#39;surf&#39;</span>
+            <span class="n">MultiSurface</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="n">MultiSurface</span><span class="o">.</span><span class="n">Faces</span>  <span class="c1"># This prevents doubling of surface elements at interfaces</span>
+            <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">MultiSurface</span><span class="o">.</span><span class="n">NodeConn</span>
+            <span class="n">SurfEdges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">MultiSurface</span><span class="o">.</span><span class="n">Edges</span><span class="p">)</span>
+            <span class="n">JunctionEdges</span> <span class="o">=</span> <span class="n">MultiSurface</span><span class="o">.</span><span class="n">Edges</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">conn</span> <span class="ow">in</span> <span class="n">MultiSurface</span><span class="o">.</span><span class="n">EdgeElemConn</span><span class="p">])]</span>
+            <span class="n">JunctionNodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">JunctionEdges</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">M</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+                <span class="n">MultiBoundary</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">MultiBoundary</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">ulabels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+            <span class="n">label_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ulabels</span><span class="p">),</span><span class="n">M</span><span class="o">.</span><span class="n">NNode</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="c1"># For each label, boolean indicator of whether each node is touching an element with that label</span>
+            <span class="n">mesh_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NNode</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ulabels</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                
+                <span class="n">MultiBoundary</span><span class="o">.</span><span class="n">addElems</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">BoundaryConn</span><span class="p">)</span>
+                <span class="n">label_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">MultiBoundary</span><span class="o">.</span><span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span>    
+            <span class="n">MultiBoundary</span><span class="o">.</span><span class="n">Type</span> <span class="o">=</span> <span class="s1">&#39;line&#39;</span>
+            <span class="n">MultiBoundary</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="n">MultiBoundary</span><span class="o">.</span><span class="n">Edges</span>  <span class="c1"># This prevents doubling of surface elements at interfaces</span>
+            <span class="n">SurfConn</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span>
+            <span class="n">SurfEdges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">Edges</span><span class="p">)</span>
+            <span class="n">JunctionEdges</span> <span class="o">=</span> <span class="n">MultiBoundary</span><span class="o">.</span><span class="n">NodeConn</span>
+            <span class="n">JunctionNodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">JunctionEdges</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">sizing</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span> <span class="ow">and</span> <span class="n">sizing</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
         <span class="n">sizing</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">h</span>
@@ -2529,6 +2497,7 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;If provided as a string, labels must correspond to an entry in M.ElemData&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">label_str</span> <span class="o">=</span> <span class="s1">&#39;labels&#39;</span>
+            <span class="n">M</span><span class="o">.</span><span class="n">ElemData</span><span class="p">[</span><span class="n">label_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">==</span> <span class="n">M</span><span class="o">.</span><span class="n">NElem</span><span class="p">,</span> <span class="s1">&#39;labels must correspond to the number of elements.&#39;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
@@ -2611,7 +2580,7 @@
 
     <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span>
     <span class="n">NewConn</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span>
-    <span class="n">new_labels</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">ElemLabels</span>
+    <span class="n">new_labels</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">[:</span><span class="n">D</span><span class="o">.</span><span class="n">NElem</span><span class="p">]</span>
     <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
         <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -2622,7 +2591,7 @@
     <span class="k">return</span> <span class="n">Mnew</span></div>
 
 
-<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_do_split</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">):</span>
 
     <span class="n">node1</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -2719,27 +2688,17 @@
         <span class="n">NewElems</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NewTris</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">NewElems</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NewTets</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-    <span class="c1"># Adding node manually instead of using D.addNodes so that emax can be tracked with it</span>
-    <span class="n">NewLength</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NNode</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">_NodeCoords</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">NewLength</span><span class="p">:</span>
-        <span class="c1"># Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.</span>
-        <span class="c1"># If the new addition is more than double the current length, the array will be extended </span>
-        <span class="c1"># to exactly fit the new nodes</span>
-        <span class="n">newsize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">NewLength</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">_NodeCoords</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">D</span><span class="o">.</span><span class="n">_NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">_NodeCoords</span><span class="p">,</span> <span class="p">(</span><span class="n">newsize</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-        <span class="n">emax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">emax</span><span class="p">,</span> <span class="n">newsize</span><span class="p">)</span>
-        <span class="n">emin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span> <span class="n">newsize</span><span class="p">)</span>
-        <span class="c1"># update the ElemConn structure as well</span>
-        <span class="n">D</span><span class="o">.</span><span class="n">ElemConn_head</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">,</span> <span class="n">newsize</span><span class="p">)</span>
-        <span class="n">D</span><span class="o">.</span><span class="n">ElemConn_tail</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">,</span> <span class="n">newsize</span><span class="p">)</span>
-    
-    <span class="n">D</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="n">D</span><span class="o">.</span><span class="n">NNode</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="n">D</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">[</span><span class="n">D</span><span class="o">.</span><span class="n">NNode</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="n">D</span><span class="o">.</span><span class="n">_NodeCoords</span><span class="p">[</span><span class="n">D</span><span class="o">.</span><span class="n">NNode</span><span class="p">]</span> <span class="o">=</span> <span class="n">newnode</span>
-    <span class="n">emax</span><span class="p">[</span><span class="n">D</span><span class="o">.</span><span class="n">NNode</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_emax</span>
-    <span class="n">emin</span><span class="p">[</span><span class="n">D</span><span class="o">.</span><span class="n">NNode</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_emin</span>
 
-    <span class="n">D</span><span class="o">.</span><span class="n">NNode</span> <span class="o">=</span> <span class="n">NewLength</span>
+    <span class="n">old_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">)</span>
+    <span class="n">D</span><span class="o">.</span><span class="n">addNodes</span><span class="p">(</span><span class="n">newnode</span><span class="p">[</span><span class="kc">None</span><span class="p">,:])</span>
+    <span class="n">new_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">new_length</span> <span class="o">&gt;</span> <span class="n">old_length</span><span class="p">:</span>
+        <span class="c1"># doubling</span>
+        <span class="n">emax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">emax</span><span class="p">,</span> <span class="n">new_length</span><span class="p">)</span>
+        <span class="n">emin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span> <span class="n">new_length</span><span class="p">)</span>
+    <span class="n">emax</span><span class="p">[</span><span class="n">D</span><span class="o">.</span><span class="n">NNode</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_emax</span>
+    <span class="n">emin</span><span class="p">[</span><span class="n">D</span><span class="o">.</span><span class="n">NNode</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_emin</span>
+
     <span class="k">if</span> <span class="n">elem_type</span> <span class="o">==</span><span class="s1">&#39;tet&#39;</span><span class="p">:</span>
         <span class="c1"># 3D Element inversion check</span>
         <span class="k">for</span> <span class="n">new_elems</span> <span class="ow">in</span> <span class="n">NewElems</span><span class="p">:</span>
@@ -2757,6 +2716,8 @@
                 <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">new_elem</span><span class="p">,</span> <span class="n">D</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">[</span><span class="n">shared_elems</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">new_elem</span> <span class="ow">in</span> <span class="n">new_elems</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">new_elem</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">merp</span> <span class="o">=</span><span class="mi">2</span> 
                 <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">new_elem</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">shared_elems</span><span class="p">:</span>
         <span class="n">D</span><span class="o">.</span><span class="n">removeElem</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
@@ -2769,8 +2730,84 @@
         <span class="n">to_add</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="o">-</span><span class="n">newedge2_L</span><span class="p">,</span> <span class="n">newedge2</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">D</span><span class="p">,</span> <span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">to_add</span>
 
-<div class="viewcode-block" id="TetFlip">
-<a class="viewcode-back" href="../../generated/submodules/mymesh.improvement.TetFlip.html#mymesh.improvement.TetFlip">[docs]</a>
+<div class="viewcode-block" id="Flip">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.improvement.Flip.html#mymesh.improvement.Flip">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Flip</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;valence&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Edge/Face flipping of triangular and tetrahedral mesh quality improvement.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    M : mymesh.mesh</span>
+<span class="sd">        Tetrahedral or triangular mesh</span>
+<span class="sd">    strategy : str, optional</span>
+<span class="sd">        Flipping strategy, by default &#39;valence&#39;</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        If true, will display progress, by default True</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Mnew : mymesh.mesh</span>
+<span class="sd">        Updated mesh</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="n">elemtypes</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">ElemType</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemtypes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Mesh must be purely triangular or tetrahedral.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">elemtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;tri&#39;</span>
+    <span class="k">elif</span> <span class="n">elemtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;tet&#39;</span><span class="p">:</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;tet&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Mesh must be purely triangular or tetrahedral.&#39;</span><span class="p">)</span>
+    
+    <span class="n">Edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">Edges</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">EdgeTuple</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span><span class="n">Edges</span><span class="p">))</span>
+    <span class="n">EdgeSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">EdgeTuple</span><span class="p">)</span>
+
+    <span class="n">D</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">mesh2dmesh</span><span class="p">()</span><span class="c1">#(ElemLabels=labels)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="s1">&#39;tqdm&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+        <span class="n">tqdm_loaded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">progress</span> <span class="o">=</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">EdgeSet</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tqdm_loaded</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Flip:&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">EdgeSet</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">tqdm_loaded</span><span class="p">:</span>
+            <span class="n">progress</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">L1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">EdgeSet</span><span class="p">)</span>
+
+        <span class="n">edge</span> <span class="o">=</span> <span class="n">EdgeSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span> <span class="o">=</span> <span class="n">_tri_flip</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">)</span>
+            <span class="n">EdgeSet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span> <span class="o">=</span> <span class="n">_tet_flip32</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">)</span>
+            <span class="n">EdgeSet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">tqdm_loaded</span><span class="p">:</span>
+            <span class="n">L2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">EdgeSet</span><span class="p">)</span>
+            <span class="n">progress</span><span class="o">.</span><span class="n">total</span> <span class="o">+=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">L2</span><span class="o">-</span><span class="n">L1</span><span class="p">)</span>
+    
+
+    <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span>
+    <span class="n">NewConn</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span>
+    <span class="c1"># new_labels = D.ElemLabels</span>
+
+    <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+        <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
+    <span class="c1"># if len(new_labels) &gt; 0:</span>
+    <span class="c1">#     Mnew.ElemData[label_str] = new_labels</span>
+
+    <span class="k">return</span> <span class="n">Mnew</span></div>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">TetFlip</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">iterate</span><span class="o">=</span><span class="s1">&#39;converge&#39;</span><span class="p">,</span> <span class="n">QualityMetric</span><span class="o">=</span><span class="s1">&#39;Skewness&#39;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="n">flips</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;4-4&#39;</span><span class="p">,</span><span class="s1">&#39;3-2&#39;</span><span class="p">,</span><span class="s1">&#39;2-3&#39;</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span>
@@ -2866,12 +2903,11 @@
         <span class="n">tet</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">tet</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">tet</span></div>
+    <span class="k">return</span> <span class="n">tet</span>
 
-
-<div class="viewcode-block" id="TetImprove">
-<a class="viewcode-back" href="../../generated/submodules/mymesh.improvement.TetImprove.html#mymesh.improvement.TetImprove">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">TetImprove</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">schedule</span><span class="o">=</span><span class="s1">&#39;scfS&#39;</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smoother</span><span class="o">=</span><span class="s1">&#39;SmartLaplacianSmoothing&#39;</span><span class="p">,</span> <span class="n">smooth_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">FeatureAngle</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">ContractIter</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<div class="viewcode-block" id="Improve">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.improvement.Improve.html#mymesh.improvement.Improve">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Improve</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">schedule</span><span class="o">=</span><span class="s1">&#39;scfS&#39;</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smoother</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smooth_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">FeatureAngle</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Tetrahedral mesh quality improvement using multiple local operations. </span>
 
@@ -2888,18 +2924,19 @@
 <span class="sd">        Possible operations:</span>
 <span class="sd">            - &#39;s&#39; - Splitting (:func:`Split`)</span>
 <span class="sd">            - &#39;c&#39; - Contraction (:func:`Contract`)</span>
-<span class="sd">            - &#39;f&#39; - Flipping (:func:`TetFlip`)</span>
+<span class="sd">            - &#39;f&#39; - Flipping (:func:`Flip`)</span>
 <span class="sd">            - &#39;S&#39; - Smoothing </span>
 
 <span class="sd">    repeat : int, optional</span>
-<span class="sd">        Number of times to repeat the schedule, by default 1</span>
+<span class="sd">        Number of times to repeat the schedule, by default 2</span>
 <span class="sd">    labels : str, array_like, or NoneType, optional</span>
 <span class="sd">        Element labels indicating different regions. If specified,</span>
 <span class="sd">        region interfaces will be preserved. This can be specified as </span>
 <span class="sd">        an array_like with M.NElem entries or a string corresponding to</span>
 <span class="sd">        an entry in M.ElemData, by default None.</span>
 <span class="sd">    smoother : str, optional</span>
-<span class="sd">        Specify which smoothing operation to use, by default &#39;SmartLaplacianSmoothing&#39;</span>
+<span class="sd">        Specify which smoothing operation to use, by default None.</span>
+<span class="sd">        If not specified, :func:`~mymesh.improvement.SmartLaplacianSmoothing` is used for tetrahedral meshes and :func:`~mymesh.improvement.TangentialLaplacianSmoothing` is used for triangular meshes.</span>
 <span class="sd">    smooth_kwargs : dict, optional</span>
 <span class="sd">        Key word arguments to be passed to the smoother, by default {}</span>
 <span class="sd">    verbose : bool, optional</span>
@@ -2908,14 +2945,17 @@
 <span class="sd">        FeatureAngle : int, optional</span>
 <span class="sd">        Angle (in degrees) used to identify features, by default 25. See</span>
 <span class="sd">        :func:`~mymesh.utils.DetectFeatures` for more information., by default 25</span>
-<span class="sd">    ContractIter : int, optional</span>
-<span class="sd">        Maximum number of iterations to perform in the contraction step, by default 5</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Mnew : mymesh.mesh</span>
 <span class="sd">        Tetrahedral mesh after quality improvement</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">if</span> <span class="n">smoother</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">M</span><span class="o">.</span><span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+            <span class="n">smoother</span> <span class="o">=</span> <span class="s1">&#39;SmartLaplacianSmoothing&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">smoother</span> <span class="o">=</span> <span class="s1">&#39;TangentialLaplacianSmoothing&#39;</span>
     <span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
     <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeat</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">operation</span> <span class="ow">in</span> <span class="n">schedule</span><span class="p">:</span>
@@ -2926,16 +2966,27 @@
                 <span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
             <span class="k">elif</span> <span class="n">operation</span> <span class="o">==</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span>
                 <span class="c1"># Contract</span>
-                <span class="n">M</span> <span class="o">=</span> <span class="n">Contract</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">4</span><span class="o">/</span><span class="mi">5</span><span class="o">*</span><span class="n">h</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">FeatureAngle</span><span class="o">=</span><span class="n">FeatureAngle</span><span class="p">,</span> <span class="n">maxIter</span><span class="o">=</span><span class="n">ContractIter</span><span class="p">)</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="n">Contract</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">4</span><span class="o">/</span><span class="mi">5</span><span class="o">*</span><span class="n">h</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">FeatureAngle</span><span class="o">=</span><span class="n">FeatureAngle</span><span class="p">)</span>
                 <span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
-            <span class="c1"># elif operation == &#39;f&#39;:</span>
-            <span class="c1">#     # Flip</span>
-            <span class="c1">#     M = TetFlip(M, flips=[&#39;3-2&#39;,&#39;2-3&#39;], verbose=verbose)</span>
-            <span class="c1">#     M.verbose=False</span>
+            <span class="k">elif</span> <span class="n">operation</span> <span class="o">==</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span>
+                <span class="c1"># Flip</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="n">Flip</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+                <span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
             <span class="k">elif</span> <span class="n">operation</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">smoother</span> <span class="o">==</span> <span class="s1">&#39;SmartLaplacianSmoothing&#39;</span><span class="p">:</span>
-                    <span class="n">M</span> <span class="o">=</span> <span class="n">SmartLaplacianSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">TangentialSurface</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">FixFeatures</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                    <span class="n">M</span> <span class="o">=</span> <span class="n">SmartLaplacianSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">TangentialSurface</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">smooth_kwargs</span><span class="p">)</span>
                     <span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+                <span class="k">elif</span> <span class="n">smoother</span> <span class="o">==</span> <span class="s1">&#39;TangentialLaplacianSmoothing&#39;</span><span class="p">:</span>
+                    <span class="n">M</span> <span class="o">=</span> <span class="n">TangentialLaplacianSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">smooth_kwargs</span><span class="p">)</span>
+                    <span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+                <span class="k">elif</span> <span class="n">smoother</span> <span class="o">==</span> <span class="s1">&#39;TaubinSmoothing&#39;</span><span class="p">:</span>
+                    <span class="n">M</span> <span class="o">=</span> <span class="n">TaubinSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">smooth_kwargs</span><span class="p">)</span>
+                    <span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+                <span class="k">elif</span> <span class="n">smoother</span> <span class="o">==</span> <span class="s1">&#39;LocalLaplacianSmoothing&#39;</span><span class="p">:</span>
+                    <span class="n">M</span> <span class="o">=</span> <span class="n">LocalLaplacianSmoothing</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">smooth_kwargs</span><span class="p">)</span>
+                    <span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid smoother: </span><span class="si">{</span><span class="n">smoother</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">M</span></div>
 
 
@@ -3586,81 +3637,6 @@
             <span class="k">break</span>
 
     <span class="k">return</span>  <span class="n">success</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">Flip</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;valence&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Edge/Face flipping of triangular and tetrahedral mesh quality improvement.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    M : mymesh.mesh</span>
-<span class="sd">        Tetrahedral or triangular mesh</span>
-<span class="sd">    strategy : str, optional</span>
-<span class="sd">        Flipping strategy, by default &#39;valence&#39;</span>
-<span class="sd">    verbose : bool, optional</span>
-<span class="sd">        If true, will display progress, by default True</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Mnew : mymesh.mesh</span>
-<span class="sd">        Updated mesh</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
-
-    <span class="n">elemtypes</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">ElemType</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elemtypes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Mesh must be purely triangular or tetrahedral.&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">elemtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
-        <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;tri&#39;</span>
-    <span class="k">elif</span> <span class="n">elemtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;tet&#39;</span><span class="p">:</span>
-        <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;tet&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Mesh must be purely triangular or tetrahedral.&#39;</span><span class="p">)</span>
-    
-    <span class="n">Edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">Edges</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-    <span class="n">EdgeTuple</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span><span class="n">Edges</span><span class="p">))</span>
-    <span class="n">EdgeSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">EdgeTuple</span><span class="p">)</span>
-
-    <span class="n">D</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">mesh2dmesh</span><span class="p">()</span><span class="c1">#(ElemLabels=labels)</span>
-
-    <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="s1">&#39;tqdm&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
-        <span class="n">tqdm_loaded</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">progress</span> <span class="o">=</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">EdgeSet</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">tqdm_loaded</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Flip:&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-
-
-    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">EdgeSet</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-
-        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">tqdm_loaded</span><span class="p">:</span>
-            <span class="n">progress</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">L1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">EdgeSet</span><span class="p">)</span>
-
-        <span class="n">edge</span> <span class="o">=</span> <span class="n">EdgeSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
-            <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span> <span class="o">=</span> <span class="n">_tri_flip</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">)</span>
-            <span class="n">EdgeSet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">D</span><span class="p">,</span> <span class="n">to_add</span> <span class="o">=</span> <span class="n">_tet_flip32</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">)</span>
-            <span class="n">EdgeSet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">tqdm_loaded</span><span class="p">:</span>
-            <span class="n">L2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">EdgeSet</span><span class="p">)</span>
-            <span class="n">progress</span><span class="o">.</span><span class="n">total</span> <span class="o">+=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">L2</span><span class="o">-</span><span class="n">L1</span><span class="p">)</span>
-    
-
-    <span class="n">NewCoords</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeCoords</span>
-    <span class="n">NewConn</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span>
-    <span class="c1"># new_labels = D.ElemLabels</span>
-
-    <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
-        <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">Mnew</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span>
-    <span class="c1"># if len(new_labels) &gt; 0:</span>
-    <span class="c1">#     Mnew.ElemData[label_str] = new_labels</span>
-
-    <span class="k">return</span> <span class="n">Mnew</span>
 
 <span class="nd">@try_njit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_tri_flip</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;valence&#39;</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>

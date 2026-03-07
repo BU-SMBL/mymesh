@@ -178,8 +178,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
@@ -192,8 +192,8 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -312,15 +312,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../dev.html">
-    Development
+  <a class="nav-link nav-internal" href="../../perf.html">
+    Performance
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../verify.html">
-    Verification
+  <a class="nav-link nav-internal" href="../../dev.html">
+    Development
   </a>
 </li>
 
@@ -428,7 +428,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">implicit</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">contour</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">register</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">visualize</span><span class="p">,</span> <span class="n">check_numba</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">implicit</span><span class="p">,</span> <span class="n">improvement</span><span class="p">,</span> <span class="n">contour</span><span class="p">,</span> <span class="n">converter</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">rays</span><span class="p">,</span> <span class="n">register</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">visualize</span><span class="p">,</span> <span class="n">check_numba</span><span class="p">,</span> <span class="n">try_njit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sys</span><span class="w"> </span><span class="kn">import</span> <span class="n">getsizeof</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -2939,7 +2939,7 @@
 
 <div class="viewcode-block" id="mesh.plot">
 <a class="viewcode-back" href="../../generated/mymesh.mesh.mesh.plot.html#mymesh.mesh.plot">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_fig</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">show_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_fig</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">show_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate a static plot of the mesh. See :func:`mymesh.visualize.view` </span>
 <span class="sd">        for a full list of optional arguments.</span>
@@ -3012,6 +3012,8 @@
             <span class="n">scale</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="n">cmin</span><span class="p">,</span> <span class="n">cmax</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">show_colorbar</span><span class="p">:</span>
                 <span class="n">colorbar</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">return_fig</span><span class="p">:</span>
@@ -3078,9 +3080,7 @@
 <span class="sd">        D : mesh.dmesh</span>
 <span class="sd">            dynamic mesh</span>
 
-
 <span class="sd">        &quot;&quot;&quot;</span>      
-
         <span class="c1"># Ensure relevant data is in properly typed numpy arrays</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
@@ -3089,68 +3089,504 @@
         
         <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
-        <span class="n">Edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Edges</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">Faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Faces</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Dynamic meshes are not valid for meshes with elements that have mixed faces (e.g. wedges or pyramids).&#39;</span><span class="p">)</span>
-        
-        <span class="c1"># ElemNeighbors = utils.PadRagged(self.ElemNeighbors. fillval=-1)</span>
-        
-        <span class="n">ElemConn_head</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-        <span class="n">ElemConn_elem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">e</span> <span class="k">for</span> <span class="n">elems</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elems</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-        <span class="n">ElemConn_next</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ElemConn_elem</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-        <span class="n">ElemConn_prev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ElemConn_elem</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-        <span class="n">ElemConn_tail</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elems</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elems</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="n">ElemConn_head</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
-            <span class="c1"># ElemConn_prev[k] = -1 # Implied by initialization</span>
-            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elems</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-                <span class="n">ElemConn_next</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span>
-                <span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
-                <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="c1"># ElemConn_next[k] = -1 # Implied by initialization</span>
-            <span class="n">ElemConn_tail</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
-            <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
-        
-        <span class="c1"># if self.Type == &#39;surf&#39;:</span>
-        <span class="c1">#     # Neighbors are connected by edges</span>
-        <span class="c1">#     NeighborConnection = len(Edges[0])</span>
-        <span class="c1"># elif self.Type == &#39;vol&#39;:</span>
-        <span class="c1">#     # Neighbors are connected by faces</span>
-        <span class="c1">#     NeighborConnection = len(Faces[0])</span>
         <span class="k">if</span> <span class="n">ElemLabels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ElemLabels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ElemLabels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ElemLabels</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="n">D</span> <span class="o">=</span> <span class="n">dmesh</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">ElemConn_head</span><span class="p">,</span> <span class="n">ElemConn_elem</span><span class="p">,</span> <span class="n">ElemConn_next</span><span class="p">,</span> <span class="n">ElemConn_prev</span><span class="p">,</span> <span class="n">ElemConn_tail</span><span class="p">,</span> <span class="n">ElemLabels</span><span class="p">)</span>
+        <span class="n">D</span> <span class="o">=</span> <span class="n">dmesh</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn</span><span class="p">,</span> <span class="n">ElemLabels</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">D</span></div>
 </div>
 
+    
+<span class="c1"># dmesh class</span>
+<span class="c1"># Attributes:</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_raw_NodeCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeCoords</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_NNode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">NNode</span>  
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_NodeCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">]</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_raw_NodeConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_NElem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_NodeConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">NElem</span><span class="p">]</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_ElemConn_head</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_ElemConn_elem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_ElemConn_next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_ElemConn_prev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_ElemConn_tail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_ElemConn_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_size</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_get_ElemLabels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span>
+
+<span class="c1"># Method implementations:</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_addNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeCoords</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add nodes to the mesh.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    NodeCoords : array_like</span>
+<span class="sd">        Coordinates of the new node(s). This can either be a single node </span>
+<span class="sd">        (shape=(3,)) or multiple nodes (shape=(n,3)).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>   
+
+    <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
+    <span class="n">NewLength</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NNode</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">NewLength</span><span class="p">:</span>
+        <span class="c1"># Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.</span>
+        <span class="c1"># If the new addition is more than double the current length, the array will be extended </span>
+        <span class="c1"># to exactly fit the new nodes</span>
+        <span class="n">newsize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">NewLength</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">,</span> <span class="p">(</span><span class="n">newsize</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+        
+        <span class="c1"># update the ElemConn structure as well</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">,</span> <span class="n">newsize</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">,</span> <span class="n">newsize</span><span class="p">)</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">:</span><span class="n">NewLength</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeCoords</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">:</span><span class="n">NewLength</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">:</span><span class="n">NewLength</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">NNode</span> <span class="o">=</span> <span class="n">NewLength</span>
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_addElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">Label</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a new element to the mesh. The element should reference </span>
+<span class="sd">    nodes that already exist in the mesh.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    NodeConn : array_like</span>
+<span class="sd">        Node connectivity of the new element. This should be a single</span>
+<span class="sd">        element (shape=(m,))</span>
+<span class="sd">    &quot;&quot;&quot;</span>  
+
+    <span class="n">NewLength</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">NewElemId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">NewLength</span><span class="p">:</span>
+        <span class="c1"># Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.</span>
+        <span class="c1"># If the new addition is more than double the current length, the array will be extended </span>
+        <span class="c1"># to exactly fit the new elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">NewLength</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)),</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">NewLength</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">[</span><span class="n">NewElemId</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeConn</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">[</span><span class="n">NewElemId</span><span class="p">]</span> <span class="o">=</span> <span class="n">Label</span>
+
+    <span class="c1"># Update ElemConn with new connections</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">[</span><span class="n">NewElemId</span><span class="p">]:</span>
+        <span class="n">dmesh_addElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">NewElemId</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_getElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">):</span>
+    
+    <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span>
+    <span class="n">ElemConn</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">ElemConn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">ElemConn</span>
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_addElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+    <span class="c1"># Add a connection between an existing node and an element</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_size</span><span class="p">:</span>
+        <span class="c1"># Amortized O(1) insertion by doubling </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span>
+    <span class="n">newIdx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_size</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">[</span><span class="n">newIdx</span><span class="p">]</span> <span class="o">=</span> <span class="n">ElemId</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># If this is the first connection for the node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span> <span class="o">=</span> <span class="n">newIdx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">newIdx</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newIdx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">newIdx</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span> <span class="o">=</span> <span class="n">newIdx</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">newIdx</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_size</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_removeElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+    <span class="c1"># Remove a connection between a node and an element</span>
+
+    <span class="c1"># Find the position of the element</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">elem</span> <span class="o">==</span> <span class="n">ElemId</span><span class="p">:</span>
+            <span class="c1"># Remove</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># this node is the head</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># this node is the tail</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            
+
+    <span class="c1"># NOTE: Not currently tracking freed slots so the remnants of old connections</span>
+    <span class="c1"># remain, taking up space. Could implement a tracker of free indices</span>
+    <span class="c1"># to all for reuse</span>
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_swapNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId1</span><span class="p">,</span> <span class="n">NodeId2</span><span class="p">):</span>
+
+    <span class="c1"># Swap all references of Node1 to Node2</span>
+    <span class="n">elemconn1</span> <span class="o">=</span> <span class="n">dmesh_getElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId1</span><span class="p">)</span>
+    <span class="n">elemconn2</span> <span class="o">=</span> <span class="n">dmesh_getElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ElemId</span> <span class="ow">in</span> <span class="n">elemconn1</span><span class="p">:</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">[</span><span class="n">ElemId</span><span class="p">]</span>
+        <span class="n">elem</span><span class="p">[</span><span class="n">elem</span> <span class="o">==</span> <span class="n">NodeId1</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeId2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">[</span><span class="n">ElemId</span><span class="p">]</span> <span class="o">=</span> <span class="n">elem</span>
+        <span class="n">dmesh_removeElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId1</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ElemId</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elemconn2</span><span class="p">:</span>
+            <span class="n">dmesh_addElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId2</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span>
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_removeElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+    <span class="c1"># Remove an element from the mesh by swap removal</span>
+    <span class="c1"># Swaps the position of the element definition in NodeConn to the position</span>
+    <span class="c1"># of the last defined element. References to the last element are updated</span>
+    <span class="c1"># to refer to the swapped position</span>
+    <span class="c1"># NOTE: If removing multiple elements, be sure to remove them in reverse</span>
+    <span class="c1"># order (largest first)</span>
+
+    <span class="n">LastId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="c1"># Remove connections to the old element</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">[</span><span class="n">ElemId</span><span class="p">]:</span>
+        <span class="n">dmesh_removeElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span><span class="n">ElemId</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ElemId</span> <span class="o">!=</span> <span class="n">LastId</span><span class="p">:</span>
+        <span class="c1"># Swap element @ ElemId with the element in the last position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">[</span><span class="n">ElemId</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">[</span><span class="n">LastId</span><span class="p">,</span> <span class="p">:]</span> <span class="c1">#oldnodes</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">[</span><span class="n">ElemId</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">[</span><span class="n">LastId</span><span class="p">]</span>
+        <span class="c1"># Update ElemConn for each node in the element</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">[</span><span class="n">LastId</span><span class="p">]:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">LastId</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ElemId</span>
+                    <span class="k">break</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span> <span class="o">-=</span> <span class="mi">1</span>
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_removeElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">):</span>
+    <span class="c1"># This just ensures that elements are removed in the proper order</span>
+    <span class="k">for</span> <span class="n">ElemId</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">ElemIds</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">dmesh_removeElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">dmesh_init</span><span class="p">(</span><span class="n">raw_NodeCoords</span><span class="p">,</span> <span class="n">raw_NodeConn</span><span class="p">,</span> <span class="n">ElemConn</span><span class="p">,</span> <span class="n">ElemLabels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        
+    <span class="n">NNode</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_NodeCoords</span><span class="p">)</span>
+    <span class="n">NElem</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_NodeConn</span><span class="p">)</span>
+
+    <span class="n">ElemConn_head</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">NNode</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">ElemConn_elem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">e</span> <span class="k">for</span> <span class="n">elems</span> <span class="ow">in</span> <span class="n">ElemConn</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elems</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">ElemConn_next</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ElemConn_elem</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">ElemConn_prev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ElemConn_elem</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">ElemConn_tail</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">NNode</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">elems</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ElemConn</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elems</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">ElemConn_head</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="c1"># ElemConn_prev[k] = -1 # Implied by initialization</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elems</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">ElemConn_next</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span>
+            <span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
+            <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># ElemConn_next[k] = -1 # Implied by initialization</span>
+        <span class="n">ElemConn_tail</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">ElemConn_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ElemConn_elem</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ElemLabels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ElemLabels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">raw_NodeCoords</span><span class="p">,</span> 
+            <span class="n">NNode</span><span class="p">,</span>
+            <span class="n">raw_NodeConn</span><span class="p">,</span>
+            <span class="n">NElem</span><span class="p">,</span>
+            <span class="n">ElemConn_head</span><span class="p">,</span>
+            <span class="n">ElemConn_elem</span><span class="p">,</span>
+            <span class="n">ElemConn_next</span><span class="p">,</span>
+            <span class="n">ElemConn_prev</span><span class="p">,</span>
+            <span class="n">ElemConn_tail</span><span class="p">,</span>
+            <span class="n">ElemConn_size</span><span class="p">,</span>
+            <span class="n">ElemLabels</span>
+            <span class="p">)</span>
+
 <span class="k">if</span> <span class="n">check_numba</span><span class="p">():</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">numba</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">numba.experimental</span><span class="w"> </span><span class="kn">import</span> <span class="n">jitclass</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">numba.experimental</span><span class="w"> </span><span class="kn">import</span> <span class="n">structref</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">numba.extending</span><span class="w"> </span><span class="kn">import</span> <span class="n">overload_method</span><span class="p">,</span> <span class="n">overload_attribute</span>
     
-    <span class="nd">@jitclass</span><span class="p">([</span>
-        <span class="p">(</span><span class="s1">&#39;_NodeCoords&#39;</span><span class="p">,</span> <span class="n">numba</span><span class="o">.</span><span class="n">float64</span><span class="p">[:,:]),</span>
-        <span class="p">(</span><span class="s1">&#39;_NodeConn&#39;</span><span class="p">,</span> <span class="n">numba</span><span class="o">.</span><span class="n">int64</span><span class="p">[:,:]),</span>
-        <span class="p">(</span><span class="s1">&#39;ElemConn_head&#39;</span><span class="p">,</span> <span class="n">numba</span><span class="o">.</span><span class="n">int64</span><span class="p">[:]),</span>
-        <span class="p">(</span><span class="s1">&#39;ElemConn_elem&#39;</span><span class="p">,</span> <span class="n">numba</span><span class="o">.</span><span class="n">int64</span><span class="p">[:]),</span>
-        <span class="p">(</span><span class="s1">&#39;ElemConn_next&#39;</span><span class="p">,</span> <span class="n">numba</span><span class="o">.</span><span class="n">int64</span><span class="p">[:]),</span>
-        <span class="p">(</span><span class="s1">&#39;ElemConn_prev&#39;</span><span class="p">,</span> <span class="n">numba</span><span class="o">.</span><span class="n">int64</span><span class="p">[:]),</span>
-        <span class="p">(</span><span class="s1">&#39;ElemConn_tail&#39;</span><span class="p">,</span> <span class="n">numba</span><span class="o">.</span><span class="n">int64</span><span class="p">[:]),</span>
-        <span class="p">(</span><span class="s1">&#39;ElemConn_size&#39;</span><span class="p">,</span> <span class="n">numba</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;NNode&#39;</span><span class="p">,</span> <span class="n">numba</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;NElem&#39;</span><span class="p">,</span> <span class="n">numba</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;ElemLabels&#39;</span><span class="p">,</span> <span class="n">numba</span><span class="o">.</span><span class="n">int64</span><span class="p">[:]),</span>
-    <span class="p">])</span>
-    <span class="k">class</span><span class="w"> </span><span class="nc">dmesh</span><span class="p">:</span>
+    <span class="c1"># StructRef definition</span>
+    <span class="nd">@structref</span><span class="o">.</span><span class="n">register</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">dmesh_type</span><span class="p">(</span><span class="n">numba</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">StructRef</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">preprocess_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">numba</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">unliteral</span><span class="p">(</span><span class="n">typ</span><span class="p">))</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">)</span>
+        
+    <span class="c1"># # Python proxy for the StructRef</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">dmesh</span><span class="p">(</span><span class="n">structref</span><span class="o">.</span><span class="n">StructRefProxy</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A specialized mesh class intended for dynamic modification of mesh </span>
+<span class="sd">        connectivity. </span>
+<span class="sd">        </span>
+<span class="sd">        The dmesh (Dynamic Mesh) class only supports single element</span>
+<span class="sd">        type meshes, and only element types that contain a single face type (e.g. </span>
+<span class="sd">        wedge elements aren&#39;t supported because they have both quadrilateral and</span>
+<span class="sd">        triangular faces). </span>
+<span class="sd">        </span>
+<span class="sd">        It&#39;s recommended that a :class:`dmesh` object is created from a :class:`mesh` </span>
+<span class="sd">        object using :meth:`mesh.mesh2dmesh`. Incorrect initialization of the mesh</span>
+<span class="sd">        will likely lead to misbehavior. </span>
+
+<span class="sd">        See also: :ref:`Dynamic mesh`</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        NodeCoords : np.ndarray(dtype=np.float64)</span>
+<span class="sd">            Node coordinates array with shape=(n,3)</span>
+<span class="sd">        NodeConn : np.ndarray</span>
+<span class="sd">            Node connectivity of elements with shape=(l,m)</span>
+<span class="sd">            </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>  
+        <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">raw_NodeCoords</span><span class="p">,</span> <span class="n">raw_NodeConn</span><span class="p">,</span> <span class="n">ElemConn</span><span class="p">,</span> <span class="n">ElemLabels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            
+            <span class="p">(</span><span class="n">raw_NodeCoords</span><span class="p">,</span> 
+            <span class="n">NNode</span><span class="p">,</span>
+            <span class="n">raw_NodeConn</span><span class="p">,</span>
+            <span class="n">NElem</span><span class="p">,</span>
+            <span class="n">ElemConn_head</span><span class="p">,</span>
+            <span class="n">ElemConn_elem</span><span class="p">,</span>
+            <span class="n">ElemConn_next</span><span class="p">,</span>
+            <span class="n">ElemConn_prev</span><span class="p">,</span>
+            <span class="n">ElemConn_tail</span><span class="p">,</span>
+            <span class="n">ElemConn_size</span><span class="p">,</span>
+            <span class="n">ElemLabels</span><span class="p">)</span> <span class="o">=</span> <span class="n">dmesh_init</span><span class="p">(</span><span class="n">raw_NodeCoords</span><span class="p">,</span> <span class="n">raw_NodeConn</span><span class="p">,</span> <span class="n">ElemConn</span><span class="p">,</span> <span class="n">ElemLabels</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">structref</span><span class="o">.</span><span class="n">StructRefProxy</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> 
+                        <span class="n">raw_NodeCoords</span><span class="p">,</span> 
+                        <span class="n">NNode</span><span class="p">,</span>
+                        <span class="n">raw_NodeConn</span><span class="p">,</span>
+                        <span class="n">NElem</span><span class="p">,</span>
+                        <span class="n">ElemConn_head</span><span class="p">,</span>
+                        <span class="n">ElemConn_elem</span><span class="p">,</span>
+                        <span class="n">ElemConn_next</span><span class="p">,</span>
+                        <span class="n">ElemConn_prev</span><span class="p">,</span>
+                        <span class="n">ElemConn_tail</span><span class="p">,</span>
+                        <span class="n">ElemConn_size</span><span class="p">,</span>
+                        <span class="n">ElemLabels</span>
+                        <span class="p">)</span>
+        
+        <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;Dynamic Mesh Object</span><span class="se">\n</span><span class="si">{0:d}</span><span class="s1"> Nodes</span><span class="se">\n</span><span class="si">{1:d}</span><span class="s1"> Elements&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">NElem</span><span class="p">)</span>
+        <span class="c1"># Attributes:</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">raw_NodeCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_raw_NodeCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">NodeCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_NodeCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">NNode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_NNode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">raw_NodeConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_raw_NodeConn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">NodeConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_NodeConn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">NElem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_NElem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ElemConn_head</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_ElemConn_head</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ElemConn_elem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_ElemConn_elem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ElemConn_next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_ElemConn_next</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ElemConn_prev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_ElemConn_prev</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ElemConn_tail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_ElemConn_tail</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ElemConn_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_ElemConn_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ElemLabels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_ElemLabels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        
+        <span class="c1"># Methods:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">addNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeCoords</span><span class="p">):</span>
+            <span class="n">dmesh_addNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">addElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">Label</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+            <span class="n">dmesh_addElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">Label</span><span class="p">)</span>
+        
+        <span class="k">def</span><span class="w"> </span><span class="nf">getElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeId</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_getElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeId</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">addElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+            <span class="n">dmesh_addElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span>
+        
+        <span class="k">def</span><span class="w"> </span><span class="nf">removeElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+            <span class="n">dmesh_removeElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">swapNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId1</span><span class="p">,</span> <span class="n">NodeId2</span><span class="p">):</span>
+            <span class="n">dmesh_swapNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId1</span><span class="p">,</span> <span class="n">NodeId2</span><span class="p">)</span>
+        
+        <span class="k">def</span><span class="w"> </span><span class="nf">removeElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+            <span class="n">dmesh_removeElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">removeElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">):</span>
+            <span class="n">dmesh_removeElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">)</span>
+
+    <span class="c1"># Attribute overloads</span>
+    <span class="nd">@overload_attribute</span><span class="p">(</span><span class="n">dmesh_type</span><span class="p">,</span> <span class="s1">&#39;NodeCoords&#39;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ol_dmesh_NodeCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_NodeCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">get</span>
+    
+    <span class="nd">@overload_attribute</span><span class="p">(</span><span class="n">dmesh_type</span><span class="p">,</span> <span class="s1">&#39;NodeConn&#39;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ol_dmesh_NodeConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_get_NodeConn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">get</span>
+        
+    <span class="c1"># Method overloads:</span>
+    <span class="nd">@overload_method</span><span class="p">(</span><span class="n">dmesh_type</span><span class="p">,</span> <span class="s1">&#39;addNodes&#39;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ol_dmesh_addNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeCoords</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">impl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeCoords</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_addNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeCoords</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">impl</span>
+
+    <span class="nd">@overload_method</span><span class="p">(</span><span class="n">dmesh_type</span><span class="p">,</span> <span class="s1">&#39;addElem&#39;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ol_dmesh_addElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">Label</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">impl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">Label</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_addElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">Label</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">impl</span>
+
+    <span class="nd">@overload_method</span><span class="p">(</span><span class="n">dmesh_type</span><span class="p">,</span> <span class="s1">&#39;getElemConn&#39;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ol_dmesh_getElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">impl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_getElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">impl</span>
+
+    <span class="nd">@overload_method</span><span class="p">(</span><span class="n">dmesh_type</span><span class="p">,</span> <span class="s1">&#39;addElemConn&#39;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ol_dmesh_addElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">impl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_addElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">impl</span>
+
+    <span class="nd">@overload_method</span><span class="p">(</span><span class="n">dmesh_type</span><span class="p">,</span> <span class="s1">&#39;removeElemConn&#39;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ol_dmesh_removeElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">impl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_removeElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">impl</span>
+
+    <span class="nd">@overload_method</span><span class="p">(</span><span class="n">dmesh_type</span><span class="p">,</span> <span class="s1">&#39;swapNode&#39;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ol_dmesh_swapNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId1</span><span class="p">,</span> <span class="n">NodeId2</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">impl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId1</span><span class="p">,</span> <span class="n">NodeId2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_swapNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId1</span><span class="p">,</span> <span class="n">NodeId2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">impl</span>
+
+    <span class="nd">@overload_method</span><span class="p">(</span><span class="n">dmesh_type</span><span class="p">,</span> <span class="s1">&#39;removeElem&#39;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ol_dmesh_removeElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">impl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_removeElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">impl</span>
+
+    <span class="nd">@overload_method</span><span class="p">(</span><span class="n">dmesh_type</span><span class="p">,</span> <span class="s1">&#39;removeElems&#39;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ol_dmesh_removeElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">impl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_removeElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">impl</span>
+    
+    <span class="c1"># Associate the proxy with the StructRef</span>
+    <span class="n">structref</span><span class="o">.</span><span class="n">define_proxy</span><span class="p">(</span><span class="n">dmesh</span><span class="p">,</span> <span class="n">dmesh_type</span><span class="p">,</span> 
+                        <span class="p">[</span><span class="s1">&#39;raw_NodeCoords&#39;</span><span class="p">,</span> 
+                            <span class="s1">&#39;NNode&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;raw_NodeConn&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;NElem&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;ElemConn_head&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;ElemConn_elem&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;ElemConn_next&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;ElemConn_prev&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;ElemConn_tail&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;ElemConn_size&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;ElemLabels&#39;</span>
+                            <span class="p">])</span> 
+<span class="k">else</span><span class="p">:</span>
+<div class="viewcode-block" id="dmesh">
+<a class="viewcode-back" href="../../generated/mymesh.dmesh.html#mymesh.dmesh">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">dmesh</span><span class="p">():</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A specialized mesh class intended for dynamic modification of mesh </span>
 <span class="sd">        connectivity. </span>
@@ -3172,216 +3608,82 @@
 <span class="sd">            Node connectivity of elements with shape=(l,m)</span>
 <span class="sd">            </span>
 
-<span class="sd">        &quot;&quot;&quot;</span>    
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">ElemConn_head</span><span class="p">,</span> <span class="n">ElemConn_elem</span><span class="p">,</span> <span class="n">ElemConn_next</span><span class="p">,</span> <span class="n">ElemConn_prev</span><span class="p">,</span> <span class="n">ElemConn_tail</span><span class="p">,</span><span class="n">ElemLabels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_NodeCoords</span> <span class="o">=</span> <span class="n">NodeCoords</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span> <span class="o">=</span> <span class="n">NodeConn</span>
-            <span class="c1"># self.ElemNeighbors = ElemNeighbors</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span> <span class="o">=</span> <span class="n">ElemConn_head</span> <span class="c1"># Points from a node to the first connected element</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span> <span class="o">=</span> <span class="n">ElemConn_elem</span> <span class="c1"># Element ids</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span> <span class="o">=</span> <span class="n">ElemConn_next</span> <span class="c1"># Points to the next element id connected to the node</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span> <span class="o">=</span> <span class="n">ElemConn_prev</span> <span class="c1"># Points to the previous element id connected to the node</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span> <span class="o">=</span> <span class="n">ElemConn_tail</span> <span class="c1"># Points from a node to the last connected element</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">)</span> <span class="c1"># </span>
-            <span class="c1"># self.ElemConn_slots = [] # E</span>
-            <span class="c1"># self.NeighborConnection = NeighborConnection # Number of shared nodes required to be considered an element neighbor. If Faces/Edges get added, this could be removed</span>
+<span class="sd">        &quot;&quot;&quot;</span>  
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_NodeCoords</span><span class="p">,</span> <span class="n">raw_NodeConn</span><span class="p">,</span> <span class="n">ElemConn</span><span class="p">,</span> <span class="n">ElemLabels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raw_NodeConn</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_size</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">)</span> <span class="o">=</span> <span class="n">dmesh_init</span><span class="p">(</span><span class="n">raw_NodeCoords</span><span class="p">,</span> <span class="n">raw_NodeConn</span><span class="p">,</span> <span class="n">ElemConn</span><span class="p">,</span> <span class="n">ElemLabels</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">NNode</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_NodeCoords</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span> <span class="o">=</span> <span class="n">ElemLabels</span>
-
+        <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;Dynamic Mesh Object</span><span class="se">\n</span><span class="si">{0:d}</span><span class="s1"> Nodes</span><span class="se">\n</span><span class="si">{1:d}</span><span class="s1"> Elements&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">NElem</span><span class="p">)</span>
+        <span class="c1"># Attributes:</span>
         <span class="nd">@property</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">NodeCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NodeCoords</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">]</span>
-        
+            <span class="k">return</span> <span class="n">dmesh_get_NodeCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="nd">@property</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">NodeConn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">NElem</span><span class="p">,:]</span>
+            <span class="k">return</span> <span class="n">dmesh_get_NodeConn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         
-        <span class="k">def</span><span class="w"> </span><span class="nf">addNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">labels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Add nodes to the mesh.</span>
+        <span class="c1"># Methods:</span>
+<div class="viewcode-block" id="dmesh.addNodes">
+<a class="viewcode-back" href="../../generated/mymesh.dmesh.addNodes.html#mymesh.dmesh.addNodes">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="nf">addNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeCoords</span><span class="p">):</span>
+            <span class="n">dmesh_addNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeCoords</span><span class="p">)</span></div>
 
-<span class="sd">            Parameters</span>
-<span class="sd">            ----------</span>
-<span class="sd">            NodeCoords : array_like</span>
-<span class="sd">                Coordinates of the new node(s). This can either be a single node </span>
-<span class="sd">                (shape=(3,)) or multiple nodes (shape=(n,3)).</span>
 
-<span class="sd">            &quot;&quot;&quot;</span>   
-
-            <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
-            <span class="n">NewLength</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NNode</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_NodeCoords</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">NewLength</span><span class="p">:</span>
-                <span class="c1"># Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.</span>
-                <span class="c1"># If the new addition is more than double the current length, the array will be extended </span>
-                <span class="c1"># to exactly fit the new nodes</span>
-                <span class="n">newsize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">NewLength</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_NodeCoords</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_NodeCoords</span><span class="p">,</span> <span class="p">(</span><span class="n">newsize</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-                
-                <span class="c1"># update the ElemConn structure as well</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">,</span> <span class="n">newsize</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">,</span> <span class="n">newsize</span><span class="p">)</span>
-            
-            <span class="bp">self</span><span class="o">.</span><span class="n">_NodeCoords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">:</span><span class="n">NewLength</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeCoords</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">:</span><span class="n">NewLength</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">NNode</span><span class="p">:</span><span class="n">NewLength</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">NNode</span> <span class="o">=</span> <span class="n">NewLength</span>
-
+<div class="viewcode-block" id="dmesh.addElem">
+<a class="viewcode-back" href="../../generated/mymesh.dmesh.addElem.html#mymesh.dmesh.addElem">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">addElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">Label</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Add a new element to the mesh. The element should reference </span>
-<span class="sd">            nodes that already exist in the mesh.</span>
+            <span class="n">dmesh_addElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">Label</span><span class="p">)</span></div>
 
-<span class="sd">            Parameters</span>
-<span class="sd">            ----------</span>
-<span class="sd">            NodeConn : array_like</span>
-<span class="sd">                Node connectivity of the new element. This should be a single</span>
-<span class="sd">                element (shape=(m,))</span>
-<span class="sd">            &quot;&quot;&quot;</span>  
-
-            <span class="n">NewLength</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">NewElemId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">NewLength</span><span class="p">:</span>
-                <span class="c1"># Amortized O(1) insertion by doubling  - double the length of the array to make space for the new data.</span>
-                <span class="c1"># If the new addition is more than double the current length, the array will be extended </span>
-                <span class="c1"># to exactly fit the new elements</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">NewLength</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)),</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>
-
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">NewLength</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)))</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">[</span><span class="n">NewElemId</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeConn</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">[</span><span class="n">NewElemId</span><span class="p">]</span> <span class="o">=</span> <span class="n">Label</span>
-
-            <span class="c1"># Update ElemConn with new connections</span>
-            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">[</span><span class="n">NewElemId</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">addElemConn</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">NewElemId</span><span class="p">)</span>
-
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span> <span class="o">+=</span> <span class="mi">1</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">removeElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
-            <span class="c1"># Remove an element from the mesh by swap removal</span>
-            <span class="c1"># Swaps the position of the element definition in NodeConn to the position</span>
-            <span class="c1"># of the last defined element. References to the last element are updated</span>
-            <span class="c1"># to refer to the swapped position</span>
-            <span class="c1"># NOTE: If removing multiple elements, be sure to remove them in reverse</span>
-            <span class="c1"># order (largest first)</span>
-
-            <span class="n">LastId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span> <span class="o">-</span> <span class="mi">1</span>
-            <span class="n">oldnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">[</span><span class="n">LastId</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-
-            <span class="c1"># Remove connections to the old element</span>
-            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">[</span><span class="n">ElemId</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">removeElemConn</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">ElemId</span><span class="p">)</span>
-    
-            <span class="k">if</span> <span class="n">ElemId</span> <span class="o">!=</span> <span class="n">LastId</span><span class="p">:</span>
-                <span class="c1"># Swap element @ ElemId with the element in the last position</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">[</span><span class="n">ElemId</span><span class="p">]</span> <span class="o">=</span> <span class="n">oldnodes</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">[</span><span class="n">ElemId</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemLabels</span><span class="p">[</span><span class="n">LastId</span><span class="p">]</span>
-                <span class="c1"># Update ElemConn for each node in the element</span>
-                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">oldnodes</span><span class="p">:</span>
-                    <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
-                    <span class="k">while</span> <span class="n">i</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">LastId</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ElemId</span>
-                        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">NElem</span> <span class="o">-=</span> <span class="mi">1</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">removeElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">):</span>
-            <span class="c1"># This just ensures that elements are removed in the proper order</span>
-            <span class="k">for</span> <span class="n">ElemId</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">ElemIds</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">removeElem</span><span class="p">(</span><span class="n">ElemId</span><span class="p">)</span>
         
-        <span class="k">def</span><span class="w"> </span><span class="nf">swapNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId1</span><span class="p">,</span> <span class="n">NodeId2</span><span class="p">):</span>
+<div class="viewcode-block" id="dmesh.getElemConn">
+<a class="viewcode-back" href="../../generated/mymesh.dmesh.getElemConn.html#mymesh.dmesh.getElemConn">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="nf">getElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeId</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dmesh_getElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NodeId</span><span class="p">)</span></div>
 
-            <span class="c1"># Swap all references of Node1 to Node2</span>
-            <span class="n">elemconn1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">NodeId1</span><span class="p">)</span>
-            <span class="n">elemconn2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">NodeId2</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">ElemId</span> <span class="ow">in</span> <span class="n">elemconn1</span><span class="p">:</span>
-                <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">[</span><span class="n">ElemId</span><span class="p">]</span>
-                <span class="n">elem</span><span class="p">[</span><span class="n">elem</span> <span class="o">==</span> <span class="n">NodeId1</span><span class="p">]</span> <span class="o">=</span> <span class="n">NodeId2</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_NodeConn</span><span class="p">[</span><span class="n">ElemId</span><span class="p">]</span> <span class="o">=</span> <span class="n">elem</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">removeElemConn</span><span class="p">(</span><span class="n">NodeId1</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">ElemId</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elemconn2</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">addElemConn</span><span class="p">(</span><span class="n">NodeId2</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span>
-        
-        <span class="k">def</span><span class="w"> </span><span class="nf">getElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">):</span>
-            
-            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span>
-            <span class="n">ElemConn</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">while</span> <span class="n">i</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                <span class="n">ElemConn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-                <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">ElemConn</span>
 
+<div class="viewcode-block" id="dmesh.addElemConn">
+<a class="viewcode-back" href="../../generated/mymesh.dmesh.addElemConn.html#mymesh.dmesh.addElemConn">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">addElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
-            <span class="c1"># Add a connection between an existing node and an element</span>
-            
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_size</span><span class="p">:</span>
-                <span class="c1"># Amortized O(1) insertion by doubling </span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">dmesh_addElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span></div>
 
-            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span>
-            <span class="n">newIdx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_size</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">[</span><span class="n">newIdx</span><span class="p">]</span> <span class="o">=</span> <span class="n">ElemId</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                <span class="c1"># If this is the first connection for the node</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span> <span class="o">=</span> <span class="n">newIdx</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">newIdx</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">newIdx</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">newIdx</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span> <span class="o">=</span> <span class="n">newIdx</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">newIdx</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_size</span> <span class="o">+=</span> <span class="mi">1</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">removeElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
-            <span class="c1"># Remove a connection between a node and an element</span>
-
-            <span class="c1"># Find the position of the element</span>
-            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span>
-            <span class="k">while</span> <span class="n">i</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">elem</span> <span class="o">==</span> <span class="n">ElemId</span><span class="p">:</span>
-                    <span class="c1"># Remove</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                        <span class="c1"># this node is the head</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_head</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                        <span class="c1"># this node is the tail</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_tail</span><span class="p">[</span><span class="n">NodeId</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-
-                    <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_elem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_prev</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-                    <span class="k">break</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ElemConn_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                    
-
-            <span class="c1"># NOTE: Not currently tracking freed slots so the remnants of old connections</span>
-            <span class="c1"># remain, taking up space. Could implement a tracker of free indices</span>
-            <span class="c1"># to all for reuse</span>
-
-<span class="k">else</span><span class="p">:</span>
-    <span class="k">class</span><span class="w"> </span><span class="nc">dmesh</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;The dmesh class requires numba.</span><span class="se">\n</span><span class="s1">Install with `pip install numba`.</span><span class="se">\n</span><span class="s1">A restart of the python session will be required.&#39;</span><span class="p">)</span>
         
+<div class="viewcode-block" id="dmesh.removeElemConn">
+<a class="viewcode-back" href="../../generated/mymesh.dmesh.removeElemConn.html#mymesh.dmesh.removeElemConn">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="nf">removeElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+            <span class="n">dmesh_removeElemConn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="dmesh.swapNode">
+<a class="viewcode-back" href="../../generated/mymesh.dmesh.swapNode.html#mymesh.dmesh.swapNode">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="nf">swapNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId1</span><span class="p">,</span> <span class="n">NodeId2</span><span class="p">):</span>
+            <span class="n">dmesh_swapNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NodeId1</span><span class="p">,</span> <span class="n">NodeId2</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="dmesh.removeElem">
+<a class="viewcode-back" href="../../generated/mymesh.dmesh.removeElem.html#mymesh.dmesh.removeElem">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="nf">removeElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">):</span>
+            <span class="n">dmesh_removeElem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemId</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="dmesh.removeElems">
+<a class="viewcode-back" href="../../generated/mymesh.dmesh.removeElems.html#mymesh.dmesh.removeElems">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="nf">removeElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">):</span>
+            <span class="n">dmesh_removeElems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ElemIds</span><span class="p">)</span></div>
+</div>
+
+    
+    
 </pre></div>
 
                 </article>
