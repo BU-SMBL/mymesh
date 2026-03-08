@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**11:54.009** total execution time for 12 files **from all galleries**:
+**11:54.379** total execution time for 12 files **from all galleries**:
 
 .. container::
 
@@ -33,38 +33,38 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_MeshGeneration_demo_image-based.py` (``../../examples/MeshGeneration/demo_image-based.py``)
-     - 02:45.278
+     - 02:44.990
      - 0.0
    * - :ref:`sphx_glr_examples_MeshAnalysis_demo_pore-thickness.py` (``../../examples/MeshAnalysis/demo_pore-thickness.py``)
-     - 02:06.568
+     - 02:05.805
      - 0.0
    * - :ref:`sphx_glr_examples_MeshModification_demo_contouring.py` (``../../examples/MeshModification/demo_contouring.py``)
-     - 01:46.778
+     - 01:49.068
      - 0.0
    * - :ref:`sphx_glr_examples_MeshModification_demo_coarsening.py` (``../../examples/MeshModification/demo_coarsening.py``)
-     - 01:33.107
+     - 01:34.536
      - 0.0
    * - :ref:`sphx_glr_examples_MeshModification_demo_registration.py` (``../../examples/MeshModification/demo_registration.py``)
-     - 01:14.603
+     - 01:15.916
      - 0.0
    * - :ref:`sphx_glr_examples_MeshAnalysis_demo_curvature.py` (``../../examples/MeshAnalysis/demo_curvature.py``)
-     - 01:14.597
+     - 01:14.572
      - 0.0
    * - :ref:`sphx_glr_examples_MeshModification_demo_improvement.py` (``../../examples/MeshModification/demo_improvement.py``)
-     - 00:40.272
+     - 00:37.615
      - 0.0
    * - :ref:`sphx_glr_examples_MeshModification_demo_smoothing.py` (``../../examples/MeshModification/demo_smoothing.py``)
-     - 00:16.878
+     - 00:16.011
      - 0.0
    * - :ref:`sphx_glr_examples_MeshGeneration_demo_mixed-top.py` (``../../examples/MeshGeneration/demo_mixed-top.py``)
-     - 00:07.891
+     - 00:07.964
      - 0.0
    * - :ref:`sphx_glr_examples_MeshGeneration_demo_pasta.py` (``../../examples/MeshGeneration/demo_pasta.py``)
-     - 00:07.127
+     - 00:06.995
      - 0.0
    * - :ref:`sphx_glr_examples_MeshGeneration_demo_heart.py` (``../../examples/MeshGeneration/demo_heart.py``)
-     - 00:00.631
+     - 00:00.619
      - 0.0
    * - :ref:`sphx_glr_examples_MeshModification_demo_conversion.py` (``../../examples/MeshModification/demo_conversion.py``)
-     - 00:00.278
+     - 00:00.288
      - 0.0
