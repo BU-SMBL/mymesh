@@ -26,19 +26,19 @@ See also: :ref:`Delaunay Triangulation`, :mod:`mymesh.delaunay`
 
     def run_no_numba(npoints, seed):
         code = f"""
-import os, subprocess, time
-import numpy as np
-os.environ["NUMBA_DISABLE_JIT"] = "1"
-from mymesh import delaunay
-# pre-run in case of any first time delays
-delaunay.BowyerWatson2d(np.random.rand(10,2))
-np.random.seed({seed})
-points = np.random.rand({npoints}, 2)
-tic = time.time()
-delaunay.BowyerWatson2d(points)
-t = time.time()-tic
-print(t)
-"""
+    import os, subprocess, time
+    import numpy as np
+    os.environ["NUMBA_DISABLE_JIT"] = "1"
+    from mymesh import delaunay
+    # pre-run in case of any first time delays
+    delaunay.BowyerWatson2d(np.random.rand(10,2))
+    np.random.seed({seed})
+    points = np.random.rand({npoints}, 2)
+    tic = time.time()
+    delaunay.BowyerWatson2d(points)
+    t = time.time()-tic
+    print(t)
+    """
         result = subprocess.run([sys.executable, "-c", code], capture_output=True)
         t = float(result.stdout)
 
