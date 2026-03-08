@@ -1,3 +1,10 @@
+import mymesh
+from mymesh import curvature, implicit
+import numpy as np
+import matplotlib.pyplot as plt
+import pyvista as pv
+import trimesh
+
 func = implicit.sphere([0,0,0], 1)
 Sphere = implicit.SurfaceMesh(func, [-1,1,-1,1,-1,1], 0.1)
 Sphere.verbose=False
@@ -7,11 +14,12 @@ Sphere.verbose=False
 (k1_vtk_S, k2_vtk_S), \
 (k1_trimesh_S, k2_trimesh_S), \
 (k1_implicit_S, k2_implicit_S) = test_curvature(Sphere, func)
-
+print('debug1')
 SmoothSphere = mymesh.improvement.Flip(Sphere, strategy='valence')
+print('debug2')
 SmoothSphere = implicit.SurfaceNodeOptimization(SmoothSphere, implicit.sphere([0,0,0], 1), 0.1, iterate=10)
 SmoothSphere.verbose=False
-
+print('debug3')
 (k1_quadratic_Smooth, k2_quadratic_Smooth), \
 (k1_cubic_Smooth, k2_cubic_Smooth), \
 (k1_vtk_Smooth, k2_vtk_Smooth), \

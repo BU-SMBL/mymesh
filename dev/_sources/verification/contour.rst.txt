@@ -53,3 +53,4 @@ Contour
     pvfe_time = time.time()-tic
 
     plt.bar(['mc\n(image)', 'mc', 'mc33', 'mt', 'pv_mc', 'pv_fe', 'voxel'], [mcimage_time, mc_time, mc33_time, mtimage_time, pvmc_time, pvfe_time, vox_time])
+    plt.ylabel('Time (s)')
