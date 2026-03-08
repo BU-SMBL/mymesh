@@ -176,7 +176,7 @@ jobs:
       shell: bash -l {0}
       run: |
         export DISPLAY=:99.0
-        sphinx-build -b html ./docs/source ./docs/build
+        sphinx-build -W -b html ./docs/source ./docs/build
     - name: Run tests
       shell: bash -l {0}
       run: |
