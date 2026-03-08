@@ -45,21 +45,15 @@ See also: :ref:`theory_curvature`, :mod:`~mymesh.curvature`, :ref:`Curvature Ana
         
 
         # vtk (via pyvista)
-        subprocess.run('echo "debug a"', shell=True)
         k1_vtk = M.to_pyvista().extract_surface().curvature(curv_type='maximum')
         k2_vtk = M.to_pyvista().extract_surface().curvature(curv_type='minimum')
-        subprocess.run('echo "debug b"', shell=True)
         # trimesh
         r = 0.05
         M_trimesh = trimesh.base.Trimesh(M.NodeCoords, M.NodeConn)
-        subprocess.run('echo "debug c"', shell=True)
         K_trimesh = trimesh.curvature.discrete_gaussian_curvature_measure(M_trimesh, M_trimesh.vertices, r) / trimesh.curvature.sphere_ball_intersection(1, r)
-        subprocess.run('echo "debug d"', shell=True)
         H_trimesh = trimesh.curvature.discrete_mean_curvature_measure (M_trimesh, M_trimesh.vertices, r) / trimesh.curvature.sphere_ball_intersection(1, r)
-        subprocess.run('echo "debug e"', shell=True)
         k1_trimesh = H_trimesh + np.sqrt(np.maximum(H_trimesh**2-K_trimesh,0))
         k2_trimesh = H_trimesh - np.sqrt(np.maximum(H_trimesh**2-K_trimesh,0))
-        subprocess.run('echo "debug f"', shell=True)
         
         if func is not None:
             # mymesh - implicit

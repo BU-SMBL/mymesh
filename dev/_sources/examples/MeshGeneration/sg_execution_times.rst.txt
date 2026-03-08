@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**03:00.567** total execution time for 4 files **from examples/MeshGeneration**:
+**03:05.750** total execution time for 4 files **from examples/MeshGeneration**:
 
 .. container::
 
@@ -33,14 +33,14 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_MeshGeneration_demo_image-based.py` (``demo_image-based.py``)
-     - 02:44.990
+     - 02:49.464
      - 0.0
    * - :ref:`sphx_glr_examples_MeshGeneration_demo_mixed-top.py` (``demo_mixed-top.py``)
-     - 00:07.964
+     - 00:08.434
      - 0.0
    * - :ref:`sphx_glr_examples_MeshGeneration_demo_pasta.py` (``demo_pasta.py``)
-     - 00:06.995
+     - 00:07.229
      - 0.0
    * - :ref:`sphx_glr_examples_MeshGeneration_demo_heart.py` (``demo_heart.py``)
-     - 00:00.619
+     - 00:00.623
      - 0.0

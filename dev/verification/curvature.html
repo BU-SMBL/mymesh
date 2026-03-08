@@ -472,21 +472,15 @@ The cubic surface fitting method (<a class="reference internal" href="../generat
 
 
     <span class="c1"># vtk (via pyvista)</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s1">&#39;echo &quot;debug a&quot;&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">k1_vtk</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">()</span><span class="o">.</span><span class="n">extract_surface</span><span class="p">()</span><span class="o">.</span><span class="n">curvature</span><span class="p">(</span><span class="n">curv_type</span><span class="o">=</span><span class="s1">&#39;maximum&#39;</span><span class="p">)</span>
     <span class="n">k2_vtk</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">()</span><span class="o">.</span><span class="n">extract_surface</span><span class="p">()</span><span class="o">.</span><span class="n">curvature</span><span class="p">(</span><span class="n">curv_type</span><span class="o">=</span><span class="s1">&#39;minimum&#39;</span><span class="p">)</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s1">&#39;echo &quot;debug b&quot;&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="c1"># trimesh</span>
     <span class="n">r</span> <span class="o">=</span> <span class="mf">0.05</span>
     <span class="n">M_trimesh</span> <span class="o">=</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">Trimesh</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">)</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s1">&#39;echo &quot;debug c&quot;&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">K_trimesh</span> <span class="o">=</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">curvature</span><span class="o">.</span><span class="n">discrete_gaussian_curvature_measure</span><span class="p">(</span><span class="n">M_trimesh</span><span class="p">,</span> <span class="n">M_trimesh</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">/</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">curvature</span><span class="o">.</span><span class="n">sphere_ball_intersection</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s1">&#39;echo &quot;debug d&quot;&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">H_trimesh</span> <span class="o">=</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">curvature</span><span class="o">.</span><span class="n">discrete_mean_curvature_measure</span> <span class="p">(</span><span class="n">M_trimesh</span><span class="p">,</span> <span class="n">M_trimesh</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">/</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">curvature</span><span class="o">.</span><span class="n">sphere_ball_intersection</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s1">&#39;echo &quot;debug e&quot;&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">k1_trimesh</span> <span class="o">=</span> <span class="n">H_trimesh</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">H_trimesh</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">K_trimesh</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
     <span class="n">k2_trimesh</span> <span class="o">=</span> <span class="n">H_trimesh</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">H_trimesh</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">K_trimesh</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s1">&#39;echo &quot;debug f&quot;&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># mymesh - implicit</span>
@@ -505,6 +499,12 @@ The cubic surface fitting method (<a class="reference internal" href="../generat
 </pre></div>
 </div>
 <p>(<a class="reference download internal" download="" href="../_downloads/2bda5b42f70665a0442eaf14ac48853e/curvature-2.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
+<figure class="align-default">
+<img alt="../_images/curvature-2_00.png" class="plot-directive" src="../_images/curvature-2_00.png" />
+</figure>
+<figure class="align-default">
+<img alt="../_images/curvature-2_01.png" class="plot-directive" src="../_images/curvature-2_01.png" />
+</figure>
 </section>
 </section>
 
