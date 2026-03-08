@@ -26,6 +26,7 @@ See also: :ref:`theory_curvature`, :mod:`~mymesh.curvature`, :ref:`Curvature Ana
     import matplotlib.pyplot as plt
     import pyvista as pv
     import trimesh
+    import subprocess
 
     def test_curvature(M, func=None):
         # Function to test different methods of curvature calculation
@@ -44,17 +45,21 @@ See also: :ref:`theory_curvature`, :mod:`~mymesh.curvature`, :ref:`Curvature Ana
         
 
         # vtk (via pyvista)
+        subprocess.run('echo "debug a"', shell=True)
         k1_vtk = M.to_pyvista().extract_surface().curvature(curv_type='maximum')
         k2_vtk = M.to_pyvista().extract_surface().curvature(curv_type='minimum')
-
+        subprocess.run('echo "debug b"', shell=True)
         # trimesh
         r = 0.05
         M_trimesh = trimesh.base.Trimesh(M.NodeCoords, M.NodeConn)
+        subprocess.run('echo "debug c"', shell=True)
         K_trimesh = trimesh.curvature.discrete_gaussian_curvature_measure(M_trimesh, M_trimesh.vertices, r) / trimesh.curvature.sphere_ball_intersection(1, r)
+        subprocess.run('echo "debug d"', shell=True)
         H_trimesh = trimesh.curvature.discrete_mean_curvature_measure (M_trimesh, M_trimesh.vertices, r) / trimesh.curvature.sphere_ball_intersection(1, r)
+        subprocess.run('echo "debug e"', shell=True)
         k1_trimesh = H_trimesh + np.sqrt(np.maximum(H_trimesh**2-K_trimesh,0))
         k2_trimesh = H_trimesh - np.sqrt(np.maximum(H_trimesh**2-K_trimesh,0))
-
+        subprocess.run('echo "debug f"', shell=True)
         
         if func is not None:
             # mymesh - implicit
@@ -65,7 +70,7 @@ See also: :ref:`theory_curvature`, :mod:`~mymesh.curvature`, :ref:`Curvature Ana
                     (k1_vtk, k2_vtk), \
                     (k1_trimesh, k2_trimesh), \
                     (k1_implicit, k2_implicit)
-
+        subprocess.run('echo "debug g"', shell=True)
         return (k1_quadratic, k2_quadratic), \
                     (k1_cubic, k2_cubic), \
                     (k1_vtk, k2_vtk), \
@@ -92,12 +97,11 @@ See also: :ref:`theory_curvature`, :mod:`~mymesh.curvature`, :ref:`Curvature Ana
     (k1_vtk_S, k2_vtk_S), \
     (k1_trimesh_S, k2_trimesh_S), \
     (k1_implicit_S, k2_implicit_S) = test_curvature(Sphere, func)
-    print('debug1')
+
     SmoothSphere = mymesh.improvement.Flip(Sphere, strategy='valence')
-    print('debug2')
     SmoothSphere = implicit.SurfaceNodeOptimization(SmoothSphere, implicit.sphere([0,0,0], 1), 0.1, iterate=10)
     SmoothSphere.verbose=False
-    print('debug3')
+    
     (k1_quadratic_Smooth, k2_quadratic_Smooth), \
     (k1_cubic_Smooth, k2_cubic_Smooth), \
     (k1_vtk_Smooth, k2_vtk_Smooth), \
