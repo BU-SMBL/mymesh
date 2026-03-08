@@ -129,7 +129,9 @@ jobs:
           myst-parser\
           pillow \
           jupyter_rfb \
-          triangle
+          triangle \
+          pyvista \
+          trimesh
         # Install vispy last
         pip install vispy
     - name: Install package
