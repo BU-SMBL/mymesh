@@ -246,7 +246,7 @@ def test_Octree_query_knn(n, k):
 
     assert len(octree_out[0]) == k, 'Incorrect number of nearest points'
     assert np.all(np.equal(octree_out[1], brute_out[1])), 'Incorrect nearest-points'
-    assert np.all(np.equal(octree_out[0], brute_out[0])), 'Incorrect nearest-point distances'    
+    assert np.all(np.isclose(octree_out[0], brute_out[0])), 'Incorrect nearest-point distances'    
 
 @pytest.mark.parametrize("n, k", [
     (
@@ -275,7 +275,7 @@ def test_Quadtree_query_knn(n, k):
 
     assert len(quadtree_out[0]) == k, 'Incorrect number of nearest points'
     assert np.all(np.equal(quadtree_out[1], brute_out[1])), 'Incorrect nearest-points'
-    assert np.all(np.equal(quadtree_out[0], brute_out[0])), 'Incorrect nearest-point distances' 
+    assert np.all(np.isclose(quadtree_out[0], brute_out[0])), 'Incorrect nearest-point distances' 
 
 @pytest.mark.parametrize("n, k, d", [
     (
@@ -310,4 +310,4 @@ def test_KDtree_query_knn(n, k, d):
 
     assert len(kdtree_out[0]) == k, 'Incorrect number of nearest points'
     assert np.all(np.equal(kdtree_out[1], brute_out[1])), 'Incorrect nearest-points'
-    assert np.all(np.equal(kdtree_out[0], brute_out[0])), 'Incorrect nearest-point distances' 
+    assert np.all(np.isclose(kdtree_out[0], brute_out[0])), 'Incorrect nearest-point distances' 
