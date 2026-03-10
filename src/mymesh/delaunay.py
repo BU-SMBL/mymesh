@@ -296,7 +296,7 @@ def Triangle(NodeCoords,Constraints=None, steiner=0):
         Out = triangle.triangulate(In,f'qS{steiner:d}')
     else:
         In = dict(vertices=NodeCoords,segments=Constraints)
-        Out = triangle.triangulate(In,f'pqS{steiner:d}')
+        Out = triangle.triangulate(In,f'pqcS{steiner:d}')
     try:
         NodeConn = Out['triangles']
         # NodeCoords = Out['vertices']
