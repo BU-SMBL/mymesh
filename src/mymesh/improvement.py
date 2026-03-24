@@ -600,7 +600,9 @@ def SmartLaplacianSmoothing(M, TangentialSurface=True, labels=None, options=dict
             NodeNeighbors[i] = SurfNodeNeighbors[i]
         for i in EdgeNodes:
             NodeNeighbors[i] = EdgeNodeNeighbors[i]
-
+    else:
+        SurfNodes = set()
+        NodeNormals = None
     nneighbors = np.array([len(ns) for ns in M.NodeNeighbors])
     neighbor_indices = np.insert(np.cumsum(nneighbors),0,0)
     flat_neighbors = np.array([n for ns in M.NodeNeighbors for n in ns])
