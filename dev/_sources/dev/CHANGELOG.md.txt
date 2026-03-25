@@ -15,6 +15,7 @@
 
 ### Fix
 
+- **improvement.SmartLaplacianSmoothing**: fix bug for TangentialSurface=False
 - **delaunay.Triangle**: fix inputs to handle constraints more reliably
 - **converter.im2voxel**: fix bug in im2voxel
 - **improvement.SmartLaplacianSmoothing**: update and speed up smart laplacian smoothing
