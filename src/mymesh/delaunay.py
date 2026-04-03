@@ -65,8 +65,7 @@ def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8, steiner=0):
         by default None. Edge constraints should be specified by node indices,
         for example [[0, 1], [1,2], ...]
     method : str, optional
-        Triangulation method, by default 'BowyerWatson' if no constraints are 
-        provided and 'Triangle' if constraints are provided.
+        Triangulation method, by default 'BowyerWatson'.
 
         - 'BowyerWatson' - Generate a Delaunay triangulation by the Bowyer-Watson algorithm (:func:`BowyerWatson2d`)
 
@@ -85,7 +84,7 @@ def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8, steiner=0):
         if (Constraints is None or len(Constraints) == 0):
             method = 'BowyerWatson'
         else:
-            method = 'Triangle'
+            method = 'BowyerWatson'
 
     if (Constraints is None or len(Constraints) == 0):
         Points,_,idx = utils.DeleteDuplicateNodes(Points,[],return_idx=True, tol=tol)
@@ -97,16 +96,16 @@ def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8, steiner=0):
             NodeCoords, NodeConn = Triangle(Points,steiner=steiner)
             NodeConn = idx[NodeConn]
         else:
-            raise ValueError(f'Invalid method "{method:s}".')
+            raise ValueError(f'Method "{method}" not supported for triangulation')
     else: 
         # Constrained Delaunay Triangulation - Sloan (1993)
         # Generate initial triangulation
-        if method.lower() == 'triangle':
-            method = 'triangle'
+        if method.lower() == 'bowyerwatson':
+            NodeConn = BowyerWatson2d(Points, Constraints=Constraints)
+        elif method.lower() == 'triangle':
+            NodeCoords, NodeConn = Triangle(Points,Constraints=Constraints,steiner=steiner)
         else:
-            raise ValueError('Currently only method="Triangle" is supported for constrained triangulation.')
-        
-        NodeCoords, NodeConn = Triangle(Points,Constraints=Constraints,steiner=steiner)
+            raise ValueError(f'Method "{method}" not supported for constrained triangulation')
 
     if 'mesh' in dir(mesh):
         T = mesh.mesh(NodeCoords,NodeConn)
@@ -493,7 +492,7 @@ def TriangleSplitting(NodeCoords, Hull=None):
 
     return NodeConn
         
-def BowyerWatson2d(NodeCoords, nsample=3):
+def BowyerWatson2d(NodeCoords, Constraints=None):
     """
     Bowyer-Watson algorithm for 2D Delaunay triangulation
 
@@ -550,15 +549,27 @@ def BowyerWatson2d(NodeCoords, nsample=3):
     
     d = m.mesh2dmesh()
 
-    d = _bowyer_watson_loop_2d(d, indices, nsample)
+    d = _bowyer_watson_loop_2d(d, indices)
 
-    NodeConn = d.NodeConn
-    Super = np.any(NodeConn == nPts, axis=1) | \
-        np.any(NodeConn == (nPts+1), axis=1) | \
-        np.any(NodeConn == (nPts+2), axis=1)
-    NodeConn = NodeConn[~Super]
+    # Remove super triangle
+    d.removeElems(d.getElemConn(nPts+2))
+    d.removeElems(d.getElemConn(nPts+1))
+    d.removeElems(d.getElemConn(nPts))
+    # Insert constraints
+    if Constraints is not None:
+        d.NodeLabels = np.zeros(len(d.raw_NodeCoords), dtype=np.int64)
+        d.NodeLabels[Constraints] = 1
+
+        for segment in Constraints:
+            d = _insert_segment_2d(d, segment)
+
+    # NodeConn = d.NodeConn.copy()
+    # Super = np.any(NodeConn == nPts, axis=1) | \
+    #     np.any(NodeConn == (nPts+1), axis=1) | \
+    #     np.any(NodeConn == (nPts+2), axis=1)
+    # NodeConn = NodeConn[~Super]
     
-    return NodeConn
+    return d.NodeConn
 
 def BowyerWatson3d(NodeCoords):
     """
@@ -886,7 +897,7 @@ def _bin_sort_2d(points):
 # from numba import objmode
 # import time
 @try_njit(inline='always', cache=True)
-def _bowyer_watson_loop_2d(d, indices, nsample):
+def _bowyer_watson_loop_2d(d, indices, nsample=1):
     # with objmode(walk_time='float64'): walk_time = 0
     # with objmode(bcavity_time='float64'): bcavity_time = 0
     # with objmode(dcavity_time='float64'): dcavity_time = 0
@@ -1068,6 +1079,188 @@ def _build_cavity_2d(d, tri_id, newPt):
         visited.append(next_t_id)
     return bad_triangles, cavity_edges
 
+@try_njit
+def _insert_segment_2d(D, segment):
+    # Other constraint edges should be marked by labeling their nodes with D.NodeLabels[i] = 1
+    n0, n1 = segment
+    elems = D.getElemConn(n0)
+
+    flip_queue = []
+    next_elem = -1
+    # Find first edge intersection:
+    for e in elems:
+        a, b, c = D.NodeConn[e]
+
+        if a == n0:
+            if b == n1 or c == n1:
+                # segment is already in the mesh
+                return D
+            if segment_intersect2d(D.raw_NodeCoords[n0], 
+                                    D.raw_NodeCoords[n1], 
+                                    D.raw_NodeCoords[b], 
+                                    D.raw_NodeCoords[c]):
+                # intersection - (b, c) will need to be flipped
+                next_elem = D.get_TriEdgeNeighbor(e, b, c)
+                prev_edge = (b, c)
+                flip_queue.append(prev_edge)
+                break
+        elif b == n0:
+            if a == n1 or c == n1:
+                # segment is already in the mesh
+                return D
+            if segment_intersect2d(D.raw_NodeCoords[n0], 
+                                    D.raw_NodeCoords[n1], 
+                                    D.raw_NodeCoords[c], 
+                                    D.raw_NodeCoords[a]):
+                # intersection - (c, a) will need to be flipped
+                next_elem = D.get_TriEdgeNeighbor(e, c, a)
+                prev_edge = (c, a)
+                flip_queue.append(prev_edge)
+                break
+        elif c == n0:
+            if a == n1 or b == n1:
+                # segment is already in the mesh
+                return D
+            if segment_intersect2d(D.raw_NodeCoords[n0], 
+                                    D.raw_NodeCoords[n1], 
+                                    D.raw_NodeCoords[a], 
+                                    D.raw_NodeCoords[b]):
+                # intersection - (a, b) will need to be flipped
+                next_elem = D.get_TriEdgeNeighbor(e, a, b)
+                prev_edge = (a, b)
+                flip_queue.append(prev_edge)
+                break
+
+    if next_elem == -1:
+        # the intersected edge has no neighbor - this should be an impossible scenario for properly defined mesh
+        raise Exception('Segment intersects mesh boundary - unexpected scenario')
+    # Walk from the first element to the other end of the segment, finding all intersections
+    while next_elem != -1:
+        a, b, c = D.NodeConn[next_elem]
+        
+        if n1 == a or n1 == b or n1 == c:
+            # This element contains the other end of the segment, terminate search
+            break
+
+        # set n = node opposite the edge, the two segments to check are (n, s1) and (n,s2)
+        if a != prev_edge[0] and a != prev_edge[1]:
+            # a is the node opposite the previous edge
+            s1 = b
+            s2 = c
+            n = a
+        elif b != prev_edge[0] and b != prev_edge[1]:
+            # b is the node opposite the previous edge
+            s1 = c
+            s2 = a
+            n = b
+        elif c != prev_edge[0] and c != prev_edge[1]:
+            # c is the node opposite the previous edge
+            s1 = a
+            s2 = b
+            n = c 
+        else:
+            raise Exception("This shouldn't happen")
+
+        if segment_intersect2d(D.raw_NodeCoords[n0], 
+                                D.raw_NodeCoords[n1], 
+                                D.raw_NodeCoords[s1], 
+                                D.raw_NodeCoords[n]):
+            # intersection - (s1, n) must be flipped
+            next_elem = D.get_TriEdgeNeighbor(next_elem, s1, n)
+            prev_edge = (s1, n)
+            flip_queue.append(prev_edge)
+        else:
+            # intersection - (s2, n) must be flipped
+            next_elem = D.get_TriEdgeNeighbor(next_elem, s2, n)
+            prev_edge = (s2, n)
+            flip_queue.append(prev_edge)
+
+    # Perform flips to eliminate intersections
+    new_edges = []
+    while len(flip_queue) > 0:
+        edge = flip_queue.pop(0)
+        new_edge = D.TriFlipEdge(edge[0], edge[1])
+        if new_edge[0] == -1:
+            # flip failed
+            flip_queue.append(edge)
+        else:
+            # First part of this check is probably problematic in edge cases
+            # without it, the intersection test says edges starting/ending at the constraint nodes intersect
+            if (n0 in new_edge or n1 in new_edge) or not segment_intersect2d(D.raw_NodeCoords[n0], 
+                            D.raw_NodeCoords[n1], 
+                            D.raw_NodeCoords[new_edge[0]], 
+                            D.raw_NodeCoords[new_edge[1]]):
+                new_edges.append(new_edge)
+            else:
+                flip_queue.append(new_edge)
+
+    # Perform flips to restore Delaunay criteria where possible
+    nswaps = 1
+    passes = 0
+    while nswaps > 0:
+        nswaps = 0
+        passes += 1
+        for i,edge in enumerate(new_edges):
+            n1, n2 = edge
+            if n1 == segment[0]:
+                if n2 == segment[1]:
+                    continue
+            elif n2 == segment[0]:
+                if n1 == segment[1]:
+                    continue
+            elif D.NodeLabels is not None and D.NodeLabels[n1] == D.NodeLabels[n2] == 1:
+                # This edge is also a constraint
+                continue
+            
+            
+            elems = D.get_TriEdgeConn(n1, n2)
+            
+            a, b, c = D.NodeConn[elems[0]]
+            d, e, f = D.NodeConn[elems[1]]
+
+            if a != n1 and a != n2:
+                n3 = a
+            elif b != n1 and b != n2:
+                n3 = b
+            else:
+                n3 = c
+
+            if d != n1 and d != n2:
+                n4 = d
+            elif e != n1 and e != n2:
+                n4 = e
+            else:
+                n4 = f
+
+            if circumcircle(D.raw_NodeCoords[a], 
+                            D.raw_NodeCoords[b], 
+                            D.raw_NodeCoords[c], 
+                            D.raw_NodeCoords[n4]) or \
+                circumcircle(D.raw_NodeCoords[d], 
+                                D.raw_NodeCoords[e], 
+                                D.raw_NodeCoords[f], 
+                                D.raw_NodeCoords[n3]):
+                # delaunay condition not satisfied
+
+                if not convex2d(D.raw_NodeCoords[np.array([n1,n3,n2,n4]),:]):
+                    continue
+
+                # perform flip 
+                # NOTE: if I in-lined the convexity test I wouldn't need to repeat the orientation tests
+                D.removeElems(elems)
+                if orient2d(D.raw_NodeCoords[n3], D.raw_NodeCoords[n4], D.raw_NodeCoords[n1]) > 0:
+                    D.addElem(np.array([n3, n4, n1]))
+                else:
+                    D.addElem(np.array([n1, n4, n3]))
+
+                if orient2d(D.raw_NodeCoords[n3], D.raw_NodeCoords[n4], D.raw_NodeCoords[n2]) > 0:
+                    D.addElem(np.array([n3, n4, n2]))
+                else:
+                    D.addElem(np.array([n2, n4, n3]))
+                
+                new_edges[i] = (n3, n4)
+                nswaps += 1
+    return D
 
 # TODO: Traversals in 3d probably won't work right because half-face pairs can't 
 # necessarily be obtained just by reversing the order
@@ -1146,4 +1339,179 @@ def _build_cavity_3d(TempCoords, ElemTable, EdgeTable, tet, newPt):
             # boundary edge, add to cavity
             cavity_edges.append(edge)
     return list(bad_tets), cavity_edges
+
+## Predicates ##
+@try_njit(inline='always')
+def orient2d(a, b, c):
+    """
+    Two dimensional orientation test. 
+    Determines whether three points in the plane are clockwise, counterclockwise, or colinear.
+
+    Parameters
+    ----------
+    a : np.ndarray
+        Two dimensional coordinates of the first point (shape=(2,))
+    b : np.ndarray
+        Two dimensional coordinates of the second point (shape=(2,))
+    c : np.ndarray
+        Two dimensional coordinates of the third point (shape=(2,))
+
+    Returns
+    -------
+    o : float
+        Cross product of (b-a) x (c-a). ``o < 0`` indicates clockwise, 
+        ``o > 0`` indicates counterclockwise, ``o == 0`` indicates colinear.
+    """    
+    # Cross product u x v between u = b - a and v = c - a
+    o = (b[0] - a[0])*(c[1] - a[1]) - (c[0] - a[0])*(b[1] - a[1])
+    # o > 0 -> CCW
+    # o = 0 -> colinear
+    # o < 0 -> CW
+    return o
+
+@try_njit(inline='always')
+def circumcircle(a, b, c, d):
+    """
+    Two dimensional point in triangular circumcircle test.
+    Tests if the point d is in the circumcircle of triangle abc
+
+    Parameters
+    ----------
+    a : np.ndarray
+        Two dimensional coordinates of the first point of the triangle (shape=(2,))
+    b : np.ndarray
+        Two dimensional coordinates of the second point of the triangle (shape=(2,))
+    c : np.ndarray
+        Two dimensional coordinates of the third point of the triangle (shape=(2,))
+    d : _type_
+        Two dimensional coordinates of the point to be compared to the circumcircle
+
+    Returns
+    -------
+    bool
+        True if point d is in the circumcircle of triangle abc
+    """    
+
+    # manual determinant of matrix [[A,B,C],[D,E,F],[G,H,I]]
+    A = a[0] - d[0]
+    B = a[1] - d[1]
+    C = (a[0] - d[0])**2 + (a[1] - d[1])**2
+
+    D = b[0] - d[0]
+    E = b[1] - d[1]
+    F = (b[0] - d[0])**2 + (b[1] - d[1])**2
+
+    G = c[0] - d[0]
+    H = c[1] - d[1]
+    I = (c[0] - d[0])**2 + (c[1] - d[1])**2
+
+    det = A*(E*I-F*H) - B*(D*I-F*G) + C*(D*H-E*G)
+    return det > 0 
+
+@try_njit(inline='always')
+def convex2d(points):
+    """
+    Two dimensional convexity test.
+    Determines whether n points form a strictly convex hull. 
+    The presence of three collinear points is considered not strictly convex.
+
+    Parameters
+    ----------
+    points : np.ndarray
+        Two dimensional point coordinates for n > 2 points (shape=(n,2))
+
+    Returns
+    -------
+    convex : bool
+        True of the points are strictly convex
+    """    
+    assert len(points) >= 3, 'At least 3 points are needed to test convexity'
+    
+    # test first point
+    o1 = orient2d(points[0], points[1], points[2])
+    if o1 == 0:
+        # collinear, not strictly convex
+        return False
+    sign1 = o1 > 0
+    # test middle points
+    for i in range(1, len(points)-2):
+        o2 = orient2d(points[i], points[i+1], points[i+2])
+        if o2 == 0 or sign1 != (o2 > 0):
+            # collinear or concave, not strictly convex
+            return False
+    # test second-to-last segment
+    o2 = orient2d(points[-2], points[-1], points[0])
+    if o2 == 0 or sign1 != (o2 > 0):
+        # collinear or concave, not strictly convex
+        return False
+    o2 = orient2d(points[-1], points[0], points[1])
+    if o2 == 0 or sign1 != (o2 > 0):
+        # collinear or concave, not strictly convex
+        return False
+    return True
+
+@try_njit(inline='always')
+def segment_intersect2d(a, b, c, d):
+    # segment a b intersection with segment c d
+
+    ux = b[0] - a[0]
+    uy = b[1] - a[1]
+
+    vx = c[0] - a[0]
+    vy = c[1] - a[1]
+
+    # orientation test 1 (c vs ab)
+    o1 = ux*vy - vx*uy
+    if o1 == 0:
+        # c collinear with ab
+        if (min(a[0], b[0]) <= c[0] <= max(a[0], b[0])) and  \
+            (min(a[1], b[1]) <= c[1] <= max(a[1], b[1])):
+            return True
+
+    wx = d[0] - a[0]
+    wy = d[1] - a[1]
+    # orientation test 2 (d vs ab)
+    o2 = ux*wy - wx*uy
+    if o2 == 0:
+        # d collinear with ab
+        if (min(a[0], b[0]) <= d[0] <= max(a[0], b[0])) and  \
+            (min(a[1], b[1]) <= d[1] <= max(a[1], b[1])):
+            return True
+        return False
+
+    if ((o2 > 0) and (o1 > 0)) or ((o2 < 0) and (o1 < 0)):
+        # c and d on the same side of ab
+        return False 
+    
+    qx = d[0] - c[0]
+    qy = d[1] - c[1]
+
+    rx = -vx
+    ry = -vy
+
+    # orientation test 3 (a vs cd)
+    o3 = qx*ry - rx*qy
+    if o3 == 0:
+        # a collinear with cd
+        if (min(c[0], d[0]) <= a[0] <= max(c[0], d[0])) and  \
+            (min(c[1], d[1]) <= a[1] <= max(c[1], d[1])):
+            return True
+    
+    sx = b[0] - c[0]
+    sy = b[1] - c[1] 
+
+    # orientation test 4 (b vs cd)
+    o4 = qx*sy - sx*qy
+    if o4 == 0:
+        # b collinear with cd
+        if (min(c[0], d[0]) <= b[0] <= max(c[0], d[0])) and  \
+            (min(c[1], d[1]) <= b[1] <= max(c[1], d[1])):
+            return True
+        return False
+    
+    if ((o4 > 0) and (o3 > 0)) or ((o4 < 0) and (o3 < 0)):
+        # a and b on the same side of cd
+        return False 
+
+    return True
 
