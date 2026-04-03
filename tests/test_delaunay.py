@@ -36,8 +36,8 @@ def test_Tetrahedralize(points):
 ])
 def test_ConvexHull(points):
 
-    methods = ['BowyerWatson', 'scipy', 'GiftWrapping']
+    methods = ['BowyerWatson', 'scipy', 'GiftWrapping', 'QuickHull']
     for method in methods:
-        if method == 'GiftWrapping' and np.shape(points)[1] == 3:
+        if (method == 'GiftWrapping' or method=='QuickHull') and np.shape(points)[1] == 3:
             continue
         H = delaunay.ConvexHull(points, method=method)
