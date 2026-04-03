@@ -59,32 +59,6 @@ of points with radius being the largest distance from the center to a point
         s3 -- s1 [penwidth=1, color="#d08770"]; 
     }
 
-The data structure for constructing the triangulation consists of two tables 
-(:code:`dict`) - an element table and an edge table. The element table, keyed by
-the node numbers that define the element, contain the oriented "half-edges" 
-connected to each element and the edge table is keyed by edges and contains 
-the element key connected to that edge. Each half-edge is connected to only one 
-element, it's "twin" has opposite numbering and is connected to a neighboring
-element, providing a structure allowing for efficient mesh traversal.
-
-The initial data structure for the super-triangle with vertices 
-(:math:`p_{1^*}`, :math:`p_{2^*}`, :math:`p_{3^*}`) is:
-
-+-----------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
-| Elements                                            | Edges                                                                                                          |
-+=====================================================+================================================================================================================+
-| (:math:`p_{1^*}`, :math:`p_{2^*}`, :math:`p_{3^*}`) | (:math:`p_{1^*}`, :math:`p_{2^*}`), (:math:`p_{2^*}`, :math:`p_{3^*}`), (:math:`p_{3^*}`, :math:`p_{1^*}`)     |
-+-----------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
-
-+-------------------------------------+-------------------------------------------------------+
-| Edges                               | Element                                               |
-+=====================================+=======================================================+
-| (:math:`p_{1^*}`, :math:`p_{2^*}`)  | (:math:`p_{1^*}`, :math:`p_{2^*}`, :math:`p_{3^*}`)   |
-+-------------------------------------+-------------------------------------------------------+
-| (:math:`p_{2^*}`, :math:`p_{3^*}`)  | (:math:`p_{1^*}`, :math:`p_{2^*}`, :math:`p_{3^*}`)   |
-+-------------------------------------+-------------------------------------------------------+
-| (:math:`p_{3^*}`, :math:`p_{2^*}`)  | (:math:`p_{1^*}`, :math:`p_{2^*}`, :math:`p_{3^*}`)   |
-+-------------------------------------+-------------------------------------------------------+
 
 Bowyer-Watson: Point Insertion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -508,10 +482,7 @@ Retriangulation
 
 Once the cavity has been formed and the edges at the boundary of the cavity 
 identified, the vertices of the cavity can be simply connected to the inserted
-point to retriangulate the cavity. Due to the oriented nature of the half-edges
-in the data structure, the triangles can be formed in a way that ensures that 
-the points of every triangle are ordered counter clockwise. 
-
+point to retriangulate the cavity. 
 
 
 .. grid:: 2
@@ -588,4 +559,518 @@ the points of every triangle are ordered counter clockwise.
                 c -- f
                 d -- f 
                 e -- f 
+            }
+
+
+Convex Hull
+===========
+
+Gift Wrapping
+-------------
+
+:cite:t:`Jarvis1973`
+
+
+.. grid:: 4
+
+    .. grid-item::
+
+        1
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!"];
+                p1 [pos="0.821, 0.182!"];
+                p2 [pos="0.108, 0.595!"];
+                p3 [pos="0.530, 0.419!"];
+                p4 [pos="0.335, 0.623!"];
+                p5 [pos="0.438, 0.736!"];
+                p6 [pos="0.518, 0.579!"];
+                p7 [pos="0.645, 0.990!"];
+                p8 [pos="0.820, 0.413!"];
+                p9 [pos="0.876, 0.824!"];
+                p10 [pos="0.054, 0.719!"];
+                p11 [pos="0.802, 0.736!"];
+                p12 [pos="0.709, 0.541!"];
+                p13 [pos="0.125, 0.958!"];
+                p14 [pos="0.403, 0.217!"];
+            }
+
+    .. grid-item::
+
+        2
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#5e81ac"];
+                p2 [pos="0.108, 0.595!"];
+                p3 [pos="0.530, 0.419!"];
+                p4 [pos="0.335, 0.623!"];
+                p5 [pos="0.438, 0.736!"];
+                p6 [pos="0.518, 0.579!"];
+                p7 [pos="0.645, 0.990!"];
+                p8 [pos="0.820, 0.413!"];
+                p9 [pos="0.876, 0.824!"];
+                p10 [pos="0.054, 0.719!"];
+                p11 [pos="0.802, 0.736!"];
+                p12 [pos="0.709, 0.541!"];
+                p13 [pos="0.125, 0.958!"];
+                p14 [pos="0.403, 0.217!"];
+
+            p1 -- p0 [color="#5e81ac"];
+            
+            }
+
+    .. grid-item::
+
+        3
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#5e81ac"];
+                p2 [pos="0.108, 0.595!"];
+                p3 [pos="0.530, 0.419!"];
+                p4 [pos="0.335, 0.623!"];
+                p5 [pos="0.438, 0.736!"];
+                p6 [pos="0.518, 0.579!"];
+                p7 [pos="0.645, 0.990!"];
+                p8 [pos="0.820, 0.413!"];
+                p9 [pos="0.876, 0.824!", color="#5e81ac"];
+                p10 [pos="0.054, 0.719!"];
+                p11 [pos="0.802, 0.736!"];
+                p12 [pos="0.709, 0.541!"];
+                p13 [pos="0.125, 0.958!"];
+                p14 [pos="0.403, 0.217!"];
+
+            p1 -- p0 [color="#5e81ac"];
+            p0 -- p9 [color="#5e81ac"];
+            p9 -- p1 [style="dashed"];
+            
+            }
+        
+    .. grid-item::
+
+        4
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#5e81ac"];
+                p2 [pos="0.108, 0.595!"];
+                p3 [pos="0.530, 0.419!"];
+                p4 [pos="0.335, 0.623!"];
+                p5 [pos="0.438, 0.736!"];
+                p6 [pos="0.518, 0.579!"];
+                p7 [pos="0.645, 0.990!", color="#5e81ac"];
+                p8 [pos="0.820, 0.413!", color="#bf616a"];
+                p9 [pos="0.876, 0.824!", color="#5e81ac"];
+                p10 [pos="0.054, 0.719!"];
+                p11 [pos="0.802, 0.736!", color="#bf616a"];
+                p12 [pos="0.709, 0.541!"];
+                p13 [pos="0.125, 0.958!"];
+                p14 [pos="0.403, 0.217!"];
+
+            p1 -- p0 [color="#5e81ac"];
+            p0 -- p9 [color="#5e81ac"];
+            p9 -- p7 [color="#5e81ac"];
+            p7 -- p1 [style="dashed"];
+            
+            }
+
+    .. grid-item::
+
+        5
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#5e81ac"];
+                p2 [pos="0.108, 0.595!"];
+                p3 [pos="0.530, 0.419!"];
+                p4 [pos="0.335, 0.623!"];
+                p5 [pos="0.438, 0.736!", color="#bf616a"];
+                p6 [pos="0.518, 0.579!", color="#bf616a"];
+                p7 [pos="0.645, 0.990!", color="#5e81ac"];
+                p8 [pos="0.820, 0.413!", color="#bf616a"];
+                p9 [pos="0.876, 0.824!", color="#5e81ac"];
+                p10 [pos="0.054, 0.719!"];
+                p11 [pos="0.802, 0.736!", color="#bf616a"];
+                p12 [pos="0.709, 0.541!", color="#bf616a"];
+                p13 [pos="0.125, 0.958!", color="#5e81ac"];
+                p14 [pos="0.403, 0.217!"];
+
+            p1 -- p0 [color="#5e81ac"];
+            p0 -- p9 [color="#5e81ac"];
+            p9 -- p7 [color="#5e81ac"];
+            p7 -- p13 [color="#5e81ac"];
+            p13 -- p1 [style="dashed"];
+            
+            }
+
+    .. grid-item::
+
+        6
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#5e81ac"];
+                p2 [pos="0.108, 0.595!"];
+                p3 [pos="0.530, 0.419!", color="#bf616a"];
+                p4 [pos="0.335, 0.623!", color="#bf616a"];
+                p5 [pos="0.438, 0.736!", color="#bf616a"];
+                p6 [pos="0.518, 0.579!", color="#bf616a"];
+                p7 [pos="0.645, 0.990!", color="#5e81ac"];
+                p8 [pos="0.820, 0.413!", color="#bf616a"];
+                p9 [pos="0.876, 0.824!", color="#5e81ac"];
+                p10 [pos="0.054, 0.719!", color="#5e81ac"];
+                p11 [pos="0.802, 0.736!", color="#bf616a"];
+                p12 [pos="0.709, 0.541!", color="#bf616a"];
+                p13 [pos="0.125, 0.958!", color="#5e81ac"];
+                p14 [pos="0.403, 0.217!"];
+
+            p1 -- p0 [color="#5e81ac"];
+            p0 -- p9 [color="#5e81ac"];
+            p9 -- p7 [color="#5e81ac"];
+            p7 -- p13 [color="#5e81ac"];
+            p13 -- p10 [color="#5e81ac"];
+            p10 -- p1 [style="dashed"];
+            
+            }
+    
+    .. grid-item::
+
+        7
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#5e81ac"];
+                p2 [pos="0.108, 0.595!", color="#5e81ac"];
+                p3 [pos="0.530, 0.419!", color="#bf616a"];
+                p4 [pos="0.335, 0.623!", color="#bf616a"];
+                p5 [pos="0.438, 0.736!", color="#bf616a"];
+                p6 [pos="0.518, 0.579!", color="#bf616a"];
+                p7 [pos="0.645, 0.990!", color="#5e81ac"];
+                p8 [pos="0.820, 0.413!", color="#bf616a"];
+                p9 [pos="0.876, 0.824!", color="#5e81ac"];
+                p10 [pos="0.054, 0.719!", color="#5e81ac"];
+                p11 [pos="0.802, 0.736!", color="#bf616a"];
+                p12 [pos="0.709, 0.541!", color="#bf616a"];
+                p13 [pos="0.125, 0.958!", color="#5e81ac"];
+                p14 [pos="0.403, 0.217!"];
+
+            p1 -- p0 [color="#5e81ac"];
+            p0 -- p9 [color="#5e81ac"];
+            p9 -- p7 [color="#5e81ac"];
+            p7 -- p13 [color="#5e81ac"];
+            p13 -- p10 [color="#5e81ac"];
+            p10 -- p2 [color="#5e81ac"];
+            p2 -- p1 [style="dashed"];
+            
+            }
+    
+    .. grid-item::
+
+        8
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#5e81ac"];
+                p2 [pos="0.108, 0.595!", color="#5e81ac"];
+                p3 [pos="0.530, 0.419!", color="#bf616a"];
+                p4 [pos="0.335, 0.623!", color="#bf616a"];
+                p5 [pos="0.438, 0.736!", color="#bf616a"];
+                p6 [pos="0.518, 0.579!", color="#bf616a"];
+                p7 [pos="0.645, 0.990!", color="#5e81ac"];
+                p8 [pos="0.820, 0.413!", color="#bf616a"];
+                p9 [pos="0.876, 0.824!", color="#5e81ac"];
+                p10 [pos="0.054, 0.719!", color="#5e81ac"];
+                p11 [pos="0.802, 0.736!", color="#bf616a"];
+                p12 [pos="0.709, 0.541!", color="#bf616a"];
+                p13 [pos="0.125, 0.958!", color="#5e81ac"];
+                p14 [pos="0.403, 0.217!", color="#5e81ac"];
+
+            p1 -- p0 [color="#5e81ac"];
+            p0 -- p9 [color="#5e81ac"];
+            p9 -- p7 [color="#5e81ac"];
+            p7 -- p13 [color="#5e81ac"];
+            p13 -- p10 [color="#5e81ac"];
+            p10 -- p2 [color="#5e81ac"];
+            p2 -- p14 [color="#5e81ac"];
+            p14 -- p1 [color="#5e81ac"];
+            
+            }
+
+QuickHull
+---------
+
+.. grid:: 4
+
+    .. grid-item::
+
+        1
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!"];
+                p1 [pos="0.821, 0.182!"];
+                p2 [pos="0.108, 0.595!"];
+                p3 [pos="0.530, 0.419!"];
+                p4 [pos="0.335, 0.623!"];
+                p5 [pos="0.438, 0.736!"];
+                p6 [pos="0.518, 0.579!"];
+                p7 [pos="0.645, 0.990!"];
+                p8 [pos="0.820, 0.413!"];
+                p9 [pos="0.876, 0.824!"];
+                p10 [pos="0.054, 0.719!"];
+                p11 [pos="0.802, 0.736!"];
+                p12 [pos="0.709, 0.541!"];
+                p13 [pos="0.125, 0.958!"];
+                p14 [pos="0.403, 0.217!"];
+            }
+
+    .. grid-item::
+
+        2
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#b48ead"];
+                p2 [pos="0.108, 0.595!", color="#b48ead"];
+                p3 [pos="0.530, 0.419!", color="#b48ead"];
+                p4 [pos="0.335, 0.623!", color="#a3be8c"];
+                p5 [pos="0.438, 0.736!", color="#a3be8c"];
+                p6 [pos="0.518, 0.579!", color="#a3be8c"];
+                p7 [pos="0.645, 0.990!", color="#a3be8c"];
+                p8 [pos="0.820, 0.413!", color="#a3be8c"];
+                p9 [pos="0.876, 0.824!", color="#a3be8c"];
+                p10 [pos="0.054, 0.719!", color="#5e81ac"];
+                p11 [pos="0.802, 0.736!", color="#a3be8c"];
+                p12 [pos="0.709, 0.541!", color="#a3be8c"];
+                p13 [pos="0.125, 0.958!", color="#a3be8c"];
+                p14 [pos="0.403, 0.217!", color="#b48ead"];
+
+            p10 -- p0 [style="dashed"];
+            
+            }
+    
+    .. grid-item::
+
+        3
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#b48ead"];
+                p2 [pos="0.108, 0.595!", color="#b48ead"];
+                p3 [pos="0.530, 0.419!", color="#b48ead"];
+                p4 [pos="0.335, 0.623!", color="#a3be8c"];
+                p5 [pos="0.438, 0.736!", color="#a3be8c"];
+                p6 [pos="0.518, 0.579!", color="#a3be8c"];
+                p7 [pos="0.645, 0.990!", color="#a3be8c"];
+                p8 [pos="0.820, 0.413!", color="#a3be8c"];
+                p9 [pos="0.876, 0.824!", color="#5e81ac"];
+                p10 [pos="0.054, 0.719!", color="#5e81ac"];
+                p11 [pos="0.802, 0.736!", color="#a3be8c"];
+                p12 [pos="0.709, 0.541!", color="#a3be8c"];
+                p13 [pos="0.125, 0.958!", color="#a3be8c"];
+                p14 [pos="0.403, 0.217!", color="#5e81ac"];
+
+            p10 -- p0 [style="dashed"];
+            p10 -- p9;
+            p9 -- p0;
+            p0 -- p14;
+            p14 -- p10;
+            
+            }
+    
+    .. grid-item::
+
+        4
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#b48ead"];
+                p2 [pos="0.108, 0.595!", color="#5e81ac"];
+                p3 [pos="0.530, 0.419!", color="#b48ead"];
+                p4 [pos="0.335, 0.623!", color="#a3be8c"];
+                p5 [pos="0.438, 0.736!", color="#a3be8c"];
+                p6 [pos="0.518, 0.579!", color="#a3be8c"];
+                p7 [pos="0.645, 0.990!", color="#a3be8c"];
+                p8 [pos="0.820, 0.413!", color="#a3be8c"];
+                p9 [pos="0.876, 0.824!", color="#5e81ac"];
+                p10 [pos="0.054, 0.719!", color="#5e81ac"];
+                p11 [pos="0.802, 0.736!", color="#a3be8c"];
+                p12 [pos="0.709, 0.541!", color="#a3be8c"];
+                p13 [pos="0.125, 0.958!", color="#a3be8c"];
+                p14 [pos="0.403, 0.217!", color="#5e81ac"];
+
+            p10 -- p0 [style="dashed"];
+            p2 -- p10 [color="#5e81ac"];
+            p14 -- p2 [color="#5e81ac"];            
+            p10 -- p9;
+            p9 -- p0;
+            p0 -- p14;
+            
+            }
+
+    .. grid-item::
+
+        5
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#5e81ac"];
+                p2 [pos="0.108, 0.595!", color="#5e81ac"];
+                p3 [pos="0.530, 0.419!", color="#BF616A"];
+                p4 [pos="0.335, 0.623!", color="#a3be8c"];
+                p5 [pos="0.438, 0.736!", color="#a3be8c"];
+                p6 [pos="0.518, 0.579!", color="#a3be8c"];
+                p7 [pos="0.645, 0.990!", color="#a3be8c"];
+                p8 [pos="0.820, 0.413!", color="#a3be8c"];
+                p9 [pos="0.876, 0.824!", color="#5e81ac"];
+                p10 [pos="0.054, 0.719!", color="#5e81ac"];
+                p11 [pos="0.802, 0.736!", color="#a3be8c"];
+                p12 [pos="0.709, 0.541!", color="#a3be8c"];
+                p13 [pos="0.125, 0.958!", color="#a3be8c"];
+                p14 [pos="0.403, 0.217!", color="#5e81ac"];
+
+            p10 -- p0 [style="dashed"];
+            p2 -- p10 [color="#5e81ac"];
+            p14 -- p2 [color="#5e81ac"];
+            p0 -- p1 [color="#5e81ac"];
+            p1 -- p14 [color="#5e81ac"];
+            p9 -- p0 [color="#5e81ac"];
+            p10 -- p9;    
+            }
+    
+    .. grid-item::
+
+        6
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#5e81ac"];
+                p2 [pos="0.108, 0.595!", color="#5e81ac"];
+                p3 [pos="0.530, 0.419!", color="#BF616A"];
+                p4 [pos="0.335, 0.623!", color="#BF616A"];
+                p5 [pos="0.438, 0.736!", color="#BF616A"];
+                p6 [pos="0.518, 0.579!", color="#BF616A"];
+                p7 [pos="0.645, 0.990!", color="#a3be8c"];
+                p8 [pos="0.820, 0.413!", color="#BF616A"];
+                p9 [pos="0.876, 0.824!", color="#5e81ac"];
+                p10 [pos="0.054, 0.719!", color="#5e81ac"];
+                p11 [pos="0.802, 0.736!", color="#BF616A"];
+                p12 [pos="0.709, 0.541!", color="#BF616A"];
+                p13 [pos="0.125, 0.958!", color="#5e81ac"];
+                p14 [pos="0.403, 0.217!", color="#5e81ac"];
+
+            p9 -- p10 [style="dashed"];
+            p2 -- p10 [color="#5e81ac"];
+            p14 -- p2 [color="#5e81ac"];
+            p0 -- p1 [color="#5e81ac"];
+            p1 -- p14 [color="#5e81ac"];
+            p9 -- p0 [color="#5e81ac"];
+            p10 -- p13;
+            p13 -- p9;    
+            }
+    
+    .. grid-item::
+
+        7
+
+        .. graphviz::
+
+            graph points {
+                node [shape=point, fontname="source code pro"];
+                edge [style=solid];
+
+                p0 [pos="0.893, 0.332!", color="#5e81ac"];
+                p1 [pos="0.821, 0.182!", color="#5e81ac"];
+                p2 [pos="0.108, 0.595!", color="#5e81ac"];
+                p3 [pos="0.530, 0.419!", color="#BF616A"];
+                p4 [pos="0.335, 0.623!", color="#BF616A"];
+                p5 [pos="0.438, 0.736!", color="#BF616A"];
+                p6 [pos="0.518, 0.579!", color="#BF616A"];
+                p7 [pos="0.645, 0.990!", color="#5e81ac"];
+                p8 [pos="0.820, 0.413!", color="#BF616A"];
+                p9 [pos="0.876, 0.824!", color="#5e81ac"];
+                p10 [pos="0.054, 0.719!", color="#5e81ac"];
+                p11 [pos="0.802, 0.736!", color="#BF616A"];
+                p12 [pos="0.709, 0.541!", color="#BF616A"];
+                p13 [pos="0.125, 0.958!", color="#5e81ac"];
+                p14 [pos="0.403, 0.217!", color="#5e81ac"];
+
+            p2 -- p10 [color="#5e81ac"];
+            p14 -- p2 [color="#5e81ac"];
+            p0 -- p1 [color="#5e81ac"];
+            p1 -- p14 [color="#5e81ac"];
+            p9 -- p0 [color="#5e81ac"];
+            p10 -- p13 [color="#5e81ac"];
+            p13 -- p7 [color="#5e81ac"]; 
+            p7 -- p9 [color="#5e81ac"];
             }
