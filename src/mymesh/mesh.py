@@ -2586,7 +2586,7 @@ class mesh:
             _ = self.ElemConn
             self.verbose = True
 
-        D = dmesh(NodeCoords, NodeConn, self.ElemConn, ElemLabels, NodeLabels)
+        D = dmesh(NodeCoords, NodeConn, self.ElemConn, NodeLabels, ElemLabels)
 
         return D
     
