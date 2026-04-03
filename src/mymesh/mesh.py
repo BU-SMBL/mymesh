@@ -9,7 +9,7 @@ mesh class
 
 """
 
-from . import utils, implicit, improvement, contour, converter, quality, rays, register, curvature, visualize, check_numba, try_njit
+from . import utils, implicit, improvement, contour, converter, quality, rays, register, curvature, visualize, delaunay, check_numba, try_njit
 from sys import getsizeof
 import scipy
 import numpy as np
@@ -2555,7 +2555,7 @@ class mesh:
         else:
             return [], [], []
 
-    def mesh2dmesh(self, ElemLabels=None):
+    def mesh2dmesh(self, NodeLabels=None, ElemLabels=None):
         """
         Convert to a dynamic mesh (:class:`dmesh`)
 
@@ -2577,12 +2577,16 @@ class mesh:
             ElemLabels = np.empty(0, np.int64)
         else:
             ElemLabels = np.asarray(ElemLabels, np.int64)
+        if NodeLabels is None:
+            NodeLabels = np.empty(0, np.int64)
+        else:
+            NodeLabels = np.asarray(NodeLabels, np.int64)
         if self.verbose:
             self.verbose = False
             _ = self.ElemConn
             self.verbose = True
 
-        D = dmesh(NodeCoords, NodeConn, self.ElemConn, ElemLabels)
+        D = dmesh(NodeCoords, NodeConn, self.ElemConn, ElemLabels, NodeLabels)
 
         return D
     
@@ -2627,10 +2631,18 @@ def dmesh_get_ElemConn_size(self):
 @try_njit(cache=True)
 def dmesh_get_ElemLabels(self):
     return self.ElemLabels
-
+@try_njit(cache=True)
+def dmesh_set_ElemLabels(self, labels):
+    self.ElemLabels = labels
+@try_njit(cache=True)
+def dmesh_get_NodeLabels(self):
+    return self.NodeLabels
+@try_njit(cache=True)
+def dmesh_set_NodeLabels(self, labels):
+    self.NodeLabels = labels
 # Method implementations:
 @try_njit(cache=True)
-def dmesh_addNodes(self,NodeCoords):
+def dmesh_addNodes(self,NodeCoords,NodeLabels=None):
     """
     Add nodes to the mesh.
 
@@ -2650,6 +2662,11 @@ def dmesh_addNodes(self,NodeCoords):
         # to exactly fit the new nodes
         newsize = np.maximum(NewLength,len(self.raw_NodeCoords)*2)
         self.raw_NodeCoords = np.resize(self.raw_NodeCoords, (newsize,3))
+        if len(self.NodeLabels) > 0:
+            self.NodeLabels = np.resize(self.NodeLabels, int(np.maximum(NewLength,len(self.NodeLabels)*2)))
+            if NodeLabels is None:
+                NodeLabels = np.zeros(len(NodeCoords), dtype=np.int64)
+            self.NodeLabels[self.NNode:NewLength] = NodeLabels
         
         # update the ElemConn structure as well
         self.ElemConn_head = np.resize(self.ElemConn_head, newsize)
@@ -2815,7 +2832,103 @@ def dmesh_removeElems(self, ElemIds):
     for ElemId in np.sort(ElemIds)[::-1]:
         dmesh_removeElem(self, ElemId)
 
-def dmesh_init(raw_NodeCoords, raw_NodeConn, ElemConn, ElemLabels=None):
+@try_njit
+def dmesh_get_TriEdgeNeighbor(self, tri_id, n1, n2):
+    # get the element that neighbors `tri_id` across edge (n1, n2)
+    next_tri_id = -1
+    i = self.ElemConn_head[n1]
+    while i != -1:
+        next_elem = self.ElemConn_elem[i]
+        # iterate through elem conn for the first node in the edge
+        if next_elem != tri_id:
+            # skip the current triangle
+            t = self.raw_NodeConn[next_elem]
+            if (t[0] == n2) or (t[1] == n2) or (t[2] == n2):
+                # element is opposite a shared edge, step into it
+                next_tri_id = next_elem
+                break                    
+        i = self.ElemConn_next[i] 
+    return next_tri_id   
+
+@try_njit
+def dmesh_get_TriEdgeConn(self, n1, n2):
+    # get the elements connected to the edge (n1, n2)
+
+    next_tri_id = -1
+    i = self.ElemConn_head[n1]
+    connections = []
+    while i != -1:
+        next_elem = self.ElemConn_elem[i]
+        # iterate through elem conn for the first node in the edge
+        t = self.raw_NodeConn[next_elem]
+        if (t[0] == n2) or (t[1] == n2) or (t[2] == n2):
+            # element is opposite a shared edge, step into it
+            connections.append(next_elem)
+        i = self.ElemConn_next[i] 
+    return connections
+
+@try_njit
+def dmesh_TriFlipEdge(self, n1, n2):
+    
+    elems = self.get_TriEdgeConn(n1, n2)
+    # tris are (n1, n3, n2) and (n1, n4, n2) (not necessarily that order)
+    # find the quadrilateral (n1,n3,n2,n4) in an ordered way (can be cw or ccw)
+    a, b, c = self.NodeConn[elems[0]]
+    if a == n1:
+        if b == n2:
+            n3 = c
+        else:
+            n3 = b
+    elif b == n1:
+        if a == n2:
+            n3 = c
+        else:
+            n3 = a
+    else: # if c == n1
+        if a == n2:
+            n3 = b
+        else:
+            n3 = a
+    
+    d, e, f = self.NodeConn[elems[1]]
+    if d == n1:
+        if e == n2:
+            n4 = f
+        else:
+            n4 = e
+    elif e == n1:
+        if d == n2:
+            n4 = f
+        else:
+            n4 = d
+    else: # if f == n1
+        if d == n2:
+            n4 = e
+        else:
+            n4 = d
+
+    # Test for strictly convex quadrilateral
+    if not delaunay.convex2d(self.raw_NodeCoords[np.array([n1,n3,n2,n4]),:]):
+        return (-1, -1)
+
+    # perform flip 
+    # NOTE: if I in-lined the convexity test I wouldn't need to repeat the orientation tests
+    self.removeElems(elems)
+    if delaunay.orient2d(self.raw_NodeCoords[n3], self.raw_NodeCoords[n4], self.raw_NodeCoords[n1]) > 0:
+        self.addElem(np.array([n3, n4, n1]))
+    else:
+        self.addElem(np.array([n1, n4, n3]))
+
+    if delaunay.orient2d(self.raw_NodeCoords[n3], self.raw_NodeCoords[n4], self.raw_NodeCoords[n2]) > 0:
+        self.addElem(np.array([n3, n4, n2]))
+    else:
+        self.addElem(np.array([n2, n4, n3]))
+    
+    new_edge = (n3, n4)
+    return new_edge
+    
+
+def dmesh_init(raw_NodeCoords, raw_NodeConn, ElemConn, NodeLabels=None, ElemLabels=None):
         
     NNode = len(raw_NodeCoords)
     NElem = len(raw_NodeConn)
@@ -2840,6 +2953,8 @@ def dmesh_init(raw_NodeCoords, raw_NodeConn, ElemConn, ElemLabels=None):
         k += 1
 
     ElemConn_size = len(ElemConn_elem)
+    if NodeLabels is None:
+        NodeLabels = np.empty(0, np.int64)
     if ElemLabels is None:
         ElemLabels = np.empty(0, np.int64)
 
@@ -2853,6 +2968,7 @@ def dmesh_init(raw_NodeCoords, raw_NodeConn, ElemConn, ElemLabels=None):
             ElemConn_prev,
             ElemConn_tail,
             ElemConn_size,
+            NodeLabels,
             ElemLabels
             )
 
@@ -2894,7 +3010,7 @@ if check_numba():
             
 
         """  
-        def __new__(cls, raw_NodeCoords, raw_NodeConn, ElemConn, ElemLabels=None):
+        def __new__(cls, raw_NodeCoords, raw_NodeConn, ElemConn, NodeLabels=None, ElemLabels=None):
             
             (raw_NodeCoords, 
             NNode,
@@ -2906,7 +3022,8 @@ if check_numba():
             ElemConn_prev,
             ElemConn_tail,
             ElemConn_size,
-            ElemLabels) = dmesh_init(raw_NodeCoords, raw_NodeConn, ElemConn, ElemLabels)
+            NodeLabels,
+            ElemLabels) = dmesh_init(raw_NodeCoords, raw_NodeConn, ElemConn, NodeLabels, ElemLabels)
             return structref.StructRefProxy.__new__(cls, 
                         raw_NodeCoords, 
                         NNode,
@@ -2918,6 +3035,7 @@ if check_numba():
                         ElemConn_prev,
                         ElemConn_tail,
                         ElemConn_size,
+                        NodeLabels,
                         ElemLabels
                         )
         
@@ -2961,12 +3079,21 @@ if check_numba():
         def ElemConn_size(self):
             return dmesh_get_ElemConn_size(self)
         @property
+        def NodeLabels(self):
+            return dmesh_get_NodeLabels(self)
+        @NodeLabels.setter
+        def NodeLabels(self, labels):
+            dmesh_set_NodeLabels(self, labels)
+        @property
         def ElemLabels(self):
             return dmesh_get_ElemLabels(self)
+        @ElemLabels.setter
+        def ElemLabels(self, labels):
+            self.ElemLabels = labels
         
         # Methods:
-        def addNodes(self,NodeCoords):
-            dmesh_addNodes(self, NodeCoords)
+        def addNodes(self,NodeCoords,Labels=None):
+            dmesh_addNodes(self, NodeCoords, Labels)
 
         def addElem(self,NodeConn,Label=0):
             dmesh_addElem(self,NodeConn,Label)
@@ -2988,6 +3115,16 @@ if check_numba():
 
         def removeElems(self, ElemIds):
             dmesh_removeElems(self, ElemIds)
+        
+        def get_TriEdgeNeighbor(self, tri_id, n1, n2):
+            return dmesh_get_TriEdgeNeighbor(self, tri_id, n1, n2)
+        
+        def get_TriEdgeConn(self, n1, n2):
+            return dmesh_get_TriEdgeConn(self, n1, n2)
+
+        def TriFlipEdge(self, n1, n2):
+            return dmesh_TriFlipEdge(self, n1, n2)
+            
 
     # Attribute overloads
     @overload_attribute(dmesh_type, 'NodeCoords')
@@ -3004,9 +3141,9 @@ if check_numba():
         
     # Method overloads:
     @overload_method(dmesh_type, 'addNodes')
-    def ol_dmesh_addNodes(self,NodeCoords):
-        def impl(self,NodeCoords):
-            return dmesh_addNodes(self,NodeCoords)
+    def ol_dmesh_addNodes(self,NodeCoords,Labels=None):
+        def impl(self,NodeCoords,Labels=None):
+            return dmesh_addNodes(self,NodeCoords,Labels)
         return impl
 
     @overload_method(dmesh_type, 'addElem')
@@ -3050,6 +3187,24 @@ if check_numba():
         def impl(self, ElemIds):
             return dmesh_removeElems(self, ElemIds)
         return impl
+
+    @overload_method(dmesh_type, 'get_TriEdgeNeighbor')
+    def ol_dmesh_get_TriEdgeNeighbor(self, tri_id, n1, n2):
+        def impl(self, tri_id, n1, n2):
+            return dmesh_get_TriEdgeNeighbor(self, tri_id, n1, n2)
+        return impl
+
+    @overload_method(dmesh_type, 'get_TriEdgeConn')
+    def ol_dmesh_get_TriEdgeConn(self, n1, n2):
+        def impl(self, n1, n2):
+            return dmesh_get_TriEdgeConn(self, n1, n2)
+        return impl
+    
+    @overload_method(dmesh_type, 'TriFlipEdge')
+    def ol_dmesh_TriFlipEdge(self, n1, n2):
+        def impl(self, n1, n2):
+            return dmesh_TriFlipEdge(self, n1, n2)
+        return impl
     
     # Associate the proxy with the StructRef
     structref.define_proxy(dmesh, dmesh_type, 
@@ -3063,6 +3218,7 @@ if check_numba():
                             'ElemConn_prev',
                             'ElemConn_tail',
                             'ElemConn_size',
+                            'NodeLabels',
                             'ElemLabels'
                             ]) 
 else:
@@ -3089,7 +3245,7 @@ else:
             
 
         """  
-        def __init__(self, raw_NodeCoords, raw_NodeConn, ElemConn, ElemLabels=None):
+        def __init__(self, raw_NodeCoords, raw_NodeConn, ElemConn, NodeLabels=None, ElemLabels=None):
             
             (self.raw_NodeCoords, 
             self.NNode,
@@ -3101,7 +3257,8 @@ else:
             self.ElemConn_prev,
             self.ElemConn_tail,
             self.ElemConn_size,
-            self.ElemLabels) = dmesh_init(raw_NodeCoords, raw_NodeConn, ElemConn, ElemLabels)
+            self.NodeLabels,
+            self.ElemLabels) = dmesh_init(raw_NodeCoords, raw_NodeConn, ElemConn, NodeLabels, ElemLabels)
 
         def __repr__(self):
             return 'Dynamic Mesh Object\n{0:d} Nodes\n{1:d} Elements'.format(self.NNode,self.NElem)
@@ -3114,8 +3271,8 @@ else:
             return dmesh_get_NodeConn(self)
         
         # Methods:
-        def addNodes(self,NodeCoords):
-            dmesh_addNodes(self, NodeCoords)
+        def addNodes(self,NodeCoords,Labels=None):
+            dmesh_addNodes(self, NodeCoords, Labels)
 
         def addElem(self,NodeConn,Label=0):
             dmesh_addElem(self,NodeConn,Label)
@@ -3138,4 +3295,12 @@ else:
         def removeElems(self, ElemIds):
             dmesh_removeElems(self, ElemIds)
     
+        def get_TriEdgeNeighbor(self, tri_id, n1, n2):
+            return dmesh_get_TriEdgeNeighbor(self, tri_id, n1, n2)
+        
+        def get_TriEdgeConn(self, n1, n2):
+            return dmesh_get_TriEdgeConn(self, n1, n2)
+
+        def TriFlipEdge(self, n1, n2):
+            return dmesh_TriFlipEdge(self, n1, n2)
     
