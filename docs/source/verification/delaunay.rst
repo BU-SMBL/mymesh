@@ -352,3 +352,27 @@ See also: :ref:`Delaunay Triangulation`, :mod:`mymesh.delaunay`
     plt.title('2D Convex Hull')
     plt.grid()
     plt.show()
+
+
+System Information
+------------------
+
+.. jupyter-execute::
+    :hide-code:
+
+    import platform, importlib, psutil, cpuinfo
+    
+    uname = platform.uname()
+    cpu_info = cpuinfo.get_cpu_info()
+    svmem = psutil.virtual_memory()
+
+    print("*"*10, "System Information", "*"*10)
+    print(f"System: {uname.system}")
+    print(f"Python Version: {platform.python_version()}")
+    print(f"Numpy Version: {importlib.metadata.version('numpy')}")
+    print(f"CPU: {cpu_info['brand_raw']}")  
+    print("CPU Physical Cores:", psutil.cpu_count(logical=False))
+    cpufreq = psutil.cpu_freq()
+    print(f"CPU Frequency Range: {cpufreq.min/1000:.2f} - {cpufreq.max/1000:.2f} GHz")
+    print(f"Available Memory: {svmem.available/(1024**3):.1f}/{svmem.total/(1024**3):.1f} GB")
+    print("*"*40)
