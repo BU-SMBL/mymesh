@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -43,10 +43,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -59,25 +59,30 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mymesh/delaunay';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
-
+  <body data-default-mode="light">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
@@ -109,7 +114,7 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
   <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
@@ -183,23 +188,13 @@
   </a>
 </li>
 
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button"
-                data-bs-toggle="dropdown" aria-expanded="false"
-                aria-controls="pst-nav-more-links">
-                    More
-                </button>
-                <ul id="pst-nav-more-links" class="dropdown-menu">
-                    
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../dev.html">
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dev.html">
     Development
   </a>
 </li>
 
-                </ul>
-            </li>
-            
   </ul>
 </nav></div>
       
@@ -454,12 +449,12 @@
 <span class="sd">    :toctree: submodules/</span>
 
 <span class="sd">    ConvexHull</span>
+<span class="sd">    GiftWrapping2d</span>
+<span class="sd">    QuickHull2d</span>
 <span class="sd">    AlphaShape</span>
 <span class="sd">    Alpha2d</span>
 <span class="sd">    Alpha3d</span>
-<span class="sd">    AlphaPeel3d</span>
-<span class="sd">    GiftWrapping</span>
-<span class="sd">    </span>
+<span class="sd">    AlphaPeel3d    </span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1">#%%</span>
@@ -486,8 +481,7 @@
 <span class="sd">        by default None. Edge constraints should be specified by node indices,</span>
 <span class="sd">        for example [[0, 1], [1,2], ...]</span>
 <span class="sd">    method : str, optional</span>
-<span class="sd">        Triangulation method, by default &#39;BowyerWatson&#39; if no constraints are </span>
-<span class="sd">        provided and &#39;Triangle&#39; if constraints are provided.</span>
+<span class="sd">        Triangulation method, by default &#39;BowyerWatson&#39;.</span>
 
 <span class="sd">        - &#39;BowyerWatson&#39; - Generate a Delaunay triangulation by the Bowyer-Watson algorithm (:func:`BowyerWatson2d`)</span>
 
@@ -506,7 +500,7 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">Constraints</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">Constraints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;BowyerWatson&#39;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;Triangle&#39;</span>
+            <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;BowyerWatson&#39;</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">Constraints</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">Constraints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
         <span class="n">Points</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">idx</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">DeleteDuplicateNodes</span><span class="p">(</span><span class="n">Points</span><span class="p">,[],</span><span class="n">return_idx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
@@ -518,16 +512,16 @@
             <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">Triangle</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span><span class="n">steiner</span><span class="o">=</span><span class="n">steiner</span><span class="p">)</span>
             <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid method &quot;</span><span class="si">{</span><span class="n">method</span><span class="si">:</span><span class="s1">s</span><span class="si">}</span><span class="s1">&quot;.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Method &quot;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">&quot; not supported for triangulation&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span> 
         <span class="c1"># Constrained Delaunay Triangulation - Sloan (1993)</span>
         <span class="c1"># Generate initial triangulation</span>
-        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;triangle&#39;</span><span class="p">:</span>
-            <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;triangle&#39;</span>
+        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;bowyerwatson&#39;</span><span class="p">:</span>
+            <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">BowyerWatson2d</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">Constraints</span><span class="o">=</span><span class="n">Constraints</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;triangle&#39;</span><span class="p">:</span>
+            <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">Triangle</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span><span class="n">Constraints</span><span class="o">=</span><span class="n">Constraints</span><span class="p">,</span><span class="n">steiner</span><span class="o">=</span><span class="n">steiner</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Currently only method=&quot;Triangle&quot; is supported for constrained triangulation.&#39;</span><span class="p">)</span>
-        
-        <span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">Triangle</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span><span class="n">Constraints</span><span class="o">=</span><span class="n">Constraints</span><span class="p">,</span><span class="n">steiner</span><span class="o">=</span><span class="n">steiner</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Method &quot;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">&quot; not supported for constrained triangulation&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
         <span class="n">T</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
@@ -587,7 +581,7 @@
 
 <div class="viewcode-block" id="ConvexHull">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.ConvexHull.html#mymesh.delaunay.ConvexHull">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">ConvexHull</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;scipy&#39;</span><span class="p">,</span><span class="n">OrientSurf</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ConvexHull</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">OrientSurf</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nD</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Identify the convex hull of a set of points. For a 2D point set </span>
 <span class="sd">    (np.shape(NodeCoords) = (n,2)), a 2D convex hull of line elements will be </span>
@@ -598,19 +592,21 @@
 <span class="sd">    ----------</span>
 <span class="sd">    NodeCoords : array_like</span>
 <span class="sd">        Coordinates of points around which the convex hull will be identified.</span>
-<span class="sd">        If shape = (n,2), a 2D convex hull will be identified, or if shape = (n,3)</span>
-<span class="sd">        a 3D convex hull will be identified. </span>
 <span class="sd">    method : str, optional</span>
-<span class="sd">        Convex hull method, by default &#39;scipy&#39;.</span>
+<span class="sd">        Convex hull method, by default &#39;QuickHull&#39; for 2D and &#39;scipy&#39; for 3D.</span>
 
-<span class="sd">        - &#39;scipy&#39; - Use :external+scipy:class:`scipy.spatial.ConvexHull`</span>
+<span class="sd">        - &#39;QuickHull&#39; - Use the quickhull algorithm (:func:`QuickHull2d`)</span>
+<span class="sd">        </span>
+<span class="sd">        - &#39;GiftWrapping&#39; - Use the gift wrapping algorithm (:func:`GiftWrapping2d`)</span>
+<span class="sd">        </span>
+<span class="sd">        - &#39;scipy&#39; or &#39;qhull&#39; - Use qhull via :external+scipy:class:`scipy.spatial.ConvexHull`</span>
 
-<span class="sd">        - &#39;BowyerWatson&#39; - Generate a Delaunay triangulation by the Bowyer-Watson algorithm (:func:`BowyerWatson2d` or :func:`BowyerWatson3d`)</span>
+<span class="sd">        - &#39;BowyerWatson&#39; - Extract the boundary of a Delaunay triangulation by the Bowyer-Watson algorithm (:func:`BowyerWatson2d` or :func:`BowyerWatson3d`). This option is mostly for theoretical interest.</span>
 
-<span class="sd">        - &#39;GiftWrapping&#39; - Use the gift wrapping algorithm (:func:`GiftWrapping`)</span>
+<span class="sd">        </span>
 <span class="sd">    OrientSurf : str, optional</span>
 <span class="sd">        Ensure the normals of the convex hull are consistently oriented outward,</span>
-<span class="sd">        by default True.</span>
+<span class="sd">        by default True. This is only relevant for method==&#39;scipy&#39;, other methods are oriented regardless.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -619,13 +615,26 @@
 <span class="sd">        or :code:`Hull.Type=&#39;surf&#39;` for a 3D hull.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="n">nD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">nD</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">nD</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">nD</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">nD</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n&gt;3 dimensional convex hulls aren&#39;t supported, use scipy.spatial.ConvexHull directly.&quot;</span><span class="p">)</span>
+
 
     <span class="k">if</span> <span class="n">nD</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;giftwrapping&#39;</span><span class="p">:</span>
-            <span class="n">hull</span> <span class="o">=</span> <span class="n">GiftWrapping</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">IncludeCollinear</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;scipy&#39;</span><span class="p">:</span>
-            <span class="n">qhull</span> <span class="o">=</span> <span class="n">spatial</span><span class="o">.</span><span class="n">ConvexHull</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;quickhull&#39;</span>
+        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;quickhull&#39;</span><span class="p">:</span>
+            <span class="n">hull</span> <span class="o">=</span> <span class="n">QuickHull2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;giftwrapping&#39;</span><span class="p">:</span>
+            <span class="n">hull</span> <span class="o">=</span> <span class="n">GiftWrapping2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">),</span><span class="n">IncludeCollinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;scipy&#39;</span> <span class="ow">or</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;qhull&#39;</span><span class="p">:</span>
+            <span class="n">qhull</span> <span class="o">=</span> <span class="n">spatial</span><span class="o">.</span><span class="n">ConvexHull</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">[:,:</span><span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
             <span class="n">hull</span> <span class="o">=</span> <span class="n">qhull</span><span class="o">.</span><span class="n">simplices</span>
         <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;bowyerwatson&#39;</span><span class="p">:</span>
             <span class="n">tri</span> <span class="o">=</span> <span class="n">BowyerWatson2d</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
@@ -638,6 +647,8 @@
             <span class="n">Hull</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">hull</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;line&#39;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">nD</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;scipy&#39;</span>
         <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;scipy&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">OrientSurf</span><span class="p">:</span>
                 <span class="n">qhull</span> <span class="o">=</span> <span class="n">spatial</span><span class="o">.</span><span class="n">ConvexHull</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
@@ -794,9 +805,10 @@
 
     <span class="k">return</span> <span class="n">NewCoords</span><span class="p">,</span> <span class="n">NewConn</span>
 
-<div class="viewcode-block" id="GiftWrapping">
-<a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.GiftWrapping.html#mymesh.delaunay.GiftWrapping">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">GiftWrapping</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">IncludeCollinear</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="GiftWrapping2d">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.GiftWrapping2d.html#mymesh.delaunay.GiftWrapping2d">[docs]</a>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">GiftWrapping2d</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">IncludeCollinear</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gift wrapping algorithm for computing the convex hull of a set of 2D points.</span>
 
@@ -805,63 +817,169 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    NodeCoords : array_like</span>
-<span class="sd">        List of 2D point coordinates</span>
+<span class="sd">        Array of 2D point coordinates</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Hull : np.ndarray</span>
-<span class="sd">        List of point indices that form the convex hull, in counterclockwise order</span>
+<span class="sd">        Node connectivity of convex hull edges (shaoe=(m,2))</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
 
-    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;At least three points are required.&#39;</span>
-    <span class="k">if</span> <span class="n">NodeCoords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">Points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;GiftWrapping is only valid for points on a plane, the third dimension is ignored.&#39;</span><span class="p">)</span>
-        <span class="n">Points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[:,:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
 
-    <span class="n">sortidx</span> <span class="o">=</span> <span class="n">Points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">Points</span> <span class="o">=</span> <span class="n">Points</span><span class="p">[</span><span class="n">sortidx</span><span class="p">,:]</span> <span class="c1"># sorting from max y to min y (TODO:for some reason if the first point comes before the second point, there are problems)</span>
-    
-    <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Points</span><span class="p">))</span>
-    <span class="n">firstP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">Points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Minimum y coordinate point</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">firstP</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="c1"># if there are multiple points at the same min y coordinate, choose the one with the max x coordinate</span>
-        <span class="n">firstP</span> <span class="o">=</span> <span class="n">firstP</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Points</span><span class="p">[</span><span class="n">firstP</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Points</span><span class="p">[</span><span class="n">firstP</span><span class="p">,</span><span class="mi">0</span><span class="p">]))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-    <span class="n">nextP</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="n">Hull</span> <span class="o">=</span> <span class="p">[</span><span class="n">firstP</span><span class="p">]</span>
-    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">Points</span><span class="p">))</span>
-    <span class="n">mask</span><span class="p">[</span><span class="n">firstP</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># Pick the starting point offset from the min corner of the bounding box</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">.1</span>
+    <span class="c1"># p_origin = np.array([points[:,0].min(), points[:,1].min()]) - eps</span>
+    <span class="n">p0x</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">eps</span>
+    <span class="n">p0y</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">eps</span>
+
+    <span class="n">i_next</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">hull</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">thetaTotal</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">Points</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Points</span><span class="p">[</span><span class="n">Hull</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="mi">1</span><span class="p">],</span><span class="n">Points</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">Points</span><span class="p">[</span><span class="n">Hull</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">])</span> 
-    <span class="n">mask</span><span class="p">[</span><span class="n">firstP</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">thetaPrev</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">or</span> <span class="n">i_next</span> <span class="o">!=</span> <span class="n">hull</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">Theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="n">D2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">or</span> <span class="p">(</span><span class="n">k</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="n">hull</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="k">continue</span>
+            <span class="n">d1</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p0y</span>
+            <span class="n">d0</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p0x</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d0</span><span class="p">)</span> <span class="o">-</span> <span class="n">thetaTotal</span>
+            <span class="k">if</span> <span class="n">theta</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">theta</span> <span class="o">+=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+            <span class="k">if</span> <span class="n">theta</span> <span class="o">==</span> <span class="n">Theta</span><span class="p">:</span>
+                <span class="n">d2</span> <span class="o">=</span> <span class="n">d0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">d1</span><span class="o">**</span><span class="mi">2</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">IncludeCollinear</span> <span class="ow">and</span> <span class="n">d2</span> <span class="o">&lt;</span> <span class="n">D2</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">IncludeCollinear</span> <span class="ow">and</span> <span class="n">d2</span> <span class="o">&gt;</span> <span class="n">D2</span><span class="p">):</span>
+                    <span class="c1"># if same angle, use closer point for collinear or furthest point</span>
+                    <span class="n">Theta</span> <span class="o">=</span> <span class="n">theta</span>
+                    <span class="n">i_next</span> <span class="o">=</span> <span class="n">i</span>
+                    <span class="n">D2</span> <span class="o">=</span> <span class="n">d2</span>
 
-    <span class="k">while</span> <span class="n">nextP</span> <span class="o">!=</span> <span class="n">firstP</span><span class="p">:</span>
-
-        <span class="n">idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">theta</span> <span class="o">==</span> <span class="n">theta</span><span class="o">.</span><span class="n">min</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idxs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">theta</span> <span class="o">&lt;</span> <span class="n">Theta</span><span class="p">:</span>
+                <span class="n">D2</span> <span class="o">=</span> <span class="n">d0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">d1</span><span class="o">**</span><span class="mi">2</span>
+                <span class="n">Theta</span> <span class="o">=</span> <span class="n">theta</span>
+                <span class="n">i_next</span> <span class="o">=</span> <span class="n">i</span>
+                
+        <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">hull</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_next</span><span class="p">)</span>
+            <span class="c1"># Point deletion optimization</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="c1"># calculate angles to the first hull point</span>
+                <span class="n">d1</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">points</span><span class="p">[</span><span class="n">hull</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">d0</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">points</span><span class="p">[</span><span class="n">hull</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d0</span><span class="p">)</span>
+                <span class="n">thetas</span><span class="p">[</span><span class="n">thetas</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+            <span class="k">elif</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">mask</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">thetas</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">thetas</span><span class="p">[</span><span class="n">i_next</span><span class="p">]</span>
+                <span class="n">mask</span><span class="p">[</span><span class="n">hull</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># this is a bit dumb, but need to keep the start unmarked</span>
             
-            <span class="c1"># Check for collinear vertices on the boundary</span>
-            <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Points</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="n">mask</span><span class="p">][</span><span class="n">idxs</span><span class="p">]]</span> <span class="o">-</span> <span class="n">Points</span><span class="p">[</span><span class="n">Hull</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">IncludeCollinear</span><span class="p">:</span>
-                <span class="c1"># includes closest point first</span>
-                <span class="n">idx</span> <span class="o">=</span> <span class="n">idxs</span><span class="p">[</span><span class="n">dists</span><span class="o">.</span><span class="n">argmin</span><span class="p">()]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Skip to furthest point</span>
-                <span class="n">idx</span> <span class="o">=</span> <span class="n">idxs</span><span class="p">[</span><span class="n">dists</span><span class="o">.</span><span class="n">argmax</span><span class="p">()]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="n">idxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">thetaTotal</span> <span class="o">+=</span> <span class="n">theta</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-        <span class="n">nextP</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">mask</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
-        <span class="n">mask</span><span class="p">[</span><span class="n">nextP</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">Hull</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nextP</span><span class="p">)</span>
-        <span class="c1"># Polar coordinate angles of all (non-hull) points, centered at the most recently added hull point</span>
-        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">Points</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Points</span><span class="p">[</span><span class="n">Hull</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="mi">1</span><span class="p">],</span><span class="n">Points</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">Points</span><span class="p">[</span><span class="n">Hull</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">thetaTotal</span>
-        <span class="n">theta</span><span class="p">[</span><span class="n">theta</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
-
-    <span class="n">Hull</span> <span class="o">=</span> <span class="n">sortidx</span><span class="p">[</span><span class="n">Hull</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
-    <span class="n">HullConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">Hull</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">Hull</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)])</span>
+            <span class="n">thetaTotal</span> <span class="o">+=</span> <span class="n">Theta</span>
+            <span class="k">if</span> <span class="n">thetaTotal</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">:</span>
+                <span class="n">thetaTotal</span> <span class="o">=</span> <span class="n">thetaTotal</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            
+        <span class="c1"># mask[i_next] = 0</span>
+        <span class="c1"># p_origin = points[i_next]</span>
+        <span class="n">p0x</span><span class="p">,</span> <span class="n">p0y</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">i_next</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">i_next</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">hull</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hull</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">HullConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">hull</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">hull</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
     <span class="k">return</span> <span class="n">HullConn</span></div>
+
+
+<div class="viewcode-block" id="QuickHull2d">
+<a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.QuickHull2d.html#mymesh.delaunay.QuickHull2d">[docs]</a>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">QuickHull2d</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    QuickHull algorithm for computing the convex hull of a set of 2D points.</span>
+
+<span class="sd">    :cite:`Barber1996`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    NodeCoords : array_like</span>
+<span class="sd">        Array of 2D point coordinates</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Hull : np.ndarray</span>
+<span class="sd">        Node connectivity of convex hull edges (shape=(m,2))</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">minx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">maxx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">mins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">minx</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">maxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">maxx</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">mins</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">mins</span><span class="p">,</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">maxs</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">maxs</span><span class="p">,</span><span class="mi">1</span><span class="p">])]</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))</span>
+    <span class="n">low</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">high</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">indices</span><span class="p">[</span><span class="n">low</span><span class="p">],</span> <span class="n">indices</span><span class="p">[</span><span class="n">p1</span><span class="p">]</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">p1</span><span class="p">],</span> <span class="n">indices</span><span class="p">[</span><span class="n">low</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">p2</span> <span class="o">==</span> <span class="n">low</span><span class="p">:</span>
+        <span class="n">indices</span><span class="p">[</span><span class="n">high</span><span class="p">],</span> <span class="n">indices</span><span class="p">[</span><span class="n">p1</span><span class="p">]</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">p1</span><span class="p">],</span> <span class="n">indices</span><span class="p">[</span><span class="n">high</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">indices</span><span class="p">[</span><span class="n">high</span><span class="p">],</span> <span class="n">indices</span><span class="p">[</span><span class="n">p2</span><span class="p">]</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">p2</span><span class="p">],</span> <span class="n">indices</span><span class="p">[</span><span class="n">high</span><span class="p">]</span>
+    <span class="n">low</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">high</span> <span class="o">-=</span> <span class="mi">1</span>
+
+    <span class="n">stack</span> <span class="o">=</span> <span class="p">[(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)]</span>
+    <span class="n">hull</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">mind</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">maxd</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">max_idx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">min_idx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">l</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="c1"># l, h are working versions of low and high</span>
+        <span class="n">h</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">vx</span><span class="p">,</span> <span class="n">vy</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">p2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">points</span><span class="p">[</span><span class="n">p1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">p2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">points</span><span class="p">[</span><span class="n">p1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">norm_denom</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">vy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="o">-</span><span class="n">vy</span><span class="o">*</span><span class="n">norm_denom</span><span class="p">,</span> <span class="n">vx</span><span class="o">*</span><span class="n">norm_denom</span>
+        
+        <span class="k">while</span> <span class="n">l</span> <span class="o">!=</span> <span class="n">h</span><span class="p">:</span>
+            <span class="n">pt_idx</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">pt_idx</span> <span class="o">==</span> <span class="n">p1</span> <span class="ow">or</span> <span class="n">pt_idx</span> <span class="o">==</span> <span class="n">p2</span><span class="p">:</span>
+                <span class="n">dist</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">l</span><span class="o">+=</span><span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="p">((</span><span class="n">points</span><span class="p">[</span><span class="n">pt_idx</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">points</span><span class="p">[</span><span class="n">p1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">pt_idx</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">points</span><span class="p">[</span><span class="n">p1</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">points</span><span class="p">[</span><span class="n">pt_idx</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">points</span><span class="p">[</span><span class="n">p2</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">pt_idx</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">points</span><span class="p">[</span><span class="n">p2</span><span class="p">,</span><span class="mi">1</span><span class="p">])):</span>
+                <span class="n">dist</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">l</span><span class="o">+=</span><span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># signed distance</span>
+                <span class="n">dist</span> <span class="o">=</span> <span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">pt_idx</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">points</span><span class="p">[</span><span class="n">p1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">nx</span> <span class="o">+</span> <span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">pt_idx</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">points</span><span class="p">[</span><span class="n">p1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">ny</span>
+            <span class="k">if</span> <span class="n">dist</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">:</span>
+                <span class="c1"># positive distance, move index to high</span>
+                <span class="n">indices</span><span class="p">[</span><span class="n">l</span><span class="p">],</span> <span class="n">indices</span><span class="p">[</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">h</span><span class="p">],</span> <span class="n">indices</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
+                <span class="n">h</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">dist</span> <span class="o">&gt;</span> <span class="n">maxd</span><span class="p">:</span>
+                    <span class="n">maxd</span> <span class="o">=</span> <span class="n">dist</span>
+                    <span class="n">max_idx</span> <span class="o">=</span> <span class="n">pt_idx</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># negative distance, move index to low</span>
+                <span class="n">l</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="n">mind</span><span class="p">:</span>
+                    <span class="n">mind</span> <span class="o">=</span> <span class="n">dist</span>
+                    <span class="n">min_idx</span> <span class="o">=</span> <span class="n">pt_idx</span>
+
+        <span class="k">if</span> <span class="n">max_idx</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">p1</span><span class="p">,</span> <span class="n">max_idx</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">high</span><span class="p">))</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">max_idx</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">high</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hull</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">p2</span><span class="p">,</span> <span class="n">p1</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">min_idx</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">p2</span><span class="p">,</span> <span class="n">min_idx</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">l</span><span class="p">))</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">min_idx</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">l</span><span class="p">))</span>
+
+        <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>  
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hull</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FanTriangulation">
@@ -935,7 +1053,7 @@
         
 <div class="viewcode-block" id="BowyerWatson2d">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.delaunay.BowyerWatson2d.html#mymesh.delaunay.BowyerWatson2d">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">BowyerWatson2d</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">nsample</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">BowyerWatson2d</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Bowyer-Watson algorithm for 2D Delaunay triangulation</span>
 
@@ -992,15 +1110,27 @@
     
     <span class="n">d</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mesh2dmesh</span><span class="p">()</span>
 
-    <span class="n">d</span> <span class="o">=</span> <span class="n">_bowyer_watson_loop_2d</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">nsample</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">_bowyer_watson_loop_2d</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
 
-    <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">NodeConn</span>
-    <span class="n">Super</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">NodeConn</span> <span class="o">==</span> <span class="n">nPts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> \
-        <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">NodeConn</span> <span class="o">==</span> <span class="p">(</span><span class="n">nPts</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> \
-        <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">NodeConn</span> <span class="o">==</span> <span class="p">(</span><span class="n">nPts</span><span class="o">+</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">NodeConn</span><span class="p">[</span><span class="o">~</span><span class="n">Super</span><span class="p">]</span>
+    <span class="c1"># Remove super triangle</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">removeElems</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">nPts</span><span class="o">+</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">removeElems</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">nPts</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">removeElems</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">nPts</span><span class="p">))</span>
+    <span class="c1"># Insert constraints</span>
+    <span class="k">if</span> <span class="n">Constraints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">NodeLabels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">NodeLabels</span><span class="p">[</span><span class="n">Constraints</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">Constraints</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">_insert_segment_2d</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">segment</span><span class="p">)</span>
+
+    <span class="c1"># NodeConn = d.NodeConn.copy()</span>
+    <span class="c1"># Super = np.any(NodeConn == nPts, axis=1) | \</span>
+    <span class="c1">#     np.any(NodeConn == (nPts+1), axis=1) | \</span>
+    <span class="c1">#     np.any(NodeConn == (nPts+2), axis=1)</span>
+    <span class="c1"># NodeConn = NodeConn[~Super]</span>
     
-    <span class="k">return</span> <span class="n">NodeConn</span></div>
+    <span class="k">return</span> <span class="n">d</span><span class="o">.</span><span class="n">NodeConn</span></div>
 
 
 <div class="viewcode-block" id="BowyerWatson3d">
@@ -1344,7 +1474,7 @@
 <span class="c1"># from numba import objmode</span>
 <span class="c1"># import time</span>
 <span class="nd">@try_njit</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="s1">&#39;always&#39;</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_bowyer_watson_loop_2d</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">nsample</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_bowyer_watson_loop_2d</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">nsample</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="c1"># with objmode(walk_time=&#39;float64&#39;): walk_time = 0</span>
     <span class="c1"># with objmode(bcavity_time=&#39;float64&#39;): bcavity_time = 0</span>
     <span class="c1"># with objmode(dcavity_time=&#39;float64&#39;): dcavity_time = 0</span>
@@ -1526,6 +1656,188 @@
         <span class="n">visited</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_t_id</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">bad_triangles</span><span class="p">,</span> <span class="n">cavity_edges</span>
 
+<span class="nd">@try_njit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_insert_segment_2d</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">segment</span><span class="p">):</span>
+    <span class="c1"># Other constraint edges should be marked by labeling their nodes with D.NodeLabels[i] = 1</span>
+    <span class="n">n0</span><span class="p">,</span> <span class="n">n1</span> <span class="o">=</span> <span class="n">segment</span>
+    <span class="n">elems</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">getElemConn</span><span class="p">(</span><span class="n">n0</span><span class="p">)</span>
+
+    <span class="n">flip_queue</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">next_elem</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="c1"># Find first edge intersection:</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elems</span><span class="p">:</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">e</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">n0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="n">n1</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">==</span> <span class="n">n1</span><span class="p">:</span>
+                <span class="c1"># segment is already in the mesh</span>
+                <span class="k">return</span> <span class="n">D</span>
+            <span class="k">if</span> <span class="n">segment_intersect2d</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n0</span><span class="p">],</span> 
+                                    <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n1</span><span class="p">],</span> 
+                                    <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">b</span><span class="p">],</span> 
+                                    <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">c</span><span class="p">]):</span>
+                <span class="c1"># intersection - (b, c) will need to be flipped</span>
+                <span class="n">next_elem</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">get_TriEdgeNeighbor</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+                <span class="n">prev_edge</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+                <span class="n">flip_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prev_edge</span><span class="p">)</span>
+                <span class="k">break</span>
+        <span class="k">elif</span> <span class="n">b</span> <span class="o">==</span> <span class="n">n0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">n1</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">==</span> <span class="n">n1</span><span class="p">:</span>
+                <span class="c1"># segment is already in the mesh</span>
+                <span class="k">return</span> <span class="n">D</span>
+            <span class="k">if</span> <span class="n">segment_intersect2d</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n0</span><span class="p">],</span> 
+                                    <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n1</span><span class="p">],</span> 
+                                    <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> 
+                                    <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">a</span><span class="p">]):</span>
+                <span class="c1"># intersection - (c, a) will need to be flipped</span>
+                <span class="n">next_elem</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">get_TriEdgeNeighbor</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+                <span class="n">prev_edge</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+                <span class="n">flip_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prev_edge</span><span class="p">)</span>
+                <span class="k">break</span>
+        <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="n">n0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">n1</span> <span class="ow">or</span> <span class="n">b</span> <span class="o">==</span> <span class="n">n1</span><span class="p">:</span>
+                <span class="c1"># segment is already in the mesh</span>
+                <span class="k">return</span> <span class="n">D</span>
+            <span class="k">if</span> <span class="n">segment_intersect2d</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n0</span><span class="p">],</span> 
+                                    <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n1</span><span class="p">],</span> 
+                                    <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> 
+                                    <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">b</span><span class="p">]):</span>
+                <span class="c1"># intersection - (a, b) will need to be flipped</span>
+                <span class="n">next_elem</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">get_TriEdgeNeighbor</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+                <span class="n">prev_edge</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+                <span class="n">flip_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prev_edge</span><span class="p">)</span>
+                <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">next_elem</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># the intersected edge has no neighbor - this should be an impossible scenario for properly defined mesh</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Segment intersects mesh boundary - unexpected scenario&#39;</span><span class="p">)</span>
+    <span class="c1"># Walk from the first element to the other end of the segment, finding all intersections</span>
+    <span class="k">while</span> <span class="n">next_elem</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">next_elem</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">n1</span> <span class="o">==</span> <span class="n">a</span> <span class="ow">or</span> <span class="n">n1</span> <span class="o">==</span> <span class="n">b</span> <span class="ow">or</span> <span class="n">n1</span> <span class="o">==</span> <span class="n">c</span><span class="p">:</span>
+            <span class="c1"># This element contains the other end of the segment, terminate search</span>
+            <span class="k">break</span>
+
+        <span class="c1"># set n = node opposite the edge, the two segments to check are (n, s1) and (n,s2)</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">prev_edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">prev_edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="c1"># a is the node opposite the previous edge</span>
+            <span class="n">s1</span> <span class="o">=</span> <span class="n">b</span>
+            <span class="n">s2</span> <span class="o">=</span> <span class="n">c</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="k">elif</span> <span class="n">b</span> <span class="o">!=</span> <span class="n">prev_edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">b</span> <span class="o">!=</span> <span class="n">prev_edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="c1"># b is the node opposite the previous edge</span>
+            <span class="n">s1</span> <span class="o">=</span> <span class="n">c</span>
+            <span class="n">s2</span> <span class="o">=</span> <span class="n">a</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="k">elif</span> <span class="n">c</span> <span class="o">!=</span> <span class="n">prev_edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">!=</span> <span class="n">prev_edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="c1"># c is the node opposite the previous edge</span>
+            <span class="n">s1</span> <span class="o">=</span> <span class="n">a</span>
+            <span class="n">s2</span> <span class="o">=</span> <span class="n">b</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">c</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;This shouldn&#39;t happen&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">segment_intersect2d</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n0</span><span class="p">],</span> 
+                                <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n1</span><span class="p">],</span> 
+                                <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">s1</span><span class="p">],</span> 
+                                <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n</span><span class="p">]):</span>
+            <span class="c1"># intersection - (s1, n) must be flipped</span>
+            <span class="n">next_elem</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">get_TriEdgeNeighbor</span><span class="p">(</span><span class="n">next_elem</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">prev_edge</span> <span class="o">=</span> <span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">flip_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prev_edge</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># intersection - (s2, n) must be flipped</span>
+            <span class="n">next_elem</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">get_TriEdgeNeighbor</span><span class="p">(</span><span class="n">next_elem</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">prev_edge</span> <span class="o">=</span> <span class="p">(</span><span class="n">s2</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">flip_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prev_edge</span><span class="p">)</span>
+
+    <span class="c1"># Perform flips to eliminate intersections</span>
+    <span class="n">new_edges</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">flip_queue</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">edge</span> <span class="o">=</span> <span class="n">flip_queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">new_edge</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">TriFlipEdge</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">new_edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># flip failed</span>
+            <span class="n">flip_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># First part of this check is probably problematic in edge cases</span>
+            <span class="c1"># without it, the intersection test says edges starting/ending at the constraint nodes intersect</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">n0</span> <span class="ow">in</span> <span class="n">new_edge</span> <span class="ow">or</span> <span class="n">n1</span> <span class="ow">in</span> <span class="n">new_edge</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">segment_intersect2d</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n0</span><span class="p">],</span> 
+                            <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n1</span><span class="p">],</span> 
+                            <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">new_edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> 
+                            <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">new_edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]]):</span>
+                <span class="n">new_edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_edge</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">flip_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_edge</span><span class="p">)</span>
+
+    <span class="c1"># Perform flips to restore Delaunay criteria where possible</span>
+    <span class="n">nswaps</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">passes</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">nswaps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">nswaps</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">passes</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">edge</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_edges</span><span class="p">):</span>
+            <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span> <span class="o">=</span> <span class="n">edge</span>
+            <span class="k">if</span> <span class="n">n1</span> <span class="o">==</span> <span class="n">segment</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">n2</span> <span class="o">==</span> <span class="n">segment</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">n2</span> <span class="o">==</span> <span class="n">segment</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">n1</span> <span class="o">==</span> <span class="n">segment</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeLabels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeLabels</span><span class="p">[</span><span class="n">n1</span><span class="p">]</span> <span class="o">==</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeLabels</span><span class="p">[</span><span class="n">n2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># This edge is also a constraint</span>
+                <span class="k">continue</span>
+            
+            
+            <span class="n">elems</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">get_TriEdgeConn</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">)</span>
+            
+            <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">elems</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">[</span><span class="n">elems</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+            <span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">n1</span> <span class="ow">and</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">n2</span><span class="p">:</span>
+                <span class="n">n3</span> <span class="o">=</span> <span class="n">a</span>
+            <span class="k">elif</span> <span class="n">b</span> <span class="o">!=</span> <span class="n">n1</span> <span class="ow">and</span> <span class="n">b</span> <span class="o">!=</span> <span class="n">n2</span><span class="p">:</span>
+                <span class="n">n3</span> <span class="o">=</span> <span class="n">b</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n3</span> <span class="o">=</span> <span class="n">c</span>
+
+            <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="n">n1</span> <span class="ow">and</span> <span class="n">d</span> <span class="o">!=</span> <span class="n">n2</span><span class="p">:</span>
+                <span class="n">n4</span> <span class="o">=</span> <span class="n">d</span>
+            <span class="k">elif</span> <span class="n">e</span> <span class="o">!=</span> <span class="n">n1</span> <span class="ow">and</span> <span class="n">e</span> <span class="o">!=</span> <span class="n">n2</span><span class="p">:</span>
+                <span class="n">n4</span> <span class="o">=</span> <span class="n">e</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n4</span> <span class="o">=</span> <span class="n">f</span>
+
+            <span class="k">if</span> <span class="n">circumcircle</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> 
+                            <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">b</span><span class="p">],</span> 
+                            <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> 
+                            <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n4</span><span class="p">])</span> <span class="ow">or</span> \
+                <span class="n">circumcircle</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">d</span><span class="p">],</span> 
+                                <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">e</span><span class="p">],</span> 
+                                <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> 
+                                <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n3</span><span class="p">]):</span>
+                <span class="c1"># delaunay condition not satisfied</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">convex2d</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n1</span><span class="p">,</span><span class="n">n3</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span><span class="n">n4</span><span class="p">]),:]):</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># perform flip </span>
+                <span class="c1"># NOTE: if I in-lined the convexity test I wouldn&#39;t need to repeat the orientation tests</span>
+                <span class="n">D</span><span class="o">.</span><span class="n">removeElems</span><span class="p">(</span><span class="n">elems</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">orient2d</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n3</span><span class="p">],</span> <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n4</span><span class="p">],</span> <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n1</span><span class="p">]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n1</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n3</span><span class="p">]))</span>
+
+                <span class="k">if</span> <span class="n">orient2d</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n3</span><span class="p">],</span> <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n4</span><span class="p">],</span> <span class="n">D</span><span class="o">.</span><span class="n">raw_NodeCoords</span><span class="p">[</span><span class="n">n2</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n2</span><span class="p">]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">D</span><span class="o">.</span><span class="n">addElem</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n2</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n3</span><span class="p">]))</span>
+                
+                <span class="n">new_edges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">)</span>
+                <span class="n">nswaps</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">D</span>
 
 <span class="c1"># TODO: Traversals in 3d probably won&#39;t work right because half-face pairs can&#39;t </span>
 <span class="c1"># necessarily be obtained just by reversing the order</span>
@@ -1605,6 +1917,181 @@
             <span class="n">cavity_edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">bad_tets</span><span class="p">),</span> <span class="n">cavity_edges</span>
 
+<span class="c1">## Predicates ##</span>
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="s1">&#39;always&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">orient2d</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Two dimensional orientation test. </span>
+<span class="sd">    Determines whether three points in the plane are clockwise, counterclockwise, or colinear.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : np.ndarray</span>
+<span class="sd">        Two dimensional coordinates of the first point (shape=(2,))</span>
+<span class="sd">    b : np.ndarray</span>
+<span class="sd">        Two dimensional coordinates of the second point (shape=(2,))</span>
+<span class="sd">    c : np.ndarray</span>
+<span class="sd">        Two dimensional coordinates of the third point (shape=(2,))</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    o : float</span>
+<span class="sd">        Cross product of (b-a) x (c-a). ``o &lt; 0`` indicates clockwise, </span>
+<span class="sd">        ``o &gt; 0`` indicates counterclockwise, ``o == 0`` indicates colinear.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="c1"># Cross product u x v between u = b - a and v = c - a</span>
+    <span class="n">o</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="c1"># o &gt; 0 -&gt; CCW</span>
+    <span class="c1"># o = 0 -&gt; colinear</span>
+    <span class="c1"># o &lt; 0 -&gt; CW</span>
+    <span class="k">return</span> <span class="n">o</span>
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="s1">&#39;always&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">circumcircle</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Two dimensional point in triangular circumcircle test.</span>
+<span class="sd">    Tests if the point d is in the circumcircle of triangle abc</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : np.ndarray</span>
+<span class="sd">        Two dimensional coordinates of the first point of the triangle (shape=(2,))</span>
+<span class="sd">    b : np.ndarray</span>
+<span class="sd">        Two dimensional coordinates of the second point of the triangle (shape=(2,))</span>
+<span class="sd">    c : np.ndarray</span>
+<span class="sd">        Two dimensional coordinates of the third point of the triangle (shape=(2,))</span>
+<span class="sd">    d : _type_</span>
+<span class="sd">        Two dimensional coordinates of the point to be compared to the circumcircle</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if point d is in the circumcircle of triangle abc</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="c1"># manual determinant of matrix [[A,B,C],[D,E,F],[G,H,I]]</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="n">D</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="n">G</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="n">det</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="p">(</span><span class="n">E</span><span class="o">*</span><span class="n">I</span><span class="o">-</span><span class="n">F</span><span class="o">*</span><span class="n">H</span><span class="p">)</span> <span class="o">-</span> <span class="n">B</span><span class="o">*</span><span class="p">(</span><span class="n">D</span><span class="o">*</span><span class="n">I</span><span class="o">-</span><span class="n">F</span><span class="o">*</span><span class="n">G</span><span class="p">)</span> <span class="o">+</span> <span class="n">C</span><span class="o">*</span><span class="p">(</span><span class="n">D</span><span class="o">*</span><span class="n">H</span><span class="o">-</span><span class="n">E</span><span class="o">*</span><span class="n">G</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">det</span> <span class="o">&gt;</span> <span class="mi">0</span> 
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="s1">&#39;always&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convex2d</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Two dimensional convexity test.</span>
+<span class="sd">    Determines whether n points form a strictly convex hull. </span>
+<span class="sd">    The presence of three collinear points is considered not strictly convex.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    points : np.ndarray</span>
+<span class="sd">        Two dimensional point coordinates for n &gt; 2 points (shape=(n,2))</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    convex : bool</span>
+<span class="sd">        True of the points are strictly convex</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;At least 3 points are needed to test convexity&#39;</span>
+    
+    <span class="c1"># test first point</span>
+    <span class="n">o1</span> <span class="o">=</span> <span class="n">orient2d</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">o1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># collinear, not strictly convex</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">sign1</span> <span class="o">=</span> <span class="n">o1</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="c1"># test middle points</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">o2</span> <span class="o">=</span> <span class="n">orient2d</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">o2</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">sign1</span> <span class="o">!=</span> <span class="p">(</span><span class="n">o2</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="c1"># collinear or concave, not strictly convex</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="c1"># test second-to-last segment</span>
+    <span class="n">o2</span> <span class="o">=</span> <span class="n">orient2d</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">o2</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">sign1</span> <span class="o">!=</span> <span class="p">(</span><span class="n">o2</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="c1"># collinear or concave, not strictly convex</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">o2</span> <span class="o">=</span> <span class="n">orient2d</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">o2</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">sign1</span> <span class="o">!=</span> <span class="p">(</span><span class="n">o2</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="c1"># collinear or concave, not strictly convex</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+<span class="nd">@try_njit</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="s1">&#39;always&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">segment_intersect2d</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+    <span class="c1"># segment a b intersection with segment c d</span>
+
+    <span class="n">ux</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">uy</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">vx</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">vy</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># orientation test 1 (c vs ab)</span>
+    <span class="n">o1</span> <span class="o">=</span> <span class="n">ux</span><span class="o">*</span><span class="n">vy</span> <span class="o">-</span> <span class="n">vx</span><span class="o">*</span><span class="n">uy</span>
+    <span class="k">if</span> <span class="n">o1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># c collinear with ab</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">and</span>  \
+            <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="n">wx</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">wy</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># orientation test 2 (d vs ab)</span>
+    <span class="n">o2</span> <span class="o">=</span> <span class="n">ux</span><span class="o">*</span><span class="n">wy</span> <span class="o">-</span> <span class="n">wx</span><span class="o">*</span><span class="n">uy</span>
+    <span class="k">if</span> <span class="n">o2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># d collinear with ab</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">and</span>  \
+            <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="p">((</span><span class="n">o2</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">o1</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">o2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">o1</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)):</span>
+        <span class="c1"># c and d on the same side of ab</span>
+        <span class="k">return</span> <span class="kc">False</span> 
+    
+    <span class="n">qx</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">qy</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">rx</span> <span class="o">=</span> <span class="o">-</span><span class="n">vx</span>
+    <span class="n">ry</span> <span class="o">=</span> <span class="o">-</span><span class="n">vy</span>
+
+    <span class="c1"># orientation test 3 (a vs cd)</span>
+    <span class="n">o3</span> <span class="o">=</span> <span class="n">qx</span><span class="o">*</span><span class="n">ry</span> <span class="o">-</span> <span class="n">rx</span><span class="o">*</span><span class="n">qy</span>
+    <span class="k">if</span> <span class="n">o3</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># a collinear with cd</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">and</span>  \
+            <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    
+    <span class="n">sx</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">sy</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> 
+
+    <span class="c1"># orientation test 4 (b vs cd)</span>
+    <span class="n">o4</span> <span class="o">=</span> <span class="n">qx</span><span class="o">*</span><span class="n">sy</span> <span class="o">-</span> <span class="n">sx</span><span class="o">*</span><span class="n">qy</span>
+    <span class="k">if</span> <span class="n">o4</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># b collinear with cd</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="ow">and</span>  \
+            <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="k">if</span> <span class="p">((</span><span class="n">o4</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">o3</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">o4</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">o3</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)):</span>
+        <span class="c1"># a and b on the same side of cd</span>
+        <span class="k">return</span> <span class="kc">False</span> 
+
+    <span class="k">return</span> <span class="kc">True</span>
+
 </pre></div>
 
                 </article>
@@ -1634,8 +2121,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1669,7 +2156,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
 </p></div>
       
     </div>

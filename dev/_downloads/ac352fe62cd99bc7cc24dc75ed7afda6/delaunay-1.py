@@ -44,8 +44,6 @@ delaunay.Triangle(points)
 
 N = 3
 for i,n in enumerate(npoints):
-    points = np.random.rand(n, 2)
-
     # BowyerWatson
     if i < 2 or bowyer_watson_avg[-1] < 5:
         reps = []

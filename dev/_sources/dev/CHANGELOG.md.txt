@@ -5,6 +5,9 @@
 
 ### Feat
 
+- **delaunay.ConvexHull**: revamp GiftWrapping and add QuickHull for 2D convex hulls
+- **delaunay**: Add support for 2D constrained Delaunay triangulation
+- **mesh.dmesh**: add NodeLabels, additional methods
 - **improvement.Improve**: update TetImprove to Improve, add tests
 - **mesh.plot**: add optional input for title
 - **contour**: add voxel_mode option to SurfaceMesh and TetMesh
@@ -15,6 +18,7 @@
 
 ### Fix
 
+- **mesh**: fix labels in mesh2dmesh conversion
 - **improvement.SmartLaplacianSmoothing**: fix bug for TangentialSurface=False
 - **delaunay.Triangle**: fix inputs to handle constraints more reliably
 - **converter.im2voxel**: fix bug in im2voxel

@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
 
     <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -61,12 +61,13 @@
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'theory/delaunay';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Improvement" href="improvement.html" />
@@ -74,14 +75,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
-
+  <body data-default-mode="light">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
@@ -113,7 +118,7 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
   <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
@@ -187,23 +192,13 @@
   </a>
 </li>
 
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button"
-                data-bs-toggle="dropdown" aria-expanded="false"
-                aria-controls="pst-nav-more-links">
-                    More
-                </button>
-                <ul id="pst-nav-more-links" class="dropdown-menu">
-                    
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../dev.html">
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
     Development
   </a>
 </li>
 
-                </ul>
-            </li>
-            
   </ul>
 </nav></div>
       
@@ -365,7 +360,14 @@
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
         <div class="sidebar-primary-item">
+
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
@@ -373,6 +375,7 @@
 <li class="toctree-l1"><a class="reference internal" href="contour.html">Contour</a></li>
 <li class="toctree-l1"><a class="reference internal" href="curvature.html">Curvature</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Delaunay Triangulation</a></li>
+
 <li class="toctree-l1"><a class="reference internal" href="improvement.html">Improvement</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="octree.html">Octree</a></li>
@@ -443,9 +446,9 @@
 <section id="bowyer-watson">
 <h2>Bowyer-Watson<a class="headerlink" href="#bowyer-watson" title="Link to this heading">#</a></h2>
 <p>See <a class="reference internal" href="../generated/submodules/mymesh.delaunay.BowyerWatson2d.html#mymesh.delaunay.BowyerWatson2d" title="mymesh.delaunay.BowyerWatson2d"><code class="xref py py-func docutils literal notranslate"><span class="pre">BowyerWatson2d()</span></code></a>, <a class="reference internal" href="../generated/submodules/mymesh.delaunay.BowyerWatson3d.html#mymesh.delaunay.BowyerWatson3d" title="mymesh.delaunay.BowyerWatson3d"><code class="xref py py-func docutils literal notranslate"><span class="pre">BowyerWatson3d()</span></code></a></p>
-<p><span id="id1">Bowyer [<a class="reference internal" href="../guide/ref.html#id27" title="Adrian Bowyer. Computing dirichlet tessellations. Computer Journal, 24:162-166, 1981. URL: https://academic.oup.com/comjnl/article/24/2/162/338193, doi:10.1093/comjnl/24.2.162.">Bow81</a>]</span>, <span id="id2">Watson [<a class="reference internal" href="../guide/ref.html#id25" title="David F. Watson. Computing the n-dimensional delaunau tessellation with application to voronoi polytopes. Computer Journal, 24:167-172, 1981. URL: https://academic.oup.com/comjnl/article/24/2/167/338200, doi:10.1093/comjnl/24.2.167.">Wat81</a>]</span></p>
+<p><span id="id1">Bowyer [<a class="reference internal" href="../guide/ref.html#id34" title="Adrian Bowyer. Computing dirichlet tessellations. Computer Journal, 24:162-166, 1981. URL: https://academic.oup.com/comjnl/article/24/2/162/338193, doi:10.1093/comjnl/24.2.162.">Bow81</a>]</span>, <span id="id2">Watson [<a class="reference internal" href="../guide/ref.html#id32" title="David F. Watson. Computing the n-dimensional delaunau tessellation with application to voronoi polytopes. Computer Journal, 24:167-172, 1981. URL: https://academic.oup.com/comjnl/article/24/2/167/338200, doi:10.1093/comjnl/24.2.167.">Wat81</a>]</span></p>
 <p>The Bowyer-Watson algorithm was developed independently and concurrently by
-Adrian Bowyer <span id="id3">[<a class="reference internal" href="../guide/ref.html#id27" title="Adrian Bowyer. Computing dirichlet tessellations. Computer Journal, 24:162-166, 1981. URL: https://academic.oup.com/comjnl/article/24/2/162/338193, doi:10.1093/comjnl/24.2.162.">Bow81</a>]</span> and David Watson <span id="id4">[<a class="reference internal" href="../guide/ref.html#id25" title="David F. Watson. Computing the n-dimensional delaunau tessellation with application to voronoi polytopes. Computer Journal, 24:167-172, 1981. URL: https://academic.oup.com/comjnl/article/24/2/167/338200, doi:10.1093/comjnl/24.2.167.">Wat81</a>]</span> (both
+Adrian Bowyer <span id="id3">[<a class="reference internal" href="../guide/ref.html#id34" title="Adrian Bowyer. Computing dirichlet tessellations. Computer Journal, 24:162-166, 1981. URL: https://academic.oup.com/comjnl/article/24/2/162/338193, doi:10.1093/comjnl/24.2.162.">Bow81</a>]</span> and David Watson <span id="id4">[<a class="reference internal" href="../guide/ref.html#id32" title="David F. Watson. Computing the n-dimensional delaunau tessellation with application to voronoi polytopes. Computer Journal, 24:167-172, 1981. URL: https://academic.oup.com/comjnl/article/24/2/167/338200, doi:10.1093/comjnl/24.2.167.">Wat81</a>]</span> (both
 published their papers in the same issue of <em>The Computer Journal</em>). The
 algorithm is an incremental approach to n-dimensional Delaunay triangulation
 where one point is inserted at a time, pre-existing triangles whose
@@ -488,47 +491,6 @@ of points with radius being the largest distance from the center to a point</p>
     s2 -- s3 [penwidth=1, color=&quot;#d08770&quot;];
     s3 -- s1 [penwidth=1, color=&quot;#d08770&quot;];
 }" class="graphviz" /></div>
-<p>The data structure for constructing the triangulation consists of two tables
-(<code class="code docutils literal notranslate"><span class="pre">dict</span></code>) - an element table and an edge table. The element table, keyed by
-the node numbers that define the element, contain the oriented “half-edges”
-connected to each element and the edge table is keyed by edges and contains
-the element key connected to that edge. Each half-edge is connected to only one
-element, it’s “twin” has opposite numbering and is connected to a neighboring
-element, providing a structure allowing for efficient mesh traversal.</p>
-<p>The initial data structure for the super-triangle with vertices
-(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>) is:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Elements</p></th>
-<th class="head"><p>Edges</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>)</p></td>
-<td><p>(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>), (<span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>), (<span class="math notranslate nohighlight">\(p_{3^*}\)</span>, <span class="math notranslate nohighlight">\(p_{1^*}\)</span>)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Edges</p></th>
-<th class="head"><p>Element</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>)</p></td>
-<td><p>(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>)</p></td>
-</tr>
-<tr class="row-odd"><td><p>(<span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>)</p></td>
-<td><p>(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>)</p></td>
-</tr>
-<tr class="row-even"><td><p>(<span class="math notranslate nohighlight">\(p_{3^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>)</p></td>
-<td><p>(<span class="math notranslate nohighlight">\(p_{1^*}\)</span>, <span class="math notranslate nohighlight">\(p_{2^*}\)</span>, <span class="math notranslate nohighlight">\(p_{3^*}\)</span>)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
 </section>
 <section id="bowyer-watson-point-insertion">
 <h3>Bowyer-Watson: Point Insertion<a class="headerlink" href="#bowyer-watson-point-insertion" title="Link to this heading">#</a></h3>
@@ -936,9 +898,7 @@ circumcircle will lead to a tetrahedron with a positive signed volume.</p>
 <h4>Retriangulation<a class="headerlink" href="#retriangulation" title="Link to this heading">#</a></h4>
 <p>Once the cavity has been formed and the edges at the boundary of the cavity
 identified, the vertices of the cavity can be simply connected to the inserted
-point to retriangulate the cavity. Due to the oriented nature of the half-edges
-in the data structure, the triangles can be formed in a way that ensures that
-the points of every triangle are ordered counter clockwise.</p>
+point to retriangulate the cavity.</p>
 <div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
 <div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
 <div class="sd-col sd-d-flex-column docutils">
@@ -1017,6 +977,461 @@ the points of every triangle are ordered counter clockwise.</p>
 </section>
 </section>
 </section>
+<section id="convex-hull">
+<h1>Convex Hull<a class="headerlink" href="#convex-hull" title="Link to this heading">#</a></h1>
+<section id="gift-wrapping">
+<h2>Gift Wrapping<a class="headerlink" href="#gift-wrapping" title="Link to this heading">#</a></h2>
+<p><span id="id6">Jarvis [<a class="reference internal" href="../guide/ref.html#id25" title="R. A. Jarvis. On the identification of the convex hull of a finite set of points in the plane. Information Processing Letters, 2:18-21, 1973. doi:10.1016/0020-0190(73)90020-3.">Jar73</a>]</span></p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-4 sd-row-cols-xs-4 sd-row-cols-sm-4 sd-row-cols-md-4 sd-row-cols-lg-4 docutils">
+<div class="sd-col sd-d-flex-column docutils">
+<p>1</p>
+<div class="graphviz"><img src="../_images/graphviz-83a4d605cade976cdb80e07cea6a62980afd1afe.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;];
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>2</p>
+<div class="graphviz"><img src="../_images/graphviz-ae505c662a193e11fa10793b9996a529885f4086.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#5e81ac&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;];
+
+p1 -- p0 [color=&quot;#5e81ac&quot;];
+
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>3</p>
+<div class="graphviz"><img src="../_images/graphviz-b44dee837a0c65d3ed88bd702d6cdf1455ad0347.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#5e81ac&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;, color=&quot;#5e81ac&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;];
+
+p1 -- p0 [color=&quot;#5e81ac&quot;];
+p0 -- p9 [color=&quot;#5e81ac&quot;];
+p9 -- p1 [style=&quot;dashed&quot;];
+
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>4</p>
+<div class="graphviz"><img src="../_images/graphviz-f6c5f97300816fa512c1d67ac4f9b6136e3d0b19.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#5e81ac&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;, color=&quot;#5e81ac&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;, color=&quot;#bf616a&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;, color=&quot;#5e81ac&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;, color=&quot;#bf616a&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;];
+
+p1 -- p0 [color=&quot;#5e81ac&quot;];
+p0 -- p9 [color=&quot;#5e81ac&quot;];
+p9 -- p7 [color=&quot;#5e81ac&quot;];
+p7 -- p1 [style=&quot;dashed&quot;];
+
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>5</p>
+<div class="graphviz"><img src="../_images/graphviz-aeae3bc471c7450bd0c095bff8b3f80f1fadd8ef.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#5e81ac&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;, color=&quot;#bf616a&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;, color=&quot;#bf616a&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;, color=&quot;#5e81ac&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;, color=&quot;#bf616a&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;, color=&quot;#5e81ac&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;, color=&quot;#bf616a&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;, color=&quot;#bf616a&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;, color=&quot;#5e81ac&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;];
+
+p1 -- p0 [color=&quot;#5e81ac&quot;];
+p0 -- p9 [color=&quot;#5e81ac&quot;];
+p9 -- p7 [color=&quot;#5e81ac&quot;];
+p7 -- p13 [color=&quot;#5e81ac&quot;];
+p13 -- p1 [style=&quot;dashed&quot;];
+
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>6</p>
+<div class="graphviz"><img src="../_images/graphviz-d2bc85a99c913a9cc5b37cf9b50cb16684f2521b.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#5e81ac&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;, color=&quot;#bf616a&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;, color=&quot;#bf616a&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;, color=&quot;#bf616a&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;, color=&quot;#bf616a&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;, color=&quot;#5e81ac&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;, color=&quot;#bf616a&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;, color=&quot;#5e81ac&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;, color=&quot;#5e81ac&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;, color=&quot;#bf616a&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;, color=&quot;#bf616a&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;, color=&quot;#5e81ac&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;];
+
+p1 -- p0 [color=&quot;#5e81ac&quot;];
+p0 -- p9 [color=&quot;#5e81ac&quot;];
+p9 -- p7 [color=&quot;#5e81ac&quot;];
+p7 -- p13 [color=&quot;#5e81ac&quot;];
+p13 -- p10 [color=&quot;#5e81ac&quot;];
+p10 -- p1 [style=&quot;dashed&quot;];
+
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>7</p>
+<div class="graphviz"><img src="../_images/graphviz-272e19786b6d3479b648e7e434d2636c36772346.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#5e81ac&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;, color=&quot;#5e81ac&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;, color=&quot;#bf616a&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;, color=&quot;#bf616a&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;, color=&quot;#bf616a&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;, color=&quot;#bf616a&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;, color=&quot;#5e81ac&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;, color=&quot;#bf616a&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;, color=&quot;#5e81ac&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;, color=&quot;#5e81ac&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;, color=&quot;#bf616a&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;, color=&quot;#bf616a&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;, color=&quot;#5e81ac&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;];
+
+p1 -- p0 [color=&quot;#5e81ac&quot;];
+p0 -- p9 [color=&quot;#5e81ac&quot;];
+p9 -- p7 [color=&quot;#5e81ac&quot;];
+p7 -- p13 [color=&quot;#5e81ac&quot;];
+p13 -- p10 [color=&quot;#5e81ac&quot;];
+p10 -- p2 [color=&quot;#5e81ac&quot;];
+p2 -- p1 [style=&quot;dashed&quot;];
+
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>8</p>
+<div class="graphviz"><img src="../_images/graphviz-47eecfcd570d2c54cf7be8fd9e575505d17a4eeb.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#5e81ac&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;, color=&quot;#5e81ac&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;, color=&quot;#bf616a&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;, color=&quot;#bf616a&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;, color=&quot;#bf616a&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;, color=&quot;#bf616a&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;, color=&quot;#5e81ac&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;, color=&quot;#bf616a&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;, color=&quot;#5e81ac&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;, color=&quot;#5e81ac&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;, color=&quot;#bf616a&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;, color=&quot;#bf616a&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;, color=&quot;#5e81ac&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;, color=&quot;#5e81ac&quot;];
+
+p1 -- p0 [color=&quot;#5e81ac&quot;];
+p0 -- p9 [color=&quot;#5e81ac&quot;];
+p9 -- p7 [color=&quot;#5e81ac&quot;];
+p7 -- p13 [color=&quot;#5e81ac&quot;];
+p13 -- p10 [color=&quot;#5e81ac&quot;];
+p10 -- p2 [color=&quot;#5e81ac&quot;];
+p2 -- p14 [color=&quot;#5e81ac&quot;];
+p14 -- p1 [color=&quot;#5e81ac&quot;];
+
+}" class="graphviz" /></div>
+</div>
+</div>
+</div>
+</section>
+<section id="quickhull">
+<h2>QuickHull<a class="headerlink" href="#quickhull" title="Link to this heading">#</a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-4 sd-row-cols-xs-4 sd-row-cols-sm-4 sd-row-cols-md-4 sd-row-cols-lg-4 docutils">
+<div class="sd-col sd-d-flex-column docutils">
+<p>1</p>
+<div class="graphviz"><img src="../_images/graphviz-83a4d605cade976cdb80e07cea6a62980afd1afe.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;];
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>2</p>
+<div class="graphviz"><img src="../_images/graphviz-eac0156024e44f16f202532205704d7d86ff46a1.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#b48ead&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;, color=&quot;#b48ead&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;, color=&quot;#b48ead&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;, color=&quot;#a3be8c&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;, color=&quot;#a3be8c&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;, color=&quot;#a3be8c&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;, color=&quot;#a3be8c&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;, color=&quot;#a3be8c&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;, color=&quot;#a3be8c&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;, color=&quot;#5e81ac&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;, color=&quot;#a3be8c&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;, color=&quot;#a3be8c&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;, color=&quot;#a3be8c&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;, color=&quot;#b48ead&quot;];
+
+p10 -- p0 [style=&quot;dashed&quot;];
+
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>3</p>
+<div class="graphviz"><img src="../_images/graphviz-c1bd9bb9d67da3f615f941050858b2511d1104fa.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#b48ead&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;, color=&quot;#b48ead&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;, color=&quot;#b48ead&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;, color=&quot;#a3be8c&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;, color=&quot;#a3be8c&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;, color=&quot;#a3be8c&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;, color=&quot;#a3be8c&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;, color=&quot;#a3be8c&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;, color=&quot;#5e81ac&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;, color=&quot;#5e81ac&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;, color=&quot;#a3be8c&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;, color=&quot;#a3be8c&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;, color=&quot;#a3be8c&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;, color=&quot;#5e81ac&quot;];
+
+p10 -- p0 [style=&quot;dashed&quot;];
+p10 -- p9;
+p9 -- p0;
+p0 -- p14;
+p14 -- p10;
+
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>4</p>
+<div class="graphviz"><img src="../_images/graphviz-140b0fbc69e2159f566323912b9f6bd9dd41c87e.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#b48ead&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;, color=&quot;#5e81ac&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;, color=&quot;#b48ead&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;, color=&quot;#a3be8c&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;, color=&quot;#a3be8c&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;, color=&quot;#a3be8c&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;, color=&quot;#a3be8c&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;, color=&quot;#a3be8c&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;, color=&quot;#5e81ac&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;, color=&quot;#5e81ac&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;, color=&quot;#a3be8c&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;, color=&quot;#a3be8c&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;, color=&quot;#a3be8c&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;, color=&quot;#5e81ac&quot;];
+
+p10 -- p0 [style=&quot;dashed&quot;];
+p2 -- p10 [color=&quot;#5e81ac&quot;];
+p14 -- p2 [color=&quot;#5e81ac&quot;];
+p10 -- p9;
+p9 -- p0;
+p0 -- p14;
+
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>5</p>
+<div class="graphviz"><img src="../_images/graphviz-864604be3723286efba0fd3dfc57e72aa77cd7c9.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#5e81ac&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;, color=&quot;#5e81ac&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;, color=&quot;#BF616A&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;, color=&quot;#a3be8c&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;, color=&quot;#a3be8c&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;, color=&quot;#a3be8c&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;, color=&quot;#a3be8c&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;, color=&quot;#a3be8c&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;, color=&quot;#5e81ac&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;, color=&quot;#5e81ac&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;, color=&quot;#a3be8c&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;, color=&quot;#a3be8c&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;, color=&quot;#a3be8c&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;, color=&quot;#5e81ac&quot;];
+
+p10 -- p0 [style=&quot;dashed&quot;];
+p2 -- p10 [color=&quot;#5e81ac&quot;];
+p14 -- p2 [color=&quot;#5e81ac&quot;];
+p0 -- p1 [color=&quot;#5e81ac&quot;];
+p1 -- p14 [color=&quot;#5e81ac&quot;];
+p9 -- p0 [color=&quot;#5e81ac&quot;];
+p10 -- p9;
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>6</p>
+<div class="graphviz"><img src="../_images/graphviz-7ae83c1ce9c62f4c14ba9979874aaba352d5c88b.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#5e81ac&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;, color=&quot;#5e81ac&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;, color=&quot;#BF616A&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;, color=&quot;#BF616A&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;, color=&quot;#BF616A&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;, color=&quot;#BF616A&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;, color=&quot;#a3be8c&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;, color=&quot;#BF616A&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;, color=&quot;#5e81ac&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;, color=&quot;#5e81ac&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;, color=&quot;#BF616A&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;, color=&quot;#BF616A&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;, color=&quot;#5e81ac&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;, color=&quot;#5e81ac&quot;];
+
+p9 -- p10 [style=&quot;dashed&quot;];
+p2 -- p10 [color=&quot;#5e81ac&quot;];
+p14 -- p2 [color=&quot;#5e81ac&quot;];
+p0 -- p1 [color=&quot;#5e81ac&quot;];
+p1 -- p14 [color=&quot;#5e81ac&quot;];
+p9 -- p0 [color=&quot;#5e81ac&quot;];
+p10 -- p13;
+p13 -- p9;
+}" class="graphviz" /></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p>7</p>
+<div class="graphviz"><img src="../_images/graphviz-fec5addb7c8552ea51234d749fccca6768081614.png" alt="graph points {
+    node [shape=point, fontname=&quot;source code pro&quot;];
+    edge [style=solid];
+
+    p0 [pos=&quot;0.893, 0.332!&quot;, color=&quot;#5e81ac&quot;];
+    p1 [pos=&quot;0.821, 0.182!&quot;, color=&quot;#5e81ac&quot;];
+    p2 [pos=&quot;0.108, 0.595!&quot;, color=&quot;#5e81ac&quot;];
+    p3 [pos=&quot;0.530, 0.419!&quot;, color=&quot;#BF616A&quot;];
+    p4 [pos=&quot;0.335, 0.623!&quot;, color=&quot;#BF616A&quot;];
+    p5 [pos=&quot;0.438, 0.736!&quot;, color=&quot;#BF616A&quot;];
+    p6 [pos=&quot;0.518, 0.579!&quot;, color=&quot;#BF616A&quot;];
+    p7 [pos=&quot;0.645, 0.990!&quot;, color=&quot;#5e81ac&quot;];
+    p8 [pos=&quot;0.820, 0.413!&quot;, color=&quot;#BF616A&quot;];
+    p9 [pos=&quot;0.876, 0.824!&quot;, color=&quot;#5e81ac&quot;];
+    p10 [pos=&quot;0.054, 0.719!&quot;, color=&quot;#5e81ac&quot;];
+    p11 [pos=&quot;0.802, 0.736!&quot;, color=&quot;#BF616A&quot;];
+    p12 [pos=&quot;0.709, 0.541!&quot;, color=&quot;#BF616A&quot;];
+    p13 [pos=&quot;0.125, 0.958!&quot;, color=&quot;#5e81ac&quot;];
+    p14 [pos=&quot;0.403, 0.217!&quot;, color=&quot;#5e81ac&quot;];
+
+p2 -- p10 [color=&quot;#5e81ac&quot;];
+p14 -- p2 [color=&quot;#5e81ac&quot;];
+p0 -- p1 [color=&quot;#5e81ac&quot;];
+p1 -- p14 [color=&quot;#5e81ac&quot;];
+p9 -- p0 [color=&quot;#5e81ac&quot;];
+p10 -- p13 [color=&quot;#5e81ac&quot;];
+p13 -- p7 [color=&quot;#5e81ac&quot;];
+p7 -- p9 [color=&quot;#5e81ac&quot;];
+}" class="graphviz" /></div>
+</div>
+</div>
+</div>
+</section>
+</section>
 
 
                 </article>
@@ -1063,8 +1478,9 @@ the points of every triangle are ordered counter clockwise.</p>
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Delaunay Triangulation</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bowyer-watson">Bowyer-Watson</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bowyer-watson-initialization">Bowyer-Watson: Initialization</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bowyer-watson-point-insertion">Bowyer-Watson: Point Insertion</a><ul class="nav section-nav flex-column">
@@ -1077,16 +1493,24 @@ the points of every triangle are ordered counter clockwise.</p>
 </ul>
 </li>
 </ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#convex-hull">Convex Hull</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gift-wrapping">Gift Wrapping</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quickhull">QuickHull</a></li>
+</ul>
+</li>
+</ul>
+
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/theory/delaunay.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/theory/delaunay.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -1101,8 +1525,8 @@ the points of every triangle are ordered counter clockwise.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1136,7 +1560,7 @@ the points of every triangle are ordered counter clockwise.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
 </p></div>
       
     </div>

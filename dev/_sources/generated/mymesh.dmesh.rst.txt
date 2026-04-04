@@ -29,6 +29,7 @@ Properties
             dmesh.NNode
             dmesh.NodeConn
             dmesh.NodeCoords
+            dmesh.NodeLabels
             dmesh.raw_NodeConn
             dmesh.raw_NodeCoords
 
@@ -42,10 +43,13 @@ Methods
         :toctree:
 
     
+                dmesh.TriFlipEdge
                 dmesh.addElem
                 dmesh.addElemConn
                 dmesh.addNodes
                 dmesh.getElemConn
+                dmesh.get_TriEdgeConn
+                dmesh.get_TriEdgeNeighbor
                 dmesh.removeElem
                 dmesh.removeElemConn
                 dmesh.removeElems
