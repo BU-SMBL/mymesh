@@ -125,18 +125,19 @@ jobs:
           jupyter-sphinx \
           setuptools \
           sphinx-design \
-          sphinx-tabs\
-          myst-parser\
+          sphinx-tabs \
+          myst-parser \
           pillow \
           jupyter_rfb \
           triangle \
           pyvista \
-          trimesh[easy]
+          trimesh[easy]\
+          py-cpuinfo
         # Install vispy last
         pip install vispy
     - name: Install package
       shell: bash -l {0}
-      run: pip install -e .[all]
+      run: pip install -e .[all,test]
     - name: Verify System Setup
       shell: bash -l {0}
       run: |
