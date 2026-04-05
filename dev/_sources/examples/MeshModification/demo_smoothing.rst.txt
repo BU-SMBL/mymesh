@@ -69,7 +69,6 @@ We'll use the `Stanford bunny <https://graphics.stanford.edu/data/3Dscanrep/>`_ 
 
  .. code-block:: none
 
-    RFBOutputContext()
 
     Identifying mesh nodes...Done
         
@@ -130,11 +129,9 @@ of the overall geometry
     Identifying boundary nodes...
             Identifying boundary...Done
             Done
-            RFBOutputContext()
-
+        
     Identifying mesh nodes...Done
-            RFBOutputContext()
-
+        
     Identifying mesh nodes...Done
         
 
@@ -192,11 +189,9 @@ smoothing moves nodes only in the plane tangent to the surface.
         
             Calculating surface element normals...Done
             Done
-    RFBOutputContext()
 
     Identifying mesh nodes...Done
-            RFBOutputContext()
-
+        
     Identifying mesh nodes...Done
         
 
@@ -250,11 +245,9 @@ and geometries.
 
  .. code-block:: none
 
-    RFBOutputContext()
 
     Identifying mesh nodes...Done
-            RFBOutputContext()
-
+        
     Identifying mesh nodes...Done
         
 
@@ -263,7 +256,7 @@ and geometries.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 13.860 seconds)
+   **Total running time of the script:** (0 minutes 15.927 seconds)
 
 
 .. _sphx_glr_download_examples_MeshModification_demo_smoothing.py:

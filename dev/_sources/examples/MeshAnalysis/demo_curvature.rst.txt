@@ -134,10 +134,6 @@ are theoretically both equal to the inverse of the radius of the sphere.
 
     /home/runner/work/mymesh/mymesh/src/mymesh/curvature.py:501: NumbaPerformanceWarning: np.dot() is faster on contiguous arrays, called on (Array(float64, 2, 'F', False, aligned=True), Array(float64, 2, 'A', False, aligned=True))
       MaxPrincipalDirection = np.dot(np.linalg.inv(R[:3,:3]), np.append(x[:,np.argmax(v)],0)[:,None])[:,0]
-    RFBOutputContext()
-    RFBOutputContext()
-    RFBOutputContext()
-    RFBOutputContext()
 
 
 
@@ -272,18 +268,16 @@ calculations.
         
             Calculating surface element normals...Done
             Done
-    RFBOutputContext()
 
     Identifying mesh nodes...Done
-            RFBOutputContext()
-
+        
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 12.307 seconds)
+   **Total running time of the script:** (1 minutes 18.185 seconds)
 
 
 .. _sphx_glr_download_examples_MeshAnalysis_demo_curvature.py:
