@@ -283,7 +283,7 @@ calculations.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 32.962 seconds)
+   **Total running time of the script:** (1 minutes 12.307 seconds)
 
 
 .. _sphx_glr_download_examples_MeshAnalysis_demo_curvature.py:
