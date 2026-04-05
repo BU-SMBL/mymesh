@@ -3,6 +3,43 @@
 
 ## Unreleased
 
+### Feat
+
+- **delaunay.ConvexHull**: revamp GiftWrapping and add QuickHull for 2D convex hulls
+- **delaunay**: Add support for 2D constrained Delaunay triangulation
+- **mesh.dmesh**: add NodeLabels, additional methods
+- **improvement.Improve**: update TetImprove to Improve, add tests
+- **mesh.plot**: add optional input for title
+- **contour**: add voxel_mode option to SurfaceMesh and TetMesh
+- **tree**: Add KDTree query_knn
+- **tree**: add KDtree and KNN search for octree
+- **rays**: add PintsInBox, PointsInBox2D
+- **QuadtreeNode**: set up preliminary nearest neighbor search
+
+### Fix
+
+- **mesh**: fix labels in mesh2dmesh conversion
+- **improvement.SmartLaplacianSmoothing**: fix bug for TangentialSurface=False
+- **delaunay.Triangle**: fix inputs to handle constraints more reliably
+- **converter.im2voxel**: fix bug in im2voxel
+- **improvement.SmartLaplacianSmoothing**: update and speed up smart laplacian smoothing
+- update dependencies
+- **primitives.Revolve**: fix occasional overlapping elements
+- **contour.MarchingCubesImage**: fix bug in cleanup
+- **__init__**: Update optional numba logic, export dmesh
+- **improvement**: update Contract, Split, Flip to new dmesh class, other bug fixes
+- **delaunay.BowyerWatson2d**: major efficiency improvements
+- **mymesh.dmesh**: convert from jitclass to StructRef
+- **__init__**: fix urllib import
+- **utils.BaryTri**: Improve barycentric coordinate efficiency
+- **utils.identify_elem**: add pyr13 and wdg15 to identify_elem
+- **utils.Face2NodeNormal**: fix nan handling
+- **contour**: bug fix in MarchingElements
+- **image**: reduce number of unnecessary voxels going to marching cubes/tets
+- **contour**: additional efficiency improvements for contouring
+- **SurfaceMesh**: fix some options for MarchingCubes
+- **MarchingCubes**: improve efficiency
+
 ## 0.3.0 (2025-12-15)
 
 ### Feat

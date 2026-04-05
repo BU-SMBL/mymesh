@@ -10,6 +10,8 @@ import os, sys, re
 import matplotlib
 import matplotlib.pyplot as plt
 import mymesh
+import vispy
+vispy.use(app='osmesa')
 
 project = 'MyMesh'
 copyright = '2023, Timothy O. Josephson'
@@ -112,7 +114,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import mymesh
 from mymesh import *
-visualize.set_vispy_backend(preference='PyQt6')
+visualize.set_vispy_backend(preference='osmesa')
 '''
 
 # graphviz_dot = r"C:\Program Files\Graphviz\bin\neato.exe"

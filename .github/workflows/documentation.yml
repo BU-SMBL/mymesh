@@ -34,76 +34,50 @@ jobs:
     - name: Prepare System Environment
       shell: bash -l {0}
       run: |
-        # opengl system libraries
-        sudo apt-get update
-        # Add Qt repository
-        sudo add-apt-repository ppa:oibaf/graphics-drivers
-        sudo apt-get update
-        sudo apt-get -y install \
-          libglu1-mesa-dev \
-          libgl1-mesa-dev \
+        sudo apt-get update -qq
+
+        # Mesa OpenGL for VisPy software rendering
+        sudo apt-get install -y \
           libgl1-mesa-dri \
           libgl1-mesa-glx \
+          libglu1-mesa-dev \
           libosmesa6-dev \
-          mesa-common-dev \
-          libxi-dev \
-          libglfw3-dev \
-          libgles2-mesa-dev \
-          libsdl2-2.0-0 \
           mesa-utils \
-          libxkbcommon-dev \
-          libxkbcommon-x11-dev \
+          xvfb
+
+        # XCB/X11 runtime libs that PyQt6's bundled Qt needs to link against
+        sudo apt-get install -y \
+          libxkbcommon0 \
+          libxkbcommon-x11-0 \
           libxcb1 \
-          libxcb1-dev \
           libxcb-randr0 \
           libxcb-render-util0 \
           libxcb-xinerama0 \
-          libxcb-icccm4-dev \
-          libxcb-image0-dev \
+          libxcb-icccm4 \
+          libxcb-image0 \
           libxcb-keysyms1 \
-          libxcb-cursor0 \
-          libegl1-mesa \
-          x11-utils \
-          xvfb
+          libxcb-cursor0
 
-        # Install Qt6 development packages
-        sudo apt-get install -y \
-          qt6-base-dev \
-          qt6-base-private-dev \
-          libqt6opengl6-dev \
-          qt6-declarative-dev \
-          qt6-tools-dev \
-          qt6-tools-private-dev \
-          libqt6core6 \
-          libqt6gui6 \
-          libqt6opengl6 \
-          libqt6widgets6
-
-        # Create symlinks for Mesa drivers if they're in a different location
-        sudo mkdir -p /usr/lib/dri
-        sudo ln -s /usr/lib/x86_64-linux-gnu/dri/swrast_dri.so /usr/lib/dri/swrast_dri.so
-        
-        # Start xvfb daemon with specific OpenGL configuration
-        export DISPLAY=:99.0
-        export MESA_GL_VERSION_OVERRIDE=3.3
-        export LIBGL_ALWAYS_SOFTWARE=1
-        
-        # Force use of system libstdc++
-        export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
-        
-        /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
+        # Start Xvfb virtual display
+        /sbin/start-stop-daemon --start --quiet \
+          --pidfile /tmp/custom_xvfb_99.pid --make-pidfile \
+          --background --exec /usr/bin/Xvfb \
+          -- :99 -screen 0 1400x900x24 -ac +extension GLX +render
         sleep 5
-       
-        # Create XDG runtime dir
-        export XDG_RUNTIME_DIR=/tmp/runtime-runner
-        mkdir -p $XDG_RUNTIME_DIR
-        chmod 700 $XDG_RUNTIME_DIR
-        echo "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR" >> $GITHUB_ENV
-        echo "DISPLAY=:99.0" >> $GITHUB_ENV
-        echo "MESA_GL_VERSION_OVERRIDE=3.3" >> $GITHUB_ENV
-        echo "LIBGL_ALWAYS_SOFTWARE=1" >> $GITHUB_ENV
-        echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-        echo "QT_QPA_PLATFORM=offscreen" >> $GITHUB_ENV
+
+        # XDG runtime dir (required by Qt)
+        mkdir -p /tmp/runtime-runner
+        chmod 700 /tmp/runtime-runner
+
+        # Persist env vars for subsequent steps
+        {
+          echo "DISPLAY=:99.0"
+          echo "LIBGL_ALWAYS_SOFTWARE=1"
+          echo "MESA_GL_VERSION_OVERRIDE=3.3"
+          echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+          echo "XDG_RUNTIME_DIR=/tmp/runtime-runner"
+          echo "QT_QPA_PLATFORM=offscreen"
+        } >> $GITHUB_ENV
     - name: Install Python dependencies
       shell: bash -l {0}
       run: |
@@ -149,7 +123,27 @@ jobs:
       shell: bash -l {0}
       run: |
         export DISPLAY=:99.0
-        python -c "import vispy; vispy.use(app='PyQt6'); print(vispy.sys_info())"
+        python -c "import vispy; vispy.use(app='osmesa'); print(vispy.sys_info())"
+    - name: Debug rendering environment
+      shell: bash -l {0}
+      run: |
+        pip show vispy
+        glxinfo | grep -E "OpenGL|renderer|version"
+        # ls -la /usr/lib/dri/swrast_dri.so
+        python -c "
+        import vispy
+        vispy.use(app='osmesa')
+        from vispy import app, scene
+        
+        canvas = scene.SceneCanvas(size=(400,400), show=False, bgcolor='red')        
+        canvas.update()
+        app.process_events()
+        app.process_events()
+        img = canvas.render()
+        print('render shape:', img.shape)
+        print('alpha channel sample:', img[::50,::50,3])   # should be 255 if working
+        print('min/max RGBA:', img.min(), img.max())        # max should be 255 if working
+        "
     - name: Install Graphviz
       shell: bash -l {0}
       run: |

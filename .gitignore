@@ -11,6 +11,7 @@ docs/source/generated/
 docs/source/examples/*
 docs/source/sg_execution_times.rst
 docs/build/
+docs/jupyter_execute
 src/mymesh.egg-info/
 docs/source/jupyterlite_contents
 cov.xml
