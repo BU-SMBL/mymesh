@@ -61,7 +61,7 @@ By providing an easily usable interface to both high-level and low-level functio
 # Research impact statement
 
 `mymesh` was originally developed in support of research within the Skeletal Mechanobiology and Biomechanics Lab at Boston University. 
-It was used extensively in the scaffold design optimization research by @Josephson2024b and is currently being used within multiple labs and institutions (e.g. @Lim2026, @Mtchedlishvili2026), for various ongoing projects including vertebral modeling, hip fracture modeling, growth modeling of skeletal tissue, and analysis of objects and biological tissues imaged using micro-computed tomography (μCT). 
+It was used extensively in the scaffold design optimization research by @Josephson2024b and is currently being used within multiple labs and institutions (e.g. @Lim2026, @Mtchedlishvili2026), for various ongoing projects including vertebral modeling, hip fracture modeling [@Olowu2026], growth modeling of skeletal tissue, and analysis of objects and biological tissues imaged using micro-computed tomography (μCT). 
 `mymesh` has proven useful in a variety of research applications, well beyond those that inspired its original development, and we expect it to remain a valuable tool in future research efforts.  
 
 # Software design
