@@ -373,6 +373,5 @@ System Information
     print(f"CPU: {cpu_info['brand_raw']}")  
     print("CPU Physical Cores:", psutil.cpu_count(logical=False))
     cpufreq = psutil.cpu_freq()
-    print(f"CPU Frequency Range: {cpufreq.min/1000:.2f} - {cpufreq.max/1000:.2f} GHz")
     print(f"Available Memory: {svmem.available/(1024**3):.1f}/{svmem.total/(1024**3):.1f} GB")
     print("*"*40)
