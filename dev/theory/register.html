@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -36,7 +36,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
     <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -55,13 +55,14 @@
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=4ea706d9"></script>
     <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'theory/register';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.17.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -92,7 +93,9 @@
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -474,21 +477,21 @@ As such, it requires an objective function (a way to score the similarity/distan
 </section>
 <section id="iterative-closest-point-icp">
 <h2>Iterative Closest Point (ICP)<a class="headerlink" href="#iterative-closest-point-icp" title="Link to this heading">#</a></h2>
-<p>Reference: <span id="id1">Besl and McKay [<a class="reference internal" href="../guide/ref.html#id16" title="Paul J. Besl and Neil D. McKay. A method for registration of 3-d shapes. IEEE Transactions on Pattern Analysis and Machine Intelligence, 14:239-256, 1992. doi:10.1109/34.121791.">BM92</a>]</span></p>
+<p>Reference: <span id="id1">Besl and McKay [<a class="reference internal" href="../guide/ref.html#id18" title="Paul J. Besl and Neil D. McKay. A method for registration of 3-d shapes. IEEE Transactions on Pattern Analysis and Machine Intelligence, 14:239-256, 1992. doi:10.1109/34.121791.">BM92</a>]</span></p>
 <p>The iterative closest point algorithm is a classic and popular method for rigid registration of point sets.</p>
 <p>The ICP algorithm involves the repetition of two key steps:
 1. Identifying the “closest point” correspondences; and
 2. Minimizing the distance between corresponding points.</p>
 <section id="minimizing-the-distance-between-corresponding-points">
 <h3>Minimizing the distance between corresponding points<a class="headerlink" href="#minimizing-the-distance-between-corresponding-points" title="Link to this heading">#</a></h3>
-<p>Reference: <span id="id2">Arun <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id14" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-squares fitting of two 3-d point sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9:698-700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span></p>
+<p>Reference: <span id="id2">Arun <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id16" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-squares fitting of two 3-d point sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9:698-700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span></p>
 <p>Once pairs of corresponding points have been identified, the squared error between a set of <span class="math notranslate nohighlight">\(N\)</span> fixed points (<span class="math notranslate nohighlight">\(p^f = \{p_i^f\}\)</span>) and a corresponding set of <span class="math notranslate nohighlight">\(N\)</span> moving points (<span class="math notranslate nohighlight">\(p^m = \{p_i^m\}\)</span>) is written:</p>
 <div class="math notranslate nohighlight">
 \[\Sigma^2 = \sum_{i=1}^{N} ||p_i^f - (\mathbf{R} p_i^m + \mathbf{T})||^2\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathbf{R}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{T}\)</span> are rotation and translation matrices, respectively.
 The objective is to find <span class="math notranslate nohighlight">\(\mathbf{R}, \ \mathbf{T}\)</span> that minimize the squared error: <span class="math notranslate nohighlight">\(\underset{\mathbf{R}, \ \mathbf{T}}{\min}\Sigma^2\)</span>.
 Before attempting to minimize this squared error, we can simplify the problem by separating translation and rotation.
-At the least squares minimum of <span class="math notranslate nohighlight">\(\Sigma^2\)</span>, the centroid of the moving points (<span class="math notranslate nohighlight">\(c(p^m) = \frac{1}{N}\sum_{i=1}^{N}p_i^m\)</span>) will be equal to that of the fixed points (<span class="math notranslate nohighlight">\(c(p^f) = \frac{1}{N}\sum_{i=1}^{N}p_i^f\)</span>) <span id="id3">[<a class="reference internal" href="../guide/ref.html#id14" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-squares fitting of two 3-d point sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9:698-700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span>, meaning the rotation can first be solved by centering both sets of points at the origin by subtracting the centroids from the points:</p>
+At the least squares minimum of <span class="math notranslate nohighlight">\(\Sigma^2\)</span>, the centroid of the moving points (<span class="math notranslate nohighlight">\(c(p^m) = \frac{1}{N}\sum_{i=1}^{N}p_i^m\)</span>) will be equal to that of the fixed points (<span class="math notranslate nohighlight">\(c(p^f) = \frac{1}{N}\sum_{i=1}^{N}p_i^f\)</span>) <span id="id3">[<a class="reference internal" href="../guide/ref.html#id16" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-squares fitting of two 3-d point sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9:698-700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span>, meaning the rotation can first be solved by centering both sets of points at the origin by subtracting the centroids from the points:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}q_i^f =  p_i^f - c(p^f), \\
 q_i^m = p_i^m - c(p^m),\end{split}\]</div>
@@ -498,7 +501,7 @@ q_i^m = p_i^m - c(p^m),\end{split}\]</div>
 <p>The translation can subsequently be determined as</p>
 <div class="math notranslate nohighlight">
 \[\mathbf{T} = c(p^f) - \mathbf{R}c(p^m).\]</div>
-<p>The rotation can be found by performing <a class="reference external" href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> of the cross covariance matrix (see <span id="id4">Arun <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id14" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-squares fitting of two 3-d point sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9:698-700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span> for derivation)</p>
+<p>The rotation can be found by performing <a class="reference external" href="https://en.wikipedia.org/wiki/Singular_value_decomposition">singular value decomposition</a> of the cross covariance matrix (see <span id="id4">Arun <em>et al.</em> [<a class="reference internal" href="../guide/ref.html#id16" title="K. S. Arun, T. S. Huang, and S. D. Blostein. Least-squares fitting of two 3-d point sets. IEEE Transactions on Pattern Analysis and Machine Intelligence, PAMI-9:698-700, 1987. doi:10.1109/TPAMI.1987.4767965.">AHB87</a>]</span> for derivation)</p>
 <div class="math notranslate nohighlight">
 \[H = \sum_{i=1}^{N} q_i^m (q_i^f)^t = \mathbf{U \Sigma V}^t.\]</div>
 <p>The rotation <span class="math notranslate nohighlight">\(\mathbf{R}\)</span> is then</p>
@@ -621,8 +624,8 @@ q_i^m = p_i^m - c(p^m),\end{split}\]</div>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -656,7 +659,7 @@ q_i^m = p_i^m - c(p^m),\end{split}\]</div>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
 </p></div>
       
     </div>

@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -36,7 +36,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
     <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -55,12 +55,13 @@
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=4ea706d9"></script>
     <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'verification/contour';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.17.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -91,7 +92,9 @@
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -437,60 +440,22 @@
                   
   <section id="contour">
 <h1>Contour<a class="headerlink" href="#contour" title="Link to this heading">#</a></h1>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">mymesh</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mymesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">image</span><span class="p">,</span> <span class="n">contour</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pyvista</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pv</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-
-<span class="n">img</span> <span class="o">=</span> <span class="n">mymesh</span><span class="o">.</span><span class="n">demo_image</span><span class="p">(</span><span class="n">scalefactor</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
-<span class="n">threshold</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.337891</span><span class="p">,</span> <span class="mf">0.337891</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-
-<span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="n">Smcimage</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mc&#39;</span><span class="p">)</span>
-<span class="n">mcimage_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">tic</span>
-
-<span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="n">Smc</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;original&#39;</span><span class="p">)</span>
-<span class="n">mc_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">tic</span>
-
-<span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="n">Smc33</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mc33&#39;</span><span class="p">)</span>
-<span class="n">mc33_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">tic</span>
-
-<span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="n">Smtimage</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mt&#39;</span><span class="p">)</span>
-<span class="n">mtimage_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">tic</span>
-
-<span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="n">vox</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">VoxelMesh</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
-<span class="n">vox_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">tic</span>
-
-<span class="n">grid</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">ImageData</span><span class="p">(</span>
-    <span class="n">dimensions</span><span class="o">=</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
-    <span class="n">spacing</span><span class="o">=</span><span class="n">h</span><span class="p">,</span>
-    <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
-<span class="p">)</span>
-
-<span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="n">Spvmc</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">contour</span><span class="p">([</span><span class="n">threshold</span><span class="p">],</span> <span class="n">img</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;marching_cubes&#39;</span><span class="p">)</span>
-<span class="n">pvmc_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">tic</span>
-
-<span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="n">Spvmc</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">contour</span><span class="p">([</span><span class="n">threshold</span><span class="p">],</span> <span class="n">img</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;flying_edges&#39;</span><span class="p">)</span>
-<span class="n">pvfe_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">tic</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">([</span><span class="s1">&#39;mc</span><span class="se">\n</span><span class="s1">(image)&#39;</span><span class="p">,</span> <span class="s1">&#39;mc&#39;</span><span class="p">,</span> <span class="s1">&#39;mc33&#39;</span><span class="p">,</span> <span class="s1">&#39;mt&#39;</span><span class="p">,</span> <span class="s1">&#39;pv_mc&#39;</span><span class="p">,</span> <span class="s1">&#39;pv_fe&#39;</span><span class="p">,</span> <span class="s1">&#39;voxel&#39;</span><span class="p">],</span> <span class="p">[</span><span class="n">mcimage_time</span><span class="p">,</span> <span class="n">mc_time</span><span class="p">,</span> <span class="n">mc33_time</span><span class="p">,</span> <span class="n">mtimage_time</span><span class="p">,</span> <span class="n">pvmc_time</span><span class="p">,</span> <span class="n">pvfe_time</span><span class="p">,</span> <span class="n">vox_time</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Time (s)&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
+<p>Contouring methods are used to extract surfaces from scalar fields (e.g. images or implicit functions).
+MyMesh has several different contouring methods with different trade-offs and capabilities.
+Here, the efficiency of these methods are compared against each other and against contouring methods provided in <a class="reference external" href="https://docs.pyvista.org/">PyVista</a> (VTK) <span id="id1">[<a class="reference internal" href="../guide/ref.html#id26" title="C. Sullivan and Alexander Kaszynski. Pyvista: 3d plotting and mesh analysis through a streamlined interface for the visualization toolkit (vtk). Journal of Open Source Software, 4:1450, 5 2019. URL: https://www.doi.org/10.21105/joss.01450, doi:10.21105/joss.01450.">SK19</a>]</span>.</p>
+<p>See also: <a class="reference internal" href="../theory/contour.html#theory-contour"><span class="std std-ref">Contour</span></a>, <a class="reference internal" href="../generated/mymesh.contour.html#module-mymesh.contour" title="mymesh.contour"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mymesh.contour</span></code></a>, <a class="reference internal" href="../generated/mymesh.contour.html#contouring"><span class="std std-ref">Contouring</span></a></p>
+<section id="d-surface-contouring">
+<h2>3D Surface Contouring<a class="headerlink" href="#d-surface-contouring" title="Link to this heading">#</a></h2>
+<p>Contouring of a unit sphere in a uniform grid</p>
 <p>(<a class="reference download internal" download="" href="../_downloads/0eddfcdb2b42d7496bcc29b0269d59d3/contour-1.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
 <figure class="align-default">
 <img alt="../_images/contour-1.png" class="plot-directive" src="../_images/contour-1.png" />
 </figure>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Marching tetrahedra operates on six times as many elements for the same number of points due to the cube-to-tetrahedra decomposition (which isn’t included in the measurement of computational time).</p>
+</div>
+</section>
 <section id="system-information">
 <h2>System Information<a class="headerlink" href="#system-information" title="Link to this heading">#</a></h2>
 <div class="jupyter_cell docutils container">
@@ -501,8 +466,7 @@ Python Version: 3.10.20
 Numpy Version: 2.2.6
 CPU: AMD EPYC 7763 64-Core Processor
 CPU Physical Cores: 2
-CPU Frequency Range: 0.00 - 0.00 GHz
-Available Memory: 3.4/15.6 GB
+Available Memory: 2.7/15.6 GB
 ****************************************
 </pre></div>
 </div>
@@ -558,6 +522,7 @@ Available Memory: 3.4/15.6 GB
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#d-surface-contouring">3D Surface Contouring</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#system-information">System Information</a></li>
 </ul>
   </nav></div>
@@ -584,8 +549,8 @@ Available Memory: 3.4/15.6 GB
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -619,7 +584,7 @@ Available Memory: 3.4/15.6 GB
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
 </p></div>
       
     </div>

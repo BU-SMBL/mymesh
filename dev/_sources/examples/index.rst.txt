@@ -5,6 +5,10 @@ Examples
 
 Examples highlighting the capabilities of MyMesh
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 
@@ -22,6 +26,10 @@ Mesh Analysis Examples
 ======================
 
 Examples for analyzing meshes.
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
 
 
 .. raw:: html
@@ -74,6 +82,10 @@ Mesh Generation Examples
 ========================
 
 Examples for different methods of generating meshes.
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
 
 
 .. raw:: html
@@ -160,6 +172,10 @@ Mesh Modification Examples
 ==========================
 
 Examples for modifying/manipulating meshes.
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
 
 
 .. raw:: html

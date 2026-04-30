@@ -93,14 +93,14 @@ for i,n in enumerate(npoints):
 
 # Plot
 plt.errorbar(npoints[:len(quickhull_avg)], quickhull_avg,
-                        yerr=quickhull_std, color='blue')
+                        yerr=quickhull_std, color='#bf616a')
 plt.errorbar(npoints[:len(gift_wrapping_avg)], gift_wrapping_avg,
-                        yerr=gift_wrapping_std, color='red')
+                        yerr=gift_wrapping_std, color='#5e81ac')
 plt.errorbar(npoints[:len(gift_wrapping_no_numba_avg)],
                 gift_wrapping_no_numba_avg,
-                yerr=gift_wrapping_no_numba_std, color='pink')
+                yerr=gift_wrapping_no_numba_std, color='#ebcb8b')
 plt.errorbar(npoints[:len(scipy_avg)], scipy_avg,
-            yerr=scipy_std, color='green')
+            yerr=scipy_std, color='#a3be8c', linestyle='dotted')
 plt.xscale('log')
 plt.yscale('log')
 plt.legend(['mymesh QuickHull', 'mymesh GiftWrapping', 'mymesh GiftWrapping (no numba)', 'scipy (qhull)'])

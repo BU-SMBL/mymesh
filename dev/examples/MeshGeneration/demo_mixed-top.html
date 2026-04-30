@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -36,7 +36,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=fd6457a4" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=1e1bb860" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -55,12 +55,13 @@
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=4ea706d9"></script>
     <script src="../../_static/thebelab-helper.js"></script>
+    <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/MeshGeneration/demo_mixed-top';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.17.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -91,7 +92,9 @@
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -444,12 +447,12 @@ to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="mixed-topology-tpms">
 <span id="sphx-glr-examples-meshgeneration-demo-mixed-top-py"></span><h1>Mixed-Topology TPMS<a class="headerlink" href="#mixed-topology-tpms" title="Link to this heading">#</a></h1>
-<p>Mixed-topology surfaces <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id31" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1-18, 7 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span> combine multiple implicit
+<p>Mixed-topology surfaces <span id="id1">[<a class="reference internal" href="../../guide/ref.html#id33" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1-18, 7 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span> combine multiple implicit
 functions by taking weighted sums of the functions. By controlling the weights,
 the resulting surface can be varied continuously between the set of surfaces.
 Depending on the set of surfaces, this can constitute a low-parameter,
 topology-varying design space that can be used for design optimization (as in
-<span id="id2">[<a class="reference internal" href="../../guide/ref.html#id31" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1-18, 7 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span>).</p>
+<span id="id2">[<a class="reference internal" href="../../guide/ref.html#id33" title="Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. Biomechanics and Modeling in Mechanobiology, pages 1-18, 7 2024. URL: https://link.springer.com/article/10.1007/s10237-024-01880-0, doi:10.1007/S10237-024-01880-0.">JM24</a>]</span>).</p>
 <p>Triply periodic minimal surfaces (TPMS) are particularly
 interesting subjects for a mixed-topology approach because the resultant surface
 will remain triply periodic (though not minimal) as long as the periodicities
@@ -507,14 +510,14 @@ Identifying mesh nodes...Done
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
 <p>To be specific, the implicit function TPMS representations are
 Fourier series approximations (also known as periodic nodal surfaces
-<span id="id4">[<a class="reference internal" href="../../guide/ref.html#id58" title="H. G. von Schnering and R. Nesper. Nodal surfaces of fourier series: fundamental invariants of structured matter. Zeitschrift für Physik B Condensed Matter, 83:407-412, 1991. URL: https://www.doi.org/10.1007/BF01313411, doi:10.1007/BF01313411.">vSN91</a>]</span>) and are not <em>truly</em> minimal surfaces (though they
+<span id="id4">[<a class="reference internal" href="../../guide/ref.html#id60" title="H. G. von Schnering and R. Nesper. Nodal surfaces of fourier series: fundamental invariants of structured matter. Zeitschrift für Physik B Condensed Matter, 83:407-412, 1991. URL: https://www.doi.org/10.1007/BF01313411, doi:10.1007/BF01313411.">vSN91</a>]</span>) and are not <em>truly</em> minimal surfaces (though they
 are truly triply periodic). This can be seen by measuring the surface curvature
 (<a class="reference internal" href="../../generated/mymesh.curvature.html#module-mymesh.curvature" title="mymesh.curvature"><code class="xref py py-mod docutils literal notranslate"><span class="pre">curvature</span></code></a>) and observing that the mean curvature is not zero at
 all points. Nevertheless, these are reasonably accurate and commonly used
 approximations.</p>
 </aside>
 </aside>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 8.254 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 8.223 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshgeneration-demo-mixed-top-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/188cf3c47a11ac8ef0666307cef28cf2/demo_mixed-top.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">demo_mixed-top.ipynb</span></code></a></p>
@@ -590,8 +593,8 @@ approximations.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -625,7 +628,7 @@ approximations.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
 </p></div>
       
     </div>

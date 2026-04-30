@@ -69,17 +69,17 @@ for n in npoints:
     brute_search_time.append(time.time()-tic)
 
 # Plot
-plt.loglog(npoints, qtree_build_time, color='blue', linestyle='dashed')
-plt.loglog(npoints, qtree_search_time, color='blue', linestyle='dotted')
-plt.loglog(npoints, np.add(qtree_build_time,qtree_search_time), color='blue',  linestyle='solid')
+plt.loglog(npoints, qtree_build_time, color='#5e81ac', linestyle='dashed')
+plt.loglog(npoints, qtree_search_time, color='#5e81ac', linestyle='dotted')
+plt.loglog(npoints, np.add(qtree_build_time,qtree_search_time), color='#5e81ac',  linestyle='solid')
 
-plt.loglog(npoints, kdtree_build_time, color='red', linestyle='dashed')
-plt.loglog(npoints, kdtree_search_time, color='red', linestyle='dotted')
-plt.loglog(npoints, np.add(kdtree_build_time, kdtree_search_time), color='red',  linestyle='solid')
+plt.loglog(npoints, kdtree_build_time, color='#bf616a', linestyle='dashed')
+plt.loglog(npoints, kdtree_search_time, color='#bf616a', linestyle='dotted')
+plt.loglog(npoints, np.add(kdtree_build_time, kdtree_search_time), color='#bf616a',  linestyle='solid')
 
-plt.loglog(npoints, sci_kdtree_build_time, color='green', linestyle='dashed')
-plt.loglog(npoints, sci_kdtree_search_time, color='green', linestyle='dotted')
-plt.loglog(npoints, np.add(sci_kdtree_build_time, sci_kdtree_search_time), color='green',  linestyle='solid')
+plt.loglog(npoints, sci_kdtree_build_time, color='#a3be8c', linestyle='dashed')
+plt.loglog(npoints, sci_kdtree_search_time, color='#a3be8c', linestyle='dotted')
+plt.loglog(npoints, np.add(sci_kdtree_build_time, sci_kdtree_search_time), color='#a3be8c',  linestyle='solid')
 
 plt.loglog(npoints, brute_search_time, color='black', linewidth=3)
 
