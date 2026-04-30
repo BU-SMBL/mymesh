@@ -116,10 +116,10 @@ See also: :ref:`Delaunay Triangulation`, :mod:`mymesh.delaunay`
             triangle_std.append(np.std(reps))
 
     # Plot
-    plt.errorbar(npoints[:len(bowyer_watson_avg)], bowyer_watson_avg, yerr=bowyer_watson_std, color='red')
-    plt.errorbar(npoints[:len(bowyer_watson_no_numba_avg)], bowyer_watson_no_numba_avg, yerr=bowyer_watson_no_numba_std, color='pink')
-    plt.errorbar(npoints[:len(scipy_avg)], scipy_avg, yerr=scipy_std, color='green')
-    plt.errorbar(npoints[:len(triangle_avg)], triangle_avg, yerr=triangle_std, color='purple')
+    plt.errorbar(npoints[:len(bowyer_watson_avg)], bowyer_watson_avg, yerr=bowyer_watson_std, color='#bf616a')
+    plt.errorbar(npoints[:len(bowyer_watson_no_numba_avg)], bowyer_watson_no_numba_avg, yerr=bowyer_watson_no_numba_std, color='#5e81ac')
+    plt.errorbar(npoints[:len(scipy_avg)], scipy_avg, yerr=scipy_std, color='#a3be8c', linestyle='dotted')
+    plt.errorbar(npoints[:len(triangle_avg)], triangle_avg, yerr=triangle_std, color='#ebcb8b', linestyle='dotted')
     plt.xscale('log')
     plt.yscale('log')
     plt.legend(['mymesh', 'mymesh (no numba)', 'scipy (qhull)', 'Triangle'])
@@ -220,9 +220,9 @@ See also: :ref:`Delaunay Triangulation`, :mod:`mymesh.delaunay`
             triangle_std.append(np.std(reps))
 
     # Plot
-    plt.errorbar(npoints[:len(bowyer_watson_avg)], bowyer_watson_avg, yerr=bowyer_watson_std, color='red')
-    plt.errorbar(npoints[:len(bowyer_watson_no_numba_avg)], bowyer_watson_no_numba_avg, yerr=bowyer_watson_no_numba_std, color='pink')
-    plt.errorbar(npoints[:len(triangle_avg)], triangle_avg, yerr=triangle_std, color='purple')
+    plt.errorbar(npoints[:len(bowyer_watson_avg)], bowyer_watson_avg, yerr=bowyer_watson_std, color='#bf616a')
+    plt.errorbar(npoints[:len(bowyer_watson_no_numba_avg)], bowyer_watson_no_numba_avg, yerr=bowyer_watson_no_numba_std, color='#5e81ac')
+    plt.errorbar(npoints[:len(triangle_avg)], triangle_avg, yerr=triangle_std, color='#ebcb8b', linestyle='dotted')
     plt.xscale('log')
     plt.yscale('log')
     plt.legend(['mymesh', 'mymesh (no numba)', 'Triangle'])
@@ -336,14 +336,14 @@ See also: :ref:`Delaunay Triangulation`, :mod:`mymesh.delaunay`
 
     # Plot
     plt.errorbar(npoints[:len(quickhull_avg)], quickhull_avg,
-                            yerr=quickhull_std, color='blue')
+                            yerr=quickhull_std, color='#bf616a')
     plt.errorbar(npoints[:len(gift_wrapping_avg)], gift_wrapping_avg, 
-                            yerr=gift_wrapping_std, color='red')
+                            yerr=gift_wrapping_std, color='#5e81ac')
     plt.errorbar(npoints[:len(gift_wrapping_no_numba_avg)], 
                     gift_wrapping_no_numba_avg, 
-                    yerr=gift_wrapping_no_numba_std, color='pink')
+                    yerr=gift_wrapping_no_numba_std, color='#ebcb8b')
     plt.errorbar(npoints[:len(scipy_avg)], scipy_avg, 
-                yerr=scipy_std, color='green')
+                yerr=scipy_std, color='#a3be8c', linestyle='dotted')
     plt.xscale('log')
     plt.yscale('log')
     plt.legend(['mymesh QuickHull', 'mymesh GiftWrapping', 'mymesh GiftWrapping (no numba)', 'scipy (qhull)'])

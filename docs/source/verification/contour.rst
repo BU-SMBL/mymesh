@@ -135,12 +135,12 @@ Contouring of a unit sphere in a uniform grid
 
 
     # Plot
-    plt.errorbar(npoints[:len(mc_avg)], mc_avg, yerr=mc_std, color='red')
-    plt.errorbar(npoints[:len(mc_img_avg)], mc_img_avg, yerr=mc_img_std, color='blue')
-    plt.errorbar(npoints[:len(mc33_avg)], mc33_avg, yerr=mc_img_std, color='pink')
-    plt.errorbar(npoints[:len(mt_avg)], mt_avg, yerr=mt_std, color='green')
-    plt.errorbar(npoints[:len(pvmc_avg)], pvmc_avg, yerr=pvmc_std, color='purple')
-    plt.errorbar(npoints[:len(pvfe_avg)], pvfe_avg, yerr=pvfe_std, color='black')
+    plt.errorbar(npoints[:len(mc_avg)], mc_avg, yerr=mc_std, color='#bf616a')
+    plt.errorbar(npoints[:len(mc_img_avg)], mc_img_avg, yerr=mc_img_std, color='#5e81ac')
+    plt.errorbar(npoints[:len(mc33_avg)], mc33_avg, yerr=mc_img_std, color='#ebcb8b')
+    plt.errorbar(npoints[:len(mt_avg)], mt_avg, yerr=mt_std, color='#a3be8c')
+    plt.errorbar(npoints[:len(pvmc_avg)], pvmc_avg, yerr=pvmc_std, color='#b48ead', linestyle='dotted')
+    plt.errorbar(npoints[:len(pvfe_avg)], pvfe_avg, yerr=pvfe_std, color='#2e3440', linestyle='dotted')
 
     plt.xscale('log')
     plt.yscale('log')
@@ -152,7 +152,7 @@ Contouring of a unit sphere in a uniform grid
     plt.show()
 
 .. Note::
-    Marching tetrahedra operates on six times as many elements for the same number of points do to the cube-to-tetrahedra decomposition
+    Marching tetrahedra operates on six times as many elements for the same number of points due to the cube-to-tetrahedra decomposition (which isn't included in the measurement of computational time).
 
 System Information
 ------------------
