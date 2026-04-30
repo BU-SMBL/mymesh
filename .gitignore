@@ -20,3 +20,4 @@ cov.xml
 *.db
 examples/MeshGeneration/*.png
 .coverage
+paper/jats
