@@ -1,0 +1,6 @@
+mymesh.register.dice
+====================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: dice

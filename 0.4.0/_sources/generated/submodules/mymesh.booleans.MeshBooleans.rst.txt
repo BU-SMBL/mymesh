@@ -1,0 +1,6 @@
+mymesh.booleans.MeshBooleans
+============================
+
+.. currentmodule:: mymesh.booleans
+
+.. autofunction:: MeshBooleans

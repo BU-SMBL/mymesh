@@ -1,0 +1,6 @@
+mymesh.implicit.plane
+=====================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: plane

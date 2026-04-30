@@ -1,0 +1,6 @@
+mymesh.improvement.TangentialLaplacianSmoothing
+===============================================
+
+.. currentmodule:: mymesh.improvement
+
+.. autofunction:: TangentialLaplacianSmoothing

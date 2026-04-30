@@ -1,0 +1,6 @@
+mymesh.converter.hex2edges
+==========================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: hex2edges

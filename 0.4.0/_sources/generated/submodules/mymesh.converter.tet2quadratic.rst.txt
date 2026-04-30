@@ -1,0 +1,6 @@
+mymesh.converter.tet2quadratic
+==============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: tet2quadratic

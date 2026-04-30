@@ -1,0 +1,6 @@
+mymesh.converter.hexsubdivide
+=============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: hexsubdivide

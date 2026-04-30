@@ -1,0 +1,6 @@
+mymesh.tree.TreeNode.prune
+==========================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: TreeNode.prune

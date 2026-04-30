@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.read
+=====================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.read

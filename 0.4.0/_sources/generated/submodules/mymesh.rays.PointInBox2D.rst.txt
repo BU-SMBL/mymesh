@@ -1,0 +1,6 @@
+mymesh.rays.PointInBox2D
+========================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: PointInBox2D

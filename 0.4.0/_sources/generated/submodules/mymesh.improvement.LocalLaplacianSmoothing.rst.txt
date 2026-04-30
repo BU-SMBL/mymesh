@@ -1,0 +1,6 @@
+mymesh.improvement.LocalLaplacianSmoothing
+==========================================
+
+.. currentmodule:: mymesh.improvement
+
+.. autofunction:: LocalLaplacianSmoothing

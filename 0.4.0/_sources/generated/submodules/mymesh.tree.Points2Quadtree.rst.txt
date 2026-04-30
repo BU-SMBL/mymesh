@@ -1,0 +1,6 @@
+mymesh.tree.Points2Quadtree
+===========================
+
+.. currentmodule:: mymesh.tree
+
+.. autofunction:: Points2Quadtree

@@ -1,0 +1,6 @@
+mymesh.register.closest\_point\_MSE
+===================================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: closest_point_MSE

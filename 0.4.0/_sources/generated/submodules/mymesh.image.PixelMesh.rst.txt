@@ -1,0 +1,6 @@
+mymesh.image.PixelMesh
+======================
+
+.. currentmodule:: mymesh.image
+
+.. autofunction:: PixelMesh

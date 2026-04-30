@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.NEdge
+======================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.NEdge

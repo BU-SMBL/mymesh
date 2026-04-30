@@ -1,0 +1,6 @@
+mymesh.primitives.Revolve
+=========================
+
+.. currentmodule:: mymesh.primitives
+
+.. autofunction:: Revolve

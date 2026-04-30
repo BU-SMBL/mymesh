@@ -1,0 +1,6 @@
+mymesh.register.Mesh2Mesh
+=========================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: Mesh2Mesh

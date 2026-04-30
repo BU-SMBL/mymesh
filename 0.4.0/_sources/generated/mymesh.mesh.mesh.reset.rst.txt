@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.reset
+======================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.reset

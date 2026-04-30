@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.SurfConn
+=========================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.SurfConn

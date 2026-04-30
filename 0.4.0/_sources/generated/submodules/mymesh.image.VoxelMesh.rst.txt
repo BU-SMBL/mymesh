@@ -1,0 +1,6 @@
+mymesh.image.VoxelMesh
+======================
+
+.. currentmodule:: mymesh.image
+
+.. autofunction:: VoxelMesh

@@ -1,0 +1,6 @@
+mymesh.tree.OctreeNode.makeChildrenPts
+======================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: OctreeNode.makeChildrenPts

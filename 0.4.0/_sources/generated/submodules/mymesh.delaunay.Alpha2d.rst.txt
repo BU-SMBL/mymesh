@@ -1,0 +1,6 @@
+mymesh.delaunay.Alpha2d
+=======================
+
+.. currentmodule:: mymesh.delaunay
+
+.. autofunction:: Alpha2d

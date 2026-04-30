@@ -1,0 +1,6 @@
+mymesh.register.ICP
+===================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: ICP

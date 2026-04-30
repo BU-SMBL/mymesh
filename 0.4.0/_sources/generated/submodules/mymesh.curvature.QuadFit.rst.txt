@@ -1,0 +1,6 @@
+mymesh.curvature.QuadFit
+========================
+
+.. currentmodule:: mymesh.curvature
+
+.. autofunction:: QuadFit

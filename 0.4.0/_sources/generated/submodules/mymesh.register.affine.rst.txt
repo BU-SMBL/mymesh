@@ -1,0 +1,6 @@
+mymesh.register.affine
+======================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: affine

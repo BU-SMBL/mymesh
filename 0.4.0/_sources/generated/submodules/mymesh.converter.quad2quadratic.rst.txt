@@ -1,0 +1,6 @@
+mymesh.converter.quad2quadratic
+===============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: quad2quadratic

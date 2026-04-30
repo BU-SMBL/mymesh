@@ -1,0 +1,6 @@
+mymesh.register.Point2Point
+===========================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: Point2Point

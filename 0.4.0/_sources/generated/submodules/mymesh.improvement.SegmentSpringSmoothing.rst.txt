@@ -1,0 +1,6 @@
+mymesh.improvement.SegmentSpringSmoothing
+=========================================
+
+.. currentmodule:: mymesh.improvement
+
+.. autofunction:: SegmentSpringSmoothing

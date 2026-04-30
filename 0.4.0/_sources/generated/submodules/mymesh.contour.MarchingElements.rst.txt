@@ -1,0 +1,6 @@
+mymesh.contour.MarchingElements
+===============================
+
+.. currentmodule:: mymesh.contour
+
+.. autofunction:: MarchingElements

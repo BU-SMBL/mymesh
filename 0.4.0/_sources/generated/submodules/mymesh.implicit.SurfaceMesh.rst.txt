@@ -1,0 +1,6 @@
+mymesh.implicit.SurfaceMesh
+===========================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: SurfaceMesh

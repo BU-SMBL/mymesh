@@ -1,0 +1,6 @@
+mymesh.contour.MarchingTriangles
+================================
+
+.. currentmodule:: mymesh.contour
+
+.. autofunction:: MarchingTriangles

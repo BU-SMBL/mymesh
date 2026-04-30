@@ -1,0 +1,6 @@
+mymesh.register.Sh3d
+====================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: Sh3d

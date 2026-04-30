@@ -1,0 +1,6 @@
+mymesh.delaunay.QuickHull2d
+===========================
+
+.. currentmodule:: mymesh.delaunay
+
+.. autofunction:: QuickHull2d

@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.SurfNodeNeighbors
+==================================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.SurfNodeNeighbors

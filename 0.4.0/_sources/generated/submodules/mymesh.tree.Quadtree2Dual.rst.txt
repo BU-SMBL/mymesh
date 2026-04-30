@@ -1,0 +1,6 @@
+mymesh.tree.Quadtree2Dual
+=========================
+
+.. currentmodule:: mymesh.tree
+
+.. autofunction:: Quadtree2Dual

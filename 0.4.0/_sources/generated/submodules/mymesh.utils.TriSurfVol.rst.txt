@@ -1,0 +1,6 @@
+mymesh.utils.TriSurfVol
+=======================
+
+.. currentmodule:: mymesh.utils
+
+.. autofunction:: TriSurfVol

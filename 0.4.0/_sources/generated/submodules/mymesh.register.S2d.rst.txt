@@ -1,0 +1,6 @@
+mymesh.register.S2d
+===================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: S2d

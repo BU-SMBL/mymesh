@@ -1,0 +1,6 @@
+mymesh.implicit.xplane
+======================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: xplane

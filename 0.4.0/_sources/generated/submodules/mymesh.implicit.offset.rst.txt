@@ -1,0 +1,6 @@
+mymesh.implicit.offset
+======================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: offset

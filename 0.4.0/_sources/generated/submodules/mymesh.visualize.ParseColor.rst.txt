@@ -1,0 +1,6 @@
+mymesh.visualize.ParseColor
+===========================
+
+.. currentmodule:: mymesh.visualize
+
+.. autofunction:: ParseColor

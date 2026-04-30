@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.PointInNode
+====================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.PointInNode

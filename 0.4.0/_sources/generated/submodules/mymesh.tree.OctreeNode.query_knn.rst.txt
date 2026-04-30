@@ -1,0 +1,6 @@
+mymesh.tree.OctreeNode.query\_knn
+=================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: OctreeNode.query_knn

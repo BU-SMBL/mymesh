@@ -1,0 +1,754 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>References &#8212; MyMesh vdev Manual</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=1e1bb860" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=4ea706d9"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'guide/ref';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API Reference" href="../api.html" />
+    <link rel="prev" title="Using MyMesh in MATLAB" href="matlab.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="dev" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="light">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/mymesh_logo.png" class="logo__image only-light" alt="MyMesh vdev Manual - Home"/>
+    <img src="../_static/mymesh_logo.png" class="logo__image only-dark pst-js-only" alt="MyMesh vdev Manual - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="what_mesh.html">What is a mesh?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh_class.html">Working with the <code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code> class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">File Input/Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elem_types.html">Element Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="connectivity.html">Connectivity Representations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="implicit_meshing.html">Implicit Meshing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image_meshing.html">Image-based Meshing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="csg.html">Constructive Solid Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matlab.html">Using MyMesh in MATLAB</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">References</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../guide.html" class="nav-link">User Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">References</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="references">
+<h1>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h1>
+<div class="docutils container" id="id1">
+<div role="list" class="citation-list">
+<div class="citation" id="id49" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>AM05<span class="fn-bracket">]</span></span>
+<p>Tomas Akenine-Möller. Fast 3d triangle-box overlap testing. <em>ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005</em>, 2005. URL: <a class="reference external" href="https://www.doi.org/10.1145/1198555.1198747">https://www.doi.org/10.1145/1198555.1198747</a>, <a class="reference external" href="https://doi.org/10.1145/1198555.1198747">doi:10.1145/1198555.1198747</a>.</p>
+</div>
+<div class="citation" id="id16" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>AHB87<span class="fn-bracket">]</span></span>
+<p>K. S. Arun, T. S. Huang, and S. D. Blostein. Least-squares fitting of two 3-d point sets. <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, PAMI-9:698–700, 1987. <a class="reference external" href="https://doi.org/10.1109/TPAMI.1987.4767965">doi:10.1109/TPAMI.1987.4767965</a>.</p>
+</div>
+<div class="citation" id="id70" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>AL08<span class="fn-bracket">]</span></span>
+<p>Romain Aubry and Rainald Löhner. On the 'most normal' normal. <em>Communications in Numerical Methods in Engineering</em>, 24:1641–1652, 12 2008. URL: <a class="reference external" href="https://onlinelibrary.wiley.com/doi/full/10.1002/cnm.1056 https://onlinelibrary.wiley.com/doi/abs/10.1002/cnm.1056 https://onlinelibrary.wiley.com/doi/10.1002/cnm.1056">https://onlinelibrary.wiley.com/doi/full/10.1002/cnm.1056 https://onlinelibrary.wiley.com/doi/abs/10.1002/cnm.1056 https://onlinelibrary.wiley.com/doi/10.1002/cnm.1056</a>, <a class="reference external" href="https://doi.org/10.1002/cnm.1056">doi:10.1002/cnm.1056</a>.</p>
+</div>
+<div class="citation" id="id4" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BDH96<span class="fn-bracket">]</span></span>
+<p>C. Bradford Barber, David P. Dobkin, and Hannu Huhdanpaa. The quickhull algorithm for convex hulls. <em>ACM Transactions on Mathematical Software</em>, 22:469–483, 12 1996. URL: <a class="reference external" href="https://dl.acm.org/doi/10.1145/235815.235821">https://dl.acm.org/doi/10.1145/235815.235821</a>, <a class="reference external" href="https://doi.org/10.1145/235815.235821">doi:10.1145/235815.235821</a>.</p>
+</div>
+<div class="citation" id="id18" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BM92<span class="fn-bracket">]</span></span>
+<p>Paul J. Besl and Neil D. McKay. A method for registration of 3-d shapes. <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, 14:239–256, 1992. <a class="reference external" href="https://doi.org/10.1109/34.121791">doi:10.1109/34.121791</a>.</p>
+</div>
+<div class="citation" id="id67" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Blo00<span class="fn-bracket">]</span></span>
+<p>Frederic J. Blom. Considerations on the spring analogy. <em>International Journal for Numerical Methods in Fluids</em>, 32:647–668, 2000. URL: <a class="reference external" href="https://doi.org/10.1002/(SICI)1097-0363(20000330)32:6%3C647::AID-FLD979%3E3.0.CO;2-K">https://doi.org/10.1002/(SICI)1097-0363(20000330)32:6%3C647::AID-FLD979%3E3.0.CO;2-K</a>, <a class="reference external" href="https://doi.org/10.1002/(SICI)1097-0363(20000330)32:6&lt;647::AID-FLD979&gt;3.0.CO;2-K">doi:10.1002/(SICI)1097-0363(20000330)32:6&lt;647::AID-FLD979&gt;3.0.CO;2-K</a>.</p>
+</div>
+<div class="citation" id="id50" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Blo94<span class="fn-bracket">]</span></span>
+<p>Jules Bloomenthal. An implicit surface polygonizer. <em>Graphics Gems</em>, pages 324–349, 1994. <a class="reference external" href="https://doi.org/10.1016/b978-0-12-336156-1.50040-9">doi:10.1016/b978-0-12-336156-1.50040-9</a>.</p>
+</div>
+<div class="citation" id="id64" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BD02<span class="fn-bracket">]</span></span>
+<p>C. L. Bottasso and D. Detomi. A procedure for tetrahedral boundary layer mesh generation. <em>Engineering with Computers</em>, 18:66–79, 2002. <a class="reference external" href="https://doi.org/10.1007/s003660200006">doi:10.1007/s003660200006</a>.</p>
+</div>
+<div class="citation" id="id36" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Bow81<span class="fn-bracket">]</span></span>
+<p>Adrian Bowyer. Computing dirichlet tessellations. <em>Computer Journal</em>, 24:162–166, 1981. URL: <a class="reference external" href="https://academic.oup.com/comjnl/article/24/2/162/338193">https://academic.oup.com/comjnl/article/24/2/162/338193</a>, <a class="reference external" href="https://doi.org/10.1093/comjnl/24.2.162">doi:10.1093/comjnl/24.2.162</a>.</p>
+</div>
+<div class="citation" id="id22" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Cav74<span class="fn-bracket">]</span></span>
+<p>James C. Cavendish. Automatic triangulation of arbitrary planar domains for the finite element method. <em>International Journal for Numerical Methods in Engineering</em>, 8:679–696, 1974. <a class="reference external" href="https://doi.org/10.1002/nme.1620080402">doi:10.1002/nme.1620080402</a>.</p>
+</div>
+<div class="citation" id="id65" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Che95<span class="fn-bracket">]</span></span>
+<p>Ev Chernyaev. Marching cubes 33: construction of topologically correct isosurfaces. <em>Institute for High Energy Physics, Moscow, Russia,</em>, pages 1–8, 1995.</p>
+</div>
+<div class="citation" id="id24" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Dic45<span class="fn-bracket">]</span></span>
+<p>Lee R. Dice. Measures of the amount of ecologic association between species. <em>Ecology</em>, 26:297–302, 1945. URL: <a class="reference external" href="https://about.jstor.org/terms">https://about.jstor.org/terms</a>, <a class="reference external" href="https://doi.org/10.2307/1932409">doi:10.2307/1932409</a>.</p>
+</div>
+<div class="citation" id="id42" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>FTB16<span class="fn-bracket">]</span></span>
+<p>Noura Faraj, Jean Marc Thiery, and Tamy Boubekeur. Multi-material adaptive volume remesher. <em>Computers and Graphics (Pergamon)</em>, 58:150–160, 2016. URL: <a class="reference external" href="http://dx.doi.org/10.1016/j.cag.2016.05.019">http://dx.doi.org/10.1016/j.cag.2016.05.019</a>, <a class="reference external" href="https://doi.org/10.1016/j.cag.2016.05.019">doi:10.1016/j.cag.2016.05.019</a>.</p>
+</div>
+<div class="citation" id="id45" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Fre97<span class="fn-bracket">]</span></span>
+<p>Lori A. Freitag. On combining laplacian and optimization-based mesh smoothing techniques. <em>American Society of Mechanical Engineers, Applied Mechanics Division, AMD</em>, 220:37–43, 1997.</p>
+</div>
+<div class="citation" id="id21" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>GH97<span class="fn-bracket">]</span></span>
+<p>Michael Garland and Paul S. Heckbert. Surface simplification using quadric error metrics. <em>Proceedings of the 24th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1997</em>, pages 209–216, 1997. URL: <a class="reference external" href="https://www.doi.org/10.1145/258734.258849">https://www.doi.org/10.1145/258734.258849</a>, <a class="reference external" href="https://doi.org/10.1145/258734.258849">doi:10.1145/258734.258849</a>.</p>
+</div>
+<div class="citation" id="id15" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>GR09<span class="fn-bracket">]</span></span>
+<p>Christophe Geuzaine and Jean François Remacle. Gmsh: a 3-d finite element mesh generator with built-in pre- and post-processing facilities. <em>International Journal for Numerical Methods in Engineering</em>, 79:1309–1331, 9 2009. URL: <a class="reference external" href="https://onlinelibrary.wiley.com/doi/full/10.1002/nme.2579 https://onlinelibrary.wiley.com/doi/abs/10.1002/nme.2579 https://onlinelibrary.wiley.com/doi/10.1002/nme.2579">https://onlinelibrary.wiley.com/doi/full/10.1002/nme.2579 https://onlinelibrary.wiley.com/doi/abs/10.1002/nme.2579 https://onlinelibrary.wiley.com/doi/10.1002/nme.2579</a>, <a class="reference external" href="https://doi.org/10.1002/nme.2579">doi:10.1002/nme.2579</a>.</p>
+</div>
+<div class="citation" id="id71" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>GI04<span class="fn-bracket">]</span></span>
+<p>Jack Goldfeather and Victoria Interrante. A novel cubic-order algorithm for approximating principal direction vectors. <em>ACM Transactions on Graphics</em>, 23:45–63, 2004. <a class="reference external" href="https://doi.org/10.1145/966131.966134">doi:10.1145/966131.966134</a>.</p>
+</div>
+<div class="citation" id="id61" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Gol05<span class="fn-bracket">]</span></span>
+<p>Ron Goldman. Curvature formulas for implicit curves and surfaces. <em>Computer Aided Geometric Design</em>, 22:632–658, 2005. <a class="reference external" href="https://doi.org/10.1016/j.cagd.2005.06.005">doi:10.1016/j.cagd.2005.06.005</a>.</p>
+</div>
+<div class="citation" id="id29" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>HSIW96<span class="fn-bracket">]</span></span>
+<p>A. Hilton, A. J. Stoddart, J. Illingworth, and T. Windeatt. Marching triangles: range image fusion for complex object modelling. <em>IEEE International Conference on Image Processing</em>, 2:381–384, 1996. URL: <a class="reference external" href="https://doi.org/10.1109/ICIP.1996.560840">https://doi.org/10.1109/ICIP.1996.560840</a>, <a class="reference external" href="https://doi.org/10.1109/icip.1996.560840">doi:10.1109/icip.1996.560840</a>.</p>
+</div>
+<div class="citation" id="id37" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Hol10<span class="fn-bracket">]</span></span>
+<p>Elias Holmlid. Manifold contouring of an adaptively sampled distance field. <em>Chalmers Publication Library</em>, pages 37, 2010. URL: <a class="reference external" href="http://publications.lib.chalmers.se/records/fulltext/123811.pdf">http://publications.lib.chalmers.se/records/fulltext/123811.pdf</a>.</p>
+</div>
+<div class="citation" id="id32" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>HA01<span class="fn-bracket">]</span></span>
+<p>Kai Hormann and Alexander Agathos. The point in polygon problem for arbitrary polygons. <em>Computational Geometry: Theory and Applications</em>, 20:131–144, 2001. URL: <a class="reference external" href="https://www.doi.org/10.1016/S0925-7721(01)00012-8">https://www.doi.org/10.1016/S0925-7721(01)00012-8</a>, <a class="reference external" href="https://doi.org/10.1016/S0925-7721(01)00012-8">doi:10.1016/S0925-7721(01)00012-8</a>.</p>
+</div>
+<div class="citation" id="id59" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>HSW+20<span class="fn-bracket">]</span></span>
+<p>Yixin Hu, Teseo Schneider, Bolun Wang, Denis Zorin, and Daniele Panozzo. Fast tetrahedral meshing in the wild. <em>ACM Transactions on Graphics</em>, 39:18, 2020. URL: <a class="reference external" href="https://www.doi.org/10.1145/3386569.3392385">https://www.doi.org/10.1145/3386569.3392385</a>, <a class="reference external" href="https://doi.org/10.1145/3386569.3392385">doi:10.1145/3386569.3392385</a>.</p>
+</div>
+<div class="citation" id="id57" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>HZG+18<span class="fn-bracket">]</span></span>
+<p>Yixin Hu, Qingnan Zhou, Xifeng Gao, Alec Jacobson, Denis Zorin, and Daniele Panozzo. Tetrahedral meshing in the wild. <em>ACM Transactions on Graphics</em>, 2018. <a class="reference external" href="https://doi.org/10.1145/3197517.3201353">doi:10.1145/3197517.3201353</a>.</p>
+</div>
+<div class="citation" id="id27" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Jar73<span class="fn-bracket">]</span></span>
+<p>R. A. Jarvis. On the identification of the convex hull of a finite set of points in the plane. <em>Information Processing Letters</em>, 2:18–21, 1973. <a class="reference external" href="https://doi.org/10.1016/0020-0190(73)90020-3">doi:10.1016/0020-0190(73)90020-3</a>.</p>
+</div>
+<div class="citation" id="id33" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>JM24<span class="fn-bracket">]</span></span>
+<p>Timothy O. Josephson and Elise F. Morgan. Mechanobiological optimization of scaffolds for bone tissue engineering. <em>Biomechanics and Modeling in Mechanobiology</em>, pages 1–18, 7 2024. URL: <a class="reference external" href="https://link.springer.com/article/10.1007/s10237-024-01880-0">https://link.springer.com/article/10.1007/s10237-024-01880-0</a>, <a class="reference external" href="https://doi.org/10.1007/S10237-024-01880-0">doi:10.1007/S10237-024-01880-0</a>.</p>
+</div>
+<div class="citation" id="id56" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>KS08<span class="fn-bracket">]</span></span>
+<p>Bryan Matthew Klingner and Jonathan Richard Shewchuk. Aggressive tetrahedral mesh improvement. <em>Proceedings of the 16th International Meshing Roundtable, IMR 2007</em>, pages 3–23, 2008. <a class="reference external" href="https://doi.org/10.1007/978-3-540-75103-8_1">doi:10.1007/978-3-540-75103-8_1</a>.</p>
+</div>
+<div class="citation" id="id72" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>KvD92<span class="fn-bracket">]</span></span>
+<p>Jan J. Koenderink and Andrea J. van Doorn. Surface shape and curvature scales. <em>Image and Vision Computing</em>, 10:557–564, 1992. URL: <a class="reference external" href="https://www.doi.org/10.1016/0262-8856(92)90076-F">https://www.doi.org/10.1016/0262-8856(92)90076-F</a>, <a class="reference external" href="https://doi.org/10.1016/0262-8856(92)90076-F">doi:10.1016/0262-8856(92)90076-F</a>.</p>
+</div>
+<div class="citation" id="id62" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>LTH86<span class="fn-bracket">]</span></span>
+<p>David H. Laidlaw, W. Benjamin Trumbore, and John F. Hughes. Constructive solid geometry for polyhedral objects. <em>Proceedings of the 13th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1986</em>, pages 161–170, 8 1986. URL: <a class="reference external" href="https://www.doi.org/10.1145/15922.15904">https://www.doi.org/10.1145/15922.15904</a>, <a class="reference external" href="https://doi.org/10.1145/15922.15904">doi:10.1145/15922.15904</a>.</p>
+</div>
+<div class="citation" id="id58" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>LC87<span class="fn-bracket">]</span></span>
+<p>William E. Lorensen and Harvey E. Cline. Marching cubes: a high resolution 3d surface construction algorithm. <em>Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987</em>, 21:163–169, 1987. <a class="reference external" href="https://doi.org/10.1145/37401.37422">doi:10.1145/37401.37422</a>.</p>
+</div>
+<div class="citation" id="id35" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>MPR19<span class="fn-bracket">]</span></span>
+<p>Célestin Marot, Jeanne Pellerin, and Jean François Remacle. One machine, one minute, three billion tetrahedra. <em>International Journal for Numerical Methods in Engineering</em>, 117:967–990, 2019. URL: <a class="reference external" href="http://gmsh.info.">http://gmsh.info.</a>, <a class="reference external" href="https://doi.org/10.1002/nme.5987">doi:10.1002/nme.5987</a>.</p>
+</div>
+<div class="citation" id="id54" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Mol97<span class="fn-bracket">]</span></span>
+<p>Tomas Möller. Fast triangle-triangle intersection test. <em>Journal of Graphics Tools</em>, 2:25–30, 1997. URL: <a class="reference external" href="https://www.doi.org/10.1080/10867651.1997.10487472">https://www.doi.org/10.1080/10867651.1997.10487472</a>, <a class="reference external" href="https://doi.org/10.1080/10867651.1997.10487472">doi:10.1080/10867651.1997.10487472</a>.</p>
+</div>
+<div class="citation" id="id51" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>MT05<span class="fn-bracket">]</span></span>
+<p>Tomas Möller and Ben Trumbore. Fast, minimum storage ray/triangle intersection. <em>ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005</em>, pages 7823–7830, 2005. URL: <a class="reference external" href="https://www.doi.org/10.1145/1198555.1198746">https://www.doi.org/10.1145/1198555.1198746</a>, <a class="reference external" href="https://doi.org/10.1145/1198555.1198746">doi:10.1145/1198555.1198746</a>.</p>
+</div>
+<div class="citation" id="id68" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>OB01<span class="fn-bracket">]</span></span>
+<p>Y. Ohtake and A. G. Belyaev. Mesh optimization for polygonized isosurfaces. <em>Computer Graphics Forum</em>, 20:368–376, 9 2001. URL: <a class="reference external" href="https://onlinelibrary-wiley-com.ezproxy.bu.edu/doi/10.1111/1467-8659.00529">https://onlinelibrary-wiley-com.ezproxy.bu.edu/doi/10.1111/1467-8659.00529</a>, <a class="reference external" href="https://doi.org/10.1111/1467-8659.00529">doi:10.1111/1467-8659.00529</a>.</p>
+</div>
+<div class="citation" id="id66" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>OBP03<span class="fn-bracket">]</span></span>
+<p>Yutaka Ohtake, Alexander Belyaev, and Alexander Pasko. Dynamic mesh optimization for polygonized implicit surfaces with sharp features. <em>Visual Computer</em>, 19:115–126, 2003. <a class="reference external" href="https://doi.org/10.1007/s00371-002-0181-z">doi:10.1007/s00371-002-0181-z</a>.</p>
+</div>
+<div class="citation" id="id53" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>SW05<span class="fn-bracket">]</span></span>
+<p>Scott Schaefer and Joe Warren. Dual marching cubes: primal contouring of dual grids. <em>Computer Graphics Forum</em>, 24:195–201, 2005. <a class="reference external" href="https://doi.org/10.1111/j.1467-8659.2005.00843.x">doi:10.1111/j.1467-8659.2005.00843.x</a>.</p>
+</div>
+<div class="citation" id="id13" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>SML06<span class="fn-bracket">]</span></span>
+<p>Will Schroeder, Ken Martin, and Bill Lorensen. <em>The Visualization Toolkit (4th ed.)</em>. Kitware, 2006. ISBN 978-1-930934-19-1.</p>
+</div>
+<div class="citation" id="id48" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>She96<span class="fn-bracket">]</span></span>
+<p>Jonathan Richard Shewchuk. Triangle: engineering a 2d quality mesh generator and delaunay triangulator. <em>Workshop on applied computational geometry</em>, pages 203–222, 1996. URL: <a class="reference external" href="http://www.cs.cmu.edu/quake/triangle.html">http://www.cs.cmu.edu/quake/triangle.html</a>, <a class="reference external" href="https://doi.org/10.1007/bfb0014497">doi:10.1007/bfb0014497</a>.</p>
+</div>
+<div class="citation" id="id47" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Si15<span class="fn-bracket">]</span></span>
+<p>Hang Si. Tetgen, a delaunay-based quality tetrahedral mesh generator. <em>ACM Transactions on Mathematical Software</em>, 2 2015. URL: <a class="reference external" href="http://dx.doi.org/10.1145/2629697 https://dl.acm.org/doi/10.1145/2629697">http://dx.doi.org/10.1145/2629697 https://dl.acm.org/doi/10.1145/2629697</a>, <a class="reference external" href="https://doi.org/10.1145/2629697">doi:10.1145/2629697</a>.</p>
+</div>
+<div class="citation" id="id23" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Sor48<span class="fn-bracket">]</span></span>
+<p>T. Sorensen. A method of establishing groups of equal amplitude in plant sociology based on similarity of species content. <em>Det. Kong. Danske Vidensk, Selesk Biology Skr</em>, 5:1–34, 1948. URL: <a class="reference external" href="https://cir.nii.ac.jp/crid/1571135649789292416">https://cir.nii.ac.jp/crid/1571135649789292416</a>.</p>
+</div>
+<div class="citation" id="id26" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>SK19<span class="fn-bracket">]</span></span>
+<p>C. Sullivan and Alexander Kaszynski. Pyvista: 3d plotting and mesh analysis through a streamlined interface for the visualization toolkit (vtk). <em>Journal of Open Source Software</em>, 4:1450, 5 2019. URL: <a class="reference external" href="https://www.doi.org/10.21105/joss.01450">https://www.doi.org/10.21105/joss.01450</a>, <a class="reference external" href="https://doi.org/10.21105/joss.01450">doi:10.21105/joss.01450</a>.</p>
+</div>
+<div class="citation" id="id20" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Tau93<span class="fn-bracket">]</span></span>
+<p>Gabriel Taubin. Accurate algorithm for rasterizing algebraic curves. <em>Proceedings on the second ACM symposium on Solid modeling and applications</em>, pages 221–230, 1993. <a class="reference external" href="https://doi.org/10.1145/164360.164427">doi:10.1145/164360.164427</a>.</p>
+</div>
+<div class="citation" id="id19" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Tau95<span class="fn-bracket">]</span></span>
+<p>Gabriel Taubin. Curve and surface smoothing without shrinkage. <em>IEEE International Conference on Computer Vision</em>, pages 852–857, 1995. <a class="reference external" href="https://doi.org/10.1109/iccv.1995.466848">doi:10.1109/iccv.1995.466848</a>.</p>
+</div>
+<div class="citation" id="id46" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>TW98<span class="fn-bracket">]</span></span>
+<p>Grit Thürrner and Charles A. Wüthrich. Computing vertex normals from polygonal facets. <em>Journal of Graphics Tools</em>, 3:43–46, 1 1998. URL: <a class="reference external" href="https://www.tandfonline.com/doi/abs/10.1080/10867651.1998.10487487">https://www.tandfonline.com/doi/abs/10.1080/10867651.1998.10487487</a>, <a class="reference external" href="https://doi.org/10.1080/10867651.1998.10487487">doi:10.1080/10867651.1998.10487487</a>.</p>
+</div>
+<div class="citation" id="id43" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>VWS09<span class="fn-bracket">]</span></span>
+<p>Dimitris Vartziotis, Joachim Wipper, and Bernd Schwald. The geometric element transformation method for tetrahedral mesh smoothing. <em>Computer Methods in Applied Mechanics and Engineering</em>, 199:169–182, 2009. URL: <a class="reference external" href="http://www.twt-gmbh.de">http://www.twt-gmbh.de</a>, <a class="reference external" href="https://doi.org/10.1016/j.cma.2009.09.027">doi:10.1016/j.cma.2009.09.027</a>.</p>
+</div>
+<div class="citation" id="id60" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>vSN91<span class="fn-bracket">]</span></span>
+<p>H. G. von Schnering and R. Nesper. Nodal surfaces of fourier series: fundamental invariants of structured matter. <em>Zeitschrift für Physik B Condensed Matter</em>, 83:407–412, 1991. URL: <a class="reference external" href="https://www.doi.org/10.1007/BF01313411">https://www.doi.org/10.1007/BF01313411</a>, <a class="reference external" href="https://doi.org/10.1007/BF01313411">doi:10.1007/BF01313411</a>.</p>
+</div>
+<div class="citation" id="id34" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Wat81<span class="fn-bracket">]</span></span>
+<p>David F. Watson. Computing the n-dimensional delaunay tessellation with application to voronoi polytopes. <em>Computer Journal</em>, 24:167–172, 1981. URL: <a class="reference external" href="https://academic.oup.com/comjnl/article/24/2/167/338200">https://academic.oup.com/comjnl/article/24/2/167/338200</a>, <a class="reference external" href="https://doi.org/10.1093/comjnl/24.2.167">doi:10.1093/comjnl/24.2.167</a>.</p>
+</div>
+<div class="citation" id="id52" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>WBMS05<span class="fn-bracket">]</span></span>
+<p>Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley. An efficient and robust ray-box intersection algorithm. <em>ACM SIGGRAPH 2005 Courses, SIGGRAPH 2005</em>, 10:55–60, 2005. URL: <a class="reference external" href="https://www.doi.org/10.1145/1198555.1198748">https://www.doi.org/10.1145/1198555.1198748</a>, <a class="reference external" href="https://doi.org/10.1145/1198555.1198748">doi:10.1145/1198555.1198748</a>.</p>
+</div>
+<div class="citation" id="id41" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>ZBS03<span class="fn-bracket">]</span></span>
+<p>Yongjie Zhang, Chandrajit Bajaj, and Bong Soo Sohn. Adaptive and quality 3d meshing from imaging data. <em>Proceedings of the Symposium on Solid Modeling and Applications</em>, pages 286–291, 2003. <a class="reference external" href="https://doi.org/10.1145/781606.781653">doi:10.1145/781606.781653</a>.</p>
+</div>
+</div>
+</div>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="matlab.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Using MyMesh in MATLAB</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../api.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API Reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/guide/ref.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Timothy O. Josephson.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

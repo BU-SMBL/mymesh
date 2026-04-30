@@ -1,0 +1,6 @@
+mymesh.image.TetMesh
+====================
+
+.. currentmodule:: mymesh.image
+
+.. autofunction:: TetMesh

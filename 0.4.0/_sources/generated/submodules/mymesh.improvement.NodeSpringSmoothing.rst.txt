@@ -1,0 +1,6 @@
+mymesh.improvement.NodeSpringSmoothing
+======================================
+
+.. currentmodule:: mymesh.improvement
+
+.. autofunction:: NodeSpringSmoothing

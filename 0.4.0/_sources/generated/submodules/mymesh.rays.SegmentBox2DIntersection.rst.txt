@@ -1,0 +1,6 @@
+mymesh.rays.SegmentBox2DIntersection
+====================================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: SegmentBox2DIntersection

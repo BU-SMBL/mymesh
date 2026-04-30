@@ -1,0 +1,6 @@
+mymesh.tree.OctreeNode.getVertices
+==================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: OctreeNode.getVertices

@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.cleanup
+========================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.cleanup

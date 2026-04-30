@@ -1,0 +1,6 @@
+mymesh.converter.mesh2im
+========================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: mesh2im

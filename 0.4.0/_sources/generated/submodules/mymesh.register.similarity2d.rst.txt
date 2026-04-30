@@ -1,0 +1,6 @@
+mymesh.register.similarity2d
+============================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: similarity2d

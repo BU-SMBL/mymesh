@@ -1,0 +1,6 @@
+mymesh.utils.Face2NodeNormal
+============================
+
+.. currentmodule:: mymesh.utils
+
+.. autofunction:: Face2NodeNormal

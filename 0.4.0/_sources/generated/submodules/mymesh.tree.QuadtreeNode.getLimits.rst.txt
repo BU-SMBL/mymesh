@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.getLimits
+==================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.getLimits

@@ -1,0 +1,6 @@
+mymesh.register.AxisAlignPoints
+===============================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: AxisAlignPoints

@@ -1,0 +1,6 @@
+mymesh.tree.OctreeNode.clearData
+================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: OctreeNode.clearData

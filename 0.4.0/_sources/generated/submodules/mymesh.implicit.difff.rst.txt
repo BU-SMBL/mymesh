@@ -1,0 +1,6 @@
+mymesh.implicit.difff
+=====================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: difff

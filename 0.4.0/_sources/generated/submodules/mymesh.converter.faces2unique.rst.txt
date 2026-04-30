@@ -1,0 +1,6 @@
+mymesh.converter.faces2unique
+=============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: faces2unique

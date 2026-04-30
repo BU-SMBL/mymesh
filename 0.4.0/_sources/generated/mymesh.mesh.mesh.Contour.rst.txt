@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.Contour
+========================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.Contour

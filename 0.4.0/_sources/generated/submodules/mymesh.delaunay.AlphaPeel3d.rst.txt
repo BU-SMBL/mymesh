@@ -1,0 +1,6 @@
+mymesh.delaunay.AlphaPeel3d
+===========================
+
+.. currentmodule:: mymesh.delaunay
+
+.. autofunction:: AlphaPeel3d

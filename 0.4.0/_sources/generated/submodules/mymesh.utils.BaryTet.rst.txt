@@ -1,0 +1,6 @@
+mymesh.utils.BaryTet
+====================
+
+.. currentmodule:: mymesh.utils
+
+.. autofunction:: BaryTet

@@ -1,0 +1,6 @@
+mymesh.converter.wedge2edges
+============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: wedge2edges

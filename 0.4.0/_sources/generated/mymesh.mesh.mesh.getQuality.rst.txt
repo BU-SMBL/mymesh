@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.getQuality
+===========================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.getQuality
