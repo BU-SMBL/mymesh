@@ -21,7 +21,7 @@ affiliations:
  - name: Department of Mechanical Engineering, Boston University, United States
    index: 3
  
-date: 16 December 2025
+date: 19 May 2026
 bibliography: paper.bib
 
 ---
@@ -46,7 +46,7 @@ Meshes are used for a variety of purposes, including simulations (e.g. finite el
 Mesh-based representations of geometries are essential in a wide variety of research applications, and as such, there is a need for robust, efficient, and easy-to-use software for creating, analyzing, and manipulating meshes.
 There are a variety of software packages for working with and generating meshes. 
 Some are general purpose, like CGAL [@cgal], VTK [@Schroeder2006], and Gmsh [@Geuzaine2009], while others are more focused on specific tasks, such as triangular or tetrahedral mesh generation (e.g. Triangle [@Shewchuk1996] and TetGen [@Si2015], respectively). 
-In Python, most meshing packages depend on (or are direct wrappers to) one or more of these libraries, such as PyVista [@Sullivan2019] (a pythonic interface to VTK), pygalmesh (a pythonic interface to CGAL) [@Schlomer2021], nanomesh (an image-based meshing workflow tool that utilizes Triangle and TetGen) [@Smeets2022b], MeshPy (which interfaces to Triangle and TetGen), and PyMesh (which depends on CGAL, Triangle, TetGen, and others). 
+In Python, most meshing packages depend on (or are direct wrappers to) one or more of these libraries, such as PyVista [@Sullivan2019] (a Pythonic interface to VTK), pygalmesh (a Pythonic interface to CGAL) [@Schlomer2021], nanomesh (an image-based meshing workflow tool that utilizes Triangle and TetGen) [@Smeets2022b], MeshPy (which interfaces to Triangle and TetGen) [@Kloeckner2025], and PyMesh (which depends on CGAL, Triangle, TetGen, and others) [@Zhou2019]. 
 While these interfaces are useful and provide access to powerful mesh generation tools, their reliance on external dependencies can make them less easy to use and limit code readability, making it more difficult to understand how the code works. 
 TriMesh [@trimesh] stands out as a capable, pure-Python library focused on triangular surface meshes, but it isn't intended for use with quadrilateral, mixed-element, or volumetric meshes. 
 Given the intended focus and/or design philosophies of these existing softwares, it was determined that building `mymesh`, rather than making contributions to existing software, was the best way to achieve a full-featured, accessible, and easy to use Python package for creating and working with meshes. 
@@ -68,15 +68,15 @@ It was used extensively in the scaffold design optimization research by @Josephs
 
 The `mymesh` package is designed around meshes defined by two fundamental components, the coordinates of nodes (`NodeCoords` or `points`) and the connectivity of those nodes to form elements (`NodeConn` or `cells`).
 These components are stored in the `mesh` object, which contains a variety of convenience functions and cached properties (e.g. `Centroids`, `NodeNormals`) that can be calculated on-demand and stored for future use.
-`mymesh` was developed from the beginning to support various element types and mixed-element meshes, so the node connectivity can be defined as either a `numpy` array or a non-rectangular list of lists, with the code designed to take advantage of the added efficiency of `numpy` arrays when possible without being reliant on them in a way that would prohibit mixed-element meshes.
+`mymesh` was developed from the beginning to support various element types and mixed-element meshes, so the node connectivity can be defined as either a `numpy` [@Harris2006] array or a non-rectangular list of lists, with the code designed to take advantage of the added efficiency of `numpy` arrays when possible without being reliant on them in a way that would prohibit mixed-element meshes.
 
 In addition to overall ease of use, the framework of `mymesh` was designed to be easy to get into and out of, so that users can easily utilize the strengths and benefits of other code or software. 
-The `mesh` object facilitates conversion to the data structures of two other popular meshing softwares, `meshio` and `pyvista`, and, through `meshio`, facilitates the reading and writing of the mesh to and from many different file formats (`mesh.read(filename)`, `mesh.write(filename)`). 
+The `mesh` object facilitates conversion to the data structures of two other popular meshing softwares, `meshio` [@Schlomer2024] and `pyvista`, and, through `meshio`, facilitates the reading and writing of the mesh to and from many different file formats (`mesh.read(filename)`, `mesh.write(filename)`). 
 Additionally, most low-level functions in `mymesh` operate on just the node coordinates and connectivity, making it easy for users of other software/packages to directly utilize individual functions, without needing to convert to `mymesh`'s `mesh` data structure.
 
 Python was chosen as the programming language for `mymesh` because of its popularity in computational research and its focus on factors such as simplicity and readability.
-Many other languages, such as Matlab and Julia, as well as finite element softwares, such as Abaqus and FEniCS, interface with Python, extending the value of `mymesh` beyond Python users. 
-While Python is often regarded as relatively inefficient compared to other languages, vectorization with `numpy` and just-in-time compilation with `numba` are used in performance-critical operations to achieve efficiency competitive with other languages.   
+Many other languages, such as Matlab and Julia, as well as finite element softwares, such as Abaqus (Dassault Systèmes, Vélizy-Villacoublay, France) and FEniCS [@Baratta2023], interface with Python, extending the value of `mymesh` beyond Python users. 
+While Python is often regarded as relatively inefficient compared to other languages, vectorization with `numpy` and just-in-time compilation with `numba` [@Lam2026] are used in performance-critical operations to achieve efficiency competitive with other languages.   
 
 # Features and Examples
 
