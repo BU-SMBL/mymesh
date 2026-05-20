@@ -75,7 +75,7 @@ The `mesh` object facilitates conversion to the data structures of two other pop
 Additionally, most low-level functions in `mymesh` operate on just the node coordinates and connectivity, making it easy for users of other software/packages to directly utilize individual functions, without needing to convert to `mymesh`'s `mesh` data structure.
 
 Python was chosen as the programming language for `mymesh` because of its popularity in computational research and its focus on factors such as simplicity and readability.
-Many other languages, such as Matlab and Julia, as well as finite element softwares, such as Abaqus (Dassault Systèmes, Vélizy-Villacoublay, France) and FEniCS [@Baratta2023], interface with Python, extending the value of `mymesh` beyond Python users. 
+Many other languages, such as Matlab and Julia, as well as finite element softwares, such as Abaqus [@Abaqus] and FEniCS [@Baratta2023], interface with Python, extending the value of `mymesh` beyond Python users. 
 While Python is often regarded as relatively inefficient compared to other languages, vectorization with `numpy` and just-in-time compilation with `numba` [@Lam2026] are used in performance-critical operations to achieve efficiency competitive with other languages.   
 
 # Features and Examples
