@@ -1,0 +1,6 @@
+mymesh.rays.PointInTet
+======================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: PointInTet

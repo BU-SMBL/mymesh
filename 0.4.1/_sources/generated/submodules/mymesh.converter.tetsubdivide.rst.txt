@@ -1,0 +1,6 @@
+mymesh.converter.tetsubdivide
+=============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: tetsubdivide

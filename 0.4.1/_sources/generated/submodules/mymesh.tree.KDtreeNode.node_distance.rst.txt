@@ -1,0 +1,6 @@
+mymesh.tree.KDtreeNode.node\_distance
+=====================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: KDtreeNode.node_distance

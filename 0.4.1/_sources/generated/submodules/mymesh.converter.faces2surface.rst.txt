@@ -1,0 +1,6 @@
+mymesh.converter.faces2surface
+==============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: faces2surface

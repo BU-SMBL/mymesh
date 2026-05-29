@@ -1,0 +1,6 @@
+mymesh.tree.OctreeNode.hasChildren
+==================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: OctreeNode.hasChildren

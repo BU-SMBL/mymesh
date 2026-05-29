@@ -1,0 +1,6 @@
+mymesh.rays.PlaneBoxIntersection
+================================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: PlaneBoxIntersection

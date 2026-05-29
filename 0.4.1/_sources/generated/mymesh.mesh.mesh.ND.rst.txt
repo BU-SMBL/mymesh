@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.ND
+===================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.ND

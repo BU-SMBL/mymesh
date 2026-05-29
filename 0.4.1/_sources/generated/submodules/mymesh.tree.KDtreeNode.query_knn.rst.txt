@@ -1,0 +1,6 @@
+mymesh.tree.KDtreeNode.query\_knn
+=================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: KDtreeNode.query_knn

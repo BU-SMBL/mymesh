@@ -1,0 +1,6 @@
+mymesh.implicit.sphere
+======================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: sphere

@@ -1,0 +1,6 @@
+mymesh.dmesh.swapNode
+=====================
+
+.. currentmodule:: mymesh
+
+.. automethod:: dmesh.swapNode

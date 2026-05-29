@@ -1,0 +1,6 @@
+mymesh.curvature.NormCurve
+==========================
+
+.. currentmodule:: mymesh.curvature
+
+.. autofunction:: NormCurve

@@ -1,0 +1,6 @@
+mymesh.implicit.box
+===================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: box

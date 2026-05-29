@@ -1,0 +1,6 @@
+mymesh.improvement.Contract
+===========================
+
+.. currentmodule:: mymesh.improvement
+
+.. autofunction:: Contract

@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.ElemType
+=========================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.ElemType

@@ -1,0 +1,6 @@
+mymesh.image.read
+=================
+
+.. currentmodule:: mymesh.image
+
+.. autofunction:: read

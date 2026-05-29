@@ -1,0 +1,6 @@
+mymesh.tree.KDtreeNode.getMaxDepth
+==================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: KDtreeNode.getMaxDepth

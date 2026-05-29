@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.identify\_type
+===============================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.identify_type

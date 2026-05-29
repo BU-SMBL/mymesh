@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.hasChildren
+====================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.hasChildren

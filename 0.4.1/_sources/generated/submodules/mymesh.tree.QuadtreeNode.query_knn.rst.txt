@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.query\_knn
+===================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.query_knn

@@ -1,0 +1,6 @@
+mymesh.dmesh.getElemConn
+========================
+
+.. currentmodule:: mymesh
+
+.. automethod:: dmesh.getElemConn

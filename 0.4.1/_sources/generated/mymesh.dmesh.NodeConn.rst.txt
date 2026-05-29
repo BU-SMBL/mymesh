@@ -1,0 +1,6 @@
+mymesh.dmesh.NodeConn
+=====================
+
+.. currentmodule:: mymesh
+
+.. autoproperty:: dmesh.NodeConn

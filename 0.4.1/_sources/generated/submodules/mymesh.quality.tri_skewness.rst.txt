@@ -1,0 +1,6 @@
+mymesh.quality.tri\_skewness
+============================
+
+.. currentmodule:: mymesh.quality
+
+.. autofunction:: tri_skewness

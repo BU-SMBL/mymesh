@@ -1,0 +1,6 @@
+mymesh.implicit.lidinoid
+========================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: lidinoid

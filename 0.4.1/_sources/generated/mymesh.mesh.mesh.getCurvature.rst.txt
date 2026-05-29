@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.getCurvature
+=============================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.getCurvature

@@ -1,0 +1,6 @@
+mymesh.tree.Voxel2Octree
+========================
+
+.. currentmodule:: mymesh.tree
+
+.. autofunction:: Voxel2Octree

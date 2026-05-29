@@ -1,0 +1,6 @@
+mymesh.converter.pyramid2edges
+==============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: pyramid2edges

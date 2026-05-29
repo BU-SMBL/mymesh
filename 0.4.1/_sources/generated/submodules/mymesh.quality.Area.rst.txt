@@ -1,0 +1,6 @@
+mymesh.quality.Area
+===================
+
+.. currentmodule:: mymesh.quality
+
+.. autofunction:: Area

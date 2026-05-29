@@ -1,0 +1,6 @@
+mymesh.register.T3d
+===================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: T3d

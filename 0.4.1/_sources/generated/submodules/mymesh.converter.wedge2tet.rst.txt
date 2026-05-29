@@ -1,0 +1,6 @@
+mymesh.converter.wedge2tet
+==========================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: wedge2tet

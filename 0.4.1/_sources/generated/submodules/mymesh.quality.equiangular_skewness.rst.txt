@@ -1,0 +1,6 @@
+mymesh.quality.equiangular\_skewness
+====================================
+
+.. currentmodule:: mymesh.quality
+
+.. autofunction:: equiangular_skewness

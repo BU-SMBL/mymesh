@@ -1,0 +1,6 @@
+mymesh.curvature.ImageCurvature
+===============================
+
+.. currentmodule:: mymesh.curvature
+
+.. autofunction:: ImageCurvature

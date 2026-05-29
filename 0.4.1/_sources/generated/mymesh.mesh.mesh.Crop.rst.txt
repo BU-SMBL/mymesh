@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.Crop
+=====================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.Crop

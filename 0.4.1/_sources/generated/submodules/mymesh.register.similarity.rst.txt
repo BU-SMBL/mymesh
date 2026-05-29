@@ -1,0 +1,6 @@
+mymesh.register.similarity
+==========================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: similarity

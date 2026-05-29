@@ -1,0 +1,6 @@
+mymesh.tree.TreeNode.getMaxDepth
+================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: TreeNode.getMaxDepth

@@ -1,0 +1,6 @@
+mymesh.rays.TriangleTriangleIntersectionPt
+==========================================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: TriangleTriangleIntersectionPt

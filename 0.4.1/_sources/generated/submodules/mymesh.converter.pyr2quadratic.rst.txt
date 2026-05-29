@@ -1,0 +1,6 @@
+mymesh.converter.pyr2quadratic
+==============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: pyr2quadratic

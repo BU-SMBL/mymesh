@@ -1,0 +1,6 @@
+mymesh.converter.tri62linear
+============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: tri62linear

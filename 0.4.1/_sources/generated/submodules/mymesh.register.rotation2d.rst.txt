@@ -1,0 +1,6 @@
+mymesh.register.rotation2d
+==========================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: rotation2d

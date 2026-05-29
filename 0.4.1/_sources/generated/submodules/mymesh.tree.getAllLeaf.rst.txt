@@ -1,0 +1,6 @@
+mymesh.tree.getAllLeaf
+======================
+
+.. currentmodule:: mymesh.tree
+
+.. autofunction:: getAllLeaf

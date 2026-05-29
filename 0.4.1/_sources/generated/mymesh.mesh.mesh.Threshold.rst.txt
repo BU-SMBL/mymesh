@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.Threshold
+==========================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.Threshold

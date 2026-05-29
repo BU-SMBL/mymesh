@@ -1,0 +1,6 @@
+mymesh.tree.TreeNode.clearData
+==============================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: TreeNode.clearData

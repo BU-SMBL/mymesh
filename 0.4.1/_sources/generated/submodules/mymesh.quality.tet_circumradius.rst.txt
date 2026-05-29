@@ -1,0 +1,6 @@
+mymesh.quality.tet\_circumradius
+================================
+
+.. currentmodule:: mymesh.quality
+
+.. autofunction:: tet_circumradius

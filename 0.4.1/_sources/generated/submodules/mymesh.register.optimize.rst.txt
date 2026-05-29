@@ -1,0 +1,6 @@
+mymesh.register.optimize
+========================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: optimize

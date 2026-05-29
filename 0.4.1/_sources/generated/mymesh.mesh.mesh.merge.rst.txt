@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.merge
+======================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.merge

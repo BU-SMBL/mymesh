@@ -1,0 +1,6 @@
+mymesh.tree.OctreeNode.makeChildrenBoxes
+========================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: OctreeNode.makeChildrenBoxes

@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.Centroids
+==========================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.Centroids

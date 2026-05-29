@@ -1,0 +1,6 @@
+mymesh.curvature.GaussianCurvature
+==================================
+
+.. currentmodule:: mymesh.curvature
+
+.. autofunction:: GaussianCurvature

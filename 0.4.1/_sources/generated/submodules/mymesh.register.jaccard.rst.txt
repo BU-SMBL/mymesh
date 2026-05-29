@@ -1,0 +1,6 @@
+mymesh.register.jaccard
+=======================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: jaccard

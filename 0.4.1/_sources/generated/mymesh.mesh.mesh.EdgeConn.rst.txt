@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.EdgeConn
+=========================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.EdgeConn

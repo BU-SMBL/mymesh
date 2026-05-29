@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.makeChildrenEdges
+==========================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.makeChildrenEdges

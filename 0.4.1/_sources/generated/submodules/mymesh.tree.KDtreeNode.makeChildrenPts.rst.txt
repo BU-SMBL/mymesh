@@ -1,0 +1,6 @@
+mymesh.tree.KDtreeNode.makeChildrenPts
+======================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: KDtreeNode.makeChildrenPts

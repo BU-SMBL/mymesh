@@ -1,0 +1,6 @@
+mymesh.utils.PadRagged
+======================
+
+.. currentmodule:: mymesh.utils
+
+.. autofunction:: PadRagged

@@ -1,0 +1,6 @@
+mymesh.dmesh.ElemConn\_size
+===========================
+
+.. currentmodule:: mymesh
+
+.. autoproperty:: dmesh.ElemConn_size

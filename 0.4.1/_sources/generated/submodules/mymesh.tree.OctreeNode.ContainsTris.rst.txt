@@ -1,0 +1,6 @@
+mymesh.tree.OctreeNode.ContainsTris
+===================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: OctreeNode.ContainsTris

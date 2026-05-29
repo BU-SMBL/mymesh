@@ -1,0 +1,6 @@
+mymesh.tree.KDtreeNode.prune
+============================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: KDtreeNode.prune

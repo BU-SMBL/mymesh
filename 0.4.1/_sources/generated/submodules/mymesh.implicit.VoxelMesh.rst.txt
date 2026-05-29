@@ -1,0 +1,6 @@
+mymesh.implicit.VoxelMesh
+=========================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: VoxelMesh

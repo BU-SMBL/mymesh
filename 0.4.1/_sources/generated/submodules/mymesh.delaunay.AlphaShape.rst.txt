@@ -1,0 +1,6 @@
+mymesh.delaunay.AlphaShape
+==========================
+
+.. currentmodule:: mymesh.delaunay
+
+.. autofunction:: AlphaShape

@@ -1,0 +1,6 @@
+mymesh.converter.hex202linear
+=============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: hex202linear

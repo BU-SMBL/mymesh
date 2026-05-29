@@ -1,0 +1,6 @@
+mymesh.converter.pyramid2faces
+==============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: pyramid2faces

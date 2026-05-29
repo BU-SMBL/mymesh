@@ -1,0 +1,6 @@
+mymesh.register.AxisAlignImage
+==============================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: AxisAlignImage

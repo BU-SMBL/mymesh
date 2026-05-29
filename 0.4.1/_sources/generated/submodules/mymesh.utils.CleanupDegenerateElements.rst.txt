@@ -1,0 +1,6 @@
+mymesh.utils.CleanupDegenerateElements
+======================================
+
+.. currentmodule:: mymesh.utils
+
+.. autofunction:: CleanupDegenerateElements

@@ -1,0 +1,6 @@
+mymesh.implicit.union
+=====================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: union

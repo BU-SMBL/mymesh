@@ -1,0 +1,6 @@
+mymesh.implicit.tpms
+====================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: tpms

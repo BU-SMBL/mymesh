@@ -1,0 +1,6 @@
+mymesh.delaunay.Tetrahedralize
+==============================
+
+.. currentmodule:: mymesh.delaunay
+
+.. autofunction:: Tetrahedralize

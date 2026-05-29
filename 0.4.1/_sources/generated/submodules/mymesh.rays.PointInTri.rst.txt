@@ -1,0 +1,6 @@
+mymesh.rays.PointInTri
+======================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: PointInTri

@@ -1,0 +1,6 @@
+mymesh.rays.RaySegmentIntersection
+==================================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: RaySegmentIntersection

@@ -1,0 +1,6 @@
+mymesh.dmesh.TriFlipEdge
+========================
+
+.. currentmodule:: mymesh
+
+.. automethod:: dmesh.TriFlipEdge

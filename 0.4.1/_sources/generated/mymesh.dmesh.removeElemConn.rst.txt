@@ -1,0 +1,6 @@
+mymesh.dmesh.removeElemConn
+===========================
+
+.. currentmodule:: mymesh
+
+.. automethod:: dmesh.removeElemConn

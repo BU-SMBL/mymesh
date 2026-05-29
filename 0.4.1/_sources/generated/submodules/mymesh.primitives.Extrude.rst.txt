@@ -1,0 +1,6 @@
+mymesh.primitives.Extrude
+=========================
+
+.. currentmodule:: mymesh.primitives
+
+.. autofunction:: Extrude

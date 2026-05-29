@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.mesh2dmesh
+===========================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.mesh2dmesh

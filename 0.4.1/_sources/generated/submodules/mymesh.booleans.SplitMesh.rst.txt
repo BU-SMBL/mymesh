@@ -1,0 +1,6 @@
+mymesh.booleans.SplitMesh
+=========================
+
+.. currentmodule:: mymesh.booleans
+
+.. autofunction:: SplitMesh

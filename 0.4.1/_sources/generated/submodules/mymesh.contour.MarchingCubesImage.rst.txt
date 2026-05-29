@@ -1,0 +1,6 @@
+mymesh.contour.MarchingCubesImage
+=================================
+
+.. currentmodule:: mymesh.contour
+
+.. autofunction:: MarchingCubesImage

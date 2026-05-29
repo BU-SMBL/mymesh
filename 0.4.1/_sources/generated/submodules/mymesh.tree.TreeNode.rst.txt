@@ -1,0 +1,32 @@
+mymesh.tree.TreeNode
+====================
+
+.. currentmodule:: mymesh.tree
+
+.. autoclass:: TreeNode
+    :no-members:
+    :no-inherited-members:
+    :show-inheritance:
+    :no-special-members:
+
+Properties
+----------
+
+
+
+
+
+Methods
+-------
+
+
+    .. autosummary::
+        :toctree:
+
+    
+                TreeNode.clearData
+                TreeNode.getLevel
+                TreeNode.getMaxDepth
+                TreeNode.hasChildren
+                TreeNode.prune
+    

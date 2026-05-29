@@ -1,0 +1,6 @@
+mymesh.tree.KDtreeNode.hasChildren
+==================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: KDtreeNode.hasChildren
