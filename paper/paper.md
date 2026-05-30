@@ -1,5 +1,5 @@
 ---
-title: 'MyMesh: General purpose, implicit, and image-based meshing in python'
+title: 'MyMesh: General purpose, implicit, and image-based meshing in Python'
 tags:
   - Python
   - mesh
@@ -29,23 +29,23 @@ bibliography: paper.bib
 # Summary
 
 A mesh is a discrete representation that subdivides a geometry or computational domain into a collection of points (nodes) connected by simple shapes (elements).
-Meshes are used for a variety of purposes, including simulations (e.g. finite element, finite volume, and finite difference methods), visualization and computer graphics, image analysis, and additive manufacturing.
+Meshes are used for a variety of purposes, including simulations (e.g., finite element, finite volume, and finite difference methods), visualization and computer graphics, image analysis, and additive manufacturing.
 `mymesh` is a general purpose set of tools for generating, manipulating, and analyzing meshes. 
 `mymesh` is particularly focused on implicit function and image-based meshing, with other functionality including:
 
 - geometric and curvature analysis,
-- intersection and inclusion tests (e.g. ray-surface intersection and point-in-surface tests),
+- intersection and inclusion tests (e.g., ray-surface intersection and point-in-surface tests),
 - mesh boolean operations (intersection, union, difference),
 - sweep construction methods (extrusions, revolutions),
 - point set, mesh, and image registration,
-- mesh quality evaluation and improvement,
+- mesh quality evaluation and improvement, and
 - mesh type conversion (e.g. volume to surface, hexahedral or mixed-element to tetrahedral, first-order elements to second-order elements).
 
 # State of the field
 
 Mesh-based representations of geometries are essential in a wide variety of research applications, and as such, there is a need for robust, efficient, and easy-to-use software for creating, analyzing, and manipulating meshes.
 There are a variety of software packages for working with and generating meshes. 
-Some are general purpose, like CGAL [@cgal], VTK [@Schroeder2006], and Gmsh [@Geuzaine2009], while others are more focused on specific tasks, such as triangular or tetrahedral mesh generation (e.g. Triangle [@Shewchuk1996] and TetGen [@Si2015], respectively). 
+Some are general purpose, like CGAL [@cgal], VTK [@Schroeder2006], and Gmsh [@Geuzaine2009], while others are more focused on specific tasks, such as triangular or tetrahedral mesh generation (e.g., Triangle [@Shewchuk1996] and TetGen [@Si2015], respectively). 
 In Python [@vanRossum1995], most meshing packages depend on (or are direct wrappers to) one or more of these libraries, such as PyVista [@Sullivan2019] (a Pythonic interface to VTK), pygalmesh (a Pythonic interface to CGAL) [@Schlomer2021], nanomesh (an image-based meshing workflow tool that utilizes Triangle and TetGen) [@Smeets2022b], MeshPy (which interfaces to Triangle and TetGen) [@Kloeckner2025], and PyMesh (which depends on CGAL, Triangle, TetGen, and others) [@Zhou2019]. 
 While these interfaces are useful and provide access to powerful mesh generation tools, their reliance on external dependencies can make them less easy to use and limit code readability, making it more difficult to understand how the code works. 
 TriMesh [@trimesh] stands out as a capable, pure-Python library focused on triangular surface meshes, but it isn't intended for use with quadrilateral, mixed-element, or volumetric meshes. 
@@ -61,13 +61,13 @@ By providing an easily usable interface to both high-level and low-level functio
 # Research impact statement
 
 `mymesh` was originally developed in support of research within the Skeletal Mechanobiology and Biomechanics Lab at Boston University. 
-It was used extensively in the scaffold design optimization research by @Josephson2024b and is currently being used within multiple labs and institutions (e.g. Lim, M., pers. comm., Mtchedlishvili, M., pers. comm.), for various ongoing projects including vertebral modeling, hip fracture modeling [@Olowu2026], growth modeling of skeletal tissue, and analysis of objects and biological tissues imaged using micro-computed tomography (μCT). 
+It was used extensively in the scaffold design optimization research by @Josephson2024b and is currently being used within multiple labs and institutions (e.g., Lim, M., pers. comm., Mtchedlishvili, M., pers. comm.), for various ongoing projects including vertebral modeling, hip fracture modeling [@Olowu2026], growth modeling of skeletal tissue, and analysis of objects and biological tissues imaged using micro-computed tomography (μCT). 
 `mymesh` has proven useful in a variety of research applications, well beyond those that inspired its original development, and we expect it to remain a valuable tool in future research efforts.  
 
 # Software design
 
 The `mymesh` package is designed around meshes defined by two fundamental components, the coordinates of nodes (`NodeCoords` or `points`) and the connectivity of those nodes to form elements (`NodeConn` or `cells`).
-These components are stored in the `mesh` object, which contains a variety of convenience functions and cached properties (e.g. `Centroids`, `NodeNormals`) that can be calculated on-demand and stored for future use.
+These components are stored in the `mesh` object, which contains a variety of convenience functions and cached properties (e.g., `Centroids`, `NodeNormals`) that can be calculated on-demand and stored for future use.
 `mymesh` was developed from the beginning to support various element types and mixed-element meshes, so the node connectivity can be defined as either a `numpy` [@Harris2006] array or a non-rectangular list of lists, with the code designed to take advantage of the added efficiency of `numpy` arrays when possible without being reliant on them in a way that would prohibit mixed-element meshes.
 
 In addition to overall ease of use, the framework of `mymesh` was designed to be easy to get into and out of, so that users can easily utilize the strengths and benefits of other code or software. 
@@ -110,12 +110,12 @@ The [documentation](https://bu-smbl.github.io/mymesh/) provides guides for getti
 
 Generative AI was not used to write this paper, the documentation, or the functionality of `mymesh`. 
 Initial development of `mymesh` began in the summer of 2021, before the release of OpenAI's ChatGPT (Nov. 30, 2022) and the widespread proliferation of powerful generative AI chatbots.
-While generative AI was never used to generate code for `mymesh`, it was in some instances consulted alongside other resources (e.g. scientific literature, StackExchange).
+While generative AI was never used to generate code for `mymesh`, it was in some instances consulted alongside other resources (e.g., scientific literature, StackExchange).
 Generative AI has been used in the following ways throughout the development of 
 `mymesh`:
 
 - as a resource for some mesh-specific and general-purpose programming concepts, such as methods for improving efficiency of certain operations,
-- assistance in setting up packaging infrastructure (e.g. pyproject.toml, GitHub workflows),
+- assistance in setting up packaging infrastructure (e.g., pyproject.toml, GitHub workflows), and
 - conceptualization of test cases for some unit tests.
   
 
