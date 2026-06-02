@@ -276,7 +276,7 @@ Note that the KD tree can be used for any k-dimensional data.
 
     plt.loglog(npoints, sci_kdtree_build_time, color='#a3be8c', linestyle='dashed')
     plt.loglog(npoints, sci_kdtree_search_time, color='#a3be8c', linestyle='dotted')
-    plt.loglog(npoints, np.add(sci_kdtree_build_time, sci_kdtree_search_time), color='#a3be8c,  linestyle='solid')
+    plt.loglog(npoints, np.add(sci_kdtree_build_time, sci_kdtree_search_time), color='#a3be8c',  linestyle='solid')
 
 
     plt.loglog(npoints, brute_search_time, color='black', linewidth=3)

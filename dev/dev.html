@@ -41,7 +41,7 @@
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="_static/css/mymesh.css?v=1e1bb860" />
+    <link rel="stylesheet" type="text/css" href="_static/css/mymesh.css?v=6b19b803" />
   
   <!-- So that users can add custom icons -->
   <script defer src="_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
@@ -221,6 +221,36 @@
       
       
         <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
 <div class="version-switcher__container dropdown pst-js-only">
   <button id="pst-version-switcher-button-2"
     type="button"
@@ -338,6 +368,36 @@
       <div class="sidebar-header-items__end">
         
           <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
 <div class="version-switcher__container dropdown pst-js-only">
   <button id="pst-version-switcher-button-3"
     type="button"
@@ -437,21 +497,33 @@
 <h1>Development<a class="headerlink" href="#development" title="Link to this heading">#</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<p>MyMesh is developed and maintained by me, Tim Josephson.
-This project was originally developed to support my academic research of orthopaedic biomechanics and mechanobiology, which heavily involves mesh-dependent computational simulations.
+<p>MyMesh is developed and maintained by Tim Josephson.
+This project was originally developed to support academic research of orthopaedic biomechanics and mechanobiology, which heavily involves mesh-dependent computational simulations, but is a general-purpose library that can be used in many applications.
 If you find MyMesh useful (or not useful), or have any questions or feature requests, I’d love to hear from you.</p>
 <section id="roadmap-planned-features">
 <h2>Roadmap &amp; Planned features<a class="headerlink" href="#roadmap-planned-features" title="Link to this heading">#</a></h2>
+<section id="current-areas-of-development">
+<h3>Current areas of development<a class="headerlink" href="#current-areas-of-development" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p>Expansion of the <a class="reference internal" href="theory.html"><span class="doc">Theory Guide</span></a></p></li>
-<li><p>Improved Delaunay triangulation/tetraheralization (and constrained Delaunay)</p></li>
-<li><p>More sophisticated mesh2sdf/implicit surface reconstruction capabilities</p></li>
-<li><p>Create <cite>interpolate</cite> module for interpolation within meshes and mapping between meshes</p></li>
-<li><p>Explore and possibly provide options for substituting CuPy for NumPy to
-enable Nvidia CUDA-based GPU computation. Since MyMesh is heavily dependent
-on NumPy for vectorized computation, CuPy could allow for dramatic performance
-enhancements across the board.</p></li>
+<li><p>Improved Delaunay triangulation/tetrahedralization (and constrained Delaunay)</p></li>
+<li><p>Speed enhancements for contouring algorithms</p></li>
+<li><p>Improved implicit surface reconstruction capabilities</p></li>
 </ul>
+</section>
+<section id="ongoing">
+<h3>Ongoing<a class="headerlink" href="#ongoing" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Expansion of documentation, especially the <a class="reference internal" href="theory.html"><span class="doc">Theory Guide</span></a> and <a class="reference internal" href="perf.html"><span class="doc">Performance</span></a> evaluations</p></li>
+<li><p>Improving test coverage</p></li>
+</ul>
+</section>
+<section id="plans-for-the-future">
+<h3>Plans for the future<a class="headerlink" href="#plans-for-the-future" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Create <cite>interpolate</cite> module for interpolation within meshes and mapping between meshes</p></li>
+<li><p>Explore options for parallelization and/or GPU acceleration</p></li>
+</ul>
+</section>
 </section>
 </section>
 
@@ -502,7 +574,12 @@ enhancements across the board.</p></li>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#roadmap-planned-features">Roadmap &amp; Planned features</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#roadmap-planned-features">Roadmap &amp; Planned features</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-areas-of-development">Current areas of development</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ongoing">Ongoing</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plans-for-the-future">Plans for the future</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
