@@ -71,7 +71,7 @@ html_logo = '_static/mymesh_logo.png'
 html_css_files = ['css/mymesh.css']
 pygments_light_style="tango"
 pygments_dark_style="nord"
-html_theme_options = dict(collapse_navigation=True, 
+html_theme_options = dict(collapse_navigation=False, 
                            navigation_depth=1,
                            icon_links= [
                               {
@@ -90,7 +90,7 @@ html_theme_options = dict(collapse_navigation=True,
                               "json_url" : "https://bu-smbl.github.io/mymesh/switcher.json",
                               "version_match" : version
                            },
-                           navbar_end=["version-switcher"]
+                           navbar_end=["theme-switcher", "navbar-icon-links", "version-switcher"]
                         )
 
 
