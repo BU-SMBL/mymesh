@@ -1,18 +1,38 @@
-cff-version: 1.2.0
-title: "MyMesh: General purpose, implicit, and image-based meshing in python"
-license: "MIT"
-type: software
-abstract: "MyMesh is a general purpose toolbox for generating, manipulating, and analyzing meshes. It's particularly focused on implicit function and image-based meshing, with other functionality including: Mesh type conversion (e.g. volume to surface, hexahedral or mixed-element to tetrahedral); Mesh quality evaluation and improvement; Mesh curvature analysis; Image-to-image, mesh-to-mesh, and mesh-to-image registration; Mesh boolean operations (intersection, union, difference)."
-message: "If you use this software, please cite it using these metadata"
+cff-version: "1.2.0"
 authors:
-  - given-names: Timothy
-    family-names: Josephson
-    affiliation: Boston University
+- family-names: Josephson
+  given-names: Timothy O.
+  orcid: "https://orcid.org/0000-0003-2703-6487"
+- family-names: Morgan
+  given-names: Elise F.
+  orcid: "https://orcid.org/0000-0002-3994-1890"
+contact:
+- family-names: Josephson
+  given-names: Timothy O.
+  orcid: "https://orcid.org/0000-0003-2703-6487"
+doi: 10.5281/zenodo.17316637
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Josephson
+    given-names: Timothy O.
     orcid: "https://orcid.org/0000-0003-2703-6487"
-keywords:
-  - mesh
-  - computational geometry
-  - finite element
-  - finite volume
-  - 3D printing
-  - biomechanics
+  - family-names: Morgan
+    given-names: Elise F.
+    orcid: "https://orcid.org/0000-0002-3994-1890"
+  date-published: 2026-06-01
+  doi: 10.21105/joss.10003
+  issn: 2475-9066
+  issue: 122
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 10003
+  title: "MyMesh: General purpose, implicit, and image-based meshing in
+    Python"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.10003"
+  volume: 11
+title: "MyMesh: General purpose, implicit, and image-based meshing in
+  Python"
