@@ -181,7 +181,7 @@ even the structured interiors have elements of only 'average' quality.
     *
 
       .. image-sg:: /examples/MeshModification/images/sphx_glr_demo_improvement_006.png
-         :alt: Improved Mean Skewness=0.43
+         :alt: Improved Mean Skewness=0.42
          :srcset: /examples/MeshModification/images/sphx_glr_demo_improvement_006.png
          :class: sphx-glr-multi-img
 
@@ -192,7 +192,7 @@ even the structured interiors have elements of only 'average' quality.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 36.920 seconds)
+   **Total running time of the script:** (0 minutes 37.091 seconds)
 
 
 .. _sphx_glr_download_examples_MeshModification_demo_improvement.py:
