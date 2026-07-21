@@ -42,6 +42,18 @@ Hulls
     Alpha3d
     AlphaPeel3d    
 
+Geometric Predicates
+====================
+.. autosummary::
+    :toctree: submodules/
+
+    orient2d
+    circumcircle
+    circumsphere
+    convex2d
+    circumsphere
+
+    
 """
 #%%
 import numpy as np
@@ -50,10 +62,9 @@ from . import utils, rays, converter, mesh, quality
 from . import try_njit, check_numba, _MYMESH_USE_NUMBA
 from scipy import spatial
 
-def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8, steiner=0):
+def Triangulate(NodeCoords, Constraints=None, method=None, tol=1e-8, steiner=0):
     """
-    Generate a triangulation for a 2D set of points. This will be a strictly
-    convex triangulation.
+    Generate a triangulation for a 2D set of points. 
 
     Parameters
     ----------
@@ -115,8 +126,7 @@ def Triangulate(NodeCoords,Constraints=None,method=None,tol=1e-8, steiner=0):
 
 def Tetrahedralize(NodeCoords, method=None, tol=1e-8):
     """
-    Generate a Delaunay tetrahedralization for a 3D set of points. This will be 
-    a strictly convex tetrahedralization.
+    Generate a Delaunay tetrahedralization for a 3D set of points. 
 
     Parameters
     ----------
@@ -128,7 +138,7 @@ def Tetrahedralize(NodeCoords, method=None, tol=1e-8):
         by default None. Edge constraints should be specified by node indices,
         for example [[0, 1], [1,2], ...]
     method : str, optional
-        Triangulation method, by default 'scipy'.
+        Triangulation method, by default 'BowyerWatson'.
 
         - 'BowyerWatson' - Generate a Delaunay triangulation by the Bowyer-Watson algorithm (:func:`BowyerWatson3d`)
 
@@ -684,45 +694,44 @@ def BowyerWatson2d(NodeCoords, Constraints=None):
         for segment in Constraints:
             d = _insert_segment_2d(d, segment)
 
-    # NodeConn = d.NodeConn.copy()
-    # Super = np.any(NodeConn == nPts, axis=1) | \
-    #     np.any(NodeConn == (nPts+1), axis=1) | \
-    #     np.any(NodeConn == (nPts+2), axis=1)
-    # NodeConn = NodeConn[~Super]
-    
     return d.NodeConn
 
 def BowyerWatson3d(NodeCoords):
     """
-    Bowyer-Watson algorithm for 3D Delaunay tetrahedralization
-    :cite:p:`Bowyer1981`, :cite:p:`Watson1981`, :cite:p:`Marot2019`
+    Bowyer-Watson algorithm for 2D Delaunay triangulation
+
+    :cite:p:`Bowyer1981`, :cite:p:`Watson1981`
 
     Parameters
     ----------
     NodeCoords : array_like
-        nx3 set of points to be tetrahedralized
+        (n,2) or (n,3) array of points to be triangulated. If three dimensional
+        coordinates are given, the third coordinate will be ignored.
 
     Returns
     -------
     NodeConn : np.ndarray
-        mx4 array of node connectivities for the Delaunay tetrahedralization
+        mx3 array of node connectivities for the Delaunay triangulation
     """
-    if check_numba():
-        import numba
-        from numba.typed import Dict
-    else:
-        Dict = dict
+    if not check_numba():
+        warnings.warn('Using numba is strongly recommended for efficiency of BowyerWatson2d.')
 
     NodeCoords = np.asarray(NodeCoords)
     assert NodeCoords.shape[0] >= 3, 'At least three points are required.'
-    assert NodeCoords.shape[1] == 3, 'BowyerWatson3d is only valid for three dimensional points.'
+    if NodeCoords.shape[1] == 3:
+        TempCoords = NodeCoords
+    else:
+        raise ValueError('BowyerWatson3d is only valid for three dimensional points.')
 
     nPts = len(NodeCoords)
 
     # Random insertion order for points
-    indices = list(range(nPts))
-    rng = np.random.default_rng()
-    rng.shuffle(indices)
+    indices = _bin_sort_3d(NodeCoords)
+
+    # Get super tet - tet with incircle that bounds the point set
+    center = np.mean(TempCoords, axis=0)
+    r = np.max(np.sqrt((TempCoords[:,0]-center[0])**2 + (TempCoords[:,1]-center[1])**2))
+    R = 10*r
 
     # Get super tetrahedron - tetrahedron with insphere that bounds the point set
     center = np.mean(NodeCoords, axis=0)
@@ -739,65 +748,30 @@ def BowyerWatson3d(NodeCoords):
     TempCoords = np.vstack([NodeCoords, super_tet_points])
     super_tet = (nPts, nPts+1, nPts+2, nPts+3)
 
-    ElemTable = Dict()
-    # Elem table links elements to tuples of (oriented) faces
-    # e.g. ElemTable[(0,1,2,3)] = ((2,0,1),(1,0,3),(3,0,2),(2,1,3)))
-    # Faces are stragically numbered s.t. the minimum node number is in the 
-    # center to allow for flipping to find the face's twin
-    ElemTable[super_tet] = (
-        (super_tet[2], super_tet[0], super_tet[1]), 
-        (super_tet[1], super_tet[0], super_tet[3]), 
-        (super_tet[3], super_tet[0], super_tet[2]), 
-        (super_tet[2], super_tet[1], super_tet[3])
-        )
-
-    EdgeTable = Dict()
-    # Edge table links oriented (half) faces to their one connected element
-    # e.g. EdgeTable[(2,0,1)] = (0,1,2,3)
-    EdgeTable[(super_tet[2], super_tet[0], super_tet[1])] = super_tet
-    EdgeTable[(super_tet[1], super_tet[0], super_tet[3])] = super_tet
-    EdgeTable[(super_tet[3], super_tet[0], super_tet[2])] = super_tet
-    EdgeTable[(super_tet[2], super_tet[1], super_tet[3])] = super_tet
- 
-    for i in indices:
-        newPt = TempCoords[i]
-        tet = _walk_3d(TempCoords, ElemTable, EdgeTable, newPt, nsample=1)
-        # Breadth first search of adjacent tets to find all invalid tets
-        # Initiate a queue of the faces
-        bad_tets, cavity_edges = _build_cavity_3d(TempCoords, ElemTable, EdgeTable, tet, newPt)
-        # Remove tets and faces
-        for t in bad_tets:
-            for e in ElemTable[t]:
-                del EdgeTable[e]
-            del ElemTable[t]
-
-        # Create new tets and faces
-        for e in cavity_edges:
-            t = (e[0], e[1], e[2], i)
-            e1 = (e[0], i, e[1])
-            e2 = (e[0], e[2], i)
-            e3 = (e[1], i, e[2])
-            min_e1_idx = e1.index(min(e1))
-            min_e2_idx = e2.index(min(e2))
-            min_e3_idx = e3.index(min(e3))
-
-            # Ordering each new edge to have the smallest value in the middle
-            e1 = e1 if min_e1_idx == 1 else (e1[1], e1[2], e1[0]) if min_e1_idx == 2 else (e1[2], e1[0], e1[1])
-            e2 = e2 if min_e2_idx == 1 else (e2[1], e2[2], e2[0]) if min_e2_idx == 2 else (e2[2], e2[0], e2[1])
-            e3 = e3 if min_e3_idx == 1 else (e3[1], e3[2], e3[0]) if min_e3_idx == 2 else (e3[2], e3[0], e3[1])
-
-            edges = (e, e1, e2, e3)
-
-            ElemTable[t] = edges
-            for edge in edges:
-                EdgeTable[edge] = t
-
-    NodeConn = np.array(list(ElemTable.keys()))
-    Super = np.any(NodeConn == nPts, axis=1) | np.any(NodeConn == (nPts+1), axis=1) | np.any(NodeConn == (nPts+2), axis=1) | np.any(NodeConn == (nPts+3), axis=1)
-    NodeConn = NodeConn[~Super]
     
+    if 'mesh' in dir(mesh):
+        m = mesh.mesh(TempCoords, [super_tet], Type='vol', verbose=False)
+    else:
+        m = mesh(TempCoords, [super_tet], Type='vol', verbose=False)
+    
+    d = m.mesh2dmesh()
 
-    return NodeConn
+    d = _bowyer_watson_loop_3d(d, indices)
+
+    # Remove super triangle
+    d.removeElems(d.getElemConn(nPts+3))
+    d.removeElems(d.getElemConn(nPts+2))
+    d.removeElems(d.getElemConn(nPts+1))
+    d.removeElems(d.getElemConn(nPts))
+    # Insert constraints
+    # if Constraints is not None:
+    #     d.NodeLabels = np.zeros(len(d.raw_NodeCoords), dtype=np.int64)
+    #     d.NodeLabels[Constraints] = 1
+
+    #     for segment in Constraints:
+    #         d = _insert_segment_2d(d, segment)
+
+    return d.NodeConn
 
 def AlphaShape(NodeCoords, alpha, method=None, Type='surf'):
     """
@@ -987,7 +961,7 @@ def _bin_sort_2d(points):
     bin_counts = np.zeros(n*n, dtype=np.uint32)
     xmax, xmin = points[:,0].max(), points[:,0].min()
     ymax, ymin = points[:,1].max(), points[:,1].min()
-    dmax = np.maximum(xmax-xmin, xmax-ymin)
+    dmax = np.maximum(xmax-xmin,ymax-ymin)
     invdmax = 1/dmax
     
     _xmax = (xmax - xmin)*invdmax
@@ -1015,24 +989,59 @@ def _bin_sort_2d(points):
     
     return indices
 
-# from numba import objmode
-# import time
+@try_njit
+def _bin_sort_3d(points):
+    # based on sloan 1992
+    P = np.empty(points.shape, dtype=np.float32)
+    # Psort = np.empty(points.shape, dtype=np.float32)
+    indices = np.empty(len(points),dtype=np.uint64)
+    n = int(np.ceil(len(P)**(1/4)))
+    b = np.empty(len(P), dtype=np.uint32)
+    bin_counts = np.zeros(n*n*n, dtype=np.uint32)
+    xmax, xmin = points[:,0].max(), points[:,0].min()
+    ymax, ymin = points[:,1].max(), points[:,1].min()
+    zmax, zmin = points[:,2].max(), points[:,2].min()
+    dmax = np.maximum(np.maximum(xmax-xmin, ymax-ymin), zmax-zmin)
+    invdmax = 1/dmax
+    
+    _xmax = (xmax - xmin)*invdmax
+    _ymax = (ymax - ymin)*invdmax
+    _zmax = (zmax - zmin)*invdmax
+
+    for idx in range(len(P)):
+        P[idx, 0] = (points[idx, 0] - xmin) * invdmax
+        P[idx, 1] = (points[idx, 1] - ymin) * invdmax
+        P[idx, 2] = (points[idx, 2] - zmin) * invdmax
+        i = int(0.99 * n * P[idx,2]/_zmax) 
+        j = int(0.99 * n * P[idx,1]/_ymax)
+        k = int(0.99 * n * P[idx,0]/_xmax)
+        ######################################
+        # this is a pretty lazy extension to 3D, could be better
+        if i%2 == 0:
+            b[idx] = i * n + j + (k*n**2)
+        else:
+            b[idx] = (i + 1) * n - j - 1 + (k*n**2)
+        ######################################
+        bin_counts[b[idx]] += 1
+    
+    bin_starts = np.zeros(n*n*n, dtype=np.uint64)
+    for bin_idx in range(1, n*n*n):
+        bin_starts[bin_idx] = bin_counts[bin_idx-1] + bin_starts[bin_idx-1]
+    
+    for idx,bidx in enumerate(b):
+        indices[bin_starts[bidx]] = idx
+        bin_starts[bidx] += 1
+    
+    return indices
+
 @try_njit(inline='always', cache=True)
 def _bowyer_watson_loop_2d(d, indices, nsample=1):
-    # with objmode(walk_time='float64'): walk_time = 0
-    # with objmode(bcavity_time='float64'): bcavity_time = 0
-    # with objmode(dcavity_time='float64'): dcavity_time = 0
     for i in indices:
         newPt = d.raw_NodeCoords[i]
-        # with objmode(t0='float64'): t0 = time.time()
         tri_id = _walk_2d(d, newPt, tri_id=d.NElem-1, nsample=nsample)
-        # with objmode(walk_time='float64'): walk_time += time.time() - t0
         # Breadth first search of adjacent triangles to find all invalid triangles
-        # with objmode(t0='float64'): t0 = time.time()
         bad_triangles, cavity_edges = _build_cavity_2d(d, tri_id, newPt)
-        # with objmode(bcavity_time='float64'): bcavity_time += time.time() - t0
         
-        # with objmode(t0='float64'): t0 = time.time()
         # Remove triangles and edges
         d.removeElems(bad_triangles)
 
@@ -1040,8 +1049,23 @@ def _bowyer_watson_loop_2d(d, indices, nsample=1):
         for e in cavity_edges:
             d.addElem([e[0], e[1], i])
         
-        # with objmode(dcavity_time='float64'): dcavity_time += time.time() - t0
-    # with objmode(): print(walk_time, bcavity_time, dcavity_time, bcavity_time+dcavity_time)
+    return d
+
+@try_njit(inline='always')#, cache=True)
+def _bowyer_watson_loop_3d(d, indices, nsample=1):
+    for i in indices:
+        newPt = d.raw_NodeCoords[i]
+        tet_id = _walk_3d(d, newPt, tet_id=d.NElem-1)#, nsample=nsample)
+        # Breadth first search of adjacent tets to find all invalid tets
+        bad_tets, cavity_faces = _build_cavity_3d(d, tet_id, newPt)
+        
+        # Remove tets
+        d.removeElems(bad_tets)
+
+        # Create new triangles and edges
+        for f in cavity_faces:
+            d.addElem(np.array([f[2], f[1], f[0], i]))
+        
     return d
 
 @try_njit(inline='always', cache=True)
@@ -1383,83 +1407,183 @@ def _insert_segment_2d(D, segment):
                 nswaps += 1
     return D
 
-# TODO: Traversals in 3d probably won't work right because half-face pairs can't 
-# necessarily be obtained just by reversing the order
 @try_njit
-def _walk_3d(TempCoords, ElemTable, EdgeTable, newPt, nsample=1):
-    # Walking algorithm to find tets containing the new point
-    tet = list(ElemTable.keys())[np.random.randint(0,len(ElemTable))]
-    minL = np.linalg.norm(TempCoords[tet[0]]-newPt)
-    for i in range(min(nsample-1,len(ElemTable)-1)):
-        t = list(ElemTable.keys())[np.random.randint(0,len(ElemTable))]
-        L = np.linalg.norm(TempCoords[t[0]]-newPt)
-        if L < minL:
-            tet = t
-    alpha, beta, gamma, delta = utils.BaryTet(TempCoords[np.array(list(tet))], newPt)
+def _walk_3d(d, newPt, tet_id=None):
+
+    if tet_id is None:
+        tet_id = np.random.randint(0,d.NElem)
+        tet = d.raw_NodeConn[tet_id]
+        # if nsample > 1:
+        #     # Try multiple start points and choose the closest
+        #     pass
+            # minL = (d.raw_NodeCoords[tri[0],0] - newPt[0])**2 + (d.raw_NodeCoords[tri[0],1] - newPt[1])**2 # squared distance
+            # if nsample > d.NElem:
+            #     nsample = d.NElem
+            # for i in range(nsample-1):
+            #     t_id = np.random.randint(0,d.NElem)
+            #     t = d.raw_NodeConn[t_id]
+            #     L = (d.raw_NodeCoords[t[0],0] - newPt[0])**2 + (d.raw_NodeCoords[t[0],1] - newPt[1])**2 # squared distance
+            #     if L < minL:
+            #         tri = t
+            #         tri_id = t_id
+    else:
+        tet = d.raw_NodeConn[tet_id]
+    alpha, beta, gamma, delta = utils.BaryTet(d.raw_NodeCoords[tet], newPt)
     while not (alpha >= 0 and beta >= 0 and gamma >= 0 and delta >= 0):
         # find node with smallest (most negative) barycentric coordinate
-        bcoords = [alpha,beta,gamma,delta]
-        nodeid = tet[bcoords.index(min(bcoords))]
+        if alpha <= beta and alpha <= gamma and alpha <= delta:
+            # alpha is min
+            face_n1 = tet[1]
+            face_n2 = tet[2]
+            face_n3 = tet[3]
+        elif beta <= alpha and beta <= gamma and beta <= delta:
+            # beta is min
+            face_n1 = tet[0]
+            face_n2 = tet[2]
+            face_n3 = tet[3]
+        elif gamma <= alpha and gamma <= beta and gamma <= delta:
+            # gamma is min
+            face_n1 = tet[0]
+            face_n2 = tet[1]
+            face_n3 = tet[3]
+        else:
+            # delta is min
+            face_n1 = tet[0]
+            face_n2 = tet[1]
+            face_n3 = tet[2]
 
-        # find edge opposite that node
-        edge = [e for e in ElemTable[tet] if nodeid not in e][0]
+        # step into the neighboring tet 
+        ##################
+        # directly using the linked lists rather than getElemConn to minimize
+        # overhead and enable early exits
 
-        # step to the neighboring tet across that face
-        tet = EdgeTable[edge[::-1]]
-        alpha, beta, gamma, delta = utils.BaryTet(TempCoords[np.array(list(tet))], newPt)
-    return tet
+        next_tet_id = -1
+        i = d.ElemConn_head[face_n1]
+        while i != -1:
+            next_elem = d.ElemConn_elem[i]
+            # iterate through elem conn for the first node in the edge
+            if next_elem != tet_id:
+                # skip the current triangle
+                t = d.raw_NodeConn[next_elem]
+                if ((t[0]==face_n2) or (t[1]==face_n2) or \
+                    (t[2]==face_n2) or (t[3]==face_n2)) and \
+                ((t[0]==face_n3) or (t[1]==face_n3) or \
+                    (t[2]==face_n3) or (t[3]==face_n3)):
+                    # element is opposite a shared edge, step into it
+                    next_tet_id = next_elem
+                    break                    
+            i = d.ElemConn_next[i] 
+
+        ######
+        if next_tet_id != -1:
+            tet_id = next_tet_id
+            tet = d.raw_NodeConn[tet_id]            
+            
+        alpha, beta, gamma, delta = utils.BaryTet(d.raw_NodeCoords[tet], newPt)
+    return tet_id
 
 @try_njit
-def _build_cavity_3d(TempCoords, ElemTable, EdgeTable, tet, newPt):
-    # TODO: it seems like some of the tets get visited more than once - maybe not anymore?
-    bad_tets = set((tet,)) #[tet]
-    cavity_edges = []
-    valid_set = set()
-    invalid_set = set()
-    queue = set(ElemTable[tet])
+def _build_cavity_3d(d, tet_id, newPt):
+    tet = d.raw_NodeConn[tet_id]
+    # Queue contains the id of a tetrahedron followed by the three vertices that define a face of that tet
+    queue = [(tet_id, tet[0], tet[1], tet[3]),
+             (tet_id, tet[1], tet[2], tet[3]),
+             (tet_id, tet[2], tet[0], tet[3]),
+             (tet_id, tet[2], tet[1], tet[0])]
+    visited = [tet_id,]
+    bad_tets = [tet_id,]
+    cavity_faces = []
+   
+    # super tet nodes
+    super_cutoff = d.NNode - 4 # nodes >= super_cutoff are part of the super tet
+
     while len(queue) > 0:
-        edge = queue.pop()
-        twin = edge[::-1]
 
-        if twin in EdgeTable:
-            t = EdgeTable[twin]
-            if t in invalid_set:
-                continue
-            elif t in valid_set:
-                cavity_edges.append(edge)
-                continue
+        prev_t_id, f0, f1, f2 = queue.pop() # tetrahedron ID, face vertex 1, face vertex 2, face vertex 3
 
-            # test circumsphere
-            x0, y0, z0 = TempCoords[t[0]]
-            x1, y1, z1 = TempCoords[t[1]]
-            x2, y2, z2 = TempCoords[t[2]]
-            x3, y3, z3 = TempCoords[t[3]]
-            x, y, z = newPt
+        next_t_id = -1
+        i = d.ElemConn_head[f0]
+        while i != -1:
+            next_elem = d.ElemConn_elem[i]
+            # iterate through elem conn for the first node in the edge
+            if next_elem != prev_t_id:
+                # skip the current triangle
+                t = d.raw_NodeConn[next_elem]
+                if (f1 in t and f2 in t): # This can be faster with explicit checks
+                    # element is opposite a shared element, step into it
+                    next_t_id = next_elem
+                    break                    
+            i = d.ElemConn_next[i] 
+        if next_t_id == -1:
+            # boundary face
+            cavity_faces.append((f0, f1, f2))
+            continue
 
-            mat = np.array([
-                [x0, y0, z0, x0**2+y0**2+z0**2, 1],
-                [x1, y1, z1, x1**2+y1**2+z1**2, 1],
-                [x2, y2, z2, x2**2+y2**2+z2**2, 1],
-                [x3, y3, z3, x3**2+y3**2+z3**2, 1],
-                [x,  y,  z,  x**2+y**2+z**2,    1],
-            ])
+        if next_t_id in visited:
+            # tet has already been checked
+            if prev_t_id in bad_tets and next_t_id not in bad_tets:
+                cavity_faces.append((f0, f1, f2))
+            continue
 
-            invalid = np.linalg.det(mat) < 0
-            if invalid:
-                invalid_set.add(t)
-                # mark invalid tets for deletion
-                bad_tets.add(t)
-                # add adjacent neighbors to queue
-                queue.update([e for e in ElemTable[t] if e != twin])
+        tet = d.raw_NodeConn[next_t_id]
+
+        # if ((tet[0] >= super_cutoff) ^ (tet[1] >= super_cutoff) ^ (tet[2] >= super_cutoff) ^ (tet[3] >= super_cutoff)) and (f0 < super_cutoff and f1 < super_cutoff and f2 < super_cutoff):
+        #     # ^ = XOR
+        #     # TODO: verify that this is necessary/correct
+        #     # tet is connected to super tet, mark boundary
+        #     cavity_faces.append((f0, f1, f2))
+        #     visited.append(next_t_id)
+        #     continue
+            
+        # test circumcircle
+        pass
+
+        if circumsphere(d.raw_NodeCoords[t[0]], d.raw_NodeCoords[t[1]], d.raw_NodeCoords[t[2]], d.raw_NodeCoords[t[3]], newPt):
+            # point in cicrumsphere of tet; add faces to queue (except for the face that was just used)
+            bad_tets.append(next_t_id)
+            
+            if (
+                (tet[2] == f0 or tet[2] == f1 or tet[2] == f2) and \
+                (tet[1] == f0 or tet[1] == f1 or tet[1] == f2) and \
+                (tet[0] == f0 or tet[0] == f1 or tet[0] == f2)
+            ):
+                # old face is (tet[2], tet[1], tet[0])
+                queue.append((next_t_id, tet[0], tet[1], tet[3]))
+                queue.append((next_t_id, tet[1], tet[2], tet[3]))
+                queue.append((next_t_id, tet[2], tet[0], tet[3]))
+
+            elif (
+                (tet[0] == f0 or tet[0] == f1 or tet[0] == f2) and \
+                (tet[1] == f0 or tet[1] == f1 or tet[1] == f2) and \
+                (tet[3] == f0 or tet[3] == f1 or tet[3] == f2)
+            ):
+                # old face is (tet[0], tet[1], tet[3])
+                queue.append((next_t_id, tet[1], tet[2], tet[3]))
+                queue.append((next_t_id, tet[2], tet[0], tet[3]))
+                queue.append((next_t_id, tet[2], tet[1], tet[0]))
+
+            elif (
+                (tet[1] == f0 or tet[1] == f1 or tet[1] == f2) and \
+                (tet[2] == f0 or tet[2] == f1 or tet[2] == f2) and \
+                (tet[3] == f0 or tet[3] == f1 or tet[3] == f2)
+            ):
+                # old face is (tet[1], tet[2], tet[3])
+                queue.append((next_t_id, tet[2], tet[0], tet[3]))
+                queue.append((next_t_id, tet[2], tet[1], tet[0]))
+                queue.append((next_t_id, tet[0], tet[1], tet[3]))
+
             else:
-                valid_set.add(t)
-                # mark this edge as a cavity boundary
-                cavity_edges.append(edge)
+                # old edge is (tet[2], tri[0], tet[3])
+                queue.append((next_t_id, tet[2], tet[1], tet[0]))
+                queue.append((next_t_id, tet[0], tet[1], tet[3]))
+                queue.append((next_t_id, tet[1], tet[2], tet[3]))
 
         else:
-            # boundary edge, add to cavity
-            cavity_edges.append(edge)
-    return list(bad_tets), cavity_edges
+            # boundary between a valid and invalid triangle
+            cavity_faces.append((f0, f1, f2))
+            
+        visited.append(next_t_id)
+    return bad_tets, cavity_faces
 
 ## Predicates ##
 @try_njit(inline='always')
@@ -1492,9 +1616,30 @@ def orient2d(a, b, c):
 
 @try_njit(inline='always')
 def circumcircle(a, b, c, d):
-    """
+    r"""
     Two dimensional point in triangular circumcircle test.
-    Tests if the point d is in the circumcircle of triangle abc
+    Tests if the point :math:`d` is in the circumcircle of triangle :math:`abc`
+
+    The :ref:`determinant test <Circumcircle Test>`:
+
+    .. math::
+
+        \det{\begin{bmatrix} 
+        a_x & a_y & a_x^2 + a_y^2 & 1 \\
+        b_x & b_y & b_x^2 + b_y^2 & 1 \\
+        c_x & c_y & c_x^2 + c_y^2 & 1 \\
+        d_x & d_y & d_x^2 + d_y^2 & 1 
+        \end{bmatrix}} > 0
+
+    is simplified by moving the triangle so that the point d is at the origin:
+
+    .. math::
+
+        \det{\begin{bmatrix} 
+        a_x - d_x & a_y - d_y & (a_x - d_x)^2 + (a_y - d_y)^2 \\
+        b_x - d_x & b_y - d_y & (b_x - d_x)^2 + (b_y - d_y)^2 \\
+        c_x - d_x & c_y - d_y & (c_x - d_x)^2 + (c_y - d_y)^2 
+        \end{bmatrix}} > 0
 
     Parameters
     ----------
@@ -1504,7 +1649,7 @@ def circumcircle(a, b, c, d):
         Two dimensional coordinates of the second point of the triangle (shape=(2,))
     c : np.ndarray
         Two dimensional coordinates of the third point of the triangle (shape=(2,))
-    d : _type_
+    d : np.ndarray
         Two dimensional coordinates of the point to be compared to the circumcircle
 
     Returns
@@ -1528,6 +1673,83 @@ def circumcircle(a, b, c, d):
 
     det = A*(E*I-F*H) - B*(D*I-F*G) + C*(D*H-E*G)
     return det > 0 
+
+@try_njit(inline='always')
+def circumsphere(a, b, c, d, e):
+    r"""
+    Three dimensional point in tetrahedral circumsphere test.
+    Tests if the point e is in the circumcircle of tetrahedron abcd
+
+    The :ref:`determinant test <Circumcircle Test>`:
+
+    .. math::
+
+        \det{\begin{bmatrix} 
+        a_x & a_y & a_z & a_x^2 + a_y^2 + a_z^2 & 1 \\
+        b_x & b_y & b_z & b_x^2 + b_y^2 + b_z^2 & 1 \\
+        c_x & c_y & c_z & c_x^2 + c_y^2 + c_z^2 & 1 \\
+        d_x & d_y & d_z & d_x^2 + d_y^2 + d_z^2 & 1 \\
+        e_x & e_y & e_z & e_x^2 + e_y^2 + e_z^2 & 1 \\
+        \end{bmatrix}} > 0
+
+    is simplified by moving the tetraheron so that the point e is at the origin:
+
+    .. math::
+
+        \det{\begin{bmatrix} 
+        a_x - e_x & a_y - e_y & a_z - e_z & (a_x - e_x)^2 + (a_y - e_y)^2 + (a_z - e_z)^2 \\
+        b_x - e_x & b_y - e_y & b_z - e_z & (b_x - e_x)^2 + (b_y - e_y)^2 + (b_z - e_z)^2 \\
+        c_x - e_x & c_y - e_y & c_z - e_z & (c_x - e_x)^2 + (c_y - e_y)^2 + (c_z - e_z)^2 \\
+        d_x - e_x & d_y - e_y & d_z - e_z & (d_x - e_x)^2 + (d_y - e_y)^2 + (d_z - e_z)^2 \\
+        \end{bmatrix}} > 0
+
+
+    Parameters
+    ----------
+    a : np.ndarray
+        Three dimensional coordinates of the first point of the tetrahedron (shape=(3,))
+    b : np.ndarray
+        Three dimensional coordinates of the second point of the tetrahedron (shape=(3,))
+    c : np.ndarray
+        Three dimensional coordinates of the third point of the tetrahedron (shape=(3,))
+    d    : np.ndarray
+        Three dimensional coordinates of the third point of the tetrahedron (shape=(3,))
+    e : np.ndarray
+        Three dimensional coordinates of the point to be compared to the circumsphere (shape=(3,))
+
+    Returns
+    -------
+    bool
+        True if point e is in the circumcircle of tetrahedron abcd
+    """   
+
+    # manual determinant of matrix [[A,B,C,D],[E,F,G,H],[I,J,K,L],[M,N,O,P]]
+    A = a[0] - e[0]
+    B = a[1] - e[1]
+    C = a[2] - e[2]
+    D = (a[0] - e[0])**2 + (a[1] - e[1])**2 + (a[2] - e[2])**2
+
+    E = b[0] - e[0]
+    F = b[1] - e[1]
+    G = b[2] - e[2]
+    H = (b[0] - e[0])**2 + (b[1] - e[1])**2 + (b[2] - e[2])**2
+
+    I = c[0] - e[0]
+    J = c[1] - e[1]
+    K = c[2] - e[2]
+    L = (c[0] - e[0])**2 + (c[1] - e[1])**2 + (c[2] - e[2])**2
+
+    M = d[0] - e[0]
+    N = d[1] - e[1]
+    O = d[2] - e[2]
+    P = (d[0] - e[0])**2 + (d[1] - e[1])**2 + (d[2] - e[2])**2
+
+    # TODO:
+    det = A*(F*(K*P - L*O) - G*(J*P - L*N) + H*(J*O - K*N)) - \
+            B*(E*(K*P - L*O) - G*(I*P - L*M) + H*(I*O - K*M)) + \
+            C*(E*(J*P - L*N) - F*(I*P - L*M) + H*(I*N - J*M)) - \
+            D*(E*(J*O - K*N) - F*(I*O - K*M) + G*(I*N - J*M))
+    return det < 0 
 
 @try_njit(inline='always')
 def convex2d(points):
