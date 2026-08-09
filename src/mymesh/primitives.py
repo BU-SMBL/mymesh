@@ -295,10 +295,11 @@ def Grid(bounds, h, exact_h=False, ElemType='hex', Type='vol'):
         ys = np.linspace(bounds[2],bounds[3],nY)
         zs = np.linspace(bounds[4],bounds[5],nZ)
 
-    if nX*nY*nZ > np.iinfo(np.uint32).max:
-        itype = np.uint64
-    else:
-        itype = np.uint32
+    # if nX*nY*nZ > np.iinfo(np.uint32).max:
+    #     itype = np.uint64
+    # else:
+    #     itype = np.uint32
+    itype = np.intp
 
     GridCoords = np.empty((nX*nY*nZ,3), dtype=np.float64)
     GridCoords[:, 0] = np.repeat(xs,nY*nZ)
