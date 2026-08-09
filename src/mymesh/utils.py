@@ -2158,10 +2158,14 @@ def PadRagged(In,fillval=-1):
         Padded array.
     """
     # Out = np.array(list(itertools.zip_longest(*In,fillvalue=fillval))).T
-    maxL = max(len(row) for row in In)
-    Out = np.full((len(In), maxL), fillval)
-    for i, row in enumerate(In):
-        Out[i, :len(row)] = row
+    if type(In) is list or (type(In) is np.ndarray and In.dtype==object):
+        maxL = max(len(row) for row in In)
+        Out = np.full((len(In), maxL), fillval)
+        for i, row in enumerate(In):
+            Out[i, :len(row)] = row
+    else:
+        # Early exit for inputs that are already rectangular arrays
+        Out = In
 
     return Out
 
