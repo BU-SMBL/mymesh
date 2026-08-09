@@ -283,6 +283,135 @@ MC_Lookup = np.array([
             [[10, 9, 6], [3, 0, 4]],
             [[4, 3, 0], [7, 11, 10]],
             [[4, 3, 0]]],dtype=object)
+MC_RLookup = np.array([
+    [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    [ 7, 10, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    [ 9, 10,  6, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    [ 6,  9,  7,  7,  9, 11, -1, -1, -1, -1, -1, -1],
+    [ 8,  9,  5, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    [ 5,  8,  9,  7, 10, 11, -1, -1, -1, -1, -1, -1],
+    [ 5,  8,  6,  6,  8, 10, -1, -1, -1, -1, -1, -1],
+    [ 5,  7,  6,  5,  8, 11,  5, 11,  7, -1, -1, -1],
+    [ 8,  4, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    [ 7, 10,  4,  4, 10,  8, -1, -1, -1, -1, -1, -1],
+    [ 4, 11,  8,  6,  9, 10, -1, -1, -1, -1, -1, -1],
+    [ 7,  6,  4,  9,  8,  4,  6,  9,  4, -1, -1, -1],
+    [ 4,  9,  5, 11,  9,  4, -1, -1, -1, -1, -1, -1],
+    [ 7,  5,  4,  7, 10,  9,  7,  9,  5, -1, -1, -1],
+    [ 5,  4,  6, 11, 10,  6,  4, 11,  6, -1, -1, -1],
+    [ 4,  6,  5,  4,  7,  6, -1, -1, -1, -1, -1, -1],
+    [ 2,  7,  3, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    [10, 11,  2,  2, 11,  3, -1, -1, -1, -1, -1, -1],
+    [ 9, 10,  6,  3,  2,  7, -1, -1, -1, -1, -1, -1],
+    [ 3,  9, 11,  3,  2,  6,  3,  6,  9, -1, -1, -1],
+    [ 2,  7,  3,  5,  8,  9, -1, -1, -1, -1, -1, -1],
+    [ 5,  8,  9, 10,  3,  2, 11,  3, 10, -1, -1, -1],
+    [ 2,  7,  3,  5,  8,  6,  6,  8, 10, -1, -1, -1],
+    [ 3,  2,  6,  3,  6,  8, 11,  3,  8,  6,  5,  8],
+    [ 8,  4, 11,  2,  7,  3, -1, -1, -1, -1, -1, -1],
+    [ 8,  2, 10,  8,  4,  3,  8,  3,  2, -1, -1, -1],
+    [ 2,  7,  3,  9, 10,  6, 11,  8,  4, -1, -1, -1],
+    [ 2,  6,  3,  3,  6,  4,  6,  9,  4,  4,  9,  8],
+    [ 7,  3,  2,  9,  5, 11, 11,  5,  4, -1, -1, -1],
+    [10,  9,  5, 10,  5,  3,  2, 10,  3,  5,  4,  3],
+    [ 2,  6,  3,  3,  6,  4,  6,  5,  4,  7, 11, 10],
+    [ 4,  6,  5,  4,  3,  2,  4,  2,  6, -1, -1, -1],
+    [ 2,  1,  6, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    [11,  7, 10,  1,  6,  2, -1, -1, -1, -1, -1, -1],
+    [ 2,  1, 10, 10,  1,  9, -1, -1, -1, -1, -1, -1],
+    [11,  1,  9, 11,  7,  2, 11,  2,  1, -1, -1, -1],
+    [ 8,  9,  5,  2,  1,  6, -1, -1, -1, -1, -1, -1],
+    [ 8,  9,  5,  1,  6,  2, 11,  7, 10, -1, -1, -1],
+    [10,  2,  8,  1,  5,  8,  2,  1,  8, -1, -1, -1],
+    [ 2, 11,  7,  1, 11,  2,  1,  8, 11,  5,  8,  1],
+    [ 4, 11,  8,  6,  2,  1, -1, -1, -1, -1, -1, -1],
+    [ 6,  2,  1,  8,  4, 10, 10,  4,  7, -1, -1, -1],
+    [ 4, 11,  8,  9,  2,  1, 10,  2,  9, -1, -1, -1],
+    [ 7,  2,  1,  7,  1,  8,  4,  7,  8,  1,  9,  8],
+    [ 1,  6,  2,  4, 11,  5,  5, 11,  9, -1, -1, -1],
+    [ 9,  7, 10,  5,  7,  9,  5,  4,  7,  2,  1,  6],
+    [ 4, 11, 10,  4, 10,  1,  5,  4,  1, 10,  2,  1],
+    [ 7,  5,  4,  7,  2,  1,  7,  1,  5, -1, -1, -1],
+    [ 7,  1,  6,  3,  1,  7, -1, -1, -1, -1, -1, -1],
+    [ 1, 11,  3,  1,  6, 10,  1, 10, 11, -1, -1, -1],
+    [ 9,  3,  1,  9, 10,  7,  9,  7,  3, -1, -1, -1],
+    [ 1, 11,  3,  1,  9, 11, -1, -1, -1, -1, -1, -1],
+    [ 9,  5,  8,  7,  3,  6,  6,  3,  1, -1, -1, -1],
+    [ 8, 11,  5,  5, 11,  1, 11,  3,  1,  9,  6, 10],
+    [ 1,  5,  8,  1,  8,  7,  3,  1,  7,  8, 10,  7],
+    [ 1, 11,  3,  1,  5,  8,  1,  8, 11, -1, -1, -1],
+    [ 4, 11,  8,  1,  6,  3,  3,  6,  7, -1, -1, -1],
+    [ 8,  4,  3,  6,  8,  3,  6,  3,  1, 10,  8,  6],
+    [ 4,  9,  8,  3,  9,  4,  3,  1,  9, 10,  7, 11],
+    [ 9,  3,  1,  9,  8,  4,  9,  4,  3, -1, -1, -1],
+    [ 6, 11,  9,  6,  7, 11,  5,  4,  3,  5,  3,  1],
+    [10,  9,  6,  1,  4,  3,  5,  4,  1, -1, -1, -1],
+    [ 7, 11, 10,  1,  5,  3,  3,  5,  4, -1, -1, -1],
+    [ 4,  1,  5,  3,  1,  4, -1, -1, -1, -1, -1, -1],
+    [ 5,  1,  0, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+    [ 1,  0,  5, 10, 11,  7, -1, -1, -1, -1, -1, -1],
+    [10,  6,  9,  0,  5,  1, -1, -1, -1, -1, -1, -1],
+    [ 0,  5,  1,  6, 11,  7,  9, 11,  6, -1, -1, -1],
+    [ 8,  9,  0,  0,  9,  1, -1, -1, -1, -1, -1, -1],
+    [ 7, 10, 11,  8,  1,  0,  9,  1,  8, -1, -1, -1],
+    [ 8, 10,  0,  6,  1,  0, 10,  6,  0, -1, -1, -1],
+    [ 6,  1,  0,  6,  0, 11,  7,  6, 11,  0,  8, 11],
+    [ 1,  0,  5, 11,  8,  4, -1, -1, -1, -1, -1, -1],
+    [ 1,  0,  5,  8,  7, 10,  4,  7,  8, -1, -1, -1],
+    [ 0,  5,  1,  6,  9, 10,  4, 11,  8, -1, -1, -1],
+    [ 0,  4,  1,  1,  4,  6,  4,  7,  6,  5,  9,  8],
+    [ 9,  1, 11,  0,  4, 11,  1,  0, 11, -1, -1, -1],
+    [ 1,  0,  4,  1,  4, 10,  9,  1, 10, 10,  4,  7],
+    [ 0,  4,  1,  1,  4,  6,  4, 11,  6,  6, 11, 10],
+    [ 6,  4,  7,  6,  1,  0,  6,  0,  4, -1, -1, -1],
+    [ 1,  0,  5,  3,  2,  7, -1, -1, -1, -1, -1, -1],
+    [ 5,  1,  0,  3, 10, 11,  2, 10,  3, -1, -1, -1],
+    [10,  6,  9,  5,  1,  0,  7,  3,  2, -1, -1, -1],
+    [ 5,  3,  0,  9,  3,  5,  9, 11,  3,  2,  6,  1],
+    [ 3,  2,  7,  8,  9,  0,  0,  9,  1, -1, -1, -1],
+    [ 0,  9,  1,  0,  8,  9,  2, 10, 11,  2, 11,  3],
+    [ 3,  0,  7,  7,  0, 10,  0,  8, 10,  2,  6,  1],
+    [ 6,  1,  2,  3,  8, 11,  0,  8,  3, -1, -1, -1],
+    [ 7,  3,  2,  1,  0,  5, 11,  8,  4, -1, -1, -1],
+    [ 3,  8,  4,  2,  8,  3,  2, 10,  8,  5,  1,  0],
+    [ 0,  5,  1,  5, 10,  6,  4, 11,  8,  2,  7,  3],
+    [ 6,  1,  2,  8,  5,  9,  0,  4,  3, -1, -1, -1],
+    [ 4, 11,  0,  0, 11,  1, 11,  9,  1,  3,  2,  7],
+    [ 3,  0,  4, 10,  9,  2,  2,  9,  1, -1, -1, -1],
+    [ 4,  3,  0, 10,  7, 11,  2,  6,  1, -1, -1, -1],
+    [ 4,  3,  0,  6,  1,  2, -1, -1, -1, -1, -1, -1],
+    [ 6,  2,  5,  5,  2,  0, -1, -1, -1, -1, -1, -1],
+    [ 7, 10, 11,  0,  5,  2,  2,  5,  6, -1, -1, -1],
+    [ 0, 10,  2,  0,  5,  9,  0,  9, 10, -1, -1, -1],
+    [11,  7,  2,  5, 11,  2,  5,  2,  0,  9, 11,  5],
+    [ 8,  2,  0,  8,  9,  6,  8,  6,  2, -1, -1, -1],
+    [ 6,  8,  9,  2,  8,  6,  2,  0,  8, 11,  7, 10],
+    [ 2,  8, 10,  2,  0,  8, -1, -1, -1, -1, -1, -1],
+    [ 0,  8,  2, 11,  7,  2,  8, 11,  2, -1, -1, -1],
+    [ 8,  4, 11,  6,  2,  5,  5,  2,  0, -1, -1, -1],
+    [ 5,  6,  8,  6, 10,  8,  7,  2,  0,  4,  7,  0],
+    [ 9, 10,  5,  5, 10,  0, 10,  2,  0,  8,  4, 11],
+    [ 8,  5,  9,  7,  2,  4,  4,  2,  0, -1, -1, -1],
+    [ 0,  4, 11,  0, 11,  6,  2,  0,  6, 11,  9,  6],
+    [ 6, 10,  9,  0,  4,  2,  2,  4,  7, -1, -1, -1],
+    [ 0, 10,  2,  0,  4, 11,  0, 11, 10, -1, -1, -1],
+    [ 0,  4,  2,  2,  4,  7, -1, -1, -1, -1, -1, -1],
+    [ 7,  5,  6,  7,  3,  0,  7,  0,  5, -1, -1, -1],
+    [ 6, 10, 11,  0,  6, 11,  0, 11,  3,  0,  5,  6],
+    [ 0,  5,  3,  3,  5,  7,  5,  9,  7,  7,  9, 10],
+    [ 3,  9, 11,  3,  0,  5,  3,  5,  9, -1, -1, -1],
+    [ 8,  9,  6,  3,  8,  6,  3,  6,  7,  0,  8,  3],
+    [ 6, 10,  9,  8,  3,  0, 11,  3,  8, -1, -1, -1],
+    [10,  0,  8, 10,  7,  3, 10,  3,  0, -1, -1, -1],
+    [ 3,  8, 11,  0,  8,  3, -1, -1, -1, -1, -1, -1],
+    [ 0,  5,  3,  3,  5,  7,  5,  6,  7,  4, 11,  8],
+    [ 3,  0,  4,  8,  6, 10,  5,  6,  8, -1, -1, -1],
+    [ 0,  4,  3,  7, 11, 10,  5,  9,  8, -1, -1, -1],
+    [ 9,  8,  5,  3,  0,  4, -1, -1, -1, -1, -1, -1],
+    [ 0,  4,  3,  7,  9,  6, 11,  9,  7, -1, -1, -1],
+    [ 4,  3,  0,  6, 10,  9, -1, -1, -1, -1, -1, -1],
+    [10,  7, 11,  0,  4,  3, -1, -1, -1, -1, -1, -1],
+    [ 3,  0,  4, -1, -1, -1, -1, -1, -1, -1, -1, -1]])
 MC33_Lookup = np.array([[[[]]],
          [[[7, 10, 11]]],
          [[[9, 10, 6]]],
@@ -4176,7 +4305,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     assert len(I.shape) == 3, 'I must be a 3D numpy array of image data. For 2D, use MarchingSquaresImage.'
     I = I - threshold  
     if method == 'original':
-        LookupTable = MC_Lookup
+        LookupTable = MC_RLookup
     elif method == '33':
         LookupTable = MC33_Lookup
     else:
@@ -4241,6 +4370,8 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     kcubes = np.vstack([kidx,kidx,kidx,kidx,kidx+1,kidx+1,kidx+1,kidx+1]).T
     
     vals = I[icubes,jcubes,kcubes]
+    # vals = np.lib.stride_tricks.sliding_window_view(I, (2,2,2)).reshape(-1,8)[:,(0,2,6,4,1,3,7,5)]
+    
     inside = (vals <= 0).astype(int)
     if not np.any(inside):
         return np.empty((0,3)), np.empty((0,3))
@@ -4249,9 +4380,20 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     if method == 'original':
         flip = tableIdx > 127
         tableIdx[flip] = 128 - (tableIdx[flip]-127)
-        edgeList =  LookupTable[tableIdx]
-        edgeConnections = np.array([x[::-1] if flip[i] else x for i,y in enumerate(edgeList) for x in y if len(x) != 0])
-        numbering = np.array([j for j,y in enumerate(edgeList) for i,x in enumerate(y) if x != []])
+        
+        # edgeList =  LookupTable[tableIdx]
+        # edgeConnections = np.array([x[::-1] if flip[i] else x for i,y in enumerate(edgeList) for x in y if len(x) != 0])
+        # numbering = np.array([j for j,y in enumerate(edgeList) for i,x in enumerate(y) if x != []])
+        
+        edgeList = LookupTable[tableIdx]
+        
+        edgeList[flip] = edgeList[flip,::-1]
+        ntris = (np.sum(edgeList!=-1,axis=1)/3).astype(np.int16)
+        nonempty = ntris!=0
+        edgeConnections = edgeList[nonempty].reshape((np.sum(nonempty)*4,3))
+        edgeConnections = edgeConnections[np.any(edgeConnections!=-1,axis=1)]
+        
+        numbering = np.repeat(np.where(nonempty)[0],ntris[nonempty])
     
     elif method == '33':
         ##### TODO ####
@@ -4259,9 +4401,10 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         
     if len(numbering) == 0:
         return np.empty((0,3)), np.empty((0,3))
-    i_indices = icubes[numbering][np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]]
-    j_indices = jcubes[numbering][np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]]
-    k_indices = kcubes[numbering][np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]]
+    idx = np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]
+    i_indices = icubes[numbering][idx]
+    j_indices = jcubes[numbering][idx]
+    k_indices = kcubes[numbering][idx]
     
     ishiftdir = i_indices[:,:,1] - i_indices[:,:,0]
     jshiftdir = j_indices[:,:,1] - j_indices[:,:,0]
@@ -4465,7 +4608,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
     AnchorDir = []
     NodeValues = np.asarray(NodeValues,dtype=float) - threshold
     if flip:
-        NodeValues = -1*NodeValues
+        NodeValues = -1*NodeValuesVoxelNodeConn
     # if method == '33':
     #     _MarchingCubes33Lookup.LookupTable = MC33_Lookup
     #     _MarchingCubes33Lookup.FaceTests = MC33_FaceTest
@@ -4494,11 +4637,23 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
 
     HexVals = NodeValues[VoxelNodeConn]
     inside = HexVals <= 0
-    ints = np.sum(inside * 2**np.arange(0,8)[::-1], axis=1)
+    # ints = np.sum(inside * 2**np.arange(0,8)[::-1], axis=1)
+    ints = np.packbits(inside)
+    
     if method.lower() == 'original' or method.lower() == 'mc':
         flip = ints > 127
         ints[flip] = 128 - (ints[flip] - 127)
-        element_lists = MC_Lookup[ints]
+
+        hexnum = np.where((ints!=0))[0]
+        element_lists = MC_RLookup[ints[hexnum]]
+        # process multiple triangles (max is 4 for MC)
+        hexnum = np.repeat(hexnum,4)
+        element_lists = np.reshape(element_lists, (len(element_lists)*4, 3))
+        nonempty = np.any(element_lists != -1, axis=1)
+        hexnum = hexnum[nonempty]
+        elem = element_lists[nonempty]
+        nelem = len(hexnum)
+
     elif method.lower() == '33' or method.lower() == 'mc33':
         cases = MC33_Cases[ints]
         # ambiguities = np.isin(cases, (3, 4, 6, 7, 10, 12, 13))
@@ -4508,15 +4663,15 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         signs = MC33_Signs[ints]
 
         element_lists = [_MarchingCubes33Lookup(configs[i], cases[i], np.array(facetests[i]), signs[i], vals) for i,vals in enumerate(HexVals)]
+
+         # Process lookup results
+        hexnum, elem = zip(*[(i,e) for i,lst in enumerate(element_lists) for e in lst if lst != [[]] ])
+        hexnum = np.array(hexnum)
+        elem = np.array(elem)
+        nelem = len(hexnum)
     else:
         raise ValueError(f'Invalid method:{method}, must be "original" or "33"')
 
-
-    # Process lookup results
-    hexnum, elem = zip(*[(i,e) for i,lst in enumerate(element_lists) for e in lst if lst != [[]] ])
-    hexnum = np.array(hexnum)
-    elem = np.array(elem)
-    nelem = len(hexnum)
 
     relevant_hexs = VoxelNodeConn[hexnum]
     
@@ -4524,10 +4679,16 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
     
     ninterppts = 2
     lookup_indices = relevant_hexs[:, edgeLookup]
-    interpolation_pairs = (lookup_indices[np.arange(len(elem))[:, None], elem]).reshape((np.prod(elem.shape),ninterppts))
+    interpolation_pairs = (lookup_indices[np.arange(len(elem))[:, None], elem]).reshape((np.prod(elem.shape),ninterppts)).astype(np.uint64, copy=False)
     # interpolation_pairs = (interpolation_pairs[np.any(interpolation_pairs!=-1,axis=1)]).astype(int)
     
-    uinterpolation_pairs,inv = np.unique(np.sort(interpolation_pairs,axis=1),axis=0,return_inverse=True)
+    lower = np.minimum(interpolation_pairs[:,0],interpolation_pairs[:,1])
+    upper = np.maximum(interpolation_pairs[:,0],interpolation_pairs[:,1])
+    # Cantor pairing function to get unique id for each interpolation pair
+    C = (lower + upper) * (lower + upper + 1) // 2 + lower
+    uC,idx,inv = np.unique(C,return_index=True, return_inverse=True)
+    uinterpolation_pairs = interpolation_pairs[idx]
+    # uinterpolation_pairs,inv = np.unique(np.sort(interpolation_pairs,axis=1),axis=0,return_inverse=True)
 
     # Interpolation
     if interpolation.lower() == 'midpoint':
@@ -4968,7 +5129,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     if Type.lower() == 'surf' and not mixed_elements:
         NodeConn = inv[np.reshape(np.arange(nelem*3), (nelem, 3))]
     else:
-        lengths = [len(e) for e in elem]
+        lengths = np.sum(PadElem!=-1, axis=1) #[len(e) for e in elem]
         sums = np.append([0],np.cumsum(lengths))
         NodeConn = [[inv[n+sums[i]] for n in range(lengths[i])] for i in range(len(lengths))]
 
@@ -5924,8 +6085,11 @@ def _generateLookup33():
         LookupTable[i], Cases[i], FaceTests[i], Signs[i] = lookup(bits,-1)
     return LookupTable, Cases, FaceTests, Signs
 
-def _generateLookup():
+def _generateLookup(rectangular=True, full=False):
     # LookupTable, Cases = _generateLookup()
+    # rectangular=True flattens inner arrays and pads the table to be a 
+    # rectangular numpy array
+    # full=True returns the full table, full=False returns the first half
     import random
     def R1x(bits, k):
         # 90 deg x-axis rotation (ccw)
@@ -6061,6 +6225,11 @@ def _generateLookup():
     for i in range(256):
         bits = np.array([int(b) for b in list('{:08b}'.format(i))])
         LookupTable[i], Cases[i] = lookup(bits)
+    if rectangular:
+        LookupTable = utils.PadRagged([np.array(LookupTable[i]).flatten() for i in range(len(LookupTable))])
+    if not full:
+        LookupTable = LookupTable[:128]
+        Cases = Cases[:128]
     return LookupTable, Cases
  
 # %%
