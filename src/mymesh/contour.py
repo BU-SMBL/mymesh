@@ -4676,6 +4676,25 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
             []                      # 15-1111
         ],dtype=object)
 
+    MT_RLookup = np.array([
+                [-1,-1,-1,-1,-1,-1],    # 0-0000
+                [ 3, 5, 4,-1,-1,-1],    # 1-0001
+                [ 4, 2, 1,-1,-1,-1],    # 2-0010
+                [ 1, 3, 5, 1, 5, 2],    # 3-0011
+                [ 0, 3, 1,-1,-1,-1],    # 4-0100
+                [ 1, 0, 5, 1, 5, 4],    # 5-0101
+                [ 0, 3, 4, 0, 4, 2],    # 6-0110
+                [ 0, 5, 2,-1,-1,-1],    # 7-0111
+                [ 0, 2, 5,-1,-1,-1],    # 8-1000
+                [ 0, 2, 4, 0, 4, 3],    # 9-1001
+                [ 0, 1, 4, 0, 4, 5],    # 10-1010
+                [ 0, 1, 3,-1,-1,-1],    # 11-1011
+                [ 1, 2, 5, 1, 5, 3],    # 12-1100
+                [ 1, 2, 4,-1,-1,-1],    # 13-1101
+                [ 3, 4, 5,-1,-1,-1],    # 14-1110
+                [-1,-1,-1,-1,-1,-1]     # 15-1111
+            ])
+
     MTMixed_Lookup = np.array([
             [],             # 0-0000
             [[3, 5, 4]],    # 1-0001
@@ -4694,7 +4713,25 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
             [[3, 4, 5]],    # 14-1110
             []              # 15-1111
         ],dtype=object)
-
+    MTMixed_RLookup = np.array([
+            [-1,-1,-1,-1],             # 0-0000
+            [ 3, 5, 4,-1],    # 1-0001
+            [ 4, 2, 1,-1],    # 2-0010
+            [ 1, 3, 5, 2], # 3-0011
+            [ 0, 3, 1,-1],    # 4-0100
+            [ 1, 0, 5, 4], # 5-0101
+            [ 0, 3, 4, 2], # 6-0110
+            [ 0, 5, 2,-1],    # 7-0111
+            [ 0, 2, 5,-1],    # 8-1000
+            [ 0, 2, 4, 3], # 9-1001
+            [ 0, 1, 4, 5], # 10-1010
+            [ 0, 1, 3,-1],    # 11-1011
+            [ 1, 2, 5, 3], # 12-1100
+            [ 1, 2, 4,-1],    # 13-1101
+            [ 3, 4, 5,-1],    # 14-1110
+            [-1,-1,-1,-1]              # 15-1111
+        ])
+    
     MTVMixed_Lookup = np.array([
             [],                     # 0-0000
             [[9, 3, 5, 4]],         # 1-0001
@@ -4713,6 +4750,24 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
             [[7, 8, 6, 3, 4, 5]],   # 14-1110
             [[6, 7, 8, 9]]          # 15-1111
         ],dtype=object)
+    MTVMixed_RLookup = np.array([
+            [-1,-1,-1,-1,-1,-1],                     # 0-0000
+            [ 9, 3, 5, 4,-1,-1],         # 1-0001
+            [ 8, 4, 2, 1,-1,-1],         # 2-0010
+            [ 3, 5, 9, 1, 2, 8],   # 3-0011
+            [ 7, 0, 3, 1,-1,-1],         # 4-0100
+            [ 1, 0, 7, 4, 5, 9],   # 5-0101
+            [ 0, 3, 7, 2, 4, 8],   # 6-0110
+            [ 7, 9, 8, 0, 5, 2],   # 7-0111
+            [ 6, 0, 2, 5,-1,-1],         # 8-1000
+            [ 0, 2, 6, 3, 4, 9],   # 9-1001
+            [ 1, 4, 8, 0, 5, 6],   # 10-1010
+            [ 6, 8, 9, 0, 1, 3],   # 11-1011
+            [ 3, 1, 7, 5, 2, 6],   # 12-1100
+            [ 7, 6, 9, 1, 2, 4],   # 13-1101
+            [ 7, 8, 6, 3, 4, 5],   # 14-1110
+            [ 6, 7, 8, 9,-1,-1]          # 15-1111
+        ])
     
     if interpolation.lower() == 'midpoint' or interpolation.lower() == 'linear':
         edgeLookup = np.array([
@@ -4743,7 +4798,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
             [2, 2, 2],  # (8) Node 2
             [3, 3, 3],  # (9) Node 3
             ])
-        PadEdgeLookup = np.vstack([edgeLookup, [-1,-1, -1]])
+        PadEdgeLookup = np.vstack([edgeLookup, [-1,-1,-1]])
         ninterppts = 3
     else:
         raise ValueError(f'Interpolation must be one of "midpoint", "linear", or "quadratic", not "{interpolation:s}"')
@@ -4768,34 +4823,47 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
             return NodeCoords, NodeConn, ParentIds
         return NodeCoords, NodeConn
 
-    ints = np.sum(inside[:,:4] * 2**np.arange(0,4)[::-1], axis=1)
-
+    # ints = np.sum(inside[:,:4] * 2**np.arange(0,4)[::-1], axis=1)
+    ints = np.packbits(inside[:,::-1], bitorder='little',axis=1)[:,0]
+    
     # Query lookup tables
     if Type.lower() == 'surf':
+        tetnum = np.where((ints!=0) & (ints!=15))[0]
         if mixed_elements:
-            element_lists = MTMixed_Lookup[ints]
+            PadElem = MTMixed_RLookup[ints[tetnum]]
+            
         else:
-            element_lists = MT_Lookup[ints]
+            element_lists = MT_RLookup[ints[tetnum]]
+            # process multiple triangles 
+            tetnum = np.repeat(tetnum,2)
+            element_lists = np.reshape(element_lists, (len(element_lists)*2, 3))
+            nonempty = np.any(element_lists != -1, axis=1)
+            tetnum = tetnum[nonempty]
+            PadElem = element_lists[nonempty]
     elif Type.lower() == 'vol':
-        element_lists = MTVMixed_Lookup[ints]
+        tetnum = np.where(ints!=0)[0]
+        PadElem = MTVMixed_RLookup[ints[tetnum]]
     else:
         raise ValueError('Invalid Type, Type must be "surf" or "vol".')
 
-    # Process lookup results
-    tetnum, elem = zip(*[(i,e) for i,lst in enumerate(element_lists) for e in lst if lst != []])
-    tetnum = np.array(tetnum)
     nelem = len(tetnum)
 
     relevant_tets = TetNodeConn[tetnum]
-    
-    PadElem = utils.PadRagged(elem)
-    pad_relevant_tets = np.hstack([relevant_tets, -1*np.ones((len(elem),1),dtype=np.int32)])
+    pad_relevant_tets = np.hstack([relevant_tets, -1*np.ones((nelem,1),dtype=np.int32)])
     
     lookup_indices = pad_relevant_tets[:, PadEdgeLookup]
-    interpolation_pairs = (lookup_indices[np.arange(len(elem))[:, None], PadElem]).reshape((np.prod(PadElem.shape),ninterppts))
-    interpolation_pairs = (interpolation_pairs[np.any(interpolation_pairs!=-1,axis=1)]).astype(int)
-    
-    uinterpolation_pairs,inv = np.unique(np.sort(interpolation_pairs,axis=1),axis=0,return_inverse=True)
+    interpolation_pairs = (lookup_indices[np.arange(nelem)[:, None], PadElem]).reshape((np.prod(PadElem.shape),ninterppts))
+    interpolation_pairs = (interpolation_pairs[np.any(interpolation_pairs!=-1,axis=1)]).astype(np.uint64, copy=False)
+
+    if interpolation_pairs.shape[1] == 2:
+        lower = np.minimum(interpolation_pairs[:,0],interpolation_pairs[:,1])
+        upper = np.maximum(interpolation_pairs[:,0],interpolation_pairs[:,1])
+        # Cantor pairing function to get unique id for each interpolation pair
+        C = (lower + upper) * (lower + upper + 1) // 2 + lower
+        uC,idx,inv = np.unique(C,return_index=True, return_inverse=True)
+        uinterpolation_pairs = interpolation_pairs[idx]
+    else:
+        uinterpolation_pairs,inv = np.unique(np.sort(interpolation_pairs,axis=1),axis=0,return_inverse=True)
 
     # Interpolation
     if interpolation.lower() == 'midpoint':
