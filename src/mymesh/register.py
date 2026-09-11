@@ -1005,7 +1005,7 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
     # Process metric input
     point_based = False
     grayscale = False
-    if metric.lower() == 'mutual_information' or metric.lower() == 'MI':
+    if metric.lower() == 'mutual_information' or metric.lower() == 'mi':
         obj = mutual_information
         grayscale = True
     elif metric.lower() == 'dice':
@@ -1021,7 +1021,7 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
         verbose = False
 
     else:
-        raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Image2Image3d registration.')
+        raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Image2Image registration.')
 
     if point_based:
         obj = None
@@ -1389,7 +1389,7 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
             print('-----||-----------||----------|----------|----------')   
     elif transform.lower() == 'translation2d':
         nparam = 2
-        transformation = lambda x : translation2d(x, center=center)
+        transformation = lambda x : translation2d(x)
         x0 = np.zeros(nparam)
         if bounds is None:
             bounds = [
