@@ -919,25 +919,33 @@ def hex2tet(NodeCoords,NodeConn,method='1to6'):
 
     if method == '1to5':
         ArrayConn = np.asarray(NodeConn, dtype=int)
-        TetConn = -1*np.ones((len(NodeConn)*5,4))
-        TetConn[0::5] = ArrayConn[:,[0,1,3,4]]
-        TetConn[1::5] = ArrayConn[:,[1,2,3,6]]
-        TetConn[2::5] = ArrayConn[:,[4,6,5,1]]
-        TetConn[3::5] = ArrayConn[:,[4,7,6,3]]
-        TetConn[4::5] = ArrayConn[:,[4,6,1,3]]
-        TetConn = TetConn.astype(int)
+        # TetConn = -1*np.ones((len(NodeConn)*5,4))
+        # TetConn[0::5] = ArrayConn[:,[0,1,3,4]]
+        # TetConn[1::5] = ArrayConn[:,[1,2,3,6]]
+        # TetConn[2::5] = ArrayConn[:,[4,6,5,1]]
+        # TetConn[3::5] = ArrayConn[:,[4,7,6,3]]
+        # TetConn[4::5] = ArrayConn[:,[4,6,1,3]]
+        # TetConn = TetConn.astype(int)
+        
+        pattern = np.array([[0,1,3,4],
+                   [1,2,3,6],
+                   [4,6,5,1],
+                   [4,7,6,3],
+                   [4,6,1,3]], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        TetConn = ArrayConn[:,pattern].reshape(shape)  
         NewCoords = NodeCoords
     elif method == '1to6':
         ArrayConn = np.asarray(NodeConn, dtype=int)
-        TetConn = -1*np.ones((len(NodeConn)*6,4))
-        TetConn[0::6] = ArrayConn[:,[0,1,3,5]]
-        TetConn[1::6] = ArrayConn[:,[5,2,3,6]]
-        TetConn[2::6] = ArrayConn[:,[0,5,3,4]]
-        TetConn[3::6] = ArrayConn[:,[3,7,4,5]]
-        TetConn[4::6] = ArrayConn[:,[1,2,3,5]]
-        TetConn[5::6] = ArrayConn[:,[5,7,6,3]]
-
-        TetConn = TetConn.astype(int)
+        pattern = np.array([[0,1,3,5],
+                   [5,2,3,6],
+                   [0,5,3,4],
+                   [3,7,4,5],
+                   [1,2,3,5],
+                   [5,7,6,3]], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        TetConn = ArrayConn[:,pattern].reshape(shape)   
+        
         NewCoords = NodeCoords
     elif method == '1to24':
         ArrayCoords = np.asarray(NodeCoords)
@@ -1046,11 +1054,18 @@ def wedge2tet(NodeCoords, NodeConn, method='1to3c'):
 
     ArrayConn = np.asarray(NodeConn)
     if method == '1to3':
-        TetConn = -1*np.ones((len(NodeConn)*3,4))
-        TetConn[0::3] = ArrayConn[:,[0,1,2,3]]
-        TetConn[1::3] = ArrayConn[:,[1,2,3,4]]
-        TetConn[2::3] = ArrayConn[:,[4,5,2,3]]
-        TetConn = TetConn.astype(int)
+        # TetConn = -1*np.ones((len(NodeConn)*3,4))
+        # TetConn[0::3] = ArrayConn[:,[0,1,2,3]]
+        # TetConn[1::3] = ArrayConn[:,[1,2,3,4]]
+        # TetConn[2::3] = ArrayConn[:,[4,5,2,3]]
+        # TetConn = TetConn.astype(int)
+
+        pattern = np.array([[0,1,2,3],
+                            [1,2,3,4],
+                            [4,5,2,3]], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        TetConn = ArrayConn[:,pattern].reshape(shape)   
+        
         NewCoords = NodeCoords
     elif method == '1to3c':
         # Get the three quadrilateral faces
@@ -1311,10 +1326,15 @@ def pyramid2tet(NodeCoords,NodeConn, method='1to2c'):
     
     if method == '1to2':
         ArrayConn = np.asarray(NodeConn)
-        TetConn = -1*np.ones((len(NodeConn)*2,4))
-        TetConn[0::2] = ArrayConn[:,[0,1,2,4]]
-        TetConn[1::2] = ArrayConn[:,[0,2,3,4]]
-        TetConn = TetConn.astype(int)
+        # TetConn = -1*np.ones((len(NodeConn)*2,4))
+        # TetConn[0::2] = ArrayConn[:,[0,1,2,4]]
+        # TetConn[1::2] = ArrayConn[:,[0,2,3,4]]
+        # TetConn = TetConn.astype(int)
+
+        pattern = np.array([[0,1,2,4],
+                            [0,2,3,4]], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        TetConn = ArrayConn[:,pattern].reshape(shape)   
         NewCoords = NodeCoords
 
     elif method == '1to2c':
@@ -1577,12 +1597,21 @@ def tet2faces(NodeCoords,NodeConn):
     # ref: https://abaqus-docs.mit.edu/2017/English/SIMACAETHERefMap/simathe-c-tritetwedge.htm#simathe-c-tritetwedge-t-Interpolation-sma-topic1__simathe-c-stmtritet-iso-master
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
-        Faces = -1*np.ones((len(NodeConn)*4,3),dtype=int)
-        # Faces = [None]*len(NodeConn)*4
-        Faces[0::4] = ArrayConn[:,[0,2,1]]
-        Faces[1::4] = ArrayConn[:,[0,1,3]]
-        Faces[2::4] = ArrayConn[:,[1,2,3]]
-        Faces[3::4] = ArrayConn[:,[0,3,2]]
+        # Faces = -1*np.ones((len(NodeConn)*4,3),dtype=int)
+        # # Faces = [None]*len(NodeConn)*4
+        # Faces[0::4] = ArrayConn[:,[0,2,1]]
+        # Faces[1::4] = ArrayConn[:,[0,1,3]]
+        # Faces[2::4] = ArrayConn[:,[1,2,3]]
+        # Faces[3::4] = ArrayConn[:,[0,3,2]]
+        
+        pattern = np.array([
+                   [0,2,1],
+                   [0,1,3],
+                   [1,2,3],
+                   [0,3,2]], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        Faces = ArrayConn[:,pattern].reshape(shape)  
+        
     else:
         Faces = np.empty((0,3))
 
@@ -1614,11 +1643,19 @@ def tet102faces(NodeCoords,NodeConn):
     # ref: https://abaqus-docs.mit.edu/2017/English/SIMACAETHERefMap/simathe-c-tritetwedge.htm#simathe-c-tritetwedge-t-Interpolation-sma-topic1__simathe-c-stmtritet-iso-master
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
-        Faces = -1*np.ones((len(NodeConn)*4,6),dtype=int)
-        Faces[0::4] = ArrayConn[:,[0,2,1,6,5,4]]
-        Faces[1::4] = ArrayConn[:,[0,1,3,4,8,7]]
-        Faces[2::4] = ArrayConn[:,[1,2,3,5,9,8]]
-        Faces[3::4] = ArrayConn[:,[0,3,2,7,9,6]]
+        # Faces = -1*np.ones((len(NodeConn)*4,6),dtype=int)
+        # Faces[0::4] = ArrayConn[:,[0,2,1,6,5,4]]
+        # Faces[1::4] = ArrayConn[:,[0,1,3,4,8,7]]
+        # Faces[2::4] = ArrayConn[:,[1,2,3,5,9,8]]
+        # Faces[3::4] = ArrayConn[:,[0,3,2,7,9,6]]
+
+        pattern = np.array([[0,2,1,6,5,4],
+                            [0,1,3,4,8,7],
+                            [1,2,3,5,9,8],
+                            [0,3,2,7,9,6]], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        Faces = ArrayConn[:,pattern].reshape(shape)   
+        
     else:
         Faces = np.empty((0,6))
 
@@ -1648,14 +1685,25 @@ def hex2faces(NodeCoords,NodeConn):
     # ref: https://abaqus-docs.mit.edu/2017/English/SIMACAEELMRefMap/simaelm-c-solidcont.htm
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
-        Faces = -1*np.ones((len(NodeConn)*6,4))
-        Faces[0::6] = ArrayConn[:,[0,3,2,1]]
-        Faces[1::6] = ArrayConn[:,[0,1,5,4]]
-        Faces[2::6] = ArrayConn[:,[1,2,6,5]]
-        Faces[3::6] = ArrayConn[:,[2,3,7,6]]
-        Faces[4::6] = ArrayConn[:,[3,0,4,7]]
-        Faces[5::6] = ArrayConn[:,[4,5,6,7]]
-        Faces = Faces.astype(int)
+        # Faces = -1*np.ones((len(NodeConn)*6,4))
+        # Faces[0::6] = ArrayConn[:,[0,3,2,1]]
+        # Faces[1::6] = ArrayConn[:,[0,1,5,4]]
+        # Faces[2::6] = ArrayConn[:,[1,2,6,5]]
+        # Faces[3::6] = ArrayConn[:,[2,3,7,6]]
+        # Faces[4::6] = ArrayConn[:,[3,0,4,7]]
+        # Faces[5::6] = ArrayConn[:,[4,5,6,7]]
+        # Faces = Faces.astype(int)
+
+        pattern = np.array([[0,3,2,1],
+                            [0,1,5,4],
+                            [1,2,6,5],
+                            [2,3,7,6],
+                            [3,0,4,7],
+                            [4,5,6,7]
+                            ], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        Faces = ArrayConn[:,pattern].reshape(shape)  
+
     else:
         Faces = np.empty((0,4))
     return Faces
@@ -1681,14 +1729,25 @@ def hex202faces(NodeCoords,NodeConn):
     """
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
-        Faces = -1*np.ones((len(NodeConn)*6,8))
-        Faces[0::6] = ArrayConn[:,[0,3,2,1,11,10,9,8]]
-        Faces[1::6] = ArrayConn[:,[0,1,5,4,8,17,12,16]]
-        Faces[2::6] = ArrayConn[:,[1,2,6,5,9,18,13,17]]
-        Faces[3::6] = ArrayConn[:,[2,3,7,6,10,19,14,18]]
-        Faces[4::6] = ArrayConn[:,[3,0,4,7,11,16,15,19]]
-        Faces[5::6] = ArrayConn[:,[4,5,6,7,12,13,14,15]]
-        Faces = Faces.astype(int)
+        # Faces = -1*np.ones((len(NodeConn)*6,8))
+        # Faces[0::6] = ArrayConn[:,[0,3,2,1,11,10,9,8]]
+        # Faces[1::6] = ArrayConn[:,[0,1,5,4,8,17,12,16]]
+        # Faces[2::6] = ArrayConn[:,[1,2,6,5,9,18,13,17]]
+        # Faces[3::6] = ArrayConn[:,[2,3,7,6,10,19,14,18]]
+        # Faces[4::6] = ArrayConn[:,[3,0,4,7,11,16,15,19]]
+        # Faces[5::6] = ArrayConn[:,[4,5,6,7,12,13,14,15]]
+        # Faces = Faces.astype(int)
+
+        pattern = np.array([[0,3,2,1,11,10,9,8],
+                            [0,1,5,4,8,17,12,16],
+                            [1,2,6,5,9,18,13,17],
+                            [2,3,7,6,10,19,14,18],
+                            [3,0,4,7,11,16,15,19],
+                            [4,5,6,7,12,13,14,15]
+                            ], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        Faces = ArrayConn[:,pattern].reshape(shape)  
+        
     else:
         Faces = np.empty((0,8))
     return Faces
@@ -1779,11 +1838,18 @@ def tri2edges(NodeCoords,NodeConn):
     # Explode surface elements into edges
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
-        Edges = -1*np.ones((len(NodeConn)*3,2))
-        Edges[0::3] = ArrayConn[:,[0,1]]
-        Edges[1::3] = ArrayConn[:,[1,2]]
-        Edges[2::3] = ArrayConn[:,[2,0]]
-        Edges = Edges.astype(int)
+        # Edges = -1*np.ones((len(NodeConn)*3,2))
+        # Edges[0::3] = ArrayConn[:,[0,1]]
+        # Edges[1::3] = ArrayConn[:,[1,2]]
+        # Edges[2::3] = ArrayConn[:,[2,0]]
+        # Edges = Edges.astype(int)
+
+        pattern = np.array([[0,1],
+                            [1,2],
+                            [2,0],
+                            ], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        Edges = ArrayConn[:,pattern].reshape(shape)  
     else:
         Edges = np.empty((0,2),dtype=int)
     
@@ -1808,13 +1874,21 @@ def quad2edges(NodeCoords,NodeConn):
     """
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
-        Edges = -1*np.ones((len(NodeConn)*4,2))
-        Edges[0::4] = ArrayConn[:,[0,1]]
-        Edges[1::4] = ArrayConn[:,[1,2]]
-        Edges[2::4] = ArrayConn[:,[2,3]]
-        Edges[3::4] = ArrayConn[:,[3,0]]
+        # Edges = -1*np.ones((len(NodeConn)*4,2))
+        # Edges[0::4] = ArrayConn[:,[0,1]]
+        # Edges[1::4] = ArrayConn[:,[1,2]]
+        # Edges[2::4] = ArrayConn[:,[2,3]]
+        # Edges[3::4] = ArrayConn[:,[3,0]]
 
-        Edges = Edges.astype(int)
+        # Edges = Edges.astype(int)
+
+        pattern = np.array([[0,1],
+                            [1,2],
+                            [2,3],
+                            [3,0]
+                            ], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        Edges = ArrayConn[:,pattern].reshape(shape) 
     else:
         Edges = np.empty((0,2),dtype=int)
     
@@ -1863,13 +1937,24 @@ def tet2edges(NodeCoords,NodeConn):
 
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
-        Edges = -1*np.ones((len(NodeConn)*6,2),dtype=np.int64)
-        Edges[0::6] = ArrayConn[:,np.array([0,1])]
-        Edges[1::6] = ArrayConn[:,np.array([1,2])]
-        Edges[2::6] = ArrayConn[:,np.array([2,0])]
-        Edges[3::6] = ArrayConn[:,np.array([0,3])]
-        Edges[4::6] = ArrayConn[:,np.array([1,3])]
-        Edges[5::6] = ArrayConn[:,np.array([2,3])]
+        # Edges = -1*np.ones((len(NodeConn)*6,2),dtype=np.int64)
+        # Edges[0::6] = ArrayConn[:,np.array([0,1])]
+        # Edges[1::6] = ArrayConn[:,np.array([1,2])]
+        # Edges[2::6] = ArrayConn[:,np.array([2,0])]
+        # Edges[3::6] = ArrayConn[:,np.array([0,3])]
+        # Edges[4::6] = ArrayConn[:,np.array([1,3])]
+        # Edges[5::6] = ArrayConn[:,np.array([2,3])]
+
+
+        pattern = np.array([[0,1],
+                            [1,2],
+                            [2,0],
+                            [0,3],
+                            [1,3],
+                            [2,3]
+                            ], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        Edges = ArrayConn[:,pattern].reshape(shape) 
     else:
         Edges = np.empty((0,2),dtype=np.int64)
     return Edges
@@ -1893,13 +1978,24 @@ def tet102edges(NodeCoords,NodeConn):
 
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
-        Edges = -1*np.ones((len(NodeConn)*6,3),dtype=np.int64)
-        Edges[0::6] = ArrayConn[:,np.array([0,4,1])]
-        Edges[1::6] = ArrayConn[:,np.array([1,5,2])]
-        Edges[2::6] = ArrayConn[:,np.array([2,6,0])]
-        Edges[3::6] = ArrayConn[:,np.array([0,7,3])]
-        Edges[4::6] = ArrayConn[:,np.array([1,8,3])]
-        Edges[5::6] = ArrayConn[:,np.array([2,9,3])]
+        # Edges = -1*np.ones((len(NodeConn)*6,3),dtype=np.int64)
+        # Edges[0::6] = ArrayConn[:,np.array([0,4,1])]
+        # Edges[1::6] = ArrayConn[:,np.array([1,5,2])]
+        # Edges[2::6] = ArrayConn[:,np.array([2,6,0])]
+        # Edges[3::6] = ArrayConn[:,np.array([0,7,3])]
+        # Edges[4::6] = ArrayConn[:,np.array([1,8,3])]
+        # Edges[5::6] = ArrayConn[:,np.array([2,9,3])]
+
+
+        pattern = np.array([[0,4,1],
+                            [1,5,2],
+                            [2,6,0],
+                            [0,7,3],
+                            [1,8,3],
+                            [2,9,3]
+                            ], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        Edges = ArrayConn[:,pattern].reshape(shape) 
     else:
         Edges = np.empty((0,3),dtype=np.int64)
     return Edges
@@ -1923,17 +2019,29 @@ def pyramid2edges(NodeCoords,NodeConn):
     """
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
-        Edges = -1*np.ones((len(NodeConn)*8,2))
-        Edges[0::8] = ArrayConn[:,[0,1]]
-        Edges[1::8] = ArrayConn[:,[1,2]]
-        Edges[2::8] = ArrayConn[:,[2,3]]
-        Edges[3::8] = ArrayConn[:,[3,0]]
-        Edges[4::8] = ArrayConn[:,[0,4]]
-        Edges[5::8] = ArrayConn[:,[1,4]]
-        Edges[6::8] = ArrayConn[:,[2,4]]
-        Edges[7::8] = ArrayConn[:,[3,4]]
-        Edges = Edges.astype(int)
-        Edges = Edges.tolist()
+        # Edges = -1*np.ones((len(NodeConn)*8,2))
+        # Edges[0::8] = ArrayConn[:,[0,1]]
+        # Edges[1::8] = ArrayConn[:,[1,2]]
+        # Edges[2::8] = ArrayConn[:,[2,3]]
+        # Edges[3::8] = ArrayConn[:,[3,0]]
+        # Edges[4::8] = ArrayConn[:,[0,4]]
+        # Edges[5::8] = ArrayConn[:,[1,4]]
+        # Edges[6::8] = ArrayConn[:,[2,4]]
+        # Edges[7::8] = ArrayConn[:,[3,4]]
+        # Edges = Edges.astype(int)
+        # Edges = Edges.tolist()
+
+        pattern = np.array([[0,1],
+                            [1,2],
+                            [2,3],
+                            [3,0],
+                            [0,4],
+                            [1,4],
+                            [2,4],
+                            [3,4]
+                            ], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        Edges = ArrayConn[:,pattern].reshape(shape) 
     else:
         Edges = np.empty((0,2),dtype=int)
     return Edges
@@ -1957,17 +2065,30 @@ def wedge2edges(NodeCoords,NodeConn):
     """
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
-        Edges = -1*np.ones((len(NodeConn)*9,2))
-        Edges[0::9] = ArrayConn[:,[0,1]]
-        Edges[1::9] = ArrayConn[:,[1,2]]
-        Edges[2::9] = ArrayConn[:,[2,0]]
-        Edges[3::9] = ArrayConn[:,[0,3]]
-        Edges[4::9] = ArrayConn[:,[1,4]]
-        Edges[5::9] = ArrayConn[:,[2,5]]
-        Edges[6::9] = ArrayConn[:,[3,4]]
-        Edges[7::9] = ArrayConn[:,[4,5]]
-        Edges[8::9] = ArrayConn[:,[5,3]]
-        Edges = Edges.astype(int)
+        # Edges = -1*np.ones((len(NodeConn)*9,2))
+        # Edges[0::9] = ArrayConn[:,[0,1]]
+        # Edges[1::9] = ArrayConn[:,[1,2]]
+        # Edges[2::9] = ArrayConn[:,[2,0]]
+        # Edges[3::9] = ArrayConn[:,[0,3]]
+        # Edges[4::9] = ArrayConn[:,[1,4]]
+        # Edges[5::9] = ArrayConn[:,[2,5]]
+        # Edges[6::9] = ArrayConn[:,[3,4]]
+        # Edges[7::9] = ArrayConn[:,[4,5]]
+        # Edges[8::9] = ArrayConn[:,[5,3]]
+        # Edges = Edges.astype(int)
+
+        pattern = np.array([[0,1],
+                            [1,2],
+                            [2,0],
+                            [0,3],
+                            [1,4],
+                            [2,5],
+                            [3,4],
+                            [4,5],
+                            [5,3]
+                            ], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        Edges = ArrayConn[:,pattern].reshape(shape) 
     else:
         Edges = np.empty((0,2),dtype=int)
     return Edges
@@ -1991,20 +2112,36 @@ def hex2edges(NodeCoords,NodeConn):
     """
     if len(NodeConn) > 0:
         ArrayConn = np.asarray(NodeConn)
-        Edges = -1*np.ones((len(NodeConn)*12,2))
-        Edges[0::12] = ArrayConn[:,[0,1]]
-        Edges[1::12] = ArrayConn[:,[1,2]]
-        Edges[2::12] = ArrayConn[:,[2,3]]
-        Edges[3::12] = ArrayConn[:,[3,0]]
-        Edges[4::12] = ArrayConn[:,[0,4]]
-        Edges[5::12] = ArrayConn[:,[1,5]]
-        Edges[6::12] = ArrayConn[:,[2,6]]
-        Edges[7::12] = ArrayConn[:,[3,7]]
-        Edges[8::12] = ArrayConn[:,[4,5]]
-        Edges[9::12] = ArrayConn[:,[5,6]]
-        Edges[10::12] = ArrayConn[:,[6,7]]
-        Edges[11::12] = ArrayConn[:,[7,4]]
-        Edges = Edges.astype(int)
+        # Edges = -1*np.ones((len(NodeConn)*12,2))
+        # Edges[0::12] = ArrayConn[:,[0,1]]
+        # Edges[1::12] = ArrayConn[:,[1,2]]
+        # Edges[2::12] = ArrayConn[:,[2,3]]
+        # Edges[3::12] = ArrayConn[:,[3,0]]
+        # Edges[4::12] = ArrayConn[:,[0,4]]
+        # Edges[5::12] = ArrayConn[:,[1,5]]
+        # Edges[6::12] = ArrayConn[:,[2,6]]
+        # Edges[7::12] = ArrayConn[:,[3,7]]
+        # Edges[8::12] = ArrayConn[:,[4,5]]
+        # Edges[9::12] = ArrayConn[:,[5,6]]
+        # Edges[10::12] = ArrayConn[:,[6,7]]
+        # Edges[11::12] = ArrayConn[:,[7,4]]
+        # Edges = Edges.astype(int)
+
+        pattern = np.array([[0,1],
+                            [1,2],
+                            [2,3],
+                            [3,0],
+                            [0,4],
+                            [1,5],
+                            [2,6],
+                            [3,7],
+                            [4,5],
+                            [5,6],
+                            [6,7],
+                            [7,4]
+                            ], dtype=int)
+        shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+        Edges = ArrayConn[:,pattern].reshape(shape) 
     else:
         Edges = np.empty((0,2),dtype=int)
     return Edges
@@ -2032,9 +2169,15 @@ def quad2tri(NodeCoords,NodeConn):
         return NodeCoords, np.empty((0,3),dtype=int)
 
     ArrayConn = np.asarray(NodeConn, dtype=int)
-    TriConn = -1*np.ones((len(NodeConn)*2,3),dtype=int)
-    TriConn[0::2] = ArrayConn[:,[0,1,3,]]
-    TriConn[1::2] = ArrayConn[:,[1,2,3,]]
+    # TriConn = -1*np.ones((len(NodeConn)*2,3),dtype=int)
+    # TriConn[0::2] = ArrayConn[:,[0,1,3,]]
+    # TriConn[1::2] = ArrayConn[:,[1,2,3,]]
+
+    pattern = np.array([[0,1,3],
+                        [1,2,3],
+                        ], dtype=int)
+    shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+    TriConn = ArrayConn[:,pattern].reshape(shape) 
     
     return NodeCoords, TriConn
 
@@ -2065,9 +2208,14 @@ def quad82tri6(NodeCoords,NodeConn):
     ArrayConn = np.column_stack([ArrayConn, np.arange(len(NodeCoords), len(NodeCoords)+len(ArrayConn))])
     NewNode = np.mean(np.asarray(NodeCoords)[ArrayConn[:,[1,3]]],axis=1)
     NewCoords = np.vstack((NodeCoords, NewNode))
-    TriConn = -1*np.ones((len(NodeConn)*2,6),dtype=int)
-    TriConn[0::2] = ArrayConn[:,[0,1,3,4,8,7]]
-    TriConn[1::2] = ArrayConn[:,[1,2,3,5,6,8]]
+    # TriConn = -1*np.ones((len(NodeConn)*2,6),dtype=int)
+    # TriConn[0::2] = ArrayConn[:,[0,1,3,4,8,7]]
+    # TriConn[1::2] = ArrayConn[:,[1,2,3,5,6,8]]
+    pattern = np.array([[0,1,3,4,8,7],
+                        [1,2,3,5,6,8],
+                        ], dtype=int)
+    shape = (len(ArrayConn)*pattern.shape[0], pattern.shape[1])
+    TriConn = ArrayConn[:,pattern].reshape(shape) 
     
     return NewCoords, TriConn
 
