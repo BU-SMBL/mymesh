@@ -70,6 +70,24 @@ MSTriangle_Lookup = np.array([
             [[0,1,2],[0,2,6],[6,7,0]], # 14-1110
             [[0,1,2],[2,3,0]]   # 15-1111
         ],dtype=object)
+MSTriangle_RLookup = np.array([
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], # 0-0000
+            [ 7, 6, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1], # 1-0001
+            [ 5, 2, 6,-1,-1,-1,-1,-1,-1,-1,-1,-1], # 2-0010
+            [ 7, 5, 2, 2, 3, 7,-1,-1,-1,-1,-1,-1], # 3-0011
+            [ 4, 1, 5,-1,-1,-1,-1,-1,-1,-1,-1,-1], # 4-0100
+            [ 4, 1, 5, 5, 6, 4, 4, 6, 7, 7, 6, 3], # 5-0101
+            [ 4, 1, 2, 2, 6, 4,-1,-1,-1,-1,-1,-1], # 6-0110
+            [ 1, 2, 3, 3, 4, 1, 4, 3, 7,-1,-1,-1], # 7-0111
+            [ 0, 4, 7,-1,-1,-1,-1,-1,-1,-1,-1,-1], # 8-1000
+            [ 0, 4, 6, 6, 3, 0,-1,-1,-1,-1,-1,-1], # 9-1001
+            [ 0, 4, 7, 4, 5, 7, 7, 5, 6, 6, 5, 2], # 10-1010
+            [ 0, 2, 3, 0, 4, 5, 5, 2, 0,-1,-1,-1], # 11-1011
+            [ 0, 1, 5, 5, 7, 0,-1,-1,-1,-1,-1,-1], # 12-1100
+            [ 0, 1, 3, 1, 5, 6, 6, 3, 1,-1,-1,-1], # 13-1101
+            [ 0, 1, 2, 0, 2, 6, 6, 7, 0,-1,-1,-1], # 14-1110
+            [ 0, 1, 2, 2, 3, 0,-1,-1,-1,-1,-1,-1]   # 15-1111
+        ])
 MSMixed_Lookup = np.array([
             [[]],               # 0-0000
             [[7,6,3]],          # 1-0001
@@ -4254,7 +4272,7 @@ def MarchingTriangles(TriNodeCoords, TriNodeConn, NodeValues, threshold=0, inter
         return NodeCoords, NodeConn, ParentIds
     return NodeCoords, NodeConn
 
-def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='original', VertexValues=False, edgemode='constant', flip=False, cleanup=True):
+def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='original', VertexValues=True, edgemode='constant', flip=False, cleanup=False):
     """
     Marching cubes algorithm :cite:p:`Lorensen1987` applied to 3D image data.
 
@@ -4282,19 +4300,19 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     VertexValues : bool, optional
         If True, the values in the image array are treated as the vertices of 
         the cubes, otherwise, they are treated as voxel values and vertices
-        are obtained through interpolation, by default, False.
+        are obtained through interpolation, by default, True.
     flip : bool, optional
         Flip the interior/exterior of the mesh, by default False. By default, values less than the threshold are assumed to be the “inside” of the mesh. If the inside is denoted by values greater than the threshold, set flip=True.
     edgemode : str, optional
         For interpolation='cubic', edgemode specifies how to handle boundary nodes. The image matrix will be padded using ``np.pad(I, 1, mode=edgemode)``, by default 'constant'
     cleanup : bool, optional
-        Determines whether or not to perform mesh cleanup, removing degenerate elements and duplicate nodes, by default True
+        Determines whether or not to perform mesh cleanup, removing degenerate elements and duplicate nodes, by default False
 
     Returns
     -------
     NewCoords : np.ndarray
         Numpy array of node coordinates for the contour mesh
-    NewConn : list
+    NewConn : np.ndarray
         List of node connectivities 
 
     """  
@@ -4365,21 +4383,28 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     jidx = np.repeat(np.tile(np.arange(X.shape[1]-1-2*Padding),(X.shape[0]-1-2*Padding)),(X.shape[2]-1-2*Padding))+Padding
     kidx = np.tile(np.arange(X.shape[2]-1-2*Padding),(X.shape[1]-1-2*Padding)*(X.shape[0]-1-2*Padding))+Padding
     
-    icubes = np.vstack([iidx,iidx+1,iidx+1,iidx,iidx,iidx+1,iidx+1,iidx]).T
-    jcubes = np.vstack([jidx,jidx,jidx+1,jidx+1,jidx,jidx,jidx+1,jidx+1]).T
-    kcubes = np.vstack([kidx,kidx,kidx,kidx,kidx+1,kidx+1,kidx+1,kidx+1]).T
+    # icubes = np.vstack([iidx,iidx+1,iidx+1,iidx,iidx,iidx+1,iidx+1,iidx]).T
+    # jcubes = np.vstack([jidx,jidx,jidx+1,jidx+1,jidx,jidx,jidx+1,jidx+1]).T
+    # kcubes = np.vstack([kidx,kidx,kidx,kidx,kidx+1,kidx+1,kidx+1,kidx+1]).T
     
-    vals = I[icubes,jcubes,kcubes]
-    # vals = np.lib.stride_tricks.sliding_window_view(I, (2,2,2)).reshape(-1,8)[:,(0,2,6,4,1,3,7,5)]
+    # vals = I[icubes,jcubes,kcubes]
+    # vals1 = np.lib.stride_tricks.sliding_window_view(I, (2,2,2)).reshape(-1,8)[:,(0,4,6,2,1,5,7,3)]
+    # vals2 = np.lib.stride_tricks.sliding_window_view(I, (2,2,2)).reshape(-1,8)
+    vals = np.lib.stride_tricks.sliding_window_view(I, (2,2,2)).reshape(-1,8)[:,(0,4,6,2,1,5,7,3)]
     
-    inside = (vals <= 0).astype(int)
+    inside = (vals <= 0)
     if not np.any(inside):
         return np.empty((0,3)), np.empty((0,3))
-    tableIdx = np.dot(inside, 2**np.arange(inside.shape[1] - 1, -1, -1))
+    #tableIdx = np.dot(inside.astype(np.uint16), 2**np.arange(inside.shape[1] - 1, -1, -1, dtype=np.uint16))
+    tableIdx = np.packbits(inside).astype(np.intp)
+    
     
     if method == 'original':
+        
         flip = tableIdx > 127
         tableIdx[flip] = 128 - (tableIdx[flip]-127)
+        flip[tableIdx==0]=False
+        ##
         
         # edgeList =  LookupTable[tableIdx]
         # edgeConnections = np.array([x[::-1] if flip[i] else x for i,y in enumerate(edgeList) for x in y if len(x) != 0])
@@ -4388,12 +4413,13 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         edgeList = LookupTable[tableIdx]
         
         edgeList[flip] = edgeList[flip,::-1]
-        ntris = (np.sum(edgeList!=-1,axis=1)/3).astype(np.int16)
+        ntris = (np.sum(LookupTable!=-1,axis=1)//3)[tableIdx] #np.sum(edgeList!=-1,axis=1)//3
         nonempty = ntris!=0
         edgeConnections = edgeList[nonempty].reshape((np.sum(nonempty)*4,3))
         edgeConnections = edgeConnections[np.any(edgeConnections!=-1,axis=1)]
         
         numbering = np.repeat(np.where(nonempty)[0],ntris[nonempty])
+        nelem = len(edgeConnections)
     
     elif method == '33':
         ##### TODO ####
@@ -4401,15 +4427,25 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         
     if len(numbering) == 0:
         return np.empty((0,3)), np.empty((0,3))
-    idx = np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections]
-    i_indices = icubes[numbering][idx]
-    j_indices = jcubes[numbering][idx]
-    k_indices = kcubes[numbering][idx]
     
-    ishiftdir = i_indices[:,:,1] - i_indices[:,:,0]
-    jshiftdir = j_indices[:,:,1] - j_indices[:,:,0]
-    kshiftdir = k_indices[:,:,1] - k_indices[:,:,0]
+    Iidx = iidx[numbering]
+    Jidx = jidx[numbering]
+    Kidx = kidx[numbering]
+    
+    icubes = np.vstack([Iidx,Iidx+1,Iidx+1,Iidx,Iidx,Iidx+1,Iidx+1,Iidx]).T
+    jcubes = np.vstack([Jidx,Jidx,Jidx+1,Jidx+1,Jidx,Jidx,Jidx+1,Jidx+1]).T
+    kcubes = np.vstack([Kidx,Kidx,Kidx,Kidx,Kidx+1,Kidx+1,Kidx+1,Kidx+1]).T
+    
+    idx = (np.arange(len(numbering))[:, np.newaxis, np.newaxis], edgeLookup[edgeConnections])
+    i_indices = icubes[idx]
+    j_indices = jcubes[idx]
+    k_indices = kcubes[idx]
+    
+    
     if interpolation == "cubic":
+        ishiftdir = i_indices[:,:,1] - i_indices[:,:,0]
+        jshiftdir = j_indices[:,:,1] - j_indices[:,:,0]
+        kshiftdir = k_indices[:,:,1] - k_indices[:,:,0]
         
         i_interp = np.stack([i_indices[:,:,0]-1*ishiftdir, i_indices[:,:,0], i_indices[:,:,1], i_indices[:,:,1]+1*ishiftdir],axis=2)
         j_interp = np.stack([j_indices[:,:,0]-1*jshiftdir, j_indices[:,:,0], j_indices[:,:,1], j_indices[:,:,1]+1*jshiftdir],axis=2)
@@ -4518,19 +4554,38 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         
     elif interpolation == "linear" or interpolation == "midpoint":
         
-        i_interp = i_indices
-        j_interp = j_indices
-        k_interp = k_indices
+        # i_interp = i_indices
+        # j_interp = j_indices
+        # k_interp = k_indices
         
-        X_interp = X[i_interp,j_interp,k_interp]
-        Y_interp = Y[i_interp,j_interp,k_interp]
-        Z_interp = Z[i_interp,j_interp,k_interp]
-        I_interp = I[i_interp,j_interp,k_interp]
+        # X_interp = X[i_interp,j_interp,k_interp]
+        # Y_interp = Y[i_interp,j_interp,k_interp]
+        # Z_interp = Z[i_interp,j_interp,k_interp]
+        # I_interp = I[i_interp,j_interp,k_interp]
         
-        x = X_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
-        y = Y_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
-        z = Z_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
-        v = I_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        # x = X_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        # y = Y_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        # z = Z_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        # v = I_interp.reshape(I_interp.shape[0]*I_interp.shape[1],I_interp.shape[2],order='F')
+        
+        ###
+        scalar_indices = np.ravel_multi_index((i_indices, j_indices, k_indices), I.shape)
+        interpolation_pairs = scalar_indices.reshape(i_indices.shape[0]*i_indices.shape[1],i_indices.shape[2])
+        
+        lower = np.minimum(interpolation_pairs[:,0],interpolation_pairs[:,1])
+        upper = np.maximum(interpolation_pairs[:,0],interpolation_pairs[:,1])
+        # Cantor pairing function to get unique id for each interpolation pair
+        C = (lower + upper) * (lower + upper + 1) // 2 + lower
+        uC,uidx,inv = np.unique(C,return_index=True, return_inverse=True)
+        uinterpolation_pairs = interpolation_pairs[uidx]
+        
+        i_interp, j_interp, k_interp = np.unravel_index(uinterpolation_pairs, I.shape)
+        
+        x = X[i_interp,j_interp,k_interp]
+        y = Y[i_interp,j_interp,k_interp]
+        z = Z[i_interp,j_interp,k_interp]
+        v = I[i_interp,j_interp,k_interp]
+        ###
         
         if interpolation == "linear":
             with np.errstate(divide='ignore', invalid='ignore'):
@@ -4549,7 +4604,8 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         raise Exception('Invalid input "{:s}" for interpolation. Must be one of "midpoint", "linear", or "cubic".'.format(interpolation))
     
     NewCoords = np.fliplr(NewCoords) # Flipping so that index 0 for the image -> z axis
-    NewConn = np.fliplr(np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F'))
+    # NewConn = np.fliplr(np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F'))
+    NewConn = inv[np.reshape(np.arange(nelem*3), (nelem, 3))]
     if cleanup:
         NewCoords,NewConn,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
         if (interpolation=='linear' or interpolation=='cubic'):
@@ -4590,7 +4646,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         to be considered a single node (see :func:`mymesh.utils.DeleteDuplicateNodes`), 
         by default 1e-10.
     cleanup : bool, optional
-        If True, duplicate nodes will be merged, by default True.
+        If True, duplicate nodes will be merged, by default False. 
 
     Returns
     -------
@@ -4608,16 +4664,8 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
     AnchorDir = []
     NodeValues = np.asarray(NodeValues,dtype=float) - threshold
     if flip:
-        NodeValues = -1*NodeValuesVoxelNodeConn
-    # if method == '33':
-    #     _MarchingCubes33Lookup.LookupTable = MC33_Lookup
-    #     _MarchingCubes33Lookup.FaceTests = MC33_FaceTest
-    #     _MarchingCubes33Lookup.Cases = MC33_Cases
-    #     _MarchingCubes33Lookup.Signs = MC33_Signs
-    # elif method == 'original':
-    #     _MarchingCubesLookup.LookupTable = MC_Lookup
-    # else:
-    #     raise Exception('Unknown method "{:s}"'.format(method))
+        NodeValues = -1*NodeValues
+
     edgeLookup = np.array([
         [0, 1],  # Edge 0 - Between nodes 0 and 1
         [1, 2],  # Edge 1
@@ -4633,7 +4681,6 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         [7, 4],  # Edge 11
         [0, 6]   # Center
         ])
-    # arrayCoords = np.asarray(VoxelNodeCoords)
 
     HexVals = NodeValues[VoxelNodeConn]
     inside = HexVals <= 0
@@ -4655,17 +4702,19 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         nelem = len(hexnum)
 
     elif method.lower() == '33' or method.lower() == 'mc33':
-        cases = MC33_Cases[ints]
+        hexnum = np.where((ints!=0) & (ints!=255))[0]
+        sub_ints = ints[hexnum]
+        cases = MC33_Cases[sub_ints]
         # ambiguities = np.isin(cases, (3, 4, 6, 7, 10, 12, 13))
 
-        configs = MC33_Lookup[ints]
-        facetests = MC33_FaceTest[ints]
-        signs = MC33_Signs[ints]
+        configs = MC33_Lookup[sub_ints]
+        facetests = MC33_FaceTest[sub_ints]
+        signs = MC33_Signs[sub_ints]
 
-        element_lists = [_MarchingCubes33Lookup(configs[i], cases[i], np.array(facetests[i]), signs[i], vals) for i,vals in enumerate(HexVals)]
+        element_lists = [_MarchingCubes33Lookup(configs[i], cases[i], np.array(facetests[i]), signs[i], HexVals[h]) for i,h in enumerate(hexnum)]
 
          # Process lookup results
-        hexnum, elem = zip(*[(i,e) for i,lst in enumerate(element_lists) for e in lst if lst != [[]] ])
+        hexnum, elem = zip(*[(hexnum[i],e) for i,lst in enumerate(element_lists) for e in lst if lst != [[]] ])
         hexnum = np.array(hexnum)
         elem = np.array(elem)
         nelem = len(hexnum)
@@ -4679,7 +4728,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
     
     ninterppts = 2
     lookup_indices = relevant_hexs[:, edgeLookup]
-    interpolation_pairs = (lookup_indices[np.arange(len(elem))[:, None], elem]).reshape((np.prod(elem.shape),ninterppts)).astype(np.uint64, copy=False)
+    interpolation_pairs = (lookup_indices[np.arange(len(elem))[:, None], elem]).reshape((np.prod(elem.shape),ninterppts)).astype(np.int64, copy=False)
     # interpolation_pairs = (interpolation_pairs[np.any(interpolation_pairs!=-1,axis=1)]).astype(int)
     
     lower = np.minimum(interpolation_pairs[:,0],interpolation_pairs[:,1])
@@ -4723,7 +4772,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
         TriNodeCoords[TriNodeConn[additional_node]] = np.mean(VoxelNodeCoords[VoxelNodeConn[hexnum[np.any(additional_node,axis=1)]]],axis=1)
 
     if cleanup: 
-        # TriNodeCoords,TriNodeConn,Idx = utils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,return_idx=True, tol=cleanup_tol)
+        TriNodeCoords,TriNodeConn,Idx = utils.DeleteDuplicateNodes(TriNodeCoords,TriNodeConn,return_idx=True, tol=cleanup_tol)
         # if return_NodeValues:
         #     NewValues = NewValues[Idx]
         TriNodeCoords,TriNodeConn,EIdx = utils.CleanupDegenerateElements(TriNodeCoords,TriNodeConn,Type='surf', return_idx=True)
@@ -4733,7 +4782,7 @@ def MarchingCubes(VoxelNodeCoords,VoxelNodeConn,NodeValues,threshold=0,interpola
     ####
     return TriNodeCoords, TriNodeConn
 
-def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', Type='surf', mixed_elements=False, flip=False, return_NodeValues=False, return_ParentIds=False, cleanup_tol=1e-10, cleanup=True):
+def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, interpolation='linear', Type='surf', mixed_elements=False, flip=False, return_NodeValues=False, return_ParentIds=False, cleanup_tol=1e-10, cleanup=False):
     """
     Marching tetrahedra algorithm :cite:p:`Bloomenthal1994` for extracting an isosurface from a tetrahedral mesh. This can be used to generate either a surface mesh or a volume mesh, with either simplex elements (triangles, tetrahedra) or mixed elements (triangles/quadrilaterals, tetrahedra/wedges).
 
@@ -4785,7 +4834,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         to be considered a single node (see :func:`mymesh.utils.DeleteDuplicateNodes`), 
         by default 1e-10.
     cleanup : bool, optional
-        If True, duplicate nodes will be merged, by default True.
+        If True, duplicate nodes will be merged, by default False.
     Returns
     -------
     NodeCoords : np.ndarray
@@ -4984,8 +5033,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
             return NodeCoords, NodeConn, ParentIds
         return NodeCoords, NodeConn
 
-    # ints = np.sum(inside[:,:4] * 2**np.arange(0,4)[::-1], axis=1)
-    ints = np.packbits(inside[:,::-1], bitorder='little',axis=1)[:,0]
+    ints = (inside[:,:4] @ np.array([8,4,2,1],dtype=np.uint8))    
     
     # Query lookup tables
     if Type.lower() == 'surf':
@@ -5009,13 +5057,13 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
 
     nelem = len(tetnum)
 
-    relevant_tets = TetNodeConn[tetnum]
-    pad_relevant_tets = np.hstack([relevant_tets, -1*np.ones((nelem,1),dtype=np.int32)])
+    # relevant_tets = TetNodeConn[tetnum]
+    pad_relevant_tets = np.hstack([TetNodeConn[tetnum], -1*np.ones((nelem,1),dtype=np.int32)])
     
     lookup_indices = pad_relevant_tets[:, PadEdgeLookup]
     interpolation_pairs = (lookup_indices[np.arange(nelem)[:, None], PadElem]).reshape((np.prod(PadElem.shape),ninterppts))
-    interpolation_pairs = (interpolation_pairs[np.any(interpolation_pairs!=-1,axis=1)]).astype(np.uint64, copy=False)
-
+    interpolation_pairs = (interpolation_pairs[np.any(interpolation_pairs!=-1,axis=1)]).astype(np.int64, copy=False)
+    
     if interpolation_pairs.shape[1] == 2:
         lower = np.minimum(interpolation_pairs[:,0],interpolation_pairs[:,1])
         upper = np.maximum(interpolation_pairs[:,0],interpolation_pairs[:,1])
@@ -5025,7 +5073,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         uinterpolation_pairs = interpolation_pairs[idx]
     else:
         uinterpolation_pairs,inv = np.unique(np.sort(interpolation_pairs,axis=1),axis=0,return_inverse=True)
-
+        
     # Interpolation
     if interpolation.lower() == 'midpoint':
         NodeCoords = np.mean(TetNodeCoords[uinterpolation_pairs],axis=1)
@@ -5043,7 +5091,7 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
         coefficient = (0 - vals1)/(vals2-vals1)
         position = coords1 + coefficient*(coords2 - coords1)
         position[coefficient.flatten() >= 1] = coords2[coefficient.flatten() >= 1]  # This is to prevent floating pt errors inverting elements
-        NodeCoords[check] =  position
+        NodeCoords[check] = position
 
         if return_NodeValues: 
             NewValues = np.zeros(len(NodeCoords))
@@ -5128,19 +5176,52 @@ def MarchingTetrahedra(TetNodeCoords, TetNodeConn, NodeValues, threshold=0, inte
     # Format points into NodeCoords, NodeConn
     if Type.lower() == 'surf' and not mixed_elements:
         NodeConn = inv[np.reshape(np.arange(nelem*3), (nelem, 3))]
+    elif Type.lower() == 'vol' and not mixed_elements:
+        ###
+        # tic = time.time()
+        # lengths = np.sum(PadElem!=-1, axis=1) #[len(e) for e in elem]
+        # sums = np.append([0],np.cumsum(lengths))
+        # NodeConn = [[inv[n+sums[i]] for n in range(lengths[i])] for i in range(len(lengths))]
+        # print(time.time()-tic)
+        ###
+        # Tic = time.time()
+        lengths = np.sum(PadElem!=-1, axis=1)
+        indices = np.arange(np.sum(lengths))
+        PadConn = PadElem.copy()
+        PadConn[PadConn != -1] = inv[indices]
+        
+        # Extract single-tet elements
+        # tic = time.time()
+        single_tets = np.isin(ints[tetnum], (1,2,4,8,15))
+        single_tet_nums = tetnum[single_tets]
+        multi_tet_nums = np.repeat(tetnum[~single_tets], 3) # 3 tets per wedge
+        tets = PadConn[single_tets, :4]
+        wdgs = PadConn[~single_tets]
+        NodeConn = np.vstack((tets,converter.wedge2tet(NodeCoords, wdgs, method='1to3c')[1]))
+        # print(time.time()-tic, time.time()-Tic)
+        
+        # tic = time.time()
+        # NodeConn = utils.ExtractRagged(PadConn, dtype=int)
+        # print(time.time()-tic)
+        ###
+        
+        tetnums = np.append(single_tet_nums, multi_tet_nums)
     else:
-        lengths = np.sum(PadElem!=-1, axis=1) #[len(e) for e in elem]
-        sums = np.append([0],np.cumsum(lengths))
-        NodeConn = [[inv[n+sums[i]] for n in range(lengths[i])] for i in range(len(lengths))]
-
-    if Type.lower() == 'vol' and not mixed_elements:
-        NodeCoords, NodeConn, ids = converter.solid2tets(NodeCoords, NodeConn, return_ids=True)
-        if return_ParentIds:
-            ParentIds = np.zeros(len(NodeConn),dtype=int)
-            for i,Id in enumerate(ids):
-                ParentIds[Id] = tetnum[i]
-    else:
-        ParentIds = tetnum
+        # mixed-element mesh
+        lengths = np.sum(PadElem!=-1, axis=1)
+        indices = np.arange(np.sum(lengths))
+        PadConn = PadElem.copy()
+        PadConn[PadConn != -1] = inv[indices]
+        NodeConn = utils.ExtractRagged(PadConn, dtype=int)
+        
+    # if Type.lower() == 'vol' and not mixed_elements:
+    #     NodeCoords, NodeConn, ids = converter.solid2tets(NodeCoords, NodeConn, return_ids=True)
+    #     if return_ParentIds:
+    #         ParentIds = np.zeros(len(NodeConn),dtype=int)
+    #         for i,Id in enumerate(ids):
+    #             ParentIds[Id] = tetnum[i]
+    # else:
+    ParentIds = tetnum
 
     if cleanup: 
         NodeCoords,NodeConn,Idx = utils.DeleteDuplicateNodes(NodeCoords,NodeConn,return_idx=True, tol=cleanup_tol)
