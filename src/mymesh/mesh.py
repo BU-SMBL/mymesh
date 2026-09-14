@@ -1551,7 +1551,7 @@ class mesh:
             # NewCoords[NodeIds] = NewRelevantCoords
         self.reset()
     
-    def Contour(self, scalars, threshold, threshold_direction=1, mixed_elements=True, Type=None, interpolation='linear'):
+    def Contour(self, scalars, threshold, threshold_direction=1, mixed_elements=False, Type=None, interpolation='linear'):
         """
         Contour the mesh to extract an isosurface/isoline based on nodal scalar values.
 
