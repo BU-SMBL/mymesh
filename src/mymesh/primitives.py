@@ -295,10 +295,11 @@ def Grid(bounds, h, exact_h=False, ElemType='hex', Type='vol'):
         ys = np.linspace(bounds[2],bounds[3],nY)
         zs = np.linspace(bounds[4],bounds[5],nZ)
 
-    if nX*nY*nZ > np.iinfo(np.uint32).max:
-        itype = np.uint64
-    else:
-        itype = np.uint32
+    # if nX*nY*nZ > np.iinfo(np.uint32).max:
+    #     itype = np.uint64
+    # else:
+    #     itype = np.uint32
+    itype = np.intp
 
     GridCoords = np.empty((nX*nY*nZ,3), dtype=np.float64)
     GridCoords[:, 0] = np.repeat(xs,nY*nZ)
@@ -307,16 +308,28 @@ def Grid(bounds, h, exact_h=False, ElemType='hex', Type='vol'):
 
     Ids = np.reshape(np.arange(nX*nY*nZ),(nX,nY,nZ))
     
-    GridConn = np.empty(((nX-1)*(nY-1)*(nZ-1),8),dtype=itype)
+    # GridConn = np.empty(((nX-1)*(nY-1)*(nZ-1),8),dtype=itype)
 
-    GridConn[:,0] = Ids[:-1,:-1,:-1].flatten()
-    GridConn[:,1] = Ids[1:,:-1,:-1].flatten()
-    GridConn[:,2] = Ids[1:,1:,:-1].flatten()
-    GridConn[:,3] = Ids[:-1,1:,:-1].flatten()
-    GridConn[:,4] = Ids[:-1,:-1,1:].flatten()
-    GridConn[:,5] = Ids[1:,:-1,1:].flatten()
-    GridConn[:,6] = Ids[1:,1:,1:].flatten()
-    GridConn[:,7] = Ids[:-1,1:,1:].flatten()
+    # GridConn[:,0] = Ids[:-1,:-1,:-1].flatten()
+    # GridConn[:,1] = Ids[1:,:-1,:-1].flatten()
+    # GridConn[:,2] = Ids[1:,1:,:-1].flatten()
+    # GridConn[:,3] = Ids[:-1,1:,:-1].flatten()
+    # GridConn[:,4] = Ids[:-1,:-1,1:].flatten()
+    # GridConn[:,5] = Ids[1:,:-1,1:].flatten()
+    # GridConn[:,6] = Ids[1:,1:,1:].flatten()
+    # GridConn[:,7] = Ids[:-1,1:,1:].flatten()
+    
+    GridConn = np.stack((
+        Ids[:-1,:-1,:-1],
+        Ids[1:,:-1,:-1],
+        Ids[1:,1:,:-1],
+        Ids[:-1,1:,:-1],
+        Ids[:-1,:-1,1:],
+        Ids[1:,:-1,1:],
+        Ids[1:,1:,1:],
+        Ids[:-1,1:,1:]
+        )).reshape(8, (nX-1)*(nY-1)*(nZ-1)).T
+    
 
     if ElemType == 'tet' or ElemType == 'tri':
         GridCoords, GridConn = converter.hex2tet(GridCoords, GridConn, method='1to6')
