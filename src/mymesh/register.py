@@ -948,7 +948,7 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
     if metric.lower() == 'mutual_information' or metric.lower() == 'mi':
         range1 = (img1.min(), img1.max())
         range2 = (img2.min(), img2.max())
-        obj = lambda img1, img2 : mutual_information(img1, img2)
+        obj = lambda img1, img2 : mutual_information(img1, img2, range1, range2)
         grayscale = True
     elif metric.lower() == 'dice':
         obj = lambda img1, img2 : -dice(img1 > threshold1, img2 > threshold2)
