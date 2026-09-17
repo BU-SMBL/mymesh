@@ -946,7 +946,9 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
     point_based = False
     grayscale = False
     if metric.lower() == 'mutual_information' or metric.lower() == 'mi':
-        obj = mutual_information
+        range1 = (img1.min(), img1.max())
+        range2 = (img2.min(), img2.max())
+        obj = lambda img1, img2 : mutual_information(img1, img2)
         grayscale = True
     elif metric.lower() == 'dice':
         obj = lambda img1, img2 : -dice(img1 > threshold1, img2 > threshold2)
@@ -2156,41 +2158,25 @@ def jaccard(u, v):
     J = TP/(TP + FP + FN)
     return J
 
-def mutual_information(img1, img2):
-    """
-    Mutual information
-    NOTE: returns negative mutual information to support minimization
-
-    Parameters
-    ----------
-    img1 : array_like
-        Image array of the first image. Two or three dimensional numpy array of image data
-    img2 : array_like
-        image array of the second image. Two or three dimensional numpy array of image data
-
-    Returns
-    -------
-    MI : float
-        Mutual information (negative)
-    """    
+def mutual_information(img1, img2, range1=(0,255), range2=(0,255)):
+    
     data1 = img1.flatten()
     data2 = img2.flatten()
     
     # Data masking to disregard empty pixels that appear due to transformation
     data1 = data1[data2>0]
     data2 = data2[data2>0]
-    lower1, upper1 = data1.min(), data1.max()
-    lower2, upper2 = data2.min(), data2.max()
+    
     bins = 100
-    hist1, edges1 = np.histogram(data1, bins=bins, range=(lower1, upper1))
+    hist1, edges1 = np.histogram(data1, bins=bins, range=range1)
     P1 = hist1/np.sum(hist1) # probability
     H1 = -np.sum(P1[P1>0] * np.log2(P1[P1>0])) # Entropy ( >0 prevents log of 0)
 
-    hist2, edges2 = np.histogram(data2, bins=bins, range=(lower2, upper2))
+    hist2, edges2 = np.histogram(data2, bins=bins, range=range2)
     P2 = hist2/np.sum(hist2)
     H2 = -np.sum(P2[P2>0] * np.log2(P2[P2>0]))
 
-    hist12, xedges, yedges = np.histogram2d(data1, data2, bins=bins, range=((lower1, upper1),(lower2, upper2)))
+    hist12, xedges, yedges = np.histogram2d(data1, data2, bins=bins, range=(range1, range2))
     P12 = hist12/np.sum(hist12)
     H12 = -np.sum(P12[P12>0] * np.log2(P12[P12>0]))
 
