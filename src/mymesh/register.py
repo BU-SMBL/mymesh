@@ -948,8 +948,11 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
     if metric.lower() == 'mutual_information' or metric.lower() == 'mi':
         range1 = (img1.min(), img1.max())
         range2 = (img2.min(), img2.max())
-        obj = lambda img1, img2 : mutual_information(img1, img2, range1, range2)
+        obj = lambda img1, img2 : -mutual_information(img1, img2, range1, range2)
         grayscale = True
+    elif metric.lower() == 'l2':
+        grayscale = True
+        obj = L2
     elif metric.lower() == 'dice':
         obj = lambda img1, img2 : -dice(img1 > threshold1, img2 > threshold2)
     elif metric.lower() == 'symmetric_closest_point_mse':
@@ -2158,15 +2161,47 @@ def jaccard(u, v):
     J = TP/(TP + FP + FN)
     return J
 
-def mutual_information(img1, img2, range1=(0,255), range2=(0,255)):
-    
+def mutual_information(img1, img2, range1=None, range2=None, mask=0):
+    """
+    Mutual information for comparison of two grayscale images.
+    Mutual information can be used for assessing similarity between 
+    multi-modal images, i.e. where grayscales are different, but represent 
+    the same object.
+
+    Parameters
+    ----------
+    img1 : np.ndarray
+        First image, 2D or 3D image array
+    img2 : np.ndarray
+        Second image, 2D or 3D image array
+    range1 : tuple, NoneType, optional
+        Minimum and maximum values to assess for img1, by default None
+        If None, the min and max of img1 are used
+    range2 : _type_, optional
+        Minimum and maximum values to assess for img2, by default None
+        If None, the min and max of img2 are used
+    mask : int, optional
+        A specific value to exclude, by default 0
+        This is used primarily in the image registration context to exclude
+        blank pixels introduced by transformations
+
+    Returns
+    -------
+    MI : float
+        Mutual information
+    """    
     data1 = img1.flatten()
     data2 = img2.flatten()
     
     # Data masking to disregard empty pixels that appear due to transformation
-    data1 = data1[data2>0]
-    data2 = data2[data2>0]
-    
+    data1 = data1[(data1!=mask) & (data2!=mask)]
+    data2 = data2[(data1!=mask) & (data2!=mask)]
+
+    if range1 is None:
+        range1 = (data1.min(), data1.max())
+    if range2 is None:
+            range2 = (data2.min(), data2.max())
+
     bins = 100
     hist1, edges1 = np.histogram(data1, bins=bins, range=range1)
     P1 = hist1/np.sum(hist1) # probability
@@ -2181,7 +2216,32 @@ def mutual_information(img1, img2, range1=(0,255), range2=(0,255)):
     H12 = -np.sum(P12[P12>0] * np.log2(P12[P12>0]))
 
     MI = H1 + H2 - H12
-    return -MI
+    return MI
+
+def L2(img1, img2, mask=0):
+    """
+    L2-norm difference between two images
+
+    Parameters
+    ----------
+    img1 : np.ndarray
+        First image, 2D or 3D image array
+    img2 : np.ndarray
+        Second image, 2D or 3D image array
+    mask : int, optional
+        A specific value to exclude, by default 0
+        This is used primarily in the image registration context to exclude
+        blank pixels introduced by transformations
+
+    Returns
+    -------
+    l2 : float
+        L2 norm difference
+    """  
+    # Data masking to disregard empty pixels that appear due to transformation
+    l2 = np.linalg.norm(img1[(img1!=mask) & (img2!=mask)] - \
+                   img2[(img1!=mask) & (img2!=mask)])
+    return l2
 
 def hausdorff(points1, points2):
     """
