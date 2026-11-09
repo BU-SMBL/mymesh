@@ -1493,8 +1493,8 @@ def CleanupDegenerateElements(NodeCoords, NodeConn, Type='auto', return_idx=Fals
     
     # based on kuppern87's answer to https://stackoverflow.com/questions/26958233/numpy-row-wise-unique-elements
     # tic = time.time()
-    idx = np.argsort(PadConn)
-    inv = np.argsort(idx, axis=1)
+    idx = np.argsort(PadConn, stable=True)
+    inv = np.argsort(idx, axis=1, stable=True)
     sort = np.take_along_axis(PadConn, idx, 1)
     duplicates = sort[:, 1:] == sort[:,:-1]
     sort[:, 1:][duplicates] = -1
@@ -2271,7 +2271,7 @@ def PadRagged(In,fillval=-1):
         Padded array.
     """
     # Out = np.array(list(itertools.zip_longest(*In,fillvalue=fillval))).T
-    if type(In) is list or (type(In) is np.ndarray and In.dtype==object):
+    if isinstance(In, (list,tuple)) or (type(In) is np.ndarray and In.dtype==object):
         maxL = max(len(row) for row in In)
         Out = np.full((len(In), maxL), fillval)
         for i, row in enumerate(In):
