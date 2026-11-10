@@ -4382,15 +4382,18 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     iidx = np.repeat(np.arange(X.shape[0]-1-2*Padding),(X.shape[1]-1-2*Padding)*(X.shape[2]-1-2*Padding))+Padding
     jidx = np.repeat(np.tile(np.arange(X.shape[1]-1-2*Padding),(X.shape[0]-1-2*Padding)),(X.shape[2]-1-2*Padding))+Padding
     kidx = np.tile(np.arange(X.shape[2]-1-2*Padding),(X.shape[1]-1-2*Padding)*(X.shape[0]-1-2*Padding))+Padding
-    
-    # icubes = np.vstack([iidx,iidx+1,iidx+1,iidx,iidx,iidx+1,iidx+1,iidx]).T
-    # jcubes = np.vstack([jidx,jidx,jidx+1,jidx+1,jidx,jidx,jidx+1,jidx+1]).T
-    # kcubes = np.vstack([kidx,kidx,kidx,kidx,kidx+1,kidx+1,kidx+1,kidx+1]).T
-    
-    # vals = I[icubes,jcubes,kcubes]
-    # vals1 = np.lib.stride_tricks.sliding_window_view(I, (2,2,2)).reshape(-1,8)[:,(0,4,6,2,1,5,7,3)]
-    # vals2 = np.lib.stride_tricks.sliding_window_view(I, (2,2,2)).reshape(-1,8)
-    vals = np.lib.stride_tricks.sliding_window_view(I, (2,2,2)).reshape(-1,8)[:,(0,4,6,2,1,5,7,3)]
+
+    if Padding > 0:
+        # TODO: might be able to speed this up
+        icubes = np.vstack([iidx,iidx+1,iidx+1,iidx,iidx,iidx+1,iidx+1,iidx]).T
+        jcubes = np.vstack([jidx,jidx,jidx+1,jidx+1,jidx,jidx,jidx+1,jidx+1]).T
+        kcubes = np.vstack([kidx,kidx,kidx,kidx,kidx+1,kidx+1,kidx+1,kidx+1]).T
+        
+        vals = I[icubes,jcubes,kcubes]
+    else:
+        # vals1 = np.lib.stride_tricks.sliding_window_view(I, (2,2,2)).reshape(-1,8)[:,(0,4,6,2,1,5,7,3)]
+        # vals2 = np.lib.stride_tricks.sliding_window_view(I, (2,2,2)).reshape(-1,8)
+        vals = np.lib.stride_tricks.sliding_window_view(I, (2,2,2)).reshape(-1,8)[:,(0,4,6,2,1,5,7,3)]
     
     inside = (vals <= 0)
     if not np.any(inside):
@@ -4412,7 +4415,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
         
         edgeList = LookupTable[tableIdx]
         
-        edgeList[flip] = edgeList[flip,::-1]
+        edgeList[~flip] = edgeList[~flip,::-1]
         ntris = (np.sum(LookupTable!=-1,axis=1)//3)[tableIdx] #np.sum(edgeList!=-1,axis=1)//3
         nonempty = ntris!=0
         edgeConnections = edgeList[nonempty].reshape((np.sum(nonempty)*4,3))
@@ -4443,6 +4446,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
     
     
     if interpolation == "cubic":
+        # TODO: Can probably speed up cubic with similar tricks used for linear
         ishiftdir = i_indices[:,:,1] - i_indices[:,:,0]
         jshiftdir = j_indices[:,:,1] - j_indices[:,:,0]
         kshiftdir = k_indices[:,:,1] - k_indices[:,:,0]
@@ -4551,7 +4555,7 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
             NewCoords[zcubic,2] = zRoots[np.sum(zCheck,axis=1)==1][zCheck[np.sum(zCheck,axis=1)==1]]
             # Fall back to linear for any failed interpolations
             NewCoords[zlinear,2] = zlin[:,1] + np.nan_to_num((0-vzlin[:,1])*(zlin[:,2]-zlin[:,1])/(vzlin[:,2]-vzlin[:,1]))
-        
+        NewConn = np.fliplr(np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F'))
     elif interpolation == "linear" or interpolation == "midpoint":
         
         # i_interp = i_indices
@@ -4600,12 +4604,12 @@ def MarchingCubesImage(I, h=1, threshold=0, interpolation='linear', method='orig
                  (y[:,0] + y[:,1])/2,
                  (z[:,0] + z[:,1])/2,
                 ]).T
+        NewConn = inv[np.reshape(np.arange(nelem*3), (nelem, 3))]
     else:
         raise Exception('Invalid input "{:s}" for interpolation. Must be one of "midpoint", "linear", or "cubic".'.format(interpolation))
     
     NewCoords = np.fliplr(NewCoords) # Flipping so that index 0 for the image -> z axis
-    # NewConn = np.fliplr(np.arange(len(NewCoords)).reshape(edgeConnections.shape,order='F'))
-    NewConn = inv[np.reshape(np.arange(nelem*3), (nelem, 3))]
+    
     if cleanup:
         NewCoords,NewConn,Idx = utils.DeleteDuplicateNodes(NewCoords,NewConn,return_idx=True)
         if (interpolation=='linear' or interpolation=='cubic'):
@@ -5418,6 +5422,8 @@ def Adaptive(func, bounds, threshold=0, method=None, grad=None, mindepth=2, maxd
         TetCoords, TetConn = converter.hex2tet(DualCoords, DualConn)
         NodeCoords, NodeConn = MarchingTetrahedra(TetCoords, TetConn, NodeValues, threshold=threshold, Type=Type)
     
+    NodeCoords,NodeConn = utils.DeleteDuplicateNodes(NodeCoords,NodeConn)
+    NodeCoords,NodeConn = utils.CleanupDegenerateElements(NodeCoords,NodeConn)
             
     return NodeCoords, NodeConn
 
