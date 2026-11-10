@@ -409,10 +409,12 @@ def test_generateLookup(method):
 
     if method == '33':
         LookupTable, Cases, FaceTests, Signs = contour._generateLookup33()
+        assert len(LookupTable) == 256
+        assert len(Cases) == 256
         assert len(FaceTests) == 256
         assert len(Signs) == 256
     else:
         LookupTable, Cases = contour._generateLookup()
 
-    assert len(LookupTable) == 256
-    assert len(Cases) == 256
+        assert len(LookupTable) == 128
+        assert len(Cases) == 128

@@ -2267,13 +2267,13 @@ def _do_split(D, edge, L, emin, emax):
         to_add.append((L/2,(node2, N)))
     for i,new_elems in enumerate(NewElems):
         # Add new elements to the mesh
-        if len(D.ElemLabels > 0):
+        if len(D.ElemLabels) > 0:
             for new_elem in new_elems:
                 D.addElem(new_elem, D.ElemLabels[shared_elems[i]])
         else:
             for new_elem in new_elems:
-                if len(np.unique(new_elem)) < 3:
-                    merp =2 
+                # if len(np.unique(new_elem)) < 3:
+                #     merp =2 
                 D.addElem(new_elem)
     for e in shared_elems:
         D.removeElem(e)

@@ -534,7 +534,7 @@ def test_RemoveNodes(NodeCoords, NodeConn):
         np.array([[0,0,0], [1,0,0], [0,1,0], [0,0,1]]),
         [[0,0,1,2]],          # Two nodes same
         'vol',
-        []                  # Should be removed
+        np.empty(shape=(0, 4), dtype=np.int64) # Should be removed
     ),
     # 2D Elements
     # Case 7: Quad -> Tri (merged nodes)
@@ -550,7 +550,7 @@ def test_RemoveNodes(NodeCoords, NodeConn):
         np.array([[0,0,0], [1,0,0], [0,1,0]]),
         [[0,0,1]],            # Two nodes same
         'auto',
-        []                  # Should be removed
+        np.empty(shape=(0, 3), dtype=np.int64) # Should be removed
     ),
     
     # Case 9: Fully degenerate Hex (all same node)
@@ -558,7 +558,7 @@ def test_RemoveNodes(NodeCoords, NodeConn):
         np.array([[0,0,0], [1,0,0], [1,1,0], [0,1,0], [0,0,1], [1,0,1], [1,1,1], [0,1,1]]),
         [[0,0,0,0,0,0,0,0]],  # All nodes same
         'auto',
-        []                  # Should be removed
+        np.empty(shape=(0, 8), dtype=np.int64) # Should be removed
     ),
 ])
 def test_CleanupDegenerateElements(NodeCoords, NodeConn, Type, expected):

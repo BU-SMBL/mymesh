@@ -123,7 +123,7 @@ def test__CubicFit(NodeCoords, neighborhood, normals):
     (implicit.sphere([0,0,0],1), implicit.SurfaceMesh(implicit.sphere([0,0,0],1),[-1,1,-1,1,-1,1],.1).NodeCoords,
     1, 1
     ),
-    (implicit.box(-.5,.5,-.5,.5,-.5,.5), implicit.SurfaceMesh(implicit.box(-.5,.5,-.5,.5,-.5,.5),[-1,1,-1,1,-1,1],.1).NodeCoords,
+    (implicit.box(-.5,.5,-.5,.5,-.5,.5), primitives.Grid([-.5,.5,-.5,.5,-.5,.5], .1, Type='surf', ElemType='tri').NodeCoords,
     0, 0
     ),
 ])
