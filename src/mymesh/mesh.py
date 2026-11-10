@@ -2567,11 +2567,11 @@ class mesh:
         """      
         # Ensure relevant data is in properly typed numpy arrays
         try:
-            NodeConn = np.array(self.NodeConn, dtype=np.int64)
+            NodeConn = np.array(self.NodeConn, dtype=np.int64, order='C')
         except:
             raise ValueError('Dynamic meshes are only valid for meshes with a single element type.')
         
-        NodeCoords = np.array(self.NodeCoords, dtype=np.float64)
+        NodeCoords = np.array(self.NodeCoords, dtype=np.float64, order='C')
 
         if ElemLabels is None:
             ElemLabels = np.empty(0, np.int64)
