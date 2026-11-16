@@ -908,7 +908,7 @@ class mesh:
                 NodeCoords = NodeCoords.tolist()
             elif type(NodeCoords) is not list:
                 NodeCoords = list(NodeCoords)
-            self.NodeCoords += NewCoords
+            self.NodeCoords += NodeCoords
 
         
         if NodeSet in self.NodeSets.keys():
