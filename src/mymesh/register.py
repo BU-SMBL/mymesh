@@ -739,6 +739,7 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
     T0 : array_like or NoneType, optional
         Initial transformation to apply to img2, by default, None. This can 
         serve as an 'initial guess' of the alignment.
+        'auto' creates an initial guess by center of mass offset.
     bounds : array_like or NoneType, optional
         Optimization bounds, formatted as [(min,max),...] for each parameter.
         If None, bounds are selected that should cover most possible 
@@ -904,73 +905,6 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
     else:
         threshold1 = threshold2 = threshold
     # Process threshold input
-    if threshold1 is None:
-        # This option intended for already binarized images (flexible enough to accomodate different types of binarization, e.g. True/False, 1/0, 255/0, ...)
-        # If the image is not binary, this will assume the midpoint of the range of values as the threshold
-        threshold1 = (np.max(img1) + np.min(img1))/2
-    if threshold2 is None:
-        threshold2 = (np.max(img2) + np.min(img2))/2
-        
-    # Process T0 input
-    if img2.dtype in (bool, int, np.int64, np.int32):
-        # Convert binary to float for better interpolation
-        img2 = img2.astype(np.float32)
-    if T0 is not None:
-        img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))
-    else:
-        # Initialize by centering img2 on img1
-        center_diff = np.subtract(scipy.ndimage.center_of_mass(img1 > threshold1), scipy.ndimage.center_of_mass(img2 > threshold2))
-        if nD == 3:
-            T0 = translation(center_diff)
-        else:
-            T0 = translation2d(center_diff)
-        img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))    
-    
-    # Process scale input
-    if scale != 1:
-        if img1.dtype in (bool, int, np.int64, np.int32):
-            # Convert binary to float for better interpolation
-            img1 = img1.astype(np.float32)
-        moving_img = scipy.ndimage.zoom(img2T0, scale, order=interpolation_order)
-        fixed_img =  scipy.ndimage.zoom(img1, scale, order=interpolation_order)
-    else:
-        moving_img = img2T0
-        fixed_img = img1
-    
-    # Process metric input
-    point_based = False
-    grayscale = False
-    if metric.lower() == 'mutual_information' or metric.lower() == 'MI':
-        obj = mutual_information
-        grayscale = True
-    elif metric.lower() == 'dice':
-        obj = lambda img1, img2 : -dice(img1 > threshold1, img2 > threshold2)
-    elif metric.lower() == 'symmetric_closest_point_mse':
-        if threshold is not None:
-            binarized1 = fixed_img > threshold1
-            binarized2 = moving_img > threshold2
-        else:
-            binarized1 = fixed_img
-            binarized2 = moving_img
-        point_based = True
-        points1 = np.column_stack(np.where(binarized1))
-        points2 = np.column_stack(np.where(binarized2))
-        # tree1 = scipy.spatial.KDTree(points1) 
-        # Note: can't precommute tree for the moving points
-        # obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)
-    elif metric.lower() == 'icp':
-        if threshold is not None:
-            binarized1 = fixed_img > threshold1
-            binarized2 = moving_img > threshold2
-        else:
-            binarized1 = fixed_img
-            binarized2 = moving_img
-        point_based = True
-    if method.lower() == 'icp' or metric.lower() == 'icp':
-        method = 'icp'
-        metric = 'icp'
-
-    # Process threshold input
     if threshold is None:
         # This option intended for already binarized images (flexible enough to accomodate different types of binarization, e.g. True/False, 1/0, 255/0, ...)
         # If the image is not binary, this will assume the midpoint of the range of values as the threshold
@@ -983,9 +917,9 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
         threshold1 = threshold2 = threshold
         
     # Process T0 input
-    if T0 is not None:
+    if isinstance(T0, (np.ndarray, list)):
         img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))
-    else:
+    elif T0 is str and T0.lower() == 'auto':
         # Initialize by centering img2 on img1
         center_diff = np.subtract(scipy.ndimage.center_of_mass(img1 > threshold1), scipy.ndimage.center_of_mass(img2 > threshold2))
         if nD == 3:
@@ -993,6 +927,12 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
         else:
             T0 = translation2d(center_diff)
         img2T0 = transform_image(img2, T0, options=dict(order=interpolation_order))    
+    else:
+        if nD == 3:
+            T0 = np.eye(4)
+        else:
+            T0 = np.eye(3)
+        img2T0 = img2
     
     # Process scale input
     if scale != 1:
@@ -1006,8 +946,13 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
     point_based = False
     grayscale = False
     if metric.lower() == 'mutual_information' or metric.lower() == 'mi':
-        obj = mutual_information
+        range1 = (img1.min(), img1.max())
+        range2 = (img2.min(), img2.max())
+        obj = lambda img1, img2 : -mutual_information(img1, img2, range1, range2)
         grayscale = True
+    elif metric.lower() == 'l2':
+        grayscale = True
+        obj = L2
     elif metric.lower() == 'dice':
         obj = lambda img1, img2 : -dice(img1 > threshold1, img2 > threshold2)
     elif metric.lower() == 'symmetric_closest_point_mse':
@@ -1059,230 +1004,12 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
     if transform_args is None:
         transform_args = dict(mode='constant', order=interpolation_order)
 
-
-
     # Process center input
     if type(center) is str and center.lower() == 'image':
         center = np.array(np.shape(fixed_img))/2
     else:
         center = np.asarray(center) * scale
 
-        # Process transform input
-        if transform.lower() == 'scale_uniform':
-            nparam = 1
-            transformation = lambda x : scale_uniform(x, center=center)
-            x0 = np.ones(nparam)
-            if bounds is None:
-                bounds = [
-                    (.9,1.1)
-                ]
-                
-            if verbose:
-                print('iter.||      score||        s ')
-                print('-----||-----------||----------')   
-        elif transform.lower() == 'rigid':
-            nparam = 6
-            transformation = lambda x : rigid(x, center=center)
-            x0 = np.zeros(nparam)
-            if bounds is None:
-                bounds = [
-                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
-                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
-                    (-0.25*np.shape(fixed_img)[2],0.25*np.shape(fixed_img)[2]),
-                    (-np.pi, np.pi),
-                    (-np.pi, np.pi),
-                    (-np.pi, np.pi)
-                ]
-                
-            if verbose:
-                print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma ')
-                print('-----||-----------||----------|----------|----------|----------|----------|----------')   
-        elif transform.lower() == 'translation':
-            nparam = 3
-            transformation = lambda x : translation(x, center=center)
-            x0 = np.zeros(nparam)
-            if bounds is None:
-                bounds = [
-                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
-                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
-                    (-0.25*np.shape(fixed_img)[2],0.25*np.shape(fixed_img)[2]),
-                ]
-                
-            if verbose:
-                print('iter.||      score||       tx |       ty |       tz ')
-                print('-----||-----------||----------|----------|----------')   
-        elif transform.lower() == 'rotation':
-            nparam = 3
-            transformation = lambda x : rotation(x, center=center)
-            x0 = np.zeros(nparam)
-            if bounds is None:
-                bounds = [
-                    (-np.pi, np.pi),
-                    (-np.pi, np.pi),
-                    (-np.pi, np.pi)
-                ]
-                
-            if verbose:
-                print('iter.||      score||    alpha |     beta |    gamma ')
-                print('-----||-----------||----------|----------|----------') 
-        elif transform.lower() == 'similarity':
-            nparam = 7
-            transformation = lambda x : similarity(x, center=center)
-            x0 = np.zeros(nparam)
-            x0[6] = 1
-            if bounds is None:
-                bounds = [
-                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
-                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
-                    (-0.25*np.shape(fixed_img)[2],0.25*np.shape(fixed_img)[2]),
-                    (-np.pi, np.pi),
-                    (-np.pi, np.pi),
-                    (-np.pi, np.pi),
-                    (0.9, 1.1),
-                ]
-            if verbose:
-                print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma |        s |')
-                print('-----||-----------||----------|----------|----------|----------|----------|----------|----------|')
-        elif transform.lower() == 'affine':
-            nparam = 15
-            transformation = lambda x : affine(x, center=center)
-            x0 = np.zeros(nparam)
-            x0[6:9] = 1
-            if bounds is None:
-                bounds = [
-                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
-                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
-                    (-0.25*np.shape(fixed_img)[2],0.25*np.shape(fixed_img)[2]),
-                    (-np.pi, np.pi),
-                    (-np.pi, np.pi),
-                    (-np.pi, np.pi),
-                    (0.9, 1.1),
-                    (0.9, 1.1),
-                    (0.9, 1.1),
-                    np.divide((0.25*np.shape(fixed_img)[0],0.75*np.shape(fixed_img)[0]),10),
-                    np.divide((0.25*np.shape(fixed_img)[0],0.75*np.shape(fixed_img)[0]),10),
-                    np.divide((0.25*np.shape(fixed_img)[1],0.75*np.shape(fixed_img)[1]),10),
-                    np.divide((0.25*np.shape(fixed_img)[1],0.75*np.shape(fixed_img)[1]),10),
-                    np.divide((0.25*np.shape(fixed_img)[2],0.75*np.shape(fixed_img)[2]),10),
-                    np.divide((0.25*np.shape(fixed_img)[2],0.75*np.shape(fixed_img)[2]),10),
-                ]
-            if verbose:
-                print('iter.||      score||       tx |       ty |       tz |    alpha |     beta |    gamma |        s |')
-                print('-----||-----------||----------|----------|----------|----------|----------|----------|----------|')
-        elif transform.lower() == 'rigid2d':
-            nparam = 3
-            transformation = lambda x : rigid2d(x, center=center)
-            x0 = np.zeros(nparam)
-            if bounds is None:
-                bounds = [
-                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
-                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
-                    (-np.pi, np.pi),
-                ]
-                
-            if verbose:
-                print('iter.||      score||       tx |       ty |    theta ')
-                print('-----||-----------||----------|----------|----------')   
-        elif transform.lower() == 'translation2d':
-            nparam = 2
-            transformation = lambda x : translation2d(x, center=center)
-            x0 = np.zeros(nparam)
-            if bounds is None:
-                bounds = [
-                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
-                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
-                ]
-                
-            if verbose:
-                print('iter.||      score||       tx |       ty ')
-                print('-----||-----------||----------|----------')   
-        elif transform.lower() == 'rotation2d':
-            nparam = 1
-            transformation = lambda x : rotation(x, center=center)
-            x0 = np.zeros(nparam)
-            if bounds is None:
-                bounds = [
-                    (-np.pi, np.pi)
-                ]
-                
-            if verbose:
-                print('iter.||      score||    theta ')
-                print('-----||-----------||----------') 
-        elif transform.lower() == 'similarity2d':
-            nparam = 4
-            transformation = lambda x : similarity2d(x, center=center)
-            x0 = np.zeros(nparam)
-            x0[3] = 1
-            if bounds is None:
-                bounds = [
-                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
-                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
-                    (-np.pi, np.pi),
-                    (0.9, 1.1),
-                ]
-            if verbose:
-                print('iter.||      score||       tx |       ty |    theta |        s ')
-                print('-----||-----------||----------|----------|----------|----------')
-        elif transform.lower() == 'affine2d':
-            nparam = 15
-            transformation = lambda x : affine2d(x, center=center)
-            x0 = np.zeros(nparam)
-            x0[6:9] = 1
-            if bounds is None:
-                bounds = [
-                    (-0.25*np.shape(fixed_img)[0],0.25*np.shape(fixed_img)[0]),
-                    (-0.25*np.shape(fixed_img)[1],0.25*np.shape(fixed_img)[1]),
-                    (-np.pi, np.pi),
-                    (0.9, 1.1),
-                    (0.9, 1.1),
-                    np.divide((0.25*np.shape(fixed_img)[0],0.75*np.shape(fixed_img)[0]),10),
-                    np.divide((0.25*np.shape(fixed_img)[1],0.75*np.shape(fixed_img)[1]),10),
-                ]
-            if verbose:
-                print('iter.||      score||       tx |       ty |    theta |       s1 |       s2 |     sh01 |     sh10 ')
-                print('-----||-----------||----------|----------|----------|----------|----------|----------|----------')        
-        else:
-            raise ValueError(f'Transformation model "{transform:s}" is not supported for Image2Image registration.')       
-        
-        if point_based:
-            _, T = Point2Point(points1, points2, T0=None, bounds=bounds, transform=transform, metric=metric, method=method, transform_args=transform_args, decimation=decimation, optimizer_args=optimizer_args, verbose=verbose)
-            new_img = transform_image(img2, T, options=dict(order=interpolation_order))
-        else:
-            if np.shape(img1) != np.shape(img2):
-               raise Exception('Images must be the same size for image-based image-to-image registration.')
-            def objective(x):
-                objective.k += 1
-                if verbose: 
-                    print('{:5d}'.format(objective.k),end='')
-                T = transformation(x)
-                
-                imgT = transform_image(moving_img, T, options=transform_args)
-                
-                f = obj(fixed_img, imgT)
-                if verbose: 
-                    print(f'||{f:11.4f}|',end='')
-                    print(('|{:10.4f}'*len(x)).format(*x))
-                return f
-            objective.k = 0
-            x,f = optimize(objective, method, x0, bounds, optimizer_args=optimizer_args)
-            
-            T1 = transformation(x)
-            if scale != 1:
-                # Account for scaling so that the transformation matrix refers to the original image size
-                D = np.eye(len(T0))
-                D[:nD,:nD] =  np.diag([scale]*nD)
-                T1 = np.linalg.inv(D) @ T1 @ D
-            
-            T = T1 @ T0 # include T0 so that img is transformed first by T0, then by the new transform
-            new_img = transform_image(img2, T, options=transform_args)
-            f = obj(img1, new_img)
-            if verbose: 
-                print('-----||-----------|', end='')
-                for i in x:
-                    print('|----------',end = '')
-                print('')
-                print(f'final||{f:11.4f}|',end='')
-                print(('|{:10.4f}'*len(x)).format(*x))
     # Process transform input
     if transform.lower() == 'rigid':
         nparam = 6
@@ -1402,7 +1129,7 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
             print('-----||-----------||----------|----------')   
     elif transform.lower() == 'rotation2d':
         nparam = 1
-        transformation = lambda x : rotation(x, center=center)
+        transformation = lambda x : rotation2d(x, center=center)
         x0 = np.zeros(nparam)
         if bounds is None:
             bounds = [
@@ -2434,30 +2161,87 @@ def jaccard(u, v):
     J = TP/(TP + FP + FN)
     return J
 
-def mutual_information(img1, img2):
-    
+def mutual_information(img1, img2, range1=None, range2=None, mask=0):
+    """
+    Mutual information for comparison of two grayscale images.
+    Mutual information can be used for assessing similarity between 
+    multi-modal images, i.e. where grayscales are different, but represent 
+    the same object.
+
+    Parameters
+    ----------
+    img1 : np.ndarray
+        First image, 2D or 3D image array
+    img2 : np.ndarray
+        Second image, 2D or 3D image array
+    range1 : tuple, NoneType, optional
+        Minimum and maximum values to assess for img1, by default None
+        If None, the min and max of img1 are used
+    range2 : _type_, optional
+        Minimum and maximum values to assess for img2, by default None
+        If None, the min and max of img2 are used
+    mask : int, optional
+        A specific value to exclude, by default 0
+        This is used primarily in the image registration context to exclude
+        blank pixels introduced by transformations
+
+    Returns
+    -------
+    MI : float
+        Mutual information
+    """    
     data1 = img1.flatten()
     data2 = img2.flatten()
     
     # Data masking to disregard empty pixels that appear due to transformation
-    data1 = data1[data2>0]
-    data2 = data2[data2>0]
+    data1 = data1[(data1!=mask) & (data2!=mask)]
+    data2 = data2[(data1!=mask) & (data2!=mask)]
+
+    if range1 is None:
+        range1 = (data1.min(), data1.max())
+    if range2 is None:
+            range2 = (data2.min(), data2.max())
 
     bins = 100
-    hist1, edges1 = np.histogram(data1, bins=bins, range=(0,255))
+    hist1, edges1 = np.histogram(data1, bins=bins, range=range1)
     P1 = hist1/np.sum(hist1) # probability
     H1 = -np.sum(P1[P1>0] * np.log2(P1[P1>0])) # Entropy ( >0 prevents log of 0)
 
-    hist2, edges2 = np.histogram(data2, bins=bins, range=(0,255))
+    hist2, edges2 = np.histogram(data2, bins=bins, range=range2)
     P2 = hist2/np.sum(hist2)
     H2 = -np.sum(P2[P2>0] * np.log2(P2[P2>0]))
 
-    hist12, xedges, yedges = np.histogram2d(data1, data2, bins=bins, range=((0,255),(0,255)))
+    hist12, xedges, yedges = np.histogram2d(data1, data2, bins=bins, range=(range1, range2))
     P12 = hist12/np.sum(hist12)
     H12 = -np.sum(P12[P12>0] * np.log2(P12[P12>0]))
 
     MI = H1 + H2 - H12
-    return -MI
+    return MI
+
+def L2(img1, img2, mask=0):
+    """
+    L2-norm difference between two images
+
+    Parameters
+    ----------
+    img1 : np.ndarray
+        First image, 2D or 3D image array
+    img2 : np.ndarray
+        Second image, 2D or 3D image array
+    mask : int, optional
+        A specific value to exclude, by default 0
+        This is used primarily in the image registration context to exclude
+        blank pixels introduced by transformations
+
+    Returns
+    -------
+    l2 : float
+        L2 norm difference
+    """  
+    # Data masking to disregard empty pixels that appear due to transformation
+    l2 = np.linalg.norm(img1[(img1!=mask) & (img2!=mask)] - \
+                   img2[(img1!=mask) & (img2!=mask)])
+    return l2
 
 def hausdorff(points1, points2):
     """
