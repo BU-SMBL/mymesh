@@ -203,12 +203,19 @@ def View(M,
         M.NodeConn = [[0,0,0]]
     if vertices.shape[1] == 2:
         vertices = np.hstack([vertices, np.zeros((len(vertices),1))])
-    if M.Type == 'vol':
+    if M.Type.lower() == 'vol':
         SurfConn, ids = converter.solid2surface(*M, return_SurfElem=True)
         _,faces, inv = converter.surf2tris(M.NodeCoords, SurfConn, return_inv=True)
         # TODO: Need to properly use ids and tri_ids to transfer element data to the surface
-    else:
+    elif M.Type.lower() == 'surf':
         _,faces, inv = converter.surf2tris(M.NodeCoords, M.SurfConn, return_inv=True)
+    elif M.Type.lower() == 'line':
+        faces = np.array(M.NodeConn)
+        inv = np.arange(M.NElem)
+        show_faces = False
+        show_edges = True
+    else:
+        raise ValueError(f'Invalid mesh type: "{M.Type}".')
 
     # Process scalars
     if scalars is not None: 
@@ -334,9 +341,10 @@ def View(M,
     
     
     # Set shading/lighting
-    shading_filter = ShadingFilter()
-    vsmesh.attach(shading_filter)
-    shading_filter.shading = shading
+    if not wireframe_only:
+        shading_filter = ShadingFilter()
+        vsmesh.attach(shading_filter)
+        shading_filter.shading = shading
 
     def attach_headlight(canvasview):
         light_dir = (0, 1, 0, 0.001)
@@ -347,8 +355,8 @@ def View(M,
         def on_transform_change(event):
             transform = canvasview.camera.transform
             shading_filter.light_dir = transform.map(initial_light_dir)[:3]
-
-    attach_headlight(canvasview)
+    if not wireframe_only:
+        attach_headlight(canvasview)
     
     AABB = utils.AABB(vertices)
     aabb =  np.matmul(np.linalg.inv(vsmesh.transform.matrix), np.hstack([AABB, np.zeros((8, 1))]).T).T
