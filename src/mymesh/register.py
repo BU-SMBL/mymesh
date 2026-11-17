@@ -945,7 +945,12 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
     # Process metric input
     point_based = False
     grayscale = False
-    if metric.lower() == 'mutual_information' or metric.lower() == 'mi':
+    if metric.lower() == 'icp' or method.lower() == 'icp':
+        metric = 'icp'
+        method = 'icp'
+        point_based = True
+        verbose = False
+    elif metric.lower() == 'mutual_information' or metric.lower() == 'mi':
         range1 = (img1.min(), img1.max())
         range2 = (img2.min(), img2.max())
         obj = lambda img1, img2 : -mutual_information(img1, img2, range1, range2)
@@ -961,10 +966,6 @@ def Image2Image(img1, img2, T0=None, bounds=None, center='image', transform='rig
         # tree1 = scipy.spatial.KDTree(points1) 
         # Note: can't precommute tree for the moving points
         # obj = lambda p1, p2 : symmetric_closest_point_MSE(p1, p2, tree1=tree1)
-    elif metric.lower() == 'icp':
-        point_based = True
-        verbose = False
-
     else:
         raise ValueError(f'Similarity metric f"{metric:s}" is not supported for Image2Image registration.')
 
