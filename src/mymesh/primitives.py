@@ -62,6 +62,7 @@ def Line(pt1, pt2, h=None, n=None):
     line : mymesh.mesh
         Mesh object containing the line mesh. 
 
+        
     .. note:: 
         Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Line(...)``
 
@@ -165,6 +166,7 @@ def Box(vertices, n=2, ElemType='hex', Type='vol'):
     box : mymesh.mesh
         Mesh object containing the box mesh. 
 
+        
     .. note:: 
     
         Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Box(...)``
@@ -778,8 +780,9 @@ def Sphere(center, radius, theta_resolution=20, phi_resolution=20, radial_resolu
     Returns
     -------
     sphere, mymesh.mesh
-        Mesh object containing the cylinder mesh.
+        Mesh object containing the spherical mesh.
 
+        
     .. note:: 
         Due to the ability to unpack the mesh object to NodeCoords and NodeConn, the NodeCoords and NodeConn array can be returned directly (instead of the mesh object) by running: ``NodeCoords, NodeConn = primitives.Sphere(...)``
 

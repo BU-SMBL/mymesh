@@ -138,11 +138,9 @@ def solid2faces(NodeCoords,NodeConn,return_FaceConn=False,return_FaceElem=False,
 
         - 'auto' or 'mixed' - Will detect element type by the number of nodes present in each element using :func:`~mymesh.utils.identify_type`. 
 
-        - 'surf' - Will detect element type by the number of nodes present in each 
-        element, assuming four node elements are quads
+        - 'surf' - Will detect element type by the number of nodes present in each element, assuming four node elements are quads.
 
-        - 'vol' - Will detect element type by the number of nodes present in each 
-        element, assuming four node elements are tets (functionally the ame as 'auto')
+        - 'vol' - Will detect element type by the number of nodes present in each element, assuming four node elements are tets (functionally the ame as 'auto').
 
         - 'tri' - All elements treated as 3-node triangular elements.
 
@@ -318,26 +316,25 @@ def solid2edges(NodeCoords,NodeConn,ElemType='auto',return_EdgeConn=False,return
         Specifies the element type contained within the mesh, by default 'auto'.
 
         - 'auto' or 'mixed': Will detect element type by the number of nodes present in each element using :func:`~mymesh.utils.identify_type`. 
-
-        - 'surf': Will detect element type by the number of nodes present in each 
-        element, assuming four node elements are quads
-
-        - 'vol': Will detect element type by the number of nodes present in each 
-        element, assuming four node elements are tets (functionally the ame as 'auto')
-
+        
+        - 'surf': Will detect element type by the number of nodes present in each element, assuming four node elements are quads.
+        
+        - 'vol': Will detect element type by the number of nodes present in each element, assuming four node elements are tets (functionally the ame as 'auto').
+        
         - 'tri': All elements treated as 3-node triangular elements.
-
+        
         - 'quad': All elements treated as 4-node quadrilateral elements.
-
+        
         - 'tet': All elements treated as 4-node tetrahedral elements.
-
+        
         - 'pyramid': All elements treated as 5-node wedge elements.
-
+        
         - 'wedge': All elements treated as 6-node quadrilateral elements.
-
+        
         - 'hex': All elements treated as 8-node quadrilateral elements.
-
+        
         - 'polygon': All elements treated as n-node polygonal elements. TODO: add support for return_EdgeConn and return_EdgeElem
+        
 
     return_EdgeConn : bool, optional
         If true, will return EdgeConn, the Edge Connectivity of each element.

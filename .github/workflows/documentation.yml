@@ -87,7 +87,7 @@ jobs:
         pip uninstall -y PyQt6 PyQt6-Qt6 PyQt6-sip
         # Install specific version of PyQt6 that matches Ubuntu's Qt version
         # Ubuntu 22.04 typically uses Qt 6.2.x
-        pip install "PyQt6==6.2.3" "PyQt6-Qt6==6.2.3" "PyQt6-sip>=13.2.0"
+        pip install "PyQt6==6.2.3" "PyQt6-Qt6==6.2.4" "PyQt6-sip>=13.2.0"
         # Then install other dependencies
         pip install \
           sphinx \
