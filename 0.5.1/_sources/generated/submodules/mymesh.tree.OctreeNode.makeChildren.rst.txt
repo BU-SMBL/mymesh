@@ -1,0 +1,6 @@
+mymesh.tree.OctreeNode.makeChildren
+===================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: OctreeNode.makeChildren

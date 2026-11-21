@@ -1,0 +1,6 @@
+mymesh.visualize.Subplot
+========================
+
+.. currentmodule:: mymesh.visualize
+
+.. autofunction:: Subplot

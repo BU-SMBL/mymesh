@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.EulerCharacteristic
+====================================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.EulerCharacteristic

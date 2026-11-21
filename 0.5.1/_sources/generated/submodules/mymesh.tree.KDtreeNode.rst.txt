@@ -1,0 +1,35 @@
+mymesh.tree.KDtreeNode
+======================
+
+.. currentmodule:: mymesh.tree
+
+.. autoclass:: KDtreeNode
+    :no-members:
+    :no-inherited-members:
+    :show-inheritance:
+    :no-special-members:
+
+Properties
+----------
+
+
+
+
+
+Methods
+-------
+
+
+    .. autosummary::
+        :toctree:
+
+    
+                KDtreeNode.clearData
+                KDtreeNode.getLevel
+                KDtreeNode.getMaxDepth
+                KDtreeNode.hasChildren
+                KDtreeNode.makeChildrenPts
+                KDtreeNode.node_distance
+                KDtreeNode.prune
+                KDtreeNode.query_knn
+    

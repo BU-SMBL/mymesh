@@ -1,0 +1,6 @@
+mymesh.utils.ErodeVoxel
+=======================
+
+.. currentmodule:: mymesh.utils
+
+.. autofunction:: ErodeVoxel

@@ -1,0 +1,6 @@
+mymesh.dmesh.ElemLabels
+=======================
+
+.. currentmodule:: mymesh
+
+.. autoproperty:: dmesh.ElemLabels

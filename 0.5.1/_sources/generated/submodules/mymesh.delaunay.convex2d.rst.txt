@@ -1,0 +1,6 @@
+mymesh.delaunay.convex2d
+========================
+
+.. currentmodule:: mymesh.delaunay
+
+.. autofunction:: convex2d

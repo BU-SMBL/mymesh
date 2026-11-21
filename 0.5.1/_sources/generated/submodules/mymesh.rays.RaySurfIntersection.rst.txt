@@ -1,0 +1,6 @@
+mymesh.rays.RaySurfIntersection
+===============================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: RaySurfIntersection

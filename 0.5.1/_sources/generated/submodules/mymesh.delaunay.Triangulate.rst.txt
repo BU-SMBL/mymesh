@@ -1,0 +1,6 @@
+mymesh.delaunay.Triangulate
+===========================
+
+.. currentmodule:: mymesh.delaunay
+
+.. autofunction:: Triangulate

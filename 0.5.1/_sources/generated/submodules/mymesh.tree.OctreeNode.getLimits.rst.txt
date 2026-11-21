@@ -1,0 +1,6 @@
+mymesh.tree.OctreeNode.getLimits
+================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: OctreeNode.getLimits

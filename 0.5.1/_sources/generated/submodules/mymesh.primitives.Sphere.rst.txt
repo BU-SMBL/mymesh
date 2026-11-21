@@ -1,0 +1,6 @@
+mymesh.primitives.Sphere
+========================
+
+.. currentmodule:: mymesh.primitives
+
+.. autofunction:: Sphere

@@ -1,0 +1,6 @@
+mymesh.visualize.set\_vispy\_backend
+====================================
+
+.. currentmodule:: mymesh.visualize
+
+.. autofunction:: set_vispy_backend

@@ -1,0 +1,2997 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Contour &#8212; MyMesh vdev Manual</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=6b19b803" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=4ea706d9"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'theory/contour';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.24.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Curvature" href="curvature.html" />
+    <link rel="prev" title="Theory Guide" href="../theory.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="dev" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="light">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/mymesh_logo.png" class="logo__image only-light" alt="MyMesh vdev Manual - Home"/>
+    <img src="../_static/mymesh_logo.png" class="logo__image only-dark pst-js-only" alt="MyMesh vdev Manual - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../theory.html">
+    Theory Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../perf.html">
+    Performance
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dev.html">
+    Development
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BU-SMBL/mymesh" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Contour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="curvature.html">Curvature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="delaunay.html">Delaunay Triangulation</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="improvement.html">Improvement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="octree.html">Octree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rays.html">Rays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="register.html">Register</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../theory.html" class="nav-link">Theory Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Contour</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="contour">
+<span id="theory-contour"></span><h1>Contour<a class="headerlink" href="#contour" title="Link to this heading">#</a></h1>
+<p>Isosurface contouring methods are used to extract the surface from a field of
+values, most often an image or an implicit function evaluated on a grid of
+points. One of the earliest and most famous methods is the Marching Cubes
+algorithm by <span class="bibtex-citation" id="id1">Lorensen and Cline [<a class="reference internal" href="../guide/ref.html#id58" title="William E. Lorensen and Harvey E. Cline. Marching cubes: a high resolution 3d surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21:163-169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span>, which inspired a variety of “marching
+element” methods that follow a similar approach. These methods “march” from
+element to element, at each one assessing the node values to determine whether
+each node is above or below the isovalue threshold in order to determine whether
+that node is inside or outside of the surface. Partitions are then created by
+placing new nodes along edges that change from inside to outside. Lookup tables
+can then be used to efficiently determine what partitions need to be used based
+on which nodes are inside and which nodes are outside. The new nodes can either
+be placed on the midpoint of the edges or interpolation can be used to
+approximate where along the edge the isovalue is.</p>
+<section id="marching-squares">
+<h2>Marching Squares<a class="headerlink" href="#marching-squares" title="Link to this heading">#</a></h2>
+<p>See also <a class="reference internal" href="../generated/submodules/mymesh.contour.MarchingSquares.html#mymesh.contour.MarchingSquares" title="mymesh.contour.MarchingSquares"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingSquares()</span></code></a></p>
+<p>Marching squares operates on square (or quadrilateral) elements. Since each of
+the four nodes can either be inside or outside of the isoline, a <span class="math notranslate nohighlight">\(2^4=16\)</span>
+entry lookup table can be used where a binary lookup index can be obtained based
+on the state of each node (1 = inside, 0 = outside). Marching squares can either
+be used to extract line segments along the boundary or triangles to fill the
+inside of the isoline.</p>
+<div class="graphviz"><img src="../_images/graphviz-ace969605c0105c4ddec57719e27ba873cd3aa87.png" alt="graph bits {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, color=&quot;#BF616A&quot;, xlabel=&quot;0&quot;];
+v1 [pos=&quot;1.,0.!&quot;, color=&quot;#EBCB8B&quot;, xlabel=&quot;1&quot;];
+v2 [pos=&quot;1.,1.!&quot;, color=&quot;#A3BE8C&quot;, xlabel=&quot;2&quot;];
+v3 [pos=&quot;0.,1.!&quot;, color=&quot;#B48EAD&quot;, xlabel=&quot;3&quot;];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+struct1 [shape=plaintext, pos=&quot;2.5,0.75!&quot;,
+  label=&lt;
+    &lt;TABLE BORDER=&quot;0&quot; CELLBORDER=&quot;1&quot; CELLSPACING=&quot;0&quot; CELLPADDING=&quot;4&quot; STYLE=&quot;ROUNDED&quot;&gt;
+        &lt;TR&gt;
+            &lt;TD BGCOLOR=&quot;white&quot; COLOR=&quot;white&quot; PORT=&quot;f0&quot;&gt;Index = &lt;/TD&gt;
+            &lt;TD BGCOLOR=&quot;white&quot; COLOR=&quot;#BF616A#B48EAD&quot; PORT=&quot;f0&quot;&gt;0&lt;/TD&gt;
+            &lt;TD BGCOLOR=&quot;white&quot; COLOR=&quot;#EBCB8B&quot; PORT=&quot;f1&quot;&gt;1&lt;/TD&gt;
+            &lt;TD BGCOLOR=&quot;white&quot; COLOR=&quot;#A3BE8C&quot; PORT=&quot;f2&quot;&gt;2&lt;/TD&gt;
+            &lt;TD BGCOLOR=&quot;white&quot; COLOR=&quot;#B48EAD&quot; PORT=&quot;f3&quot;&gt;3&lt;/TD&gt;
+        &lt;/TR&gt;
+    &lt;/TABLE&gt;
+    &gt;];
+
+}" class="graphviz" /></div>
+<p>Edge Lookup Table</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 sd-border-1 docutils">
+<div class="sd-row sd-row-cols-3 sd-row-cols-xs-3 sd-row-cols-sm-6 sd-row-cols-md-6 sd-row-cols-lg-6 docutils">
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-440208f5f4775d87346b39ab4c22518d6dfdd925.png" alt="graph case0 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+}" class="graphviz" /></div>
+<p>Case 0</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-8b0a6067f25edb3b7298b2b8da641ae3d071b78a.png" alt="graph case1 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v6 -- v7 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 1</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-cb40006ce8b6a6449a3b57ad34cad524761a49f8.png" alt="graph case2 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v5 -- v6 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 2</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-931fac7e499bb942379673006964ab6c12e56897.png" alt="graph case3 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v5 -- v7 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 3</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-45c24af3d650796f3d5aa5c571b93897b7a6213c.png" alt="graph case4 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v4 -- v5 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 4</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-933235aa643661bab966c090d78ae96c5ce5f2b0.png" alt="graph case5 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v7 -- v4 [color=&quot;#5E81AC&quot;];
+v5 -- v6 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 5</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-23c6b42bff90255fd8f6bee501e1d9d695d6fae4.png" alt="graph case6 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v4 -- v6 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 6</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-8fb6879d4531513cd1fb19e7539b1da55e3e7a5b.png" alt="graph case7 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v4 -- v7 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 7</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-cf851101cda32eade8089cf46c085e22dfa0c984.png" alt="graph case8 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v7 -- v4 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 8</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-58758c5887abc7af14244e05d3305e17fa480d5f.png" alt="graph case9 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v6 -- v4 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 9</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-7c10183532c5adbb4017e5aa8a9a31bd859132cd.png" alt="graph case10 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v4 -- v5 [color=&quot;#5E81AC&quot;];
+v6 -- v7 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 10</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-476d3171934977663d7cd9d166bd8a60625f6499.png" alt="graph case11 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=bllack];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v5 -- v4 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 11</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-d46a5e134ec0ce0c0377ef75545df97cb7464848.png" alt="graph case12 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v7 -- v5 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 12</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-bb08d9865522512adca159b694dc51a2cfda0d91.png" alt="graph case13 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v6 -- v5 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 13</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-b1a33fc6c767f1bd19aca97d3516b22cb2b43f34.png" alt="graph case1 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v7 -- v6 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 14</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-e966159128756bb063ad890bb9575831538e6903.png" alt="graph case15 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+}" class="graphviz" /></div>
+<p>Case 15</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-4359797dca8e9409022dada982550d42b6080704.png" alt="graph legend {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+v1 [pos=&quot;0.,0.75!&quot;, fillcolor=white];
+Inside [shape=plaintext, pos=&quot;0.6,1.!&quot;];
+Outside [shape=plaintext, pos=&quot;0.6,0.75!&quot;];
+blank [pos=&quot;0.,0!&quot;, color=white];
+
+}" class="graphviz" /></div>
+</div>
+</div>
+</div>
+<p>Triangle Lookup Table</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 sd-border-1 docutils">
+<div class="sd-row sd-row-cols-3 sd-row-cols-xs-3 sd-row-cols-sm-6 sd-row-cols-md-6 sd-row-cols-lg-6 docutils">
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-440208f5f4775d87346b39ab4c22518d6dfdd925.png" alt="graph case0 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+}" class="graphviz" /></div>
+<p>Case 0</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-fb3149f4ccbe9d7234cdeff4083782842d3f5a0b.png" alt="graph case1 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v7 -- v6 [color=&quot;#5E81AC&quot;];
+v6 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v7 [color=&quot;#5E81AC&quot;];
+}" class="graphviz" /></div>
+<p>Case 1</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-f776c551dd7ec51e0de2693cd8f05b7cd377c8d0.png" alt="graph case2 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v5 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v6 [color=&quot;#5E81AC&quot;];
+v6 -- v5 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 2</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-831ee3771f9fccdd98ef01c1947b1994a91c6d4f.png" alt="graph case3 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+//v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v7 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v7 [color=&quot;#5E81AC&quot;];
+v2 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v7 [color=&quot;#5E81AC&quot;];
+}" class="graphviz" /></div>
+<p>Case 3</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-bcc54a2fdd2481f8f232d2ca6459bc67c411b03c.png" alt="graph case4 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v4 -- v1 [color=&quot;#5E81AC&quot;];
+v1 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v4 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 4</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-1f2807c6116ebf7f1bd54ffccadfc8f10592c09c.png" alt="graph case5 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v4 -- v1 [color=&quot;#5E81AC&quot;];
+v1 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v4 [color=&quot;#5E81AC&quot;];
+v5 -- v6 [color=&quot;#5E81AC&quot;];
+v6 -- v4 [color=&quot;#5E81AC&quot;];
+v6 -- v7 [color=&quot;#5E81AC&quot;];
+v7 -- v4 [color=&quot;#5E81AC&quot;];
+v6 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v7 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 5</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-c1157ed6f9cab3ab9e83e9de5a84a3a5b32bb65f.png" alt="graph case6 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+//v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v4 -- v1 [color=&quot;#5E81AC&quot;];
+v1 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v4 [color=&quot;#5E81AC&quot;];
+v2 -- v6 [color=&quot;#5E81AC&quot;];
+v6 -- v4 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 6</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-bf253d24471025727d3494267ab130a7cef1810f.png" alt="graph case7 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+//v1 -- v2 [style=dotted];
+//v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v1 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v1 [color=&quot;#5E81AC&quot;];
+v3 -- v4 [color=&quot;#5E81AC&quot;];
+v4 -- v1 [color=&quot;#5E81AC&quot;];
+v3 -- v7 [color=&quot;#5E81AC&quot;];
+v4 -- v7 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 7</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-013343c409e06f869c89997a743358e470a51541.png" alt="graph case8 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v0 -- v4 [color=&quot;#5E81AC&quot;];
+v4 -- v7 [color=&quot;#5E81AC&quot;];
+v7 -- v0 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 8</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-15159270d803274241c7dc64b687e7faa0158d0e.png" alt="graph case9 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+//v3 -- v0 [style=dotted];
+
+v0 -- v4 [color=&quot;#5E81AC&quot;];
+v4 -- v6 [color=&quot;#5E81AC&quot;];
+v6 -- v0 [color=&quot;#5E81AC&quot;];
+v6 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v0 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 9</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-de276302256bbf695d89e0ed582f16b6fc68c8eb.png" alt="graph case10 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v0 -- v4 [color=&quot;#5E81AC&quot;];
+v4 -- v7 [color=&quot;#5E81AC&quot;];
+v7 -- v0 [color=&quot;#5E81AC&quot;];
+v4 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v7 [color=&quot;#5E81AC&quot;];
+v5 -- v6 [color=&quot;#5E81AC&quot;];
+v6 -- v7 [color=&quot;#5E81AC&quot;];
+v5 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v6 [color=&quot;#5E81AC&quot;];
+}" class="graphviz" /></div>
+<p>Case 10</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-e9d14e11ce35354b9f1506ec780b3ad45508ce41.png" alt="graph case11 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=white];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+//v2 -- v3 [style=dotted];
+//v3 -- v0 [style=dotted];
+
+v0 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v0 [color=&quot;#5E81AC&quot;];
+v0 -- v4 [color=&quot;#5E81AC&quot;];
+v4 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v0 [color=&quot;#5E81AC&quot;];
+v5 -- v2 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 11</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-7676b9f9e6d77b3d5120b967f0a6283c70397f10.png" alt="graph case12 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+//v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v0 -- v1 [color=&quot;#5E81AC&quot;];
+v1 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v0 [color=&quot;#5E81AC&quot;];
+v5 -- v7 [color=&quot;#5E81AC&quot;];
+v7 -- v0 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 12</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-bd525483d3a717022c821d0a75ea547f727ebb25.png" alt="graph case13 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=white];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+//v0 -- v1 [style=dotted];
+v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+//v3 -- v0 [style=dotted];
+
+v0 -- v1 [color=&quot;#5E81AC&quot;];
+v1 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v0 [color=&quot;#5E81AC&quot;];
+v1 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v6 [color=&quot;#5E81AC&quot;];
+v6 -- v1 [color=&quot;#5E81AC&quot;];
+v6 -- v3 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 13</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-7cb4ec0a150f5c1337e024032a882af697b5d817.png" alt="graph case1 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=white];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+//v0 -- v1 [style=dotted];
+//v1 -- v2 [style=dotted];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+
+v0 -- v1 [color=&quot;#5E81AC&quot;];
+v1 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v0 [color=&quot;#5E81AC&quot;];
+v2 -- v6 [color=&quot;#5E81AC&quot;];
+v6 -- v0 [color=&quot;#5E81AC&quot;];
+v6 -- v7 [color=&quot;#5E81AC&quot;];
+v7 -- v0 [color=&quot;#5E81AC&quot;];
+}" class="graphviz" /></div>
+<p>Case 14</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-a83091203b8f6f3cf67b46937e1bafbe84029a2a.png" alt="graph case15 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+
+v0 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v1 [pos=&quot;1.,0.!&quot;, fillcolor=black];
+v2 [pos=&quot;1.,1.!&quot;, fillcolor=black];
+v3 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+
+//v4 [pos=&quot;0.5,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;1.0,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v6 [pos=&quot;0.5,1.!&quot;, color=&quot;#5E81AC&quot;];
+//v7 [pos=&quot;0.,0.5!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [color=&quot;#5E81AC&quot;];
+v1 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v0 [color=&quot;#5E81AC&quot;];
+
+v0 -- v2 [color=&quot;#5E81AC&quot;];
+
+
+}" class="graphviz" /></div>
+<p>Case 15</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-4359797dca8e9409022dada982550d42b6080704.png" alt="graph legend {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+v1 [pos=&quot;0.,0.75!&quot;, fillcolor=white];
+Inside [shape=plaintext, pos=&quot;0.6,1.!&quot;];
+Outside [shape=plaintext, pos=&quot;0.6,0.75!&quot;];
+blank [pos=&quot;0.,0!&quot;, color=white];
+
+}" class="graphviz" /></div>
+</div>
+</div>
+</div>
+</section>
+<section id="marching-cubes">
+<h2>Marching Cubes<a class="headerlink" href="#marching-cubes" title="Link to this heading">#</a></h2>
+<p><span class="bibtex-citation" id="id2">Lorensen and Cline [<a class="reference internal" href="../guide/ref.html#id58" title="William E. Lorensen and Harvey E. Cline. Marching cubes: a high resolution 3d surface construction algorithm. Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques, SIGGRAPH 1987, 21:163-169, 1987. doi:10.1145/37401.37422.">LC87</a>]</span></p>
+<p>See also <a class="reference internal" href="../generated/submodules/mymesh.contour.MarchingCubes.html#mymesh.contour.MarchingCubes" title="mymesh.contour.MarchingCubes"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingCubes()</span></code></a></p>
+<p>For a cube, there are <span class="math notranslate nohighlight">\(2^8 = 256\)</span> possible combinations of vertices
+falling inside or outside of the surface, however by rotations and inversion,
+this can be reduced to 15 unique triangulations.</p>
+<p>Marching Cubes Lookup Table</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 sd-border-1 docutils">
+<div class="sd-row sd-row-cols-3 sd-row-cols-xs-3 sd-row-cols-sm-6 sd-row-cols-md-6 sd-row-cols-lg-6 docutils">
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-1db265ade2cfc79916d2b20d70ddb888a3203a17.png" alt="graph case0 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=white];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=white];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=white];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=white];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=white];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=white];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=white];
+
+// bottom edges
+//e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+//e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+//e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+//e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+//e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+//e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+//e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+//e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+//e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+//e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+//e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+}" class="graphviz" /></div>
+<p>Case 0</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-8317cf635f70276e1ed83942a25bab20bf69200f.png" alt="graph case1 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=black];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=white];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=white];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=white];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=white];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=white];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=white];
+
+// bottom edges
+e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+//e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+//e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+//e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+//e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+//e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+//e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+//e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+//e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e0 -- e3 [color=&quot;#5E81AC&quot;];
+e3 -- e4 [color=&quot;#5E81AC&quot;];
+e4 -- e0 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 1</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-3c774dfc79ce5c37de652da175eadae4b907bacc.png" alt="graph case2 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=black];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=black];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=white];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=white];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=white];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=white];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=white];
+
+// bottom edges
+//e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+//e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+//e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+//e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+//e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+//e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+//e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e1 -- e3 [color=&quot;#5E81AC&quot;];
+e3 -- e5 [color=&quot;#5E81AC&quot;];
+e5 -- e1 [color=&quot;#5E81AC&quot;];
+e3 -- e4 [color=&quot;#5E81AC&quot;];
+e4 -- e5 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 2</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-c7dddb5678fe55fc029ee55b75bc2b1e9a4e5f3e.png" alt="graph case1 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=black];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=white];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=white];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=white];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=white];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=black];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=white];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=white];
+
+// bottom edges
+e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+//e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+//e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+//e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+//e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+//e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e0 -- e3 [color=&quot;#5E81AC&quot;];
+e3 -- e4 [color=&quot;#5E81AC&quot;];
+e4 -- e0 [color=&quot;#5E81AC&quot;];
+
+e5 -- e8 [color=&quot;#5E81AC&quot;];
+e8 -- e9 [color=&quot;#5E81AC&quot;];
+e9 -- e5 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 3</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-6098d953bc5f7eb8d84090728d466942b728d18b.png" alt="graph case4 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=black];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=white];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=white];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=white];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=white];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=black];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=white];
+
+// bottom edges
+e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+//e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+//e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+//e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+//e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+//e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e0 -- e3 [color=&quot;#5E81AC&quot;];
+e3 -- e4 [color=&quot;#5E81AC&quot;];
+e4 -- e0 [color=&quot;#5E81AC&quot;];
+
+e6 -- e9 [color=&quot;#5E81AC&quot;];
+e9 -- e10 [color=&quot;#5E81AC&quot;];
+e10 -- e6 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 4</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-e18d4081f973bac00214ebca891ee8d220ea7908.png" alt="graph case5 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=white];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=black];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=black];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=black];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=white];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=white];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=white];
+
+// bottom edges
+e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+//e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+//e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+//e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+//e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+//e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+//e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e0 -- e3 [color=&quot;#5E81AC&quot;];
+e3 -- e5 [color=&quot;#5E81AC&quot;];
+e5 -- e0 [color=&quot;#5E81AC&quot;];
+e5 -- e7 [color=&quot;#5E81AC&quot;];
+e5 -- e6 [color=&quot;#5E81AC&quot;];
+e6 -- e7 [color=&quot;#5E81AC&quot;];
+e3 -- e7 [color=&quot;#5E81AC&quot;];
+}" class="graphviz" /></div>
+<p>Case 5</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-6ffe6c0aa8edfec2c863488059a1272fe07adece.png" alt="graph case6 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=black];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=black];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=white];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=white];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=white];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=black];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=white];
+
+// bottom edges
+//e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+//e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+//e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+//e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e3 -- e1 [color=&quot;#5E81AC&quot;];
+e1 -- e5 [color=&quot;#5E81AC&quot;];
+e5 -- e3 [color=&quot;#5E81AC&quot;];
+e4 -- e5 [color=&quot;#5E81AC&quot;];
+e4 -- e3 [color=&quot;#5E81AC&quot;];
+e6 -- e9 [color=&quot;#5E81AC&quot;];
+e9 -- e10 [color=&quot;#5E81AC&quot;];
+e10 -- e6 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 6</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-f0a92a158eb209eafc5245fd0857b76c85dc9f97.png" alt="graph case7 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=white];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=black];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=white];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=white];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=black];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=black];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=white];
+
+// bottom edges
+e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+//e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+//e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e0 -- e1 [color=&quot;#5E81AC&quot;];
+e1 -- e5 [color=&quot;#5E81AC&quot;];
+e5 -- e0 [color=&quot;#5E81AC&quot;];
+e4 -- e8 [color=&quot;#5E81AC&quot;];
+e8 -- e11 [color=&quot;#5E81AC&quot;];
+e11 -- e4 [color=&quot;#5E81AC&quot;];
+e6 -- e9 [color=&quot;#5E81AC&quot;];
+e9 -- e10 [color=&quot;#5E81AC&quot;];
+e10 -- e6 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 7</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-3e1c74b2ad4c06285059d78da03d4393b27095d6.png" alt="graph case8 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=black];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=black];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=black];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=black];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=white];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=white];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=white];
+
+// bottom edges
+//e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+//e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+//e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+//e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+//e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+//e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+//e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e4 -- e5 [color=&quot;#5E81AC&quot;];
+e5 -- e6 [color=&quot;#5E81AC&quot;];
+e6 -- e4 [color=&quot;#5E81AC&quot;];
+e4 -- e7 [color=&quot;#5E81AC&quot;];
+e7 -- e6 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 8</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-4a051d177f3056226c0a14140dc5a6719b2bb08e.png" alt="graph case9 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=black];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=white];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=black];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=black];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=white];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=white];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=black];
+
+// bottom edges
+e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+//e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+//e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+//e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+//e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+//e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e0 -- e1 [color=&quot;#5E81AC&quot;];
+e1 -- e6 [color=&quot;#5E81AC&quot;];
+e6 -- e0 [color=&quot;#5E81AC&quot;];
+e0 -- e10 [color=&quot;#5E81AC&quot;];
+e10 -- e6 [color=&quot;#5E81AC&quot;];
+e0 -- e4 [color=&quot;#5E81AC&quot;];
+e4 -- e11 [color=&quot;#5E81AC&quot;];
+e11 -- e10 [color=&quot;#5E81AC&quot;];
+e4 -- e10 [color=&quot;#5E81AC&quot;];
+}" class="graphviz" /></div>
+<p>Case 9</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-60a6837a8ca2b550049713935c945a02a7538b8c.png" alt="graph case10 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=black];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=white];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=black];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=white];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=black];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=black];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=white];
+
+// bottom edges
+e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+//e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+//e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+//e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+//e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e0 -- e3 [color=&quot;#5E81AC&quot;];
+e3 -- e8 [color=&quot;#5E81AC&quot;];
+e8 -- e0 [color=&quot;#5E81AC&quot;];
+e8 -- e11 [color=&quot;#5E81AC&quot;];
+e11 -- e3 [color=&quot;#5E81AC&quot;];
+e1 -- e2 [color=&quot;#5E81AC&quot;];
+e2 -- e9 [color=&quot;#5E81AC&quot;];
+e9 -- e1 [color=&quot;#5E81AC&quot;];
+e9 -- e10 [color=&quot;#5E81AC&quot;];
+e10 -- e2 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 10</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-62122ba83ebf2a341fa686f62d0e7d19215d95dd.png" alt="graph case11 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=black];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=white];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=black];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=black];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=white];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=black];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=white];
+
+// bottom edges
+e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+//e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+//e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+//e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+//e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+//e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e0 -- e1 [color=&quot;#5E81AC&quot;];
+e1 -- e9 [color=&quot;#5E81AC&quot;];
+e9 -- e0 [color=&quot;#5E81AC&quot;];
+e0 -- e4 [color=&quot;#5E81AC&quot;];
+e4 -- e7 [color=&quot;#5E81AC&quot;];
+e7 -- e0 [color=&quot;#5E81AC&quot;];
+e7 -- e10 [color=&quot;#5E81AC&quot;];
+e10 -- e9 [color=&quot;#5E81AC&quot;];
+e9 -- e7 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 11</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-56a205a248a09ff8280e3fb6357b08e3665a4011.png" alt="graph case12 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=white];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=black];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=black];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=black];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=black];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=white];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=white];
+
+// bottom edges
+e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+//e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+e5 [pos=&quot;1.4, 1.0!&quot; color=&quot;#5E81AC&quot;];
+e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+e7 [pos=&quot;0.8, 1.3!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+//e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+//e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e0 -- e3 [color=&quot;#5E81AC&quot;];
+e3 -- e5 [color=&quot;#5E81AC&quot;];
+e5 -- e6 [color=&quot;#5E81AC&quot;];
+e6 -- e7 [color=&quot;#5E81AC&quot;];
+e7 -- e3 [color=&quot;#5E81AC&quot;];
+e0 -- e5 [color=&quot;#5E81AC&quot;];
+e5 -- e7 [color=&quot;#5E81AC&quot;];
+e4 -- e11 [color=&quot;#5E81AC&quot;];
+e11 -- e8 [color=&quot;#5E81AC&quot;];
+e8 -- e4 [color=&quot;#5E81AC&quot;];
+}" class="graphviz" /></div>
+<p>Case 12</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-d9bb2a1630c66e750cb7a1f4acdfbe2d9227a45a.png" alt="graph case13 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=black];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=white];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=black];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=white];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=white];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=black];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=white];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=black];
+
+// bottom edges
+e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+e5 [pos=&quot;1.4, 1.1!&quot; color=&quot;#5E81AC&quot;];
+e6 [pos=&quot;1.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+e8 [pos=&quot;1.0, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e0 -- e3 [color=&quot;#5E81AC&quot;];
+e3 -- e4 [color=&quot;#5E81AC&quot;];
+e4 -- e0 [color=&quot;#5E81AC&quot;];
+e1 -- e2 [color=&quot;#5E81AC&quot;];
+e2 -- e6 [color=&quot;#5E81AC&quot;];
+e6 -- e1 [color=&quot;#5E81AC&quot;];
+e5 -- e8 [color=&quot;#5E81AC&quot;];
+e8 -- e9 [color=&quot;#5E81AC&quot;];
+e9 -- e5 [color=&quot;#5E81AC&quot;];
+e7 -- e10 [color=&quot;#5E81AC&quot;];
+e10 -- e11 [color=&quot;#5E81AC&quot;];
+e11 -- e7 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 13</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-dc1d5542fc8b0d8d2e3d3df83db00f31615f1a56.png" alt="graph case14 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.4,0.5!&quot;, fillcolor=white];
+v1 [pos=&quot;1.4,0.5!&quot;, fillcolor=black];
+v2 [pos=&quot;1.8,0.9!&quot;, fillcolor=black];
+v3 [pos=&quot;0.8,0.9!&quot;, fillcolor=black];
+v4 [pos=&quot;0.4,1.5!&quot;, fillcolor=white];
+v5 [pos=&quot;1.4,1.5!&quot;, fillcolor=white];
+v6 [pos=&quot;1.8,1.9!&quot;, fillcolor=white];
+v7 [pos=&quot;0.8,1.9!&quot;, fillcolor=black];
+
+// bottom edges
+e0 [pos=&quot;0.9, 0.5!&quot;, color=&quot;#5E81AC&quot;];
+//e1 [pos=&quot;1.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+//e2 [pos=&quot;1.3, 0.9!&quot;, color=&quot;#5E81AC&quot;];
+e3 [pos=&quot;0.6, 0.7!&quot;, color=&quot;#5E81AC&quot;];
+
+// middle edges
+//e4 [pos=&quot;0.4, 1.0!&quot;, color=&quot;#5E81AC&quot;];
+e5 [pos=&quot;1.4, 0.75!&quot; color=&quot;#5E81AC&quot;];
+e6 [pos=&quot;1.8, 1.6!&quot;, color=&quot;#5E81AC&quot;];
+//e7 [pos=&quot;0.8, 1.4!&quot;, color=&quot;#5E81AC&quot;];
+
+// top edges
+//e8 [pos=&quot;0.9, 1.5!&quot;, color=&quot;#5E81AC&quot;];
+//e9 [pos=&quot;1.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+e10 [pos=&quot;1.3, 1.9!&quot;, color=&quot;#5E81AC&quot;];
+e11 [pos=&quot;0.6, 1.7!&quot;, color=&quot;#5E81AC&quot;];
+
+v0 -- v1 [style=solid];
+v1 -- v2 [style=solid];
+v2 -- v3 [style=dotted];
+v3 -- v0 [style=dotted];
+v0 -- v4 [style=solid];
+v1 -- v5 [style=solid];
+v2 -- v6 [style=solid];
+v3 -- v7 [style=dotted];
+v4 -- v5 [style=solid];
+v5 -- v6 [style=solid];
+v6 -- v7 [style=solid];
+v7 -- v4 [style=solid];
+
+e0 -- e3 [color=&quot;#5E81AC&quot;];
+e3 -- e11 [color=&quot;#5E81AC&quot;];
+e11 -- e0 [color=&quot;#5E81AC&quot;];
+e0 -- e5 [color=&quot;#5E81AC&quot;];
+e5 -- e6 [color=&quot;#5E81AC&quot;];
+e6 -- e11 [color=&quot;#5E81AC&quot;];
+e11 -- e10 [color=&quot;#5E81AC&quot;];
+e10 -- e6 [color=&quot;#5E81AC&quot;];
+e0 -- e6 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 14</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-4359797dca8e9409022dada982550d42b6080704.png" alt="graph legend {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+v1 [pos=&quot;0.,0.75!&quot;, fillcolor=white];
+Inside [shape=plaintext, pos=&quot;0.6,1.!&quot;];
+Outside [shape=plaintext, pos=&quot;0.6,0.75!&quot;];
+blank [pos=&quot;0.,0!&quot;, color=white];
+
+}" class="graphviz" /></div>
+</div>
+</div>
+</div>
+<section id="marching-cubes-33">
+<h3>Marching Cubes 33<a class="headerlink" href="#marching-cubes-33" title="Link to this heading">#</a></h3>
+<p><span class="bibtex-citation" id="id3">Chernyaev [<a class="reference internal" href="../guide/ref.html#id65" title="Ev Chernyaev. Marching cubes 33: construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1-8, 1995.">Che95</a>]</span></p>
+<p>See also <a class="reference internal" href="../generated/submodules/mymesh.contour.MarchingCubes.html#mymesh.contour.MarchingCubes" title="mymesh.contour.MarchingCubes"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingCubes()</span></code></a></p>
+<p>One of the main shortcomings of the marching cubes algorithm is that there exist
+several ambiguous cases - situations in which there are multiple possible
+triangulations that could be used to separate the inside from the outside of the
+surface. For example, the opposite corners of Case 4 could be connected through
+the center of the cube. These ambiguities can lead to topological errors and
+non-watertight surfaces. Several methods have been proposed to resolve these
+ambiguities, including an extend lookup table that has 33 entries, rather than
+15 <span class="bibtex-citation" id="id4">[<a class="reference internal" href="../guide/ref.html#id65" title="Ev Chernyaev. Marching cubes 33: construction of topologically correct isosurfaces. Institute for High Energy Physics, Moscow, Russia,, pages 1-8, 1995.">Che95</a>]</span>. Additional tests are used to test whether diagonal
+nodes are connected or separated to choose the correct triangulation.</p>
+</section>
+</section>
+<section id="marching-tetrahedra">
+<h2>Marching Tetrahedra<a class="headerlink" href="#marching-tetrahedra" title="Link to this heading">#</a></h2>
+<p><span class="bibtex-citation" id="id5">Bloomenthal [<a class="reference internal" href="../guide/ref.html#id50" title="Jules Bloomenthal. An implicit surface polygonizer. Graphics Gems, pages 324-349, 1994. doi:10.1016/b978-0-12-336156-1.50040-9.">Blo94</a>]</span></p>
+<p>See also <a class="reference internal" href="../generated/submodules/mymesh.contour.MarchingTetrahedra.html#mymesh.contour.MarchingTetrahedra" title="mymesh.contour.MarchingTetrahedra"><code class="xref py py-func docutils literal notranslate"><span class="pre">MarchingTetrahedra()</span></code></a></p>
+<p>Another approach to resolve the ambiguities of marching cubes is to partition
+tetrahedra, rather than cubes.</p>
+<p>Mixed-Surface Lookup Table</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 sd-border-1 docutils">
+<div class="sd-row sd-row-cols-3 sd-row-cols-xs-3 sd-row-cols-sm-6 sd-row-cols-md-6 sd-row-cols-lg-6 docutils">
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-6db3ed52f21e6d21ae0480a58a51f89a24f00593.png" alt="graph case0 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=white];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=white];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=white];
+
+//v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+//v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+}" class="graphviz" /></div>
+<p>Case 0</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-6fb0c8fb72aa76e11e37a8ad5defbc81cda307b3.png" alt="graph case1 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=white];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=white];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=black];
+
+//v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v3 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v4 [color=&quot;#5E81AC&quot;];
+v4 -- v3 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 1</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-1911ff42874222fd01fb19c0dccdf9f160fa34ef.png" alt="graph case2 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=white];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=black];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=white];
+
+//v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v4 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v1 [color=&quot;#5E81AC&quot;];
+v1 -- v4 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 2</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-5d2b83574d5db6e004dcefce9d722db5875e3101.png" alt="graph case3 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=white];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=black];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=black];
+
+//v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+//v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v1 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v1 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 3</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-da87dadd60f5d0cb7d357dad15f01810ad887fb4.png" alt="graph case4 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=black];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=white];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=white];
+
+v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+//v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v0 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v1 [color=&quot;#5E81AC&quot;];
+v1 -- v0 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 4</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-505f75305cf28a53c4f5352e4d12ddc7c9c22a52.png" alt="graph case5 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=black];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=white];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=black];
+
+v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v1 -- v0 [color=&quot;#5E81AC&quot;];
+v0 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v4 [color=&quot;#5E81AC&quot;];
+v4 -- v1 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 5</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-56f171710847081baf53cf69fa9c498f03e0f66d.png" alt="graph case6 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=black];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=black];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=white];
+
+v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v0 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v4 [color=&quot;#5E81AC&quot;];
+v4 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v0 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 6</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-7d98a86e56006903ec3defdcc3dcf84d37fa6bb2.png" alt="graph case7 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=white];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=black];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=black];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=black];
+
+v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+//v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v0 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v0 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 7</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-00818fd920f2f5b64274cf217b0cff30fd516d65.png" alt="graph case8 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=white];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=white];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=white];
+
+v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+//v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v0 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v0 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 8</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-eacb50df6677ab07e98194f1cf385609b65d5192.png" alt="graph case9 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=white];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=white];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=black];
+
+v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v0 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v4 [color=&quot;#5E81AC&quot;];
+v4 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v0 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 9</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-0b484eddae3424b3db9269a8e1604cffb52492ce.png" alt="graph case10 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=white];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=black];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=white];
+
+v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v0 -- v1 [color=&quot;#5E81AC&quot;];
+v1 -- v4 [color=&quot;#5E81AC&quot;];
+v4 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v0 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 10</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-3cfd6891fa77717be6b4b86bef844952e7048dc7.png" alt="graph case11 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=white];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=black];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=black];
+
+v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+//v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v0 -- v1 [color=&quot;#5E81AC&quot;];
+v1 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v0 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 11</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-e4276bc4c7ed07c3e8b07abc437a775b8f5febb1.png" alt="graph case12 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=black];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=white];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=white];
+
+//v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+//v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v1 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v3 [color=&quot;#5E81AC&quot;];
+v3 -- v1 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 12</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-44a09234033d252ed0481a393da76e39bf8766bf.png" alt="graph case6 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=black];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=white];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=black];
+
+//v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v1 -- v2 [color=&quot;#5E81AC&quot;];
+v2 -- v4 [color=&quot;#5E81AC&quot;];
+v4 -- v1 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 13</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-9ec91bbc8aa988c9ea59d1e7511f4feb850793e8.png" alt="graph case14 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=black];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=black];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=white];
+
+//v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+v3 -- v4 [color=&quot;#5E81AC&quot;];
+v4 -- v5 [color=&quot;#5E81AC&quot;];
+v5 -- v3 [color=&quot;#5E81AC&quot;];
+
+}" class="graphviz" /></div>
+<p>Case 14</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-47f0bc38147d53e361b9051f5f991bcb3d91c7d1.png" alt="graph case15 {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v6 [pos=&quot;0.,0.!&quot;, fillcolor=black];
+v7 [pos=&quot;0.6,-0.2!&quot;, fillcolor=black];
+v8 [pos=&quot;0.9,0.2!&quot;, fillcolor=black];
+v9 [pos=&quot;0.4,0.8!&quot;, fillcolor=black];
+
+//v0 [pos=&quot;0.3,-0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v1 [pos=&quot;0.75,0.!&quot;, color=&quot;#5E81AC&quot;];
+//v2 [pos=&quot;0.45,0.1!&quot;, color=&quot;#5E81AC&quot;];
+//v3 [pos=&quot;0.5,0.3!&quot;, color=&quot;#5E81AC&quot;];
+//v4 [pos=&quot;0.65,0.5!&quot;, color=&quot;#5E81AC&quot;];
+//v5 [pos=&quot;0.2,0.4!&quot;, color=&quot;#5E81AC&quot;];
+
+v6 -- v7 [style=solid];
+v7 -- v8 [style=solid];
+v8 -- v6 [style=dotted];
+v6 -- v9 [style=solid];
+v7 -- v9 [style=solid];
+v8 -- v9 [style=solid];
+
+
+}" class="graphviz" /></div>
+<p>Case 15</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-center docutils">
+<div class="graphviz"><img src="../_images/graphviz-4359797dca8e9409022dada982550d42b6080704.png" alt="graph legend {
+node [shape=point, fontname=&quot;source code pro&quot;];
+edge [style=solid, penwidth=2];
+
+v0 [pos=&quot;0.,1.!&quot;, fillcolor=black];
+v1 [pos=&quot;0.,0.75!&quot;, fillcolor=white];
+Inside [shape=plaintext, pos=&quot;0.6,1.!&quot;];
+Outside [shape=plaintext, pos=&quot;0.6,0.75!&quot;];
+blank [pos=&quot;0.,0!&quot;, color=white];
+
+}" class="graphviz" /></div>
+</div>
+</div>
+</div>
+<p>A similar lookup table can be constructed for volume elements (tetrahedra and wedges). Quadrilateral and wedge elements can be decomposed into triangles and tetrahedra, respectively, however care must be taken to ensure the edges of adjacent wedges are partitioned consistently so that they are split along the same diagonal.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../theory.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Theory Guide</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="curvature.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Curvature</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#marching-squares">Marching Squares</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#marching-cubes">Marching Cubes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#marching-cubes-33">Marching Cubes 33</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#marching-tetrahedra">Marching Tetrahedra</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/theory/contour.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2023, Timothy O. Josephson.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

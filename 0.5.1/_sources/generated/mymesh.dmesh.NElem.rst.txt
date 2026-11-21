@@ -1,0 +1,6 @@
+mymesh.dmesh.NElem
+==================
+
+.. currentmodule:: mymesh
+
+.. autoproperty:: dmesh.NElem

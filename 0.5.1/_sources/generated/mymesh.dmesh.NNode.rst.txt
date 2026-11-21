@@ -1,0 +1,6 @@
+mymesh.dmesh.NNode
+==================
+
+.. currentmodule:: mymesh
+
+.. autoproperty:: dmesh.NNode

@@ -1,0 +1,6 @@
+mymesh.converter.edge2quadratic
+===============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: edge2quadratic

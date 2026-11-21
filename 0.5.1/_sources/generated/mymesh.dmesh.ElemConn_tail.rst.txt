@@ -1,0 +1,6 @@
+mymesh.dmesh.ElemConn\_tail
+===========================
+
+.. currentmodule:: mymesh
+
+.. autoproperty:: dmesh.ElemConn_tail

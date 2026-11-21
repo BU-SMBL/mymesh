@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.cells
+======================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.cells

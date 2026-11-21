@@ -1,0 +1,6 @@
+mymesh.primitives.Line
+======================
+
+.. currentmodule:: mymesh.primitives
+
+.. autofunction:: Line

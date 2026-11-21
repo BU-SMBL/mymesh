@@ -1,0 +1,6 @@
+mymesh.tree.OctreeNode.prune
+============================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: OctreeNode.prune

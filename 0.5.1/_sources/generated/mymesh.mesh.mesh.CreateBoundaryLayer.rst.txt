@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.CreateBoundaryLayer
+====================================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.CreateBoundaryLayer

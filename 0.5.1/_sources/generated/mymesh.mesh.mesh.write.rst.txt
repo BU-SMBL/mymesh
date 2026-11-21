@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.write
+======================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.write

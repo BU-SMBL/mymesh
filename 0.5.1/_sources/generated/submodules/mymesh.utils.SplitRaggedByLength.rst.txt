@@ -1,0 +1,6 @@
+mymesh.utils.SplitRaggedByLength
+================================
+
+.. currentmodule:: mymesh.utils
+
+.. autofunction:: SplitRaggedByLength

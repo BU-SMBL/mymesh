@@ -1,0 +1,6 @@
+mymesh.converter.edges2unique
+=============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: edges2unique

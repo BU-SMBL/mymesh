@@ -1,0 +1,6 @@
+mymesh.rays.PointsInVoxel
+=========================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: PointsInVoxel

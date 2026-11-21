@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.ContainsEdges
+======================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.ContainsEdges

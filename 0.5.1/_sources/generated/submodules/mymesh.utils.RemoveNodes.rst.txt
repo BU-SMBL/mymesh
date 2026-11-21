@@ -1,0 +1,6 @@
+mymesh.utils.RemoveNodes
+========================
+
+.. currentmodule:: mymesh.utils
+
+.. autofunction:: RemoveNodes

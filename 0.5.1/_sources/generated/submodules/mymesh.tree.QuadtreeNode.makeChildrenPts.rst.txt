@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.makeChildrenPts
+========================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.makeChildrenPts

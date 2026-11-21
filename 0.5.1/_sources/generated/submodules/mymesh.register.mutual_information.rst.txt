@@ -1,0 +1,6 @@
+mymesh.register.mutual\_information
+===================================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: mutual_information

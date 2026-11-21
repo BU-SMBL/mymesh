@@ -1,0 +1,6 @@
+mymesh.delaunay.orient2d
+========================
+
+.. currentmodule:: mymesh.delaunay
+
+.. autofunction:: orient2d

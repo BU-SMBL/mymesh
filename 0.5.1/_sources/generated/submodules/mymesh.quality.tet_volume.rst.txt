@@ -1,0 +1,6 @@
+mymesh.quality.tet\_volume
+==========================
+
+.. currentmodule:: mymesh.quality
+
+.. autofunction:: tet_volume

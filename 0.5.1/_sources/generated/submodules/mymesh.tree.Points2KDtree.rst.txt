@@ -1,0 +1,6 @@
+mymesh.tree.Points2KDtree
+=========================
+
+.. currentmodule:: mymesh.tree
+
+.. autofunction:: Points2KDtree

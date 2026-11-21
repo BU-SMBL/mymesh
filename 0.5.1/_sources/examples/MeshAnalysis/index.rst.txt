@@ -1,0 +1,67 @@
+
+
+.. _sphx_glr_examples_MeshAnalysis:
+
+Mesh Analysis Examples
+======================
+
+Examples for analyzing meshes.
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Local (for every node) measurements of pore size and thickness can be obtained by performing ray-surface intersections between the surface node normals and the surface.  This test is, by default, bidirectional, meaning it will find intersections in both the outward direction and the inward direction. Inward intersections correspond to measures of thickness (the rays pass through the &quot;inside&quot; of the surface) while the outward intersections correspond to pore size measurements (the rays pass through the empty pore space and find the next intersection with the object).">
+
+.. only:: html
+
+  .. image:: /examples/MeshAnalysis/images/thumb/sphx_glr_demo_pore-thickness_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshAnalysis/demo_pore-thickness`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Pore size & Thickness measurements</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Curvature Analysis">
+
+.. only:: html
+
+  .. image:: /examples/MeshAnalysis/images/thumb/sphx_glr_demo_curvature_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshAnalysis/demo_curvature`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Curvature Analysis</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/MeshAnalysis/demo_pore-thickness
+   /examples/MeshAnalysis/demo_curvature
+

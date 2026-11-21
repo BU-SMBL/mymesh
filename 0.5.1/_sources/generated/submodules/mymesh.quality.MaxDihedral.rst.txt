@@ -1,0 +1,6 @@
+mymesh.quality.MaxDihedral
+==========================
+
+.. currentmodule:: mymesh.quality
+
+.. autofunction:: MaxDihedral

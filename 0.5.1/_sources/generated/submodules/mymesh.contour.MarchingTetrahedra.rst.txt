@@ -1,0 +1,6 @@
+mymesh.contour.MarchingTetrahedra
+=================================
+
+.. currentmodule:: mymesh.contour
+
+.. autofunction:: MarchingTetrahedra

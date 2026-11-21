@@ -1,0 +1,6 @@
+mymesh.delaunay.circumsphere
+============================
+
+.. currentmodule:: mymesh.delaunay
+
+.. autofunction:: circumsphere

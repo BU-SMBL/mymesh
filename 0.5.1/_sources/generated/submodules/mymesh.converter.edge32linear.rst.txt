@@ -1,0 +1,6 @@
+mymesh.converter.edge32linear
+=============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: edge32linear
