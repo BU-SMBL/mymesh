@@ -256,7 +256,7 @@ and geometries.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 12.721 seconds)
+   **Total running time of the script:** (0 minutes 8.703 seconds)
 
 
 .. _sphx_glr_download_examples_MeshModification_demo_smoothing.py:

@@ -153,7 +153,7 @@ Stanford Bunny
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 43.331 seconds)
+   **Total running time of the script:** (1 minutes 13.286 seconds)
 
 
 .. _sphx_glr_download_examples_MeshAnalysis_demo_pore-thickness.py:

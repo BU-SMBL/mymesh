@@ -3,6 +3,8 @@
 
 ## Unreleased
 
+## 0.5.0 (2026-11-21)
+
 ### Feat
 
 - **register**: Update options for grayscale registration, add L2 metric
