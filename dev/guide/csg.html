@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -36,7 +36,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=6b19b803" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
     <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -61,7 +61,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'guide/csg';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.19.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -542,7 +542,7 @@ new function can then be meshed as any other implicit function.</p>
 <span class="n">func2</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">func</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">difff</span><span class="p">(</span><span class="n">func1</span><span class="p">,</span> <span class="n">func2</span><span class="p">)</span>
 <span class="n">diff</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">SurfaceMesh</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">.05</span><span class="p">)</span>
-<span class="n">diff</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">)</span>
+<span class="n">diff</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">'w'</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="s1">'trimetric'</span><span class="p">)</span>
 </pre></div>
 </div>
 <figure class="align-default">
@@ -560,7 +560,7 @@ intended operation (and a union operations are more difficult to achieve).</p>
 <span class="n">func2</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">cube</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">TetMesh</span><span class="p">(</span><span class="n">func1</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">.05</span><span class="p">)</span>
 <span class="n">diff</span> <span class="o">=</span> <span class="n">implicit</span><span class="o">.</span><span class="n">TetMesh</span><span class="p">(</span><span class="n">func2</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">.05</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="n">cube</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">diff</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">)</span>
+<span class="n">diff</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">'w'</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="s1">'trimetric'</span><span class="p">)</span>
 </pre></div>
 </div>
 <figure class="align-default">
@@ -568,8 +568,8 @@ intended operation (and a union operations are more difficult to achieve).</p>
 </figure>
 <p>This operation can equivalently be performed using the
 <a class="reference internal" href="../generated/mymesh.mesh.mesh.Contour.html#mymesh.mesh.mesh.Contour" title="mymesh.mesh.mesh.Contour"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Contour()</span></code></a> method.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">m1</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">&#39;func2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func2</span><span class="p">(</span><span class="n">m1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">m1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">m1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
-<span class="n">m2</span> <span class="o">=</span> <span class="n">m1</span><span class="o">.</span><span class="n">Contour</span><span class="p">(</span><span class="s1">&#39;func2&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">m1</span><span class="o">.</span><span class="n">NodeData</span><span class="p">[</span><span class="s1">'func2'</span><span class="p">]</span> <span class="o">=</span> <span class="n">func2</span><span class="p">(</span><span class="n">m1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">m1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">m1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">m2</span> <span class="o">=</span> <span class="n">m1</span><span class="o">.</span><span class="n">Contour</span><span class="p">(</span><span class="s1">'func2'</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">'vol'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This leads to much cleaner intersection edges between the two objects, however
@@ -597,26 +597,26 @@ labeling elements, which is done identically regardless of which operation is
 being performed, <a class="reference internal" href="../generated/submodules/mymesh.booleans.MeshBooleans.html#mymesh.booleans.MeshBooleans" title="mymesh.booleans.MeshBooleans"><code class="xref py py-func docutils literal notranslate"><span class="pre">MeshBooleans()</span></code></a> returns the union,
 intersection, and difference meshes together (note that the difference is not
 symmetric, i.e. A-B ≠ B-A).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cube</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">([</span><span class="o">-</span><span class="mf">.9</span><span class="p">,</span><span class="mf">.9</span><span class="p">,</span><span class="o">-</span><span class="mf">.9</span><span class="p">,</span><span class="mf">.9</span><span class="p">,</span><span class="o">-</span><span class="mf">.9</span><span class="p">,</span><span class="mf">.9</span><span class="p">],</span> <span class="mf">.25</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;tri&#39;</span><span class="p">)</span>
-<span class="n">sphere</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;tri&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cube</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">([</span><span class="o">-</span><span class="mf">.9</span><span class="p">,</span><span class="mf">.9</span><span class="p">,</span><span class="o">-</span><span class="mf">.9</span><span class="p">,</span><span class="mf">.9</span><span class="p">,</span><span class="o">-</span><span class="mf">.9</span><span class="p">,</span><span class="mf">.9</span><span class="p">],</span> <span class="mf">.25</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">'surf'</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">'tri'</span><span class="p">)</span>
+<span class="n">sphere</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ElemType</span><span class="o">=</span><span class="s1">'tri'</span><span class="p">)</span>
 
 <span class="n">U</span><span class="p">,</span><span class="n">I</span><span class="p">,</span><span class="n">D</span> <span class="o">=</span> <span class="n">booleans</span><span class="o">.</span><span class="n">MeshBooleans</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span><span class="n">sphere</span><span class="p">)</span>
 
 <span class="c1"># Plotting:</span>
-<span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_fig</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">)</span>
-<span class="n">fig2</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_fig</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">)</span>
-<span class="n">fig3</span><span class="p">,</span> <span class="n">ax3</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_fig</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">)</span>
+<span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_fig</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">'g'</span><span class="p">,</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">'w'</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="s1">'trimetric'</span><span class="p">)</span>
+<span class="n">fig2</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_fig</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">'b'</span><span class="p">,</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">'w'</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="s1">'trimetric'</span><span class="p">)</span>
+<span class="n">fig3</span><span class="p">,</span> <span class="n">ax3</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">return_fig</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">'r'</span><span class="p">,</span><span class="n">bgcolor</span><span class="o">=</span><span class="s1">'w'</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="s1">'trimetric'</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig1</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig2</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig3</span><span class="p">);</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
 <span class="n">a1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_images</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_array</span><span class="p">())</span>
 <span class="n">a2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ax2</span><span class="o">.</span><span class="n">get_images</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_array</span><span class="p">())</span>
 <span class="n">a3</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ax3</span><span class="o">.</span><span class="n">get_images</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_array</span><span class="p">())</span>
-<span class="n">a1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Union&#39;</span><span class="p">)</span>
+<span class="n">a1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'Union'</span><span class="p">)</span>
 <span class="n">a1</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
-<span class="n">a2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Intersection&#39;</span><span class="p">)</span>
+<span class="n">a2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'Intersection'</span><span class="p">)</span>
 <span class="n">a2</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
-<span class="n">a3</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Difference&#39;</span><span class="p">)</span>
+<span class="n">a3</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'Difference'</span><span class="p">)</span>
 <span class="n">a3</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
@@ -703,8 +703,8 @@ symmetric, i.e. A-B ≠ B-A).</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -738,7 +738,7 @@ symmetric, i.e. A-B ≠ B-A).</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

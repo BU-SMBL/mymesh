@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -35,7 +35,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -43,10 +43,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=6b19b803" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -60,7 +60,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mymesh/booleans';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.19.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -478,7 +478,7 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># Created on Wed Feb 16 11:28:28 2022</span>
 <span class="c1"># @author: toj</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="sd">Boolean (union, intersection, difference) operations for meshes</span>
 
 <span class="sd">Operations</span>
@@ -489,7 +489,7 @@
 <span class="sd">    MeshBooleans</span>
 <span class="sd">    SplitMesh</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -498,7 +498,7 @@
 <div class="viewcode-block" id="MeshBooleans">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.booleans.MeshBooleans.html#mymesh.booleans.MeshBooleans">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">MeshBooleans</span><span class="p">(</span><span class="n">Surf1</span><span class="p">,</span> <span class="n">Surf2</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Boolean (union, intersection, difference) for two meshes.</span>
 <span class="sd">    Currently operations are only supported on purely triangular meshes.</span>
 <span class="sd">    If a volume or non-triangular mesh is given, it will be converted</span>
@@ -522,11 +522,11 @@
 <span class="sd">        Mesh object containing the intersection of the two input surfaces</span>
 <span class="sd">    Difference : mesh.mesh</span>
 <span class="sd">        Mesh object containing the difference of the two input surfaces</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    """</span>    
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Surf1</span><span class="o">.</span><span class="n">BoundaryNodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Surf1 is not a fully closed surface - boolean operations may produce unexpected results.&#39;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">'Surf1 is not a fully closed surface - boolean operations may produce unexpected results.'</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Surf2</span><span class="o">.</span><span class="n">BoundaryNodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Surf2 is not a fully closed surface - boolean operations may produce unexpected results.&#39;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">'Surf2 is not a fully closed surface - boolean operations may produce unexpected results.'</span><span class="p">)</span>
 
     <span class="n">eps</span> <span class="o">=</span> <span class="n">tol</span><span class="o">/</span><span class="mi">100</span>
     <span class="n">eps_final</span> <span class="o">=</span> <span class="n">tol</span><span class="o">*</span><span class="mi">10</span>    
@@ -564,7 +564,7 @@
     <span class="n">MergedICoords</span><span class="p">,</span> <span class="n">MergedIConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">MergeMesh</span><span class="p">(</span><span class="n">Split1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">AIConn</span><span class="p">,</span> <span class="n">Split2</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">BIConn</span><span class="p">)</span>
     <span class="n">MergedDCoords</span><span class="p">,</span> <span class="n">MergedDConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">MergeMesh</span><span class="p">(</span><span class="n">Split1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">ADConn</span><span class="p">,</span> <span class="n">Split2</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">fliplr</span><span class="p">(</span><span class="n">BDConn</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">'mesh'</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
         <span class="n">Union</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">MergedUCoords</span><span class="p">,</span><span class="n">MergedUConn</span><span class="p">)</span>
         <span class="n">Intersection</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">MergedICoords</span><span class="p">,</span><span class="n">MergedIConn</span><span class="p">)</span>
         <span class="n">Difference</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span><span class="n">MergedDCoords</span><span class="p">,</span><span class="n">MergedDConn</span><span class="p">)</span>
@@ -583,7 +583,7 @@
 <div class="viewcode-block" id="SplitMesh">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.booleans.SplitMesh.html#mymesh.booleans.SplitMesh">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">SplitMesh</span><span class="p">(</span><span class="n">Surf1</span><span class="p">,</span> <span class="n">Surf2</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Find intersections between two surfaces and split them. The resulting meshes</span>
 <span class="sd">    will have nodes placed along their interfaces and retriangulated to contain </span>
 <span class="sd">    the lines of intersection. If a volume or non-triangular mesh is given, it </span>
@@ -604,15 +604,15 @@
 <span class="sd">        First surface mesh split by the second.</span>
 <span class="sd">    Surf2 : mymesh.mesh</span>
 <span class="sd">        Second surface mesh split by the first.</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">if</span> <span class="n">Surf1</span><span class="o">.</span><span class="n">Type</span> <span class="o">!=</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
+<span class="sd">    """</span>    
+    <span class="k">if</span> <span class="n">Surf1</span><span class="o">.</span><span class="n">Type</span> <span class="o">!=</span> <span class="s1">'surf'</span><span class="p">:</span>
         <span class="n">Surf1</span> <span class="o">=</span> <span class="n">Surf1</span><span class="o">.</span><span class="n">Surface</span>
-    <span class="k">if</span> <span class="n">Surf2</span><span class="o">.</span><span class="n">Type</span> <span class="o">!=</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">Surf2</span><span class="o">.</span><span class="n">Type</span> <span class="o">!=</span> <span class="s1">'surf'</span><span class="p">:</span>
         <span class="n">Surf2</span> <span class="o">=</span> <span class="n">Surf2</span><span class="o">.</span><span class="n">Surface</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Surf1</span><span class="o">.</span><span class="n">ElemType</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">Surf1</span><span class="o">.</span><span class="n">ElemType</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Surf1</span><span class="o">.</span><span class="n">ElemType</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">Surf1</span><span class="o">.</span><span class="n">ElemType</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'tri'</span><span class="p">:</span>
         <span class="n">Surf1</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Surf1</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2tris</span><span class="p">(</span><span class="o">*</span><span class="n">Surf1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Surf2</span><span class="o">.</span><span class="n">ElemType</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">Surf2</span><span class="o">.</span><span class="n">ElemType</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;tri&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Surf2</span><span class="o">.</span><span class="n">ElemType</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">Surf2</span><span class="o">.</span><span class="n">ElemType</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'tri'</span><span class="p">:</span>
         <span class="n">Surf2</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Surf2</span><span class="o">.</span><span class="n">NodeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2tris</span><span class="p">(</span><span class="o">*</span><span class="n">Surf2</span><span class="p">)</span>
 
     <span class="n">Surf1Intersections</span><span class="p">,</span><span class="n">Surf2Intersections</span><span class="p">,</span><span class="n">IntersectionPts</span> <span class="o">=</span> <span class="n">rays</span><span class="o">.</span><span class="n">SurfSurfIntersection</span><span class="p">(</span><span class="o">*</span><span class="n">Surf1</span><span class="p">,</span><span class="o">*</span><span class="n">Surf2</span><span class="p">,</span><span class="n">return_pts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -651,7 +651,7 @@
                 <span class="n">k</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
                 <span class="n">flatnodes</span><span class="p">,</span><span class="n">R</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">RotateNormalToVector</span><span class="p">(</span><span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">n</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
                     
-                <span class="n">coords</span><span class="p">,</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">delaunay</span><span class="o">.</span><span class="n">Triangulate</span><span class="p">(</span><span class="n">flatnodes</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;Triangle&#39;</span><span class="p">,</span><span class="n">Constraints</span><span class="o">=</span><span class="n">Constraints</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>  
+                <span class="n">coords</span><span class="p">,</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">delaunay</span><span class="o">.</span><span class="n">Triangulate</span><span class="p">(</span><span class="n">flatnodes</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span><span class="n">method</span><span class="o">=</span><span class="s1">'Triangle'</span><span class="p">,</span><span class="n">Constraints</span><span class="o">=</span><span class="n">Constraints</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>  
                 
 
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">]):</span>
@@ -662,7 +662,7 @@
                 <span class="n">surf</span><span class="o">.</span><span class="n">addNodes</span><span class="p">(</span><span class="n">SplitGroupNodes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 
         <span class="c1"># Collinear check</span>
-        <span class="n">Edges</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2edges</span><span class="p">(</span><span class="o">*</span><span class="n">surf</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;tri&#39;</span><span class="p">)</span>
+        <span class="n">Edges</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2edges</span><span class="p">(</span><span class="o">*</span><span class="n">surf</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">'tri'</span><span class="p">)</span>
         <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">NodeCoords</span><span class="p">)</span>
         <span class="n">EdgePoints</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">Edges</span><span class="p">]</span>
         <span class="n">ElemPoints</span> <span class="o">=</span> <span class="n">ArrayCoords</span><span class="p">[</span><span class="n">surf</span><span class="o">.</span><span class="n">NodeConn</span><span class="p">]</span>
@@ -692,7 +692,7 @@
     <span class="k">return</span> <span class="n">SharedA</span><span class="p">,</span> <span class="n">SharedB</span>
                            
 <span class="k">def</span><span class="w"> </span><span class="nf">_ClassifyTris</span><span class="p">(</span><span class="n">SplitA</span><span class="p">,</span> <span class="n">SharedA</span><span class="p">,</span> <span class="n">SplitB</span><span class="p">,</span> <span class="n">SharedB</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Classify triangles of meshes split by :func:`SplitMesh`.</span>
 
 <span class="sd">    Parameters</span>
@@ -726,7 +726,7 @@
 <span class="sd">        Set of element IDs of B that are on the surface of surface A</span>
 <span class="sd">    BflipA : set</span>
 <span class="sd">        Set of element IDs of B that are on the surface of surface A, facing the opposite direction</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Classifies each Triangle in A as inside, outside, or on the surface facing the same or opposite direction as surface B</span>
     
     <span class="n">octA</span> <span class="o">=</span> <span class="kc">None</span><span class="c1"># octree.Surface2Octree(*SplitA)</span>
@@ -855,7 +855,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ProblemsB</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ProblemsB</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">ProblemsA</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Some triangles failed to be labeled.&#39;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">'Some triangles failed to be labeled.'</span><span class="p">)</span>
        
     <span class="k">return</span> <span class="n">AinB</span><span class="p">,</span> <span class="n">AoutB</span><span class="p">,</span> <span class="n">AsameB</span><span class="p">,</span> <span class="n">AflipB</span><span class="p">,</span> <span class="n">BinA</span><span class="p">,</span> <span class="n">BoutA</span><span class="p">,</span> <span class="n">BsameA</span><span class="p">,</span> <span class="n">BflipA</span>
                         
@@ -888,8 +888,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -923,7 +923,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

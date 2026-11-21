@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -36,7 +36,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=6b19b803" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
     <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -61,7 +61,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'verification/tree';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.19.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -505,7 +505,7 @@
 <p>Spatial tree structures can dramatically speed up nearest neighbor searching compared to brute-force approaches that require distances between all points to be calculated, however, there is an added up-front cost of constructing the tree.
 If only a single search needs to be performed, the brute-force approach may be the most efficient option, but if performing multiple searches, or other operations that can utilize the tree structure, performance can be enhanced significantly.</p>
 <p>Here the performance of multiple tree structures are compared to a brute-force search.
-A quadtree (<a class="reference internal" href="../generated/submodules/mymesh.tree.QuadtreeNode.html#mymesh.tree.QuadtreeNode" title="mymesh.tree.QuadtreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuadtreeNode</span></code></a>),  KD tree (<a class="reference internal" href="../generated/submodules/mymesh.tree.KDtreeNode.html#mymesh.tree.KDtreeNode" title="mymesh.tree.KDtreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">KDtreeNode</span></code></a>), and SciPy’s implementation of a <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html#scipy.spatial.KDTree" title="(in SciPy v1.17.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.spatial.KDTree</span></code></a> are compared to a brute force search for 2D point data.
+A quadtree (<a class="reference internal" href="../generated/submodules/mymesh.tree.QuadtreeNode.html#mymesh.tree.QuadtreeNode" title="mymesh.tree.QuadtreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuadtreeNode</span></code></a>),  KD tree (<a class="reference internal" href="../generated/submodules/mymesh.tree.KDtreeNode.html#mymesh.tree.KDtreeNode" title="mymesh.tree.KDtreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">KDtreeNode</span></code></a>), and SciPy’s implementation of a <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html#scipy.spatial.KDTree" title="(in SciPy v1.18.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.spatial.KDTree</span></code></a> are compared to a brute force search for 2D point data.
 For 3D point data, an octree (<a class="reference internal" href="../generated/submodules/mymesh.tree.OctreeNode.html#mymesh.tree.OctreeNode" title="mymesh.tree.OctreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">OctreeNode</span></code></a>), is used in place of the quadtree.
 Note that the KD tree can be used for any k-dimensional data.</p>
 <section id="d-point-data">
@@ -591,11 +591,11 @@ Note that the KD tree can be used for any k-dimensional data.</p>
 <div class="cell_output docutils container">
 <div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>********** System Information **********
 System: Linux
-Python Version: 3.10.20
+Python Version: 3.10.22
 Numpy Version: 2.2.6
-CPU: Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz
+CPU: AMD EPYC 9V74 80-Core Processor
 CPU Physical Cores: 2
-Available Memory: 0.8/15.6 GB
+Available Memory: 3.0/15.6 GB
 ****************************************
 </pre></div>
 </div>
@@ -682,8 +682,8 @@ Available Memory: 0.8/15.6 GB
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -717,7 +717,7 @@ Available Memory: 0.8/15.6 GB
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

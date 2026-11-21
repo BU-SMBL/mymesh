@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -35,7 +35,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -43,10 +43,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/css/mymesh.css?v=6b19b803" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
     <script src="../../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -60,7 +60,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mymesh/quality';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.19.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -478,13 +478,13 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># Created on Sun Jan 23 23:58:18 2022</span>
 <span class="c1"># @author: toj</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="sd">Element quality measurements</span>
 
 <span class="sd">+--------------------------------------------------+---------------+----------------+</span>
 <span class="sd">| Quality Metric                                   | Best Quality  | Worst quality  |</span>
 <span class="sd">+==================================================+===============+================+</span>
-<span class="sd">| :func:`~mymesh.quality.AspectRatio`              | 1             | :math:`\infty` |</span>
+<span class="sd">| :func:`~mymesh.quality.AspectRatio`              | 1             | :math:`\\infty` |</span>
 <span class="sd">+--------------------------------------------------+---------------+----------------+</span>
 <span class="sd">| :func:`~mymesh.quality.Orthogonality`            | 1             | 0              |</span>
 <span class="sd">+--------------------------------------------------+---------------+----------------+</span>
@@ -534,7 +534,7 @@
 <span class="sd">    dihedralAngles</span>
 <span class="sd">    SurfDihedralAngles</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">copy</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
@@ -545,7 +545,7 @@
 <div class="viewcode-block" id="AspectRatio">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.AspectRatio.html#mymesh.quality.AspectRatio">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">AspectRatio</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates element aspect ratios for each element in the mesh.</span>
 <span class="sd">    For all element types, the aspect ratio is calculated as the length of the </span>
 <span class="sd">    longest edge divided by the length of the shortest edge of an element.</span>
@@ -565,7 +565,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    aspect : np.ndarray</span>
 <span class="sd">        Array of aspect ratios for each element.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
     <span class="n">Edges</span><span class="p">,</span><span class="n">EdgeConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2edges</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_EdgeConn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">return_EdgeElem</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">Edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Edges</span><span class="p">)</span>
@@ -580,18 +580,18 @@
         <span class="n">minAspect</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">aspect</span><span class="p">)</span>
         <span class="n">maxAspect</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">aspect</span><span class="p">)</span>
         <span class="n">meanAspect</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">aspect</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimum Aspect Ratio: </span><span class="si">{</span><span class="n">minAspect</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">aspect</span><span class="o">==</span><span class="n">minAspect</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum Aspect Ratio: </span><span class="si">{</span><span class="n">maxAspect</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">aspect</span><span class="o">==</span><span class="n">maxAspect</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Aspect Ratio: </span><span class="si">{</span><span class="n">meanAspect</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Minimum Aspect Ratio: </span><span class="si">{</span><span class="n">minAspect</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">aspect</span><span class="o">==</span><span class="n">minAspect</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Maximum Aspect Ratio: </span><span class="si">{</span><span class="n">maxAspect</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">aspect</span><span class="o">==</span><span class="n">maxAspect</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Mean Aspect Ratio: </span><span class="si">{</span><span class="n">meanAspect</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">aspect</span></div>
 
 
 <div class="viewcode-block" id="Orthogonality">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.Orthogonality.html#mymesh.quality.Orthogonality">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">Orthogonality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates element orthogonality for each element in the mesh.</span>
 <span class="sd">    For all element types, orthogonality is calculated by determining the minimum </span>
 <span class="sd">    of the angle cosines between face normal vectors (Ai) and the element centroid</span>
@@ -616,7 +616,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    ortho : np.ndarray</span>
 <span class="sd">        Array of orthogonalities for each element.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Faces</span><span class="p">,</span><span class="n">FaceConn</span><span class="p">,</span><span class="n">FaceElem</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">return_FaceConn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_FaceElem</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">RFaceConn</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">FaceConn</span><span class="p">,</span><span class="n">fillval</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">FaceElemConn</span><span class="p">,</span> <span class="n">UFaces</span><span class="p">,</span> <span class="n">UFaceConn</span><span class="p">,</span> <span class="n">UFaceElem</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">inv</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">faces2faceelemconn</span><span class="p">(</span><span class="n">Faces</span><span class="p">,</span><span class="n">FaceConn</span><span class="p">,</span><span class="n">FaceElem</span><span class="p">,</span><span class="n">return_UniqueFaceInfo</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -654,11 +654,11 @@
         <span class="n">minOrtho</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ortho</span><span class="p">)</span>
         <span class="n">maxOrtho</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ortho</span><span class="p">)</span>
         <span class="n">meanOrtho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ortho</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimum Orthogonality: </span><span class="si">{</span><span class="n">minOrtho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ortho</span><span class="o">==</span><span class="n">minOrtho</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum Orthogonality: </span><span class="si">{</span><span class="n">maxOrtho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ortho</span><span class="o">==</span><span class="n">maxOrtho</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Orthogonality: </span><span class="si">{</span><span class="n">meanOrtho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Minimum Orthogonality: </span><span class="si">{</span><span class="n">minOrtho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ortho</span><span class="o">==</span><span class="n">minOrtho</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Maximum Orthogonality: </span><span class="si">{</span><span class="n">maxOrtho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ortho</span><span class="o">==</span><span class="n">maxOrtho</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Mean Orthogonality: </span><span class="si">{</span><span class="n">meanOrtho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ortho</span></div>
 
@@ -666,7 +666,7 @@
 <div class="viewcode-block" id="InverseOrthogonality">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.InverseOrthogonality.html#mymesh.quality.InverseOrthogonality">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">InverseOrthogonality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates element inverse orthogonality for each element in the mesh.</span>
 <span class="sd">    For all element types, inverse orthogonality is calculated as 1-orthogonality.</span>
 
@@ -688,7 +688,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    iortho : np.ndarray</span>
 <span class="sd">        Array of inverse orthogonalities for each element.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ortho</span> <span class="o">=</span> <span class="n">Orthogonality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
     <span class="n">iortho</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">ortho</span>
 
@@ -696,11 +696,11 @@
         <span class="n">minIortho</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">iortho</span><span class="p">)</span>
         <span class="n">maxIortho</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">iortho</span><span class="p">)</span>
         <span class="n">meanIortho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">iortho</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimum Inverse Orthogonality: </span><span class="si">{</span><span class="n">minIortho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">iortho</span><span class="o">==</span><span class="n">minIortho</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum Inverse Orthogonality: </span><span class="si">{</span><span class="n">maxIortho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">iortho</span><span class="o">==</span><span class="n">maxIortho</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Inverse Orthogonality: </span><span class="si">{</span><span class="n">meanIortho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Minimum Inverse Orthogonality: </span><span class="si">{</span><span class="n">minIortho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">iortho</span><span class="o">==</span><span class="n">minIortho</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Maximum Inverse Orthogonality: </span><span class="si">{</span><span class="n">maxIortho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">iortho</span><span class="o">==</span><span class="n">maxIortho</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Mean Inverse Orthogonality: </span><span class="si">{</span><span class="n">meanIortho</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">iortho</span></div>
 
@@ -708,7 +708,7 @@
 <div class="viewcode-block" id="OrthogonalQuality">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.OrthogonalQuality.html#mymesh.quality.OrthogonalQuality">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">OrthogonalQuality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates element orthogonality for each element in the mesh.</span>
 <span class="sd">    For all element types, orthogonal quality is calculated as 1-InverseOrthogonalQuality.</span>
 
@@ -730,18 +730,18 @@
 <span class="sd">    -------</span>
 <span class="sd">    orthoq : np.ndarray</span>
 <span class="sd">        Array of orthogonal qualities for each element.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">orthoq</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">InverseOrthogonalQuality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
         <span class="n">minOrthoq</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">orthoq</span><span class="p">)</span>
         <span class="n">maxOrthoq</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">orthoq</span><span class="p">)</span>
         <span class="n">meanOrthoq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">orthoq</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimum Orthogonal quality: </span><span class="si">{</span><span class="n">minOrthoq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">orthoq</span><span class="o">==</span><span class="n">minOrthoq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum Orthogonal quality: </span><span class="si">{</span><span class="n">maxOrthoq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">orthoq</span><span class="o">==</span><span class="n">maxOrthoq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Orthogonal quality: </span><span class="si">{</span><span class="n">meanOrthoq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Minimum Orthogonal quality: </span><span class="si">{</span><span class="n">minOrthoq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">orthoq</span><span class="o">==</span><span class="n">minOrthoq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Maximum Orthogonal quality: </span><span class="si">{</span><span class="n">maxOrthoq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">orthoq</span><span class="o">==</span><span class="n">maxOrthoq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Mean Orthogonal quality: </span><span class="si">{</span><span class="n">meanOrthoq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">orthoq</span></div>
 
@@ -749,7 +749,7 @@
 <div class="viewcode-block" id="InverseOrthogonalQuality">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.InverseOrthogonalQuality.html#mymesh.quality.InverseOrthogonalQuality">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">InverseOrthogonalQuality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates element inverse orthogonal quality for each </span>
 <span class="sd">    element in the mesh. For tetrahedral, wedge, and pyramidal elements, inverse orthogonal</span>
 <span class="sd">    quality is calculated as the maximum of skewness and inverse orthogonality. For hexahedral</span>
@@ -773,7 +773,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    iorthoq : np.ndarray</span>
 <span class="sd">        Array of inverse orthogonal quality for each element.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">iortho</span> <span class="o">=</span> <span class="n">InverseOrthogonality</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">skew</span> <span class="o">=</span> <span class="n">Skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">nElem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">NodeConn</span><span class="p">])</span>
@@ -785,19 +785,19 @@
         <span class="n">minIorthoq</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">iorthoq</span><span class="p">)</span>
         <span class="n">maxIorthoq</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">iorthoq</span><span class="p">)</span>
         <span class="n">meanIorthoq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">iorthoq</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimum Inverse Orthogonal quality: </span><span class="si">{</span><span class="n">minIorthoq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">iorthoq</span><span class="o">==</span><span class="n">minIorthoq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum Inverse Orthogonal quality: </span><span class="si">{</span><span class="n">maxIorthoq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">iorthoq</span><span class="o">==</span><span class="n">maxIorthoq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Inverse Orthogonal quality: </span><span class="si">{</span><span class="n">meanIorthoq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Minimum Inverse Orthogonal quality: </span><span class="si">{</span><span class="n">minIorthoq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">iorthoq</span><span class="o">==</span><span class="n">minIorthoq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Maximum Inverse Orthogonal quality: </span><span class="si">{</span><span class="n">maxIorthoq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">iorthoq</span><span class="o">==</span><span class="n">maxIorthoq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Mean Inverse Orthogonal quality: </span><span class="si">{</span><span class="n">meanIorthoq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">iorthoq</span></div>
 
 
 <div class="viewcode-block" id="Skewness">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.Skewness.html#mymesh.quality.Skewness">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">Skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">simplexmethod</span><span class="o">=</span><span class="s1">&#39;size&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">simplexmethod</span><span class="o">=</span><span class="s1">'size'</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates element skewness for each element in the mesh. </span>
 <span class="sd">    For triangular, hexahedral, wedge, and pyramidal elements, skewness is </span>
 <span class="sd">    calculated by the equiangular skewness method. </span>
@@ -815,34 +815,34 @@
 <span class="sd">        List of nodal connectivities.</span>
 <span class="sd">    verbose : bool, optional</span>
 <span class="sd">        If true, will print min, max, and mean element quality, as well </span>
-<span class="sd">        as the number of &#39;slivers&#39; i.e. elements with skewness above 0.9, by default False.</span>
+<span class="sd">        as the number of 'slivers' i.e. elements with skewness above 0.9, by default False.</span>
 <span class="sd">    simplexmethod : str, optional</span>
-<span class="sd">        Method to be used for triangular/tetrahedral skewness, by default &#39;size&#39;.</span>
-<span class="sd">        &#39;size&#39; - uses equilateral area/volume skewness method.</span>
-<span class="sd">        &#39;angle&#39; - uses equiangular skewness method.</span>
+<span class="sd">        Method to be used for triangular/tetrahedral skewness, by default 'size'.</span>
+<span class="sd">        'size' - uses equilateral area/volume skewness method.</span>
+<span class="sd">        'angle' - uses equiangular skewness method.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    skew : np.ndarray</span>
 <span class="sd">        Array of skewness for each element.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">Type</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">identify_type</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">)</span>
 
     
-    <span class="k">if</span> <span class="n">simplexmethod</span> <span class="o">==</span> <span class="s1">&#39;angle&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">simplexmethod</span> <span class="o">==</span> <span class="s1">'angle'</span><span class="p">:</span>
         <span class="n">skew</span> <span class="o">=</span> <span class="n">equiangular_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
 
-    <span class="k">elif</span> <span class="n">simplexmethod</span> <span class="o">==</span> <span class="s1">&#39;size&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">simplexmethod</span> <span class="o">==</span> <span class="s1">'size'</span><span class="p">:</span>
         <span class="n">skew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">))</span>
 
         <span class="n">Ls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">NodeConn</span><span class="p">])</span>
         
-        <span class="k">if</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">'surf'</span><span class="p">:</span>
             <span class="n">triIdx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ls</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">tetIdx</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">otherIdx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">Ls</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">'vol'</span><span class="p">:</span>
             <span class="n">tetIdx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ls</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">triIdx</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">otherIdx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ls</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -861,7 +861,7 @@
             <span class="n">skew</span><span class="p">[</span><span class="n">otherIdx</span><span class="p">]</span> <span class="o">=</span> <span class="n">OtherSkew</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Invalid simplexmethod argument. Must be &quot;angle&quot; or &quot;size&quot;.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">'Invalid simplexmethod argument. Must be "angle" or "size".'</span><span class="p">)</span>
     
     
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
@@ -869,12 +869,12 @@
         <span class="n">maxSkew</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">skew</span><span class="p">)</span>
         <span class="n">meanSkew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">skew</span><span class="p">)</span>
         <span class="n">nSliver</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">skew</span><span class="o">&gt;</span><span class="mf">0.9</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimum Skewness: </span><span class="si">{</span><span class="n">minSkew</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">skew</span><span class="o">==</span><span class="n">minSkew</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum Skewness: </span><span class="si">{</span><span class="n">maxSkew</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">skew</span><span class="o">==</span><span class="n">maxSkew</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Skewness: </span><span class="si">{</span><span class="n">meanSkew</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">nSliver</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1"> Elements with Skewness &gt; 0.9&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Minimum Skewness: </span><span class="si">{</span><span class="n">minSkew</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">skew</span><span class="o">==</span><span class="n">minSkew</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Maximum Skewness: </span><span class="si">{</span><span class="n">maxSkew</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">skew</span><span class="o">==</span><span class="n">maxSkew</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Mean Skewness: </span><span class="si">{</span><span class="n">meanSkew</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">nSliver</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1"> Elements with Skewness &gt; 0.9'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">skew</span></div>
 
@@ -882,7 +882,7 @@
 <div class="viewcode-block" id="MinDihedral">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.MinDihedral.html#mymesh.quality.MinDihedral">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">MinDihedral</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate the minimum dihedral angle between element faces</span>
 
 <span class="sd">    Parameters</span>
@@ -898,7 +898,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    MinAngles : np.ndarray</span>
 <span class="sd">        Array of minimum dihedral angles for each angle.</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    """</span>    
     <span class="n">Faces</span><span class="p">,</span> <span class="n">FaceConn</span><span class="p">,</span> <span class="n">FaceElem</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_FaceConn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">return_FaceElem</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">Normals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">CalcFaceNormal</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">Faces</span><span class="p">))</span>
 
@@ -914,18 +914,18 @@
         <span class="n">minAngle</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">MinAngles</span><span class="p">)</span>
         <span class="n">maxAngle</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">MinAngles</span><span class="p">)</span>
         <span class="n">meanAngle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">MinAngles</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimum Minimum Dihedral Angle: </span><span class="si">{</span><span class="n">minAngle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">° on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">MinAngles</span><span class="o">==</span><span class="n">minAngle</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum Minimum Dihedral Angle: </span><span class="si">{</span><span class="n">maxAngle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">° on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">MinAngles</span><span class="o">==</span><span class="n">maxAngle</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Minimum Dihedral Angle: </span><span class="si">{</span><span class="n">meanAngle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">°&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Minimum Minimum Dihedral Angle: </span><span class="si">{</span><span class="n">minAngle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">° on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">MinAngles</span><span class="o">==</span><span class="n">minAngle</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Maximum Minimum Dihedral Angle: </span><span class="si">{</span><span class="n">maxAngle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">° on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">MinAngles</span><span class="o">==</span><span class="n">maxAngle</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Mean Minimum Dihedral Angle: </span><span class="si">{</span><span class="n">meanAngle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">°'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">MinAngles</span></div>
 
 
 <div class="viewcode-block" id="MaxDihedral">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.MaxDihedral.html#mymesh.quality.MaxDihedral">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">MaxDihedral</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate the maximum dihedral angle between element faces</span>
 
 <span class="sd">    Parameters</span>
@@ -941,7 +941,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    MaxAngles : np.ndarray</span>
 <span class="sd">        Array of maximum dihedral angles for each angle.</span>
-<span class="sd">    &quot;&quot;&quot;</span> 
+<span class="sd">    """</span> 
     <span class="n">Faces</span><span class="p">,</span> <span class="n">FaceConn</span><span class="p">,</span> <span class="n">FaceElem</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_FaceConn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">return_FaceElem</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">Normals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">CalcFaceNormal</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">Faces</span><span class="p">))</span>
 
@@ -957,18 +957,18 @@
         <span class="n">minAngle</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">MaxAngles</span><span class="p">)</span>
         <span class="n">maxAngle</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">MaxAngles</span><span class="p">)</span>
         <span class="n">meanAngle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">MaxAngles</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimum Maximum Dihedral Angle: </span><span class="si">{</span><span class="n">minAngle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">° on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">MaxAngles</span><span class="o">==</span><span class="n">minAngle</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum Maximum Dihedral Angle: </span><span class="si">{</span><span class="n">maxAngle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">° on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">MaxAngles</span><span class="o">==</span><span class="n">maxAngle</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Maximum Dihedral Angle: </span><span class="si">{</span><span class="n">meanAngle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">°&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Minimum Maximum Dihedral Angle: </span><span class="si">{</span><span class="n">minAngle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">° on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">MaxAngles</span><span class="o">==</span><span class="n">minAngle</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Maximum Maximum Dihedral Angle: </span><span class="si">{</span><span class="n">maxAngle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">° on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">MaxAngles</span><span class="o">==</span><span class="n">maxAngle</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Mean Maximum Dihedral Angle: </span><span class="si">{</span><span class="n">meanAngle</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">°'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">MaxAngles</span></div>
 
 
 <div class="viewcode-block" id="MeanRatio">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.MeanRatio.html#mymesh.quality.MeanRatio">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">MeanRatio</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates mean ratios for each element. The mean ratio can be interpreted </span>
 <span class="sd">    as the distance from an ideal tetrahedron with equal volume :cite:p:Liu1994,</span>
 <span class="sd">    :cite:p:Vartziotis2009. </span>
@@ -986,7 +986,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    q : np.ndarray</span>
 <span class="sd">        Mean ratio element quality</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">NodeCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
     <span class="n">NodeConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span>
 
@@ -1007,7 +1007,7 @@
     <span class="c1"># Matrix multiplication in a numba-friendly style</span>
     <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">Winv</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
-    <span class="n">Sfrob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="s1">&#39;fro&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">Sfrob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="s1">'fro'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
     <span class="n">det</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
     <span class="n">q</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">det</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="n">Sfrob</span><span class="o">**</span><span class="mi">2</span>
 
@@ -1015,11 +1015,11 @@
         <span class="n">minq</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
         <span class="n">maxq</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
         <span class="n">meanq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimum Mean Ratio: </span><span class="si">{</span><span class="n">minq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">q</span><span class="o">==</span><span class="n">minq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum Mean Ratio: </span><span class="si">{</span><span class="n">maxq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">q</span><span class="o">==</span><span class="n">maxq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Mean Ratio: </span><span class="si">{</span><span class="n">meanq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Minimum Mean Ratio: </span><span class="si">{</span><span class="n">minq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">q</span><span class="o">==</span><span class="n">minq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Maximum Mean Ratio: </span><span class="si">{</span><span class="n">maxq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">q</span><span class="o">==</span><span class="n">maxq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Mean Mean Ratio: </span><span class="si">{</span><span class="n">meanq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">q</span></div>
 
@@ -1046,7 +1046,7 @@
     <span class="c1"># Matrix multiplication in a numba-friendly style</span>
     <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">Winv</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
-    <span class="n">Sfrob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="s1">&#39;fro&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">Sfrob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="s1">'fro'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
     <span class="n">det</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
     <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
     <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eps</span><span class="o">*</span><span class="p">(</span><span class="n">eps</span> <span class="o">-</span> <span class="n">det</span><span class="o">.</span><span class="n">min</span><span class="p">()))</span> <span class="k">if</span> <span class="n">det</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">eps</span> <span class="k">else</span> <span class="mi">0</span>
@@ -1058,11 +1058,11 @@
         <span class="n">minq</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
         <span class="n">maxq</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
         <span class="n">meanq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimum Mean Ratio: </span><span class="si">{</span><span class="n">minq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">q</span><span class="o">==</span><span class="n">minq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Maximum Mean Ratio: </span><span class="si">{</span><span class="n">maxq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">q</span><span class="o">==</span><span class="n">maxq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Mean Ratio: </span><span class="si">{</span><span class="n">meanq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Minimum Mean Ratio: </span><span class="si">{</span><span class="n">minq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">q</span><span class="o">==</span><span class="n">minq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Maximum Mean Ratio: </span><span class="si">{</span><span class="n">maxq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> on Element </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">q</span><span class="o">==</span><span class="n">maxq</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Mean Mean Ratio: </span><span class="si">{</span><span class="n">meanq</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">q</span>
 
 <span class="nd">@try_njit</span>
@@ -1158,7 +1158,7 @@
 <div class="viewcode-block" id="Area">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.Area.html#mymesh.quality.Area">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">Area</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">Type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates element areas for each element in the mesh. For volume elements,</span>
 <span class="sd">    the area will be the total surface area of each element. </span>
 
@@ -1169,7 +1169,7 @@
 <span class="sd">    NodeConn : array_like</span>
 <span class="sd">        List of nodal connectivities.</span>
 <span class="sd">    Type : str</span>
-<span class="sd">        Specifies whether the mesh is a surface (&#39;surf&#39;) or volume (&#39;vol&#39;) mesh.</span>
+<span class="sd">        Specifies whether the mesh is a surface ('surf') or volume ('vol') mesh.</span>
 <span class="sd">        If None, will be automatically determined by </span>
 <span class="sd">        :func:`~mymesh.utils.identify_type`, by default, None.</span>
 
@@ -1178,11 +1178,11 @@
 <span class="sd">    A : np.ndarray</span>
 <span class="sd">        Array of area for each element.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="c1"># assert np.shape(NodeConn)[1] == 3, &#39;Currently only valid for triangular elements.&#39;</span>
+<span class="sd">    """</span>    
+    <span class="c1"># assert np.shape(NodeConn)[1] == 3, 'Currently only valid for triangular elements.'</span>
     <span class="k">if</span> <span class="n">Type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">Type</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">identify_type</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">&#39;surf&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">Type</span> <span class="o">==</span> <span class="s1">'surf'</span><span class="p">:</span>
         <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">TriConn</span><span class="p">,</span> <span class="n">inv</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">surf2tris</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">return_inv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -1194,25 +1194,25 @@
         <span class="c1"># Calculate element surface area</span>
         <span class="n">Faces</span><span class="p">,</span> <span class="n">FaceConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">return_FaceConn</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">area</span> <span class="o">=</span> <span class="n">Area</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Faces</span><span class="p">,</span> <span class="s1">&#39;surf&#39;</span><span class="p">)</span>
+        <span class="n">area</span> <span class="o">=</span> <span class="n">Area</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">Faces</span><span class="p">,</span> <span class="s1">'surf'</span><span class="p">)</span>
         <span class="n">area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">area</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">PadRagged</span><span class="p">(</span><span class="n">FaceConn</span><span class="p">)],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
         <span class="n">minArea</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
         <span class="n">maxArea</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
         <span class="n">meanArea</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Minimum Area: </span><span class="si">{:.2e}</span><span class="s1"> on Element </span><span class="si">{:.0f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">minArea</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span><span class="o">==</span><span class="n">minArea</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Maximum Area: </span><span class="si">{:.2e}</span><span class="s1"> on Element </span><span class="si">{:.0f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maxArea</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span><span class="o">==</span><span class="n">maxArea</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Mean Area: </span><span class="si">{:.2e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">meanArea</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'Minimum Area: </span><span class="si">{:.2e}</span><span class="s1"> on Element </span><span class="si">{:.0f}</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">minArea</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span><span class="o">==</span><span class="n">minArea</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'Maximum Area: </span><span class="si">{:.2e}</span><span class="s1"> on Element </span><span class="si">{:.0f}</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maxArea</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span><span class="o">==</span><span class="n">maxArea</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'Mean Area: </span><span class="si">{:.2e}</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">meanArea</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">A</span></div>
 
 
 <div class="viewcode-block" id="Volume">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.Volume.html#mymesh.quality.Volume">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">Volume</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Volume</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">ElemType</span><span class="o">=</span><span class="s1">'auto'</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates element volumes for each element in the mesh.</span>
 
 <span class="sd">    Parameters</span>
@@ -1225,7 +1225,7 @@
 <span class="sd">        If true, will print min, max, and mean element volume, by default False.</span>
 <span class="sd">    ElemType : str, optional</span>
 <span class="sd">        Specifies which element type the mesh contains. For any input other than </span>
-<span class="sd">        &#39;tet&#39;, elements will be temporarily converted to tet sub-elements for </span>
+<span class="sd">        'tet', elements will be temporarily converted to tet sub-elements for </span>
 <span class="sd">        the purposes of volume calculation, then summed to get the full element</span>
 <span class="sd">        volume</span>
 
@@ -1233,10 +1233,10 @@
 <span class="sd">    -------</span>
 <span class="sd">    V : np.ndarray</span>
 <span class="sd">        Array of volumes for each element.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="n">ElemType</span> <span class="o">!=</span> <span class="s1">&#39;tet&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ElemType</span> <span class="o">!=</span> <span class="s1">'tet'</span><span class="p">:</span>
         <span class="n">ArrayCoords</span><span class="p">,</span><span class="n">TetConn</span><span class="p">,</span><span class="n">inv</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2tets</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_inv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>     
         <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ArrayCoords</span><span class="p">)</span>   
         <span class="n">ArrayConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">TetConn</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
@@ -1244,7 +1244,7 @@
         <span class="n">ArrayCoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)</span>
         <span class="n">ArrayConn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">vol</span> <span class="o">=</span> <span class="n">tet_volume</span><span class="p">(</span><span class="n">ArrayCoords</span><span class="p">,</span> <span class="n">ArrayConn</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ElemType</span> <span class="o">!=</span> <span class="s1">&#39;tet&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ElemType</span> <span class="o">!=</span> <span class="s1">'tet'</span><span class="p">:</span>
         <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">))</span>
         <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="n">inv</span><span class="p">,</span><span class="n">vol</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1255,13 +1255,13 @@
         <span class="n">maxVol</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
         <span class="n">meanVol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
         <span class="n">totalVol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Minimum Volume: </span><span class="si">{:.2e}</span><span class="s1"> on Element </span><span class="si">{:.0f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">minVol</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">V</span><span class="o">==</span><span class="n">minVol</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Maximum Volume: </span><span class="si">{:.2e}</span><span class="s1"> on Element </span><span class="si">{:.0f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maxVol</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">V</span><span class="o">==</span><span class="n">maxVol</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Mean Volume: </span><span class="si">{:.2e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">meanVol</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total Volume: </span><span class="si">{:.2e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">totalVol</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'Minimum Volume: </span><span class="si">{:.2e}</span><span class="s1"> on Element </span><span class="si">{:.0f}</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">minVol</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">V</span><span class="o">==</span><span class="n">minVol</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'Maximum Volume: </span><span class="si">{:.2e}</span><span class="s1"> on Element </span><span class="si">{:.0f}</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maxVol</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">V</span><span class="o">==</span><span class="n">maxVol</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'Mean Volume: </span><span class="si">{:.2e}</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">meanVol</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'Total Volume: </span><span class="si">{:.2e}</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">totalVol</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'------------------------------------------'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">V</span></div>
 
 
@@ -1269,7 +1269,7 @@
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.tri_area.html#mymesh.quality.tri_area">[docs]</a>
 <span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">tri_area</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Element areas of a purely triangular mesh.</span>
 
 <span class="sd">    .. math::</span>
@@ -1290,7 +1290,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    area : np.ndarray</span>
 <span class="sd">        Areas of each triangle</span>
-<span class="sd">    &quot;&quot;&quot;</span>   
+<span class="sd">    """</span>   
 
     <span class="n">pt0</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]]</span>
     <span class="n">pt1</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]]</span>
@@ -1302,7 +1302,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">tri_circumradius</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Circumradii for elements in a triangular mesh.</span>
 
 <span class="sd">    .. math::</span>
@@ -1323,7 +1323,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    area : np.ndarray</span>
 <span class="sd">        Areas of each triangle</span>
-<span class="sd">    &quot;&quot;&quot;</span> 
+<span class="sd">    """</span> 
 
     <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)]</span>
     <span class="k">if</span> <span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
@@ -1335,7 +1335,7 @@
         <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> 
         <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Node coordinates must have shape=(n,3)&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'Node coordinates must have shape=(n,3)'</span><span class="p">)</span>
 
     <span class="n">R</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">b</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">c</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">c</span> <span class="o">+</span> <span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">-</span> <span class="n">c</span><span class="p">))</span>
     
@@ -1345,7 +1345,7 @@
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.tet_volume.html#mymesh.quality.tet_volume">[docs]</a>
 <span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">tet_volume</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Element volumes of a purely tetrahedal mesh.</span>
 
 <span class="sd">    .. math::</span>
@@ -1366,7 +1366,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    vol : np.ndarray</span>
 <span class="sd">        Volumes of each tetrahedron</span>
-<span class="sd">    &quot;&quot;&quot;</span>   
+<span class="sd">    """</span>   
     <span class="n">pt0</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]]</span>
     <span class="n">pt1</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]]</span>
     <span class="n">pt2</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]]</span>
@@ -1378,7 +1378,7 @@
 
 <span class="nd">@try_njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_tet_volume</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Element volume for a single tetrahedron.</span>
 
 <span class="sd">    .. math::</span>
@@ -1399,7 +1399,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    vol : float</span>
 <span class="sd">        Volume of each tetrahedron</span>
-<span class="sd">    &quot;&quot;&quot;</span>   
+<span class="sd">    """</span>   
     <span class="n">pt0</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
     <span class="n">pt1</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
     <span class="n">pt2</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
@@ -1413,7 +1413,7 @@
 <div class="viewcode-block" id="tet_circumradius">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.tet_circumradius.html#mymesh.quality.tet_circumradius">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">tet_circumradius</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Circumradii for elements in a tetrahedral mesh.</span>
 <span class="sd">        </span>
 <span class="sd">    .. math::</span>
@@ -1437,7 +1437,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    R : np.ndarray</span>
 <span class="sd">        Circumradii of tetrahedra</span>
-<span class="sd">    &quot;&quot;&quot;</span>   
+<span class="sd">    """</span>   
 
     <span class="k">if</span> <span class="n">V</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">V</span> <span class="o">=</span> <span class="n">tet_volume</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">)</span>
@@ -1462,7 +1462,7 @@
 <div class="viewcode-block" id="tri_skewness">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.tri_skewness.html#mymesh.quality.tri_skewness">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">tri_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates triangular skewness for each triangle in the mesh. </span>
 <span class="sd">    Mesh should be strictly triangular.</span>
 
@@ -1480,7 +1480,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    skew : np.ndarray</span>
 <span class="sd">        Array of skewness for each element.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">points</span> <span class="o">=</span> <span class="n">NodeCoords</span><span class="p">[</span><span class="n">NodeConn</span><span class="p">]</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">B</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
@@ -1508,7 +1508,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">tri_area_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates element skewness for each triangular element in the mesh</span>
 <span class="sd">    using the equilateral area skewness method.</span>
 
@@ -1526,7 +1526,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    skew : np.ndarray</span>
 <span class="sd">        Array of skewness for each element.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     
     <span class="c1"># Area-based</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -1539,7 +1539,7 @@
     <span class="n">l1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">l2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="c1"># Circumcircle</span>
-    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">'ignore'</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">'ignore'</span><span class="p">):</span>
         <span class="n">R</span> <span class="o">=</span> <span class="n">l1</span> <span class="o">*</span> <span class="n">l2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e1</span><span class="o">-</span><span class="n">e2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
 
         <span class="n">Aideal</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span> <span class="o">*</span> <span class="n">R</span><span class="o">**</span><span class="mi">2</span>
@@ -1549,7 +1549,7 @@
 <div class="viewcode-block" id="quad_skewness">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.quad_skewness.html#mymesh.quality.quad_skewness">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">quad_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates quadrilateral skewness for each quad in the mesh. </span>
 <span class="sd">    Mesh should be strictly quadrilateral.</span>
 
@@ -1567,7 +1567,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    skew : np.ndarray</span>
 <span class="sd">        Array of skewness for each element.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NodeConn</span><span class="p">)]</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">B</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
@@ -1604,7 +1604,7 @@
 <div class="viewcode-block" id="tet_vol_skewness">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.tet_vol_skewness.html#mymesh.quality.tet_vol_skewness">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">tet_vol_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span> <span class="n">NodeConn</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates element skewness for each tetrahedral element in the mesh</span>
 <span class="sd">    using the equilateral volume skewness method.</span>
 
@@ -1625,7 +1625,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    skew : np.ndarray</span>
 <span class="sd">        Array of skewness for each element.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     
     <span class="c1"># Volume-based</span>
     <span class="k">if</span> <span class="n">V</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1642,7 +1642,7 @@
 <div class="viewcode-block" id="equiangular_skewness">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.equiangular_skewness.html#mymesh.quality.equiangular_skewness">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">equiangular_skewness</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates element skewness for each element in the mesh</span>
 <span class="sd">    using the equiangular skewness method.</span>
 
@@ -1660,7 +1660,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    skew : np.ndarray</span>
 <span class="sd">        Array of skewness for each element.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Faces</span><span class="p">,</span><span class="n">FaceConn</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">solid2faces</span><span class="p">(</span><span class="n">NodeCoords</span><span class="p">,</span><span class="n">NodeConn</span><span class="p">,</span><span class="n">return_FaceConn</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">FaceSkew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Faces</span><span class="p">))</span>
@@ -1686,7 +1686,7 @@
 <div class="viewcode-block" id="dihedralAngles">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.dihedralAngles.html#mymesh.quality.dihedralAngles">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">dihedralAngles</span><span class="p">(</span><span class="n">Nis</span><span class="p">,</span><span class="n">Njs</span><span class="p">,</span><span class="n">Abs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate dihedral angles between paired normal vectors. This function</span>
 <span class="sd">    is primarily for internal use with MinDihedral() and MaxDihedral()</span>
 
@@ -1704,7 +1704,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    angles : np.ndarray</span>
 <span class="sd">        Dihedral angles</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    """</span>    
     <span class="k">if</span> <span class="n">Abs</span><span class="p">:</span>
         <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Nis</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Njs</span><span class="p">)),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1715,7 +1715,7 @@
 <div class="viewcode-block" id="SurfDihedralAngles">
 <a class="viewcode-back" href="../../generated/submodules/mymesh.quality.SurfDihedralAngles.html#mymesh.quality.SurfDihedralAngles">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">SurfDihedralAngles</span><span class="p">(</span><span class="n">ElemNormals</span><span class="p">,</span><span class="n">ElemNeighbors</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate dihedral angles between adjacent faces in a triangular surface mesh</span>
 
 <span class="sd">    Parameters</span>
@@ -1730,7 +1730,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    angles : np.ndarray</span>
 <span class="sd">        Dihedral angles between adjacent element faces</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    """</span>    
     <span class="n">ElemNormals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ElemNormals</span><span class="p">)</span>
     <span class="n">ElemNeighbors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ElemNeighbors</span><span class="p">)</span>
     <span class="n">NeighborNormals</span> <span class="o">=</span> <span class="n">ElemNormals</span><span class="p">[</span><span class="n">ElemNeighbors</span><span class="p">]</span>
@@ -1767,8 +1767,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1802,7 +1802,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

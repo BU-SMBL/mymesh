@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -36,7 +36,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=6b19b803" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
     <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -61,7 +61,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'guide/mesh_class';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.19.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -571,7 +571,7 @@ values:</p>
 <p>Data associated with meshes can be stored within the <a class="reference internal" href="../generated/mymesh.mesh.html#mymesh.mesh" title="mymesh.mesh.mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">mesh</span></code></a> object.
 Node data (data for which there are values associated with each node of the mesh) can be stored in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.NodeData</span></code> attribute.
 Likewise, data associated with the elements of the mesh (element data) can be stored in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.ElemData</span></code> attribute.
-Both <code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.NodeData</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.ElemData</span></code> data are dictionaries (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>), so named data entries can be stored, for example, <code class="code docutils literal notranslate"><span class="pre">M.NodeData['strain']</span> <span class="pre">=</span> <span class="pre">strain</span></code>.
+Both <code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.NodeData</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">mesh.ElemData</span></code> data are dictionaries (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>), so named data entries can be stored, for example, <code class="code docutils literal notranslate"><span class="pre">M.NodeData['strain']</span> <span class="pre">=</span> <span class="pre">strain</span></code>.
 Scalar and vector node/element data can be stored, and these values will be saved when writing the mesh to a .vtu file or other file formats that support such properties (see <a class="reference internal" href="io.html#file-input-output"><span class="std std-ref">File Input/Output</span></a> for more details on reading/writing files).</p>
 </section>
 <section id="from-meshes-to-meshes">
@@ -593,7 +593,7 @@ mesh won’t modify the other.</p>
 <p><a class="reference internal" href="../generated/mymesh.mesh.mesh.Clip.html#mymesh.mesh.mesh.Clip" title="mymesh.mesh.mesh.Clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Clip()</span></code></a> cuts the mesh along a plane</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">M</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.1</span><span class="p">)</span>
 <span class="n">M2</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">Clip</span><span class="p">(</span><span class="n">normal</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">M2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+<span class="n">M2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="s1">'trimetric'</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">'w'</span><span class="p">)</span>
 </pre></div>
 </div>
 <figure class="align-default">
@@ -605,8 +605,8 @@ mesh won’t modify the other.</p>
 <p><a class="reference internal" href="../generated/mymesh.mesh.mesh.Threshold.html#mymesh.mesh.mesh.Threshold" title="mymesh.mesh.mesh.Threshold"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Threshold()</span></code></a> generates a new mesh that keeps elements from the
 original mesh based on scalar values and the chosen thresholding rule.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">M</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.1</span><span class="p">)</span>
-<span class="n">M2</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">Threshold</span><span class="p">(</span><span class="n">scalars</span><span class="o">=</span><span class="n">implicit</span><span class="o">.</span><span class="n">sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)(</span><span class="o">*</span><span class="n">M</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;&lt;=&#39;</span><span class="p">)</span>
-<span class="n">M2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+<span class="n">M2</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">Threshold</span><span class="p">(</span><span class="n">scalars</span><span class="o">=</span><span class="n">implicit</span><span class="o">.</span><span class="n">sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)(</span><span class="o">*</span><span class="n">M</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">'&lt;='</span><span class="p">)</span>
+<span class="n">M2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="s1">'trimetric'</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">'w'</span><span class="p">)</span>
 </pre></div>
 </div>
 <figure class="align-default">
@@ -618,8 +618,8 @@ original mesh based on scalar values and the chosen thresholding rule.</p>
 <p><a class="reference internal" href="../generated/mymesh.mesh.mesh.Contour.html#mymesh.mesh.mesh.Contour" title="mymesh.mesh.mesh.Contour"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Contour()</span></code></a> generates a new mesh that contours the
 original mesh based on scalar values.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">M</span> <span class="o">=</span> <span class="n">primitives</span><span class="o">.</span><span class="n">Grid</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.1</span><span class="p">)</span>
-<span class="n">M2</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">Contour</span><span class="p">(</span><span class="n">scalars</span><span class="o">=</span><span class="n">implicit</span><span class="o">.</span><span class="n">sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)(</span><span class="o">*</span><span class="n">M</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;surf&#39;</span><span class="p">)</span>
-<span class="n">M2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="s1">&#39;trimetric&#39;</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+<span class="n">M2</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">Contour</span><span class="p">(</span><span class="n">scalars</span><span class="o">=</span><span class="n">implicit</span><span class="o">.</span><span class="n">sphere</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)(</span><span class="o">*</span><span class="n">M</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">threshold_direction</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">'surf'</span><span class="p">)</span>
+<span class="n">M2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="s1">'trimetric'</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">'w'</span><span class="p">)</span>
 </pre></div>
 </div>
 <figure class="align-default">
@@ -711,8 +711,8 @@ original mesh based on scalar values.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -746,7 +746,7 @@ original mesh based on scalar values.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>

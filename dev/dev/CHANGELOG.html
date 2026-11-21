@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=0790524f97105ba85085" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -36,7 +36,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -44,10 +44,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/mymesh.css?v=6b19b803" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
 
     <script src="../_static/documentation_options.js?v=3ce10a4d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -61,7 +61,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'dev/CHANGELOG';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.18.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.19.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://bu-smbl.github.io/mymesh/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
@@ -501,6 +501,38 @@
 <h1>Change Log<a class="headerlink" href="#change-log" title="Link to this heading">#</a></h1>
 <section id="unreleased">
 <h2>Unreleased<a class="headerlink" href="#unreleased" title="Link to this heading">#</a></h2>
+<section id="feat">
+<h3>Feat<a class="headerlink" href="#feat" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>register</strong>: Update options for grayscale registration, add L2 metric</p></li>
+<li><p><strong>delaunay</strong>: re-implement 3D Delaunay tetrahedralization with higher performance</p></li>
+</ul>
+</section>
+<section id="fix">
+<h3>Fix<a class="headerlink" href="#fix" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>visualize.View</strong>: fix display of line meshes</p></li>
+<li><p><strong>register.Image2Image</strong>: fix option parsing for ‘icp’</p></li>
+<li><p><strong>visualize.View</strong>: fix handling of line meshes</p></li>
+<li><p><strong>register.Image2Image</strong>: utilize MI range input</p></li>
+<li><p><strong>register.mutual_information</strong>: update add optional range inputs</p></li>
+<li><p><strong>register</strong>: Fix bugs in 2D image registration, mutual_information</p></li>
+<li><p><strong>mesh.addNodes</strong>: fix bug in NodeCoord list append</p></li>
+<li><p><strong>contour.MarchingCubesImage</strong>: efficiency improvement</p></li>
+<li><p><strong>mesh.mesh2dmesh</strong>: enforce C-order layout for arrays</p></li>
+<li><p><strong>utils.CleanupDegenerateElements</strong>: switch to stable sort for consistent handling</p></li>
+<li><p><strong>mesh.Contour</strong>: switch default for mixed_elements to False</p></li>
+<li><p><strong>contour</strong>: Efficiency improvements for MarchingCubesImage + MarchingTetrahedra</p></li>
+<li><p><strong>utils.CleanupDegenerateElements</strong>: Update row-unique strategy</p></li>
+<li><p><strong>primitives.Grid</strong>: update node connectivity construction</p></li>
+<li><p><strong>converter</strong>: update indexing strategy</p></li>
+<li><p><strong>register.Image2Image</strong>: minor bug fixes</p></li>
+<li><p><strong>contour.MarchingCubes</strong>: speedup marching cubes</p></li>
+<li><p><strong>contour.MarchingTetrahedra</strong>: efficiency enhancements</p></li>
+<li><p><strong>primitives.Grid</strong>: change NodeConn dtype to intp for faster downstream indexing</p></li>
+<li><p><strong>PadRagged</strong>: add quick exit for inputs that are already arrays</p></li>
+</ul>
+</section>
 </section>
 <section id="id1">
 <h2>0.4.1 (2026-05-29)<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
@@ -510,8 +542,8 @@
 </section>
 <section id="id2">
 <h2>0.4.0 (2026-04-30)<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
-<section id="feat">
-<h3>Feat<a class="headerlink" href="#feat" title="Link to this heading">#</a></h3>
+<section id="id3">
+<h3>Feat<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p><strong>delaunay.ConvexHull</strong>: revamp GiftWrapping and add QuickHull for 2D convex hulls</p></li>
 <li><p><strong>delaunay</strong>: Add support for 2D constrained Delaunay triangulation</p></li>
@@ -525,8 +557,8 @@
 <li><p><strong>QuadtreeNode</strong>: set up preliminary nearest neighbor search</p></li>
 </ul>
 </section>
-<section id="fix">
-<h3>Fix<a class="headerlink" href="#fix" title="Link to this heading">#</a></h3>
+<section id="id4">
+<h3>Fix<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p><strong>mesh</strong>: fix labels in mesh2dmesh conversion</p></li>
 <li><p><strong>improvement.SmartLaplacianSmoothing</strong>: fix bug for TangentialSurface=False</p></li>
@@ -552,10 +584,10 @@
 </ul>
 </section>
 </section>
-<section id="id3">
-<h2>0.3.0 (2025-12-15)<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
-<section id="id4">
-<h3>Feat<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<section id="id5">
+<h2>0.3.0 (2025-12-15)<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<section id="id6">
+<h3>Feat<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p><strong>improvement.Flip</strong>: implement preliminary flipping procedures</p></li>
 <li><p><strong>mymesh.mesh.dmesh</strong>: add removeElems function</p></li>
@@ -566,8 +598,8 @@
 <li><p><strong>mesh</strong>: add Transform method</p></li>
 </ul>
 </section>
-<section id="id5">
-<h3>Fix<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<section id="id7">
+<h3>Fix<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p><strong>quality.Skewness</strong>: fix type handling</p></li>
 <li><p><strong>delaunay.FanTriangulation</strong>: fix handling of unordered hull edges</p></li>
@@ -579,16 +611,16 @@
 </ul>
 </section>
 </section>
-<section id="id6">
-<h2>0.2.0 (2025-11-03)<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
-<section id="id7">
-<h3>Feat<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
+<section id="id8">
+<h2>0.2.0 (2025-11-03)<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<section id="id9">
+<h3>Feat<a class="headerlink" href="#id9" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>add TaubinSmoothing</p></li>
 </ul>
 </section>
-<section id="id8">
-<h3>Fix<a class="headerlink" href="#id8" title="Link to this heading">#</a></h3>
+<section id="id10">
+<h3>Fix<a class="headerlink" href="#id10" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>bugfixes in Image2Image</p></li>
 <li><p>improve ICP performance and robustness</p></li>
@@ -598,16 +630,16 @@
 </ul>
 </section>
 </section>
-<section id="id9">
-<h2>0.1.1 (2025-10-10)<a class="headerlink" href="#id9" title="Link to this heading">#</a></h2>
-<section id="id10">
-<h3>Feat<a class="headerlink" href="#id10" title="Link to this heading">#</a></h3>
+<section id="id11">
+<h2>0.1.1 (2025-10-10)<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<section id="id12">
+<h3>Feat<a class="headerlink" href="#id12" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>add additional surfaces to tpms</p></li>
 </ul>
 </section>
-<section id="id11">
-<h3>Fix<a class="headerlink" href="#id11" title="Link to this heading">#</a></h3>
+<section id="id13">
+<h3>Fix<a class="headerlink" href="#id13" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>handle sets in mymesh2meshio</p></li>
 <li><p>improve handling of meshes for .ply</p></li>
@@ -620,8 +652,8 @@
 <section id="alpha-2025-09-22">
 <h2>0.1.0-alpha (2025-09-22)<a class="headerlink" href="#alpha-2025-09-22" title="Link to this heading">#</a></h2>
 </section>
-<section id="id12">
-<h2>0.0.1 (2024-11-24)<a class="headerlink" href="#id12" title="Link to this heading">#</a></h2>
+<section id="id14">
+<h2>0.0.1 (2024-11-24)<a class="headerlink" href="#id14" title="Link to this heading">#</a></h2>
 </section>
 </section>
 
@@ -672,30 +704,34 @@
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unreleased">Unreleased</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">0.4.1 (2026-05-29)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">0.4.0 (2026-04-30)</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unreleased">Unreleased</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#feat">Feat</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fix">Fix</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">0.3.0 (2025-12-15)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Feat</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Fix</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">0.4.1 (2026-05-29)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">0.4.0 (2026-04-30)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Feat</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Fix</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">0.2.0 (2025-11-03)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Feat</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Fix</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">0.3.0 (2025-12-15)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Feat</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Fix</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">0.1.1 (2025-10-10)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">Feat</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">Fix</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">0.2.0 (2025-11-03)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">Feat</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">Fix</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">0.1.1 (2025-10-10)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">Feat</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">Fix</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alpha-2025-09-22">0.1.0-alpha (2025-09-22)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">0.0.1 (2024-11-24)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id14">0.0.1 (2024-11-24)</a></li>
 </ul>
   </nav></div>
 
@@ -721,8 +757,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=0790524f97105ba85085"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=0790524f97105ba85085"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -756,7 +792,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.18.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
 </p></div>
       
     </div>
