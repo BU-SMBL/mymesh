@@ -1,0 +1,6 @@
+mymesh.converter.EdgesByElement
+===============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: EdgesByElement

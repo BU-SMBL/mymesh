@@ -1,0 +1,6 @@
+mymesh.curvature.CubicFit
+=========================
+
+.. currentmodule:: mymesh.curvature
+
+.. autofunction:: CubicFit

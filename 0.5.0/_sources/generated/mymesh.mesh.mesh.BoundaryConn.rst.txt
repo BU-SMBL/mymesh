@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.BoundaryConn
+=============================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.BoundaryConn

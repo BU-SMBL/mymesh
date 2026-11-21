@@ -1,0 +1,6 @@
+mymesh.utils.getNodeNeighborhoodByRadius
+========================================
+
+.. currentmodule:: mymesh.utils
+
+.. autofunction:: getNodeNeighborhoodByRadius

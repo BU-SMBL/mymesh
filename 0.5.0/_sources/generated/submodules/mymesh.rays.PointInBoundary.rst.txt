@@ -1,0 +1,6 @@
+mymesh.rays.PointInBoundary
+===========================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: PointInBoundary

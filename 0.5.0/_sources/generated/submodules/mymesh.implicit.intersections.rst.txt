@@ -1,0 +1,6 @@
+mymesh.implicit.intersections
+=============================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: intersections

@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.Boundary
+=========================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.Boundary

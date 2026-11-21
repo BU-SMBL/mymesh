@@ -1,0 +1,6 @@
+mymesh.tree.Octree2Dual
+=======================
+
+.. currentmodule:: mymesh.tree
+
+.. autofunction:: Octree2Dual

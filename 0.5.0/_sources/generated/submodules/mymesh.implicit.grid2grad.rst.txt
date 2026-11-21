@@ -1,0 +1,6 @@
+mymesh.implicit.grid2grad
+=========================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: grid2grad

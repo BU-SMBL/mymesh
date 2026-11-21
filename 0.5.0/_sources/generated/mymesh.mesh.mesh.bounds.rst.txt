@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.bounds
+=======================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.bounds

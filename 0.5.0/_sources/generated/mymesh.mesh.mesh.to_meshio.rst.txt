@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.to\_meshio
+===========================
+
+.. currentmodule:: mymesh.mesh
+
+.. automethod:: mesh.to_meshio

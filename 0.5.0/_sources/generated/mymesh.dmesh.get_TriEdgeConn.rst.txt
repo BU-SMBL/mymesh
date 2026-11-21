@@ -1,0 +1,6 @@
+mymesh.dmesh.get\_TriEdgeConn
+=============================
+
+.. currentmodule:: mymesh
+
+.. automethod:: dmesh.get_TriEdgeConn

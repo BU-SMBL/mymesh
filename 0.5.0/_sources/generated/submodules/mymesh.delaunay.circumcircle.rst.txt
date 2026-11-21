@@ -1,0 +1,6 @@
+mymesh.delaunay.circumcircle
+============================
+
+.. currentmodule:: mymesh.delaunay
+
+.. autofunction:: circumcircle

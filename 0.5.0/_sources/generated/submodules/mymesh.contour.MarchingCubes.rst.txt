@@ -1,0 +1,6 @@
+mymesh.contour.MarchingCubes
+============================
+
+.. currentmodule:: mymesh.contour
+
+.. autofunction:: MarchingCubes

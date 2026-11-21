@@ -1,0 +1,6 @@
+mymesh.rays.RayTriangleIntersection
+===================================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: RayTriangleIntersection

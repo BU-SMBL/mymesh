@@ -1,0 +1,6 @@
+mymesh.primitives.CirclePt
+==========================
+
+.. currentmodule:: mymesh.primitives
+
+.. autofunction:: CirclePt

@@ -1,0 +1,6 @@
+mymesh.converter.tet102linear
+=============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: tet102linear

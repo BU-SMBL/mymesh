@@ -1,0 +1,6 @@
+mymesh.implicit.gyroid
+======================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: gyroid

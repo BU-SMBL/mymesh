@@ -1,0 +1,6 @@
+mymesh.improvement.Improve
+==========================
+
+.. currentmodule:: mymesh.improvement
+
+.. autofunction:: Improve

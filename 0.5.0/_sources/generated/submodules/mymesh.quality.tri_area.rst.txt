@@ -1,0 +1,6 @@
+mymesh.quality.tri\_area
+========================
+
+.. currentmodule:: mymesh.quality
+
+.. autofunction:: tri_area

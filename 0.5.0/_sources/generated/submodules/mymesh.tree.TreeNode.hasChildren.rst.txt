@@ -1,0 +1,6 @@
+mymesh.tree.TreeNode.hasChildren
+================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: TreeNode.hasChildren

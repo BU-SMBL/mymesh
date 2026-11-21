@@ -1,0 +1,6 @@
+mymesh.implicit.mixed\_topology
+===============================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: mixed_topology

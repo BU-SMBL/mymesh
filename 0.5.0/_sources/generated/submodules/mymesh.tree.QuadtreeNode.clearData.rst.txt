@@ -1,0 +1,6 @@
+mymesh.tree.QuadtreeNode.clearData
+==================================
+
+.. currentmodule:: mymesh.tree
+
+.. automethod:: QuadtreeNode.clearData

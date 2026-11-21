@@ -1,0 +1,139 @@
+
+
+.. _sphx_glr_examples_MeshModification:
+
+Mesh Modification Examples
+==========================
+
+Examples for modifying/manipulating meshes.
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The mymesh.converter module contains many functions to convert between different types of meshes. This example will highlight a few of them.">
+
+.. only:: html
+
+  .. image:: /examples/MeshModification/images/thumb/sphx_glr_demo_conversion_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshModification/demo_conversion`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Conversion</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Contouring can be used to create meshes from images, implicit functions, or other scalar fields.  It can also be used to modify existing meshes, for example by evaluating  implicit functions at the nodes of the mesh.">
+
+.. only:: html
+
+  .. image:: /examples/MeshModification/images/thumb/sphx_glr_demo_contouring_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshModification/demo_contouring`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Contouring</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Mesh coarsening can be performed as part of a mesh quality improvement process, or to reduce the resolution/complexity of a mesh for various other purposes. The Contract function supports coarsening of either tetrahedral or triangular meshes by contracting edges to achieve the desired edge length. For non-triangular or non-tetrahedral meshes, they can be first  converted using solid2tets or surf2tris (see also Conversion).">
+
+.. only:: html
+
+  .. image:: /examples/MeshModification/images/thumb/sphx_glr_demo_coarsening_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshModification/demo_coarsening`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Coarsening</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates the effects of different smoothing methods. Smoothing a mesh can serve two purposes - the first is to smooth the geometry, rounding out sharp features; the second is to redistribute nodes, often in pursuit of improved element quality. When attempting to improve element quality, often the goal is to redistribute the nodes while having a minimal effect on the geometry. Different smoothing methods have different effects on the geometry.">
+
+.. only:: html
+
+  .. image:: /examples/MeshModification/images/thumb/sphx_glr_demo_smoothing_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshModification/demo_smoothing`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Mesh Smoothing</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates registration of meshes and images using the Stanford Bunny.">
+
+.. only:: html
+
+  .. image:: /examples/MeshModification/images/thumb/sphx_glr_demo_registration_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshModification/demo_registration`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Registration</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="See also: improvement, quality, theory_improvement">
+
+.. only:: html
+
+  .. image:: /examples/MeshModification/images/thumb/sphx_glr_demo_improvement_thumb.png
+    :alt:
+
+  :doc:`/examples/MeshModification/demo_improvement`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Mesh quality improvement</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/MeshModification/demo_conversion
+   /examples/MeshModification/demo_contouring
+   /examples/MeshModification/demo_coarsening
+   /examples/MeshModification/demo_smoothing
+   /examples/MeshModification/demo_registration
+   /examples/MeshModification/demo_improvement
+

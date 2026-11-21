@@ -1,0 +1,6 @@
+mymesh.register.transform\_points
+=================================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: transform_points

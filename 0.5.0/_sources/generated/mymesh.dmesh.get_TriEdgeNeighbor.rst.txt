@@ -1,0 +1,6 @@
+mymesh.dmesh.get\_TriEdgeNeighbor
+=================================
+
+.. currentmodule:: mymesh
+
+.. automethod:: dmesh.get_TriEdgeNeighbor

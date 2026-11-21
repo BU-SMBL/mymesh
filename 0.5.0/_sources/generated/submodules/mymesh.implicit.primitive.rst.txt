@@ -1,0 +1,6 @@
+mymesh.implicit.primitive
+=========================
+
+.. currentmodule:: mymesh.implicit
+
+.. autofunction:: primitive

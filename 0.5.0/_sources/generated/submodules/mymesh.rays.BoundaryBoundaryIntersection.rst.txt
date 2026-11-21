@@ -1,0 +1,6 @@
+mymesh.rays.BoundaryBoundaryIntersection
+========================================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: BoundaryBoundaryIntersection

@@ -1,0 +1,6 @@
+mymesh.converter.hex2tet
+========================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: hex2tet

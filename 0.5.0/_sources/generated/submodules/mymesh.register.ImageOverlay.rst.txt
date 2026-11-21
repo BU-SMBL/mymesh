@@ -1,0 +1,6 @@
+mymesh.register.ImageOverlay
+============================
+
+.. currentmodule:: mymesh.register
+
+.. autofunction:: ImageOverlay

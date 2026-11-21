@@ -1,0 +1,6 @@
+mymesh.rays.PlaneTrianglesIntersection
+======================================
+
+.. currentmodule:: mymesh.rays
+
+.. autofunction:: PlaneTrianglesIntersection

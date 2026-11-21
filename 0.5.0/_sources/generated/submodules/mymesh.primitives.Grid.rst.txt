@@ -1,0 +1,6 @@
+mymesh.primitives.Grid
+======================
+
+.. currentmodule:: mymesh.primitives
+
+.. autofunction:: Grid

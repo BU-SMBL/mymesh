@@ -1,0 +1,6 @@
+mymesh.mesh.mesh.MeshNodes
+==========================
+
+.. currentmodule:: mymesh.mesh
+
+.. autoproperty:: mesh.MeshNodes

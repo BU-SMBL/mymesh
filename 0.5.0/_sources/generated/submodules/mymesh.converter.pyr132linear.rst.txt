@@ -1,0 +1,6 @@
+mymesh.converter.pyr132linear
+=============================
+
+.. currentmodule:: mymesh.converter
+
+.. autofunction:: pyr132linear

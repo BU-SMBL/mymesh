@@ -1,0 +1,6 @@
+mymesh.curvature.AnalyticalCurvature
+====================================
+
+.. currentmodule:: mymesh.curvature
+
+.. autofunction:: AnalyticalCurvature
