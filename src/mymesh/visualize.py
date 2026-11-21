@@ -209,7 +209,11 @@ def View(M,
         # TODO: Need to properly use ids and tri_ids to transfer element data to the surface
     elif M.Type.lower() == 'surf':
         _,faces, inv = converter.surf2tris(M.NodeCoords, M.SurfConn, return_inv=True)
-    elif M.Type.lower() == 'line':
+    elif M.Type.lower() == 'line' or M.Type.lower() == 'empty':
+        if M.Type.lower() == 'empty':
+            # Assume point cloud
+            show_points = True
+            hide_free_nodes = False
         faces = np.array(M.NodeConn)
         inv = np.arange(M.NElem)
         show_faces = False
